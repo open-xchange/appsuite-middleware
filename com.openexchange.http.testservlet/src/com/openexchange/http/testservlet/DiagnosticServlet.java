@@ -106,7 +106,10 @@ public class DiagnosticServlet extends HttpServlet {
             page.append("<head><title>Diagnostic</title></head>\n");
             page.append("<body>\n");
             page.append("<h1>Diagnostic</h1><hr/>\n");
-            page.append("<p>Missing \"param\" URL parameter. Possible value(s): ciphersuites</p>\n");
+            page.append("<p>Missing \"param\" URL parameter. Possible value(s):</p>\n<ul>\n");
+            page.append("<li>ciphersuites</li>\n");
+            page.append("<li>version</li>\n");
+            page.append("</ul>\n");
             page.append("</body>\n</html>");
             writer.write(page.toString());
             writer.flush();
@@ -114,7 +117,7 @@ public class DiagnosticServlet extends HttpServlet {
         }
 
         if ("ciphersuites".equalsIgnoreCase(parameter)) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("text/html");
             PrintWriter writer = resp.getWriter();
             final StringBuilder page = new StringBuilder(1024);
@@ -130,6 +133,25 @@ public class DiagnosticServlet extends HttpServlet {
             }
 
             page.append("</ul>\n");
+            page.append("</body>\n</html>");
+            writer.write(page.toString());
+            writer.flush();
+            return;
+        }
+
+        if ("version".equalsIgnoreCase(parameter)) {
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("text/html");
+            PrintWriter writer = resp.getWriter();
+            final StringBuilder page = new StringBuilder(1024);
+            page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
+            page.append("<html>\n");
+            page.append("<head><title>Version</title></head>\n");
+            page.append("<body>\n");
+            page.append("<h1>Version</h1><hr/>\n");
+            page.append("<p>\n");
+            page.append(com.openexchange.version.Version.getInstance().getVersionString()).append("\n");
+            page.append("</p>\n");
             page.append("</body>\n</html>");
             writer.write(page.toString());
             writer.flush();

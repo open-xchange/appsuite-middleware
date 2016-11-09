@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.requesthandler.osgi;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -129,13 +129,25 @@ import com.openexchange.user.UserService;
  */
 public class DispatcherActivator extends AbstractSessionServletActivator {
 
-    final Set<String> servlets = new HashSet<String>();
-    volatile String prefix;
+    static final Object PRESENT = new Object();
+
+    // ---------------------------------------------------------------------------------------------------
+
+    final ConcurrentMap<String, Object> servlets = new ConcurrentHashMap<>(32, 0.9F, 1);
+    String prefix;
+
+    /**
+     * Initializes a new {@link DispatcherActivator}.
+     */
+    public DispatcherActivator() {
+        super();
+    }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
     	DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
-        prefix = dispatcherPrefixService.getPrefix();
+        final String prefix = dispatcherPrefixService.getPrefix();
+        this.prefix = prefix;
     	Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
     	Dispatcher.PREFIX.set(prefix);
 
@@ -289,7 +301,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
-                if (servlets.add(module)) {
+                if (null == servlets.putIfAbsent(module, PRESENT)) {
                     registerSessionServlet(prefix + module, dispatcherServlet);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
                         registerSessionServlet(prefix + "oauth/modules/" + module, oAuthDispatcherServlet);
@@ -300,7 +312,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             @Override
             public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
-                if (servlets.remove(module)) {
+                if (null != servlets.remove(module)) {
                     unregisterServlet(prefix + module);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
                         unregisterServlet(prefix + "oauth/modules/" + module);
@@ -396,7 +408,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);

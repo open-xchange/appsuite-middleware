@@ -100,7 +100,7 @@ import com.openexchange.report.client.transport.TransportHandler;
  * @since 7.8.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ObjectHandler.class, VersionHandler.class, ReportClientBase.class })
+@PrepareForTest({ ObjectHandler.class, VersionHandler.class })
 public class ReportClientBaseTest {
 
     private static final String UUID_CONST = UUID.randomUUID().toString();

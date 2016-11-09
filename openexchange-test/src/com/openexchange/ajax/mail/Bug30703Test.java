@@ -161,6 +161,7 @@ public class Bug30703Test extends AbstractAJAXSession {
         mailAccountDescription.setSpam("Spam");
         mailAccountDescription.setSpamHandler("NoSpamHandler");
         MailAccountInsertResponse response = client.execute(new MailAccountInsertRequest(mailAccountDescription));
+        assertFalse("Warning during account creation: " + response.getResponse().getWarnings().toString(), response.hasWarnings());
         response.fillObject(mailAccountDescription);
     }
 

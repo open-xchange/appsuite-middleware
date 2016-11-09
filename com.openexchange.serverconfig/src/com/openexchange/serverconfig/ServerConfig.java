@@ -66,7 +66,7 @@ import com.openexchange.capabilities.Capability;
 public interface ServerConfig {
 
     /**
-     * Get the whole config object as map, might contain more entries than available via documented methods as the object is built
+     * Get the whole config object as a read-only map, might contain more entries than available via documented methods as the object is built
      * dynamically.
      *
      * @return The whole config object as map

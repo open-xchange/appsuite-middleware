@@ -6,7 +6,10 @@ Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.serverconfig.impl.osgi.ServerConfigActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.capabilities,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.conversion.simple,

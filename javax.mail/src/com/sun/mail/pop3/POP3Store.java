@@ -41,6 +41,7 @@
 package com.sun.mail.pop3;
 
 import java.util.Properties;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.lang.reflect.*;
 
@@ -56,6 +57,8 @@ import java.util.Map;
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.MailLogger;
 import com.sun.mail.util.SocketConnectException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.util.MailConnectException;
 
 /**
@@ -459,5 +462,23 @@ public class POP3Store extends Store {
     private void checkConnected() throws MessagingException {
 	if (!super.isConnected())
 	    throw new MessagingException("Not connected");
+    }
+
+    @Override
+    public boolean isSetAndGetReadTimeoutSupported() {
+        return true;
+    }
+
+    @Override
+    public synchronized int setAndGetReadTimeout(int readTimeout) throws MessagingException {
+        if (port != null) {
+            try {
+                return port.setAndGetReadTimeout(readTimeout);
+            } catch (IOException ioex) {
+                throw new MessagingException("Setting SO_TIMEOUT failed", ioex);
+            }
+        }
+
+        return -1;
     }
 }

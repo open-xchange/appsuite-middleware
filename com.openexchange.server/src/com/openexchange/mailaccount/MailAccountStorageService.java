@@ -131,6 +131,18 @@ public interface MailAccountStorageService {
     void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException;
 
     /**
+     * Propagates given event for specified mail account.
+     *
+     * @param event The event
+     * @param id The mail account identifier
+     * @param eventProps Optional event properties
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If event propagation fails
+     */
+    void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException;
+
+    /**
      * Checks if the mail account referenced by specified identifier does exist.
      *
      * @param id The mail account identifier

@@ -50,14 +50,11 @@
 package com.openexchange.mail.dataobjects.compose;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
-import javax.mail.internet.MimeUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentInfo;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
 
@@ -72,8 +69,6 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
      *
      */
     private static final long serialVersionUID = -3158021272821196715L;
-
-    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreDocumentMailPart.class);
 
     private transient final Session session;
     private transient final String documentId;
@@ -101,11 +96,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
         {
             final String fileName = attachment.getName();
             if (!com.openexchange.java.Strings.isEmpty(fileName)) {
-                try {
-                    setFileName(MimeUtility.encodeText(fileName, MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
-                } catch (final UnsupportedEncodingException e) {
-                    setFileName(fileName);
-                }
+                setFileName(fileName);
             }
         }
     }

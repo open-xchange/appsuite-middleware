@@ -132,7 +132,8 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final EnumSet<Name> PROPS_TO_IGNORE = EnumSet.of(LogProperties.Name.SESSION_CONTEXT_ID);
 
-    protected static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
+    /** The reference to the <code>Dispatcher</code> instance */
+    private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
     /**
      * Sets the dispatcher instance.
@@ -153,41 +154,6 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private static final AtomicReference<List<ResponseRenderer>> RESPONSE_RENDERERS = new AtomicReference<List<ResponseRenderer>>(Collections.<ResponseRenderer> emptyList());
-
-    /**
-     * The default <code>AJAXRequestDataTools</code>.
-     */
-    protected final AJAXRequestDataTools defaultRequestDataTools;
-
-    /**
-     * The line separator.
-     */
-    protected final String lineSeparator;
-
-    /**
-     * The dispatcher servlet prefix (e.g. /appsuite/api/)
-     */
-    protected final String prefix;
-
-
-    /**
-     * Initializes a new {@link DispatcherServlet}.
-     */
-    public DispatcherServlet(String prefix) {
-        super();
-        this.prefix = prefix;
-        defaultRequestDataTools = AJAXRequestDataTools.getInstance();
-        lineSeparator = System.getProperty("line.separator");
-    }
-
-    /**
-     * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
-     *
-     * @return The <code>AJAXRequestDataTools</code> instance
-     */
-    protected AJAXRequestDataTools getAjaxRequestDataTools() {
-        return defaultRequestDataTools;
-    }
 
     /**
      * The prefix reference for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
@@ -259,6 +225,43 @@ public class DispatcherServlet extends SessionServlet {
      */
     public static void clearRenderer() {
         RESPONSE_RENDERERS.set(Collections.<ResponseRenderer> emptyList());
+    }
+
+    // -------------------------------------------------------------------------------------------------
+
+    /**
+     * The default <code>AJAXRequestDataTools</code>.
+     */
+    protected final AJAXRequestDataTools defaultRequestDataTools;
+
+    /**
+     * The line separator.
+     */
+    protected final String lineSeparator;
+
+    /**
+     * The dispatcher servlet prefix (e.g. /appsuite/api/)
+     */
+    protected final String prefix;
+
+
+    /**
+     * Initializes a new {@link DispatcherServlet}.
+     */
+    public DispatcherServlet(String prefix) {
+        super();
+        this.prefix = prefix;
+        defaultRequestDataTools = AJAXRequestDataTools.getInstance();
+        lineSeparator = System.getProperty("line.separator");
+    }
+
+    /**
+     * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
+     *
+     * @return The <code>AJAXRequestDataTools</code> instance
+     */
+    protected AJAXRequestDataTools getAjaxRequestDataTools() {
+        return defaultRequestDataTools;
     }
 
     @Override

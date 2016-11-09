@@ -56,6 +56,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.Event;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -238,6 +239,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     @Override
     public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
         storageService.setNamesForMailAccount(id, indexes, names, userId, contextId);
+    }
+
+    @Override
+    public void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException {
+        storageService.propagateEvent(event, id, eventProps, userId, contextId);
     }
 
     @Override

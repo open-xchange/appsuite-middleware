@@ -73,6 +73,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
@@ -365,14 +366,24 @@ public class DefaultMessageGenerator implements MessageGenerator {
 
         // Alter text content to include share reference
         TextBodyMailPart textPart = composeContext.getTextPart().copy();
-        textPart.setPlainText(null);
 
-        {
+        if (composeContext.isPlainText()) {
+            String plainText = textPart.getPlainText();
+            StringBuilder plainTextBuilder = new StringBuilder(plainText.length() + 512);
+
+            // Append the prefix that notifies about to access the message's attachment via provided share link
+            plainTextBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles, true));
+
+            plainTextBuilder.append(plainText);
+
+            textPart.setPlainText(plainTextBuilder.toString());
+            composedMessage.setBodyPart(textPart);
+        } else {
             String text = (String) textPart.getContent();
             StringBuilder textBuilder = new StringBuilder(text.length() + 512);
 
             // Append the prefix that notifies about to access the message's attachment via provided share link
-            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles));
+            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles, false));
 
             // Append actual text
             textBuilder.append(text);
@@ -425,7 +436,11 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The generated prefix
      * @throws OXException If generating prefix from template fails
      */
-    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate, Map<String, String> previews, int moreFiles) throws OXException {
+    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate, Map<String, String> previews, int moreFiles, boolean isPlainText) throws OXException {
+        if (isPlainText) {
+            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+            return htmlService.html2text(generatePrefixPlain(locale, info, shareReference), true);
+        }
         return fromTemplate ? loadPrefixFromTemplate(locale, info, shareReference, previews, moreFiles) : generatePrefixPlain(locale, info, shareReference);
     }
 
@@ -461,11 +476,10 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Files
         {
             textBuilder.append("<ul>");
-            List<String> fileNames = new ArrayList<>(items.size());
             for (Item item : items) {
                 textBuilder.append("<li>");
                 String fileName = item.getName();
-                fileNames.add(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : htmlFormat(fileName));
+                textBuilder.append(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : htmlFormat(fileName));
                 textBuilder.append("</li>");
             }
             textBuilder.append("</ul>").append("<br>");
@@ -514,9 +528,9 @@ public class DefaultMessageGenerator implements MessageGenerator {
 
     /** The template place-holder for the listing of file names */
     protected static final String VARIABLE_FILE_NAMES = "filenames";
-    
+
     protected static final String VARIABLE_PREVIEW = "previews";
-    
+
     protected static final String VARIABLE_MORE_FILES = "more";
 
     /**
@@ -658,7 +672,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         }
         return map;
     }
-    
+
     private Map<String, String> generateFilenameMapping(List<Item> items, Translator translator) {
         if (null == items || items.size() == 0) {
             return Collections.emptyMap();

@@ -114,7 +114,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
 
         final OSGiSubscriptionSourceDiscoveryCollector discoveryCollector = new OSGiSubscriptionSourceDiscoveryCollector(context);
         discoveryCollector.addSubscriptionSourceDiscoveryService(collector);
-        AutoUpdateActivator.COLLECTOR = discoveryCollector;
+        AutoUpdateActivator.setCollector(discoveryCollector);
         registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, discoveryDict);
 
         final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(5);
@@ -131,7 +131,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
         registerService(SubscriptionExecutionService.class, executor);
         registerService(FolderUpdaterRegistry.class, executor);
 
-        AutoUpdateActivator.EXECUTOR = executor;
+        AutoUpdateActivator.setExecutor(executor);
 
         final DBProvider provider = getService(DBProvider.class);
         final WhiteboardGenericConfigurationStorageService genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
@@ -180,6 +180,8 @@ public class DiscoveryActivator extends HousekeepingActivator {
         AbstractSubscribeService.CRYPTO_SERVICE.set(null);
         AbstractSubscribeService.FOLDERS.set(null);
         AbstractSubscribeService.USER_PERMISSIONS.set(null);
+        AutoUpdateActivator.setCollector(null);
+        AutoUpdateActivator.setExecutor(null);
     }
 
     @Override

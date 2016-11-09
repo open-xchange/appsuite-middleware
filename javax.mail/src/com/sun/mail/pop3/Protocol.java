@@ -859,4 +859,25 @@ class Protocol {
     private void batchCommandStart(String command) { }
     private void batchCommandContinue(String command) { }
     private void batchCommandEnd() { }
+
+    /**
+     * Sets the specified read timeout and returns the previously applicable SO_TIMEOUT value.
+     *
+     * @param readTimeout The new SO_TIMEOUT to set. A timeout of zero is interpreted as an infinite timeout. A value of less than zero is ignored
+     * @return The previously applicable SO_TIMEOUT value
+     * @throws IOException If SO_TIMEOUT cannot be set
+     */
+    public int setAndGetReadTimeout(int readTimeout) throws IOException {
+        Socket socket = this.socket;
+        if (null == socket) {
+            return -1;
+        }
+
+        int to = socket.getSoTimeout();
+        if (readTimeout >= 0) {
+            socket.setSoTimeout(readTimeout);
+        }
+        return to;
+    }
+
 }

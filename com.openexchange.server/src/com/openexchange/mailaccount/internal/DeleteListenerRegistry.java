@@ -53,8 +53,10 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
+import com.openexchange.mailaccount.MailAccountListener;
 
 /**
  * {@link DeleteListenerRegistry} - Registry for mail account delete listeners.
@@ -62,6 +64,8 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteListenerRegistry {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteListenerRegistry.class);
 
     private static volatile DeleteListenerRegistry instance;
 
@@ -136,6 +140,36 @@ public final class DeleteListenerRegistry {
     public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
         for (final MailAccountDeleteListener mailAccountDeleteListener : registry.values()) {
             mailAccountDeleteListener.onAfterMailAccountDeletion(id, properties, user, cid, con);
+        }
+    }
+
+    /**
+     * Triggers the {@link MailAccountListener#onMailAccountCreated(int, Map, int, int, Connection)} event for registered listeners.
+     */
+    public void triggerOnCreation(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) {
+        for (final MailAccountDeleteListener mailAccountDeleteListener : registry.values()) {
+            if (mailAccountDeleteListener instanceof MailAccountListener) {
+                try {
+                    ((MailAccountListener) mailAccountDeleteListener).onMailAccountCreated(id, properties, user, cid, con);
+                } catch (Exception e) {
+                    LOG.warn("Failed onMailAccountCreated() invocation for {}", mailAccountDeleteListener.getClass().getName(), e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Triggers the {@link MailAccountListener#onMailAccountModified(int, Map, int, int, Connection)} event for registered listeners.
+     */
+    public void triggerOnModification(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) {
+        for (final MailAccountDeleteListener mailAccountDeleteListener : registry.values()) {
+            if (mailAccountDeleteListener instanceof MailAccountListener) {
+                try {
+                    ((MailAccountListener) mailAccountDeleteListener).onMailAccountModified(id, properties, user, cid, con);
+                } catch (Exception e) {
+                    LOG.warn("Failed onMailAccountModified() invocation for {}", mailAccountDeleteListener.getClass().getName(), e);
+                }
+            }
         }
     }
 

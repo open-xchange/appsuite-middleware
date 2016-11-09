@@ -85,6 +85,7 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -159,7 +160,8 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Trackers
              */
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
-            track(CacheEventService.class, new ListLsubInvalidator(context));
+            ListLsubInvalidator listLsubInvalidator = new ListLsubInvalidator(context);
+            track(CacheEventService.class, listLsubInvalidator);
             trackService(FolderService.class);
             trackService(AuditLogService.class);
             openTrackers();
@@ -167,6 +169,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Command provider
              */
             registerService(CommandProvider.class, new ListLsubCommandProvider());
+            registerService(MailAccountDeleteListener.class, listLsubInvalidator);
             /*
              * Initialize cache regions
              */
