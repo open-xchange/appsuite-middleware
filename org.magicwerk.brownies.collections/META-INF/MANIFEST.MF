@@ -6,10 +6,10 @@ Bundle-Version: 0.9.10
 Bundle-Vendor: Magicwerk.org
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
- lib/brownies-collections-0.9.10.jar
-Export-Package: org.magicwerk.brownies.collections;version="0.9.10",
- org.magicwerk.brownies.collections.exceptions;version="0.9.10",
- org.magicwerk.brownies.collections.function;version="0.9.10",
- org.magicwerk.brownies.collections.helper;version="0.9.10",
- org.magicwerk.brownies.collections.helper.primitive;version="0.9.10",
- org.magicwerk.brownies.collections.primitive;version="0.9.10"
+ lib/brownies-collections-0.9.13.jar
+Export-Package: org.magicwerk.brownies.collections;version="0.9.13",
+ org.magicwerk.brownies.collections.exceptions;version="0.9.13",
+ org.magicwerk.brownies.collections.function;version="0.9.13",
+ org.magicwerk.brownies.collections.helper;version="0.9.13",
+ org.magicwerk.brownies.collections.helper.primitive;version="0.9.13",
+ org.magicwerk.brownies.collections.primitive;version="0.9.13"

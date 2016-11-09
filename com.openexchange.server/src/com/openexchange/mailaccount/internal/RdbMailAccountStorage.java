@@ -108,6 +108,7 @@ import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.ProviderUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.Event;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -835,6 +836,48 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            propagateEvent(event, id, eventProps, userId, contextId, con);
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    private void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        switch (event) {
+            case DELETED:
+                DeleteListenerRegistry.getInstance().triggerOnAfterDeletion(id, eventProps, userId, contextId, con);
+                break;
+            case CREATED:
+                DeleteListenerRegistry.getInstance().triggerOnCreation(id, eventProps, userId, contextId, con);
+                break;
+            case MODIFIED:
+                DeleteListenerRegistry.getInstance().triggerOnModification(id, eventProps, userId, contextId, con);
+                break;
+            default:
+                LOG.warn("Unknown event: {}", event);
+                break;
         }
     }
 

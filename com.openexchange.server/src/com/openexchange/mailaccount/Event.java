@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,39 +49,28 @@
 
 package com.openexchange.mailaccount;
 
-import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link MailAccountDeleteListener} - Listener interface for mail account deletion.
+ * {@link Event} - A mail account event.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public interface MailAccountDeleteListener {
+public enum Event {
 
-    /**
-     * Handles the event <i>before</i> the denoted mail account is deleted.
-     *
-     * @param id The mail account ID
-     * @param eventProps Optional properties for delete event
-     * @param userId The user ID
-     * @param contextId The context ID
-     * @param con The used connection <i>in transactional state</i>
-     * @throws OXException If a critical error occurs which should abort mail account deletion
-     */
-    void onBeforeMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException;
+    /** A mail account has been deleted */
+    DELETED("deleted"),
+    /** A mail account has been created */
+    CREATED("created"),
+    /** A mail account has been modified */
+    MODIFIED("modified"),
 
-    /**
-     * Handles the event <i>after</i> the denoted mail account is deleted.
-     *
-     * @param id The mail account ID
-     * @param eventProps Optional properties for delete event
-     * @param userId The user ID
-     * @param contextId The context ID
-     * @param con The used connection <i>in transactional state</i>
-     * @throws OXException If a critical error occurs which should abort mail account deletion
-     */
-    void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException;
+    ;
+
+    private final String id;
+
+    private Event(String id) {
+        this.id = id;
+    }
 
 }
