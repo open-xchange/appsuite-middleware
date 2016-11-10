@@ -179,8 +179,12 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
             return;
         }
         if (size <= HzDataUtility.CHUNK_THRESHOLD) {
-            for (int i = 0; i < size; i++) {
-                publish(senderId, messages.get(i));
+            if (1 == size) {
+                publish(senderId, messages.get(0));
+            } else {
+                for (E message : messages) {
+                    publish(senderId, message);
+                }
             }
         } else {
             // Chunk-wise
