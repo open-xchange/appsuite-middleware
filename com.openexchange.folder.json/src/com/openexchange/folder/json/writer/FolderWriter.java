@@ -139,7 +139,7 @@ public final class FolderWriter {
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-            FolderObject fo = turnIntoFolderObjects(new UserizedFolder[] { folder }).iterator().next();
+            FolderObject fo = turnIntoFolderObject(folder);
             Object value = aff.getValue(fo, requestData.getSession());
             jsonPutter.put(jsonPutter.withKey() ? aff.getColumnName() : null, aff.renderJSON(requestData, value));
         }
@@ -588,24 +588,28 @@ public final class FolderWriter {
         System.arraycopy(allFields, 0, ALL_FIELDS, 0, j);
     }
 
-    private static List<FolderObject> turnIntoFolderObjects(final UserizedFolder[] folders) {
-        final List<FolderObject> retval = new ArrayList<FolderObject>(folders.length);
-        for (final UserizedFolder folder : folders) {
-            final FolderObject fo = new FolderObject();
-            final int numFolderId = Tools.getUnsignedInteger(folder.getID());
-            if (numFolderId < 0) {
-                fo.setFullName(folder.getID());
-            } else {
-                fo.setObjectID(numFolderId);
-            }
-            fo.setFolderName(folder.getName());
-            fo.setModule(folder.getContentType().getModule());
-            if (null != folder.getType()) {
-                fo.setType(folder.getType().getType());
-            }
-            fo.setCreatedBy(folder.getCreatedBy());
-            fo.setPermissions(turnIntoOCLPermissions(numFolderId, folder.getPermissions()));
-            retval.add(fo);
+    static FolderObject turnIntoFolderObject(UserizedFolder folder) {
+        FolderObject fo = new FolderObject();
+        final int numFolderId = Tools.getUnsignedInteger(folder.getID());
+        if (numFolderId < 0) {
+            fo.setFullName(folder.getID());
+        } else {
+            fo.setObjectID(numFolderId);
+        }
+        fo.setFolderName(folder.getName());
+        fo.setModule(folder.getContentType().getModule());
+        if (null != folder.getType()) {
+            fo.setType(folder.getType().getType());
+        }
+        fo.setCreatedBy(folder.getCreatedBy());
+        fo.setPermissions(turnIntoOCLPermissions(numFolderId, folder.getPermissions()));
+        return fo;
+    }
+
+    static List<FolderObject> turnIntoFolderObjects(final UserizedFolder[] folders) {
+        List<FolderObject> retval = new ArrayList<FolderObject>(folders.length);
+        for (UserizedFolder folder : folders) {
+            retval.add(turnIntoFolderObject(folder));
         }
         return retval;
     }
@@ -651,8 +655,9 @@ public final class FolderWriter {
             final int curCol = cols[i];
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
             if (null == ffw) {
-                if (additionalFolderFieldList.knows(curCol)) {
-                    final AdditionalFolderField aff = new BulkFolderField(additionalFolderFieldList.get(curCol));
+                AdditionalFolderField aff = additionalFolderFieldList.opt(curCol);
+                if (null != aff) {
+                    aff = new BulkFolderField(aff, folders.length);
                     aff.getValues(turnIntoFolderObjects(folders), requestData.getSession());
                     ffw = new AdditionalFolderFieldWriter(requestData, aff);
                 } else {
@@ -711,8 +716,8 @@ public final class FolderWriter {
             final int curCol = cols[i];
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
             if (null == ffw) {
-                if (additionalFolderFieldList.knows(curCol)) {
-                    final AdditionalFolderField aff = additionalFolderFieldList.get(curCol);
+                AdditionalFolderField aff = additionalFolderFieldList.opt(curCol);
+                if (null != aff) {
                     ffw = new AdditionalFolderFieldWriter(requestData, aff);
                 } else {
                     ffw = getPropertyByField(curCol, fieldSet);

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
 import java.net.SocketException;
@@ -911,21 +912,8 @@ public class MimeMailException extends OXException {
         return isEitherOf(e, java.net.SocketTimeoutException.class);
     }
 
-    //java.net.SocketTimeoutException
-
-    private static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
-        if (null == e) {
-            return false;
-        }
-
-        for (Class<? extends Exception> clazz : classes) {
-            if (clazz.isInstance(e)) {
-                return true;
-            }
-        }
-
-        Throwable next = (e instanceof MessagingException) ? ((MessagingException) e).getNextException() : e.getCause();
-        return null == next ? false : isEitherOf(next, classes);
+    public static boolean isSSLHandshakeException(MessagingException e) {
+        return isEitherOf(e, javax.net.ssl.SSLHandshakeException.class);
     }
 
     // ------------------------------------------------- SMTP error stuff ----------------------------------------------------------------
