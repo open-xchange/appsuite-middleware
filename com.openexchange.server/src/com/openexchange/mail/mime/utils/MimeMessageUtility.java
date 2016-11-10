@@ -1,5 +1,6 @@
 /*
  *
+
  *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
@@ -773,6 +774,11 @@ public final class MimeMessageUtility {
         ContentType ct = new ContentType();
         for (int i = count; !found && i-- > 0;) {
             MailPart part = mp.getEnclosedMailPart(i);
+            if (!(part.getContentType().getBaseType().toLowerCase().startsWith("application") && part.getContentType().getSubType().toLowerCase().endsWith("-signature"))) {
+                if (hasAttachmentInMetadata(part)) {
+                    return true;
+                }
+            }
             String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
@@ -783,7 +789,7 @@ public final class MimeMessageUtility {
         }
         return found;
     }
-
+    
     private static boolean hasAttachmentInMetadata(MailPart part) {
         ContentDisposition contentDisposition = part.getContentDisposition();
         if (contentDisposition != null) {
