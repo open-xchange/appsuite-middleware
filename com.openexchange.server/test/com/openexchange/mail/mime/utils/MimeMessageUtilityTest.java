@@ -196,6 +196,7 @@ public class MimeMessageUtilityTest extends TestCase {
             Mockito.when(mailpart.getContentDisposition()).thenReturn(cd);
             ContentType ct = new ContentType(PLAIN_TEXT);
             Mockito.when(mailpart.getContentType()).thenReturn(ct);
+            Mockito.when(mailpart.getEnclosedMailPart(0)).thenReturn(mailpart);
             result = MimeMessageUtility.hasAttachments(mailpart, "inline");
         } catch (MessagingException | OXException | IOException e) {
             e.printStackTrace();
@@ -211,6 +212,7 @@ public class MimeMessageUtilityTest extends TestCase {
             Mockito.when(mailpart.getContentDisposition()).thenReturn(cd);
             ContentType ct = new ContentType(PLAIN_TEXT);
             Mockito.when(mailpart.getContentType()).thenReturn(ct);
+            Mockito.when(mailpart.getEnclosedMailPart(0)).thenReturn(mailpart);
             result = MimeMessageUtility.hasAttachments(mailpart, "inline");
         } catch (MessagingException | OXException | IOException e) {
             e.printStackTrace();
