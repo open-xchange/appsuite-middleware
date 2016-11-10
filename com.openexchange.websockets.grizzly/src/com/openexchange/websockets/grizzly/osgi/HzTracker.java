@@ -59,7 +59,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.websockets.WebSocket;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
 
 /**
@@ -100,7 +100,7 @@ public class HzTracker implements ServiceTrackerCustomizer<HazelcastInstance, Ha
         activator.addService(HazelcastInstance.class, hzInstance);
         remoteDistributor.setHazelcastResources(hzInstance, mapName);
 
-        GrizzlyWebSocketApplication app = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
+        DefaultGrizzlyWebSocketApplication app = DefaultGrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
         if (null != app) {
             List<WebSocket> sockets = app.listLocalWebSockets();
             int size = sockets.size();

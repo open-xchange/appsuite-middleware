@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.impl;
 
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.WebSocket;
@@ -117,22 +117,22 @@ public class WebSocketListenerAdapter implements org.glassfish.grizzly.websocket
 
     @Override
     public void onClose(WebSocket socket, DataFrame frame) {
-        if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onWebSocketClose((SessionBoundWebSocket) socket);
+        if (socket instanceof DefaultSessionBoundWebSocket) {
+            webSocketListener.onWebSocketClose((DefaultSessionBoundWebSocket) socket);
         }
     }
 
     @Override
     public void onConnect(WebSocket socket) {
-        if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onWebSocketConnect((SessionBoundWebSocket) socket);
+        if (socket instanceof DefaultSessionBoundWebSocket) {
+            webSocketListener.onWebSocketConnect((DefaultSessionBoundWebSocket) socket);
         }
     }
 
     @Override
     public void onMessage(WebSocket socket, String text) {
-        if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onMessage((SessionBoundWebSocket) socket, text);
+        if (socket instanceof DefaultSessionBoundWebSocket) {
+            webSocketListener.onMessage((DefaultSessionBoundWebSocket) socket, text);
         }
     }
 

@@ -47,69 +47,32 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.impl;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import com.openexchange.websockets.WebSocketSession;
+import com.openexchange.websockets.IndividualWebSocketListener;
 
 /**
- * {@link WebSocketSessionImpl}
+ * {@link IndividualWebSocketListenerAdapter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketSessionImpl implements WebSocketSession {
-
-    private final ConcurrentMap<String, Object> attributes;
+public class IndividualWebSocketListenerAdapter extends WebSocketListenerAdapter {
 
     /**
-     * Initializes a new {@link WebSocketSessionImpl}.
+     * Initializes a new {@link IndividualWebSocketListenerAdapter}.
      */
-    public WebSocketSessionImpl() {
-        super();
-        attributes = new ConcurrentHashMap<>(8, 0.9F, 1);
+    protected IndividualWebSocketListenerAdapter(IndividualWebSocketListener individualWebSocketListener) {
+        super(individualWebSocketListener);
     }
 
-    @Override
-    public <V> V getAttribute(String name) {
-        try {
-            return (V) (null == name ? null : attributes.get(name));
-        } catch (ClassCastException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public Set<String> getAttributeNames() {
-        return new LinkedHashSet<>(attributes.keySet());
-    }
-
-    @Override
-    public void setAttribute(String name, Object value) {
-        if (null == name) {
-            return;
-        }
-        if (null == value) {
-            attributes.remove(name);
-        } else {
-            attributes.put(name, value);
-        }
-    }
-
-    @Override
-    public void removeAttribute(String name) {
-        if (null == name) {
-            return;
-        }
-        attributes.remove(name);
-    }
-
-    @Override
-    public String toString() {
-        return attributes.toString();
+    /**
+     * Creates a new adapter for the associated Web Socket listener that receives individual call-backs.
+     *
+     * @return The new adapter
+     */
+    public WebSocketListenerAdapter newAdapter() {
+        return new WebSocketListenerAdapter(((IndividualWebSocketListener) webSocketListener).newInstance());
     }
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.impl;
 
 import java.util.List;
 import com.openexchange.websockets.WebSocketListener;
