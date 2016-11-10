@@ -230,9 +230,18 @@ public class ExceptionUtils {
      * @param clazz The exception class to check for
      * @return <code>true</code> if the exception class occurs in exception chain; otherwise <code>false</code>
      */
-    public static boolean isEitherOf(Throwable e, Class<? extends Exception> clazz) {
-        return isEitherOf(e, clazz);
-    }
+	public static boolean isEitherOf(Throwable e, Class<? extends Exception> clazz) {
+		if (null == e || null == clazz) {
+			return false;
+		}
+
+		if (clazz.isInstance(e)) {
+			return true;
+		}
+
+		Throwable next = e.getCause();
+		return null == next ? false : isEitherOf(next, clazz);
+	}
 
     /**
      * Checks if any of specified exception (classes) occurs in exception chain of given {@link Throwable} instance.
