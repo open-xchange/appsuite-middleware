@@ -508,13 +508,17 @@ public final class MailNotifyPushListenerRegistry {
         } else {
             for (String alias : aliases) {
                 int idx = alias.indexOf('@');
-                mboxIds.add(Strings.toLowerCase( (idx > 0) ? alias.substring(0, idx) : alias) );
+                mboxIds.add(Strings.toLowerCase((idx > 0) ? alias.substring(0, idx) : alias));
             }
         }
 
         // Add login-info as well (if demanded)
         if (useOXLogin) {
-            mboxIds.add(user.getLoginInfo().toLowerCase());
+            String loginInfo = user.getLoginInfo();
+            if (loginInfo != null) {
+                mboxIds.add(loginInfo.toLowerCase());
+                LOG.debug("Added login info from user with id {} in context {}.", userId, contextId);
+            }
         }
 
         return mboxIds;
