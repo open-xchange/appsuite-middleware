@@ -51,6 +51,7 @@ package com.openexchange.websockets.grizzly.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.Filter;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
@@ -63,12 +64,14 @@ import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Tools;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
+import com.openexchange.websockets.IndividualWebSocketListener;
 import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
@@ -114,8 +117,11 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         this.remoteDistributor = remoteDistributor;
 
         WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context);
-        ServiceTracker<WebSocketListener, WebSocketListener> st = track(WebSocketListener.class, listenerTracker);
-        st.open();
+        {
+            Filter filter = Tools.generateServiceFilter(context, WebSocketListener.class, IndividualWebSocketListener.class);
+            ServiceTracker<Object, Object> st = track(filter, listenerTracker);
+            st.open();
+        }
 
         GrizzlyWebSocketApplication app = this.app;
         if (null == app) {

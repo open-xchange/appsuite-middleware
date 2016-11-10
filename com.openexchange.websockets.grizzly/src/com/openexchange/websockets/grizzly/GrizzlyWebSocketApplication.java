@@ -615,7 +615,14 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                         }
                     }
                 }
-                listenersToUse.addAll(listenerRegistry.getListeners());
+                for (WebSocketListener grizzlyWebSocketListener : listenerRegistry.getListeners()) {
+                    if (grizzlyWebSocketListener instanceof IndividualWebSocketListenerAdapter) {
+                        // Pass individual instance
+                        listenersToUse.add(((IndividualWebSocketListenerAdapter) grizzlyWebSocketListener).newAdapter());
+                    } else {
+                        listenersToUse.add(grizzlyWebSocketListener);
+                    }
+                }
                 effectiveListeners = listenersToUse.toArray(new WebSocketListener[listenersToUse.size()]);
             }
 
@@ -719,9 +726,14 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
                 synchronized (sessionBoundSocket) {
                     Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
-                    for (WebSocketListener listener : listenerRegistry.getListeners()) {
-                        if (!listeners.contains(listener)) {
-                            listeners.add(listener);
+                    for (WebSocketListener grizzlyWebSocketListener : listenerRegistry.getListeners()) {
+                        if (!listeners.contains(grizzlyWebSocketListener)) {
+                            if (grizzlyWebSocketListener instanceof IndividualWebSocketListenerAdapter) {
+                                // Pass individual instance
+                                listeners.add(((IndividualWebSocketListenerAdapter) grizzlyWebSocketListener).newAdapter());
+                            } else {
+                                listeners.add(grizzlyWebSocketListener);
+                            }
                         }
                     }
                 }
@@ -764,15 +776,20 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     /**
      * Adds specified listener to existing Web Sockets
      *
-     * @param listener The listener to add
+     * @param grizzlyWebSocketListener The listener to add
      */
-    public void addWebSocketListener(WebSocketListener listener) {
+    public void addWebSocketListener(WebSocketListener grizzlyWebSocketListener) {
         for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
             for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
                 synchronized (sessionBoundSocket) {
                     Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
-                    if (!listeners.contains(listener)) {
-                        listeners.add(listener);
+                    if (!listeners.contains(grizzlyWebSocketListener)) {
+                        if (grizzlyWebSocketListener instanceof IndividualWebSocketListenerAdapter) {
+                            // Pass individual instance
+                            listeners.add(((IndividualWebSocketListenerAdapter) grizzlyWebSocketListener).newAdapter());
+                        } else {
+                            listeners.add(grizzlyWebSocketListener);
+                        }
                     }
                 }
             }
@@ -782,12 +799,12 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     /**
      * Removes specified listener to existing Web Sockets
      *
-     * @param listener The listener to remove
+     * @param grizzlyWebSocketListener The listener to remove
      */
-    public void removeWebSocketListener(WebSocketListener listener) {
+    public void removeWebSocketListener(WebSocketListener grizzlyWebSocketListener) {
         for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
             for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
-                sessionBoundSocket.remove(listener);
+                sessionBoundSocket.remove(grizzlyWebSocketListener);
             }
         }
     }
