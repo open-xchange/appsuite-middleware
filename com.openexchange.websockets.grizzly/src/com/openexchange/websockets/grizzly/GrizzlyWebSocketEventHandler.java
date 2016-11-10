@@ -47,9 +47,11 @@
  *
  */
 
-package com.openexchange.websockets.grizzly.osgi;
+package com.openexchange.websockets.grizzly;
 
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -58,7 +60,6 @@ import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 
 /**
  * {@link GrizzlyWebSocketEventHandler}
@@ -71,11 +72,32 @@ public class GrizzlyWebSocketEventHandler implements EventHandler {
     /** The logger constant */
     static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketEventHandler.class);
 
+    final Queue<AbstractGrizzlyWebSocketApplication<?>> apps;
+
     /**
      * Initializes a new {@link GrizzlyWebSocketEventHandler}.
      */
     public GrizzlyWebSocketEventHandler() {
         super();
+        apps = new ConcurrentLinkedQueue<>();
+    }
+
+    /**
+     * Adds specified application.
+     *
+     * @param app The application to add
+     */
+    public void addApp(AbstractGrizzlyWebSocketApplication<?> app) {
+        apps.offer(app);
+    }
+
+    /**
+     * Removes specified application.
+     *
+     * @param app The application to remove
+     */
+    public void removeApp(AbstractGrizzlyWebSocketApplication<?> app) {
+        apps.remove(app);
     }
 
     @Override
@@ -92,7 +114,7 @@ public class GrizzlyWebSocketEventHandler implements EventHandler {
         }
     }
 
-    private static final class GrizzlyWebSocketEventHandlerRunnable implements Runnable {
+    private final class GrizzlyWebSocketEventHandlerRunnable implements Runnable {
 
         private final Event event;
 
@@ -101,32 +123,30 @@ public class GrizzlyWebSocketEventHandler implements EventHandler {
          *
          * @param event The event to handle
          */
-        protected GrizzlyWebSocketEventHandlerRunnable(final Event event) {
+        protected GrizzlyWebSocketEventHandlerRunnable(Event event) {
             super();
             this.event = event;
         }
 
         @Override
         public void run() {
-            GrizzlyWebSocketApplication app = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
-            if (null == app) {
-                return;
-            }
+            String topic = event.getTopic();
 
-            final String topic = event.getTopic();
-            try {
-                if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                    Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                    app.closeWebSocketForSession(session.getSessionID(), session.getUserId(), session.getContextId());
-                } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                    for (Session session : sessionContainer.values()) {
+            for (AbstractGrizzlyWebSocketApplication<?> app : apps) {
+                try {
+                    if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                        Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                         app.closeWebSocketForSession(session.getSessionID(), session.getUserId(), session.getContextId());
+                    } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                        for (Session session : sessionContainer.values()) {
+                            app.closeWebSocketForSession(session.getSessionID(), session.getUserId(), session.getContextId());
+                        }
                     }
+                } catch (final Exception e) {
+                    LOG.error("Error while handling SessionD event \"{}\".", topic, e);
                 }
-            } catch (final Exception e) {
-                LOG.error("Error while handling SessionD event \"{}\".", topic, e);
             }
         }
     } // End of PushEventHandlerRunnable

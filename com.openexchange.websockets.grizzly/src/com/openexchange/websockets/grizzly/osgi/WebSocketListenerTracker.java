@@ -56,9 +56,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.websockets.WebSocketListener;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
-import com.openexchange.websockets.grizzly.WebSocketListenerAdapter;
-import com.openexchange.websockets.grizzly.WebSocketListenerRegistry;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
+import com.openexchange.websockets.grizzly.impl.WebSocketListenerAdapter;
+import com.openexchange.websockets.grizzly.impl.WebSocketListenerRegistry;
 
 
 /**
@@ -76,7 +76,7 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<Object
 
     private final BundleContext context;
     private final CopyOnWriteArrayList<org.glassfish.grizzly.websockets.WebSocketListener> adapters;
-    private volatile GrizzlyWebSocketApplication application;
+    private volatile DefaultGrizzlyWebSocketApplication application;
 
     /**
      * Initializes a new {@link WebSocketListenerTracker}.
@@ -100,7 +100,7 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<Object
      *
      * @param application The application to set
      */
-    public void setApplication(GrizzlyWebSocketApplication application) {
+    public void setApplication(DefaultGrizzlyWebSocketApplication application) {
         this.application = application;
     }
 
@@ -115,7 +115,7 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<Object
         WebSocketListener listener = (WebSocketListener) service;
         WebSocketListenerAdapter adapter = WebSocketListenerAdapter.newAdapterFor(listener);
         if (adapters.addIfAbsent(adapter)) {
-            GrizzlyWebSocketApplication application = this.application;
+            DefaultGrizzlyWebSocketApplication application = this.application;
             if (null != application) {
                 application.addWebSocketListener(adapter);
             }
@@ -140,7 +140,7 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<Object
         WebSocketListener listener = (WebSocketListener) service;
         WebSocketListenerAdapter adapter = WebSocketListenerAdapter.newAdapterFor(listener);
         if (adapters.remove(adapter)) {
-            GrizzlyWebSocketApplication application = this.application;
+            DefaultGrizzlyWebSocketApplication application = this.application;
             if (null != application) {
                 application.removeWebSocketListener(adapter);
             }

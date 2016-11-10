@@ -47,32 +47,69 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.impl;
 
-import com.openexchange.websockets.IndividualWebSocketListener;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.websockets.WebSocketSession;
 
 /**
- * {@link IndividualWebSocketListenerAdapter}
+ * {@link WebSocketSessionImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class IndividualWebSocketListenerAdapter extends WebSocketListenerAdapter {
+public class WebSocketSessionImpl implements WebSocketSession {
+
+    private final ConcurrentMap<String, Object> attributes;
 
     /**
-     * Initializes a new {@link IndividualWebSocketListenerAdapter}.
+     * Initializes a new {@link WebSocketSessionImpl}.
      */
-    protected IndividualWebSocketListenerAdapter(IndividualWebSocketListener individualWebSocketListener) {
-        super(individualWebSocketListener);
+    public WebSocketSessionImpl() {
+        super();
+        attributes = new ConcurrentHashMap<>(8, 0.9F, 1);
     }
 
-    /**
-     * Creates a new adapter for the associated Web Socket listener that receives individual call-backs.
-     *
-     * @return The new adapter
-     */
-    public WebSocketListenerAdapter newAdapter() {
-        return new WebSocketListenerAdapter(((IndividualWebSocketListener) webSocketListener).newInstance());
+    @Override
+    public <V> V getAttribute(String name) {
+        try {
+            return (V) (null == name ? null : attributes.get(name));
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Set<String> getAttributeNames() {
+        return new LinkedHashSet<>(attributes.keySet());
+    }
+
+    @Override
+    public void setAttribute(String name, Object value) {
+        if (null == name) {
+            return;
+        }
+        if (null == value) {
+            attributes.remove(name);
+        } else {
+            attributes.put(name, value);
+        }
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+        if (null == name) {
+            return;
+        }
+        attributes.remove(name);
+    }
+
+    @Override
+    public String toString() {
+        return attributes.toString();
     }
 
 }

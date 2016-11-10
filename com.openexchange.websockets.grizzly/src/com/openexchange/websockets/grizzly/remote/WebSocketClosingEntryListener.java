@@ -54,7 +54,7 @@ import org.slf4j.Logger;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.MapEvent;
 import com.openexchange.websockets.ConnectionId;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
 
 /**
  * {@link WebSocketClosingEntryListener}
@@ -66,12 +66,12 @@ public class WebSocketClosingEntryListener implements com.hazelcast.core.EntryLi
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketClosingEntryListener.class);
 
-    private final GrizzlyWebSocketApplication app;
+    private final DefaultGrizzlyWebSocketApplication app;
 
     /**
      * Initializes a new {@link WebSocketClosingEntryListener}.
      */
-    public WebSocketClosingEntryListener(GrizzlyWebSocketApplication app) {
+    public WebSocketClosingEntryListener(DefaultGrizzlyWebSocketApplication app) {
         super();
         this.app = app;
     }

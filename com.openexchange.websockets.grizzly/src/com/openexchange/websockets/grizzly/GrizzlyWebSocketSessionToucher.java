@@ -63,16 +63,16 @@ import com.openexchange.sessiond.SessiondServiceExtended;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketSessionToucher implements Runnable {
+public class GrizzlyWebSocketSessionToucher<S extends SessionBoundWebSocket> implements Runnable {
 
-    private final GrizzlyWebSocketApplication app;
+    private final AbstractGrizzlyWebSocketApplication<S> app;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketSessionToucher}.
      *
      * @param app The Web Socket application
      */
-    public GrizzlyWebSocketSessionToucher(GrizzlyWebSocketApplication app) {
+    public GrizzlyWebSocketSessionToucher(AbstractGrizzlyWebSocketApplication<S> app) {
         super();
         this.app = app;
     }
@@ -88,10 +88,10 @@ public class GrizzlyWebSocketSessionToucher implements Runnable {
         }
 
         // Get a list of currently active sessions bound to a Web Socket
-        Map<String, List<SessionBoundWebSocket>> sessions = app.getActiveSessions();
+        Map<String, List<S>> sessions = app.getActiveSessions();
 
         // Touch them
-        for (Map.Entry<String, List<SessionBoundWebSocket>> sessionEntry : sessions.entrySet()) {
+        for (Map.Entry<String, List<S>> sessionEntry : sessions.entrySet()) {
             Session session = sessiondService.getSession(sessionEntry.getKey());
             if (null == session) {
                 // No such session
