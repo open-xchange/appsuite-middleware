@@ -52,8 +52,8 @@ package com.openexchange.websockets.grizzly.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
 
 
 /**
@@ -77,7 +77,7 @@ public class GrizzlyWebSocketAuthenticatorTracker implements ServiceTrackerCusto
     @Override
     public GrizzlyWebSocketAuthenticator addingService(ServiceReference<GrizzlyWebSocketAuthenticator> reference) {
         GrizzlyWebSocketAuthenticator authenticator = context.getService(reference);
-        GrizzlyWebSocketApplication.setGrizzlyWebSocketAuthenticator(authenticator);
+        DefaultGrizzlyWebSocketApplication.setGrizzlyWebSocketAuthenticator(authenticator);
         return authenticator;
     }
 
@@ -88,7 +88,7 @@ public class GrizzlyWebSocketAuthenticatorTracker implements ServiceTrackerCusto
 
     @Override
     public void removedService(ServiceReference<GrizzlyWebSocketAuthenticator> reference, GrizzlyWebSocketAuthenticator service) {
-        GrizzlyWebSocketApplication.unsetGrizzlyWebSocketAuthenticator();
+        DefaultGrizzlyWebSocketApplication.unsetGrizzlyWebSocketAuthenticator();
         context.ungetService(reference);
     }
 }

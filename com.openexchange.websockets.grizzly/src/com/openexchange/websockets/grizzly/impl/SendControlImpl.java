@@ -47,68 +47,36 @@
  *
  */
 
-package com.openexchange.websockets.grizzly.remote;
+package com.openexchange.websockets.grizzly.impl;
 
-import static com.openexchange.java.Autoboxing.I;
-import org.slf4j.Logger;
-import com.hazelcast.core.EntryEvent;
-import com.hazelcast.core.MapEvent;
-import com.openexchange.websockets.ConnectionId;
-import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
+import java.util.concurrent.Future;
+import com.openexchange.websockets.SendControl;
+
 
 /**
- * {@link WebSocketClosingEntryListener}
+ * {@link SendControlImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketClosingEntryListener implements com.hazelcast.core.EntryListener<String, String> {
+public class SendControlImpl<V> implements SendControl {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketClosingEntryListener.class);
-
-    private final DefaultGrizzlyWebSocketApplication app;
+    private final Future<V> future;
 
     /**
-     * Initializes a new {@link WebSocketClosingEntryListener}.
+     * Initializes a new {@link SendControlImpl}.
+     *
+     * @param future The backing {@link Future} instance
      */
-    public WebSocketClosingEntryListener(DefaultGrizzlyWebSocketApplication app) {
+    public SendControlImpl(Future<V> future) {
         super();
-        this.app = app;
+        this.future = future;
+
     }
 
     @Override
-    public void entryEvicted(EntryEvent<String, String> event) {
-        // Manually close associated Web Socket (if any available) to enforce re-establishing a new one
-        MapKey key = MapKey.parseFrom(event.getKey());
-        MapValue value = MapValue.parseFrom(event.getValue());
-        if (app.closeWebSockets(key.getUserId(), key.getContextId(), ConnectionId.newInstance(value.getConnectionId()))) {
-            LOG.info("Closed Web Socket ({}) due to entry eviction for user {} in context {}.", value.getConnectionId(), I(key.getUserId()), I(key.getContextId()));
-        }
-    }
-
-    @Override
-    public void entryAdded(EntryEvent<String, String> event) {
-        // Nothing
-    }
-
-    @Override
-    public void entryUpdated(EntryEvent<String, String> event) {
-        // Nothing
-    }
-
-    @Override
-    public void entryRemoved(EntryEvent<String, String> event) {
-        // Nothing
-    }
-
-    @Override
-    public void mapCleared(MapEvent event) {
-        // Nothing
-    }
-
-    @Override
-    public void mapEvicted(MapEvent event) {
-        // Nothing
+    public boolean isDone() {
+        return future.isDone();
     }
 
 }

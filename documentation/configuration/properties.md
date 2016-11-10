@@ -43,7 +43,7 @@ These information are contained within the columns have the following meaning:
 
 ## New properties
 
-To insert a new property you just have to create or update the corresponding yml file in /documentation/config folder.
+To insert a new property you just have to create or update the corresponding yml file in /documentation-generic/config folder.
 
 The yml file must have the following structure:
 

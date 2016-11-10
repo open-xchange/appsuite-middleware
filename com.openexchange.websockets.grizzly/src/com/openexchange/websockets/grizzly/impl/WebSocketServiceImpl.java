@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.impl;
 
 import java.util.List;
 import java.util.concurrent.Future;
@@ -61,21 +61,21 @@ import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link WebSocketServiceImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
+public class WebSocketServiceImpl implements WebSocketService {
 
-    private final GrizzlyWebSocketApplication localApp;
+    private final DefaultGrizzlyWebSocketApplication localApp;
     private final RemoteWebSocketDistributor remoteDistributor;
     private final boolean asyncRemoteDistribution;
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
+     * Initializes a new {@link WebSocketServiceImpl}.
      */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
+    public WebSocketServiceImpl(DefaultGrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
         super();
         this.localApp = app;
         this.remoteDistributor = remoteDistributor;

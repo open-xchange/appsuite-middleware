@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.impl;
 
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.WebSocket;
+import com.openexchange.websockets.IndividualWebSocketListener;
 import com.openexchange.websockets.WebSocketListener;
 
 /**
@@ -61,12 +62,31 @@ import com.openexchange.websockets.WebSocketListener;
  */
 public class WebSocketListenerAdapter implements org.glassfish.grizzly.websockets.WebSocketListener {
 
-    private final WebSocketListener webSocketListener;
+    /**
+     * Creates a new adapter for given Web Socket listener.
+     *
+     * @param webSocketListener The Web Socket listener
+     * @return The adapter instance
+     */
+    public static WebSocketListenerAdapter newAdapterFor(WebSocketListener webSocketListener) {
+        if (webSocketListener instanceof IndividualWebSocketListener) {
+            // Have an individual instance per Web Socket
+            return new IndividualWebSocketListenerAdapter((IndividualWebSocketListener) webSocketListener);
+        }
+
+        // A common instance shared among Web Sockets
+        return new WebSocketListenerAdapter(webSocketListener);
+    }
+
+    // ------------------------------------------------------------------
+
+    /** The Web Socket listener */
+    protected final WebSocketListener webSocketListener;
 
     /**
      * Initializes a new {@link WebSocketListenerAdapter}.
      */
-    public WebSocketListenerAdapter(WebSocketListener webSocketListener) {
+    protected WebSocketListenerAdapter(WebSocketListener webSocketListener) {
         super();
         this.webSocketListener = webSocketListener;
     }
@@ -97,22 +117,22 @@ public class WebSocketListenerAdapter implements org.glassfish.grizzly.websocket
 
     @Override
     public void onClose(WebSocket socket, DataFrame frame) {
-        if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onWebSocketClose((SessionBoundWebSocket) socket);
+        if (socket instanceof DefaultSessionBoundWebSocket) {
+            webSocketListener.onWebSocketClose((DefaultSessionBoundWebSocket) socket);
         }
     }
 
     @Override
     public void onConnect(WebSocket socket) {
-        if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onWebSocketConnect((SessionBoundWebSocket) socket);
+        if (socket instanceof DefaultSessionBoundWebSocket) {
+            webSocketListener.onWebSocketConnect((DefaultSessionBoundWebSocket) socket);
         }
     }
 
     @Override
     public void onMessage(WebSocket socket, String text) {
-        if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onMessage((SessionBoundWebSocket) socket, text);
+        if (socket instanceof DefaultSessionBoundWebSocket) {
+            webSocketListener.onMessage((DefaultSessionBoundWebSocket) socket, text);
         }
     }
 

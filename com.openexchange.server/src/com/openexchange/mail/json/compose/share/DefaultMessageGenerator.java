@@ -661,7 +661,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
             // Ensure account identifier does not point to Unified Mail account
             ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
             UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
-            if ((null != management) && (accountId != management.getUnifiedINBOXAccountID(info.getComposeContext().getSession()))) {
+            if ((null == management) || (accountId != management.getUnifiedINBOXAccountID(info.getComposeContext().getSession()))) {
                 MailAccountStorageService storageService = registry.getService(MailAccountStorageService.class);
 
                 String personal;

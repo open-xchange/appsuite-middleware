@@ -47,68 +47,56 @@
  *
  */
 
-package com.openexchange.websockets.grizzly.remote;
+package com.openexchange.websockets.grizzly.impl;
 
-import static com.openexchange.java.Autoboxing.I;
 import org.slf4j.Logger;
-import com.hazelcast.core.EntryEvent;
-import com.hazelcast.core.MapEvent;
-import com.openexchange.websockets.ConnectionId;
-import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
+import com.openexchange.threadpool.AbstractTask;
 
 /**
- * {@link WebSocketClosingEntryListener}
+ * {@link SendToUserTask}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketClosingEntryListener implements com.hazelcast.core.EntryListener<String, String> {
+public class SendToUserTask extends AbstractTask<Void> {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketClosingEntryListener.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SendToUserTask.class);
 
-    private final DefaultGrizzlyWebSocketApplication app;
+    private final String message;
+    private final String pathFilter;
+    private final boolean remote;
+    private final int userId;
+    private final int contextId;
+    private final DefaultGrizzlyWebSocketApplication application;
 
     /**
-     * Initializes a new {@link WebSocketClosingEntryListener}.
+     * Initializes a new {@link SendToUserTask}.
+     *
+     * @param message The text message to send
+     * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
+     * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param application The running application
      */
-    public WebSocketClosingEntryListener(DefaultGrizzlyWebSocketApplication app) {
+    public SendToUserTask(String message, String pathFilter, boolean remote, int userId, int contextId, DefaultGrizzlyWebSocketApplication application) {
         super();
-        this.app = app;
+        this.message = message;
+        this.pathFilter = pathFilter;
+        this.remote = remote;
+        this.userId = userId;
+        this.contextId = contextId;
+        this.application = application;
     }
 
     @Override
-    public void entryEvicted(EntryEvent<String, String> event) {
-        // Manually close associated Web Socket (if any available) to enforce re-establishing a new one
-        MapKey key = MapKey.parseFrom(event.getKey());
-        MapValue value = MapValue.parseFrom(event.getValue());
-        if (app.closeWebSockets(key.getUserId(), key.getContextId(), ConnectionId.newInstance(value.getConnectionId()))) {
-            LOG.info("Closed Web Socket ({}) due to entry eviction for user {} in context {}.", value.getConnectionId(), I(key.getUserId()), I(key.getContextId()));
+    public Void call() throws Exception {
+        try {
+            application.sendToUser(message, pathFilter, remote, userId, contextId);
+        } catch (Exception e) {
+            LOG.error("Failed to send message to user {} in context {}", userId, contextId, e);
         }
-    }
-
-    @Override
-    public void entryAdded(EntryEvent<String, String> event) {
-        // Nothing
-    }
-
-    @Override
-    public void entryUpdated(EntryEvent<String, String> event) {
-        // Nothing
-    }
-
-    @Override
-    public void entryRemoved(EntryEvent<String, String> event) {
-        // Nothing
-    }
-
-    @Override
-    public void mapCleared(MapEvent event) {
-        // Nothing
-    }
-
-    @Override
-    public void mapEvicted(MapEvent event) {
-        // Nothing
+        return null;
     }
 
 }

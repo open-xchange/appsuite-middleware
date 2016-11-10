@@ -47,56 +47,23 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.impl;
 
-import org.slf4j.Logger;
-import com.openexchange.threadpool.AbstractTask;
+import java.util.List;
+import com.openexchange.websockets.WebSocketListener;
 
 /**
- * {@link SendToUserTask}
+ * {@link WebSocketListenerRegistry} - A registry for {@link WebSocketListener} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class SendToUserTask extends AbstractTask<Void> {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SendToUserTask.class);
-
-    private final String message;
-    private final String pathFilter;
-    private final boolean remote;
-    private final int userId;
-    private final int contextId;
-    private final GrizzlyWebSocketApplication application;
+public interface WebSocketListenerRegistry {
 
     /**
-     * Initializes a new {@link SendToUserTask}.
+     * Gets the currently registered listeners
      *
-     * @param message The text message to send
-     * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
-     * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param application The running application
+     * @return The listeners
      */
-    public SendToUserTask(String message, String pathFilter, boolean remote, int userId, int contextId, GrizzlyWebSocketApplication application) {
-        super();
-        this.message = message;
-        this.pathFilter = pathFilter;
-        this.remote = remote;
-        this.userId = userId;
-        this.contextId = contextId;
-        this.application = application;
-    }
-
-    @Override
-    public Void call() throws Exception {
-        try {
-            application.sendToUser(message, pathFilter, remote, userId, contextId);
-        } catch (Exception e) {
-            LOG.error("Failed to send message to user {} in context {}", userId, contextId, e);
-        }
-        return null;
-    }
-
+    List<org.glassfish.grizzly.websockets.WebSocketListener> getListeners();
 }
