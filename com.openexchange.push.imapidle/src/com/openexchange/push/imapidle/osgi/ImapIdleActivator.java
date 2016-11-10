@@ -49,6 +49,7 @@
 
 package com.openexchange.push.imapidle.osgi;
 
+import org.osgi.framework.ServiceReference;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -57,6 +58,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.imapidle.ImapIdleConfiguration;
@@ -69,6 +71,7 @@ import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -110,10 +113,25 @@ public class ImapIdleActivator extends HousekeepingActivator {
         }
         trackService(PushNotificationService.class);
         trackService(SessionStorageService.class);
+
+        final ImapIdleDeleteListener imapIdleDeleteListener = new ImapIdleDeleteListener();
+        track(UserPermissionService.class, new SimpleRegistryListener<UserPermissionService>() {
+
+            @Override
+            public void added(ServiceReference<UserPermissionService> ref, UserPermissionService service) {
+                imapIdleDeleteListener.setUserPermissionService(service);
+            }
+
+            @Override
+            public void removed(ServiceReference<UserPermissionService> ref, UserPermissionService service) {
+                imapIdleDeleteListener.setUserPermissionService(null);
+            }
+        });
+        trackService(UserPermissionService.class);
         openTrackers();
 
+        registerService(DeleteListener.class, imapIdleDeleteListener);
         registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener());
-        registerService(DeleteListener.class, new ImapIdleDeleteListener());
     }
 
     @Override
