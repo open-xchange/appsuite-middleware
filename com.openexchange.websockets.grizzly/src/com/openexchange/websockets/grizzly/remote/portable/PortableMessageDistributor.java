@@ -60,8 +60,8 @@ import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.java.Strings;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketUtils;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
 
 /**
  * {@link PortableMessageDistributor}
@@ -195,19 +195,19 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
 
     @Override
     public Void call() throws Exception {
-        GrizzlyWebSocketApplication application = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
+        DefaultGrizzlyWebSocketApplication application = DefaultGrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
         if (null == application) {
-            WS_LOGGER.warn("Found no Web Socket application on cluster member {}", GrizzlyWebSocketApplication.getLocalHost());
+            WS_LOGGER.warn("Found no Web Socket application on cluster member {}", DefaultGrizzlyWebSocketApplication.getLocalHost());
             return null;
         }
 
         String[] messages = splitMessage(message);
         if (messages.length == 0) {
-            WS_LOGGER.debug("Received no messages on cluster member {} for user {} in context {}", GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
+            WS_LOGGER.debug("Received no messages on cluster member {} for user {} in context {}", DefaultGrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
             return null;
         }
 
-        WS_LOGGER.debug("Received {} message(s) on cluster member {} for user {} in context {}", I(messages.length), GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
+        WS_LOGGER.debug("Received {} message(s) on cluster member {} for user {} in context {}", I(messages.length), DefaultGrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
 
         try {
             for (String msg : messages) {
@@ -220,7 +220,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
             }
             return null;
         } catch (Exception e) {
-            LOGGER.error("Failed to handle {} message(s) on cluster member {} for user {} in context {}", I(messages.length), GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId), e);
+            LOGGER.error("Failed to handle {} message(s) on cluster member {} for user {} in context {}", I(messages.length), DefaultGrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId), e);
             throw e;
         }
     }

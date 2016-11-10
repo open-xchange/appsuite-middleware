@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,36 @@
  *
  */
 
-package com.openexchange.push.dovecot;
+package com.openexchange.websockets.grizzly.impl;
 
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.push.dovecot.osgi.Services;
-import com.openexchange.userconf.UserPermissionService;
+import java.util.concurrent.Future;
+import com.openexchange.websockets.SendControl;
+
 
 /**
- * {@link DovecotPushDeleteListener} - Delete listener for Dovecot Push bundle.
+ * {@link SendControlImpl}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class DovecotPushDeleteListener implements DeleteListener {
+public class SendControlImpl<V> implements SendControl {
+
+    private final Future<V> future;
 
     /**
-     * Initializes a new {@link DovecotPushDeleteListener}.
+     * Initializes a new {@link SendControlImpl}.
+     *
+     * @param future The backing {@link Future} instance
      */
-    public DovecotPushDeleteListener() {
+    public SendControlImpl(Future<V> future) {
         super();
+        this.future = future;
+
     }
 
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        int userId = event.getId();
-        Context context = event.getContext();
-
-        UserPermissionService userPermissionService = Services.optService(UserPermissionService.class);
-        boolean hasWebMail = userPermissionService == null ? false : userPermissionService.getUserPermissionBits(readCon, userId, context).hasWebMail();
-
-        if (hasWebMail && (DeleteEvent.TYPE_USER == event.getType())) {
-            DovecotPushManagerService instance = DovecotPushManagerService.getInstance();
-            if (null != instance) {
-                instance.stopListener(false, true, userId, context.getContextId());
-            }
-        }
+    public boolean isDone() {
+        return future.isDone();
     }
 
 }

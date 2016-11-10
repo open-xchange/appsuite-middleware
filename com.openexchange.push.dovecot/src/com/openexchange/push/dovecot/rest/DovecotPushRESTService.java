@@ -43,10 +43,10 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.push.dovecot.osgi.Services;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionMatcher;
@@ -203,7 +203,7 @@ public class DovecotPushRESTService {
                     } else {
                         Map<String, Object> props = new LinkedHashMap<String, Object>(4);
                         props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
-                        setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), data.optInt("unread", -1), props);
+                        setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), data.optInt("unseen", -1), props);
                         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), session, props, true, true);
                         LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", userId, contextId);
                     }
@@ -243,7 +243,7 @@ public class DovecotPushRESTService {
             }
         }
         {
-            int unread = data.optInt("unread", -1);
+            int unread = data.optInt("unseen", -1);
             if (unread >= 0) {
                 messageData.put(PushNotificationField.MAIL_UNREAD.getId(), Integer.valueOf(unread));
             }

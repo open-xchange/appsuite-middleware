@@ -65,11 +65,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BulkFolderField implements AdditionalFolderField {
 
+    /** The default initial capacity - MUST be a power of two. */
+    private static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
+
     private static final Object NULL = new Object();
 
     private final AdditionalFolderField delegate;
-
-    private final Map<String, Object> values;
+    private final Map<Object, Object> values;
 
     /**
      * Initializes a new {@link BulkFolderField}.
@@ -77,8 +79,18 @@ public class BulkFolderField implements AdditionalFolderField {
      * @param delegate The delegate field
      */
     public BulkFolderField(AdditionalFolderField delegate) {
+        this(delegate, -1);
+    }
+
+    /**
+     * Initializes a new {@link BulkFolderField}.
+     *
+     * @param delegate The delegate field
+     * @param initialCapacity The initial cache capacity
+     */
+    public BulkFolderField(AdditionalFolderField delegate, int initialCapacity) {
         super();
-        values = new HashMap<String, Object>();
+        values = initialCapacity < 0 ? new HashMap<Object, Object>(DEFAULT_INITIAL_CAPACITY, 0.9F) : new HashMap<Object, Object>(initialCapacity, 0.9F);
         this.delegate = delegate;
     }
 
@@ -94,23 +106,25 @@ public class BulkFolderField implements AdditionalFolderField {
 
     @Override
     public Object getValue(FolderObject f, ServerSession session) {
-        String fn = f.getFullName();
-        if (fn == null) {
-            fn = Integer.toString(f.getObjectID());
+        Object key = f.getFullName();
+        Object value = values.get(key == null ? Integer.valueOf(f.getObjectID()) : key);
+        if (null == value) {
+            // Not yet contained in cache
+            value = getValues(Collections.singletonList(f), session).get(0);
         }
-        if (!values.containsKey(fn)) {
-            getValues(Collections.singletonList(f), session);
-        }
-        Object value = values.get(fn);
         return NULL == value ? null : value;
     }
 
     @Override
     public List<Object> getValues(List<FolderObject> folders, ServerSession session) {
+        if (values.isEmpty()) {
+            return warmUp(folders, session);
+        }
+
         List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
         for (FolderObject f : folders) {
-            String fn = f.getFullName();
-            if (!values.containsKey(fn == null ? Integer.toString(f.getObjectID()) : fn)) {
+            Object key = f.getFullName();
+            if (!values.containsKey(key == null ? Integer.valueOf(f.getObjectID()) : key)) {
                 fl.add(f);
             }
         }
@@ -119,8 +133,8 @@ public class BulkFolderField implements AdditionalFolderField {
         }
         List<Object> vals = new ArrayList<Object>(folders.size());
         for (FolderObject f : folders) {
-            String fn = f.getFullName();
-            Object value = values.get(fn == null ? Integer.toString(f.getObjectID()) : fn);
+            Object key = f.getFullName();
+            Object value = values.get(key == null ? Integer.valueOf(f.getObjectID()) : key);
             vals.add(NULL == value ? null : value);
         }
         return vals;
@@ -137,14 +151,15 @@ public class BulkFolderField implements AdditionalFolderField {
      * @param folders The folders
      * @param session The session
      */
-    public void warmUp(List<FolderObject> folders, ServerSession session) {
+    public List<Object> warmUp(List<FolderObject> folders, ServerSession session) {
         List<Object> vals = delegate.getValues(folders, session);
         int i = 0;
         for (FolderObject f : folders) {
-            String fn = f.getFullName();
+            Object key = f.getFullName();
             Object value = vals.get(i++);
-            values.put(fn == null ? Integer.toString(f.getObjectID()) : fn, null == value ? NULL : value);
+            values.put(key == null ? Integer.valueOf(f.getObjectID()) : key, null == value ? NULL : value);
         }
+        return vals;
     }
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.websockets.grizzly.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.Filter;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
@@ -63,18 +64,22 @@ import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Tools;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
+import com.openexchange.websockets.IndividualWebSocketListener;
 import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketService;
+import com.openexchange.websockets.grizzly.GrizzlyWebSocketEventHandler;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketSessionToucher;
 import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
+import com.openexchange.websockets.grizzly.impl.DefaultSessionBoundWebSocket;
+import com.openexchange.websockets.grizzly.impl.WebSocketServiceImpl;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributorFactory;
 
@@ -86,9 +91,10 @@ import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistri
  */
 public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
-    private GrizzlyWebSocketApplication app;
+    private DefaultGrizzlyWebSocketApplication app;
     private ScheduledTimerTask sessionToucherTask;
     private HzRemoteWebSocketDistributor remoteDistributor;
+    private GrizzlyWebSocketEventHandler eventHandler;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketActivator}.
@@ -114,20 +120,29 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         this.remoteDistributor = remoteDistributor;
 
         WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context);
-        ServiceTracker<WebSocketListener, WebSocketListener> st = track(WebSocketListener.class, listenerTracker);
-        st.open();
+        {
+            Filter filter = Tools.generateServiceFilter(context, WebSocketListener.class, IndividualWebSocketListener.class);
+            ServiceTracker<Object, Object> st = track(filter, listenerTracker);
+            st.open();
+        }
 
-        GrizzlyWebSocketApplication app = this.app;
+        GrizzlyWebSocketEventHandler eventHandler = new GrizzlyWebSocketEventHandler();
+        this.eventHandler = eventHandler;
+
+        DefaultGrizzlyWebSocketApplication app = this.app;
         if (null == app) {
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
-            app = GrizzlyWebSocketApplication.initializeGrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
+            app = DefaultGrizzlyWebSocketApplication.initializeGrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
             listenerTracker.setApplication(app);
-            webApplicationService.registerWebSocketApplication("", "/*", app, null);
-            registerService(WebSocketService.class, new GrizzlyWebSocketService(app, remoteDistributor));
+            webApplicationService.registerWebSocketApplication("", "/socket.io/*", app, null);
+            webApplicationService.registerWebSocketApplication("", "/ws/*", app, null);
+            registerService(WebSocketService.class, new WebSocketServiceImpl(app, remoteDistributor));
             this.app = app;
 
             long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
-            sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher(app), period, period);
+            sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher<DefaultSessionBoundWebSocket>(app), period, period);
+
+            eventHandler.addApp(app);
         }
 
         track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
@@ -138,7 +153,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
-                GrizzlyWebSocketApplication.invalidateEnabledCache();
+                DefaultGrizzlyWebSocketApplication.invalidateEnabledCache();
             }
 
             @Override
@@ -152,7 +167,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         {
             Dictionary<String, Object> props = new Hashtable<>(2);
             props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new GrizzlyWebSocketEventHandler(), props);
+            registerService(EventHandler.class, eventHandler, props);
         }
 
         {
@@ -164,9 +179,14 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        GrizzlyWebSocketApplication app = this.app;
+        DefaultGrizzlyWebSocketApplication app = this.app;
         if (null != app) {
             this.app = null;
+
+            GrizzlyWebSocketEventHandler eventHandler = this.eventHandler;
+            if (null != eventHandler) {
+                eventHandler.removeApp(app);
+            }
 
             ScheduledTimerTask sessionToucherTask = this.sessionToucherTask;
             if (null != sessionToucherTask) {
@@ -178,7 +198,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
                 }
             }
 
-            GrizzlyWebSocketApplication.unsetGrizzlyWebSocketApplication();
+            DefaultGrizzlyWebSocketApplication.unsetGrizzlyWebSocketApplication();
 
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
             if (null != webApplicationService) {

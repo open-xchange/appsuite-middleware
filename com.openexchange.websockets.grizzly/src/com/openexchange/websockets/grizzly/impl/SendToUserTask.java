@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,56 @@
  *
  */
 
-package com.openexchange.push.dovecot;
+package com.openexchange.websockets.grizzly.impl;
 
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.push.dovecot.osgi.Services;
-import com.openexchange.userconf.UserPermissionService;
+import org.slf4j.Logger;
+import com.openexchange.threadpool.AbstractTask;
 
 /**
- * {@link DovecotPushDeleteListener} - Delete listener for Dovecot Push bundle.
+ * {@link SendToUserTask}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class DovecotPushDeleteListener implements DeleteListener {
+public class SendToUserTask extends AbstractTask<Void> {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SendToUserTask.class);
+
+    private final String message;
+    private final String pathFilter;
+    private final boolean remote;
+    private final int userId;
+    private final int contextId;
+    private final DefaultGrizzlyWebSocketApplication application;
 
     /**
-     * Initializes a new {@link DovecotPushDeleteListener}.
+     * Initializes a new {@link SendToUserTask}.
+     *
+     * @param message The text message to send
+     * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
+     * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param application The running application
      */
-    public DovecotPushDeleteListener() {
+    public SendToUserTask(String message, String pathFilter, boolean remote, int userId, int contextId, DefaultGrizzlyWebSocketApplication application) {
         super();
+        this.message = message;
+        this.pathFilter = pathFilter;
+        this.remote = remote;
+        this.userId = userId;
+        this.contextId = contextId;
+        this.application = application;
     }
 
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        int userId = event.getId();
-        Context context = event.getContext();
-
-        UserPermissionService userPermissionService = Services.optService(UserPermissionService.class);
-        boolean hasWebMail = userPermissionService == null ? false : userPermissionService.getUserPermissionBits(readCon, userId, context).hasWebMail();
-
-        if (hasWebMail && (DeleteEvent.TYPE_USER == event.getType())) {
-            DovecotPushManagerService instance = DovecotPushManagerService.getInstance();
-            if (null != instance) {
-                instance.stopListener(false, true, userId, context.getContextId());
-            }
+    public Void call() throws Exception {
+        try {
+            application.sendToUser(message, pathFilter, remote, userId, contextId);
+        } catch (Exception e) {
+            LOG.error("Failed to send message to user {} in context {}", userId, contextId, e);
         }
+        return null;
     }
 
 }

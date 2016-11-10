@@ -69,7 +69,6 @@ import javax.mail.Provider;
 import javax.mail.Store;
 import javax.mail.URLName;
 import javax.mail.internet.idn.IDNA;
-import javax.net.ssl.SSLHandshakeException;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
@@ -660,6 +659,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 warnings.add(MailExceptionCode.PING_FAILED_AUTH.create(e, config.getServer(), config.getLogin()));
                 throw MimeMailException.handleMessagingException(e, config, session);
             } catch (final MessagingException e) {
+                if (MimeMailException.isSSLHandshakeException(e)) {
+                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), config.getServer());
+                    warnings.add(oxe);
+                    throw oxe;
+                }
+
                 Exception cause = e.getNextException();
                 if (com.sun.mail.iap.ConnectionException.class.isInstance(cause)) {
                     OXException oxe = MimeMailException.handleMessagingException(e, config, session);
@@ -671,10 +676,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     throw oxe;
                 } else if (StarttlsRequiredException.class.isInstance(cause)) {
                     OXException oxe = MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
-                    warnings.add(oxe);
-                    throw oxe;
-                } else if (SSLHandshakeException.class.isInstance(cause)) {
-                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(config.getServer(), e);
                     warnings.add(oxe);
                     throw oxe;
                 }
@@ -820,13 +821,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         map.put(newHostAndPort(config), Long.valueOf(System.currentTimeMillis()));
                     }
                 }
+                if (MimeMailException.isSSLHandshakeException(e)) {
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
+                }
                 {
                     Exception next = e.getNextException();
                     if (StarttlsRequiredException.class.isInstance(next)) {
                         throw MailExceptionCode.NON_SECURE_DENIED.create(server);
-                    }
-                    if (SSLHandshakeException.class.isInstance(next)) {
-                        throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
                     }
                 }
                 throw e;

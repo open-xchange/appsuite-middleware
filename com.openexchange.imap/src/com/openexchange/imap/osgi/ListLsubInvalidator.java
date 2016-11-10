@@ -102,16 +102,20 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
 
     @Override
     public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
-        ListLsubCache.dropFor(userId, contextId, true);
+        invalidateFor(userId, contextId);
     }
 
     @Override
     public void onMailAccountCreated(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
-        ListLsubCache.dropFor(userId, contextId, true);
+        invalidateFor(userId, contextId);
     }
 
     @Override
     public void onMailAccountModified(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
+        invalidateFor(userId, contextId);
+    }
+
+    private void invalidateFor(int userId, int contextId) {
         ListLsubCache.dropFor(userId, contextId, true);
     }
 

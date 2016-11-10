@@ -47,36 +47,32 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.impl;
 
-import java.util.concurrent.Future;
-import com.openexchange.websockets.SendControl;
-
+import com.openexchange.websockets.IndividualWebSocketListener;
 
 /**
- * {@link SendControlImpl}
+ * {@link IndividualWebSocketListenerAdapter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class SendControlImpl<V> implements SendControl {
-
-    private final Future<V> future;
+public class IndividualWebSocketListenerAdapter extends WebSocketListenerAdapter {
 
     /**
-     * Initializes a new {@link SendControlImpl}.
-     *
-     * @param future The backing {@link Future} instance
+     * Initializes a new {@link IndividualWebSocketListenerAdapter}.
      */
-    public SendControlImpl(Future<V> future) {
-        super();
-        this.future = future;
-
+    protected IndividualWebSocketListenerAdapter(IndividualWebSocketListener individualWebSocketListener) {
+        super(individualWebSocketListener);
     }
 
-    @Override
-    public boolean isDone() {
-        return future.isDone();
+    /**
+     * Creates a new adapter for the associated Web Socket listener that receives individual call-backs.
+     *
+     * @return The new adapter
+     */
+    public WebSocketListenerAdapter newAdapter() {
+        return new WebSocketListenerAdapter(((IndividualWebSocketListener) webSocketListener).newInstance());
     }
 
 }
