@@ -128,7 +128,8 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
             app = GrizzlyWebSocketApplication.initializeGrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
             listenerTracker.setApplication(app);
-            webApplicationService.registerWebSocketApplication("", "/*", app, null);
+            webApplicationService.registerWebSocketApplication("", "/socket.io/*", app, null);
+            webApplicationService.registerWebSocketApplication("", "/ws/*", app, null);
             registerService(WebSocketService.class, new GrizzlyWebSocketService(app, remoteDistributor));
             this.app = app;
 
