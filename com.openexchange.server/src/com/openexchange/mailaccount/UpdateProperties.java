@@ -61,6 +61,32 @@ import com.openexchange.session.Session;
 public class UpdateProperties {
 
     /**
+     * Creates a new builder instance.
+     *
+     * @return The new builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Creates a new builder instance initialized with values from given update properties.
+     *
+     * @param updateProperties The update properties to initialize from
+     * @return The new builder instance
+     */
+    public static Builder builder(UpdateProperties updateProperties) {
+        Builder builder = new Builder();
+        if (null != updateProperties) {
+            builder.setChangePrimary(updateProperties.isChangePrimary());
+            builder.setChangeProtocol(updateProperties.isChangeProtocol());
+            builder.setCon(updateProperties.getCon());
+            builder.setSession(updateProperties.getSession());
+        }
+        return builder;
+    }
+
+    /**
      * A builder for an {@code UpdateProperties} instance.
      */
     public static class Builder {
