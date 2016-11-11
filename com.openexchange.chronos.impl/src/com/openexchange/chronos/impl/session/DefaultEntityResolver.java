@@ -450,7 +450,11 @@ public class DefaultEntityResolver implements EntityResolver {
                 throw e;
             }
         }
-        return null != user ? new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL) : null;
+        if (null != user) {
+            knownUsers.put(I(user.getId()), user);
+            return new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL);
+        }
+        return null;
     }
 
     private Resource loadResource(int entity) throws OXException {
