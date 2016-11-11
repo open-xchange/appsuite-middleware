@@ -256,13 +256,14 @@ public class CalendarUtils {
 
     /**
      * Gets a value indicating whether the supplied event is considered as the <i>master</i> event of a recurring series or not, based
-     * on the properties {@link EventField#ID} and {@link EventField#SERIES_ID} for equality.
+     * on checking the properties {@link EventField#ID} and {@link EventField#SERIES_ID} for equality and the absence of an assigned
+     * {@link EventField#RECURRENCE_ID}.
      *
      * @param event The event to check
      * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
      */
     public static boolean isSeriesMaster(Event event) {
-        return null != event && event.getId() == event.getSeriesId();
+        return null != event && event.getId() == event.getSeriesId() && null == event.getRecurrenceId();
     }
 
     /**

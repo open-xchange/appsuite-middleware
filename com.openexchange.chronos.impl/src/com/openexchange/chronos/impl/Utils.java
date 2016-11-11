@@ -72,6 +72,7 @@ import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -407,13 +408,20 @@ public class Utils {
         if (false == includePrivate && isClassifiedFor(event, session.getUser().getId())) {
             return true;
         }
-        if (isSeriesMaster(event)) {
-            //TODO: really consider "implicit" series period also if isResolveOccurrences(session) == false?
-            //      (needed for com.openexchange.ajax.appointment.bugtests.Bug16107Test)
-            Period implicitSeriesPeriod = Recurrence.getImplicitSeriesPeriod(new DefaultRecurrenceData(event), new Period(event));
-            return false == isInRange(implicitSeriesPeriod, getFrom(session), getUntil(session), getTimeZone(session));
+        Date from = getFrom(session);
+        Date until = getUntil(session);
+        if (null != from || null != until) {
+            Period period = new Period(event);
+            if (isSeriesMaster(event)) {
+                //TODO: really consider "implicit" series period also if isResolveOccurrences(session) == false?
+                //      (needed for com.openexchange.ajax.appointment.bugtests.Bug16107Test)
+                period = Recurrence.getImplicitSeriesPeriod(new DefaultRecurrenceData(event), period);
+            }
+            if (false == isInRange(period, from, until, getTimeZone(session))) {
+                return true;
+            }
         }
-        return false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session));
+        return false;
     }
 
     static boolean isIncludePrivate(CalendarParameters parameters) {
@@ -439,17 +447,36 @@ public class Utils {
     }
 
     /**
-     * Finds a specific event identified by its folder- and object-identifier in a collection.
+     * Finds a specific event identified by its event identifier in a collection.
      *
      * @param events The events to search in
-     * @param folderID The identifier of the parent folder to search
+     * @param eventID The identifier of the event to search
+     * @return The event, or <code>null</code> if not found
+     */
+    static UserizedEvent find(Collection<UserizedEvent> events, EventID eventID) {
+        if (null != events) {
+            for (UserizedEvent event : events) {
+                if (event.getFolderId() == eventID.getFolderID() && event.getEvent().getId() == eventID.getObjectID()) {
+                    if (null == eventID.getRecurrenceID() || eventID.getRecurrenceID().equals(event.getEvent().getRecurrenceId())) {
+                        return event;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds a specific event identified by its object-identifier in a collection.
+     *
+     * @param events The events to search in
      * @param objectID The object identifier of the event to search
      * @return The event, or <code>null</code> if not found
      */
-    static UserizedEvent find(Collection<UserizedEvent> events, int folderID, int objectID) {
+    static Event find(Collection<Event> events, int objectID) {
         if (null != events) {
-            for (UserizedEvent event : events) {
-                if (event.getFolderId() == folderID && event.getEvent().getId() == objectID) {
+            for (Event event : events) {
+                if (event.getId() == objectID) {
                     return event;
                 }
             }

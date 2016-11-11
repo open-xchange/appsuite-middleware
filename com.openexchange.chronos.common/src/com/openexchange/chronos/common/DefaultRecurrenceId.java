@@ -98,16 +98,7 @@ public class DefaultRecurrenceId implements RecurrenceId {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DefaultRecurrenceId other = (DefaultRecurrenceId) obj;
-        if (value != other.value)
-            return false;
-        return true;
+        return null != obj && RecurrenceId.class.isInstance(obj) && value == ((RecurrenceId) obj).getValue();
     }
 
     @Override

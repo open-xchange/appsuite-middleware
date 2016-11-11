@@ -302,7 +302,7 @@ public class Appointment2Event {
      * @return The recurrence identifier, or <code>null</code> if no matching recurrence identifier was found
      */
     public static RecurrenceId getRecurrenceID(RecurrenceData recurrenceData, int recurrencePosition) throws OXException {
-        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData);
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData, true);
         int position = 0;
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();

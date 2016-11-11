@@ -481,8 +481,20 @@ public class EventConverter {
             appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
             appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(recurrenceData, event.getRecurrenceId()));
         }
-        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule() && CalendarUtils.isSeriesMaster(event)) {
-            SeriesPattern pattern = Event2Appointment.getSeriesPattern(new DefaultRecurrenceData(event));
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule() && false == CalendarUtils.isSeriesException(event)) {
+
+            // series pattern seems to be added in response for recurrence master and "regular" occurrences, but not for change exceptions
+
+            RecurrenceData recurrenceData;
+            if (CalendarUtils.isSeriesMaster(event)) {
+                recurrenceData = new DefaultRecurrenceData(event);
+            } else if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                recurrenceData = (RecurrenceData) event.getRecurrenceId();
+            } else {
+                EventID masterID = new EventID(userizedEvent.getFolderId(), event.getSeriesId());
+                recurrenceData = loadRecurrenceData(session, masterID);
+            }
+            SeriesPattern pattern = Event2Appointment.getSeriesPattern(recurrenceData);
             if (SeriesPattern.MONTHLY_2.equals(pattern.getType())) {
                 appointment.setRecurrenceType(SeriesPattern.MONTHLY_1.intValue());
             } else if (SeriesPattern.YEARLY_2.equals(pattern.getType())) {
@@ -683,26 +695,9 @@ public class EventConverter {
          */
         SeriesPattern pattern = new SeriesPattern();
         if (null != originalRecurrenceData) {
-            if (null != originalRecurrenceData.getRecurrenceRule()) {
-                SeriesPattern originalPattern = Event2Appointment.getSeriesPattern(originalRecurrenceData);
-                pattern.setDayOfMonth(originalPattern.getDayOfMonth());
-                pattern.setDaysOfWeek(originalPattern.getDaysOfWeek());
-                pattern.setFullTime(originalPattern.isFullTime());
-                pattern.setInterval(originalPattern.getInterval());
-                pattern.setMonth(originalPattern.getMonth());
-                if (null != originalPattern.getOccurrences()) {
-                    pattern.setOccurrences(originalPattern.getOccurrences());
-                } else {
-                    pattern.setSeriesEnd(originalPattern.getSeriesEnd());
-                }
-                pattern.setSeriesStart(originalPattern.getSeriesStart());
-                pattern.setType(originalPattern.getType());
-                pattern.setTz(originalPattern.getTimeZone());
-            } else {
-                pattern.setFullTime(Boolean.valueOf(originalRecurrenceData.isAllDay()));
-                pattern.setSeriesStart(Long.valueOf(originalRecurrenceData.getSeriesStart()));
-                pattern.setTz(null != originalRecurrenceData.getTimeZoneID() ? TimeZone.getTimeZone(originalRecurrenceData.getTimeZoneID()) : null);
-            }
+            pattern.setFullTime(Boolean.valueOf(originalRecurrenceData.isAllDay()));
+            pattern.setSeriesStart(Long.valueOf(originalRecurrenceData.getSeriesStart()));
+            pattern.setTz(TimeZone.getTimeZone(null != originalRecurrenceData.getTimeZoneID() ? originalRecurrenceData.getTimeZoneID() : "UTC"));
         }
         if (appointment.containsRecurrenceType()) {
             if (0 == appointment.getRecurrenceType()) {

@@ -319,27 +319,17 @@ public class CalendarReader {
         List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
         Map<UserizedFolder, List<EventID>> idsPerFolder = getIdsPerFolder(eventIDs);
         for (Map.Entry<UserizedFolder, List<EventID>> entry : idsPerFolder.entrySet()) {
-            events.addAll(readEventsInFolder(entry.getKey(), entry.getValue()));
+            List<Event> eventsInFolder = readEventsInFolder(entry.getKey(), entry.getValue());
+            events.addAll(userize(eventsInFolder, entry.getKey(), true));
         }
         List<UserizedEvent> orderedEvents = new ArrayList<UserizedEvent>(eventIDs.size());
         for (EventID eventID : eventIDs) {
-            UserizedEvent event = find(events, eventID.getFolderID(), eventID.getObjectID());
+            UserizedEvent event = find(events, eventID);
             if (null == event) {
                 continue; //TODO check; see com.openexchange.ajax.appointment.NewListTest.testRemovedObjectHandling()
                 //                throw OXException.notFound(eventID.toString()); //TODO
             }
-            if (null != eventID.getRecurrenceID() && isSeriesMaster(event.getEvent())) {
-                TimeZone timeZone = getTimeZone(session);
-                Calendar fromCalendar = initCalendar(timeZone, eventID.getRecurrenceID().getValue());
-                Iterator<Event> iterator = Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(event.getEvent(), fromCalendar, null, I(1), null);
-                if (false == iterator.hasNext()) {
-                    continue; // TODO check
-                }
-                Event occurrence = iterator.next();
-                orderedEvents.add(getUserizedEvent(occurrence, event.getFolderId(), event.getAlarms()));
-            } else {
-                orderedEvents.add(event);
-            }
+            orderedEvents.add(event);
         }
         return orderedEvents;
     }
@@ -363,7 +353,7 @@ public class CalendarReader {
         return userize(events, folder, isIncludePrivate(session));
     }
 
-    private List<UserizedEvent> readEventsInFolder(UserizedFolder folder, List<EventID> eventIDs) throws OXException {
+    private List<Event> readEventsInFolder(UserizedFolder folder, List<EventID> eventIDs) throws OXException {
         Set<Integer> objectIDs = new HashSet<Integer>(eventIDs.size());
         int folderID = i(folder);
         for (EventID eventID : eventIDs) {
@@ -371,7 +361,32 @@ public class CalendarReader {
                 objectIDs.add(I(eventID.getObjectID()));
             }
         }
-        return readEventsInFolder(folder, I2i(objectIDs), false, null);
+        List<Event> events = readEventsInFolder(folder, I2i(objectIDs), false, null);
+        List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
+        for (EventID eventID : eventIDs) {
+            Event event = find(events, eventID.getObjectID());
+            if (null == event) {
+                continue; //TODO check; see com.openexchange.ajax.appointment.NewListTest.testRemovedObjectHandling()
+                //                throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(I(i(folder)), I(eventID.getObjectID()));
+            }
+            if (null != eventID.getRecurrenceID()) {
+                if (isSeriesMaster(event)) {
+                    Calendar fromCalendar = initCalendar(getTimeZone(session), eventID.getRecurrenceID().getValue());
+                    Iterator<Event> iterator = Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(event, fromCalendar, null, I(1), null);
+                    if (false == iterator.hasNext()) {
+                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(eventID.getObjectID()), eventID.getRecurrenceID());
+                    }
+                    orderedEvents.add(iterator.next());
+                } else if (eventID.getRecurrenceID().equals(event.getRecurrenceId())) {
+                    orderedEvents.add(event);
+                } else {
+                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(eventID.getObjectID()), eventID.getRecurrenceID());
+                }
+            } else {
+                orderedEvents.add(event);
+            }
+        }
+        return orderedEvents;
     }
 
     private Map<UserizedFolder, List<EventID>> getIdsPerFolder(List<EventID> eventIDs) throws OXException {
@@ -387,11 +402,15 @@ public class CalendarReader {
     }
 
     public List<UserizedEvent> readEventsInFolder(int folderID, Date updatedSince) throws OXException {
-        return readEventsInFolder(getFolder(folderID), null, false, updatedSince);
+        UserizedFolder folder = getFolder(folderID);
+        List<Event> events = readEventsInFolder(folder, null, false, updatedSince);
+        return userize(events, folder, true);
     }
 
     public List<UserizedEvent> readDeletedEventsInFolder(int folderID, Date deletedSince) throws OXException {
-        return readEventsInFolder(getFolder(folderID), null, true, deletedSince);
+        UserizedFolder folder = getFolder(folderID);
+        List<Event> events = readEventsInFolder(getFolder(folderID), null, true, deletedSince);
+        return userize(events, folder, true);
     }
 
     public List<UserizedEvent> readEventsOfUser(int userID, Date updatedSince) throws OXException {
@@ -435,7 +454,7 @@ public class CalendarReader {
         return userize(events, folder, true);
     }
 
-    protected List<UserizedEvent> readEventsInFolder(UserizedFolder folder, int[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
+    protected List<Event> readEventsInFolder(UserizedFolder folder, int[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
@@ -464,8 +483,7 @@ public class CalendarReader {
         } else {
             events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
         }
-        readAdditionalEventData(events, getFields(session));
-        return userize(events, folder, true);
+        return readAdditionalEventData(events, getFields(session));
     }
 
     protected List<UserizedEvent> readEventsOfUser(int userID, boolean deleted, Date updatedSince) throws OXException {
@@ -516,7 +534,7 @@ public class CalendarReader {
     }
 
     private Map<Integer, List<Alarm>> readAlarms(List<Event> events, int userID) throws OXException {
-        List<Integer> objectIDs = new ArrayList<Integer>(events.size());
+        Set<Integer> objectIDs = new HashSet<Integer>(events.size());
         for (Event event : events) {
             if (isAttendee(event, userID)) {
                 objectIDs.add(I(event.getId()));
