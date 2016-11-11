@@ -69,12 +69,12 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.report.appsuite.serialization.Report;
-import com.openexchange.report.appsuite.serialization.ReportConfigs;
+import com.openexchange.report.client.configuration.ReportConfigs;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.MacDetail;
 import com.openexchange.report.client.container.Total;
+import com.openexchange.report.client.transport.ReportPrinting;
 import com.openexchange.report.client.transport.TransportHandler;
 import com.openexchange.tools.CSVWriter;
 import com.openexchange.tools.console.TableWriter;
@@ -617,7 +617,7 @@ public class ReportClientBase extends AbstractJMXTools {
      */
     private void runAndDeliverASReport(ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, ReportConfigs reportConfig) {
         try {
-            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
+            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName()});
 
             // Start polling
             boolean done = false;
@@ -776,7 +776,7 @@ public class ReportClientBase extends AbstractJMXTools {
         }
         try {
             String uuid = "";
-            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
+            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName()});
             System.out.println("\nRunning report with uuid: " + uuid);
         } catch (Exception e) {
             e.printStackTrace();
@@ -850,7 +850,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     } else if (data.get(string) instanceof Boolean) {
                         System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
                     } else if (string.equals("macdetail") || string.equals("oxaas")) {
-                        Report.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
+                        ReportPrinting.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
                     } else {
                         JSONObject obj = (JSONObject) data.get(string);
                         System.out.println("  \"" + string + "\" : " + obj.toString(2, 1) + ",");

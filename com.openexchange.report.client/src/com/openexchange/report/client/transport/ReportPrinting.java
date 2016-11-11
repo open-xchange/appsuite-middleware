@@ -47,50 +47,33 @@
  *
  */
 
-package com.openexchange.report.appsuite.management;
+package com.openexchange.report.client.transport;
 
-import com.openexchange.report.appsuite.ReportService;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Scanner;
 
 /**
- * The {@link ReportMXBean} defines the JMX operations for running reports according to the MXBean conventions. These
- * methods are the equivalents of the methods in the {@link ReportService}
+ * Helper class to print report content in console.
+ * 
+ * {@link ReportPrinting}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.8.3
  */
-public interface ReportMXBean {
+public class ReportPrinting {
 
-    /**
-     * Same as calling {@link #getLastReport(String)} with the 'default' reportType
-     */
-    public abstract JMXReport retrieveLastReport(String reportType) throws Exception;
+    public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) {
 
-    /**
-     * Get the last finished report of the given reportType or null if during the uptime of this cluster, no report has been produced.
-     */
-    public abstract JMXReport retrieveLastReport() throws Exception;
-
-    /**
-     * Get a list of currently running reports. You can check the progress of these reports by examining the startTime, pendingTasks and numberOfTasks of the running reports
-     */
-    public abstract JMXReport[] retrievePendingReports(String reportType) throws Exception;
-
-    /**
-     * Same as calling {@link #getPendingReports(String)} with the 'default' reportType
-     */
-    public abstract JMXReport[] retrievePendingReports() throws Exception;
-
-    /**
-     * Remove the markers for the pending report with the given uuid, to make way to start a new report. Useful to cancel crashed reports.
-     */
-    public abstract void flushPending(String uuid, String reportType) throws Exception;
-
-    /**
-     * Same as calling {@link #flushPending(String, String)} with the 'default' reportType
-     */
-    public abstract void flushPending(String uuid) throws Exception;
-
-    public abstract JMXReport retrieveLastErrorReport(String reportType) throws Exception;
-
-    public abstract String run(String reportType, Boolean isSingleDeployment, Boolean isConfigureTimerange, Long timeframeStart, Long timeframeEnd) throws Exception;
+        try (FileInputStream is = new FileInputStream(storageFolderPath + "/" + uuid + ".report"); Scanner sc = new Scanner(is, "UTF-8")) {
+            while (sc.hasNext()) {
+                System.out.println(sc.nextLine());
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println(("Unable to load file: " + storageFolderPath + "/" + uuid + ".report" + e.getMessage()));
+        } catch (IOException e) {
+            System.err.println(("Unable to load and write report data to console." + e.getMessage()));
+        }
+    }
 }

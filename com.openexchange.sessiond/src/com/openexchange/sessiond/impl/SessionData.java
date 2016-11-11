@@ -768,16 +768,18 @@ final class SessionData {
         // Read-only access
         rlock.lock();
         try {
-            final int size = sessionList.size();
-            for (int i = 0; i < size; i++) {
-                if ((control = sessionList.get(i).getSessionById(sessionId)) != null) {
-                    if (i > 0) {
+            boolean first = true;
+            for (SessionContainer container : sessionList) {
+                if ((control = container.getSessionById(sessionId)) != null) {
+                    if (false == first) {
                         // Schedule task to put session into first container and remove from latter one. This requires a write lock.
                         // See bug 16158.
                         scheduleTask2MoveSession2FirstContainer(sessionId, false);
                     }
                     return control;
                 }
+
+                first = false;
             }
         } catch (final IndexOutOfBoundsException e) {
             // For safety

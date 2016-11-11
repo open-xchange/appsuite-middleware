@@ -49,7 +49,6 @@
 
 package com.openexchange.report.appsuite;
 
-import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
