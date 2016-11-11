@@ -21,7 +21,7 @@
           Each element is an object as described in HTTP API (Extended Permission Object), without the "bits" property set. For external contacts, the fields "entity" and "type" are also not set.
         schema:
           type: array
-          elements:
+          items:
             type: string
     x-ox-examples:      
       - Example1:
