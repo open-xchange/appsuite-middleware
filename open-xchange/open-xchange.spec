@@ -16,7 +16,7 @@ BuildRequires:    java-devel >= 1.7.0
 BuildRequires:    systemd-rpm-macros
 %endif
 Version:          @OXVERSION@
-%define           ox_release 40
+%define           ox_release 41
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -97,6 +97,8 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 %endif
 
 %changelog
+* Fri Nov 11 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-11-21 (3729)
 * Thu Oct 13 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-10-24 (3628)
 * Tue Sep 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
