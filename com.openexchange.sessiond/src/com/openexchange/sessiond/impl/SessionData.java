@@ -113,7 +113,16 @@ final class SessionData {
 
     protected final Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
 
-    SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
+    /**
+     * Initializes a new {@link SessionData}.
+     *
+     * @param containerCount The container count for short-term sessions
+     * @param maxSessions The max. number of total sessions
+     * @param randomTokenTimeout The timeout for random tokens
+     * @param longTermContainerCount The container count for long-term sessions
+     * @param autoLogin Whether auto-login is enabled or not
+     */
+    SessionData(int containerCount, int maxSessions, long randomTokenTimeout, int longTermContainerCount, boolean autoLogin) {
         super();
         threadPoolService = new AtomicReference<ThreadPoolService>();
         timerService = new AtomicReference<TimerService>();
@@ -121,21 +130,24 @@ final class SessionData {
         this.randomTokenTimeout = randomTokenTimeout;
         this.autoLogin = autoLogin;
 
-        sessionList = new ArrayList<SessionContainer>((int) containerCount);
         randoms = new ConcurrentHashMap<String, String>();
+
         ReadWriteLock shortTermLock = new ReentrantReadWriteLock(true);
         rlock = shortTermLock.readLock();
         wlock = shortTermLock.writeLock();
+
+        sessionList = new ArrayList<SessionContainer>(containerCount);
+        for (int i = containerCount; i-- > 0;) {
+            sessionList.add(new SessionContainer());
+        }
+
         ReadWriteLock longTermLock = new ReentrantReadWriteLock(true);
         wlongTermLock = longTermLock.writeLock();
         rlongTermLock = longTermLock.readLock();
-        for (int i = 0; i < containerCount; i++) {
-            sessionList.add(0, new SessionContainer());
-        }
 
-        longTermList = new ArrayList<SessionMap>((int) longTermContainerCount);
-        for (int i = 0; i < longTermContainerCount; i++) {
-            longTermList.add(0, new SessionMap(256));
+        longTermList = new ArrayList<SessionMap>(longTermContainerCount);
+        for (int i = longTermContainerCount; i-- > 0;) {
+            longTermList.add(new SessionMap(256));
         }
     }
 

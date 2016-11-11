@@ -162,8 +162,8 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     }
 
     @Override
-    public long getNumberOfSessionContainers() {
-        return sessionShortLifeTime / SHORT_CONTAINER_LIFE_TIME;
+    public int getNumberOfSessionContainers() {
+        return (int) (sessionShortLifeTime / SHORT_CONTAINER_LIFE_TIME);
     }
 
     @Override
@@ -197,9 +197,9 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     }
 
     @Override
-    public long getNumberOfLongTermSessionContainers() {
+    public int getNumberOfLongTermSessionContainers() {
         long retval = (longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME;
-        return (retval < 1) ? 1 : retval;
+        return (int) ((retval < 1) ? 1 : retval);
     }
 
     @Override
