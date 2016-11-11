@@ -206,11 +206,12 @@ public class ConfirmationTest extends CalDAVTest {
         /*
          * accept series on server
          */
+        appointment = getAppointment(uid);
         getManager().confirm(appointment, Appointment.ACCEPT, "ok");
         /*
          * verify appointment on server
          */
-        appointment = super.getAppointment(uid);
+        appointment = getAppointment(uid);
         assertNotNull("appointment not found on server", appointment);
         assertNotNull("no users found in apointment", appointment.getUsers());
         UserParticipant user = null;
