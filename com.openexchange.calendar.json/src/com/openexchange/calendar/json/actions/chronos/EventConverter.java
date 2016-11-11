@@ -384,7 +384,11 @@ public class EventConverter {
 
         UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
         if (appointment.containsAlarm()) {
-            userizedEvent.setAlarms(Collections.singletonList(Appointment2Event.getAlarm(appointment.getAlarm())));
+            if (-1 == appointment.getAlarm()) {
+                userizedEvent.setAlarms(null); // "-1" means alarm removal
+            } else {
+                userizedEvent.setAlarms(Collections.singletonList(Appointment2Event.getAlarm(appointment.getAlarm())));
+            }
         }
         if (appointment.containsParentFolderID()) {
             userizedEvent.setFolderId(appointment.getParentFolderID());
