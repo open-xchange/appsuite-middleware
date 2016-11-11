@@ -654,7 +654,7 @@ public class EventConverter {
         }
         if (null != users) {
             for (UserParticipant user : users) {
-                Attendee existingAttendee = find(attendees, user.getIdentifier());
+                Attendee existingAttendee = CalendarUtils.find(attendees, user.getIdentifier());
                 if (null != existingAttendee) {
                     copyProperties(getAttendee(user), existingAttendee);
                 } else {
@@ -881,24 +881,6 @@ public class EventConverter {
             session.set(CalendarParameters.PARAMETER_RANGE_START, oldRangeStart);
             session.set(CalendarParameters.PARAMETER_RANGE_END, oldRangeEnd);
         }
-    }
-
-    /**
-     * Looks up a specific internal attendee in a collection of attendees based on its entity identifier.
-     *
-     * @param attendees The attendees to search
-     * @param entity The entity identifier to lookup
-     * @return The matching attendee, or <code>null</code> if not found
-     */
-    private static Attendee find(List<Attendee> attendees, int entity) {
-        if (null != attendees && 0 < attendees.size()) {
-            for (Attendee attendee : attendees) {
-                if (entity == attendee.getEntity()) {
-                    return attendee;
-                }
-            }
-        }
-        return null;
     }
 
     /**

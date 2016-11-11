@@ -212,20 +212,20 @@ public class UpdateOperation extends AbstractOperation {
             /*
              * check for conflicts
              */
-            Event newEvent = originalEvent.clone();
-            EventMapper.getInstance().copy(eventUpdate.getUpdate(), newEvent, EventField.values());
-            List<Attendee> newAttendees;
-            if (updatedEvent.containsAttendees()) {
-                newAttendees = new AttendeeHelper(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).apply(originalEvent.getAttendees());
-            } else {
-                newAttendees = originalEvent.getAttendees();
-            }
-            List<EventConflict> conflicts = new ConflictChecker(session, storage).checkConflicts(newEvent, newAttendees);
-            if (null != conflicts && 0 < conflicts.size()) {
-                for (EventConflict eventConflict : conflicts) {
-                    result.addConflict(eventConflict);
+            if (needsConflictCheck(eventUpdate)) {
+                Event newEvent = originalEvent.clone();
+                EventMapper.getInstance().copy(eventUpdate.getUpdate(), newEvent, EventField.values());
+                List<Attendee> newAttendees;
+                if (updatedEvent.containsAttendees()) {
+                    newAttendees = new AttendeeHelper(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).apply(originalEvent.getAttendees());
+                } else {
+                    newAttendees = originalEvent.getAttendees();
                 }
-                return;
+                List<EventConflict> conflicts = new ConflictChecker(session, storage).checkConflicts(newEvent, newAttendees);
+                if (null != conflicts && 0 < conflicts.size()) {
+                    result.addConflicts(conflicts);
+                    return;
+                }
             }
             /*
              * perform update
@@ -279,6 +279,25 @@ public class UpdateOperation extends AbstractOperation {
         return eventUpdate.containsAnyChangeOf(new EventField[] {
             EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
         });
+    }
+
+    /**
+     * Gets a value indicating whether the participation status of the event's attendees needs to be reset along with the update or not.
+     *
+     * @param eventUpdate The event update to evaluate
+     * @return <code>true</code> if the attendee's participation status should be reseted, <code>false</code>, otherwise
+     */
+    private boolean needsConflictCheck(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
+        if (eventUpdate.containsAnyChangeOf(new EventField[] {
+            EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY, EventField.TRANSP
+        })) {
+            return true;
+        }
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
+        if (0 < attendeeHelper.getAttendeesToInsert().size()) {
+            return true;
+        }
+        return false;
     }
 
     /**

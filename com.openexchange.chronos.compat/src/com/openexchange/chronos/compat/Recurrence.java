@@ -166,7 +166,6 @@ public class Recurrence {
          */
         TimeZone timeZone = null != recurrenceData.getTimeZoneID() ? TimeZone.getTimeZone(recurrenceData.getTimeZoneID()) : TimeZones.UTC;
         Calendar calendar = CalendarUtils.initCalendar(timeZone, masterPeriod.getStartDate());
-        calendar.setTime(masterPeriod.getStartDate());
         int startHour = calendar.get(Calendar.HOUR_OF_DAY);
         int startMinute = calendar.get(Calendar.MINUTE);
         int startSecond = calendar.get(Calendar.SECOND);
