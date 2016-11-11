@@ -2,7 +2,7 @@
   put:
     operationId: uploadFile
     tags:
-      - drive
+      - Drive
     summary: Uploads a file to the server.
     consumes:
       - application/octet-stream
@@ -98,3 +98,23 @@
           fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveActionsResponse"
+    x-ox-examples:
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=upload&root=56&path=/test2&newName=Penguins.jpg&newChecksum=9d377b10ce778c4938b3c7e2c63a229a&contentType=image/jpeg&offset=0&totalLength=777835&binary=true&device=Laptop&created=1375343426999&modified=1375343427001&session=5d0c1e8eb0964a3095438b450ff6810f
+          > Content: 
+            [application/octet-stream;, 777835 bytes]
+
+          <== HTTP 200 OK (108.0062 ms elapsed, 118 bytes received)
+          <   Content: 
+              {
+                "data" : [{
+                    "action" : "acknowledge",
+                    "newVersion" : {
+                      "name" : "Penguins.jpg",
+                      "checksum" : "9d377b10ce778c4938b3c7e2c63a229a"
+                    }
+                  }
+                ]
+              }

@@ -31,7 +31,7 @@ list.
   get:
     operationId: getFile
     tags:
-      - drive
+      - Drive
     summary: Gets metadata of a specific synchronized file (**available since API version 4**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -94,7 +94,7 @@ After defining the parameter you can use it in a request's `parameters` section 
   get:
     operationId: getFile
     tags:
-      - drive
+      - Drive
     summary: Gets metadata of a specific synchronized file (**available since API version 4**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -156,7 +156,7 @@ In case of the Drive API we always use **drive** as tag (attention: case sensiti
   get:
     operationId: getFooBar
 	tags:
-	  - drive
+	  - Drive
 ```
 Afterwards each request should have a short `summary`. This can be followed by a description that goes into detail.
 If the description shall be multilined use a pipe to introduce multiline descriptions, like:
@@ -175,7 +175,7 @@ e.g. consumes `application/json` and produces `text/html`, you have to override 
   get:
     operationId: getFooBar
 	tags:
-	  - drive
+	  - Drive
 	summary: Gets something really attractive.
 	consumes:
 	  - application/json
@@ -191,7 +191,7 @@ that provides detailed information on adding parameters. Responses are specified
   get:
     operationId: getFooBar
 	tags:
-	  - drive
+	  - Drive
 	summary: Gets something really attractive.
 	parameters:
 	  - $ref: "#/parameters/gblQueryParamSession"

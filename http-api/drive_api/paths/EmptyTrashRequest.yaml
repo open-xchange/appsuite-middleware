@@ -1,0 +1,48 @@
+/drive?action=emptyTrash:
+  get:
+    operationId: emptyTrash
+    tags:
+      - Drive
+    summary: Empties the trash folder
+    description: |
+      Empties the trash folder, i.e. permanently removes any contained files and folders. 
+      If a trash folder is available or not can be checked via hasTrashFolder received in the Settings request.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+    responses:
+      200:
+        description: |
+          A JSON object holding the updated folder statistics after the trash was emptied.
+          If no trash folder is available, an empty response is returned.
+        schema:
+          type: object
+          required: 
+            - totalSize
+            - numFiles
+            - numFolders
+          properties:
+            totalSize:
+              type: integer
+              description: The total size of the contents in bytes.
+            numFiles:
+              type: integer
+              description: The total number of contained files.
+            numFolders:
+              type: integer
+              description: The total number of contained folders.
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=emptyTrash&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+
+          <== HTTP 200 OK (184.0234 ms elapsed, 52 bytes received)
+          <   Content: 
+              {
+                "data": {
+                  "totalSize": 0,
+                  "numFiles": 0,
+                  "numFolders": 0
+                }
+              }

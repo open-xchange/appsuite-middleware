@@ -2,7 +2,7 @@
   put:
     operationId: syncFolders
     tags:
-      - drive
+      - Drive
     summary: Synchronizes folders.
     description: |
       This request performs the synchronization of all folders, resulting in different actions that should be
@@ -52,3 +52,113 @@
           fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveActionsResponse"
+    x-ox-examples:
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f
+          > Content:
+          {
+            "clientVersions" : [{
+                "path" : "/",
+                "checksum" : "7b744b13df4b41006495e1a15327368a"
+              }, {
+                "path" : "/test1",
+                "checksum" : "3ecc97334d7f6bf2b795988092b8137e"
+              }, {
+                "path" : "/test2",
+                "checksum" : "56534fc2ddcb3b7310d3ef889bc5ae18"
+              }, {
+                "path" : "/test2/test3",
+                "checksum" : "c193fae995d9f9431986dcdc3621cd98"
+              }
+            ],
+            "originalVersions" : [{
+                "path" : "/",
+                "checksum" : "7b744b13df4b41006495e1a15327368a"
+              }, {
+                "path" : "/test2/test3",
+                "checksum" : "c193fae995d9f9431986dcdc3621cd98"
+              }, {
+                "path" : "/test2",
+                "checksum" : "35d1b51fdefbee5bf81d7ae8167719b8"
+              }, {
+                "path" : "/test1",
+                "checksum" : "3ecc97334d7f6bf2b795988092b8137e"
+              }
+            ]
+          }
+  
+          <== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)
+          <   Content: 
+              {
+                "data" : [{
+                    "action" : "sync",
+                    "version" : {
+                      "path" : "/test2",
+                      "checksum" : "56534fc2ddcb3b7310d3ef889bc5ae18"
+                    }
+                  }
+                ]
+              }
+      - Example2:
+        description: Extended example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f
+            > Content:
+              {
+                "clientVersions" : [{
+                    "path" : "/",
+                    "checksum" : "7b744b13df4b41006495e1a15327368a"
+                  }, {
+                    "path" : "/test1",
+                    "checksum" : "3ecc97334d7f6bf2b795988092b8137e"
+                  }, {
+                    "path" : "/test2",
+                    "checksum" : "56534fc2ddcb3b7310d3ef889bc5ae18"
+                  }, {
+                    "path" : "/test2/test3",
+                    "checksum" : "c193fae995d9f9431986dcdc3621cd98"
+                  }
+                ],
+                "originalVersions" : [{
+                    "path" : "/",
+                    "checksum" : "7b744b13df4b41006495e1a15327368a"
+                  }, {
+                    "path" : "/test2/test3",
+                    "checksum" : "c193fae995d9f9431986dcdc3621cd98"
+                  }, {
+                    "path" : "/test2",
+                    "checksum" : "35d1b51fdefbee5bf81d7ae8167719b8"
+                  }, {
+                    "path" : "/test1",
+                    "checksum" : "3ecc97334d7f6bf2b795988092b8137e"
+                  }
+                ]
+                "fileExclusions" : [{
+                    "path" : "/",
+                    "name" : "excluded.txt",
+                    "type" : "exact"
+                  }
+                ], "directoryExclusions" : [{
+                    "path" : "/temp",
+                    "type" : "exact"
+                  }, {
+                    "path" : "/temp/*",
+                    "type" : "glob"
+                  }
+                ]
+              }
+            
+          <== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)
+          <   Content: 
+              {
+                "data" : [{
+                    "action" : "sync",
+                    "version" : {
+                      "path" : "/test2",
+                      "checksum" : "56534fc2ddcb3b7310d3ef889bc5ae18"
+                    }
+                  }
+                ]
+              }

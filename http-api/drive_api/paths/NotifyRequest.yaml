@@ -2,8 +2,8 @@
   put:
     operationId: notifyAboutSharedItem
     tags:
-      - drive
-    summary: Notifies users or groups about a shared file or folder (**available since API version 4**).
+      - Drive
+    summary: Notifies users or groups about a shared file or folder.
     description: (Re-)Sends a share notification to one or more permission entities of a specific shared file or folder.
     consumes:
       - application/json
@@ -26,3 +26,24 @@
           the `warnings` field. In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveNotificationResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=notify&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+          > Content:
+            {
+              "path": "/test",
+              "name": "image.jpg",
+              "checksum": "d63540e8f986ec305b0dd1293d8a3276",
+              "entities": [10,78],
+              "notification": {
+                "message": "Look!"
+              }
+            }
+
+          <== HTTP 200 OK (45.2084 ms elapsed, 11 bytes received)
+          <   Content: 
+              {
+                "data": {}
+              }

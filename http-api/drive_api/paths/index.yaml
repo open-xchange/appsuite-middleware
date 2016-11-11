@@ -23,3 +23,8 @@ requests:
   - UpdateFolderRequest.yaml
   - UpdateFileRequest.yaml
   - NotifyRequest.yaml
+  - GetTrashStatsRequest.yaml
+  - EmptyTrashRequest.yaml
+  - AutocompleteRequest.yaml
+  - MoveDirectoryRequest.yaml
+  - MoveFileRequest.yaml

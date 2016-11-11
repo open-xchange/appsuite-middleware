@@ -2,8 +2,8 @@
   get:
     operationId: getFile
     tags:
-      - drive
-    summary: Gets metadata of a specific synchronized file (**available since API version 4**).
+      - Drive
+    summary: Gets metadata of a specific synchronized file.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamRoot"

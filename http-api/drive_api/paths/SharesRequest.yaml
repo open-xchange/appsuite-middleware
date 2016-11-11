@@ -2,8 +2,8 @@
   get:
     operationId: getShares
     tags:
-      - drive
-    summary: Gets all shared files and directories (**available since API version 4**).
+      - Drive
+    summary: Gets all shared files and directories.
     description: Gets all files and directories within the synchronized tree that are shared to others.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -15,3 +15,232 @@
           In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveSharesResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=shares&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+
+          <== HTTP 200 OK (191.2707 ms elapsed, 5339 bytes received)
+          <   Content: 
+              {
+                "data": {
+                  "directories": [{
+                    "id": "316770",
+                    "name": "test",
+                    "checksum": "bef03e92c3c675c1a6efddc831ac21b9",
+                    "localized_name": "test",
+                    "path": "/test",
+                    "created": 1437989289761,
+                    "modified": 1438176370780,
+                    "own_rights": 403710016,
+                    "permissions": [{
+                      "bits": 403710016,
+                      "entity": 182,
+                      "display_name": "Mander, Jens",
+                      "email_address": "jens.mander@example.com",
+                      "type": "user"
+                    },
+                    {
+                      "bits": 135274497,
+                      "entity": 8340,
+                      "display_name": "Otto Example",
+                      "email_address": "otto@example.com",
+                      "type": "guest"
+                    },
+                    {
+                      "bits": 257,
+                      "entity": 16175,
+                      "display_name": "Guest",
+                      "type": "anonymous"
+                    }],
+                    "extended_permissions": [{
+                      "entity": 182,
+                      "bits": 403710016,
+                      "type": "user",
+                      "display_name": "Mander, Jens",
+                      "contact": {
+                        "email1": "jens.mander@example.com",
+                        "last_name": "Mander",
+                        "first_name": "Jens"
+                      }
+                    },
+                    {
+                      "entity": 8340,
+                      "bits": 135274497,
+                      "type": "guest",
+                      "display_name": "Otto Example",
+                      "contact": {
+                        "email1": "otto@example.com"
+                      }
+                    },
+                    {
+                      "entity": 16175,
+                      "bits": 257,
+                      "type": "anonymous",
+                      "share_url": "http://127.0.0.1/ajax/share/102b560404b3e96c9623be94b3d643829a46b117558d9ec9/31342f1f"
+                    }],
+                    "jump": ["permissions"],
+                    "shared": true,
+                    "shareable": true
+                  },
+                  {
+                    "id": "300695",
+                    "name": "sharetest",
+                    "checksum": "cdfb5724f9614290a850ec507aea72a2",
+                    "localized_name": "sharetest",
+                    "path": "/sub1/check/sharetest",
+                    "created": 1430218822598,
+                    "modified": 1430218833769,
+                    "own_rights": 403710016,
+                    "permissions": [{
+                      "bits": 257,
+                      "entity": 10,
+                      "display_name": "Klaus Mander",
+                      "email_address": "klaus.mander@example.com",
+                      "type": "user"
+                    },
+                    {
+                      "bits": 403710016,
+                      "entity": 182,
+                      "display_name": "Mander, Jens",
+                      "email_address": "jens.mander@example.com",
+                      "type": "user"
+                    }],
+                    "extended_permissions": [{
+                      "entity": 10,
+                      "bits": 257,
+                      "type": "user",
+                      "display_name": "Klaus Mander",
+                      "contact": {
+                        "email1": "klaus.mander@example.com",
+                        "title": "",
+                        "last_name": "Mander",
+                        "first_name": "Klaus",
+                        "image1_url": "/ajax/image/user/picture?id=10&timestamp=1413376661353"
+                      }
+                    },
+                    {
+                      "entity": 182,
+                      "bits": 403710016,
+                      "type": "user",
+                      "display_name": "Mander, Jens",
+                      "contact": {
+                        "email1": "jens.mander@example.com",
+                        "last_name": "Mander",
+                        "first_name": "Jens"
+                      }
+                    }],
+                    "jump": ["permissions"],
+                    "shared": true,
+                    "shareable": true
+                  }],
+                  "files": [{
+                    "name": "Chrysanthemum.jpg",
+                    "created": 1438177192835,
+                    "modified": 1438177729597,
+                    "created_by": {
+                      "entity": 182,
+                      "display_name": "Mander, Jens",
+                      "email_address": "jens.mander@example.com",
+                      "type": "user"
+                    },
+                    "modified_by": {
+                      "entity": 182,
+                      "display_name": "Mander, Jens",
+                      "email_address": "jens.mander@example.com",
+                      "type": "user"
+                    },
+                    "preview": "http://127.0.0.1/ajax/files?action=document&folder=309373&id=309373/346541&version=1&delivery=download&scaleType=contain&width=800&height=800&rotate=true",
+                    "thumbnail": "http://127.0.0.1/ajax/files?action=document&folder=309373&id=309373/346541&version=1&delivery=download&scaleType=contain&width=100&height=100&rotate=true",
+                    "object_permissions": [{
+                      "bits": 1,
+                      "entity": 16178,
+                      "display_name": "Guest",
+                      "type": "anonymous"
+                    }],
+                    "extended_object_permissions": [{
+                      "entity": 16178,
+                      "bits": 1,
+                      "type": "anonymous",
+                      "share_url": "http://127.0.0.1/ajax/share/1224dd0b065f2076b6db0e665f1f441f89f1308ad2a8ad7f/167e4881"
+                    }],
+                    "shared": true,
+                    "shareable": true,
+                    "jump": ["preview",
+                    "permissions"],
+                    "path": "/Pictures",
+                    "checksum": "076e3caed758a1c18c91a0e9cae3368f"
+                  },
+                  {
+                    "name": "data.zip",
+                    "created": 1427291138800,
+                    "modified": 1438593586254,
+                    "created_by": {
+                      "entity": 182,
+                      "display_name": "Mander, Jens",
+                      "email_address": "jens.mander@example.com",
+                      "type": "user"
+                    },
+                    "modified_by": {
+                      "entity": 182,
+                      "display_name": "Mander, Jens",
+                      "email_address": "jens.mander@example.com",
+                      "type": "user"
+                    },
+                    "object_permissions": [{
+                      "bits": 4,
+                      "entity": 10,
+                      "display_name": "Klaus Mander",
+                      "email_address": "klaus.mander@example.com",
+                      "type": "user"
+                    },
+                    {
+                      "bits": 4,
+                      "entity": 8338,
+                      "display_name": "Horst Example",
+                      "email_address": "horst@example.com",
+                      "type": "guest"
+                    },
+                    {
+                      "bits": 1,
+                      "entity": 11224,
+                      "display_name": "Guest",
+                      "type": "anonymous"
+                    }],
+                    "extended_object_permissions": [{
+                      "entity": 10,
+                      "bits": 4,
+                      "type": "user",
+                      "display_name": "Klaus Mander",
+                      "contact": {
+                        "email1": "klaus.mander@example.com",
+                        "title": "",
+                        "last_name": "Mander",
+                        "first_name": "Klaus",
+                        "image1_url": "/ajax/image/user/picture?id=10&timestamp=1413376661353"
+                      }
+                    },
+                    {
+                      "entity": 8338,
+                      "bits": 4,
+                      "type": "guest",
+                      "display_name": "Horst Example",
+                      "contact": {
+                        "email1": "horst@example.com"
+                      }
+                    },
+                    {
+                      "entity": 11224,
+                      "bits": 1,
+                      "type": "anonymous",
+                      "share_url": "http://127.0.0.1/ajax/share/1f74962e0b55529663dfbc3b55794ea59b753c9301c0da75/76c846ae"
+                    }],
+                    "shared": true,
+                    "shareable": true,
+                    "jump": ["permissions"],
+                    "path": "/Projects/ACME",
+                    "checksum": "d63540e8f986ec305b0dd1293d8a3276"
+                  }]
+                }
+              }
