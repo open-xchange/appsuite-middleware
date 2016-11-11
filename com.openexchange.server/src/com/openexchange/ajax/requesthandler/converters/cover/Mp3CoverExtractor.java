@@ -51,9 +51,6 @@ package com.openexchange.ajax.requesthandler.converters.cover;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -75,6 +72,7 @@ import org.jaudiotagger.tag.images.Artwork;
 import org.jaudiotagger.tag.mp4.Mp4FieldKey;
 import org.jaudiotagger.tag.mp4.Mp4Tag;
 import org.jaudiotagger.tag.mp4.field.Mp4TagCoverField;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
@@ -169,7 +167,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
                         } else {
                             LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: {}", body.getClass().getName());
                         }
-                    } 
+                    }
                 }
                 return null;
             } else if (isSupported(managedFile.getContentType()) || isSupportedFileExt(managedFile.getFileName())) {
@@ -228,7 +226,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         }
     }
 
-    private static final Set<String> EXTENSIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(".mp3", ".m4a", ".flac", ".wma", ".ogg")));
+    private static final Set<String> EXTENSIONS = ImmutableSet.of(".mp3", ".m4a", ".flac", ".wma", ".ogg");
 
     /**
      * Tests for a supported file extension.
@@ -258,7 +256,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         return (null != fileName && fileName.toLowerCase(Locale.ENGLISH).endsWith(".mp3"));
     }
 
-    private static final Set<String> MP3_MIME_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> MP3_MIME_TYPES = ImmutableSet.of(
         "audio/mpeg",
         "audio/x-mpeg",
         "audio/mp3",
@@ -267,7 +265,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         "audio/x-mpeg3",
         "audio/mpg",
         "audio/x-mpg",
-        "audio/x-mpegaudio")));
+        "audio/x-mpegaudio");
 
     /**
      * Tests for MP3 MIME type.
@@ -288,7 +286,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         return false;
     }
 
-    private static final Set<String> MIME_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> MIME_TYPES = ImmutableSet.of(
         "audio/mpeg",
         "audio/x-mpeg",
         "audio/mp3",
@@ -305,7 +303,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         "audio/x-flac",
         "audio/flac",
         "audio/x-ms-wma",
-        "application/x-ogg")));
+        "application/x-ogg");
 
     /**
      * Tests for a supported MIME type.

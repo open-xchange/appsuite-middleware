@@ -52,8 +52,6 @@ package com.openexchange.mail.structure.parser;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -69,6 +67,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -424,7 +423,7 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static final Set<String> HEADERS_ADDRESS = new HashSet<String>(Arrays.asList(
+    private static final Set<String> HEADERS_ADDRESS = ImmutableSet.of(
         "from",
         "to",
         "cc",
@@ -437,9 +436,9 @@ public final class MIMEStructureParser {
         "resent-from",
         "resent-to",
         "resent-sender",
-        "disposition-notification-to"));
+        "disposition-notification-to");
 
-    private static final Set<String> HEADERS_DATE = new HashSet<String>(Arrays.asList("date"));
+    private static final Set<String> HEADERS_DATE = ImmutableSet.of("date");
 
     private static void parseHeaders(final JSONObject jsonHeaders, final MimePart mimePart, final ContentType contentType) throws OXException {
         try {

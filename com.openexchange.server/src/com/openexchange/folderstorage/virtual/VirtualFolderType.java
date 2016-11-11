@@ -49,10 +49,8 @@
 
 package com.openexchange.folderstorage.virtual;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
@@ -88,9 +86,9 @@ public final class VirtualFolderType implements FolderType {
         return (null != folderId);
     }
 
-    private static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> KNOWN_TREES = ImmutableSet.of(
         FolderStorage.REAL_TREE_ID,
-        OutlookFolderStorage.OUTLOOK_TREE_ID)));
+        OutlookFolderStorage.OUTLOOK_TREE_ID);
 
     @Override
     public boolean servesTreeId(final String treeId) {

@@ -54,11 +54,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -72,6 +69,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
@@ -316,13 +314,13 @@ public class Multiple extends SessionServlet {
     }
 
     /** If a module identifier is contained in this set, serial execution is mandatory */
-    private static final Set<String> SERIAL_MODULES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MODULE_MAIL, "templating")));
+    private static final Set<String> SERIAL_MODULES = ImmutableSet.of(MODULE_MAIL, "templating");
 
     /** If a module identifier is contained in this set, serial execution is mandatory in case action hints to a {@link #MODIFYING_ACTIONS modifying operation} */
-    private static final Set<String> SERIAL_ON_MODIFICATION_MODULES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MODULE_CALENDAR, MODULE_TASK, MODULE_FOLDER, MODULE_FOLDERS, MODULE_CONTACT)));
+    private static final Set<String> SERIAL_ON_MODIFICATION_MODULES = ImmutableSet.of(MODULE_CALENDAR, MODULE_TASK, MODULE_FOLDER, MODULE_FOLDERS, MODULE_CONTACT);
 
     /** A set containing those actions that are considered as modifying */
-    private static final Set<String> MODIFYING_ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ACTION_DELETE, ACTION_NEW, ACTION_UPDATE)));
+    private static final Set<String> MODIFYING_ACTIONS = ImmutableSet.of(ACTION_DELETE, ACTION_NEW, ACTION_UPDATE);
 
     private static boolean indicatesSerial(final JSONObject dataObject) throws JSONException {
         // Retrieve module identifier

@@ -50,10 +50,9 @@
 package com.openexchange.groupware.notify;
 
 import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.mail.MailObject;
@@ -163,10 +162,10 @@ public class TaskState extends LinkableState {
 		return type;
 	}
 
-	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
+	private static final Set<Integer> FIELDS_TO_IGNORE = ImmutableSet.of(
 	    Task.ALARM,
 	    Task.LAST_MODIFIED
-	));
+	);
 
     @Override
     public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {

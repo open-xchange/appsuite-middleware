@@ -50,12 +50,10 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -121,15 +119,15 @@ public final class SubscribePerformer extends AbstractPerformer {
         super(user, context, folderStorageDiscoverer);
     }
 
-    private static final Set<String> SYSTEM_FOLDERS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> SYSTEM_FOLDERS = ImmutableSet.of(
         FolderStorage.ROOT_ID,
         FolderStorage.PRIVATE_ID,
         FolderStorage.PUBLIC_ID,
-        FolderStorage.SHARED_ID)));
+        FolderStorage.SHARED_ID);
 
-    private static final Set<String> VIRTUAL_IDS =  Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> VIRTUAL_IDS =  ImmutableSet.of(
         Integer.toString(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), Integer.toString(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID),
-            Integer.toString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), Integer.toString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID))));
+            Integer.toString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), Integer.toString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
 
     /**
      * The prepared fullname.

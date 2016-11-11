@@ -57,10 +57,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -68,6 +66,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -344,7 +343,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         }
     }
 
-    private static final Set<String> BOOLS = new HashSet<>(Arrays.asList("true", "yes", "y", "on", "1"));
+    private static final Set<String> BOOLS = ImmutableSet.of("true", "yes", "y", "on", "1");
 
     /**
      * Parses specified value to a <code>boolean</code>:<br>

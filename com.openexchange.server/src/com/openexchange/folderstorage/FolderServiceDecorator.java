@@ -50,16 +50,15 @@
 package com.openexchange.folderstorage;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link FolderServiceDecorator} - The decorator for {@link FolderService}.
@@ -230,12 +229,12 @@ public final class FolderServiceDecorator implements Cloneable {
         return properties.get(propertyName);
     }
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> BOOL_VALS = ImmutableSet.of(
         "true",
         "1",
         "yes",
         "y",
-        "on")));
+        "on");
 
     /**
      * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter.

@@ -56,8 +56,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,6 +81,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
@@ -333,7 +332,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
-    private static final Set<String> REMAIN = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(KEY_HEADERS, MailJSONField.RECEIVED_DATE.getKey())));
+    private static final Set<String> REMAIN = ImmutableSet.of(KEY_HEADERS, MailJSONField.RECEIVED_DATE.getKey());
 
     @Override
     public boolean handleSMIMEBodyText(final MailPart part) throws OXException {
@@ -830,11 +829,9 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final HeaderName HN_SUBJECT = HeaderName.valueOf("subject");
 
-    private static final Set<HeaderName> PARAMETERIZED_HEADERS =
-        new HashSet<HeaderName>(Arrays.asList(HN_CONTENT_TYPE, HeaderName.valueOf(CONTENT_DISPOSITION)));
+    private static final Set<HeaderName> PARAMETERIZED_HEADERS = ImmutableSet.of(HN_CONTENT_TYPE, HeaderName.valueOf(CONTENT_DISPOSITION));
 
-    private static final Set<HeaderName> ADDRESS_HEADERS =
-        new HashSet<HeaderName>(Arrays.asList(
+    private static final Set<HeaderName> ADDRESS_HEADERS = ImmutableSet.of(
             HeaderName.valueOf("From"),
             HeaderName.valueOf("To"),
             HeaderName.valueOf("Cc"),
@@ -847,7 +844,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Resent-From"),
             HeaderName.valueOf("Resent-To"),
             HeaderName.valueOf("Resent-Sender"),
-            HeaderName.valueOf("Disposition-Notification-To")));
+            HeaderName.valueOf("Disposition-Notification-To"));
 
     private static final Pattern P_DOUBLE_BACKSLASH = Pattern.compile(Pattern.quote("\\\\\\\""));
 
