@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 19
+%define        ox_release 20
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -51,6 +51,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc config
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Nov 11 2016 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2016-11-21 (3728)
 * Fri Nov 04 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-11-10 (3712)
 * Thu Oct 13 2016 Carsten Hoeger <choeger@open-xchange.com>
