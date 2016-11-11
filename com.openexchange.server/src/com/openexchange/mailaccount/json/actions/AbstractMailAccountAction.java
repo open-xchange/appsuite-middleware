@@ -98,7 +98,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractMailAccountAction} - An abstract folder action.
+ * {@link AbstractMailAccountAction} - An abstract mail account action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
