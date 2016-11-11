@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 25
+%define        ox_release 26
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,6 +55,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Nov 11 2016 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2016-11-21 (3730)
 * Fri Oct 28 2016 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2016-11-07 (3677)
 * Mon Oct 17 2016 Steffen Templin <steffen.templin@open-xchange.com>
