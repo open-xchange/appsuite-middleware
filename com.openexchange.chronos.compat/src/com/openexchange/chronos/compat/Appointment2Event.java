@@ -66,6 +66,7 @@ import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -252,7 +253,8 @@ public class Appointment2Event {
      * @param recurrenceData The corresponding recurrence data
      * @param recurrenceDatePosition The legacy recurrence date position, i.e. the date where the original occurrence would have been, as
      *            UTC date with truncated time fraction
-     * @return The recurrence identifier, or <code>null</code> if no matching recurrence identifier was found
+     * @return The recurrence identifier
+     * @throws {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId getRecurrenceID(RecurrenceData recurrenceData, Date recurrenceDatePosition) throws OXException {
         Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, recurrenceData.getSeriesStart());
@@ -268,7 +270,7 @@ public class Appointment2Event {
                 break;
             }
         }
-        return null;
+        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence date position " + recurrenceDatePosition.getTime(), recurrenceData.getRecurrenceRule());
     }
 
     /**
@@ -279,6 +281,7 @@ public class Appointment2Event {
      * @param recurrenceDatePositions The legacy recurrence date positions, i.e. the dates where the original occurrences would have been,
      *            as UTC date with truncated time fraction
      * @return The recurrence identifiers
+     * @throws {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static List<Date> getRecurrenceIDs(RecurrenceData recurrenceData, List<Date> recurrenceDatePositions) throws OXException {
         // TODO
@@ -299,7 +302,8 @@ public class Appointment2Event {
      *
      * @param recurrenceData The corresponding recurrence data
      * @param recurrencePosition The legacy, 1-based recurrence position
-     * @return The recurrence identifier, or <code>null</code> if no matching recurrence identifier was found
+     * @return The recurrence identifier
+     * @throws {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId getRecurrenceID(RecurrenceData recurrenceData, int recurrencePosition) throws OXException {
         RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData, true);
@@ -310,7 +314,7 @@ public class Appointment2Event {
                 return new DataAwareRecurrenceId(recurrenceData, nextMillis);
             }
         }
-        return null;
+        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence position " + recurrencePosition, recurrenceData.getRecurrenceRule());
     }
 
     /**

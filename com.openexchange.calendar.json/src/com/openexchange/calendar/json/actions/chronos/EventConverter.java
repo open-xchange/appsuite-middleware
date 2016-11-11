@@ -133,6 +133,8 @@ public class EventConverter {
                 return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(e, e.getLogArgs()[0]);
             case 4042: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND
                 return OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create();
+            case 4044: // com.openexchange.chronos.exception.CalendarExceptionCodes.INVALID_RECURRENCE_ID
+                return OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(e.getLogArgs()[0]);
             case 4090: // com.openexchange.chronos.exception.CalendarExceptionCodes.UID_CONFLICT
                 return OXCalendarExceptionCodes.APPOINTMENT_UID_ALREDY_EXISTS.create("", e.getLogArgs()[0]);
             default:
