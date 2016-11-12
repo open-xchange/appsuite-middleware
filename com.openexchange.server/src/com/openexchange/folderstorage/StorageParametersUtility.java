@@ -49,10 +49,8 @@
 
 package com.openexchange.folderstorage;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link StorageParametersUtility} - A utility class for {@link StorageParameters}.
@@ -99,12 +97,12 @@ public final class StorageParametersUtility {
         return null != tmp && ((tmp instanceof Boolean) ? ((Boolean) tmp).booleanValue() : parseBoolParameter(tmp.toString()));
     }
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> BOOL_VALS = ImmutableSet.of(
         "true",
         "1",
         "yes",
         "y",
-        "on")));
+        "on");
 
     /**
      * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter.

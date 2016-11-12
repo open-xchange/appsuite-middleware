@@ -74,6 +74,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
@@ -203,10 +204,10 @@ public final class OutlookFolderStorage implements FolderStorage {
     /**
      * <code>"9"</code>, <code>"10"</code>, and <code>"15"</code>
      */
-    private static final Set<String> SYSTEM_INFOSTORES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> SYSTEM_INFOSTORES = ImmutableSet.of(
         INFOSTORE,
         INFOSTORE_PUBLIC,
-        INFOSTORE_USER)));
+        INFOSTORE_USER);
 
     /**
      * The logger.

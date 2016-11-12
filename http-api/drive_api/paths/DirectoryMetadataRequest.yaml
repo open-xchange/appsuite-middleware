@@ -2,7 +2,7 @@
   get:
     operationId: getDirectoryMetadata
     tags:
-      - drive
+      - Drive
     summary: Gets directory metadata (**deprecated, available until API version 2**).
     description: Additional metadata of synchronized directories is made available.
     parameters:

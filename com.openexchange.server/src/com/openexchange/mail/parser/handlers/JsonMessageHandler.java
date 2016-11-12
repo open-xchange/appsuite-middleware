@@ -55,10 +55,8 @@ import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,6 +70,7 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -628,10 +627,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * These headers are covered by fields of {@link MailMessage}
      */
-    private static final Set<HeaderName> COVERED_HEADER_NAMES = new HashSet<HeaderName>(Arrays.asList(new HeaderName[] {
+    private static final Set<HeaderName> COVERED_HEADER_NAMES = ImmutableSet.of(
         MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE, MessageHeaders.BCC, MessageHeaders.CC,
         MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY, MessageHeaders.SUBJECT,
-        MessageHeaders.TO }));
+        MessageHeaders.TO);
 
     @Override
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {

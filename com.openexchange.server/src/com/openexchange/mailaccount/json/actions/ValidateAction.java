@@ -122,6 +122,11 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
 
         if (accountDescription.getId() >= 0) {
+            if (accountDescription.getId() != MailAccount.DEFAULT_ID && existsSeparateActionProviderSupportingMethod(GetAction.ACTION, session)) {
+                // Unable to validate existing account hosted by another provider
+                return new AJAXRequestResult(Boolean.TRUE);
+            }
+
             MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             MailAccount storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
 

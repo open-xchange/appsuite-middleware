@@ -2,8 +2,8 @@
   get:
     operationId: getFolder
     tags:
-      - drive
-    summary: Gets metadata of a specific synchronized directory (**available since API version 4**).
+      - Drive
+    summary: Gets metadata of a specific synchronized directory.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamRoot"

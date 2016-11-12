@@ -2,7 +2,7 @@
   put:
     operationId: downloadFile
     tags:
-      - drive
+      - Drive
     summary: Downloads a file from the server.
     consumes:
       - application/json
@@ -59,3 +59,10 @@
         description: In case of the requested file was deleted or modified in the meantime.
       500:
         description: In case of errors like missing parameters, etc.
+    x-ox-examples:
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=download&root=56&path=/test2&name=Jellyfish.jpg&checksum=5a44c7ba5bbe4ec867233d67e4806848&offset=0&length=-1&session=5d0c1e8eb0964a3095438b450ff6810f
+
+          <== HTTP 200 OK (20.0011 ms elapsed, 775702 bytes received)

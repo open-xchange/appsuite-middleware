@@ -57,11 +57,9 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -76,6 +74,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -1035,7 +1034,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return UploadUtility.newFileUploadBase(maxFileSize, maxOverallSize);
     }
 
-    private static final Set<String> UPLOAD_ACTIONS = new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_ADDFILE, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import", "CSV", "VCARD","ICAL", "OUTLOOK_CSV"));
+    private static final Set<String> UPLOAD_ACTIONS = ImmutableSet.of(ACTION_NEW, ACTION_ADDFILE, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import", "CSV", "VCARD","ICAL", "OUTLOOK_CSV");
 
     /**
      * Checks if given action is supposed to pass an incoming upload request.

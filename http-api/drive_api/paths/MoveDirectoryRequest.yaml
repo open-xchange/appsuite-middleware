@@ -1,0 +1,40 @@
+/drive?action=moveFolder:
+  get:
+    operationId: moveFolder
+    tags:
+      - Drive
+    summary: Moves or renames a directory
+    description: |
+      Explicitly performs a move or rename operation for a directory. 
+      This method is intended for the situation when no phsyical copy of the synchronized data is available on the client.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: "#/parameters/gblQueryParamPath"
+      - in: query
+        name: checksum
+        type: string
+        description: The checksum of the directory to update.
+        required: true
+      - in: query
+        name: newPath
+        type: string
+        description: The new target path to apply, relative to the root folder.
+        required: true        
+    responses:
+      200:
+        description: |
+          An empty JSON object in case of a successful move. The client should perform the move operation locally afterwards, then enter a normal synchronization cycle to acknowledge any changes.
+        schema:
+           $ref: "#/definitions/CommonResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://local.ox/ajax/drive?action=moveFolder&root=163114&apiVersion=6&path=%2ftest&checksum=57ff72d92073bac92f13791bf4e7baf4&newPath=%2ftest3&session=9eabd980fead41d4ac81d32f6c86da5b
+
+          <== HTTP 200 OK (90.064 ms elapsed, 11 bytes received)
+          <   Content: 
+              {
+                "data": {}
+              }

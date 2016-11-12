@@ -2,7 +2,7 @@
   get:
     operationId: getSynchronizableFolders
     tags:
-      - drive
+      - Drive
     summary: Gets synchronizable folders.
     description: |
       Allows getting a list of folders that are available on the server for synchronization. This request should be used to
@@ -21,3 +21,114 @@
           objects will be left out. In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveSubfoldersResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=subfolders&session=35cb8c2d1423480692f0d5053d14ba52
+  
+          <== HTTP 200 OK (241.0252 ms elapsed, 966 bytes received)
+          <   Content: 
+              {
+                "data": [{
+                  "id": "com.openexchange.file.storage.googledrive://1/",
+                  "name": "Google Drive",
+                  "path": "/Google Drive",
+                  "has_subfolders": true,
+                  "own_rights": 403710016,
+                  "permissions": [{
+                    "bits": 403710016,
+                    "group": false,
+                    "entity": 182,
+                    "display_name": "Mander, Jens",
+                    "email_address": "jens.mander@example.com",
+                    "guest": false
+                  }],
+                  "jump": ["permissions"]
+                },
+                {
+                  "id": "10",
+                  "name": "Freigegebene Dateien",
+                  "path": "/Freigegebene Dateien",
+                  "created": 1224493261628,
+                  "modified": 1417164170136,
+                  "has_subfolders": true,
+                  "own_rights": 1,
+                  "permissions": [{
+                    "bits": 1,
+                    "group": true,
+                    "entity": 0,
+                    "display_name": "All users",
+                    "guest": false
+                  },
+                  {
+                    "bits": 1,
+                    "group": true,
+                    "entity": 2147483647,
+                    "display_name": "Guests",
+                    "guest": false
+                  }],
+                  "jump": ["permissions"],
+                  "shared": true
+                },
+                {
+                  "id": "15",
+                  "name": "Öffentliche Dateien",
+                  "path": "/Öffentliche Dateien",
+                  "created": 1224493261628,
+                  "modified": 1418383637250,
+                  "has_subfolders": true,
+                  "own_rights": 403709956,
+                  "permissions": [{
+                    "bits": 403709956,
+                    "group": true,
+                    "entity": 0,
+                    "display_name": "All users",
+                    "guest": false
+                  },
+                  {
+                    "bits": 1,
+                    "group": true,
+                    "entity": 2147483647,
+                    "display_name": "Guests",
+                    "guest": false
+                  }],
+                  "jump": ["permissions"],
+                  "shared": true
+                },
+                {
+                  "id": "com.openexchange.file.storage.dropbox://1/",
+                  "name": "Dropbox",
+                  "path": "/Dropbox",
+                  "has_subfolders": true,
+                  "own_rights": 403710016,
+                  "permissions": [{
+                    "bits": 403710016,
+                    "group": false,
+                    "entity": 182,
+                    "display_name": "Mander, Jens",
+                    "email_address": "jens.mander@example.com",
+                    "guest": false
+                  }],
+                  "jump": ["permissions"]
+                },
+                {
+                  "id": "9542",
+                  "name": "Meine Dateien",
+                  "path": "/Meine Dateien",
+                  "created": 1320230546147,
+                  "modified": 1426764458823,
+                  "default_folder": true,
+                  "has_subfolders": true,
+                  "own_rights": 403710016,
+                  "permissions": [{
+                    "bits": 403710016,
+                    "group": false,
+                    "entity": 182,
+                    "display_name": "Mander, Jens",
+                    "email_address": "jens.mander@example.com",
+                    "guest": false
+                  }],
+                  "jump": ["permissions"]
+                }]
+              }

@@ -156,12 +156,12 @@ public class SessionHandlerTest {
             }
 
             @Override
-            public long getNumberOfSessionContainers() {
+            public int getNumberOfSessionContainers() {
                 return 2;
             }
 
             @Override
-            public long getNumberOfLongTermSessionContainers() {
+            public int getNumberOfLongTermSessionContainers() {
                 return 2;
             }
 

@@ -53,7 +53,6 @@ import static com.openexchange.java.Strings.asciiLowerCase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +69,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.java.Strings;
@@ -340,7 +340,7 @@ public final class RateLimiter {
 
     // ----------------------------------------------------------------------------------- //
 
-    private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1", "::1")));
+    private static final Set<String> LOCALS = ImmutableSet.of("localhost", "127.0.0.1", "::1");
 
     private static final String LINE_SEP = System.getProperty("line.separator");
     private static final long LAST_RATE_LIMIT_LOG_THRESHOLD = 60000L;

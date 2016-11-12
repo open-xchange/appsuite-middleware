@@ -2,7 +2,7 @@
   get:
     operationId: pollingForChanges
     tags:
-      - drive
+      - Drive
     summary: Listen for changes (long polling).
     description: |
       Listens for server-side changes. The request **blocks until new actions for the client are available, or the
@@ -30,3 +30,72 @@
           request after the response was processed. In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveActionsResponse"
+    x-ox-examples:
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=listen&root=65841&session=51378e29f82042b4afe4af1c034c6d68
+
+          <== HTTP 200 OK (63409.6268 ms elapsed, 28 bytes received)
+          <   Content: 
+              {
+                "data" : [{
+                    "action" : "sync"
+                  }
+                ]
+              }
+  put:
+    operationId: pollingForChanges
+    tags:
+      - Drive
+    summary: Listen for changes (long polling).
+    description: |
+      Listens for server-side changes on moultiple root folders. The request **blocks until new actions for the client are available, or the
+      specified waiting time elapses**. May return immediately if previously received but not yet processed actions
+      are available for this client.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: timeout
+        type: integer
+        format: int64
+        description: The maximum timeout in milliseconds to wait.
+        required: false
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push registration token to associate it to generated events.
+        required: false
+      - in: body
+        name: body
+        description: A JSON object named root holding a JSON array of those root folder identifiers to listen for changes in.
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: |
+          A JSON array containing all actions the client should execute for synchronization. Each array element is an action as described in Actions. 
+          The relevant root folder identifier is available in the root parameter of the action. If there are no changes were detected, an empty array is returned. 
+          Typically, the client will continue with the next listen request after the response was processed.
+        schema:
+          $ref: "#/definitions/DriveActionsResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=listen&session=51378e29f82042b4afe4af1c034c6d68
+          > Content:
+            {
+              "root": [ "129136", "129137" ]
+            },
+
+          <== HTTP 200 OK (132.7421 ms elapsed, 11 bytes received)
+          <   Content: 
+              {
+                "data" : [{
+                    "action" : "sync",
+                    "root" : "129137"
+                  }
+                ]
+              }

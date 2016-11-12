@@ -117,6 +117,7 @@ import org.apache.james.mime4j.stream.FieldBuilder;
 import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
@@ -188,7 +189,7 @@ public final class MimeMessageUtility {
         tmp.add(HeaderName.valueOf("windows-1258"));
         tmp.add(HeaderName.valueOf("UTF-8"));
         tmp.add(HeaderName.valueOf("us-ascii"));
-        ENCODINGS = java.util.Collections.unmodifiableSet(tmp);
+        ENCODINGS = ImmutableSet.copyOf(tmp);
         final MailDateFormat mdf = new MailDateFormat();
         mdf.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
         MAIL_DATE_FORMAT = mdf;
@@ -779,12 +780,12 @@ public final class MimeMessageUtility {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
                 if (ct.startsWith("multipart/")) {
                     found |= hasAttachments(part, ct.getSubType());
-                } 
+                }
             }
         }
         return found;
     }
-    
+
     private static boolean hasAttachmentInMetadata(MailPart part) {
         ContentDisposition contentDisposition = part.getContentDisposition();
         if (contentDisposition != null) {

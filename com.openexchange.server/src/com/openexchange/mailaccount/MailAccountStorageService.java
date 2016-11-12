@@ -322,6 +322,30 @@ public interface MailAccountStorageService {
     void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int cid, Session session) throws OXException;
 
     /**
+     * Updates the given attributes of specified transport account
+     *
+     * @param transportAccount The transport account
+     * @param attributes The attributes to update
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param session The session
+     * @throws OXException If update fails
+     */
+    void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException;
+
+    /**
+     * Updates the given attributes of specified transport account using specified properties.
+     *
+     * @param transportAccount The transport account
+     * @param attributes The attributes to update
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param updateProperties The update properties
+     * @throws OXException If update fails
+     */
+    void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException;
+
+    /**
      * Acquires next available mail/transport account identifier.
      *
      * @param userId The user identifier
