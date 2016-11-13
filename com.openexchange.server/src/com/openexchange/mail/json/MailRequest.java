@@ -51,7 +51,6 @@ package com.openexchange.mail.json;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -133,18 +132,17 @@ public final class MailRequest {
      * @throws OXException If <code>max</code> is not a number
      */
     public long getMax() throws OXException {
-        String s = null;
-        for (final Iterator<String> it = ALIASES_MAX.iterator(); (null == s) && it.hasNext();) {
-            s = requestData.getParameter(it.next());
+        for (String name : ALIASES_MAX) {
+            String value = requestData.getParameter(name);
+            if (null != value) {
+                try {
+                    return Long.parseLong(value.trim());
+                } catch (NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, value);
+                }
+            }
         }
-        if (null == s) {
-            return -1L;
-        }
-        try {
-            return Long.parseLong(s.trim());
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("max", s);
-        }
+        return -1L;
     }
 
     /**
