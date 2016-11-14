@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite.management;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.internal.LocalReportService;
@@ -104,12 +105,17 @@ public class ReportMXBeanImpl implements ReportMXBean {
     }
     
     @Override
-    public String run(ReportConfigs reportConfig) throws Exception {
+    public String run(String reportType, Boolean isSingleDeployment, Boolean isConfigureTimerange, Long timeframeStart, Long timeframeEnd) throws Exception {
         try {
+            ReportConfigs reportConfig = new ReportConfigs.ReportConfigsBuilder(reportType)
+                .isSingleDeployment(isSingleDeployment)
+                .isConfigTimerange(isConfigureTimerange)
+                .consideredTimeframeStart(timeframeStart)
+                .consideredTimeframeEnd(timeframeEnd)
+                .build();
             return Services.getService(ReportService.class).run(reportConfig);
         } catch (OXException e) {
             throw new Exception(e.getMessage());
         }
     }
-    
 }

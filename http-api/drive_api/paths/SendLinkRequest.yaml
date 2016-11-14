@@ -2,8 +2,8 @@
   put:
     operationId: sendShareLink
     tags:
-      - drive
-    summary: Sends a share link (**available since API version 4**).
+      - Drive
+    summary: Sends a share link
     description: Sends a notification message for a share link to one or more recipients.
     consumes:
       - application/json
@@ -25,3 +25,24 @@
           the `warnings` field. In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveNotificationResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=sendLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+          > Content:
+            {
+              "path": "/",
+              "name": "photo.jpg",
+              "checksum": "bdf3bf1da3405725be763540d6601144",
+              "recipients": [
+                ["Otto Example", "otto@example.com"],
+                ["Horst Example", "horst@example.org"]
+              ]    
+            }
+
+          <== HTTP 200 OK (260.9242 ms elapsed, 11 bytes received)
+          <   Content: 
+              {
+                "data": {}
+              }

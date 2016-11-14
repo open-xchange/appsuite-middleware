@@ -14,7 +14,8 @@ consumes:
   - application/x-www-form-urlencoded
 # The list of modules and their short descriptions
 tags:
-  - name: drive
+  - name: Drive
+    description: The drive module
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

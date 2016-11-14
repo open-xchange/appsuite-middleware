@@ -56,9 +56,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +73,7 @@ import javax.mail.internet.HeaderTokenizer;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
@@ -729,7 +728,7 @@ public final class MessageUtility {
         return GB2312.equals(com.openexchange.java.Strings.asciiLowerCase(charset));
     }
 
-    private static final Set<String> SHIFT_JIS = new HashSet<String>(Arrays.asList("shift_jis", "shift-jis", "sjis", "cp932"));
+    private static final Set<String> SHIFT_JIS = ImmutableSet.of("shift_jis", "shift-jis", "sjis", "cp932");
 
     /**
      * Checks if specified charset name can be considered as <i>Shift-JIS</i>.

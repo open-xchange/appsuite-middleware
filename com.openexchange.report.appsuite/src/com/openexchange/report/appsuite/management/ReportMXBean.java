@@ -50,7 +50,6 @@
 package com.openexchange.report.appsuite.management;
 
 import com.openexchange.report.appsuite.ReportService;
-import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportMXBean} defines the JMX operations for running reports according to the MXBean conventions. These
@@ -93,5 +92,5 @@ public interface ReportMXBean {
 
     public abstract JMXReport retrieveLastErrorReport(String reportType) throws Exception;
 
-    public abstract String run(ReportConfigs reportConfig) throws Exception;
+    public abstract String run(String reportType, Boolean isSingleDeployment, Boolean isConfigureTimerange, Long timeframeStart, Long timeframeEnd) throws Exception;
 }

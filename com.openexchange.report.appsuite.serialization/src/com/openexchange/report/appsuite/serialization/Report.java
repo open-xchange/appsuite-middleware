@@ -548,19 +548,6 @@ public class Report implements Serializable {
         }
     }
 
-    public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) {
-
-        try (FileInputStream is = new FileInputStream(storageFolderPath + "/" + uuid + ".report"); Scanner sc = new Scanner(is, "UTF-8")) {
-            while (sc.hasNext()) {
-                System.out.println(sc.nextLine());
-            }
-        } catch (FileNotFoundException e) {
-            LOG.error("Unable to load file: " + storageFolderPath + "/" + uuid + ".report" , e);
-        } catch (IOException e) {
-            LOG.error("Unable to load and write report data to console." , e);
-        }
-    }
-
     private String getIndentation(int level) {
         String result = "";
         for (int i = 0; i < level; i++) {

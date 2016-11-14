@@ -55,11 +55,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +69,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.uadetector.UserAgentFamily;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
@@ -651,7 +649,7 @@ public final class SessionUtility {
         }
     }
 
-    private static final Set<String> AGENTS_WO_PUBLIC_SESSION_COOKIE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange usm http client")));
+    private static final Set<String> AGENTS_WO_PUBLIC_SESSION_COOKIE = ImmutableSet.of("open-xchange usm http client");
 
     /**
      * Checks presence of public session cookie.
@@ -840,7 +838,7 @@ public final class SessionUtility {
         return isMediaPlayerAgent(userAgent) || isMSIE11(userAgent);
     }
 
-    private static final Set<String> MEDIA_AGENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("applecoremedia/", "stagefright/")));
+    private static final Set<String> MEDIA_AGENTS = ImmutableSet.of("applecoremedia/", "stagefright/");
 
     private static boolean isMediaPlayerAgent(String userAgent) {
         if (null == userAgent) {

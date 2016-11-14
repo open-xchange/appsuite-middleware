@@ -117,6 +117,7 @@ import org.apache.james.mime4j.stream.FieldBuilder;
 import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
@@ -188,7 +189,7 @@ public final class MimeMessageUtility {
         tmp.add(HeaderName.valueOf("windows-1258"));
         tmp.add(HeaderName.valueOf("UTF-8"));
         tmp.add(HeaderName.valueOf("us-ascii"));
-        ENCODINGS = java.util.Collections.unmodifiableSet(tmp);
+        ENCODINGS = ImmutableSet.copyOf(tmp);
         final MailDateFormat mdf = new MailDateFormat();
         mdf.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
         MAIL_DATE_FORMAT = mdf;
@@ -753,11 +754,6 @@ public final class MimeMessageUtility {
             return hasAttachments0(mp, mp.getEnclosedCount());
         }
 
-        if (mp.getContentType().getBaseType().startsWith("application") && mp.getContentType().getSubType().endsWith("-signature")) {
-            return false;
-        } else if (hasAttachmentInMetadata(mp)) {
-            return true;
-        }
         // TODO: Think about special check for multipart/signed
         /*
          * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
@@ -774,6 +770,11 @@ public final class MimeMessageUtility {
         ContentType ct = new ContentType();
         for (int i = count; !found && i-- > 0;) {
             MailPart part = mp.getEnclosedMailPart(i);
+            if (!(part.getContentType().getBaseType().toLowerCase().startsWith("application") && part.getContentType().getSubType().toLowerCase().endsWith("-signature"))) {
+                if (hasAttachmentInMetadata(part)) {
+                    return true;
+                }
+            }
             String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));

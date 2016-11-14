@@ -2,8 +2,8 @@
   put:
     operationId: deleteShareLink
     tags:
-      - drive
-    summary: Deletes a share link (**available since API version 4**).
+      - Drive
+    summary: Deletes a share link
     description: Deletes a previously created link for a file or folder. This action is only available for items marked as `shareable`.
     consumes:
       - application/json
@@ -21,3 +21,20 @@
         description: An empty JSON object. In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/CommonResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=deleteLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+          > Content:
+            {
+              "path": "/",
+              "name": "photo.jpg",
+              "checksum": "bdf3bf1da3405725be763540d6601144"
+            }
+
+          <== HTTP 200 OK (149.3251 ms elapsed, 11 bytes received)
+          <   Content: 
+              {
+                "data": {}
+              }

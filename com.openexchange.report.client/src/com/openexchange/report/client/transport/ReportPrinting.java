@@ -47,59 +47,33 @@
  *
  */
 
+package com.openexchange.report.client.transport;
 
-
-package com.openexchange.groupware.reminder;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.timer.TimerService;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Scanner;
 
 /**
- * ReminderPool - Not used by now.
+ * Helper class to print report content in console.
+ * 
+ * {@link ReportPrinting}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.8.3
  */
-public class ReminderPool implements Runnable {
+public class ReportPrinting {
 
-	private static final Map<String, ReminderEvent> register = new HashMap<String, ReminderEvent>();
+    public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) {
 
-	private static final Set<ReminderObject> pool = new HashSet<ReminderObject>();
-
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReminderPool.class);
-
-	public ReminderPool(final ReminderConfig reminderConfig) {
-		if (reminderConfig.isReminderEnabled()) {
-			LOG.info("Starting ReminderPool");
-
-			//addReminderEvent(new ProjectsReminderEvent(), Types.PROJECT);
-
-			final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-            if (timer != null) {
-                timer.schedule(this, reminderConfig.getReminderInterval());
+        try (FileInputStream is = new FileInputStream(storageFolderPath + "/" + uuid + ".report"); Scanner sc = new Scanner(is, "UTF-8")) {
+            while (sc.hasNext()) {
+                System.out.println(sc.nextLine());
             }
-		} else {
-			LOG.info("ReminderPool is disabled");
-		}
-	}
-
-	@Override
-    public void run() {
-	    // TODO: Do something useful here
-	}
-
-	public static void addReminderEvent( final ReminderEvent reminderevent, final int module ) {
-		register.put(String.valueOf(module), reminderevent);
-	}
-
-	public static void add( final ReminderObject reminderobject ) {
-		pool.add(reminderobject);
-	}
-
-	public static void remove( final ReminderObject reminderobject ) {
-		pool.remove(reminderobject);
-	}
+        } catch (FileNotFoundException e) {
+            System.err.println(("Unable to load file: " + storageFolderPath + "/" + uuid + ".report" + e.getMessage()));
+        } catch (IOException e) {
+            System.err.println(("Unable to load and write report data to console." + e.getMessage()));
+        }
+    }
 }

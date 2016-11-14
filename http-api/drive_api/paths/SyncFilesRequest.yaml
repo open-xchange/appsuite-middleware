@@ -2,7 +2,7 @@
   put:
     operationId: syncFiles
     tags:
-      - drive
+      - Drive
     summary: Synchronizes files in a folder.
     description: |
       This request performs the synchronization of a single folder, resulting in different actions that should be
@@ -63,3 +63,184 @@
           field of `action`. In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveExtendedActionsResponse"
+    x-ox-examples:
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=syncfiles&root=56&path=/test2&device=Laptop&session=5d0c1e8eb0964a3095438b450ff6810f
+          > Content: 
+            {
+              "clientVersions" : [{
+                  "name" : "Jellyfish.jpg",
+                  "checksum" : "5a44c7ba5bbe4ec867233d67e4806848"
+                }, {
+                  "name" : "Penguins.jpg",
+                  "checksum" : "9d377b10ce778c4938b3c7e2c63a229a"
+                }
+              ],
+              "originalVersions" : [{
+                  "name" : "Jellyfish.jpg",
+                  "checksum" : "5a44c7ba5bbe4ec867233d67e4806848"
+                }
+              ]
+            }
+
+          <== HTTP 200 OK (6.0004 ms elapsed, 140 bytes received)
+          <   Content:
+              {
+                "data" : [{
+                    "path" : "/test2",
+                    "action" : "upload",
+                    "newVersion" : {
+                      "name" : "Penguins.jpg",
+                      "checksum" : "9d377b10ce778c4938b3c7e2c63a229a"
+                    },
+                    "offset" : 0
+                  }
+                ]
+              }
+      - Example2:
+        description: Filesync with exclusions
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=syncfiles&root=56&path=/test2&device=Laptop&session=5d0c1e8eb0964a3095438b450ff6810f
+          > Content: 
+            {
+              "clientVersions" : [{
+                  "name" : "Jellyfish.jpg",
+                  "checksum" : "5a44c7ba5bbe4ec867233d67e4806848"
+                }, {
+                  "name" : "Penguins.jpg",
+                  "checksum" : "9d377b10ce778c4938b3c7e2c63a229a"
+                }
+              ],
+              "originalVersions" : [{
+                  "name" : "Jellyfish.jpg",
+                  "checksum" : "5a44c7ba5bbe4ec867233d67e4806848"
+                }
+              ]
+              "fileExclusions" : [{
+                  "path" : "*",
+                  "name" : "*.tmp",
+                  "type" : "glob"
+                }
+              ]
+            }
+
+          <== HTTP 200 OK (6.0004 ms elapsed, 140 bytes received)
+          <   Content:
+              {
+                "data" : [{
+                    "path" : "/test2",
+                    "action" : "upload",
+                    "newVersion" : {
+                      "name" : "Penguins.jpg",
+                      "checksum" : "9d377b10ce778c4938b3c7e2c63a229a"
+                    },
+                    "offset" : 0
+                  }
+                ]
+              }
+      - Example3:
+        description: Initial sync
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=syncfiles&root=123975&path=/&apiVersion=4&driveMeta=inline&session=0833ca06093a4bad826347a30bf7ace7
+          > Content: 
+            {
+              "clientVersions": [],
+              "originalVersions": []
+            }
+
+          <== HTTP 200 OK (27.5238 ms elapsed, 2058 bytes received)
+          <   Content:
+              {
+                "data": {
+                  "actions": [{
+                    "action": "download",
+                    "newVersion": {
+                      "checksum": "36301942a30c3c09bc59f6e9b0c63fba",
+                      "name": ".drive-meta"
+                    },
+                    "totalLength": 1511,
+                    "data": {
+                      "id": "123975",
+                      "own_rights": 403710016,
+                      "permissions": [{
+                        "bits": 403710016,
+                        "entity": 7,
+                        "group": false
+                      }],
+                      "extended_permissions": [{
+                        "entity": 7,
+                        "bits": 403710016,
+                        "type": "user",
+                        "display_name": "Test User 2",
+                        "contact": {
+                          "email1": "test2@local.ox",
+                          "last_name": "test2",
+                          "first_name": "test2"
+                        }
+                      }],
+                      "jump": ["permissions"],
+                      "shareable": true,
+                      "files": [{
+                        "name": "test1.txt",
+                        "created": 1460030191867,
+                        "modified": 1460030191867,
+                        "created_by": 7,
+                        "modified_by": 7,
+                        "content_type": "text/plain",
+                        "preview": "http://local.ox/ajax/files?action=document&format=preview_image&folder=123975&id=123975/493515&version=1&delivery=download&scaleType=contain&width=1600&height=1600",
+                        "thumbnail": "http://local.ox/ajax/files?action=document&format=preview_image&folder=123975&id=123975/493515&version=1&delivery=download&scaleType=contain&width=100&height=100",
+                        "shareable": true,
+                        "number_of_versions": 1,
+                        "version": "1",
+                        "jump": ["preview",
+                        "edit",
+                        "permissions",
+                        "version_history"]
+                      },
+                      {
+                        "name": "test2.txt",
+                        "created": 1460030191931,
+                        "modified": 1460030191931,
+                        "created_by": 7,
+                        "modified_by": 7,
+                        "content_type": "text/plain",
+                        "preview": "http://local.ox/ajax/files?action=document&format=preview_image&folder=123975&id=123975/493516&version=1&delivery=download&scaleType=contain&width=1600&height=1600",
+                        "thumbnail": "http://local.ox/ajax/files?action=document&format=preview_image&folder=123975&id=123975/493516&version=1&delivery=download&scaleType=contain&width=100&height=100",
+                        "shareable": true,
+                        "number_of_versions": 1,
+                        "version": "1",
+                        "jump": ["preview",
+                        "edit",
+                        "permissions",
+                        "version_history"]
+                      }]
+                    },
+                    "path": "/",
+                    "modified": 1460030191779
+                  },
+                  {
+                    "action": "download",
+                    "newVersion": {
+                      "checksum": "e8d1be53d24895ae5cfc2808bec152bc",
+                      "name": "test1.txt"
+                    },
+                    "totalLength": 36,
+                    "created": 1460030191867,
+                    "path": "/",
+                    "modified": 1460030191867
+                  },
+                  {
+                    "action": "download",
+                    "newVersion": {
+                      "checksum": "767c4efab82482dcfafdcdbc034800d4",
+                      "name": "test2.txt"
+                    },
+                    "totalLength": 36,
+                    "created": 1460030191931,
+                    "path": "/",
+                    "modified": 1460030191931
+                  }]
+                }
+              }

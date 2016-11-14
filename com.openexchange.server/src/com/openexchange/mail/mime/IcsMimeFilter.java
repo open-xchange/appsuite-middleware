@@ -50,10 +50,9 @@
 package com.openexchange.mail.mime;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import javax.mail.BodyPart;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.utils.MessageUtility;
@@ -84,7 +83,7 @@ public final class IcsMimeFilter extends MimeFilter {
         super(Arrays.asList("text/calendar", "application/ics"));
     }
 
-    private static final Set<String> ITIP_METHODS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("REQUEST", "CANCEL", "REPLY")));
+    private static final Set<String> ITIP_METHODS = ImmutableSet.of("REQUEST", "CANCEL", "REPLY");
 
     @Override
     public boolean ignorable(final String contentType, final BodyPart bodyPart) {

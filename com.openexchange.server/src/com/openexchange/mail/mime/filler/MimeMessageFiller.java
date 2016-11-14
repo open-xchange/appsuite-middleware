@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -90,6 +89,7 @@ import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
@@ -368,7 +368,7 @@ public class MimeMessageFiller {
         }
     }
 
-    private static final Set<String> LOCAL_ADDRS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("127.0.0.1", "localhost", "::1")));
+    private static final Set<String> LOCAL_ADDRS = ImmutableSet.of("127.0.0.1", "localhost", "::1");
 
     static boolean isLocalhost(final String localIp) {
         return LOCAL_ADDRS.contains(localIp);

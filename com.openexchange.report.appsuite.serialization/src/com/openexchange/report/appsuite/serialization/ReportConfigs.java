@@ -12,63 +12,16 @@ import javax.management.openmbean.SimpleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReportConfigs implements Serializable, CompositeData {
+public class ReportConfigs implements Serializable {
 
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 4288681340803505052L;
-    private static final Logger LOG = LoggerFactory.getLogger(ReportConfigs.class);
 
     private HashMap<String, Object> attributeMap;
 
-    @Override
-    public CompositeType getCompositeType() {
-        CompositeType compType = null;
-        try {
-            compType = new CompositeType("ReportConfigs", "ReportConfigs", new String[] {"type", "isSingleDeployment", "consideredTimeframeStart", "consideredTimeframeEnd", "isConfigTimerange"}
-                                                                         , new String[] {"type", "isSingleDeployment", "consideredTimeframeStart", "consideredTimeframeEnd", "isConfigTimerange"}
-                                                                         , new OpenType[] {SimpleType.STRING, SimpleType.LONG, SimpleType.LONG, SimpleType.BOOLEAN, SimpleType.BOOLEAN});
-        } catch (OpenDataException e) {
-            LOG.error("Unable to create CompositeType of report", e);
-        }
-        return compType;
-    }
-
-    @Override
-    public Object get(String key) {
-        return this.attributeMap.get(key);
-    }
-
-    @Override
-    public Object[] getAll(String[] keys) {
-        return null;
-    }
-
-    @Override
-    public boolean containsKey(String key) {
-        return this.attributeMap.containsKey(key);
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return false;
-    }
-
-    @Override
-    public Collection<?> values() {
-        return (Collection<?>) this.attributeMap;
-    }
     //--------------------Constructors--------------------
-
-    public static ReportConfigs from(CompositeData cd) {
-        return new ReportConfigsBuilder((String) cd.get("type"))
-            .isSingleDeployment((boolean) cd.get("isSingleDeployment"))
-            .isConfigTimerange((boolean) cd.get("isConfigTimerange"))
-            .consideredTimeframeStart((long) cd.get("consideredTimeframeStart"))
-            .consideredTimeframeEnd((long) cd.get("consideredTimeframeEnd"))
-            .build();
-    }
 
     private ReportConfigs(ReportConfigsBuilder builder) {
         super();

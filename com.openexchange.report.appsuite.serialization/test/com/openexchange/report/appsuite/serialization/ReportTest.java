@@ -1,3 +1,4 @@
+
 package com.openexchange.report.appsuite.serialization;
 
 import static org.junit.Assert.assertTrue;
@@ -18,23 +19,23 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ReportTest {
-    
+
     private Report report;
     private final String STORAGE_PATH = "./test/test/testfiles/";
     private final String UUID = "testreport";
     private final String PART1 = STORAGE_PATH + UUID + "_test1.part";
     private final String PART2 = STORAGE_PATH + UUID + "_test2.part";
-    
-    
+
     @Before
     public void setUp() {
         this.report = new Report(UUID, "default", new Date().getTime());
         this.report.setStorageFolderPath(STORAGE_PATH);
     }
-    
+
     @After
     public void cleanUp() {
         LinkedList<File> parts = new LinkedList<>((Arrays.asList(new File(STORAGE_PATH).listFiles(new FilenameFilter() {
+
             @Override
             public boolean accept(File dir, String name) {
                 return name.endsWith(".part");
@@ -53,11 +54,14 @@ public class ReportTest {
         this.report.composeReportFromStoredParts("container", Report.JsonObjectType.ARRAY, "root", 2);
         // does the report look like expected
         File result = new File(STORAGE_PATH + UUID + ".report");
-        assertTrue("Report content was not composed. ",result.exists());
+        assertTrue("Report content was not composed. ", result.exists());
         File expected = new File(STORAGE_PATH + "expected.result");
+        // If the testsuite loads both files in different order, the content is still valid
+        File alsoValid = new File(STORAGE_PATH + "also_valid_expected.result");
         try {
-            assertTrue("Composed report-content is not like expected. Actual result: " + "\n" + Files.readAllLines(result.toPath(), Charset.defaultCharset()) + "\n" + "expectedResult" + "\n" + Files.readAllLines(expected.toPath(), Charset.defaultCharset()), 
-                Files.readAllLines(result.toPath(), Charset.defaultCharset()).equals(Files.readAllLines(expected.toPath(), Charset.defaultCharset())));
+            boolean isExpectationMet = Files.readAllLines(result.toPath(), Charset.defaultCharset()).equals(Files.readAllLines(expected.toPath(), Charset.defaultCharset()));
+            boolean isAlsoValid = Files.readAllLines(result.toPath(), Charset.defaultCharset()).equals(Files.readAllLines(alsoValid.toPath(), Charset.defaultCharset()));
+            assertTrue("Composed report-content is not like expected.", isExpectationMet || isAlsoValid);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,7 +75,7 @@ public class ReportTest {
         }))));
         assertTrue("Part-Files were not deleted", parts.size() == 0);
     }
-    
+
     private void createTestFilesReportComposition() {
         // copy content from permanent testfiles to .part files
         try {
@@ -81,7 +85,7 @@ public class ReportTest {
             e.printStackTrace();
         }
     }
-    
+
     private static void copyFileUsingStream(File source, File dest) throws IOException {
         InputStream is = null;
         OutputStream os = null;
@@ -94,8 +98,12 @@ public class ReportTest {
                 os.write(buffer, 0, length);
             }
         } finally {
-            is.close();
-            os.close();
+            if (is != null) {
+                is.close();
+            }
+            if (os != null) {
+                os.close();
+            }
         }
     }
 }

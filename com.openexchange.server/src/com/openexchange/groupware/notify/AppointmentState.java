@@ -53,11 +53,10 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -259,7 +258,7 @@ public class AppointmentState extends LinkableState {
         return type;
     }
 
-    private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
+    private static final Set<Integer> FIELDS_TO_IGNORE = ImmutableSet.of(
         I(Appointment.OBJECT_ID),
         I(Appointment.CREATED_BY),
         I(Appointment.MODIFIED_BY),
@@ -272,7 +271,7 @@ public class AppointmentState extends LinkableState {
         I(Appointment.CATEGORIES),
         I(Appointment.SEQUENCE),
         I(Appointment.SHOWN_AS)
-    ));
+    );
 
     @Override
     public boolean onlyIrrelevantFieldsChanged(final CalendarObject oldObj, final CalendarObject newObj) {

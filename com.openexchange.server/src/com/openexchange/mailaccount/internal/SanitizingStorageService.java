@@ -342,6 +342,16 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException {
+        storageService.updateTransportAccount(transportAccount, attributes, userId, contextId, session);
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
+        storageService.updateTransportAccount(transportAccount, attributes, userId, contextId, updateProperties);
+    }
+
+    @Override
     public TransportAccount getTransportAccount(int accountId, int userId, int contextId) throws OXException {
         return storageService.getTransportAccount(accountId, userId, contextId);
     }

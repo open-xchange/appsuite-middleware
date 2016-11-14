@@ -110,7 +110,7 @@ public class HttpDoveAdmEndpointAvailableStrategy implements EndpointAvailableSt
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
             if (200 == status) {
-                LOG.info("DoveAdm end-point {} is re-available and will therefore removed from black-list", uri);
+                LOG.info("DoveAdm end-point {} is re-available and is therefore removed from black-list", uri);
                 return AvailableResult.AVAILABLE;
             }
             if (401 == status) {
@@ -122,7 +122,7 @@ public class HttpDoveAdmEndpointAvailableStrategy implements EndpointAvailableSt
             close(get, response);
         }
 
-        LOG.info("DoveAdm end-point {} is (still) not available and will therefore removed from black-list", uri);
+        LOG.info("DoveAdm end-point {} is (still) not available and is therefore removed from black-list", uri);
         return AvailableResult.UNAVAILABLE;
     }
 

@@ -54,7 +54,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,6 +64,7 @@ import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
@@ -176,7 +176,7 @@ public abstract class MailMessage extends MailPart {
     /*-
      * ------------------- User Flags ------------------------------
      */
-    
+
     /**
      * The value of virtual forwarded flag.
      *
@@ -190,14 +190,14 @@ public abstract class MailMessage extends MailPart {
      * @value $MDNSent
      */
     public static final String USER_READ_ACK = "$MDNSent";
-    
+
     /**
      * The value of virtual spam flag.
      *
      * @value $Junk
      */
     public static final String USER_SPAM = "$Junk";
-    
+
     /*-
      * ------------------- Priority ------------------------------
      */
@@ -246,9 +246,9 @@ public abstract class MailMessage extends MailPart {
     public static final int COLOR_LABEL_NONE = 0;
 
     /**
-     * The <code>string</code> with all valid color flags whitespace seperated
+     * The <code>string</code> with all valid color flags whitespace separated
      */
-    private static final Set<String> ALL_COLOR_LABELS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("$cl_0", "$cl_1", "$cl_2", "$cl_3", "$cl_4", "$cl_5", "$cl_6", "$cl_7", "$cl_8", "$cl_9", "$cl_10", "cl_0", "cl_1", "cl_2", "cl_3", "cl_4", "cl_5", "cl_6", "cl_7", "cl_8", "cl_9", "cl_10")));
+    private static final Set<String> ALL_COLOR_LABELS = ImmutableSet.of("$cl_0", "$cl_1", "$cl_2", "$cl_3", "$cl_4", "$cl_5", "$cl_6", "$cl_7", "$cl_8", "$cl_9", "$cl_10", "cl_0", "cl_1", "cl_2", "cl_3", "cl_4", "cl_5", "cl_6", "cl_7", "cl_8", "cl_9", "cl_10");
 
     /**
      * Determines the corresponding <code>int</code> value of a given color label's string representation.

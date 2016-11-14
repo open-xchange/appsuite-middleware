@@ -49,10 +49,7 @@
 
 package com.openexchange.mail.event;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -64,6 +61,7 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.event.CommonEvent;
@@ -273,14 +271,14 @@ public final class EventPool implements Runnable {
         }
     }
 
-    private static final Set<String> RESERVED_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> RESERVED_NAMES = ImmutableSet.of(
         PushEventConstants.PROPERTY_CONTEXT,
         PushEventConstants.PROPERTY_CONTENT_RELATED,
         PushEventConstants.PROPERTY_FOLDER,
         PushEventConstants.PROPERTY_IMMEDIATELY,
         PushEventConstants.PROPERTY_SESSION,
         PushEventConstants.PROPERTY_USER,
-        CommonEvent.PUBLISH_MARKER)));
+        CommonEvent.PUBLISH_MARKER);
 
     private void broadcastEvent(final PooledEvent pooledEvent) {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);

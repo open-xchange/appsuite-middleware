@@ -668,7 +668,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             return DoveAdmClientExceptionCodes.AUTH_ERROR.create(cause, cause.getMessage());
         }
 
-        LOG.info("Encountered I/O error \"{}\" ({}) while trying to access DoveAdm end-point {}. End-point will therefore be added to black-list until re-available", e.getMessage(), e.getClass().getName(), endpoint.getBaseUri());
+        LOG.warn("Encountered I/O error \"{}\" ({}) while trying to access DoveAdm end-point {}. End-point will therefore be added to black-list until re-available", e.getMessage(), e.getClass().getName(), endpoint.getBaseUri());
         endpointManager.blacklist(call, endpoint);
         return DoveAdmClientExceptionCodes.IO_ERROR.create(e, e.getMessage());
     }
