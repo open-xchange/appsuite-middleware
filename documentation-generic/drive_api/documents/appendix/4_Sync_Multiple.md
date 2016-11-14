@@ -1,6 +1,6 @@
 # Synchronize files for multiple folders
 
-Utilizing the [multiple request](https://documentation.open-xchange.com/components/middleware/http-api/develop/index.html?version=develop#/Multiple), it is possible to execute multiple "syncfiles" requests in parallel. Especially during an initial synchronization and in combination with "inline" mode for .drive-meta files, this may reduce the number of necessary requests. Therefore, the parameters and file versions of each syncfiles request are serializied into a JSON array of the multiple-request body. In the same way, the response contains the resulting actions of each "syncfiles" result in an JSON array of the response.
+Utilizing the [multiple request](https://documentation.open-xchange.com/components/middleware/http-api/<current>/index.html?version=<current>#/Multiple), it is possible to execute multiple "syncfiles" requests in parallel. Especially during an initial synchronization and in combination with "inline" mode for .drive-meta files, this may reduce the number of necessary requests. Therefore, the parameters and file versions of each syncfiles request are serializied into a JSON array of the multiple-request body. In the same way, the response contains the resulting actions of each "syncfiles" result in an JSON array of the response.
 
 The following shows an example of executing three syncfiles actions inside a single mutliple request:
 ```
