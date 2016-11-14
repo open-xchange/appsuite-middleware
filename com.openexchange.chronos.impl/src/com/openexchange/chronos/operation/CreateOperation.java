@@ -86,7 +86,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CreateOperation extends AbstractOperation {
+public class CreateOperation extends AbstractUpdateOperation {
 
     /**
      * Prepares a create operation.

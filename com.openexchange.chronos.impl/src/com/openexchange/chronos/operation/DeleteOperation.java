@@ -88,7 +88,7 @@ import com.openexchange.folderstorage.UserizedFolder;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DeleteOperation extends AbstractOperation {
+public class DeleteOperation extends AbstractUpdateOperation {
 
     /**
      * Prepares a delete operation.

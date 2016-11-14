@@ -90,7 +90,7 @@ import com.openexchange.folderstorage.type.PublicType;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateAttendeeOperation extends AbstractOperation {
+public class UpdateAttendeeOperation extends AbstractUpdateOperation {
 
     /**
      * Prepares an update attendee operation.

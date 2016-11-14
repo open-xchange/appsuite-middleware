@@ -354,6 +354,8 @@ public abstract class ChronosAction extends AppointmentAction {
                     return new AbstractMap.SimpleEntry<String, Integer>(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, Integer.valueOf(value));
                 case AJAXServlet.LEFT_HAND_LIMIT:
                     return new AbstractMap.SimpleEntry<String, Integer>(CalendarParameters.PARAMETER_LEFT_HAND_LIMIT, Integer.valueOf(value));
+                case AJAXServlet.PARAMETER_IGNORE:
+                    return new AbstractMap.SimpleEntry<String, String[]>(CalendarParameters.PARAMETER_IGNORE, Strings.splitByComma(value));
                 default:
                     throw new IllegalArgumentException("unknown paramter: " + parameter);
             }

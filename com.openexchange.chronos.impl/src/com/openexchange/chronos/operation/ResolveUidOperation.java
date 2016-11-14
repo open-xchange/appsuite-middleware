@@ -47,66 +47,71 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.operation;
 
-import java.sql.Connection;
-import com.openexchange.chronos.impl.osgi.Services;
+import static com.openexchange.chronos.impl.Utils.getSearchTerm;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
- * {@link ReadOperation}
+ * {@link ResolveUidOperation}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class ReadOperation<T> {
-
-    private final CalendarSession session;
+public class ResolveUidOperation extends AbstractQueryOperation {
 
     /**
-     * Initializes a new {@link ReadOperation}.
+     * Prepares a new {@link ResolveUidOperation}.
      *
-     * @param session The server session
+     * @param session The calendar session
+     * @param storage The underlying calendar storage
+     * @return The prepared operation
      */
-    public ReadOperation(CalendarSession session) {
-        super();
-        this.session = session;
+    public static ResolveUidOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
+        return new ResolveUidOperation(session, storage);
     }
 
     /**
-     * Executes the storage operation in a transaction.
+     * Initializes a new {@link ResolveUidOperation}.
      *
-     * @return The result
+     * @param session The calendar session
+     * @param storage The underlying calendar storage
      */
-    public T execute() throws OXException {
-        DatabaseService dbService = Services.getService(DatabaseService.class);
-        CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
-        Connection readConnection = null;
-        try {
-            readConnection = dbService.getReadOnly(session.getContext());
-            SimpleDBProvider dbProvider = new SimpleDBProvider(readConnection, null);
-            CalendarStorage storage = storageFactory.create(session.getContext(), session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-            return execute(new CalendarReader(session, storage));
-        } finally {
-            if (null != readConnection) {
-                dbService.backReadOnly(session.getContext(), readConnection);
-            }
-        }
+    private ResolveUidOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+        super(session, storage);
     }
 
     /**
-     * Executes the storage operation.
+     * Performs the operation.
      *
-     * @param writer The calendar reader to use
-     * @return The result
+     * @param uid The unique identifier to resolve
+     * @return The identifier of the resolved event, or <code>0</code> if not found
      */
-    protected abstract T execute(CalendarReader writer) throws OXException;
+    public int perform(String uid) throws OXException {
+        /*
+         * construct search term
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
+                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+            )
+        ;
+        /*
+         * search for an event matching the UID
+         */
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
+        return 0 < events.size() ? events.get(0).getId() : 0;
+    }
 
 }
-

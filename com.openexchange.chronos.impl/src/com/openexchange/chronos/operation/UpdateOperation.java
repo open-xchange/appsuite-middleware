@@ -97,7 +97,7 @@ import com.openexchange.folderstorage.UserizedFolder;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateOperation extends AbstractOperation {
+public class UpdateOperation extends AbstractUpdateOperation {
 
     /**
      * Prepares an update operation.

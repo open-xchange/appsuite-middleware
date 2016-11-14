@@ -76,12 +76,12 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link AbstractOperation}
+ * {@link AbstractUpdateOperation}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class AbstractOperation {
+public abstract class AbstractUpdateOperation {
 
     protected final CalendarSession session;
     protected final CalendarStorage storage;
@@ -91,13 +91,13 @@ public abstract class AbstractOperation {
     protected final CalendarResultImpl result;
 
     /**
-     * Initializes a new {@link AbstractOperation}.
+     * Initializes a new {@link AbstractUpdateOperation}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    protected AbstractOperation(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    protected AbstractUpdateOperation(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super();
         this.folder = folder;
         this.calendarUser = getCalendarUser(folder);

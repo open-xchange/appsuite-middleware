@@ -157,6 +157,14 @@ public interface CalendarParameters {
     static final String PARAMETER_TIMESTAMP = "timestamp";
 
     /**
+     * {@link String[]}
+     * <p/>
+     * A collection of values that should be "ignored" when retrieving results, currently known values are <code>deleted</code> and
+     * <code>changed</code> when serving the "updates" request.
+     */
+    static final String PARAMETER_IGNORE = "ignore";
+
+    /**
      * Sets a parameter.
      *
      * @param parameter The parameter name to set

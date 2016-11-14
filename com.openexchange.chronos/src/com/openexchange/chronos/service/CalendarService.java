@@ -98,12 +98,8 @@ public interface CalendarService {
 
     Map<EventID, CalendarResult> deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
 
-    List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
 
-    List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException;
-
-    List<UserizedEvent> getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
-
-    List<UserizedEvent> getDeletedEventsOfUser(CalendarSession session, Date deletedSince) throws OXException;
+    UpdatesResult getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
 
 }

@@ -53,6 +53,8 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,6 +71,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Recurrence;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -77,8 +80,14 @@ import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderResponse;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -128,7 +137,7 @@ public class Utils {
      * @see CalendarParameters#PARAMETER_FIELDS
      * @see Utils#MANDATORY_FIELDS
      */
-    static EventField[] getFields(CalendarParameters parameters, EventField... requiredFields) {
+    public static EventField[] getFields(CalendarParameters parameters, EventField... requiredFields) {
         return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), requiredFields);
     }
 
@@ -140,7 +149,7 @@ public class Utils {
      * @return <code>true</code> if individual occurrences should be resolved, <code>false</code>, otherwise
      * @see CalendarParameters#PARAMETER_RECURRENCE_MASTER
      */
-    static boolean isResolveOccurrences(CalendarParameters parameters) {
+    public static boolean isResolveOccurrences(CalendarParameters parameters) {
         return false == parameters.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
@@ -175,7 +184,7 @@ public class Utils {
      * @param parameters The calendar parameters to evaluate
      * @return The "from" date, or <code>null</code> if not set
      */
-    static Date getFrom(CalendarParameters parameters) {
+    public static Date getFrom(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
     }
 
@@ -185,7 +194,7 @@ public class Utils {
      * @param parameters The calendar parameters to evaluate
      * @return The "until" date, or <code>null</code> if not set
      */
-    static Date getUntil(CalendarParameters parameters) {
+    public static Date getUntil(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
     }
 
@@ -198,7 +207,7 @@ public class Utils {
      * @return The fields to use when querying events from the storage
      * @see Utils#MANDATORY_FIELDS
      */
-    static EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
+    public static EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
         if (null == requestedFields) {
             return EventField.values();
         }
@@ -221,7 +230,7 @@ public class Utils {
      * @param folder The folder to construct the search term for
      * @return The search term
      */
-    static SearchTerm<?> getFolderIdTerm(UserizedFolder folder) {
+    public static SearchTerm<?> getFolderIdTerm(UserizedFolder folder) {
         if (PublicType.getInstance().equals(folder.getType())) {
             if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
                 return new CompositeSearchTerm(CompositeOperation.AND)
@@ -259,7 +268,7 @@ public class Utils {
      * @param updatedSince The minimum (exclusive) last modification time of the events, or <code>null</code> for no restrictions
      * @return The passed search term reference
      */
-    static CompositeSearchTerm appendCommonTerms(CompositeSearchTerm searchTerm, Date from, Date until, Date updatedSince) {
+    public static CompositeSearchTerm appendCommonTerms(CompositeSearchTerm searchTerm, Date from, Date until, Date updatedSince) {
         if (null != from) {
             searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from));
         }
@@ -358,7 +367,7 @@ public class Utils {
      * @param sortOrders The sort orders to get the comparator for
      * @return The comparator
      */
-    static Comparator<Event> getComparator(final SortOrder[] sortOrders) {
+    public static Comparator<Event> getComparator(final SortOrder[] sortOrders) {
         return new Comparator<Event>() {
 
             @Override
@@ -404,7 +413,7 @@ public class Utils {
      * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
      * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
      */
-    static boolean isExcluded(Event event, CalendarSession session, boolean includePrivate) throws OXException {
+    public static boolean isExcluded(Event event, CalendarSession session, boolean includePrivate) throws OXException {
         if (false == includePrivate && isClassifiedFor(event, session.getUser().getId())) {
             return true;
         }
@@ -424,7 +433,7 @@ public class Utils {
         return false;
     }
 
-    static boolean isIncludePrivate(CalendarParameters parameters) {
+    public static boolean isIncludePrivate(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
@@ -436,7 +445,7 @@ public class Utils {
      * @param userID The identifier of the accessing user to check
      * @return <code>true</code> if the event is classified for the supplied user, <code>false</code>, otherwise
      */
-    static boolean isClassifiedFor(Event event, int userID) {
+    public static boolean isClassifiedFor(Event event, int userID) {
         if (null == event.getClassification() || Classification.PUBLIC.equals(event.getClassification())) {
             return false;
         }
@@ -453,7 +462,7 @@ public class Utils {
      * @param eventID The identifier of the event to search
      * @return The event, or <code>null</code> if not found
      */
-    static UserizedEvent find(Collection<UserizedEvent> events, EventID eventID) {
+    public static UserizedEvent find(Collection<UserizedEvent> events, EventID eventID) {
         if (null != events) {
             for (UserizedEvent event : events) {
                 if (event.getFolderId() == eventID.getFolderID() && event.getEvent().getId() == eventID.getObjectID()) {
@@ -473,7 +482,7 @@ public class Utils {
      * @param objectID The object identifier of the event to search
      * @return The event, or <code>null</code> if not found
      */
-    static Event find(Collection<Event> events, int objectID) {
+    public static Event find(Collection<Event> events, int objectID) {
         if (null != events) {
             for (Event event : events) {
                 if (event.getId() == objectID) {
@@ -491,7 +500,7 @@ public class Utils {
      * @param sortOptions The sort options to use
      * @return The sorted events
      */
-    static List<UserizedEvent> sort(List<UserizedEvent> events, SortOptions sortOptions) {
+    public static List<UserizedEvent> sort(List<UserizedEvent> events, SortOptions sortOptions) {
         if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) ||
             null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
             return events;
@@ -528,7 +537,7 @@ public class Utils {
      * @param folder The folder to determine the proxy user for
      * @return The proxy calendar user, or <code>null</code> if the current session's user is acting on behalf of it's own
      */
-    static User getProxyUser(UserizedFolder folder) throws OXException {
+    public static User getProxyUser(UserizedFolder folder) throws OXException {
         return SharedType.getInstance().equals(folder.getType()) ? folder.getUser() : null;
     }
 
@@ -562,6 +571,53 @@ public class Utils {
      */
     public static boolean isInPast(Event event, TimeZone timeZone) throws OXException {
         return isInPast(event, new Date(), timeZone);
+    }
+
+    /**
+     * Gets a <i>userized</i> folder by its identifier.
+     *
+     * @param session The calendar session
+     * @param folderID The identifier of the folder to get
+     * @return The folder
+     */
+    public static UserizedFolder getFolder(CalendarSession session, int folderID) throws OXException {
+        try {
+            return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), initDecorator(session));
+        } catch (OXException e) {
+            if ("FLD-0003".equals(e.getErrorCode())) {
+                // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
+                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folderID));
+            }
+            throw e;
+        }
+    }
+
+    public static List<UserizedFolder> getVisibleFolders(CalendarSession session) throws OXException {
+        return getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance(), PublicType.getInstance());
+    }
+
+    public static List<UserizedFolder> getVisibleFolders(CalendarSession session, Type... types) throws OXException {
+        List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
+        FolderService folderService = Services.getService(FolderService.class);
+        for (Type type : types) {
+            FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session.getSession(), initDecorator(session));
+            UserizedFolder[] folders = response.getResponse();
+            if (null != folders && 0 < folders.length) {
+                visibleFolders.addAll(Arrays.asList(folders));
+            }
+        }
+        return visibleFolders;
+    }
+
+    private static FolderServiceDecorator initDecorator(CalendarSession session) {
+        FolderServiceDecorator decorator = new FolderServiceDecorator();
+        Connection connection = session.get(StorageOperation.PARAM_CONNECTION, Connection.class, null);
+        if (null != connection) {
+            decorator.put(Connection.class.getName(), connection);
+        }
+        decorator.setLocale(session.getUser().getLocale());
+        decorator.setTimeZone(Utils.getTimeZone(session));
+        return decorator;
     }
 
 }

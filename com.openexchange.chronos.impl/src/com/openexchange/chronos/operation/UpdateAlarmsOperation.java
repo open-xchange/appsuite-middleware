@@ -80,7 +80,7 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateAlarmsOperation extends AbstractOperation {
+public class UpdateAlarmsOperation extends AbstractUpdateOperation {
 
     /**
      * Prepares an alarm update operation.

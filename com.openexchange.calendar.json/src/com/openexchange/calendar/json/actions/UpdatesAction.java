@@ -51,7 +51,6 @@ package com.openexchange.calendar.json.actions;
 
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,7 +62,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.UserizedEvent;
+import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -273,7 +272,7 @@ public final class UpdatesAction extends ChronosAction {
 
     //    {action=updates, columns=1, start=1475043687797, end=1538122887797, showPrivate=true, recurrence_master=true, timestamp=1317198087797, ignore=deleted, sort=201, order=asc, timezone=UTC, session=f95184c1c11d4826b0ec25c86c6970d8}
     private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
-        AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END,
+        AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END,
         AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, AJAXServlet.PARAMETER_RECURRENCE_MASTER,
         AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER
     );
@@ -294,23 +293,9 @@ public final class UpdatesAction extends ChronosAction {
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
         }
         Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        String ignore = request.getParameter(AJAXServlet.PARAMETER_IGNORE);
-        boolean ignoreUpdated = null != ignore && ignore.contains("changed");
-        boolean ignoreDeleted = null != ignore && ignore.contains("deleted");
-        int folderID = request.getFolderId();
-        List<UserizedEvent> newAndModifiedEvents;
-        List<UserizedEvent> deletedEvents;
-        if (0 < folderID) {
-            if (false == ignoreUpdated) {
-                newAndModifiedEvents = session.getCalendarService().getUpdatedEventsInFolder(session, folderID, since);
-            } else {
-                newAndModifiedEvents = null;
-            }
-            if (false == ignoreDeleted) {
-                deletedEvents = session.getCalendarService().getDeletedEventsInFolder(session, folderID, since);
-            } else {
-                deletedEvents = null;
-            }
+        UpdatesResult result;
+        if (0 < request.getFolderId()) {
+            result = session.getCalendarService().getUpdatedEventsInFolder(session, request.getFolderId(), since);
         } else {
             if (false == session.contains(CalendarParameters.PARAMETER_RANGE_START)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_START);
@@ -318,18 +303,9 @@ public final class UpdatesAction extends ChronosAction {
             if (false == session.contains(CalendarParameters.PARAMETER_RANGE_END)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_END);
             }
-            if (false == ignoreUpdated) {
-                newAndModifiedEvents = session.getCalendarService().getUpdatedEventsOfUser(session, since);
-            } else {
-                newAndModifiedEvents = null;
-            }
-            if (false == ignoreDeleted) {
-                deletedEvents = session.getCalendarService().getDeletedEventsOfUser(session, since);
-            } else {
-                deletedEvents = null;
-            }
+            result = session.getCalendarService().getUpdatedEventsOfUser(session, since);
         }
-        AJAXRequestResult deltaResult = getAppointmentDeltaResultWithTimestamp(session, newAndModifiedEvents, deletedEvents);
+        AJAXRequestResult deltaResult = getAppointmentDeltaResultWithTimestamp(session, result.getNewAndModifiedEvents(), result.getDeletedEvents());
         if (null == deltaResult.getTimestamp() || deltaResult.getTimestamp().before(since)) {
             deltaResult.setTimestamp(since);
         }
