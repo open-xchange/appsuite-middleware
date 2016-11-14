@@ -323,27 +323,27 @@ public class SeriesPattern {
      * @return The database pattern string
      */
     public String getDatabasePattern() {
-        StringBuilder stringBuilder = new StringBuilder().append("t|").append(type);
+        StringBuilder stringBuilder = new StringBuilder().append("t|").append(type).append('|');
         if (null != interval) {
-            stringBuilder.append("|i|").append(interval);
+            stringBuilder.append("i|").append(interval).append('|');
         }
         if (null != daysOfWeek) {
-            stringBuilder.append("|a|").append(daysOfWeek);
+            stringBuilder.append("a|").append(daysOfWeek).append('|');
         }
         if (null != dayOfMonth) {
-            stringBuilder.append("|b|").append(dayOfMonth);
+            stringBuilder.append("b|").append(dayOfMonth).append('|');
         }
         if (null != month) {
-            stringBuilder.append("|c|").append(month);
+            stringBuilder.append("c|").append(month).append('|');
         }
         if (null != seriesStart) {
-            stringBuilder.append("|s|").append(seriesStart);
+            stringBuilder.append("s|").append(seriesStart).append('|');
         }
         if (null != seriesEnd) {
-            stringBuilder.append("|e|").append(seriesEnd);
+            stringBuilder.append("e|").append(seriesEnd).append('|');
         }
         if (null != occurrences) {
-            stringBuilder.append("|o|").append(occurrences);
+            stringBuilder.append("o|").append(occurrences).append('|');
         }
         return stringBuilder.toString();
     }
