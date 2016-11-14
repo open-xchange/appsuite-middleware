@@ -143,26 +143,14 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     }
 
     /**
-     * Tests if there is a separate {@link MailAccountActionProvider action provider} that supports specified action.
+     * Optionally gets the active {@link MailAccountActionProvider action provider}.
      *
-     * @param action The action to test
      * @param session The session
-     * @return <code>true</code> if there is such an action provider; otherwise <code>false</code>
-     * @throws OXException If test fails
+     * @return The active provider or <code>null</code>
+     * @throws OXException If active provider cannot be determined
      */
-    protected boolean existsSeparateActionProviderSupportingMethod(String action, ServerSession session) throws OXException {
-        MailAccountActionProvider activeProvider = null == activeProviderDetector ? null : activeProviderDetector.getActiveProvider(session);
-        if (null == activeProvider) {
-            return false;
-        }
-
-        AJAXActionService actionService = activeProvider.getAction(action);
-        if (null == actionService) {
-            // Obviously request's action is not supported by provider
-            return false;
-        }
-
-        return true;
+    protected MailAccountActionProvider optActiveProvider(ServerSession session) throws OXException {
+        return null == activeProviderDetector ? null : activeProviderDetector.getActiveProvider(session);
     }
 
     private AJAXRequestResult optResultUsing(AJAXRequestData requestData, ServerSession session) throws OXException {
