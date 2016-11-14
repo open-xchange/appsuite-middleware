@@ -108,6 +108,7 @@ import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
@@ -451,6 +452,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
             attachment.setStreamProvider(new InputStreamProviderImpl(part));
 
             ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
+            if (null == mfm) {
+                throw ServiceExceptionCode.absentService(ManagedFileManagement.class);
+            }
             if (!mfm.contains(header)) {
                 ManagedFile mf = mfm.createManagedFile(header, attachment.getInputStream());
                 mf.setContentDisposition(attachment.getContentDisposition());
