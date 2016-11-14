@@ -524,13 +524,16 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
              * Perform it here to be able to abort hand-shake orderly; otherwise Grizzly puts instance prematurely into internally managed collection messing-up filter chain handling
              */
             int maxSize = getMaxSize();
-            UserAndContext userAndContext = UserAndContext.newInstance(session);
-            ConcurrentMap<ConnectionId, S> userSockets = openSockets.get(userAndContext);
-            if (userSockets == null) {
-                userSockets = new ConcurrentHashMap<>(maxSize <= 0 ? DEFAULT_INITIAL_CAPACITY : maxSize, 0.9F, 1);
-                ConcurrentMap<ConnectionId, S> existing = openSockets.putIfAbsent(userAndContext, userSockets);
-                if (existing != null) {
-                    userSockets = existing;
+            ConcurrentMap<ConnectionId, S> userSockets;
+            {
+                UserAndContext userAndContext = UserAndContext.newInstance(session);
+                userSockets = openSockets.get(userAndContext);
+                if (userSockets == null) {
+                    userSockets = new ConcurrentHashMap<>(maxSize <= 0 ? DEFAULT_INITIAL_CAPACITY : maxSize, 0.9F, 1);
+                    ConcurrentMap<ConnectionId, S> existing = openSockets.putIfAbsent(userAndContext, userSockets);
+                    if (existing != null) {
+                        userSockets = existing;
+                    }
                 }
             }
 
@@ -538,7 +541,7 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
             try {
                 if (maxSize > 0 && userSockets.size() == maxSize) {
                     // Max. number of sockets per user exceeded
-                    throw new HandshakeException("Max. number of Web Sockets (" + maxSize + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
+                    throw new HandshakeException("Max. number of Web Sockets (" + maxSize + ") exceeded for user " + session.getUserId() + " in context " + session.getContextId());
                 }
 
                 if (null != userSockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
