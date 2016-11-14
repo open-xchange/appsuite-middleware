@@ -74,6 +74,7 @@ import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import org.glassfish.grizzly.websockets.WebSocketException;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -389,6 +390,27 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
     }
 
     /**
+     * Handles the specified <code>HandshakeException</code>.
+     *
+     * @param e The exception to handle
+     * @param handler The associated protocol handler
+     * @param requestPacket The request package
+     */
+    protected void handleWebSocketException(WebSocketException e, ProtocolHandler handler, HttpRequestPacket requestPacket) {
+        if (e instanceof HandshakeException) {
+            handleHandshakeException((HandshakeException) e, handler, requestPacket);
+            return;
+        }
+
+        FilterChainContext ctx = handler.getFilterChainContext();
+        HttpResponsePacket response = requestPacket.getResponse();
+        response.setProtocol(Protocol.HTTP_1_1);
+        response.setStatus(500);
+        response.setReasonPhrase("Internal Server Error");
+        ctx.write(HttpContent.builder(response).build());
+    }
+
+    /**
      * Gets the authenticator to use
      *
      * @return The authenticator
@@ -478,13 +500,51 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
                 throw new HandshakeException("Such a Web Socket connection already exists: " + connectionId);
             }
 
-            return doCreateSocket(session, connectionId, parameters, handler, requestPacket, listeners);
+            // Create the socket instance with session association
+            S sessionBoundSocket = doCreateSocket(session, connectionId, parameters, handler, requestPacket, listeners);
+
+            /*-
+             * Add to socket collection
+             *
+             * Perform it here to be able to abort hand-shake orderly; otherwise Grizzly puts instance prematurely into internally managed collection messing-up filter chain handling
+             */
+            int maxSize = getMaxSize();
+            UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
+            ConcurrentMap<ConnectionId, S> userSockets = openSockets.get(userAndContext);
+            if (userSockets == null) {
+                userSockets = new ConcurrentHashMap<>(maxSize, 0.9F, 1);
+                ConcurrentMap<ConnectionId, S> existing = openSockets.putIfAbsent(userAndContext, userSockets);
+                if (existing != null) {
+                    userSockets = existing;
+                }
+            }
+
+            synchronized (userSockets) {
+                if (userSockets.size() == maxSize) {
+                    // Max. number of sockets per user exceeded
+                    throw new HandshakeException("Max. number of Web Sockets (" + maxSize + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
+                }
+
+                if (null != userSockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
+                    throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                }
+            }
+
+            // Socket instance successfully created & added to socket collection...
+            return sessionBoundSocket;
         } catch (HandshakeException e) {
             // Handle Handshake error
             handleHandshakeException(e, handler, requestPacket);
             throw e;
         }
     }
+
+    /**
+     * Gets the max. number of sockets allowed per user.
+     *
+     * @return The max. number of sockets
+     */
+    protected abstract int getMaxSize();
 
     /**
      * Creates the session-bound socket using given arguments.
@@ -502,45 +562,22 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
     @Override
     public void onConnect(WebSocket socket) {
         // Override this method to take control over socket collection
-        boolean error = true; // Pessimistic...
+        if (false == socketClass.isInstance(socket)) {
+            // No session-bound socket... for whatever reason
+            super.onConnect(socket);
+            return;
+        }
+
+        // A session-bound socket...
+        S sessionBoundSocket = socketClass.cast(socket);
+
+        // Handle connected socket
         try {
-            if (socketClass.isInstance(socket)) {
-                S sessionBoundSocket = socketClass.cast(socket);
-
-                int MAX_SIZE = getMaxSize();
-
-                UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
-                ConcurrentMap<ConnectionId, S> userSockets = openSockets.get(userAndContext);
-                if (userSockets == null) {
-                    userSockets = new ConcurrentHashMap<>(MAX_SIZE, 0.9F, 1);
-                    ConcurrentMap<ConnectionId, S> existing = openSockets.putIfAbsent(userAndContext, userSockets);
-                    if (existing != null) {
-                        userSockets = existing;
-                    }
-                }
-
-                synchronized (userSockets) {
-                    if (userSockets.size() == MAX_SIZE) {
-                        // Max. number of sockets per user exceeded
-                        throw new HandshakeException("Max. number of Web Sockets (" + MAX_SIZE + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
-                    }
-
-                    if (null != userSockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
-                        throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
-                    }
-                }
-
-                onConnectedSocket(sessionBoundSocket);
-
-                LOGGER.debug("Accepted Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
-            } else {
-                super.onConnect(socket);
-            }
-            error = false;
-        } finally {
-            if (error) {
-                socket.close();
-            }
+            onConnectedSocket(sessionBoundSocket);
+            LOGGER.debug("Accepted Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
+        } catch (RuntimeException e) {
+            // Grizzly cannot handle exceptions in 'org.glassfish.grizzly.websockets.WebSocketListener.onConnect(WebSocket)' call-back
+            LOGGER.warn("Failed to connect Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()), e);
         }
     }
 
@@ -551,33 +588,30 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
      */
     protected abstract void onConnectedSocket(S sessionBoundSocket);
 
-    /**
-     * Gets the max. number of sockets allowed per user.
-     *
-     * @return The max. number of sockets
-     */
-    protected abstract int getMaxSize();
-
     @Override
     public void onClose(WebSocket socket, DataFrame frame) {
         // Override this method to take control over socket collection
-        if (socketClass.isInstance(socket)) {
-            S sessionBoundSocket = socketClass.cast(socket);
-
-            UserAndContext key = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
-            ConcurrentMap<ConnectionId, S> userSockets = openSockets.get(key);
-            if (userSockets != null) {
-                userSockets.remove(sessionBoundSocket.getConnectionId());
-            }
-
-            closeSocketSafe(sessionBoundSocket);
-
-            onClosedSocket(sessionBoundSocket);
-
-            LOGGER.debug("Closed Web Socket ({}) with path \"{}\" due to connection closure for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
-        } else {
+        if (false == socketClass.isInstance(socket)) {
+            // No session-bound socket... for whatever reason
             super.onClose(socket, frame);
+            return;
         }
+
+        // A session-bound socket
+        S sessionBoundSocket = socketClass.cast(socket);
+
+        // Remove it from socket collection...
+        UserAndContext key = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
+        ConcurrentMap<ConnectionId, S> userSockets = openSockets.get(key);
+        if (userSockets != null) {
+            userSockets.remove(sessionBoundSocket.getConnectionId());
+        }
+
+        // ... and perform other shut-down stuff
+        closeSocketSafe(sessionBoundSocket);
+        onClosedSocket(sessionBoundSocket);
+
+        LOGGER.debug("Closed Web Socket ({}) with path \"{}\" due to connection closure for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
     }
 
     /**
