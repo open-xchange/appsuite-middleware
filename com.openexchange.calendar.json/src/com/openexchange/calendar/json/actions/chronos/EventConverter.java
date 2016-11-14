@@ -120,6 +120,8 @@ public class EventConverter {
         if (false == e.isPrefix("CAL")) {
             return e;
         }
+        Object firstArg = null != e.getLogArgs() && 0 < e.getLogArgs().length ? e.getLogArgs()[0] : null;
+        Object secondArg = null != e.getLogArgs() && 1 < e.getLogArgs().length ? e.getLogArgs()[1] : null;
         switch (e.getCode()) {
             case 4224: // com.openexchange.chronos.exception.CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED
                 return OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE.create(e);
@@ -128,15 +130,15 @@ public class EventConverter {
             case 4221: // com.openexchange.chronos.exception.CalendarExceptionCodes.END_BEFORE_START
                 return OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create(e);
             case 4041: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER
-                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create(e, e.getLogArgs()[1]);
+                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create(e, secondArg);
             case 4030: // com.openexchange.chronos.exception.CalendarExceptionCodes.NO_READ_PERMISSION
-                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(e, e.getLogArgs()[0]);
+                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(e, firstArg);
             case 4042: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND
                 return OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create();
             case 4044: // com.openexchange.chronos.exception.CalendarExceptionCodes.INVALID_RECURRENCE_ID
-                return OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(e.getLogArgs()[0]);
+                return OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(firstArg);
             case 4090: // com.openexchange.chronos.exception.CalendarExceptionCodes.UID_CONFLICT
-                return OXCalendarExceptionCodes.APPOINTMENT_UID_ALREDY_EXISTS.create("", e.getLogArgs()[0]);
+                return OXCalendarExceptionCodes.APPOINTMENT_UID_ALREDY_EXISTS.create("", firstArg);
             default:
                 return e;
         }
@@ -243,6 +245,16 @@ public class EventConverter {
         }
     }
 
+    /**
+     * Gets the event identifier for the supplied full appointment identifier, optionally resolving a recurrence position to the
+     * corresponding recurrence identifier.
+     *
+     * @param session The calendar session
+     * @param folderID The folder identifier
+     * @param objectID The object identifier
+     * @param recurrencePosition The recurrence position, or a value <code>< 0</code> if not set
+     * @return The event identifier
+     */
     public EventID getEventID(CalendarSession session, int folderID, int objectID, int recurrencePosition) throws OXException {
         EventID eventID = new EventID(folderID, objectID);
         if (0 >= recurrencePosition) {
@@ -252,6 +264,16 @@ public class EventConverter {
         return new EventID(folderID, objectID, recurrenceID);
     }
 
+    /**
+     * Gets the event identifier for the supplied full appointment identifier, optionally resolving a recurrence date position to the
+     * corresponding recurrence identifier.
+     *
+     * @param session The calendar session
+     * @param folderID The folder identifier
+     * @param objectID The object identifier
+     * @param recurrenceDatePosition The recurrence date position, or <code>null</code> if not set
+     * @return The event identifier
+     */
     public EventID getEventID(CalendarSession session, int folderID, int objectID, Date recurrenceDatePosition) throws OXException {
         EventID eventID = new EventID(folderID, objectID);
         if (null == recurrenceDatePosition) {
@@ -271,6 +293,7 @@ public class EventConverter {
      */
     public UserizedEvent getEvent(CalendarSession session, Appointment appointment, EventID originalEventID) throws OXException {
         Event event = new Event();
+        RecurrenceData recurrenceData = null;
         if (appointment.containsObjectID()) {
             event.setId(appointment.getObjectID());
         }
@@ -315,8 +338,6 @@ public class EventConverter {
         if (appointment.containsRecurrenceID()) {
             event.setSeriesId(appointment.getRecurrenceID());
         }
-        RecurrenceData recurrenceData = null;
-        //        SeriesPattern seriesPattern = null;
         if (appointment.containsRecurrenceType()) {
             if (0 == appointment.getRecurrenceType()) {
                 event.setRecurrenceRule(null);
@@ -347,12 +368,24 @@ public class EventConverter {
             }
         }
         if (appointment.containsChangeExceptions()) {
-            //TODO - UTC dates -> original start time of occurrence?
-            event.setChangeExceptionDates(null != appointment.getChangeException() ? Arrays.asList(appointment.getChangeException()) : null);
+            if (null == appointment.getChangeException()) {
+                event.setChangeExceptionDates(null);
+            } else {
+                if (null == recurrenceData) {
+                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                }
+                event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, Arrays.asList(appointment.getChangeException())));
+            }
         }
         if (appointment.containsDeleteExceptions()) {
-            //TODO - UTC dates -> original start time of occurrence?
-            event.setDeleteExceptionDates(null != appointment.getDeleteException() ? Arrays.asList(appointment.getDeleteException()) : null);
+            if (null == appointment.getDeleteException()) {
+                event.setChangeExceptionDates(null);
+            } else {
+                if (null == recurrenceData) {
+                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                }
+                event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, Arrays.asList(appointment.getDeleteException())));
+            }
         }
         //appointment.getNotification();
         //appointment.getRecurrenceCalculator();
@@ -406,6 +439,7 @@ public class EventConverter {
     public CalendarDataObject getAppointment(CalendarSession session, UserizedEvent userizedEvent) throws OXException {
         Event event = userizedEvent.getEvent();
         CalendarDataObject appointment = new CalendarDataObject();
+        RecurrenceData recurrenceData = null;
         if (event.containsId()) {
             appointment.setObjectID(event.getId());
         }
@@ -468,37 +502,44 @@ public class EventConverter {
         }
         if (userizedEvent.containsAlarms()) {
             Integer reminder = Event2Appointment.getReminder(userizedEvent.getAlarms());
-            appointment.setAlarm(null == reminder ? -1 : reminder.intValue());
+            if (null == reminder) {
+                // don't apply "-1" reminder minutes when converting to appointment
+            } else {
+                appointment.setAlarmFlag(true);
+                appointment.setAlarm(reminder.intValue());
+            }
         }
         if (event.containsSeriesId()) {
             appointment.setRecurrenceID(event.getSeriesId());
         }
-        if (event.containsRecurrenceId() && null != event.getRecurrenceId()) {
-            RecurrenceData recurrenceData;
-            if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                recurrenceData = (RecurrenceData) event.getRecurrenceId();
+        if (event.containsRecurrenceId()) {
+            if (null == event.getRecurrenceId()) {
+                appointment.setRecurrencePosition(0);
+                appointment.setRecurrenceDatePosition(null);
             } else {
-                EventID masterID = new EventID(userizedEvent.getFolderId(), event.getSeriesId());
-                recurrenceData = loadRecurrenceData(session, masterID);
+                if (null == recurrenceData) {
+                    if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                        recurrenceData = (RecurrenceData) event.getRecurrenceId();
+                    } else {
+                        recurrenceData = loadRecurrenceData(session, new EventID(userizedEvent.getFolderId(), event.getSeriesId()));
+                    }
+                }
+                appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
+                appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(recurrenceData, event.getRecurrenceId()));
             }
-            // TODO:
-            // provide master event in resolved recurrence?
-            // provide needed info for calculation in resolved recurrence?
-            appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
-            appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(recurrenceData, event.getRecurrenceId()));
         }
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule() && false == CalendarUtils.isSeriesException(event)) {
 
             // series pattern seems to be added in response for recurrence master and "regular" occurrences, but not for change exceptions
 
-            RecurrenceData recurrenceData;
-            if (CalendarUtils.isSeriesMaster(event)) {
-                recurrenceData = new DefaultRecurrenceData(event);
-            } else if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                recurrenceData = (RecurrenceData) event.getRecurrenceId();
-            } else {
-                EventID masterID = new EventID(userizedEvent.getFolderId(), event.getSeriesId());
-                recurrenceData = loadRecurrenceData(session, masterID);
+            if (null == recurrenceData) {
+                if (CalendarUtils.isSeriesMaster(event)) {
+                    recurrenceData = new DefaultRecurrenceData(event);
+                } else if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                    recurrenceData = (RecurrenceData) event.getRecurrenceId();
+                } else {
+                    recurrenceData = loadRecurrenceData(session, new EventID(userizedEvent.getFolderId(), event.getSeriesId()));
+                }
             }
             SeriesPattern pattern = Event2Appointment.getSeriesPattern(recurrenceData);
             if (SeriesPattern.MONTHLY_2.equals(pattern.getType())) {
@@ -538,8 +579,7 @@ public class EventConverter {
         //appointment.setNotification(false);
         //appointment.setRecurrenceCalculator(0);
         if (event.containsAttendees()) {
-            List<Attendee> attendees = event.getAttendees();
-            if (null == attendees) {
+            if (null == event.getAttendees()) {
                 appointment.setParticipants((Participant[]) null);
                 appointment.setUsers((UserParticipant[]) null);
                 appointment.setConfirmations((ConfirmableParticipant[]) null);
@@ -547,7 +587,7 @@ public class EventConverter {
                 List<Participant> participants = new ArrayList<Participant>();
                 List<UserParticipant> users = new ArrayList<UserParticipant>();
                 List<ConfirmableParticipant> confirmations = new ArrayList<ConfirmableParticipant>();
-                for (Attendee attendee : attendees) {
+                for (Attendee attendee : event.getAttendees()) {
                     convertAttendee(attendee, participants, users, confirmations);
                 }
                 appointment.setParticipants(participants);
