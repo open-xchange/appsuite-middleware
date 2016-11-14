@@ -62,6 +62,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
@@ -153,10 +155,19 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------
 
+    /** The main socket collection divided by user-association */
     protected final ConcurrentMap<UserAndContext, ConcurrentMap<ConnectionId, S>> openSockets;
+
+    /** The lock to acquire when adding a socket to the socket collection */
+    protected final Lock addUserSocketLock;
+
+    /** The service look-up */
     protected final ServiceLookup services;
-    protected final CookieHashSource hashSource;
+
+    /** The default authenticator for session-bound Web Sockets */
     protected final DefaultGrizzlyWebSocketAuthenticator defaultAuthenticator;
+
+    /** The concrete (sub-)class of the socket instances */
     private final Class<S> socketClass;
 
     /**
@@ -167,8 +178,9 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         this.services = services;
         this.socketClass = socketClass;
         openSockets = new ConcurrentHashMap<>(265, 0.9F, 1);
+        addUserSocketLock = new ReentrantLock();
         ConfigurationService configService = services.getService(ConfigurationService.class);
-        hashSource = CookieHashSource.parse(configService.getProperty(Property.COOKIE_HASH.getPropertyName()));
+        CookieHashSource hashSource = CookieHashSource.parse(configService.getProperty(Property.COOKIE_HASH.getPropertyName()));
         defaultAuthenticator = new DefaultGrizzlyWebSocketAuthenticator(hashSource, services, LOGGER);
     }
 
@@ -460,6 +472,9 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
 
     // ------------------------------------------------------ Methods from org.glassfish.grizzly.websockets.WebSocketApplication ------------------------------------------------------
 
+    /** The default initial capacity for the table holding Web Sockets associated with a certain user. */
+    private static final int DEFAULT_INITIAL_CAPACITY = 16;
+
     @Override
     public WebSocket createSocket(ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener... listeners) {
         try {
@@ -509,18 +524,19 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
              * Perform it here to be able to abort hand-shake orderly; otherwise Grizzly puts instance prematurely into internally managed collection messing-up filter chain handling
              */
             int maxSize = getMaxSize();
-            UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
+            UserAndContext userAndContext = UserAndContext.newInstance(session);
             ConcurrentMap<ConnectionId, S> userSockets = openSockets.get(userAndContext);
             if (userSockets == null) {
-                userSockets = new ConcurrentHashMap<>(maxSize, 0.9F, 1);
+                userSockets = new ConcurrentHashMap<>(maxSize <= 0 ? DEFAULT_INITIAL_CAPACITY : maxSize, 0.9F, 1);
                 ConcurrentMap<ConnectionId, S> existing = openSockets.putIfAbsent(userAndContext, userSockets);
                 if (existing != null) {
                     userSockets = existing;
                 }
             }
 
-            synchronized (userSockets) {
-                if (userSockets.size() == maxSize) {
+            addUserSocketLock.lock();
+            try {
+                if (maxSize > 0 && userSockets.size() == maxSize) {
                     // Max. number of sockets per user exceeded
                     throw new HandshakeException("Max. number of Web Sockets (" + maxSize + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
                 }
@@ -528,6 +544,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
                 if (null != userSockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
                     throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
                 }
+            } finally {
+                addUserSocketLock.unlock();
             }
 
             // Socket instance successfully created & added to socket collection...
@@ -540,9 +558,9 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
     }
 
     /**
-     * Gets the max. number of sockets allowed per user.
+     * Gets the max. number of sockets allowed per user; or less than/equal to 0 (zero) for no limitation
      *
-     * @return The max. number of sockets
+     * @return The max. number of sockets or less than/equal to 0 (zero)
      */
     protected abstract int getMaxSize();
 
