@@ -671,7 +671,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     @Override
     protected byte[] generateICal() throws OXException {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
-        ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
+        ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
         List<ConversionError> conversionErrors = new LinkedList<ConversionError>();
         List<ConversionWarning> conversionWarnings = new LinkedList<ConversionWarning>();
         CalendarDataObject[] changeExceptions;

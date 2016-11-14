@@ -141,7 +141,7 @@ public class TaskResource extends CalDAVResource<Task> {
     @Override
     protected byte[] generateICal() throws OXException {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
-        ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
+        ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
         Task task = parent.load(object);
         applyAttachments(task);
         icalEmitter.writeTask(session, task, factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
