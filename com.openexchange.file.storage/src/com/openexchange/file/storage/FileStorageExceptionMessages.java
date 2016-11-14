@@ -114,6 +114,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
     public static final String FILE_UPDATE_ABORTED_MSG = "The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.";
+    
+    // The file(s) were not moved due to possible data loss. Please review the warnings for details.
+    public static final String FILE_MOVE_ABORTED_MSG = "The file(s) were not moved due to possible data loss. Please review the warnings for details.";
 
     // The %1$s URL does not denote a file: %2$s
     public static final String NOT_A_FILE_MSG = "The %1$s URL does not denote a file: %1$s";
