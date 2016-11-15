@@ -50,8 +50,6 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 
@@ -79,7 +77,7 @@ public class OutlookComConfigSource extends StaticConfigSource {
     }
 
     @Override
-    protected DefaultAutoconfig getStaticAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
+    protected DefaultAutoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
         final DefaultAutoconfig autoconfig = new DefaultAutoconfig();
         // IMAP
         autoconfig.setMailPort(993);

@@ -56,9 +56,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.websockets.WebSocketListener;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
-import com.openexchange.websockets.grizzly.WebSocketListenerAdapter;
-import com.openexchange.websockets.grizzly.WebSocketListenerRegistry;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
+import com.openexchange.websockets.grizzly.impl.WebSocketListenerAdapter;
+import com.openexchange.websockets.grizzly.impl.WebSocketListenerRegistry;
 
 
 /**
@@ -67,7 +67,7 @@ import com.openexchange.websockets.grizzly.WebSocketListenerRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketListenerTracker implements ServiceTrackerCustomizer<WebSocketListener, WebSocketListener>, WebSocketListenerRegistry {
+public class WebSocketListenerTracker implements ServiceTrackerCustomizer<Object, Object>, WebSocketListenerRegistry {
 
     /*
      * Uses a ReadWriteLock to prevent from calling getListeners() while a new listener appears in addingService() call-back.
@@ -76,7 +76,7 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<WebSoc
 
     private final BundleContext context;
     private final CopyOnWriteArrayList<org.glassfish.grizzly.websockets.WebSocketListener> adapters;
-    private volatile GrizzlyWebSocketApplication application;
+    private volatile DefaultGrizzlyWebSocketApplication application;
 
     /**
      * Initializes a new {@link WebSocketListenerTracker}.
@@ -87,7 +87,7 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<WebSoc
         if (null != initialListeners && initialListeners.length > 0) {
             List<org.glassfish.grizzly.websockets.WebSocketListener> initialAdapters = new ArrayList<>(initialListeners.length);
             for (WebSocketListener listener : initialListeners) {
-                initialAdapters.add(new WebSocketListenerAdapter(listener));
+                initialAdapters.add(WebSocketListenerAdapter.newAdapterFor(listener));
             }
             adapters = new CopyOnWriteArrayList<>(initialAdapters);
         } else {
@@ -100,16 +100,22 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<WebSoc
      *
      * @param application The application to set
      */
-    public void setApplication(GrizzlyWebSocketApplication application) {
+    public void setApplication(DefaultGrizzlyWebSocketApplication application) {
         this.application = application;
     }
 
     @Override
-    public WebSocketListener addingService(ServiceReference<WebSocketListener> reference) {
-        WebSocketListener listener = context.getService(reference);
-        WebSocketListenerAdapter adapter = new WebSocketListenerAdapter(listener);
+    public Object addingService(ServiceReference<Object> reference) {
+        Object service = context.getService(reference);
+        if (false == (service instanceof WebSocketListener)) {
+            context.ungetService(reference);
+            return null;
+        }
+
+        WebSocketListener listener = (WebSocketListener) service;
+        WebSocketListenerAdapter adapter = WebSocketListenerAdapter.newAdapterFor(listener);
         if (adapters.addIfAbsent(adapter)) {
-            GrizzlyWebSocketApplication application = this.application;
+            DefaultGrizzlyWebSocketApplication application = this.application;
             if (null != application) {
                 application.addWebSocketListener(adapter);
             }
@@ -120,15 +126,21 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<WebSoc
     }
 
     @Override
-    public void modifiedService(ServiceReference<WebSocketListener> reference, WebSocketListener listener) {
+    public void modifiedService(ServiceReference<Object> reference, Object service) {
         // Nothing
     }
 
     @Override
-    public void removedService(ServiceReference<WebSocketListener> reference, WebSocketListener listener) {
-        WebSocketListenerAdapter adapter = new WebSocketListenerAdapter(listener);
+    public void removedService(ServiceReference<Object> reference, Object service) {
+        if (false == (service instanceof WebSocketListener)) {
+            context.ungetService(reference);
+            return;
+        }
+
+        WebSocketListener listener = (WebSocketListener) service;
+        WebSocketListenerAdapter adapter = WebSocketListenerAdapter.newAdapterFor(listener);
         if (adapters.remove(adapter)) {
-            GrizzlyWebSocketApplication application = this.application;
+            DefaultGrizzlyWebSocketApplication application = this.application;
             if (null != application) {
                 application.removeWebSocketListener(adapter);
             }

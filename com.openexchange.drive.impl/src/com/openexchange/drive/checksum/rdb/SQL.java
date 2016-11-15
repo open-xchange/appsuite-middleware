@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link SQL}
@@ -281,6 +282,13 @@ public class SQL {
             LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         }
+    }
+
+    public static OXException wrap(SQLException e) {
+        if (DBUtils.isTransactionRollbackException(e)) {
+            return DriveExceptionCodes.DB_ERROR_RETRY.create(e, e.getMessage());
+        }
+        return DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
     }
 
     public static FolderID unescapeFolder(String escaped) throws OXException {

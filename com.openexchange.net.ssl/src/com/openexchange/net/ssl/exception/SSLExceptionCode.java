@@ -63,29 +63,27 @@ import com.openexchange.exception.OXExceptionStrings;
  * @since v7.8.3
  */
 public enum SSLExceptionCode implements DisplayableOXExceptionCode {
-    
+
+    /**
+     * The certificate for domain "%1$s" is untrusted.
+     */
     UNTRUSTED_CERTIFICATE("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 1, SSLExceptionMessages.UNTRUSTED_CERTIFICATE_MSG),
-    
-    UNTRUSTED_CERT_USER_CONFIG("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 2, SSLExceptionMessages.UNTRUSTED_CERT_USER_CONFIG_MSG);
-    
+    /**
+     * The certificate for domain "%1$s" is untrusted
+     */
+    UNTRUSTED_CERT_USER_CONFIG("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 2, SSLExceptionMessages.UNTRUSTED_CERT_USER_CONFIG_MSG),
+
+    ;
+
     public static final String PREFIX = "SSL";
 
     private final Category category;
-
     private final int detailNumber;
-
     private final String message;
-
-    /**
-     * Message displayed to the user
-     */
-    private String displayMessage;
+    private final String displayMessage;
 
     /**
      * Initializes a new {@link SSLExceptionCode}.
-     *
-     * @param message
-     * @param category
      * @param detailNumber
      */
     private SSLExceptionCode(final String message, final Category category, final int detailNumber) {
@@ -94,11 +92,6 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SSLExceptionCode}.
-     *
-     * @param message
-     * @param category
-     * @param detailNumber
-     * @param displayMessage
      */
     private SSLExceptionCode(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;

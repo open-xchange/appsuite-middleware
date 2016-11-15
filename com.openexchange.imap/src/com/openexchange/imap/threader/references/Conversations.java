@@ -100,21 +100,22 @@ public final class Conversations {
         super();
     }
 
-    static final FetchProfile FETCH_PROFILE_CONVERSATION_BY_HEADERS;
-    static final FetchProfile FETCH_PROFILE_CONVERSATION_BY_ENVELOPE;
-    static {
+    private static FetchProfile newFetchProfile(boolean byEnvelope) {
         FetchProfile fp = new FetchProfile();
         fp.add(UIDFolder.FetchProfileItem.UID);
         fp.add("References");
-        fp.add("Message-Id");
-        //fp.add("In-Reply-To");
-        FETCH_PROFILE_CONVERSATION_BY_HEADERS = fp;
-        fp = new FetchProfile();
-        fp.add("References");
-        fp.add(UIDFolder.FetchProfileItem.UID);
-        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
-        FETCH_PROFILE_CONVERSATION_BY_ENVELOPE = fp;
+
+        if (byEnvelope) {
+            fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
+        } else {
+            fp.add("Message-Id");
+            fp.add("In-Reply-To");
+        }
+        return fp;
     }
+
+    static final FetchProfile FETCH_PROFILE_CONVERSATION_BY_HEADERS = newFetchProfile(false);
+    static final FetchProfile FETCH_PROFILE_CONVERSATION_BY_ENVELOPE = newFetchProfile(true);
 
     /**
      * Gets the <i>"by envelope"</i> fetch profile including specified fields.
@@ -123,10 +124,7 @@ public final class Conversations {
      * @return The <i>"by envelope"</i> fetch profile
      */
     public static FetchProfile getFetchProfileConversationByEnvelope(MailField... fields) {
-        FetchProfile fp = new FetchProfile();
-        fp.add("References");
-        fp.add(UIDFolder.FetchProfileItem.UID);
-        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
+        FetchProfile fp = newFetchProfile(true);
         if (null != fields) {
             for (MailField field : fields) {
                 if (!MimeStorageUtility.isEnvelopeField(field)) {
@@ -144,10 +142,7 @@ public final class Conversations {
      * @return The <i>"by headers"</i> fetch profile
      */
     public static FetchProfile getFetchProfileConversationByHeaders(MailField... fields) {
-        FetchProfile fp = new FetchProfile();
-        fp.add(UIDFolder.FetchProfileItem.UID);
-        fp.add("References");
-        fp.add("Message-Id");
+        FetchProfile fp = newFetchProfile(false);
         if (null != fields) {
             for (MailField field : fields) {
                 if (MailField.RECEIVED_DATE.equals(field)) {
@@ -170,101 +165,25 @@ public final class Conversations {
     public static FetchProfile checkFetchProfile(final FetchProfile fetchProfile, final boolean byEnvelope) {
         // Add 'References' to FetchProfile if absent
         {
-            boolean found = false;
-            final String hdrReferences = MessageHeaders.HDR_REFERENCES;
-            final String[] headerNames = fetchProfile.getHeaderNames();
-            for (int i = 0; !found && i < headerNames.length; i++) {
-                if (hdrReferences.equalsIgnoreCase(headerNames[i])) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                fetchProfile.add(hdrReferences);
-            }
+            String hdrReferences = MessageHeaders.HDR_REFERENCES;
+            fetchProfile.add(hdrReferences);
         }
         // Add UID item to FetchProfile if absent
         {
-            boolean found = false;
-            final Item uid = UIDFolder.FetchProfileItem.UID;
-            final Item[] items = fetchProfile.getItems();
-            for (int i = 0; !found && i < items.length; i++) {
-                final Item cur = items[i];
-                if (uid == cur) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                fetchProfile.add(uid);
-            }
+            Item uid = UIDFolder.FetchProfileItem.UID;
+            fetchProfile.add(uid);
         }
         // ------ Either by-envelope or by headers ------
         if (byEnvelope) {
-            boolean found = false;
-            final Item envelope = FetchProfile.Item.ENVELOPE;
-            final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
-            final Item[] items = fetchProfile.getItems();
-            for (int i = 0; !found && i < items.length; i++) {
-                final Item cur = items[i];
-                if (envelope == cur || envelopeOnly == cur) {
-                    found = true;
-                }
-            }
-            if (!found) {
+            Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
+            if (false == fetchProfile.contains(FetchProfile.Item.ENVELOPE, envelopeOnly)) {
                 fetchProfile.add(envelopeOnly);
             }
         } else {
-            // Add 'In-Reply-To' to FetchProfile if absent
-            /*-
-             *
-            {
-                boolean found = false;
-                final Item envelope = FetchProfile.Item.ENVELOPE;
-                final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
-                final Item[] items = fetchProfile.getItems();
-                for (int i = 0; !found && i < items.length; i++) {
-                    final Item cur = items[i];
-                    if (envelope == cur || envelopeOnly == cur) {
-                        found = true;
-                    }
-                }
-                if (!found) {
-                    final String hdrInReplyTo = MessageHeaders.HDR_IN_REPLY_TO;
-                    final String[] headerNames = fetchProfile.getHeaderNames();
-                    for (int i = 0; !found && i < headerNames.length; i++) {
-                        if (hdrInReplyTo.equalsIgnoreCase(headerNames[i])) {
-                            found = true;
-                        }
-                    }
-                    if (!found) {
-                        fetchProfile.add(hdrInReplyTo);
-                    }
-                }
-            }
-             */
-            // Add 'Message-Id' to FetchProfile if absent
-            {
-                boolean found = false;
-                final Item envelope = FetchProfile.Item.ENVELOPE;
-                final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
-                final Item[] items = fetchProfile.getItems();
-                for (int i = 0; !found && i < items.length; i++) {
-                    final Item cur = items[i];
-                    if (envelope == cur || envelopeOnly == cur) {
-                        found = true;
-                    }
-                }
-                if (!found) {
-                    final String hdrMessageId = MessageHeaders.HDR_MESSAGE_ID;
-                    final String[] headerNames = fetchProfile.getHeaderNames();
-                    for (int i = 0; !found && i < headerNames.length; i++) {
-                        if (hdrMessageId.equalsIgnoreCase(headerNames[i])) {
-                            found = true;
-                        }
-                    }
-                    if (!found) {
-                        fetchProfile.add(envelopeOnly);
-                    }
-                }
+            // Add 'Message-Id' and 'In-Reply-To' to FetchProfile if absent
+            if (false == fetchProfile.contains(FetchProfile.Item.ENVELOPE, MailMessageFetchIMAPCommand.ENVELOPE_ONLY)) {
+                fetchProfile.add(MessageHeaders.HDR_MESSAGE_ID);
+                fetchProfile.add(MessageHeaders.HDR_IN_REPLY_TO);
             }
         }
         return fetchProfile;
@@ -315,6 +234,7 @@ public final class Conversations {
              */
             return Collections.<MailMessage> emptyList();
         }
+
         final org.slf4j.Logger log = LOG;
         return (List<MailMessage>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 

@@ -98,13 +98,12 @@ public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
         // Perform the task
         PreparedStatement statement = null;
         try {
-            String dropTokensSQL = "UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE cid = ? AND serviceId = ?";
+            String dropTokensSQL = "UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE serviceId = ?";
             statement = writeConnection.prepareStatement(dropTokensSQL);
 
             int parameterIndex = 1;
             statement.setString(parameterIndex++, "");
             statement.setString(parameterIndex++, "");
-            statement.setInt(parameterIndex++, contextId);
             statement.setString(parameterIndex++, API.DROPBOX.getFullName());
 
             statement.execute();

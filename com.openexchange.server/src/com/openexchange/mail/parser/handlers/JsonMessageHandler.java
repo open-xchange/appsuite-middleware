@@ -55,10 +55,8 @@ import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,6 +70,7 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -90,6 +89,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -627,10 +627,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * These headers are covered by fields of {@link MailMessage}
      */
-    private static final Set<HeaderName> COVERED_HEADER_NAMES = new HashSet<HeaderName>(Arrays.asList(new HeaderName[] {
+    private static final Set<HeaderName> COVERED_HEADER_NAMES = ImmutableSet.of(
         MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE, MessageHeaders.BCC, MessageHeaders.CC,
         MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY, MessageHeaders.SUBJECT,
-        MessageHeaders.TO }));
+        MessageHeaders.TO);
 
     @Override
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
@@ -1373,7 +1373,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         try {
-            jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone())));
+            Object value = receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone()));
+            jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), value);
+            if (false == MailProperties.getInstance().isPreferSentDate()) {
+                jsonObject.put(MailJSONField.DATE.getKey(), value);
+            }
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1383,7 +1387,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleSentDate(final Date sentDate) throws OXException {
         try {
-            jsonObject.put(MailJSONField.SENT_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone())));
+            Object value = sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone()));
+            jsonObject.put(MailJSONField.SENT_DATE.getKey(), value);
+            if (MailProperties.getInstance().isPreferSentDate()) {
+                jsonObject.put(MailJSONField.DATE.getKey(), value);
+            }
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

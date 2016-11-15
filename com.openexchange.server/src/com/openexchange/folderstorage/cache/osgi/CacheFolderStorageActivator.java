@@ -74,6 +74,7 @@ import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -141,7 +142,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         try {
             /*
              * (Re-)Initialize service registry with available services
@@ -158,11 +159,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
             }
             initCacheFolderStorage();
+            CacheFolderStorageInvalidator invalidator = new CacheFolderStorageInvalidator(context);
+            registrations.add(context.registerService(MailAccountDeleteListener.class, invalidator, null));
             // Register service trackers
             List<ServiceTracker<?,?>> serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
             this.serviceTrackers = serviceTrackers;
             serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new CacheFolderStorageServiceTracker(context)));
-            serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, new CacheFolderStorageInvalidator(context)));
+            serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, invalidator));
             serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, new FolderMapInvalidator(context)));
             for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
@@ -174,7 +177,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         try {
             // Drop service trackers
             List<ServiceTracker<?, ?>> serviceTrackers = this.serviceTrackers;

@@ -51,19 +51,22 @@ package com.openexchange.mail.json;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.json.utils.ColumnCollection;
@@ -120,7 +123,7 @@ public final class MailRequest {
         this.mailServletInterface = openedMailServletInterface;
     }
 
-    private static final Set<String> ALIASES_MAX = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("max", "maximum")));
+    private static final Set<String> ALIASES_MAX = ImmutableSet.of("max", "maximum");
 
     /**
      * Gets the <code>max</code> parameter.
@@ -129,18 +132,17 @@ public final class MailRequest {
      * @throws OXException If <code>max</code> is not a number
      */
     public long getMax() throws OXException {
-        String s = null;
-        for (final Iterator<String> it = ALIASES_MAX.iterator(); (null == s) && it.hasNext();) {
-            s = requestData.getParameter(it.next());
+        for (String name : ALIASES_MAX) {
+            String value = requestData.getParameter(name);
+            if (null != value) {
+                try {
+                    return Long.parseLong(value.trim());
+                } catch (NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, value);
+                }
+            }
         }
-        if (null == s) {
-            return -1L;
-        }
-        try {
-            return Long.parseLong(s.trim());
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("max", s);
-        }
+        return -1L;
     }
 
     /**
@@ -213,6 +215,7 @@ public final class MailRequest {
     /**
      * Checks for columns.
      *
+     * @param requestData The associated request data
      * @return The column collection
      * @throws OXException If parameter is missing
      */
@@ -232,7 +235,19 @@ public final class MailRequest {
             l = new ArrayList<Column>(sa.length);
             for (String s : sa) {
                 int field = Tools.getUnsignedInteger(s);
-                l.add(field > 0 ? Column.field(field) : Column.header(s));
+                if (field > 0) {
+                    if (field == MailListField.DATE.getField()) {
+                        field = MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+                    }
+                    l.add(Column.field(field));
+                } else {
+                    if (MailJSONField.DATE.getKey().equalsIgnoreCase(s)) {
+                        field = MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+                        l.add(Column.field(field));
+                    } else {
+                        l.add(Column.header(s));
+                    }
+                }
             }
         }
 
@@ -292,6 +307,35 @@ public final class MailRequest {
             }
         }
         return ret;
+    }
+
+    /**
+     * Gets the appropriate sort field for given sort string.
+     *
+     * @param sort The sort string to examine
+     * @return The appropriate sort field
+     * @throws OXException If sort field cannot be returned
+     */
+    public int getSortFieldFor(String sort) throws OXException {
+        if (Strings.isEmpty(sort)) {
+            return MailListField.RECEIVED_DATE.getField();
+        }
+        String parseMe = sort.trim();
+
+        if (MailJSONField.DATE.getKey().equalsIgnoreCase(parseMe)) {
+            return MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+        }
+
+        try {
+            int field = Integer.parseInt(parseMe);
+            if (MailListField.DATE.getField() == field) {
+                return (MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField());
+            }
+
+            return field < 0 ? MailListField.RECEIVED_DATE.getField() : field;
+        } catch (NumberFormatException e) {
+            throw MailExceptionCode.INVALID_INT_VALUE.create(e, AJAXServlet.PARAMETER_SORT);
+        }
     }
 
     /**

@@ -55,6 +55,9 @@ package com.openexchange.ajax.mail.filter.api.dao;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum MatchType {
+    all,
+    domain,
+    localpart,
     regex,
     is,
     contains,

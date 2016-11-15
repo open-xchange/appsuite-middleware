@@ -51,10 +51,8 @@ package com.openexchange.mail.mime;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link MimeTypes} - Utilities & constants for MIME types.
@@ -223,7 +221,7 @@ public final class MimeTypes {
     /**
      * The set of such MIME types that are considered as invalid (e.g. for file upload attempts)
      */
-    public static final Set<String> INVALIDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+    public static final Set<String> INVALIDS = ImmutableSet.of(
         "application/octet-stream",
         "application/force-download",
         "application/binary",
@@ -233,7 +231,7 @@ public final class MimeTypes {
         "application/vnd.ms-word.document.12",
         "application/vnd.ms-word",
         "application/odt",
-        "application/x-pdf")));
+        "application/x-pdf");
 
     // --------------------------------------------------------------------------------------------------------
 

@@ -51,8 +51,11 @@ package com.openexchange.push.dovecot;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.push.dovecot.osgi.Services;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link DovecotPushDeleteListener} - Delete listener for Dovecot Push bundle.
@@ -68,10 +71,16 @@ public final class DovecotPushDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER == event.getType()) {
+        int userId = event.getId();
+        Context context = event.getContext();
+
+        UserPermissionService userPermissionService = Services.optService(UserPermissionService.class);
+        boolean hasWebMail = userPermissionService == null ? false : userPermissionService.getUserPermissionBits(readCon, userId, context).hasWebMail();
+
+        if (hasWebMail && (DeleteEvent.TYPE_USER == event.getType())) {
             DovecotPushManagerService instance = DovecotPushManagerService.getInstance();
             if (null != instance) {
-                instance.stopListener(false, true, event.getId(), event.getContext().getContextId());
+                instance.stopListener(false, true, userId, context.getContextId());
             }
         }
     }

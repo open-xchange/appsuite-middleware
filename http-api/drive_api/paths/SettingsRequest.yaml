@@ -2,7 +2,7 @@
   get:
     operationId: getSettings
     tags:
-      - drive
+      - Drive
     summary: Gets various settings applicable for the drive client.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -21,3 +21,42 @@
           errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveSettingsResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=settings&root=56&session=35cb8c2d1423480692f0d5053d14ba52
+  
+          <== HTTP 200 OK (11.3530 ms elapsed, 318 bytes received)
+          <   Content: 
+              {
+                "data" : {
+                  "quota" : [{
+                      "limit" : 107374182400,
+                      "use" : 8828427,
+                      "type" : "storage"
+                    }, {
+                      "limit" : 800000000000,
+                      "use" : 1559,
+                      "type" : "file"
+                    }
+                  ],
+                  "helpLink" : "http://192.168.32.191/appsuite/help-drive/l10n/de_DE/index.html",
+                  "quotaManageLink" : "http://192.168.32.191/manageQuota",
+                  "serverVersion" : "7.8.1-Rev1",
+                  "supportedApiVersion" : "4",
+                  "minApiVersion" : "1",
+                  "localizedFolderNames": {
+                    "/Documents": "Dokumente",
+                    "/Music": "Musik",
+                    "/Pictures": "Bilder",
+                    "/": "Meine Dateien",
+                    "/Documents/Templates": "Vorlagen"
+                  },
+                  "capabilities" : [
+                    "invite_guests",
+                    "share_links",
+                    "invite_users_and_groups"
+                  ]
+                }
+              }

@@ -108,6 +108,7 @@ import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.ProviderUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.Event;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -120,6 +121,9 @@ import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
+import com.openexchange.mailaccount.json.fields.TransportAccountGetSwitch;
+import com.openexchange.mailaccount.json.fields.TransportGetSwitch;
+import com.openexchange.mailaccount.json.fields.TransportSetSwitch;
 import com.openexchange.mailaccount.utils.MailAccountUtils;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -835,6 +839,48 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            propagateEvent(event, id, eventProps, userId, contextId, con);
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    private void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        switch (event) {
+            case DELETED:
+                DeleteListenerRegistry.getInstance().triggerOnAfterDeletion(id, eventProps, userId, contextId, con);
+                break;
+            case CREATED:
+                DeleteListenerRegistry.getInstance().triggerOnCreation(id, eventProps, userId, contextId, con);
+                break;
+            case MODIFIED:
+                DeleteListenerRegistry.getInstance().triggerOnModification(id, eventProps, userId, contextId, con);
+                break;
+            default:
+                LOG.warn("Unknown event: {}", event);
+                break;
         }
     }
 
@@ -2247,11 +2293,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     @Override
     public void updateTransportAccount(final TransportAccountDescription transportAccount, final int userId, final int contextId, final Session session) throws OXException {
         final int accountId = transportAccount.getId();
+
         // Check name
-        final String name = transportAccount.getName();
+        String name = transportAccount.getName();
         if (!isValid(name)) {
-            throw MailAccountExceptionCodes.INVALID_NAME.create(name);
+            name = null;
         }
+
         dropPOP3StorageFolders(userId, contextId);
         final Connection con = Database.get(contextId, true);
         PreparedStatement stmt = null;
@@ -2280,10 +2328,20 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
             final String transportURL = transportAccount.generateTransportServerURL();
             if (null != transportURL) {
-                final String encryptedTransportPassword = encrypt(transportAccount.getTransportPassword(), session);
-                stmt = con.prepareStatement("UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ?, starttls = ?, oauth = ? WHERE cid = ? AND id = ? AND user = ?");
+                String encryptedTransportPassword = encrypt(transportAccount.getTransportPassword(), session);
+
+                StringBuilder sb = new StringBuilder(128).append("UPDATE user_transport_account SET ");
+                if (null != name) {
+                    sb.append("name = ?, ");
+                }
+                sb.append("url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ?, starttls = ?, oauth = ? WHERE cid = ? AND id = ? AND user = ?");
+                stmt = con.prepareStatement(sb.toString());
+                sb = null;
+
                 int pos = 1;
-                stmt.setString(pos++, name);
+                if (null != name) {
+                    stmt.setString(pos++, name);
+                }
                 stmt.setString(pos++, transportURL);
                 setOptionalString(stmt, pos++, transportAccount.getTransportLogin());
                 setOptionalString(stmt, pos++, encryptedTransportPassword);
@@ -2336,6 +2394,324 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             autocommit(con);
             Database.back(contextId, true, con);
         }
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            updateTransportAccount(transportAccount, attributes, userId, contextId, UpdateProperties.builder().setChangePrimary(false).setChangeProtocol(false).setCon(con).setSession(session).build());
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    private void updateTransportAccount0(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            updateTransportAccount(transportAccount, attributes, userId, contextId, UpdateProperties.builder(updateProperties).setCon(con).build());
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
+        Connection con = updateProperties == null ? null : updateProperties.getCon();
+        if (null == con) {
+            updateTransportAccount0(transportAccount, attributes, userId, contextId, updateProperties);
+            return;
+        }
+
+        Session session = updateProperties == null ? null : updateProperties.getSession();
+        boolean changePrimary = updateProperties == null ? false : updateProperties.isChangePrimary();
+        boolean changeProtocol = updateProperties == null ? false : updateProperties.isChangeProtocol();
+
+        if (attributes.contains(Attribute.NAME_LITERAL)) {
+            // Check name
+            final String name = transportAccount.getName();
+            if (!isValid(name)) {
+                throw MailAccountExceptionCodes.INVALID_NAME.create(name);
+            }
+        }
+
+        if (!changePrimary && (MailAccount.DEFAULT_ID == transportAccount.getId())) {
+            /*
+             * Iterate attributes and compare their values except the one for Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
+             * Attribute.PERSONAL_LITERAL and Attribute.REPLY_TO_LITERAL
+             */
+            for (final Attribute attribute : attributes) {
+                // Check for not editable attributes
+                if (!Attribute.ID_LITERAL.equals(attribute) && !PRIMARY_EDITABLE.contains(attribute)) {
+                    throw MailAccountExceptionCodes.NO_DEFAULT_UPDATE.create(I(userId), I(contextId));
+                }
+            }
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            TransportAccount storageVersion = null;
+            if (prepareURL(attributes, Attribute.TRANSPORT_URL_ATTRIBUTES, Attribute.TRANSPORT_URL_LITERAL)) {
+                storageVersion = getTransportAccount(transportAccount.getId(), userId, contextId, con);
+
+                TransportAccountGetSwitch getSwitch = new TransportAccountGetSwitch(storageVersion);
+                TransportSetSwitch setSwitch = new TransportSetSwitch(transportAccount);
+
+                for (Attribute attribute : Attribute.TRANSPORT_URL_ATTRIBUTES) {
+                    if (!attributes.contains(attribute)) {
+                        Object value = attribute.doSwitch(getSwitch);
+                        setSwitch.setValue(value);
+                        attribute.doSwitch(setSwitch);
+                    }
+                }
+                checkDuplicateTransportAccount(transportAccount, new TIntHashSet(new int[] { transportAccount.getId() }), userId, contextId, con);
+
+                // Check protocol mismatch
+                if (false == changeProtocol) {
+                    String newProtocol = transportAccount.getTransportProtocol();
+                    if (null != newProtocol) {
+                        String oldProtocol = storageVersion.getTransportProtocol();
+                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                        }
+                    }
+                }
+            } else if (attributes.contains(Attribute.TRANSPORT_URL_LITERAL)) {
+                checkDuplicateTransportAccount(transportAccount, new TIntHashSet(new int[] { transportAccount.getId() }), userId, contextId, con);
+
+                // Check protocol mismatch
+                if (false == changeProtocol) {
+                    String newProtocol = transportAccount.getTransportProtocol();
+                    if (null != newProtocol) {
+                        storageVersion = getTransportAccount(transportAccount.getId(), userId, contextId, con);
+
+                        String oldProtocol = storageVersion.getTransportProtocol();
+                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                        }
+                    }
+                }
+            }
+
+            attributes.removeAll(Attribute.MAIL_URL_ATTRIBUTES);
+            attributes.removeAll(Attribute.TRANSPORT_URL_ATTRIBUTES);
+
+            String encryptedPassword = null; //
+
+            List<Attribute> orderedAttributes = null;
+            if (UpdateTransportAccountBuilder.needsUpdate(attributes)) {
+                orderedAttributes = new ArrayList<>(attributes);
+
+                /*
+                 * Check existence of transport entry
+                 */
+                stmt = con.prepareStatement("SELECT 1 FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
+                int pos = 1;
+                stmt.setLong(pos++, contextId);
+                stmt.setLong(pos++, transportAccount.getId());
+                stmt.setLong(pos++, userId);
+                rs = stmt.executeQuery();
+                final boolean exists = rs.next();
+                closeSQLStuff(rs, stmt);
+
+                if (exists) {
+                    UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
+                    TransportGetSwitch getter = new TransportGetSwitch(transportAccount);
+
+                    // Compose SQL statement
+                    for (Iterator<Attribute> iter = orderedAttributes.iterator(); iter.hasNext();) {
+                        Attribute attribute = iter.next();
+                        if (Attribute.TRANSPORT_URL_LITERAL == attribute) {
+                            Object value = attribute.doSwitch(getter);
+                            if (null == value) {
+                                iter.remove();
+                            } else {
+                                attribute.doSwitch(sqlBuilder);
+                            }
+                        } else {
+                            attribute.doSwitch(sqlBuilder);
+                        }
+                    }
+
+                    if (sqlBuilder.isValid()) {
+                        stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+
+                        // Fill prepared statement
+                        pos = 1;
+                        for (Attribute attribute : orderedAttributes) {
+                            if (!sqlBuilder.handles(attribute)) {
+                                continue;
+                            }
+                            Object value = attribute.doSwitch(getter);
+                            switch (attribute) {
+                                case TRANSPORT_PASSWORD_LITERAL:
+                                    if (encryptedPassword == null) {
+                                        encryptedPassword = encrypt(transportAccount.getTransportPassword(), session);
+                                    }
+                                    setOptionalString(stmt, pos++, encryptedPassword);
+                                    break;
+                                case TRANSPORT_LOGIN_LITERAL:
+                                    setOptionalString(stmt, pos++, (String) value);
+                                    break;
+                                case TRANSPORT_URL_LITERAL:
+                                    setOptionalString(stmt, pos++, (String) value);
+                                    break;
+                                case PERSONAL_LITERAL:
+                                    final String personal = transportAccount.getPersonal();
+                                    if (isEmpty(personal)) {
+                                        stmt.setNull(pos++, TYPE_VARCHAR);
+                                    } else {
+                                        stmt.setString(pos++, personal);
+                                    }
+                                    break;
+                                case REPLY_TO_LITERAL:
+                                    final String replyTo = transportAccount.getReplyTo();
+                                    if (isEmpty(replyTo)) {
+                                        stmt.setNull(pos++, TYPE_VARCHAR);
+                                    } else {
+                                        stmt.setString(pos++, replyTo);
+                                    }
+                                    break;
+                                case TRANSPORT_STARTTLS_LITERAL:
+                                    boolean ttls = transportAccount.isTransportStartTls();
+                                    stmt.setBoolean(pos++, ttls);
+                                    break;
+                                case TRANSPORT_OAUTH_LITERAL:
+                                    int tOAuthId = transportAccount.getTransportOAuthId();
+                                    stmt.setInt(pos++, tOAuthId);
+                                    break;
+                                default:
+                                    stmt.setObject(pos++, value);
+                                    break;
+                            }
+                        }
+
+                        stmt.setLong(pos++, contextId);
+                        stmt.setLong(pos++, transportAccount.getId());
+                        stmt.setLong(pos++, userId);
+
+                        if (LOG.isDebugEnabled()) {
+                            final String query = stmt.toString();
+                            LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", orderedAttributes, query.substring(query.indexOf(':') + 1));
+                        }
+
+                        stmt.executeUpdate();
+                        closeSQLStuff(stmt);
+                    }
+                } else {
+                    /*
+                     * Such an entry does not exist, yet
+                     */
+                    String transportURL = transportAccount.generateTransportServerURL();
+                    if (null != transportURL) {
+                        stmt.close();
+                        String encryptedTransportPassword;
+                        if (session == null) {
+                            encryptedTransportPassword = null;
+                        } else {
+                            encryptedTransportPassword = encrypt(transportAccount.getTransportPassword(), session);
+                        }
+                        // cid, id, user, name, url, login, password, send_addr, default_flag
+                        stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo, starttls, oauth) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        pos = 1;
+                        stmt.setLong(pos++, contextId);
+                        stmt.setLong(pos++, transportAccount.getId());
+                        stmt.setLong(pos++, userId);
+                        setOptionalString(stmt, pos++, transportAccount.getName());
+                        stmt.setString(pos++, transportURL);
+                        if (null == transportAccount.getTransportLogin()) {
+                            stmt.setString(pos++, "");
+                        } else {
+                            stmt.setString(pos++, transportAccount.getTransportLogin());
+                        }
+                        setOptionalString(stmt, pos++, encryptedTransportPassword);
+                        setOptionalString(stmt, pos++, transportAccount.getPrimaryAddress());
+                        stmt.setInt(pos++, 0); // default flag
+                        String personal = transportAccount.getPersonal();
+                        if (isEmpty(personal)) {
+                            stmt.setNull(pos++, TYPE_VARCHAR);
+                        } else {
+                            stmt.setString(pos++, personal);
+                        }
+                        String replyTo = transportAccount.getReplyTo();
+                        if (isEmpty(replyTo)) {
+                            stmt.setNull(pos++, TYPE_VARCHAR);
+                        } else {
+                            stmt.setString(pos++, replyTo);
+                        }
+                        stmt.setInt(pos++, transportAccount.isTransportStartTls() ? 1 : 0);
+
+                        int oAuth = transportAccount.getTransportOAuthId();
+                        if (oAuth < 0) {
+                            stmt.setNull(pos++, Types.INTEGER);
+                        } else {
+                            stmt.setInt(pos++, oAuth);
+                        }
+
+                        if (LOG.isDebugEnabled()) {
+                            String query = stmt.toString();
+                            LOG.debug("Trying to perform SQL insert query:\n{}", query.substring(query.indexOf(':') + 1));
+                        }
+
+                        stmt.executeUpdate();
+                        closeSQLStuff(stmt);
+                    }
+                }
+            }
+
+            if (attributes.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
+                TransportAuth transportAuth = transportAccount.getTransportAuth();
+                updateProperty(contextId, userId, transportAccount.getId(), "transport.auth", null == transportAuth ? null : transportAuth.getId(), true, con);
+            }
+        } catch (SQLSyntaxErrorException e) {
+            if (null != stmt) {
+                final String sql = stmt.toString();
+                LOG.debug("\n\tFailed transport account statement:\n\t{}", new Object() {
+
+                    @Override
+                    public String toString() {
+                        return sql.substring(sql.indexOf(": ") + 2);
+                    }
+                });
+            }
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+
     }
 
     @Override

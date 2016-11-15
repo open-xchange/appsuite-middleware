@@ -3783,6 +3783,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      *     }
      * </pre></blockquote>
      *
+     * ASSERT: Must be called with this folder's synchronization lock held.
+     *
      * @return	the IMAPProtocol for the Store's connection
      * @exception	ProtocolException for protocol errors
      */
@@ -3983,18 +3985,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	return null;
     }
 
-    protected Object doProtocolCommand(ProtocolCommand cmd)
+    protected synchronized Object doProtocolCommand(ProtocolCommand cmd)
 				throws ProtocolException {
-	synchronized (this) {
-	    /*
-	     * Check whether we have a protocol object, not whether we're
-	     * opened, to allow use of the exsting protocol object in the
-	     * open method before the state is changed to "opened".
-	     */
-	    if (protocol != null) {
-		synchronized (messageCacheLock) {
-		    return cmd.doCommand(getProtocol());
-		}
+	/*
+	 * Check whether we have a protocol object, not whether we're
+	 * opened, to allow use of the exsting protocol object in the
+	 * open method before the state is changed to "opened".
+	 */
+	if (protocol != null) {
+	    synchronized (messageCacheLock) {
+		return cmd.doCommand(getProtocol());
 	    }
 	}
 
@@ -4013,6 +4013,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * Release the store protocol object.  If we borrowed a protocol
      * object from the connection pool, give it back.  If we used our
      * own protocol object, nothing to do.
+     *
+     * ASSERT: Must be called with this folder's synchronization lock held.
      *
      * @param	p	the IMAPProtocol object
      */

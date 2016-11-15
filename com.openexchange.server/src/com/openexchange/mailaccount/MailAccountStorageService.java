@@ -131,6 +131,18 @@ public interface MailAccountStorageService {
     void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException;
 
     /**
+     * Propagates given event for specified mail account.
+     *
+     * @param event The event
+     * @param id The mail account identifier
+     * @param eventProps Optional event properties
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If event propagation fails
+     */
+    void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException;
+
+    /**
      * Checks if the mail account referenced by specified identifier does exist.
      *
      * @param id The mail account identifier
@@ -308,6 +320,30 @@ public interface MailAccountStorageService {
      * @throws OXException If the mail account cannot be updated
      */
     void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int cid, Session session) throws OXException;
+
+    /**
+     * Updates the given attributes of specified transport account
+     *
+     * @param transportAccount The transport account
+     * @param attributes The attributes to update
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param session The session
+     * @throws OXException If update fails
+     */
+    void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException;
+
+    /**
+     * Updates the given attributes of specified transport account using specified properties.
+     *
+     * @param transportAccount The transport account
+     * @param attributes The attributes to update
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param updateProperties The update properties
+     * @throws OXException If update fails
+     */
+    void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException;
 
     /**
      * Acquires next available mail/transport account identifier.

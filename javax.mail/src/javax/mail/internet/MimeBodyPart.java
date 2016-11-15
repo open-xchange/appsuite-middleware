@@ -1156,11 +1156,18 @@ public class MimeBodyPart extends BodyPart implements MimePart {
     static boolean isMimeType(MimePart part, String mimeType)
 				throws MessagingException {
 	// XXX - lots of room for optimization here!
+	String type = part.getContentType();
 	try {
-	    ContentType ct = new ContentType(part.getContentType());
-	    return ct.match(mimeType);
+	    return new ContentType(type).match(mimeType);
 	} catch (ParseException ex) {
-	    return part.getContentType().equalsIgnoreCase(mimeType);
+	    // we only need the type and subtype so throw away the rest
+	    try {
+		int i = type.indexOf(';');
+		if (i > 0)
+		    return new ContentType(type.substring(0, i)).match(mimeType);
+	    } catch (ParseException pex2) {
+	    }
+	    return type.equalsIgnoreCase(mimeType);
 	}
     }
 

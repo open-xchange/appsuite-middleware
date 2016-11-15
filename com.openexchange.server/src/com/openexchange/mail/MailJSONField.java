@@ -225,6 +225,26 @@ public enum MailJSONField {
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID("original_folder_id"),
+    /**
+     * Flag \ANSWERED
+     */
+    ANSWERED("answered"),
+    /**
+     * Flag \FORWARDED
+     */
+    FORWARDED("forwarded"),
+    /**
+     * Flag \DRAFT
+     */
+    DRAFT("draft"),
+    /**
+     * Flag \FLAGGED
+     */
+    FLAGGED("flagged"),
+    /**
+     * The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header).
+     */
+    DATE("date")
     ;
 
 

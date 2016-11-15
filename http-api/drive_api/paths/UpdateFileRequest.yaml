@@ -2,8 +2,8 @@
   put:
     operationId: updateFile
     tags:
-      - drive
-    summary: Updates a file's metadata (**available since API version 4**).
+      - Drive
+    summary: Updates a file's metadata.
     description: |
       Updates specific metadata of a synchronized file. This currently only includes the object permissions - which
       in turn is only allowed for files marked as `shareable`.
@@ -40,3 +40,28 @@
           the `warnings` field. In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveNotificationResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=updateFolder&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542&path=/test&checksum=d41d8cd98f00b204e9800998ecf8427e
+          > Content:
+            {
+              "file": {
+                "object_permissions": [{
+                  "type": "guest",
+                  "email_address": "otto@example.com",
+                  "display_name": "Otto Example",
+                  "bits": 16641
+                }]
+              },
+              "notification": {
+                "message": "Look!"
+              }
+            }
+
+          <== HTTP 200 OK (132.7421 ms elapsed, 11 bytes received)
+          <   Content: 
+              {
+                "data": {}
+              }

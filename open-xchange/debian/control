@@ -2,13 +2,14 @@ Source: open-xchange
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk
+Build-Depends: cdbs (>= 0.4.123), dh-systemd (>= 1.5), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-authentication, open-xchange-authorization, open-xchange-mailstore, open-xchange-smtp (>= @OXVERSION@), open-xchange-grizzly | open-xchange-httpservice
+Conflicts: open-xchange-linkedin
 Description: The Open-Xchange backend
  This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
  installed. Additionally this package provides the init script for starting the backend on system boot.

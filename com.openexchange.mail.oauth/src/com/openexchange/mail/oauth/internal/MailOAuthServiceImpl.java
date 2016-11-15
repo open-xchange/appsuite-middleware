@@ -86,15 +86,7 @@ public class MailOAuthServiceImpl implements MailOAuthService {
         this.services = services;
     }
 
-    @Override
-    public Autoconfig getAutoconfigFor(int oauthAccountId, Session session) throws OXException {
-        OAuthService oAuthService = services.getOptionalService(OAuthService.class);
-        if (null == oAuthService) {
-            throw ServiceExceptionCode.absentService(OAuthService.class);
-        }
-
-        // Get the OAuth account
-        OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+    private void checkOAuthAccount(OAuthAccount oAuthAccount, Session session) throws OXException {
         OAuthServiceMetaData oAuthServiceMetaData = oAuthAccount.getMetaData();
 
         // Check if mail is supported
@@ -121,10 +113,37 @@ public class MailOAuthServiceImpl implements MailOAuthService {
                 throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(oAuthServiceMetaData.getDisplayName(), OXScope.mail.getDisplayName());
             }
         }
+    }
+
+    @Override
+    public Autoconfig getAutoconfigFor(int oauthAccountId, Session session) throws OXException {
+        OAuthService oAuthService = services.getOptionalService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        // Get the OAuth account
+        OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+        checkOAuthAccount(oAuthAccount, session);
 
         // Try to compose the auto-configuration
-        MailOAuthProvider provider = registry.getProviderFor(oAuthServiceMetaData.getId());
+        MailOAuthProvider provider = registry.getProviderFor(oAuthAccount.getMetaData().getId());
         return null == provider ? null : provider.getAutoconfigFor(oAuthAccount, session);
+    }
+
+    @Override
+    public String getTokenFor(int oauthAccountId, Session session) throws OXException {
+        OAuthService oAuthService = services.getOptionalService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        // Get the OAuth account
+        OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+        //checkOAuthAccount(oAuthAccount, session);
+
+        MailOAuthProvider provider = registry.getProviderFor(oAuthAccount.getMetaData().getId());
+        return null == provider ? null : provider.getTokenFor(oAuthAccount, session);
     }
 
 }

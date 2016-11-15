@@ -52,15 +52,13 @@ package com.openexchange.ajax.requesthandler;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.osgi.BodyParserRegistry;
 import com.openexchange.exception.OXException;
@@ -332,7 +330,7 @@ public class AJAXRequestDataTools {
         return TRUE_VALS.contains(com.openexchange.java.Strings.toLowerCase(value.trim()));
     }
 
-    private static final Set<String> TRUE_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "y", "on")));
+    private static final Set<String> TRUE_VALS = ImmutableSet.of("true", "1", "yes", "y", "on");
 
     /**
      * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter value.
@@ -347,7 +345,7 @@ public class AJAXRequestDataTools {
         return (null != parameter) && TRUE_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim()));
     }
 
-    private static final Set<String> FALSE_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("false", "0", "no", "n", "off")));
+    private static final Set<String> FALSE_VALS = ImmutableSet.of("false", "0", "no", "n", "off");
 
     /**
      * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter value.

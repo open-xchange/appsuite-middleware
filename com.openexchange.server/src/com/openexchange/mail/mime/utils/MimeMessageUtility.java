@@ -117,6 +117,7 @@ import org.apache.james.mime4j.stream.FieldBuilder;
 import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
@@ -188,7 +189,7 @@ public final class MimeMessageUtility {
         tmp.add(HeaderName.valueOf("windows-1258"));
         tmp.add(HeaderName.valueOf("UTF-8"));
         tmp.add(HeaderName.valueOf("us-ascii"));
-        ENCODINGS = java.util.Collections.unmodifiableSet(tmp);
+        ENCODINGS = ImmutableSet.copyOf(tmp);
         final MailDateFormat mdf = new MailDateFormat();
         mdf.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
         MAIL_DATE_FORMAT = mdf;
@@ -308,7 +309,7 @@ public final class MimeMessageUtility {
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
      * synchronized(mdf) {
-     *  mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
+     * mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
      * }
      * ...
      * </pre>
@@ -329,7 +330,7 @@ public final class MimeMessageUtility {
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
      * synchronized(mdf) {
-     *  mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
+     * mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
      * }
      * ...
      * </pre>
@@ -358,7 +359,7 @@ public final class MimeMessageUtility {
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(timeZoneId);
      * synchronized(mdf) {
-     *  mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
+     * mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
      * }
      * ...
      * </pre>
@@ -418,13 +419,9 @@ public final class MimeMessageUtility {
         return com.openexchange.java.Strings.isEmpty(string);
     }
 
-    private static final Pattern PATTERN_EMBD_IMG = Pattern.compile(
-        "(<img[^>]+src=\"cid:)([^\"]+)(\"[^>]*/?>)",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img[^>]+src=\"cid:)([^\"]+)(\"[^>]*/?>)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern PATTERN_EMBD_IMG_ALT = Pattern.compile(
-        "(<img[^>]+src=\")([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"[^>]*/?>)",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG_ALT = Pattern.compile("(<img[^>]+src=\")([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"[^>]*/?>)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains inlined images
@@ -727,9 +724,9 @@ public final class MimeMessageUtility {
 
     private static final String MULTI_SUBTYPE_RELATED = "RELATED";
 
-    // private static final String MULTI_SUBTYPE_MIXED = "MIXED";
+    private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
-    // private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
+    //     private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
 
     /**
      * Checks if given multipart contains (file) attachments
@@ -753,9 +750,10 @@ public final class MimeMessageUtility {
                 return true;
             }
             return hasAttachments0(mp, count);
-        } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype)) {
+        } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype) || MULTI_SUBTYPE_MIXED.equalsIgnoreCase(subtype)) {
             return hasAttachments0(mp, mp.getEnclosedCount());
         }
+
         // TODO: Think about special check for multipart/signed
         /*
          * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
@@ -772,7 +770,11 @@ public final class MimeMessageUtility {
         ContentType ct = new ContentType();
         for (int i = count; !found && i-- > 0;) {
             MailPart part = mp.getEnclosedMailPart(i);
-
+            if (!(part.getContentType().getBaseType().toLowerCase().startsWith("application") && part.getContentType().getSubType().toLowerCase().endsWith("-signature"))) {
+                if (hasAttachmentInMetadata(part)) {
+                    return true;
+                }
+            }
             String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
@@ -782,6 +784,20 @@ public final class MimeMessageUtility {
             }
         }
         return found;
+    }
+
+    private static boolean hasAttachmentInMetadata(MailPart part) {
+        ContentDisposition contentDisposition = part.getContentDisposition();
+        if (contentDisposition != null) {
+            if (contentDisposition.getFilenameParameter() != null) {
+                return true;
+            }
+            String disposition = contentDisposition.getDisposition();
+            if (disposition != null && disposition.equalsIgnoreCase(Part.ATTACHMENT)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -806,9 +822,10 @@ public final class MimeMessageUtility {
                 return true;
             }
             return hasAttachments0(mp, count);
-        } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype)) {
+        } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype) || MULTI_SUBTYPE_MIXED.equalsIgnoreCase(subtype)) {
             return hasAttachments0(mp, mp.getCount());
         }
+
         // TODO: Think about special check for multipart/signed
         /*
          * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
@@ -825,6 +842,11 @@ public final class MimeMessageUtility {
         ContentType ct = new ContentType();
         for (int i = count; !found && i-- > 0;) {
             BodyPart part = mp.getBodyPart(i);
+            if (!(part.getContentType().toLowerCase().startsWith("application") && part.getContentType().toLowerCase().endsWith("-signature"))) {
+                if (hasAttachmentInMetadata(part)) {
+                    return true;
+                }
+            }
             String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
@@ -834,6 +856,20 @@ public final class MimeMessageUtility {
             }
         }
         return found;
+    }
+
+    private static boolean hasAttachmentInMetadata(BodyPart part) throws MessagingException, OXException {
+        String disposition = part.getDisposition();
+        if (disposition != null) {
+            ContentDisposition cd = new ContentDisposition(disposition);
+            if (cd.getDisposition().equalsIgnoreCase(Part.ATTACHMENT)) {
+                return true;
+            }
+            if (cd.getFilenameParameter() != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -851,9 +887,10 @@ public final class MimeMessageUtility {
                     return true;
                 }
                 return hasAttachments0(bodystructure);
-            }  else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(bodystructure.subtype)) {
+            } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(bodystructure.subtype) || MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bodystructure.subtype)) {
                 return hasAttachments0(bodystructure);
             }
+
             // TODO: Think about special check for multipart/signed
             /*
              * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) { if (bodystructure.bodies.length > 2) { return true; }
@@ -863,6 +900,16 @@ public final class MimeMessageUtility {
                 return true;
             }
             return hasAttachments0(bodystructure);
+        }
+
+        if (!(bodystructure.type.toLowerCase().startsWith("application") && bodystructure.subtype.toLowerCase().endsWith("-signature"))) {
+            if (bodystructure.disposition != null && bodystructure.disposition.equals(Part.ATTACHMENT)) {
+                return true;
+            }
+
+            if (bodystructure.dParams != null && bodystructure.dParams.get("filename") != null) {
+                return true;
+            }
         }
         return false;
     }
@@ -1061,12 +1108,12 @@ public final class MimeMessageUtility {
             // Encoded word does not include charset
             return hdrVal;
         }
-        start = pos+1;
+        start = pos + 1;
         if ((pos = hdrVal.indexOf('?', start)) == -1) {
             // Encoded word does not include encoding
             return hdrVal;
         }
-        start = pos+1;
+        start = pos + 1;
         if ((pos = hdrVal.indexOf("?=", start)) == -1) {
             // Encoded word does not end with "?="
             return hdrVal.substring(start);
@@ -1220,8 +1267,8 @@ public final class MimeMessageUtility {
      *
      * <pre>
      * =?windows-1258?Q?foo_bar@mail.foobar.com, _Foo_B=E4r_=28fb@somewhere,
-     *  =@unspecified-domain,  =?windows-1258?Q?de=29@mail.foobar.com,
-     *  _Jane_Doe@mail.foobar.com, ?=
+     * =@unspecified-domain, =?windows-1258?Q?de=29@mail.foobar.com,
+     * _Jane_Doe@mail.foobar.com, ?=
      * </pre>
      *
      * @param eword The possibly corrupt encoded word
@@ -1452,6 +1499,7 @@ public final class MimeMessageUtility {
     }
 
     private static volatile Boolean checkReplaceWithComma;
+
     private static boolean checkReplaceWithComma() {
         Boolean b = checkReplaceWithComma;
         if (null == b) {
@@ -1625,8 +1673,7 @@ public final class MimeMessageUtility {
             }
             final String replaced = P_REPL2.matcher(P_REPL1.matcher(phrase).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
             // final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
-            return new StringBuilder(len + 2).append('"').append(
-                encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
+            return new StringBuilder(len + 2).append('"').append(encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
@@ -1763,10 +1810,11 @@ public final class MimeMessageUtility {
             return null;
         }
 
-        String s = PATTERN_UNFOLD.matcher(headerLine).replaceAll("$1$3");
+        boolean hasEncodingMark = headerLine.indexOf("?=", 0) >= 0;
+        String s = hasEncodingMark ? PATTERN_UNFOLD.matcher(headerLine).replaceAll("$1$3") : headerLine;
 
         int i;
-        if ((i = headerLine.indexOf('\r')) < 0 && (i = headerLine.indexOf('\n')) < 0) {
+        if ((i = headerLine.indexOf('\r', 0)) < 0 && (i = headerLine.indexOf('\n', 0)) < 0) {
             return s;
         }
         /*-
@@ -1781,7 +1829,7 @@ public final class MimeMessageUtility {
          * In this case the SPACE character is not part of the header and should
          * be discarded.
          */
-        if (headerLine.indexOf("=?") < 0) {
+        if (!hasEncodingMark) {
             s = headerLine;
         } else {
             s = unfoldEncodedWords(headerLine);

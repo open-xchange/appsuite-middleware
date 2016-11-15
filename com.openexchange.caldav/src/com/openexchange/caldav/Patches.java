@@ -92,14 +92,25 @@ public class Patches {
     }
 
     /**
-     * Replaces the representation of the prefix used for private comments denoting a new time proposal with another one
+     * Replaces the representation of the prefix used for private comments denoting a new time proposal with another one.
      *
      * @param appointment The appointment to patch
      * @param The prefix to replace
      * @param The replacement prefix
      */
     private static void patchPrivateComments(Appointment appointment, String prefix, String replacement) {
-        Participant[] participants = appointment.getParticipants();
+        patchPrivateComments(appointment.getParticipants(), prefix, replacement);
+        patchPrivateComments(appointment.getUsers(), prefix, replacement);
+    }
+
+    /**
+     * Replaces the representation of the prefix used for private comments denoting a new time proposal with another one.
+     *
+     * @param participants The participants to patch
+     * @param The prefix to replace
+     * @param The replacement prefix
+     */
+    private static void patchPrivateComments(Participant[] participants, String prefix, String replacement) {
         if (null == participants || 0 == participants.length) {
             return;
         }
@@ -359,7 +370,7 @@ public class Patches {
          */
         public static void adjustTaskStart(Task originalTask, Task updatedTask) {
             Date startDate = updatedTask.containsStartDate() ? updatedTask.getStartDate() : originalTask.getStartDate();
-            if (null != startDate && updatedTask.containsEndDate() && updatedTask.getEndDate().before(startDate)) {
+            if (null != startDate && updatedTask.containsEndDate() && null != updatedTask.getEndDate() && updatedTask.getEndDate().before(startDate)) {
                 /*
                  * remove currently set start date
                  */

@@ -1,5 +1,6 @@
 # Introduction
 
+This pages describes the HTTP API of the OX Middleware.
 
 ## Low level protocol
 

@@ -62,7 +62,7 @@ public interface SessiondConfigInterface {
 
     long getLongTermSessionContainerTimeout();
 
-    long getNumberOfSessionContainers();
+    int getNumberOfSessionContainers();
 
     int getMaxSessions();
 
@@ -76,7 +76,7 @@ public interface SessiondConfigInterface {
 
     long getRandomTokenTimeout();
 
-    long getNumberOfLongTermSessionContainers();
+    int getNumberOfLongTermSessionContainers();
 
     /**
      * @return <code>true</code> if autologin is enabled.

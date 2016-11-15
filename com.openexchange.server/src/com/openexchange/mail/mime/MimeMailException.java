@@ -49,7 +49,9 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import java.io.IOException;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
@@ -470,7 +472,7 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
                 com.sun.mail.iap.CommandFailedException cfe = (com.sun.mail.iap.CommandFailedException) nextException;
-                OXException handled = handleProtocolException(cfe, mailConfig, session, folder);
+                OXException handled = handleProtocolExceptionByResponseCode(cfe, mailConfig, session, folder);
                 if (null != handled) {
                     return handled;
                 }
@@ -502,7 +504,7 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 com.sun.mail.iap.BadCommandException bce = (com.sun.mail.iap.BadCommandException) nextException;
-                OXException handled = handleProtocolException(bce, mailConfig, session, folder);
+                OXException handled = handleProtocolExceptionByResponseCode(bce, mailConfig, session, folder);
                 if (null != handled) {
                     return handled;
                 }
@@ -519,9 +521,14 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.PROCESSING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof com.sun.mail.iap.ProtocolException) {
                 com.sun.mail.iap.ProtocolException pe = (com.sun.mail.iap.ProtocolException) nextException;
-                OXException handled = handleProtocolException(pe, mailConfig, session, folder);
+                OXException handled = handleProtocolExceptionByResponseCode(pe, mailConfig, session, folder);
                 if (null != handled) {
                     return handled;
+                }
+
+                Throwable protocolError = pe.getCause();
+                if (protocolError instanceof IOException) {
+                    return handleIOException((IOException) protocolError, mailConfig, session, folder);
                 }
 
                 if (null != mailConfig && null != session) {
@@ -535,16 +542,7 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.PROCESSING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof java.io.IOException) {
-                if (null != mailConfig && null != session) {
-                    return MimeMailExceptionCode.IO_ERROR_EXT.create(
-                        nextException,
-                        appendInfo(nextException.getMessage(), folder),
-                        mailConfig.getServer(),
-                        mailConfig.getLogin(),
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()));
-                }
-                return MimeMailExceptionCode.IO_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
+                return handleIOException((IOException) nextException, mailConfig, session, folder);
             } else if (toLowerCase(e.getMessage(), "").indexOf(ERR_QUOTA) != -1) {
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, getInfo(skipTag(e.getMessage())));
             }
@@ -572,7 +570,7 @@ public class MimeMailException extends OXException {
      * @param folder The optional folder
      * @return The {@link OXException} instance suitable for response code or <code>null</code>
      */
-    public static OXException handleProtocolException(com.sun.mail.iap.ProtocolException pe, MailConfig mailConfig, Session session, Folder folder) {
+    public static OXException handleProtocolExceptionByResponseCode(com.sun.mail.iap.ProtocolException pe, MailConfig mailConfig, Session session, Folder folder) {
         com.sun.mail.iap.ResponseCode rc = pe.getKnownResponseCode();
         if (null == rc) {
             return null;
@@ -668,6 +666,19 @@ public class MimeMailException extends OXException {
             authenticationFailedException,
             mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                 authenticationFailedException.getMessage());
+    }
+
+    private static OXException handleIOException(IOException ioException, MailConfig mailConfig, Session session, Folder folder) {
+        if (null != mailConfig && null != session) {
+            return MimeMailExceptionCode.IO_ERROR_EXT.create(
+                ioException,
+                appendInfo(ioException.getMessage(), folder),
+                mailConfig.getServer(),
+                mailConfig.getLogin(),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
+        }
+        return MimeMailExceptionCode.IO_ERROR.create(ioException, appendInfo(ioException.getMessage(), folder));
     }
 
     /**
@@ -840,6 +851,69 @@ public class MimeMailException extends OXException {
         }
         CommandFailedException commandFailedError = lookupNested(e, com.sun.mail.iap.CommandFailedException.class);
         return null != commandFailedError;
+    }
+
+    /**
+     * Checks if cause of specified exception indicates a communication problem; such as read timeout, EOF, etc.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if a communication problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isCommunicationException(OXException e) {
+        if (null == e) {
+            return false;
+        }
+
+        Throwable next = e.getCause();
+        if (next instanceof OXException) {
+            return isCommunicationException((OXException) next);
+        }
+        if (next instanceof MessagingException) {
+            return isCommunicationException((MessagingException) next);
+        }
+        return isEitherOf(next == null ? e : next, com.sun.mail.iap.ByeIOException.class, java.net.SocketTimeoutException.class, java.io.EOFException.class);
+    }
+
+    /**
+     * Checks if cause of specified messaging exception indicates a communication problem; such as read timeout, EOF, etc.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a communication problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isCommunicationException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        javax.mail.FolderClosedException folderClosedError = lookupNested(e, javax.mail.FolderClosedException.class);
+        if (null != folderClosedError) {
+            return true;
+        }
+
+        javax.mail.StoreClosedException storeClosedError = lookupNested(e, javax.mail.StoreClosedException.class);
+        if (null != storeClosedError) {
+            return true;
+        }
+
+        return isEitherOf(e, com.sun.mail.iap.ByeIOException.class, java.net.SocketTimeoutException.class, java.io.EOFException.class);
+    }
+
+    /**
+     * Checks if cause of specified messaging exception indicates a timeout problem.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a timeout problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTimeoutException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.SocketTimeoutException.class);
+    }
+
+    public static boolean isSSLHandshakeException(MessagingException e) {
+        return isEitherOf(e, javax.net.ssl.SSLHandshakeException.class);
     }
 
     // ------------------------------------------------- SMTP error stuff ----------------------------------------------------------------

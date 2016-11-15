@@ -399,7 +399,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             }
 
             // Generate preview images
-            previewImages = generatePreviewImages(session, shareReference);
+            previewImages = context.isPlainText() ? Collections.<String, ThresholdFileHolder> emptyMap() : generatePreviewImages(session, shareReference);
             Map<String, String> cidMapping = getCidMapping(previewImages);
             List<MailPart> imageParts = createPreviewPart(cidMapping, previewImages);
 

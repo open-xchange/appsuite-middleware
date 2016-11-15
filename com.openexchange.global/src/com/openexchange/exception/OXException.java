@@ -244,7 +244,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(4);
         arguments = new HashMap<String, Object>(4);
-        categories = new LinkedList<Category>();
+        categories = new ArrayList<Category>(2);
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
@@ -265,7 +265,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(4);
         arguments = new HashMap<String, Object>(4);
-        categories = new LinkedList<Category>();
+        categories = new ArrayList<Category>(2);
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
@@ -285,7 +285,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.generic = cloneMe.generic;
         this.count = cloneMe.count;
         this.code = cloneMe.code;
-        this.categories = null == cloneMe.categories ? new LinkedList<Category>() : new ArrayList<Category>(cloneMe.categories);
+        this.categories = null == cloneMe.categories ? new ArrayList<Category>(2) : new ArrayList<Category>(cloneMe.categories);
         this.displayArgs = cloneMe.displayArgs;
         this.displayMessage = cloneMe.displayMessage;
         this.exceptionId = cloneMe.exceptionId;
@@ -309,7 +309,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(4);
         arguments = new HashMap<String, Object>(4);
-        categories = new LinkedList<Category>();
+        categories = new ArrayList<Category>(2);
         this.code = code;
         this.displayMessage = OXExceptionStrings.MESSAGE;
         this.displayArgs = MESSAGE_ARGS_EMPTY;
@@ -331,7 +331,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(4);
         arguments = new HashMap<String, Object>(4);
-        categories = new LinkedList<Category>();
+        categories = new ArrayList<Category>(2);
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
@@ -354,7 +354,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(4);
         arguments = new HashMap<String, Object>(4);
-        categories = new LinkedList<Category>();
+        categories = new ArrayList<Category>(2);
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;

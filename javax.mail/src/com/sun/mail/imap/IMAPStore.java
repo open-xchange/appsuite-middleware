@@ -277,6 +277,7 @@ public class IMAPStore extends Store
     private boolean peek = false;
     private boolean closeFoldersOnStoreFailure = true;
     private boolean enableCompress = false;	// enable COMPRESS=DEFLATE
+    private boolean finalizeCleanClose = false;
 
     private long myValidity;
 
@@ -308,7 +309,7 @@ public class IMAPStore extends Store
     static class ConnectionPool {
 
         // container for the pool's IMAP protocol objects
-        private final Vector<IMAPProtocol> authenticatedConnections = new Vector<IMAPProtocol>();
+        final Vector<IMAPProtocol> authenticatedConnections = new Vector<IMAPProtocol>();
 
         // vectore of open folders
         private Vector<IMAPFolder> folders;
@@ -602,16 +603,16 @@ public class IMAPStore extends Store
 		if (logger.isLoggable(Level.CONFIG)) {
             logger.config("SASL mechanisms allowed: " + s);
         }
-		Vector v = new Vector(5);
+		java.util.List<String> v = new java.util.ArrayList<String>(5);
 		StringTokenizer st = new StringTokenizer(s, " ,");
 		while (st.hasMoreTokens()) {
 		    String m = st.nextToken();
 		    if (m.length() > 0) {
-                v.addElement(m);
+                v.add(m);
             }
 		}
 		saslMechanisms = new String[v.size()];
-		v.copyInto(saslMechanisms);
+		v.toArray(saslMechanisms);
 	    }
 	}
 
@@ -710,6 +711,12 @@ public class IMAPStore extends Store
 	    "mail." + name + ".compress.enable", false);
 	if (enableCompress)
 	    logger.config("enable COMPRESS");
+
+	// check if finalizeCleanClose is enabled
+	finalizeCleanClose = PropUtil.getBooleanSessionProperty(session,
+	    "mail." + name + ".finalizecleanclose", false);
+	if (finalizeCleanClose)
+	    logger.config("close connection cleanly in finalize");
 
 	s = session.getProperty("mail." + name + ".folder.class");
 	if (s != null) {
@@ -1226,6 +1233,31 @@ public class IMAPStore extends Store
      */
     public synchronized void setPassword(String password) {
 	this.password = password;
+    }
+
+    @Override
+    public boolean isSetAndGetReadTimeoutSupported() {
+        return true;
+    }
+
+    @Override
+    public int setAndGetReadTimeout(int readTimeout) throws MessagingException {
+        synchronized (pool) {
+            Vector<IMAPProtocol> authenticatedConnections = pool.authenticatedConnections;
+            if (authenticatedConnections.isEmpty()) {
+                throw new IllegalStateException("Not connected");
+            }
+            
+            try {
+                int to = -1;
+                for (IMAPProtocol imapProtocol : authenticatedConnections) {
+                    to = imapProtocol.setAndGetReadTimeout(readTimeout);
+                }
+                return to;
+            } catch (ProtocolException pex) {
+                throw new MessagingException(pex.getMessage(), pex);
+            }
+        }
     }
 
     /*
@@ -2002,6 +2034,14 @@ public class IMAPStore extends Store
 
     @Override
     protected void finalize() throws Throwable {
+	if (!finalizeCleanClose) {
+	    // when finalizing, close connections abruptly
+	    synchronized (connectionFailedLock) {
+		connectionFailed = true;
+		forceClose = true;
+	    }
+	    closeFoldersOnStoreFailure = true;	// make sure folders get closed
+	}
 	try {
 	    close();
 	} finally {

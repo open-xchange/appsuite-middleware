@@ -403,7 +403,7 @@ public class Flags implements Cloneable, Serializable {
      * @return	array of Flags.Flag objects representing system flags
      */
     public Flag[] getSystemFlags() {
-	Vector v = new Vector();
+	Vector<Flag> v = new Vector<Flag>();
 	if ((system_flags & ANSWERED_BIT) != 0)
 	    v.addElement(Flag.ANSWERED);
 	if ((system_flags & DELETED_BIT) != 0)
@@ -442,6 +442,16 @@ public class Flags implements Cloneable, Serializable {
 	String[] f = new String[v.size()];
 	v.copyInto(f);
 	return f;
+    }
+
+    /**
+     * Removes all user flags from this Flags object.
+     *
+     * @return This Flags object with all user flags removed
+     */
+    public Flags removeAllUserFlags() {
+        user_flags = null;
+        return this;
     }
 
     /**

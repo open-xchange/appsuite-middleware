@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2015 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013-2015 Jason Mehrens. All rights reserved.
+ * Copyright (c) 2013-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013-2016 Jason Mehrens. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -65,6 +65,22 @@ import java.util.logging.LogRecord;
  * @since JavaMail 1.5.2
  */
 public class CompactFormatter extends java.util.logging.Formatter {
+    /**
+     * Load any declared classes to workaround GLASSFISH-21258.
+     */
+    static {
+        loadDeclaredClasses();
+    }
+
+    /**
+     * Used to load declared classes encase class loader doesn't allow loading
+     * during JVM termination.  This method is used with unit testing.
+     *
+     * @return an array of classes never null.
+     */
+    private static Class<?>[] loadDeclaredClasses() {
+        return new Class<?>[]{Alternate.class};
+    }
 
     /**
      * Holds the java.util.Formatter pattern.
@@ -101,8 +117,11 @@ public class CompactFormatter extends java.util.logging.Formatter {
      *     java.util.Formatter} format string specified in the
      * &lt;formatter-name&gt;.format property or the format that was given when
      * this formatter was created.</li>
-     * <li>{@code date} - a {@linkplain Date} object representing
-     * {@linkplain LogRecord#getMillis event time} of the log record.</li>
+     * <li>{@code date} - if the log record supports nanoseconds then a
+     *     ZonedDateTime object representing the event time of the log record in
+     *     the system time zone. Otherwise, a {@linkplain Date} object
+     *     representing {@linkplain LogRecord#getMillis event time} of the log
+     *     record.</li>
      * <li>{@code source} - a string representing the caller, if available;
      * otherwise, the logger's name.</li>
      * <li>{@code logger} - the logger's
@@ -214,7 +233,7 @@ public class CompactFormatter extends java.util.logging.Formatter {
         String thrown = formatThrown(record);
         String err = formatError(record);
         Object[] params = {
-            new Date(record.getMillis()),
+            formatZonedDateTime(record),
             formatSource(record),
             formatLoggerName(record),
             formatLevel(record),
@@ -509,6 +528,22 @@ public class CompactFormatter extends java.util.logging.Formatter {
     }
 
     /**
+     * Gets the zoned date time from the given log record.
+     *
+     * @param record the current log record.
+     * @return a zoned date time or a legacy date object.
+     * @throws NullPointerException if the given record is null.
+     * @since JavaMail 1.5.6
+     */
+    private Comparable<?> formatZonedDateTime(final LogRecord record) {
+        Comparable<?> zdt = LogManagerProperties.getZonedDateTime(record);
+        if (zdt == null) {
+           zdt = new java.util.Date(record.getMillis());
+        }
+        return zdt;
+    }
+
+    /**
      * Determines if a stack frame should be ignored as the cause of an error.
      * This does not check for unknown line numbers because code can be compiled
      * without debugging info.
@@ -720,6 +755,7 @@ public class CompactFormatter extends java.util.logging.Formatter {
             this.right = String.valueOf(right);
         }
 
+        @SuppressWarnings("override") //JDK-6954234
         public void formatTo(java.util.Formatter formatter, int flags,
                 int width, int precision) {
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -127,7 +127,7 @@ class Protocol {
 		throw new IOException("Connect failed");
 	    }
 	}
-	if (enableAPOP) {
+	if (enableAPOP && r.data != null) {
 	    int challStart = r.data.indexOf('<');	// start of challenge
 	    int challEnd = r.data.indexOf('>', challStart); // end of challenge
 	    if (challStart != -1 && challEnd != -1)
@@ -346,15 +346,24 @@ class Protocol {
 	    Response r = simpleCommand("QUIT");
 	    ok = r.ok;
 	} finally {
-	    try {
-		socket.close();
-	    } finally {
-		socket = null;
-		input = null;
-		output = null;
-	    }
+	    close();
 	}
 	return ok;
+    }
+
+    /**
+     * Close the connection without sending any commands.
+     */
+    void close() {
+	try {
+	    socket.close();
+	} catch (IOException ex) {
+	    // ignore it
+	} finally {
+	    socket = null;
+	    input = null;
+	    output = null;
+	}
     }
 
     /**
@@ -850,4 +859,25 @@ class Protocol {
     private void batchCommandStart(String command) { }
     private void batchCommandContinue(String command) { }
     private void batchCommandEnd() { }
+
+    /**
+     * Sets the specified read timeout and returns the previously applicable SO_TIMEOUT value.
+     *
+     * @param readTimeout The new SO_TIMEOUT to set. A timeout of zero is interpreted as an infinite timeout. A value of less than zero is ignored
+     * @return The previously applicable SO_TIMEOUT value
+     * @throws IOException If SO_TIMEOUT cannot be set
+     */
+    public int setAndGetReadTimeout(int readTimeout) throws IOException {
+        Socket socket = this.socket;
+        if (null == socket) {
+            return -1;
+        }
+
+        int to = socket.getSoTimeout();
+        if (readTimeout >= 0) {
+            socket.setSoTimeout(readTimeout);
+        }
+        return to;
+    }
+
 }

@@ -110,7 +110,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     checkFolderValidity(folderInfo);
                     return Boolean.TRUE;
                 } catch (final BoxAPIException e) {
-                    if (404 == e.getResponseCode()) {
+                    if (SC_NOT_FOUND == e.getResponseCode()) {
                         return Boolean.FALSE;
                     }
                     throw e;

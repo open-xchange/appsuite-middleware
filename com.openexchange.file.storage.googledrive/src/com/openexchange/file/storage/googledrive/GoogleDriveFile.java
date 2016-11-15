@@ -182,18 +182,18 @@ public final class GoogleDriveFile extends DefaultFile {
      * Parses specified Google Drive revision.
      *
      * @param revision The Google Drive revision
+     * @param name The file name/title to set
      * @param fields The fields to consider
      * @throws OXException If parsing Google Drive file fails
      * @return This Google Drive file with property set applied
      */
-    public GoogleDriveFile parseRevision(Revision revision, List<Field> fields) throws OXException {
+    public GoogleDriveFile parseRevision(Revision revision, String name, List<Field> fields) throws OXException {
         if (null != revision) {
             try {
                 setVersion(revision.getId());
-                String name = revision.getOriginalFilename();
-                setTitle(name);
-                setFileName(name);
-                setVersion(revision.getId());
+                String n = null == name ? revision.getOriginalFilename() : name;
+                setTitle(n);
+                setFileName(n);
 
                 Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
@@ -206,7 +206,7 @@ public final class GoogleDriveFile extends DefaultFile {
                     String contentType = revision.getMimeType();
                     if (com.openexchange.java.Strings.isEmpty(contentType)) {
                         final MimeTypeMap map = Services.getService(MimeTypeMap.class);
-                        contentType = map.getContentType(name);
+                        contentType = map.getContentType(n);
                     }
                     setFileMIMEType(contentType);
                 }

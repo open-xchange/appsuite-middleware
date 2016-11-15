@@ -71,6 +71,7 @@ import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.internal.CustomTrustManager;
 import com.openexchange.net.ssl.internal.DefaultTrustManager;
 import com.openexchange.net.ssl.osgi.Services;
+import com.openexchange.tools.ssl.DelegatingSSLSocket;
 
 /**
  * {@link TrustedSSLSocketFactory}
@@ -140,8 +141,8 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
      */
     private static SSLSocketFactory newAdapteeFactory(SSLContext sslcontext) throws KeyManagementException {
         List<TrustManager> trustManagers = TRUST_MANAGERS.get();
-        if (trustManagers.isEmpty()) {
-            LOG.error("No trust manager configured. Going to use default one for now. Please enable default or custom trust store.");
+        if (trustManagers == null || trustManagers.isEmpty()) {
+            LOG.error("No trust managers available, maybe configuration error. Going to use default one for now. Please enable default or custom trust store.");
             sslcontext.init(null, null, null);
             return sslcontext.getSocketFactory();
         }
@@ -191,56 +192,53 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     @Override
     public Socket createSocket() throws IOException {
         Socket socket = this.adapteeFactory.createSocket();
-        setProperties(socket);
-        return socket;
+        return setProperties(socket);
     }
 
     @Override
     public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
         Socket socket = this.adapteeFactory.createSocket(s, host, port, autoClose);
-        setProperties(socket);
-        return socket;
+        return setProperties(socket);
     }
 
     @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
         Socket socket = this.adapteeFactory.createSocket(host, port);
-        setProperties(socket);
-        return socket;
+        return setProperties(socket);
     }
 
     @Override
     public Socket createSocket(InetAddress host, int port) throws IOException {
         Socket socket = this.adapteeFactory.createSocket(host, port);
-        setProperties(socket);
-        return socket;
+        return setProperties(socket);
     }
 
     @Override
     public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
         Socket socket = this.adapteeFactory.createSocket(host, port, localHost, localPort);
-        setProperties(socket);
-        return socket;
+        return setProperties(socket);
     }
 
     @Override
     public Socket createSocket(InetAddress address, int port, InetAddress localHost, int localPort) throws IOException {
         Socket socket = this.adapteeFactory.createSocket(address, port, localHost, localPort);
-        setProperties(socket);
-        return socket;
+        return setProperties(socket);
     }
 
-    private void setProperties(Socket socket) {
-        if (socket instanceof SSLSocket) {
-            SSLSocket sslSocket = (SSLSocket) socket;
+    private Socket setProperties(Socket socket) {
+        if (!(socket instanceof SSLSocket)) {
+            return socket;
+        }
+
+        SSLSocket sslSocket = (SSLSocket) socket;
 //            String[] supportedProtocols = sslSocket.getSupportedProtocols();
 //            String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
-            SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
-            sslSocket.setEnabledProtocols(sslConfigService.getSupportedProtocols());
-            sslSocket.setEnabledCipherSuites(sslConfigService.getSupportedCipherSuites());
-            sslSocket.setUseClientMode(true);
-            sslSocket.addHandshakeCompletedListener(this);
-        }
+        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+        sslSocket.setEnabledProtocols(sslConfigService.getSupportedProtocols());
+        sslSocket.setEnabledCipherSuites(sslConfigService.getSupportedCipherSuites());
+        sslSocket.setUseClientMode(true);
+        sslSocket.addHandshakeCompletedListener(this);
+        return new DelegatingSSLSocket(sslSocket);
     }
 
     @Override

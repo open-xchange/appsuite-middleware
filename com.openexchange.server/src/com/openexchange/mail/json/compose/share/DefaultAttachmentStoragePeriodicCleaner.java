@@ -124,12 +124,14 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
 
     @Override
     public void run() {
+        DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (null == databaseService) {
+            // Do nothing
+            return;
+        }
+
         long start = System.currentTimeMillis();
         try {
-            DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-            if (null == databaseService) {
-                throw ServiceExceptionCode.absentService(DatabaseService.class);
-            }
 
             List<Integer> contextsIdInDifferentSchemas = new LinkedList<Integer>();
             {

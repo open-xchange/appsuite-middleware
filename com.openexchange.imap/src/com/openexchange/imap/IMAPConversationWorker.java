@@ -199,9 +199,7 @@ public final class IMAPConversationWorker {
                 return Collections.emptyList();
             }
             int lookAhead;
-            if (max <= 0) {
-                lookAhead = -1;
-            } else {
+            {
                 lookAhead = 1000;
                 if (null != indexRange) {
                     while (indexRange.end >= (lookAhead / 2)) {

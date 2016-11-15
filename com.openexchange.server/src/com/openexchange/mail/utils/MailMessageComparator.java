@@ -272,14 +272,77 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                final boolean isSeen1 = msg1.isSeen();
-                if (isSeen1) {
+                if (msg1.isSeen()) {
                     if (msg2.isSeen()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
                     return 1;
                 }
                 if (msg2.isSeen()) {
+                    return -1;
+                }
+                return compareByReceivedDate(msg1, msg2, false);
+            }
+        });
+        COMPARERS.put(MailSortField.FLAG_ANSWERED, new FieldComparer() {
+
+            @Override
+            public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+                if (msg1.isAnswered()) {
+                    if (msg2.isAnswered()) {
+                        return compareByReceivedDate(msg1, msg2, false);
+                    }
+                    return 1;
+                }
+                if (msg2.isAnswered()) {
+                    return -1;
+                }
+                return compareByReceivedDate(msg1, msg2, false);
+            }
+        });
+        COMPARERS.put(MailSortField.FLAG_ANSWERED, new FieldComparer() {
+
+            @Override
+            public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+                if (msg1.isForwarded()) {
+                    if (msg2.isForwarded()) {
+                        return compareByReceivedDate(msg1, msg2, false);
+                    }
+                    return 1;
+                }
+                if (msg2.isForwarded()) {
+                    return -1;
+                }
+                return compareByReceivedDate(msg1, msg2, false);
+            }
+        });
+        COMPARERS.put(MailSortField.FLAG_DRAFT, new FieldComparer() {
+
+            @Override
+            public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+                if (msg1.isDraft()) {
+                    if (msg2.isDraft()) {
+                        return compareByReceivedDate(msg1, msg2, false);
+                    }
+                    return 1;
+                }
+                if (msg2.isDraft()) {
+                    return -1;
+                }
+                return compareByReceivedDate(msg1, msg2, false);
+            }
+        });
+        COMPARERS.put(MailSortField.FLAG_FLAGGED, new FieldComparer() {
+
+            @Override
+            public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+                if (msg1.isFlagged()) {
+                    if (msg2.isFlagged()) {
+                        return compareByReceivedDate(msg1, msg2, false);
+                    }
+                    return 1;
+                }
+                if (msg2.isFlagged()) {
                     return -1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);

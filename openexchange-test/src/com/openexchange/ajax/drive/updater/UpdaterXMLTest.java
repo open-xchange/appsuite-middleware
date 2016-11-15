@@ -78,6 +78,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.java.Strings;
 import org.apache.commons.codec.binary.Hex;
 
 /**
@@ -131,7 +132,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
             HttpResponse response = httpClient.execute(targetHost, getXML);
             HttpEntity entity = response.getEntity();
             EntityUtils.consume(entity);
-            assertTrue("Expected 401.", response.getStatusLine().getStatusCode() == 401);
+            assertEquals(401, response.getStatusLine().getStatusCode());
 
             httpClient.getCredentialsProvider().setCredentials(
                 new AuthScope(targetHost.getHostName(), targetHost.getPort()),
@@ -172,6 +173,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
 
         SAXBuilder builder = new SAXBuilder();
         String xml = response.getXML();
+        assertFalse("The response no or only an empty xml!", Strings.isEmpty(xml));
 
         Document doc = null;
         try {

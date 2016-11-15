@@ -49,7 +49,9 @@
 
 package com.openexchange.dovecot.doveadm.client;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -164,7 +166,7 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
         public Builder setParameter(String name, Object value) {
             if (null != name && null != value) {
                 if (isInvalidParameterValue(value)) {
-                    throw new IllegalArgumentException("Value is neither of type Boolean, Character, Number nor String");
+                    throw new IllegalArgumentException("Value itself or one of contained ones is neither of type Boolean, Character, Number nor String");
                 }
                 mapBuilder.put(name, value);
             }
@@ -181,7 +183,7 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
         public Builder setParameter(Entry<? extends String, ? extends Object> entry) {
             if (null != entry && null != entry.getKey() && null != entry.getValue()) {
                 if (isInvalidParameterValue(entry.getValue())) {
-                    throw new IllegalArgumentException("Value is neither of type Boolean, Character, Number nor String");
+                    throw new IllegalArgumentException("Value itself or one of contained ones is neither of type Boolean, Character, Number nor String");
                 }
                 mapBuilder.put(entry);
             }
@@ -202,7 +204,7 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
                     String value = entry.getValue();
                     if (null != key && null != value) {
                         if (isInvalidParameterValue(value)) {
-                            throw new IllegalArgumentException("Value is neither of type Boolean, Character, Number nor String");
+                            throw new IllegalArgumentException("Value itself or one of contained ones is neither of type Boolean, Character, Number nor String");
                         }
                         toInsert.add(entry);
                     }
@@ -229,7 +231,7 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
                     String value = entry.getValue();
                     if (null != key && null != value) {
                         if (isInvalidParameterValue(value)) {
-                            throw new IllegalArgumentException("Value is neither of type Boolean, Character, Number nor String");
+                            throw new IllegalArgumentException("Value itself or one of contained ones is neither of type Boolean, Character, Number nor String");
                         }
                         toInsert.add(entry);
                     }
@@ -243,6 +245,40 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
         }
 
         private boolean isInvalidParameterValue(Object value) {
+            if (value.getClass().isArray()) {
+                for (int i = Array.getLength(value); i-- > 0;) {
+                    Object elem = Array.get(value, i);
+                    if (isInvalidParameterValue(elem)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (value instanceof Collection) {
+                Collection<Object> collection = (Collection<Object>) value;
+                for (Object elem : collection) {
+                    if (isInvalidParameterValue(elem)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (value instanceof Map) {
+                try {
+                    Map<String, Object> map = (Map<String, Object>) value;
+                    for (Object elem : map.values()) {
+                        if (isInvalidParameterValue(elem)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                } catch (ClassCastException e) {
+                    return true;
+                }
+            }
+
             return (String.class != value.getClass() && Boolean.class != value.getClass() && Character.class != value.getClass() && !Number.class.isInstance(value));
         }
 

@@ -115,7 +115,7 @@ public class GetAction extends AutoconfigAction {
         }
 
         AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure);
+        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUserId(), session.getContextId(), forceSecure);
         return new AJAXRequestResult(autoconfig, "autoconfig");
     }
 

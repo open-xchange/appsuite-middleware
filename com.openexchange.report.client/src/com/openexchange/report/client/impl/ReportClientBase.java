@@ -69,12 +69,12 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.report.appsuite.serialization.Report;
-import com.openexchange.report.appsuite.serialization.ReportConfigs;
+import com.openexchange.report.client.configuration.ReportConfigs;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.MacDetail;
 import com.openexchange.report.client.container.Total;
+import com.openexchange.report.client.transport.ReportPrinting;
 import com.openexchange.report.client.transport.TransportHandler;
 import com.openexchange.tools.CSVWriter;
 import com.openexchange.tools.console.TableWriter;
@@ -159,22 +159,6 @@ public class ReportClientBase extends AbstractJMXTools {
 
     private static final String OPT_APPSUITE_SET_TIMEFRAME_END_LONG = "timeframe-end";
 
-    private static final char OPT_OXAAS_SET_SINGLE_BRAND_SHORT = 'R';
-
-    private static final String OPT_OXAAS_SET_SINGLE_BRAND_LONG = "single-tenant";
-
-    private static final char OPT_OXAAS_SET_IGNORE_ADMINS_SHORT = 'A';
-
-    private static final String OPT_OXAAS_SET_IGNORE_ADMINS_LONG = "ignore-admins";
-
-    private static final char OPT_OXAAS_SET_DRIVE_METRICS_SHORT = 'D';
-
-    private static final String OPT_OXAAS_SET_DRIVE_METRICS_LONG = "drive-metrics";
-
-    private static final char OPT_OXAAS_SET_MAIL_METRICS_SHORT = 'M';
-
-    private static final String OPT_OXAAS_SET_MAIL_METRICS_LONG = "mail-metrics";
-
     private CLIOption displayonly = null;
 
     private CLIOption sendonly = null;
@@ -207,15 +191,6 @@ public class ReportClientBase extends AbstractJMXTools {
     private CLIOption runAndDeliverOldReport = null;
 
     private CLIOption asReportType = null;
-
-    // OXAAS options
-    private CLIOption singleTenant = null;
-
-    private CLIOption ignoreAdmins = null;
-
-    private CLIOption driveMetrics = null;
-
-    private CLIOption mailMetrics = null;
 
     public enum ReportMode {
         SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE
@@ -276,28 +251,13 @@ public class ReportClientBase extends AbstractJMXTools {
             if (reportType == null) {
                 reportType = "default";
             }
-            boolean isSingleTenant = false;
-            long singeTenantId = 0l;
-            boolean isIgnoreAdmin = false;
-            boolean isShowDriveMetrics = false;
-            boolean isShowMailMetrics = false;
-            if (reportType.equals("oxaas-extended")) {
-                if (parser.getOptionValue(singleTenant) != null) {
-                    isSingleTenant = true;
-                    singeTenantId = Long.parseLong(((String) parser.getOptionValue(singleTenant)));
-                }
-                if (parser.getOptionValue(ignoreAdmins) != null) {
-                    isIgnoreAdmin = true;
-                }
-                if (parser.getOptionValue(driveMetrics) != null) {
-                    isShowDriveMetrics = true;
-                }
-                if (parser.getOptionValue(mailMetrics) != null) {
-                    isShowMailMetrics = true;
-                }
-            }
 
-            ReportConfigs reportConfigs = new ReportConfigs.ReportConfigsBuilder(reportType).isSingleDeployment(false).isConfigTimerange(isCustomTimeframe).consideredTimeframeStart(timeframeStart.getTime()).consideredTimeframeEnd(timeframeEnd.getTime()).isShowSingleTenant(isSingleTenant).singleTenantId(singeTenantId).isAdminIgnore(isIgnoreAdmin).isShowDriveMetrics(isShowDriveMetrics).isShowMailMetrics(isShowMailMetrics).build();
+            ReportConfigs reportConfigs = new ReportConfigs.ReportConfigsBuilder(reportType)
+                                                            .isSingleDeployment(false)
+                                                            .isConfigTimerange(isCustomTimeframe)
+                                                            .consideredTimeframeStart(timeframeStart.getTime())
+                                                            .consideredTimeframeEnd(timeframeEnd.getTime())
+                                                            .build();
             //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
             final MBeanServerConnection initConnection = initConnection(env);
@@ -405,7 +365,7 @@ public class ReportClientBase extends AbstractJMXTools {
 
         this.runAsReport = setShortLongOpt(parser, OPT_APPSUITE_RUN_REPORT_SHORT, OPT_APPSUITE_RUN_REPORT_LONG, "Schedule an appsuite style report. Will print out the reports UUID or, if a report is being generated, the UUID of the pending report", false, NeededQuadState.notneeded);
 
-        this.asReportType = setShortLongOpt(parser, OPT_APPSUITE_REPORT_TYPE_SHORT, OPT_APPSUITE_REPORT_TYPE_LONG, "The type of the report to run. Leave this off for the 'default' report. 'Known reports next to 'default': 'extended', 'oscs-extended' Enables additional options, as listed below (provisioning-bundels needed)", true, NeededQuadState.notneeded);
+        this.asReportType = setShortLongOpt(parser, OPT_APPSUITE_REPORT_TYPE_SHORT, OPT_APPSUITE_REPORT_TYPE_LONG, "The type of the report to run. Leave this off for the 'default' report. 'Known reports next to 'default': 'extended'", true, NeededQuadState.notneeded);
 
         this.inspectAsReports = setLongOpt(parser, OPT_APPSUITE_INSPECT_REPORTS_LONG, "Prints information about currently running reports", false, false);
 
@@ -420,14 +380,6 @@ public class ReportClientBase extends AbstractJMXTools {
         this.timeframeStart = setShortLongOpt(parser, OPT_APPSUITE_SET_TIMEFRAME_START_SHORT, OPT_APPSUITE_SET_TIMEFRAME_START_LONG, "Set the starting date of the timeframe in format: dd.mm.yyyy", true, NeededQuadState.notneeded);
 
         this.timeframeEnd = setShortLongOpt(parser, OPT_APPSUITE_SET_TIMEFRAME_END_SHORT, OPT_APPSUITE_SET_TIMEFRAME_END_LONG, "Set the ending date of the timeframe in format: dd.mm.yyyy. If start date is set and this parameter not, the current Date is taken as timeframe end.", true, NeededQuadState.notneeded);
-
-        this.singleTenant = setShortLongOpt(parser, OPT_OXAAS_SET_SINGLE_BRAND_SHORT, OPT_OXAAS_SET_SINGLE_BRAND_LONG, "OXAAS only: Run the report for a single brand, identified by the sid of the brands admin. oxaas-extended report-type only", true, NeededQuadState.notneeded);
-
-        this.ignoreAdmins = setShortLongOpt(parser, OPT_OXAAS_SET_IGNORE_ADMINS_SHORT, OPT_OXAAS_SET_IGNORE_ADMINS_LONG, "OXAAS only: Ignore admins and dont show users of that category. oxaas-extended report-type only", false, NeededQuadState.notneeded);
-
-        this.driveMetrics = setShortLongOpt(parser, OPT_OXAAS_SET_DRIVE_METRICS_SHORT, OPT_OXAAS_SET_DRIVE_METRICS_LONG, "OXAAS only: Get drive metrics for each user. oxaas-extended report-type only", false, NeededQuadState.notneeded);
-
-        this.mailMetrics = setShortLongOpt(parser, OPT_OXAAS_SET_MAIL_METRICS_SHORT, OPT_OXAAS_SET_MAIL_METRICS_LONG, "OXAAS only: Get mail metrics for each user. oxaas-extended report-type only", false, NeededQuadState.notneeded);
     }
 
     protected void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, Map<String, String> serverConfiguration, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
@@ -665,7 +617,7 @@ public class ReportClientBase extends AbstractJMXTools {
      */
     private void runAndDeliverASReport(ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, ReportConfigs reportConfig) {
         try {
-            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
+            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName()});
 
             // Start polling
             boolean done = false;
@@ -824,7 +776,7 @@ public class ReportClientBase extends AbstractJMXTools {
         }
         try {
             String uuid = "";
-            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
+            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName()});
             System.out.println("\nRunning report with uuid: " + uuid);
         } catch (Exception e) {
             e.printStackTrace();
@@ -898,7 +850,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     } else if (data.get(string) instanceof Boolean) {
                         System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
                     } else if (string.equals("macdetail") || string.equals("oxaas")) {
-                        Report.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
+                        ReportPrinting.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
                     } else {
                         JSONObject obj = (JSONObject) data.get(string);
                         System.out.println("  \"" + string + "\" : " + obj.toString(2, 1) + ",");

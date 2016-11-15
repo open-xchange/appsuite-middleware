@@ -310,12 +310,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         }
                     }
                 } else {
-                    int sortCol;
-                    try {
-                        sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                    } catch (NumberFormatException e) {
-                        throw MailExceptionCode.INVALID_INT_VALUE.create(e, AJAXServlet.PARAMETER_SORT);
-                    }
+                    int sortCol = req.getSortFieldFor(sort);
                     String category_filter = req.getParameter("categoryid");
                     if (filterApplied || category_filter != null) {
                         mailInterface.openFor(folderId);

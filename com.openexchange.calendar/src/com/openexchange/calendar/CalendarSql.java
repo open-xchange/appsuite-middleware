@@ -674,8 +674,12 @@ public class CalendarSql implements AppointmentSQLInterface {
                 conflicts = ch.getConflicts();
             }
             if (conflicts.length == 0) {
+                /*
+                 * Bug 49322 - NPE at c.o.calendar.CalendarSql.updateAppointmentObject
+                 * Added a check if users actually exist before accessing the data 
+                 */
                 // Check user participants completeness
-                if (cdao.containsUserParticipants()) {
+                if (cdao.containsUserParticipants() && null != cdao.getUsers() && 0 < cdao.getUsers().length) {
                     final UserParticipant[] edaoUsers = edao.getUsers();
                     final List<UserParticipant> origUsers = Arrays.asList(edaoUsers);
 

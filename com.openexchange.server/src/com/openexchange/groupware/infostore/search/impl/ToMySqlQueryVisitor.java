@@ -52,11 +52,11 @@ package com.openexchange.groupware.infostore.search.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.owasp.esapi.codecs.MySQLCodec;
 import org.owasp.esapi.codecs.MySQLCodec.Mode;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.AbstractStringSearchTerm;
@@ -105,7 +105,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version";
     private static final char[] IMMUNE = new char[] { ' ', '%', '_' };
     private static final char[] IMMUNE_WILDCARDS = new char[] { ' ', '%', '_', '\\' };
-    private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = Collections.unmodifiableSet(new HashSet<Class<? extends SearchTerm<?>>>(Arrays.asList(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class)));
+    private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = ImmutableSet.<Class<? extends SearchTerm<?>>> of(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class);
 
     private final StringBuilder filterBuilder;
     private final MySQLCodec codec;

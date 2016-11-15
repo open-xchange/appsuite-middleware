@@ -2,7 +2,7 @@
   put:
     operationId: getFileMetadata
     tags:
-      - drive
+      - Drive
     summary: Gets file metadata (**deprecated, available until API version 2**).
     description: Additional metadata of synchronized files is made available.
     consumes:
@@ -33,3 +33,33 @@
           in the response are filled.
         schema:
           $ref: "#/definitions/DriveFileMetadataResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=fileMetadata&root=97974&path=%2f&columns=702%2c708%2c752%2c750%2c753&session=43aca91a80de42559ff0c2493dd973d0
+          > Content:
+            [
+              {
+                "name" : "image.jpg",
+                "checksum" : "2b04df3ecc1d94afddff082d139c6f15"
+              }, {
+                "name" : "song.mp3",
+                "checksum" : "5a9a91184e611dae3fed162b8787ce5f"
+              }, {
+                "name" : "test1.txt",
+                "checksum" : "7e36f409a042f06ecb88606a97a88c8f"
+              }, {
+                "name" : "test3.txt",
+                "checksum" : "703bc9aabff33faf07cf121dcda12ec8"
+              }
+            ]  
+
+          <== HTTP 200 OK (6.0004 ms elapsed, 140 bytes received)
+          <   Content:
+              [
+                ["image.jpg", "2b04df3ecc1d94afddff082d139c6f15", "https://192.168.32.191/ox6/index.html#m=infostore&f=97974&i=179629", "https://192.168.32.191/ajax/files?action=document&folder=97974&id=179629&version=1&delivery=download&scaleType=contain&width=128&height=90", "m=infostore&f=97974&i=179629"], 
+                ["song.mp3", "5a9a91184e611dae3fed162b8787ce5f", "https://192.168.32.191/ox6/index.html#m=infostore&f=97974&i=179630", "https://192.168.32.191/ajax/image/file/mp3Cover?folder=97974&id=179630&version=1&delivery=download&scaleType=contain&width=128&height=90", "m=infostore&f=97974&i=179630"], 
+                ["test1.txt", "7e36f409a042f06ecb88606a97a88c8f", "https://192.168.32.191/ox6/index.html#m=infostore&f=97974&i=179626", null, "m=infostore&f=97974&i=179626"], 
+                ["test3.txt", "703bc9aabff33faf07cf121dcda12ec8", "https://192.168.32.191/ox6/index.html#m=infostore&f=97974&i=179624", null, "m=infostore&f=97974&i=179624"]
+              ]

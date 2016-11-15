@@ -64,7 +64,7 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface MessageDispatcher {
-    
+
     /**
      * Delivers a {@link Stanza} to a list of given recipients.
      *
@@ -72,19 +72,19 @@ public interface MessageDispatcher {
      * @return A map of IDs that could not be reached because of an occurred exception.
      * @throws OXException If send operation fails for any reason
      */
-    public Map<ID, OXException> send(Stanza stanza, IDMap<Resource> recipients) throws OXException;
-    
+    Map<ID, OXException> send(Stanza stanza, IDMap<Resource> recipients) throws OXException;
+
     /**
      * Delivers a stanza using the resource directory to resolve the recipients
-     * 
+     *
      * @param stanza The Stanza to send
      * @throws OXException when delivery fails
      */
-    public void send(Stanza stanza) throws OXException;
+    void send(Stanza stanza) throws OXException;
 
     /**
      * Send a message and synchronously waits for a response. The recipient is supposed to send exactly one Stanza
-     * back to the 'from' ID. The 'from' ID is generated in this method. 
+     * back to the 'from' ID. The 'from' ID is generated in this method.
      */
-    public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException;
+    Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException;
 }

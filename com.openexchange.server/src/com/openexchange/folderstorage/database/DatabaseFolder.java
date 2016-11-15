@@ -108,6 +108,9 @@ public class DatabaseFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -4035221612481906228L;
 
+    private static final String CAPABILITY_ZIPPABLE_FOLDER = Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name());
+    private static final String CAPABILITY_FILE_VERSIONS = Strings.asciiLowerCase(FileStorageCapability.FILE_VERSIONS.name());
+
     private static final TIntSet COUNTABLE_MODULES = new TIntHashSet(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK, FolderObject.INFOSTORE });
 
     private boolean cacheable;
@@ -149,7 +152,8 @@ public class DatabaseFolder extends AbstractFolder {
         contentType = getContentType(folderObject.getModule());
         if (contentType.getModule() == InfostoreContentType.getInstance().getModule()) {
             accountId = FileStorageAccounts.getQualifiedID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID);
-            addSupportedCapabilities(Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name()));
+            addSupportedCapabilities(CAPABILITY_ZIPPABLE_FOLDER);
+            addSupportedCapabilities(CAPABILITY_FILE_VERSIONS);
         }
         final OCLPermission[] oclPermissions = folderObject.getPermissionsAsArray();
         permissions = new Permission[oclPermissions.length];

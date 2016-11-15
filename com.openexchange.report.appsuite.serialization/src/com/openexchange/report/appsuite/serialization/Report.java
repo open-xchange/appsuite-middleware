@@ -211,42 +211,6 @@ public class Report implements Serializable {
         return this;
     }
 
-    /**
-     * Initializes a new {@link Report}. With all fields needed for either timeframe considered only "default" report or
-     * "oxcs-etended" report-type with additional parameters. If no timeframe is given, the last year from today is used
-     * as timeframe.
-     * 
-     * @param uuid
-     * @param reportType
-     * @param startTime
-     * @param startDate
-     * @param endDate
-     * @param isCustomTimerange
-     * @param isShowSingleTenant
-     * @param singleTenantId
-     * @param isIgnoreAdmin
-     * @param isShowDriveMetrics
-     * @param isShowMailMetrics
-     */
-    public Report(String uuid, String reportType, long startTime, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) {
-        this.uuid = uuid;
-        this.type = reportType;
-        this.startTime = startTime;
-        this.tenantMap = new LinkedHashMap<>();
-        this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
-        if (isCustomTimerange) {
-            this.defaultTimeframeStart = startDate.getTime();
-            this.defaultTimeframeEnd = endDate.getTime();
-        } else {
-            Calendar cal = Calendar.getInstance();
-            Date ed = cal.getTime();
-            cal.add(Calendar.YEAR, -1);
-            Date sd = cal.getTime();
-            this.defaultTimeframeStart = sd.getTime();
-            this.defaultTimeframeEnd = ed.getTime();
-        }
-    }
-
     public Report(String uuid, long startTime, ReportConfigs reportConfig) {
         this.uuid = uuid;
         this.type = reportConfig.getType();
@@ -472,26 +436,6 @@ public class Report implements Serializable {
         return timeframeEnd;
     }
 
-    public boolean isShowSingleTenant() {
-        return this.reportConfig.isShowSingleTenant();
-    }
-
-    public Long getSingleTenantId() {
-        return this.reportConfig.getSingleTenantId();
-    }
-
-    public boolean isAdminIgnore() {
-        return this.reportConfig.isAdminIgnore();
-    }
-
-    public boolean isShowDriveMetrics() {
-        return this.reportConfig.isShowDriveMetrics();
-    }
-
-    public boolean isShowMailMetrics() {
-        return this.reportConfig.isShowMailMetrics();
-    }
-
     public String getStorageFolderPath() {
         return storageFolderPath;
     }
@@ -601,19 +545,6 @@ public class Report implements Serializable {
             LOG.error("Unable to load file: " + appendingFile.getAbsolutePath() , e);
         } catch (IOException e) {
             LOG.error("Unable to write into file: " + appendingFile.getAbsolutePath() , e);
-        }
-    }
-
-    public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) {
-
-        try (FileInputStream is = new FileInputStream(storageFolderPath + "/" + uuid + ".report"); Scanner sc = new Scanner(is, "UTF-8")) {
-            while (sc.hasNext()) {
-                System.out.println(sc.nextLine());
-            }
-        } catch (FileNotFoundException e) {
-            LOG.error("Unable to load file: " + storageFolderPath + "/" + uuid + ".report" , e);
-        } catch (IOException e) {
-            LOG.error("Unable to load and write report data to console." , e);
         }
     }
 

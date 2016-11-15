@@ -258,10 +258,10 @@ public final class UnifiedInboxUID {
         for (int i = '0'; i <= '9'; i++) {
             PRINTABLE_CHARS.set(i);
         }
-        for (int i = 'G'; i <= 'Z'; i++) {
+        for (int i = 'A'; i <= 'Z'; i++) {
             PRINTABLE_CHARS.set(i);
         }
-        for (int i = 'g'; i <= 'z'; i++) {
+        for (int i = 'a'; i <= 'z'; i++) {
             PRINTABLE_CHARS.set(i);
         }
     }

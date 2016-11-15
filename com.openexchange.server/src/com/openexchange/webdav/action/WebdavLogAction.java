@@ -54,15 +54,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.arrays.Collections;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavLogAction extends AbstractAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavLogAction.class);
-    private static final Set<String> CONFIDENTIAL_HEADERS = Collections.unmodifiableSet("AUTHORIZATION");
+    private static final Set<String> CONFIDENTIAL_HEADERS = ImmutableSet.of("AUTHORIZATION");
 
 	private boolean logBody;
 	private boolean logResponse;

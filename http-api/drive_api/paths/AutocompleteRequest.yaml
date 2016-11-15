@@ -1,0 +1,70 @@
+/drive?action=autocomplete:
+  get:
+    operationId: autocomplete
+    tags:
+      - Drive
+    summary: Autocomplete contacts
+    description: |
+      Performs a "starts-with" search to find users, contacts and groups, e.g. to look up recipients when sharing a folder or item. 
+      Prior triggering the request, clients should check the user input against the configured value of minSearchChars received in the Settings request.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: query
+        type: string
+        description: The query to search for (no need to include additional wildcards).
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON array holding the found users, contacts and groups. 
+          Each element is an object as described in HTTP API (Extended Permission Object), without the "bits" property set. For external contacts, the fields "entity" and "type" are also not set.
+        schema:
+          type: array
+          items:
+            type: string
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=autocomplete&query=tes&session=35d55f0bd2284e78a8eb4dba99b1310b
+
+          <== HTTP 200 OK (184.0234 ms elapsed, 52 bytes received)
+          <   Content: 
+              {
+                "data": [{
+                  "contact": {
+                    "email1": "test1@local.ox",
+                    "last_name": "test1",
+                    "first_name": "test1"
+                  },
+                  "display_name": "Test User 1",
+                  "type": "user",
+                  "entity": 6
+                },
+                {
+                  "contact": {
+                    "email1": "test4@local.ox",
+                    "last_name": "test4",
+                    "first_name": "test4",
+                    "image1_url": "/ajax/image/user/picture?id=13&timestamp=1453973021020"
+                  },
+                  "display_name": "Test User 4",
+                  "type": "user",
+                  "entity": 13
+                },
+                {
+                  "contact": {
+                    "email1": "test@example.org",
+                    "last_name": "Test",
+                    "first_name": "Otto",
+                    "image1_url": "/ajax/image/contact/picture?folder=31&id=118493&timestamp=1465481052986"
+                  },
+                  "display_name": "Test, Otto"
+                },
+                {
+                  "entity": 3851,
+                  "type": "group",
+                  "display_name": "Test Group"
+                }]
+              }

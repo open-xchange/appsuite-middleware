@@ -43,7 +43,7 @@ These information are contained within the columns have the following meaning:
 
 ## New properties
 
-To insert a new property you just have to create or update the corresponding yml file in /documentation/config folder.
+To insert a new property you just have to create or update the corresponding yml file in /documentation-generic/config folder.
 
 The yml file must have the following structure:
 
@@ -110,7 +110,7 @@ If you would like to add a reference to another property use the following appro
 
 | Key | <span style="font-weight:normal">com.openexchange.dovecot.doveadm.endpoints</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the URIs to the Dovecot DoveAdm REST interface end-points. <br>e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"<br><br>Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior<br>com.openexchange.mailaccount.dovecot.endpoints.totalConnections        The number of total connections held in HTTP connection pool<br>com.openexchange.mailaccount.dovecot.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining<br>com.openexchange.mailaccount.dovecot.endpoints.readTimeout             The read time-out in milliseconds<br>com.openexchange.mailaccount.dovecot.endpoints.connectTimeout          The connect time-out in milliseconds<br><br>Full example :<br>com.openexchange.mailaccount.dovecot.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081<br>com.openexchange.mailaccount.dovecot.endpoints.totalConnections=100<br>com.openexchange.mailaccount.dovecot.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)<br>com.openexchange.mailaccount.dovecot.endpoints.readTimeout=2500<br>com.openexchange.mailaccount.dovecot.endpoints.connectTimeout=1500<br><br>The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.<br> |
+| __Description__ | Specifies the URIs to the Dovecot DoveAdm REST interface end-points. <br>e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"<br><br>Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of total connections held in HTTP connection pool<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds<br><br>Full example :<br>com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections=100<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout=2500<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout=1500<br><br>The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.<br> |
 | __Default__ |  |
 | __Version__ | 7.8.3  |
 | __Reloadable__ | false  |
@@ -167,6 +167,26 @@ If you would like to add a reference to another property use the following appro
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
 | __File__ | imap.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.preferSentDate</span> |
+|:----------------|:--------|
+| __Description__ | Specifies what to consider as the date of a mail; either the internal received date or mail's sent date (as given by "Date" header).<br>This property is considered in case a client passes special "date" (661) column to "columns" parameter and/or "sort" parameter.<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.3  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.maxDriveAttachments</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the max. number of Drive documents that are allowed to be sent via E-Mail<br> |
+| __Default__ | 20  |
+| __Version__ | 7.6.2  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | mail.properties  |
 
 ---
 

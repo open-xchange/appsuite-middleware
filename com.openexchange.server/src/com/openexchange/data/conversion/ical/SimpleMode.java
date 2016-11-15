@@ -49,23 +49,37 @@
 
 package com.openexchange.data.conversion.ical;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.data.conversion.ical.itip.ITipMethod;
 
 /**
  * {@link SimpleMode}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class SimpleMode implements Mode {
+public class SimpleMode implements Mode {
 
     private final ZoneInfo zoneInfo;
-    private final Map<String, Object> parameters;
+    private final ITipMethod method;
 
-    public SimpleMode(final ZoneInfo zoneInfo) {
+    /**
+     * Initializes a new {@link SimpleMode}.
+     *
+     * @param zoneInfo The time zone information to use
+     * @param method The method to use, or <code>null</code> / {@link ITipMethod#NO_METHOD} for no special method
+     */
+    public SimpleMode(ZoneInfo zoneInfo, ITipMethod method) {
         super();
         this.zoneInfo = zoneInfo;
-        this.parameters = new HashMap<String, Object>();
+        this.method = method;
+    }
+
+    /**
+     * Initializes a new {@link SimpleMode} using the default {@link ITipMethod#PUBLISH}.
+     *
+     * @param zoneInfo The time zone information to use
+     */
+    public SimpleMode(ZoneInfo zoneInfo) {
+        this(zoneInfo, ITipMethod.PUBLISH);
     }
 
     @Override
@@ -74,16 +88,13 @@ public final class SimpleMode implements Mode {
     }
 
     @Override
-    public Object getParameter(String name) {
-        return parameters.get(name);
+    public ITipMethod getMethod() {
+        return method;
     }
 
-    public void setParameter(String name, Object value) {
-        if (null == value) {
-            parameters.remove(name);
-        } else {
-            parameters.put(name, value);
-        }
+    @Override
+    public String toString() {
+        return "SimpleMode [zoneInfo=" + zoneInfo + ", method=" + method + "]";
     }
 
 }

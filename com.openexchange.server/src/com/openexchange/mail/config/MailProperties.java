@@ -62,6 +62,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
@@ -148,6 +149,8 @@ public final class MailProperties implements IMailProperties {
     private boolean ignoreSubscription;
 
     private boolean hidePOP3StorageFolders;
+
+    private boolean preferSentDate;
 
     private char defaultSeparator;
 
@@ -274,6 +277,7 @@ public final class MailProperties implements IMailProperties {
         defaultMimeCharset = null;
         ignoreSubscription = false;
         hidePOP3StorageFolders = false;
+        preferSentDate = false;
         defaultSeparator = '/';
         quoteLineColors = null;
         javaMailProperties = null;
@@ -493,6 +497,12 @@ public final class MailProperties implements IMailProperties {
             final String ignoreSubsStr = configuration.getProperty("com.openexchange.mail.ignoreSubscription", "false").trim();
             ignoreSubscription = Boolean.parseBoolean(ignoreSubsStr);
             logBuilder.append("\tIgnore Folder Subscription: ").append(ignoreSubscription).append('\n');
+        }
+
+        {
+            final String preferSentDateStr = configuration.getProperty("com.openexchange.mail.preferSentDate", "false").trim();
+            preferSentDate = Boolean.parseBoolean(preferSentDateStr);
+            logBuilder.append("\tPrefer Sent Date: ").append(preferSentDate).append('\n');
         }
 
         {
@@ -832,6 +842,15 @@ public final class MailProperties implements IMailProperties {
     @Override
     public boolean isIgnoreSubscription() {
         return ignoreSubscription;
+    }
+
+    /**
+     * Signals whether a mail's sent date (<code>"Date"</code> header) is preferred over its received date when serving the special {@link MailListField#DATE} field.
+     *
+     * @return <code>true</code> to prefer sent date; otherwise <code>false</code> for received date
+     */
+    public boolean isPreferSentDate() {
+        return preferSentDate;
     }
 
     public boolean isHidePOP3StorageFolders() {

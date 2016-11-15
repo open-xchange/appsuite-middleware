@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.oauth.google;
 
+import static com.openexchange.google.api.client.GoogleApiClients.REFRESH_THRESHOLD;
 import java.io.IOException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.gmail.Gmail;
@@ -102,6 +103,45 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
         } catch (IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public String getTokenFor(OAuthAccount oauthAccount, Session session) throws OXException {
+        // Ensure not expired
+        String key = "oauth.google.expiry." + oauthAccount.getId();
+
+        // Query session parameters
+        {
+            Object object = session.getParameter(key);
+            if (object instanceof Long) {
+                Long stamp = (Long) object;
+                if ((stamp.longValue() - System.currentTimeMillis()) >= REFRESH_THRESHOLD) {
+                    // More than 1 minute to go
+                    return oauthAccount.getToken();
+                }
+
+                // Expired... Drop cached value.
+                session.setParameter(key, null);
+            }
+        }
+
+        // Not cached... Query Google API
+        {
+            int expirySeconds = GoogleApiClients.getExpiryForGoogleAccount(oauthAccount, session);
+            if (expirySeconds >= REFRESH_THRESHOLD) {
+                // More than 1 minute to go
+                session.setParameter(key, Long.valueOf(System.currentTimeMillis() + (expirySeconds * 1000)));
+                return oauthAccount.getToken();
+            }
+        }
+
+        // Expired...
+        OAuthAccount oauthAccountToUse = oauthAccount;
+        OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccountToUse, session);
+        if (null != newAccount) {
+            oauthAccountToUse = newAccount;
+        }
+        return oauthAccountToUse.getToken();
     }
 
     @Override

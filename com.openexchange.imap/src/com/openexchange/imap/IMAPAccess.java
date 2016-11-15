@@ -50,7 +50,6 @@
 package com.openexchange.imap;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Date;
@@ -70,7 +69,6 @@ import javax.mail.Provider;
 import javax.mail.Store;
 import javax.mail.URLName;
 import javax.mail.internet.idn.IDNA;
-import javax.net.ssl.SSLHandshakeException;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
@@ -174,6 +172,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * a server-port-pair will throw an appropriate exception.
      */
     private static volatile Map<HostAndPort, Long> timedOutServers;
+
+    /**
+     * Gets the timedOutServers
+     *
+     * @return The timedOutServers
+     */
+    public static Map<HostAndPort, Long> getTimedOutServers() {
+        return timedOutServers;
+    }
 
     /**
      * Remembers whether a certain IMAP server supports the ACL extension.
@@ -633,7 +640,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get connected store
                  */
-                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, -1, preAuthStartTlsCap);
+                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, -1, preAuthStartTlsCap, true);
                 /*
                  * Add warning if non-secure
                  */
@@ -652,6 +659,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 warnings.add(MailExceptionCode.PING_FAILED_AUTH.create(e, config.getServer(), config.getLogin()));
                 throw MimeMailException.handleMessagingException(e, config, session);
             } catch (final MessagingException e) {
+                if (MimeMailException.isSSLHandshakeException(e)) {
+                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), config.getServer());
+                    warnings.add(oxe);
+                    throw oxe;
+                }
+
                 Exception cause = e.getNextException();
                 if (com.sun.mail.iap.ConnectionException.class.isInstance(cause)) {
                     OXException oxe = MimeMailException.handleMessagingException(e, config, session);
@@ -663,10 +676,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     throw oxe;
                 } else if (StarttlsRequiredException.class.isInstance(cause)) {
                     OXException oxe = MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
-                    warnings.add(oxe);
-                    throw oxe;
-                } else if (SSLHandshakeException.class.isInstance(cause)) {
-                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(config.getServer(), e);
                     warnings.add(oxe);
                     throw oxe;
                 }
@@ -803,25 +812,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Check for a SocketTimeoutException
                  */
-                if (tmpDownEnabled) {
-                    final Exception nextException = e.getNextException();
-                    if (SocketTimeoutException.class.isInstance(nextException)) {
-                        /*
-                         * Remember a timed-out IMAP server on connect attempt
-                         */
-                        final Map<HostAndPort, Long> map = timedOutServers;
-                        if (null != map) {
-                            map.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
-                        }
+                if (tmpDownEnabled && MimeMailException.isTimeoutException(e)) {
+                    /*
+                     * Remember a timed-out IMAP server on connect attempt
+                     */
+                    final Map<HostAndPort, Long> map = timedOutServers;
+                    if (null != map) {
+                        map.put(newHostAndPort(config), Long.valueOf(System.currentTimeMillis()));
                     }
+                }
+                if (MimeMailException.isSSLHandshakeException(e)) {
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
                 }
                 {
                     Exception next = e.getNextException();
                     if (StarttlsRequiredException.class.isInstance(next)) {
                         throw MailExceptionCode.NON_SECURE_DENIED.create(server);
-                    }
-                    if (SSLHandshakeException.class.isInstance(next)) {
-                        throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
                     }
                 }
                 throw e;
@@ -1004,10 +1010,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId) throws MessagingException {
-        return newConnectedImapStore(imapSession, server, port, login, pw, accountId, null);
+        return newConnectedImapStore(imapSession, server, port, login, pw, accountId, null, false);
     }
 
-    private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId, boolean[] preAuthStartTlsCap) throws MessagingException {
+    private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId, boolean[] preAuthStartTlsCap, boolean knownExternal) throws MessagingException {
         /*
          * Establish a new one...
          */
@@ -1030,14 +1036,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     // Ignore
                 }
             }
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, knownExternal);
         } catch (final AuthenticationFailedException e) {
             /*
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
             imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, knownExternal);
         }
 
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
@@ -1063,9 +1069,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @param pw The password
      * @param accountId The account identifier
      * @param session The associated Groupware session
+     * @param knownExternal <code>true</code> if it is known that a connection is supposed to be established to an external IMAP service, otherwise <code>false</code> if not known
      * @throws MessagingException If operation fails
      */
-    public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw, int accountId, Session session) throws MessagingException {
+    public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw, int accountId, Session session, boolean knownExternal) throws MessagingException {
         Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
         if (null == kerberosSubject) {
             imapStore.connect(server, port, login, pw);
@@ -1077,7 +1084,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
         AuditLogService auditLogService = Services.optService(AuditLogService.class);
         if (null != auditLogService) {
-            String eventId = MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login";
+            String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
             auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
         }
     }
@@ -1093,7 +1100,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
 
         MailConfig mailConfig = getMailConfig();
-        HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
+        HostAndPort key = newHostAndPort(mailConfig);
         Long range = map.get(key);
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
@@ -1279,15 +1286,41 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return true;
     }
 
-    private static final class HostAndPort {
+    /**
+     * Creates a new <code>HostAndPort</code> instance from given arguments.
+     *
+     * @param config The configuration providing host name or IP address of the IMAP server as well as port
+     * @return The new instance
+     */
+    public static HostAndPort newHostAndPort(MailConfig config) {
+        return newHostAndPort(config.getServer(), config.getPort());
+    }
+
+    /**
+     * Creates a new <code>HostAndPort</code> instance from given arguments.
+     *
+     * @param host The host name or IP address of the IMAP server
+     * @param port The port
+     * @return The new instance
+     */
+    public static HostAndPort newHostAndPort(String host, int port) {
+        return new HostAndPort(host, port);
+    }
+
+    /** Simple class to hold host and port for an IMAP end-point */
+    public static final class HostAndPort {
 
         private final String host;
-
         private final int port;
-
         private final int hashCode;
 
-        public HostAndPort(final String host, final int port) {
+        /**
+         * Initializes a new {@link HostAndPort}.
+         *
+         * @param host The host name or IP address of the IMAP server
+         * @param port The port
+         */
+        HostAndPort(final String host, final int port) {
             super();
             if (port < 0 || port > 0xFFFF) {
                 throw new IllegalArgumentException("port out of range:" + port);

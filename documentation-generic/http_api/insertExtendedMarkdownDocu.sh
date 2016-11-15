@@ -8,4 +8,8 @@ cp ./tmpl/index_tmpl.html ./html/index.html
 sed -e '/OX_MARKDOWN_INTRO/r../backend/documentation-generic/http_api/documents/html/intro.html' > ./html/index.html < ./tmpl/index_tmpl.html
 cp ./html/index.html tmp.html
 sed -e '/OX_MARKDOWN_APPENDIX/r../backend/documentation-generic/http_api/documents/html/appendix.html' > ./html/index.html < tmp.html
+cp ./html/index.html tmp.html
+sed -e 's/<!--OX_MARKDOWN_TITLE-->/OX HTTP API/' > ./html/index.html < tmp.html
+cp ./html/index.html tmp.html
+sed -e 's/<!--OX_MARKDOWN_SWAGGER_FOLDER-->/http_api/' > ./html/index.html < tmp.html
 rm tmp.html

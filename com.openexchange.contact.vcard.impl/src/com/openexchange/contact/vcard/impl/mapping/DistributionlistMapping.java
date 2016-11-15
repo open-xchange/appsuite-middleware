@@ -141,8 +141,8 @@ public class DistributionlistMapping extends AbstractMapping {
             /*
              * apply distribution list flag and import members
              */
-            contact.setMarkAsDistributionlist(true);
             contact.setDistributionList(importMembers(vCard.getMembers(), parameters, warnings));
+            contact.setMarkAsDistributionlist(true);
         } else {
             /*
              * not/no longer a distribution list, remove distribution list entries and flag

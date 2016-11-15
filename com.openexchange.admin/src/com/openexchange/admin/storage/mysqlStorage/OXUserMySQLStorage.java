@@ -1659,7 +1659,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (null != timezone) {
                     stmt.setString(7, timezone);
                 } else {
-                    stmt.setString(7, DEFAULT_TIMEZONE_CREATE);
+                    String fallbackTimeZone = cache.getProperties().getUserProp(AdminProperties.User.DEFAULT_TIMEZONE, DEFAULT_TIMEZONE_CREATE);
+                    stmt.setString(7, fallbackTimeZone);
                 }
 
                 // language cannot be null, that's checked in checkCreateUserData()

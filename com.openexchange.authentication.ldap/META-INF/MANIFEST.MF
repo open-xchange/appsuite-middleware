@@ -16,6 +16,8 @@ Import-Package: com.openexchange.authentication,
  javax.naming,
  javax.naming.directory,
  javax.naming.ldap,
+ javax.net,
+ javax.net.ssl,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j

@@ -108,6 +108,13 @@ public interface ComposeContext {
     ServerSession getSession();
 
     /**
+     * Checks if associated text part is explicitly supposed to be sent as plain text
+     *
+     * @return <code>true</code> for plain text; otherwise <code>false</code>
+     */
+    boolean isPlainText();
+
+    /**
      * Gets the text part
      *
      * @return The text part

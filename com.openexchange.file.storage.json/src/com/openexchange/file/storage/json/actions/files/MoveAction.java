@@ -74,7 +74,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 
-
 /**
  * {@link MoveAction}
  *
@@ -190,16 +189,33 @@ public class MoveAction extends AbstractWriteAction {
 
             {
                 for (String folderId : deleteableFolders) {
-                    try { folderAccess.deleteFolder(folderId, true); } catch (Exception e) {/* ignore */}
+                    try {
+                        folderAccess.deleteFolder(folderId, true);
+                    } catch (Exception e) {
+                        /* ignore */}
                 }
             }
 
             error = false;
-            return result(conflicting, request);
+            AJAXRequestResult result = result(conflicting, request);
+
+            // Add any warnings to the response
+            Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+            result.addWarnings(warnings);
+
+            boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+            if ((warnings != null) && (!warnings.isEmpty()) && (!ignoreWarnings)) {
+                result.setException(FileStorageExceptionCodes.FILE_MOVE_ABORTED.create());
+            }
+
+            return result;
         } finally {
             if (error) {
                 for (String folderId : deleteableFolders) {
-                    try { folderAccess.deleteFolder(folderId, true); } catch (Exception e) {/* ignore */}
+                    try {
+                        folderAccess.deleteFolder(folderId, true);
+                    } catch (Exception e) {
+                        /* ignore */}
                 }
             }
         }

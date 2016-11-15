@@ -2,8 +2,8 @@
   put:
     operationId: getShareLink
     tags:
-      - drive
-    summary: Gets a share link (**available since API version 4**).
+      - Drive
+    summary: Gets a share link
     description: |
       Creates a new or gets the previously created link for a file or folder that can be used to access the item in a browser
       by anyone. This request is only available for items marked as `shareable`.
@@ -25,3 +25,46 @@
           fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveShareLinkResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Get the intial link for a file
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=getLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+          > Content:
+            {
+             "path": "/",
+             "name": "photo.jpg",
+             "checksum": "bdf3bf1da3405725be763540d6601144"
+           }
+
+          <== HTTP 200 OK (311.8978 ms elapsed, 118 bytes received)
+          <   Content: 
+              {
+                "data": {
+                  "url": "http://127.0.0.1/ajax/share/17bc4ac00d424e85ef5272dd427342438e7f20b415aba46c/4df04226",
+                  "is_new": true,
+                  "checksum": "bdf3bf1da3405725be763540d6601144"
+                }
+              }
+      - Example2:
+        description: Get an already existing link for a file
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=getLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+          > Content:
+            {
+              "path": "/",
+              "name": "photo.jpg",
+              "checksum": "bdf3bf1da3405725be763540d6601144"
+            }
+
+          <== HTTP 200 OK (78.0547 ms elapsed, 167 bytes received)
+          <   Content: 
+              {
+                "data": {
+                  "url": "http://127.0.0.1/ajax/share/17bc4ac00d424e85ef5272dd427342438e7f20b415aba46c/4df04226",
+                  "is_new": false,
+                  "expiry_date": 1451606400000,
+                  "password": "secret",
+                  "checksum": "bdf3bf1da3405725be763540d6601144"
+                }
+              }

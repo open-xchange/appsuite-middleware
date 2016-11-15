@@ -414,6 +414,12 @@ specific field data of single or multiple objects.
 ||cid | String | The value of the "Content-ID" header, if the header is present.|
 |654 | original_id | String | The original mail identifier (e.g. if fetched from "virtual/all" folder).|
 |655 | original_folder_id | String | The original folder identifier (e.g. if fetched from "virtual/all" folder).|
+|656 | content_type | String | The Content-Type of a mail; e.g. multipart/mixed; boundary="-0123456abcdefg--".|
+|657 | answered | String | Special field to sort mails by answered status.|
+|658 | forwarded | String | Special field to sort mails by forwarded status. Note that mail service needs either support a \Forwarded system flag or a $Forwarded user flag |
+|659 | draft | String | Special field to sort mails by draft flag.|
+|660 | flagged | String | Special field to sort mails by flagged status.|
+|661 | date | String | The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header). Supposed to be the replacement for ``sent_date`` (609) or ``received_date`` (610) to let the Open-Xchange Middleware decide based on configuration for ``com.openexchange.mail.preferSentDate`` property what to consider. Supported at both - ``columns`` parameter and ``sort`` parameter.|
 
 ### Mail system flags
 
@@ -574,6 +580,9 @@ specific field data of single or multiple objects.
 | 1043 | transport_auth | String | Available since v7.6.1 Specifies the source for mail transport (SMTP) credentials. See [Credential source](#credential-source).|
 | 1044 | mail_starttls | Boolean | Available since v7.8.2 Whether to establish a secure connection to mail server via STARTTLS. |
 | 1045 | transport_starttls | Boolean | Available since v7.8.2 Whether to establish a secure connection to transport server via STARTTLS. |
+| 1046 | root_folder | String | Available since v7.8.3 Specifies the identifier of an account's root folder |
+| 1047 | mail_oauth | Integer | Available since v7.8.3 Specifies the identifier of the associated OAuth account for mail access |
+| 1048 | transport_oauth | Integer | Available since v7.8.3 Specifies the identifier of the associated OAuth account for mail transport |
 
 ### Credential source
 

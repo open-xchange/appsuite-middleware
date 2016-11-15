@@ -607,8 +607,15 @@ public class NotificationMail {
         if (isAttachmentUpdate()) {
             return true;
         }
+        if (isChangeUserSpecific()) {
+            return false;
+        }
 
         return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
+    }
+
+    private boolean isChangeUserSpecific() {
+        return diff.exactlyTheseChanged(CalendarFields.CHANGE_EXCEPTIONS, CalendarFields.RECURRENCE_DATE_POSITION, CalendarFields.RECURRENCE_POSITION);
     }
 
     public boolean isAboutStateChangesOnly() {

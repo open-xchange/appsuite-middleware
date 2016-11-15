@@ -89,6 +89,7 @@ import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -116,6 +117,8 @@ import com.openexchange.rest.client.endpointpool.Endpoint;
  * @since v1.0.0
  */
 public class HttpDoveAdmClient implements DoveAdmClient {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpDoveAdmClient.class);
 
     // -------------------------------------------------------------------------------------------------------------- //
 
@@ -664,6 +667,8 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         if (cause instanceof AuthenticationException) {
             return DoveAdmClientExceptionCodes.AUTH_ERROR.create(cause, cause.getMessage());
         }
+
+        LOG.warn("Encountered I/O error \"{}\" ({}) while trying to access DoveAdm end-point {}. End-point will therefore be added to black-list until re-available", e.getMessage(), e.getClass().getName(), endpoint.getBaseUri());
         endpointManager.blacklist(call, endpoint);
         return DoveAdmClientExceptionCodes.IO_ERROR.create(e, e.getMessage());
     }

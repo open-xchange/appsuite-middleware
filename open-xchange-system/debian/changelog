@@ -1,3 +1,9 @@
+open-xchange-system (7.8.3-2) stable; urgency=medium
+
+  * Second preview for 7.8.3 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Sat, 29 Oct 2016 09:45:49 +0200
+
 open-xchange-system (7.8.3-1) stable; urgency=medium
 
   * First preview 7.8.3 release

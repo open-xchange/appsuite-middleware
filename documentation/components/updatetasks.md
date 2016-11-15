@@ -22,6 +22,46 @@ Each new version of the Open-Xchange Middleware may ship with one or more such u
 
 Furthermore, an administrator may (re-)execute certain update tasks through using the ``forceupdatetask`` command-line interface.
 
+**Note:** The update tasks that are actually scheduled and/or available for execution may vary based on the installed packages and enabled features on the system.  
+
+# Excluding update tasks
+
+In certain scenarios, specific update tasks may be forcibly excluded from being executed. In order to do so, the update task's name needs to be uncommented or entered in the configuration file ``excludedupdatetasks.properties``. Update tasks and their identifying names used to be announced in the release notes. Newly introduced update tasks will be added in the following overview instead.
+
+# Core update tasks
+
+The following list gives an overview about the known update tasks of the core Open-Xchange Middleware starting from v7.8.3.
+
+- ``com.openexchange.publish.database.PublicationsAddEntityIndex``  
+  Adds the index "entity (cid,module,entity)" to the table "publications".
+- ``com.openexchange.tools.oxfolder.RemoveInconsistentLocksUpdateTasks``  
+  Removes all file locks which may be hold by any user which doesn't have any permissions to do so anymore.
+- ``com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServiceIdUpdateTask``  
+  Updates the service identifier and scope for LinkedIN accounts stored in the table "oauthAccounts".
+- ``com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask``  
+  Adds "oauth" column to the "user_mail_account" and "user_transport_account" tables.
+- ``com.openexchange.oauth.impl.internal.groupware.OAuthAddScopeColumnTask``  
+  Adds the column "scope" to the "oauthAccounts" table.
+- ``com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2``  
+  Corrects the column definitions for the table "oauthAccounts" if needed.
+- ``com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask``  
+  Creates the "oauthAccounts" table.
+- ``com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTable``  
+  Ensures a NOT NULL value for "quota_max" column in "user" and "del_user" tables.
+- ``com.openexchange.groupware.update.tasks.AllowNullValuesForStandardFolderNamesUpdateTask``  
+  Updates the "user_mail_account" table to allow NULL values in folder names.
+- ``com.openexchange.groupware.update.tasks.FolderDefaultValuesForDelTablesTasks``  
+  Adds default values to the 'del_oxfolder_tree', and 'virtualBackupTree' tables.
+- ``com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrimaryTask``  
+  Changes the column defintion for "uuid" to "uuid BINARY(16) NOT NULL" in the "driveEventSubscriptions" table, fills it with random values, then changes the primary key to "(cid,uuid)". Also, an additional index for "(cid,service,token)" is added.
+- ``com.openexchange.download.limit.rdb.FileAccessCreateTableTask``  
+  Creates the "fileAccess" table.
+- ``com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask``  
+  Adds the column "uuid BINARY(16) DEFAULT NULL" to the table "driveEventSubscriptions".
+- ``com.openexchange.groupware.update.tasks.UserSettingMediumTextTask``  
+  Applies "MEDIUM TEXT" to "user_setting" table.
+
+
 # Error scenarios
 
 ## Unexpected termination
@@ -93,23 +133,23 @@ As mentioned above the ``forceupdatetask`` command-line interface is supposed to
 
 ### Parameters
 
- - ``-c,--context <arg>``<br>
+ - ``-c,--context <arg>``  
  A valid context identifier contained in target schema; if missing and '-n/--name' option is also absent all schemas are considered.
- - ``-H,--host <arg>``<br>
+ - ``-H,--host <arg>``  
  The optional JMX host (default:localhost)
- - ``-h,--help``<br>
+ - ``-h,--help``  
  Prints a help text
- - ``-l,--login <arg>``<br>
+ - ``-l,--login <arg>``  
  The optional JMX login (if JMX has authentication enabled)
- - ``-n,--name <arg>``<br>
+ - ``-n,--name <arg>``  
  A valid schema name. This option is a substitute for ``-c/--context`` option. If both are present ``-c/--context`` is preferred. If both absent all schemas are considered.
- - ``-p,--port <arg>``<br>
+ - ``-p,--port <arg>``  
  The optional JMX port (default:9999)
- - ``--responsetimeout <arg>``<br>
+ - ``--responsetimeout <arg>``  
  The optional response timeout in seconds when reading data from server (default: 0s; infinite)
- - ``-s,--password <arg>``<br>
+ - ``-s,--password <arg>``  
  The optional JMX password (if JMX has authentication enabled)
- - ``-t,--task <arg>``<br>
+ - ``-t,--task <arg>``  
  The update task's class name
 
 ### Examples
@@ -124,19 +164,19 @@ The ``listExecutedTasks`` is supposed to be used in order to list all update tas
 
 ### Parameters
 
-- ``-H,--host <arg>``<br>
+- ``-H,--host <arg>``  
 The optional JMX host (default:localhost)
-- ``-h,--help``<br>
+- ``-h,--help``  
 Prints a help text.
-- ``-l,--login <arg>``<br>
+- ``-l,--login <arg>``  
 The optional JMX login (if JMX has authentication enabled)
-- ``-n,--name <arg>``<br>
+- ``-n,--name <arg>``  
 A valid schema name.
-- ``-p,--port <arg>``<br>
+- ``-p,--port <arg>``  
 The optional JMX port (default:9999)
-- ``--responsetimeout <arg>``<br>
+- ``--responsetimeout <arg>``  
 The optional response timeout in seconds when reading data from server (default: 0s; infinite)
-- ``-s,--password <arg>``<br>
+- ``-s,--password <arg>``  
 The optional JMX password (if JMX has authentication enabled)
 
 ### Examples
@@ -171,21 +211,21 @@ Once the schema is updated, the tool lists those update tasks, that could not be
 
 ### Parameters
 
-- ``-c,--context <arg>``<br>
+- ``-c,--context <arg>``  
 A valid context identifier contained in target schema
-- ``-H,--host <arg>``<br>
+- ``-H,--host <arg>``  
 The optional JMX host (default:localhost)
-- ``-h,--help``<br>
+- ``-h,--help``  
 Prints a help text
-- ``-l,--login <arg>``<br>
+- ``-l,--login <arg>``  
 The optional JMX login (if JMX has authentication enabled)
-- ``-n,--name <arg>``<br>
+- ``-n,--name <arg>``  
 A valid schema name. This option is a substitute for ``-c/--context`` option. If both are present ``-c/--context`` is preferred.
-- ``-p,--port <arg>``<br>
+- ``-p,--port <arg>``  
 The optional JMX port (default:9999)
-- ``--responsetimeout <arg>``<br>
+- ``--responsetimeout <arg>``  
 The optional response timeout in seconds when reading data from server (default: 0s; infinite)
-- ``-s,--password <arg>``<br>
+- ``-s,--password <arg>``  
 The optional JMX password (if JMX has authentication enabled)
 
 ### Examples
@@ -205,19 +245,19 @@ Moreover, that tool starts a task that performs the actual update asynchronously
 
 ### Parameters
 
-- ``-e,--error``<br>
+- ``-e,--error``  
 The flag indicating whether process is supposed to be stopped if an error occurs when trying to update a schema.
-- ``-H,--host <arg>``<br>
+- ``-H,--host <arg>``  
 The optional JMX host (default:localhost)
-- ``-h,--help``<br>
+- ``-h,--help``  
 Prints a help text
-- ``-l,--login <arg>``<br>
+- ``-l,--login <arg>``  
 The optional JMX login (if JMX has authentication enabled)
-- ``-p,--port <arg>``<br>
+- ``-p,--port <arg>``  
 The optional JMX port (default:9999)
-- ``--responsetimeout <arg>``<br>
+- ``--responsetimeout <arg>``  
 The optional response timeout in seconds when reading data from server (default: 0s; infinite)
-- ``-s,--password <arg>``<br>
+- ``-s,--password <arg>``  
 The optional JMX password (if JMX has authentication enabled)
 
 ### Example
@@ -247,7 +287,7 @@ Processed 42 of 167 schemas.
 Update conflict detected. Another process is currently updating schema database1_77.
 ```
 
-Invocation without ``error`` flag enabled:<br>
+Invocation without ``error`` flag enabled:  
 Possible errors/warnings are written to logging
 
 ```
@@ -272,13 +312,13 @@ To check for pending, blocked or stale schemas, the ``checkdatabase`` command-li
 
 ### Parameters
 
-- ``-h,--help``<br>
+- ``-h,--help``  
 Prints a help text                                                 
-- ``--responsetimeout <arg>``<br>
+- ``--responsetimeout <arg>``  
 The optional response timeout in seconds for reading response from the backend (default 0s; infinite)
-- ``-A,--adminuser <arg>``<br>
+- ``-A,--adminuser <arg>``  
 Admin username              
-- ``-P,--adminpass <arg>``<br>
+- ``-P,--adminpass <arg>``  
 Admin password
 
 ### Examples
@@ -304,19 +344,19 @@ Such schemas considered as stale may be unblocked by an administrator in order t
 
 ### Parameters
 
-- ``-h,--help``<br>
+- ``-h,--help``  
 Prints a help text          
-- ``--responsetimeout <arg>``<br>
+- ``--responsetimeout <arg>``  
 The optional response timeout in seconds for reading response from the backend (default 0s; infinite)
-- ``-A,--adminuser <arg>``<br>
+- ``-A,--adminuser <arg>``  
 Admin username              
-- ``-P,--adminpass <arg>``<br>
+- ``-P,--adminpass <arg>``  
 Admin password              
-- ``-i,--id <arg>``<br>
+- ``-i,--id <arg>``  
 The id of the database.     
-- ``-n,--name <arg>``<br>
+- ``-n,--name <arg>``  
 Name of the database        
-- ``--schema <arg>``<br>
+- ``--schema <arg>``  
 The optional schema name of the database.
 
 ### Examples

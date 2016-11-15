@@ -69,6 +69,7 @@ import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
@@ -78,7 +79,6 @@ import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
@@ -89,6 +89,9 @@ import com.openexchange.session.Session;
  * @since 7.6.1
  */
 public class GoogleApiClients {
+
+    /** The refresh threshold in seconds: <code>60</code> */
+    public static final int REFRESH_THRESHOLD = 60;
 
     /**
      * Initializes a new {@link GoogleApiClients}.
@@ -141,21 +144,13 @@ public class GoogleApiClients {
 
                 // Check expiry
                 int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
-                if (expiry < 300) {
-                    // Less than 5 minutes to live -> refresh token!
+                if (expiry < REFRESH_THRESHOLD) {
+                    // Less than 1 minute to live -> refresh token!
                     ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
                     defaultAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount), new ExponentialBackOffRetryPolicy());
                 }
             } catch (org.scribe.exceptions.OAuthException e) {
-                // Failed to request new access token
-                if (e.getMessage().indexOf("\"invalid_grant\"") >= 0) {
-                    // Refresh token in use is invalid/expired
-                    throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, defaultAccount.getDisplayName(), defaultAccount.getId());
-                }
-                if (null != e.getCause() && SSLHandshakeException.class.isInstance(e.getCause())) {
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create("www.googleapis.com");
-                }
-                throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+                throw handleScribeOAuthException(e, defaultAccount);
             }
         }
 
@@ -197,17 +192,21 @@ public class GoogleApiClients {
         OAuthAccount googleAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
 
         if (reacquireIfExpired) {
-            // Create Scribe Google OAuth service
-            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-            serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-            Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+            try {
+                // Create Scribe Google OAuth service
+                final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+                serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
+                Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
-            // Check expiry
-            int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
-            if (expiry < 300) {
-                // Less than 5 minutes to live -> refresh token!
-                ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                googleAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
+                // Check expiry
+                int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
+                if (expiry < REFRESH_THRESHOLD) {
+                    // Less than 1 minute to live -> refresh token!
+                    ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+                    googleAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
+                }
+            } catch (org.scribe.exceptions.OAuthException e) {
+                throw handleScribeOAuthException(e, googleAccount);
             }
         }
 
@@ -227,14 +226,17 @@ public class GoogleApiClients {
             return -1L;
         }
 
-        // Create Scribe Google OAuth service
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-        serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-        Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+        try {
+            // Create Scribe Google OAuth service
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+            serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
+            Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
-        // Check expiry
-        int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
-        return expiry;
+            // Check expiry
+            return scribeOAuthService.getExpiry(googleAccount.getToken());
+        } catch (org.scribe.exceptions.OAuthException e) {
+            throw handleScribeOAuthException(e, googleAccount);
+        }
     }
 
     /**
@@ -256,20 +258,76 @@ public class GoogleApiClients {
             throw ServiceExceptionCode.absentService(OAuthService.class);
         }
 
-        // Create Scribe Google OAuth service
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-        serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-        final Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+        try {
+            // Create Scribe Google OAuth service
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+            serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
+            final Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
-        // Check expiry
-        int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
-        if (expiry >= 300) {
-            // More than 5 minutes to live
-            return null;
+            // Check expiry
+            int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
+            if (expiry >= REFRESH_THRESHOLD) {
+                // More than 1 minute to live
+                return null;
+            }
+
+            ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+            return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
+        } catch (org.scribe.exceptions.OAuthException e) {
+            throw handleScribeOAuthException(e, googleAccount);
+        }
+    }
+
+    /**
+     * Gets the expiry (in seconds) for given Google OAuth account
+     *
+     * @param googleAccount The Google OAuth account to check
+     * @param session The associated session
+     * @return The expiry in seconds or <code>-1</code> if access token is already expired
+     * @throws OXException If expiry cannot be returned
+     * @throws IllegalArgumentException If provided account is <code>null</code>
+     */
+    public static int getExpiryForGoogleAccount(final OAuthAccount googleAccount, final Session session) throws OXException {
+        if (null == googleAccount) {
+            throw new IllegalArgumentException("Account must not be null");
         }
 
-        ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-        return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
+        // Get OAuth service
+        final OAuthService oAuthService = Services.optService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        try {
+            // Create Scribe Google OAuth service
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+            serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
+            final Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+
+            // Check expiry
+            return scribeOAuthService.getExpiry(googleAccount.getToken());
+        } catch (org.scribe.exceptions.OAuthException e) {
+            throw handleScribeOAuthException(e, googleAccount);
+        }
+    }
+
+    static OXException handleScribeOAuthException(OAuthException e, OAuthAccount googleAccount) {
+        if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
+            return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, "www.googleapis.com");
+        }
+
+        String exMessage = e.getMessage();
+        String errorMsg = parseErrorFrom(exMessage);
+        if (Strings.isEmpty(errorMsg)) {
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
+        }
+        if (exMessage.contains("invalid_grant")) {
+            if (null != googleAccount) {
+                return OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, googleAccount.getDisplayName(), googleAccount.getId());
+            }
+            return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
+        }
+        return OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
     }
 
     private static String parseErrorFrom(String message) {
@@ -376,18 +434,8 @@ public class GoogleApiClients {
             try {
                 return scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
             } catch (OAuthException e) {
-                String exMessage = e.getMessage();
-                String errorMsg = parseErrorFrom(exMessage);
-                if (Strings.isEmpty(errorMsg)) {
-                    throw OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
-                }
-                if (exMessage.contains("invalid_grant")) {
-                    OAuthAccount dbAccount = getDBAccount();
-                    String cburl = OAuthUtil.buildCallbackURL(dbAccount);
-                    API api = dbAccount.getAPI();
-                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), dbAccount.getId(), getSession().getUserId(), getSession().getContextId(), api.getFullName(), cburl);
-                }
-                throw OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
+                OAuthAccount dbAccount = getDBAccount();
+                throw handleScribeOAuthException(e, dbAccount);
             }
         }
     }

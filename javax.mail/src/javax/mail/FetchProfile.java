@@ -40,9 +40,9 @@
 
 package javax.mail;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -172,15 +172,15 @@ public class FetchProfile {
 
     // -----------------------------------------------------------------------------------
 
-    private final List<Item> specials; // specials
-    private final Set<String> headers; // set of header names
+    private final Set<Item> specials; // specials
+    private final Map<String, String> headers; // set of header names
 
     /**
      * Create an empty FetchProfile.
      */
     public FetchProfile() {
-        specials = new LinkedList<Item>();
-        headers = new LinkedHashSet<String>();
+        specials = new LinkedHashSet<Item>();
+        headers = new LinkedHashMap<String, String>();
     }
 
     /**
@@ -193,8 +193,7 @@ public class FetchProfile {
      * @see FetchProfile.Item#FLAGS
      */
     public void add(Item item) {
-        if (!specials.contains(item))
-            specials.add(item);
+        specials.add(item);
     }
 
     /**
@@ -204,7 +203,7 @@ public class FetchProfile {
      * @param   headerName  header to be prefetched
      */
     public void add(String headerName) {
-        headers.add(headerName);
+        headers.put(toLowerCase(headerName), headerName);
     }
 
     /**
@@ -224,7 +223,41 @@ public class FetchProfile {
      * @return  true if the fetch profile contains the given header name
      */
     public boolean contains(String headerName) {
-        return headers.contains(headerName);
+        return null == headerName ? false : headers.containsKey(toLowerCase(headerName));
+    }
+
+    /**
+     * Returns true if the fetch profile contains any of the given special items.
+     *
+     * @param items the Items to test
+     * @return true if the fetch profile contains any of the given special items
+     */
+    public boolean contains(Item... items) {
+        if (null != items) {
+            for (int i = items.length; i-- > 0;) {
+                if (specials.contains(items[i])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the fetch profile contains any of the given header names.
+     *
+     * @param headerNames the headers to test
+     * @return true if the fetch profile contains any of the given header names
+     */
+    public boolean contains(String... headerNames) {
+        if (null != headerNames) {
+            for (int i = headerNames.length; i-- > 0;) {
+                if (headers.containsKey(toLowerCase(headerNames[i]))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -233,7 +266,8 @@ public class FetchProfile {
      * @return      items set in this profile
      */
     public Item[] getItems() {
-        return specials.isEmpty() ? new Item[0] : specials.toArray(new Item[specials.size()]);
+        int size = specials.size();
+        return size == 0 ? new Item[0] : specials.toArray(new Item[size]);
     }
 
     /**
@@ -242,6 +276,20 @@ public class FetchProfile {
      * @return      headers set in this profile
      */
     public String[] getHeaderNames() {
-        return headers.isEmpty() ? new String[0] : headers.toArray(new String[headers.size()]);
+        int size = headers.size();
+        return size == 0 ? new String[0] : headers.values().toArray(new String[size]);
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 }

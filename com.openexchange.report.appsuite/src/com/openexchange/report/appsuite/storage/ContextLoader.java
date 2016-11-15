@@ -77,35 +77,6 @@ public class ContextLoader {
     }
 
     /**
-     * Get all contexts IDs as a list for a given sub-admin id. The sub-admin is a tenant administrator.
-     * 
-     * @param sid, sub-admins ID
-     * @return a list with all contextIDs for the sub-admins brand
-     * @throws SQLException, if the query is incorrect or can not be executed
-     * @throws OXException
-     */
-    public List<Integer> getAllContextsForSid(long sid) throws SQLException, OXException {
-        ArrayList<Integer> result = new ArrayList<>();
-        PreparedStatement stmt = null;
-        ResultSet sqlResult = null;
-        Connection currentConnection = this.dbService.getReadOnly();
-        try {
-            stmt = currentConnection.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
-            stmt.setLong(1, sid);
-            sqlResult = stmt.executeQuery();
-            while (sqlResult.next()) {
-                result.add(sqlResult.getInt(1));
-            }
-        } catch (SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(sqlResult, stmt);
-            dbService.backReadOnly(currentConnection);
-        }
-        return result;
-    }
-    
-    /**
      * Loads all context-ids that are in the same schema, as the given cid. The given cid
      * will be also returned in the list.
      * 

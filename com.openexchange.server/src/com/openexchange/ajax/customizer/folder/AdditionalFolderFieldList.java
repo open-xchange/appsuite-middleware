@@ -104,6 +104,16 @@ public class AdditionalFolderFieldList {
     }
 
     /**
+     * Optionally gets the additional folder field associated with specified column number.
+     *
+     * @param col The column number
+     * @return The additional folder field associated with specified column number or <code>null</code>
+     */
+    public AdditionalFolderField opt(final int col) {
+        return byColId.get(col);
+    }
+
+    /**
      * Gets known fields.
      *
      * @return The known fields

@@ -91,7 +91,7 @@ import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
 import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSockets;
-import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor;
 
 /**
@@ -250,7 +250,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         this.hzInstance = hzInstance;
         this.mapName = mapName;
 
-        GrizzlyWebSocketApplication app = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
+        DefaultGrizzlyWebSocketApplication app = DefaultGrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
         if (null == app) {
             LOGGER.warn("Entry listener cloud not be applied", new Throwable("Missing Grizzly Web Application"));
             return;
@@ -880,7 +880,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     return;
                 }
 
-                GrizzlyWebSocketApplication application = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
+                DefaultGrizzlyWebSocketApplication application = DefaultGrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
                 if (null == application) {
                     LOGGER.warn("Missing Web Application instance. Failed to perform cleaner task for user {} in context {}", I(userId), I(contextId));
                     return;
@@ -928,7 +928,12 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     }
                 }
 
-                LOGGER.info("Removed {} orphaned entries from Hazelcast map during cleaner task run for user {} in context {}", I(connectionIds.size()), I(userId), I(contextId));
+                int size = connectionIds.size();
+                if (1 == size) {
+                    LOGGER.info("Removed 1 orphaned entry from Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
+                } else {
+                    LOGGER.info("Removed {} orphaned entries from Hazelcast map during cleaner task run for user {} in context {}", I(size), I(userId), I(contextId));
+                }
             } catch (Exception e) {
                 LOGGER.warn("Failed to perform cleaner task for user {} in context {}", I(userId), I(contextId), e);
             }

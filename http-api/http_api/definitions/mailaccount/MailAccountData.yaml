@@ -105,7 +105,7 @@ properties:
   spam_fullname:
     type: string
     description: Path to default spam folder. Preferred over `spam`.
-  confirmed_span_fullname:
+  confirmed_spam_fullname:
     type: string
     description: Path to default confirmed-spam folder. Preferred over `confirmed_spam`.
   confirmed_ham_fullname:
