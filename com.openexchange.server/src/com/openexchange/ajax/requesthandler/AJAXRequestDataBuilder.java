@@ -72,6 +72,20 @@ public class AJAXRequestDataBuilder {
         return new AJAXRequestDataBuilder();
     }
 
+    /**
+     * Initializes a new {@code AJAXRequestDataBuilder} instance.
+     * <p>
+     * Best used as a static import.
+     *
+     * @param action The action identifier
+     * @param module The module identifier
+     * @param session The associated session
+     * @return A new {@code AJAXRequestDataBuilder} instance
+     */
+    public static AJAXRequestDataBuilder request(String action, String module, ServerSession session) {
+        return new AJAXRequestDataBuilder().session(session).module(module).action(action);
+    }
+
     // ------------------------------------------------------------------------------------------------------------------
 
     private final AJAXRequestData data;

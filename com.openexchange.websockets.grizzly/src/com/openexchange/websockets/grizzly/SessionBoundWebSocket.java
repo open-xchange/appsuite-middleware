@@ -78,6 +78,28 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
         this.path = path;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the associated protocol handler on socket creation
+     *
+     * @return The protocol handler
+     */
+    public ProtocolHandler getProtocolHandler() {
+        return protocolHandler;
+    }
+
+    /**
+     * Gets the associated HTTP request on socket creation
+     *
+     * @return The HTTP request
+     */
+    public HttpRequestPacket getRequest() {
+        return request;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     /**
      * Gets the connection identifier
      *

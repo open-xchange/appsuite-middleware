@@ -49,18 +49,23 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javax.mail.internet.idn.IDNA;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
@@ -68,10 +73,16 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Password;
+import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
+import com.openexchange.mailaccount.json.MailAccountActionProvider;
+import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URITools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -95,10 +106,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
-            throw
-            MailAccountExceptionCodes.NOT_ENABLED.create(
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(session.getContextId()));
+            throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
 
         MailAccountDescription accountDescription = new MailAccountDescription();
@@ -121,58 +129,156 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             tree = AJAXRequestDataTools.parseBoolParameter(tmp);
         }
 
-        if (accountDescription.getId() >= 0) {
-            if (accountDescription.getId() != MailAccount.DEFAULT_ID && existsSeparateActionProviderSupportingMethod(GetAction.ACTION, session)) {
-                // Unable to validate existing account hosted by another provider
-                return new AJAXRequestResult(Boolean.TRUE);
-            }
-
+        Password password = null;
+        try {
             MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            MailAccount storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
 
-            boolean checkPassword = true;
-            if (null == accountDescription.getPassword()) {
-                checkPassword = false;
-                // Identifier is given, but password not set. Thus load from storage version.
-                try {
-                    String password = storageMailAccount.getPassword();
-                    if (null != password) {
-                        String decryptedPassword = MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
-                        accountDescription.setPassword(decryptedPassword);
+            if (accountDescription.getId() >= 0) {
+                MailAccountActionProvider activeProvider = MailAccount.DEFAULT_ID == accountDescription.getId() ? null : optActiveProvider(session);
+                if (null == activeProvider) {
+                    MailAccount storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+
+                    boolean checkPassword = true;
+                    if (null == accountDescription.getPassword()) {
+                        checkPassword = false;
+                        // Identifier is given, but password not set. Thus load from storage version.
+                        try {
+                            String passwd = storageMailAccount.getPassword();
+                            if (null != passwd) {
+                                String decryptedPassword = MailPasswordUtil.decrypt(passwd, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                                accountDescription.setPassword(decryptedPassword);
+                            }
+                        } catch (OXException e) {
+                            if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                                throw e;
+                            }
+                            storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
+                            storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+                            String decryptedPassword = MailPasswordUtil.decrypt(storageMailAccount.getPassword(), session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                            accountDescription.setPassword(decryptedPassword);
+                        }
                     }
-                } catch (OXException e) {
-                    if (!CryptoErrorMessage.BadPassword.equals(e)) {
-                        throw e;
+
+                    // Check for any modifications that would justify validation
+                    if (!tree && !hasValidationReason(accountDescription, storageMailAccount, checkPassword, session)) {
+                        return new AJAXRequestResult(Boolean.TRUE);
                     }
-                    storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
-                    storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
-                    String decryptedPassword = MailPasswordUtil.decrypt(storageMailAccount.getPassword(), session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
-                    accountDescription.setPassword(decryptedPassword);
+                } else {
+                    password = activeProvider.getPassword(Integer.toString(accountDescription.getId()), session);
+
+                    String passwd;
+                    if (Password.Type.ENCRYPTED == password.getType()) {
+                        passwd = MailPasswordUtil.decrypt(new String(password.getPassword()), session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                    } else {
+                        passwd = new String(password.getPassword());
+                    }
+
+                    JSONObject jAccount;
+                    {
+                        AJAXActionService getAction = activeProvider.getAction(GetAction.ACTION);
+                        AJAXRequestData getActionRequestData = request(GetAction.ACTION, "account", session).format("json").params(AJAXServlet.PARAMETER_ID, Integer.toString(accountDescription.getId())).build(requestData);
+                        jAccount = (JSONObject) getAction.perform(getActionRequestData, session).getResultObject();
+                    }
+
+                    boolean checkPassword = true;
+                    if (null == accountDescription.getPassword()) {
+                        checkPassword = false;
+                        accountDescription.setPassword(passwd);
+                    }
+
+                    // Check for any modifications that would justify validation
+                    if (!tree && !hasValidationReason(accountDescription, jAccount, checkPassword, passwd, storageService, session)) {
+                        return new AJAXRequestResult(Boolean.TRUE);
+                    }
                 }
             }
 
-            // Check for any modifications that would justify validation
-            if (!tree && !hasValidationReason(accountDescription, storageMailAccount, checkPassword, session)) {
-                return new AJAXRequestResult(Boolean.TRUE);
+            checkNeededFields(accountDescription);
+
+            if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
+                // Deny validation of Unified Mail account
+                throw MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED.create();
+            }
+
+            boolean ignoreInvalidTransport;
+            {
+                String tmp = requestData.getParameter("ignoreInvalidTransport");
+                ignoreInvalidTransport = AJAXRequestDataTools.parseBoolParameter(tmp);
+            }
+
+            if (tree) {
+                return new AJAXRequestResult(actionValidateTree(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
+            }
+            return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings, false)).addWarnings(warnings);
+        } finally {
+            Streams.close(password);
+        }
+    }
+
+    private static boolean hasValidationReason(MailAccountDescription accountDescription, JSONObject jAccount, boolean checkPassword, String passwd, MailAccountStorageService storageService, ServerSession session) throws OXException {
+        String s1 = generateMailServerURL(jAccount);
+        String s2 = accountDescription.generateMailServerURL();
+        if (null == s1) {
+            if (null != s2) {
+                return true;
+            }
+        } else if (!s1.equals(s2)) {
+            return true;
+        }
+
+        s1 = generateTransportServerURL(jAccount);
+        s2 = accountDescription.generateTransportServerURL();
+        if (null == s1) {
+            if (null != s2) {
+                return true;
+            }
+        } else if (!s1.equals(s2)) {
+            return true;
+        }
+
+        s1 = jAccount.optString(MailAccountFields.LOGIN, null);
+        s2 = accountDescription.getLogin();
+        if (null == s1) {
+            if (null != s2) {
+                return true;
+            }
+        } else if (!s1.equals(s2)) {
+            return true;
+        }
+
+        if (checkPassword) {
+            s1 = passwd;
+            s2 = accountDescription.getPassword();
+            if (null == s1) {
+                if (null != s2) {
+                    return true;
+                }
+            } else if (!s1.equals(s2)) {
+                return true;
             }
         }
 
-        checkNeededFields(accountDescription);
-        if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
-            // Deny validation of Unified Mail account
-            throw MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED.create();
+        s2 = accountDescription.getTransportLogin();
+        if (null != s2) {
+            s1 = jAccount.optString(MailAccountFields.TRANSPORT_LOGIN, null);
+            if (!s2.equals(s1)) {
+                return true;
+            }
         }
 
-        // Check for ignoreInvalidTransport parameter
-        boolean ignoreInvalidTransport;
-        {
-            String tmp = requestData.getParameter("ignoreInvalidTransport");
-            ignoreInvalidTransport = AJAXRequestDataTools.parseBoolParameter(tmp);
+        s2 = accountDescription.getTransportPassword();
+        if (null != s2) {
+            TransportAccount transportAccount = storageService.getTransportAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+            s1 = transportAccount.getTransportPassword();
+            if (null != s1) {
+                s1 = MailPasswordUtil.decrypt(s1, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                if (!s2.equals(s1)) {
+                    return true;
+                }
+            }
         }
-        if (tree) {
-            return new AJAXRequestResult(actionValidateTree(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
-        }
-        return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings, false)).addWarnings(warnings);
+
+        return false;
     }
 
     private static boolean hasValidationReason(MailAccountDescription accountDescription, MailAccount storageMailAccount, boolean checkPassword, ServerSession session) throws OXException {
@@ -289,6 +395,48 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             }
         }
         return Boolean.valueOf(validated);
+    }
+
+    private static String generateMailServerURL(JSONObject jAccount) throws OXException {
+        String mailServer = jAccount.optString(MailAccountFields.MAIL_SERVER, null);
+        if (com.openexchange.java.Strings.isEmpty(mailServer)) {
+            return null;
+        }
+
+        boolean mailSecure = jAccount.optBoolean(MailAccountFields.MAIL_SECURE, false);
+        String mailProtocol = jAccount.optString(MailAccountFields.MAIL_PROTOCOL, null);
+        int mailPort = jAccount.optInt(MailAccountFields.MAIL_PORT, mailSecure ? URIDefaults.IMAP.getPort() : URIDefaults.IMAP.getSSLPort());
+        try {
+            return URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, IDNA.toASCII(mailServer), mailPort).toString();
+        } catch (final URISyntaxException e) {
+            final StringBuilder sb = new StringBuilder(32);
+            sb.append(mailProtocol);
+            if (mailSecure) {
+                sb.append('s');
+            }
+            throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, sb.append("://").append(mailServer).append(':').append(mailPort).toString());
+        }
+    }
+
+    private static String generateTransportServerURL(JSONObject jAccount) throws OXException {
+        String transportServer = jAccount.optString(MailAccountFields.TRANSPORT_SERVER, null);
+        if (com.openexchange.java.Strings.isEmpty(transportServer)) {
+            return null;
+        }
+
+        boolean transportSecure = jAccount.optBoolean(MailAccountFields.TRANSPORT_SECURE, false);
+        String transportProtocol = jAccount.optString(MailAccountFields.TRANSPORT_PROTOCOL, null);
+        int transportPort = jAccount.optInt(MailAccountFields.TRANSPORT_PORT, transportSecure ? URIDefaults.SMTP.getPort() : URIDefaults.SMTP.getSSLPort());
+        try {
+            return URITools.generateURI(transportSecure ? transportProtocol + 's' : transportProtocol, IDNA.toASCII(transportServer), transportPort).toString();
+        } catch (final URISyntaxException e) {
+            final StringBuilder sb = new StringBuilder(32);
+            sb.append(transportProtocol);
+            if (transportSecure) {
+                sb.append('s');
+            }
+            throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, sb.append("://").append(transportServer).append(':').append(transportPort).toString());
+        }
     }
 
 }
