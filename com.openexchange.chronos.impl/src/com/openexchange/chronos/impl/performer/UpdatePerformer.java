@@ -76,6 +76,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -255,9 +256,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if the change exceptions should be reseted, <code>false</code>, otherwise
      */
     private boolean needsChangeExceptionsReset(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
-        return eventUpdate.containsAnyChangeOf(new EventField[] {
+        if (eventUpdate.containsAnyChangeOf(new EventField[] {
             EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
-        });
+        })) {
+            return true;
+        }
+        if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE) && null == eventUpdate.getUpdate().getRecurrenceRule()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -273,15 +280,18 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Gets a value indicating whether the participation status of the event's attendees needs to be reset along with the update or not.
+     * Gets a value indicating whether conflict checks should take place along with the update or not.
      *
      * @param eventUpdate The event update to evaluate
-     * @return <code>true</code> if the attendee's participation status should be reseted, <code>false</code>, otherwise
+     * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
     private boolean needsConflictCheck(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
         if (eventUpdate.containsAnyChangeOf(new EventField[] {
-            EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY, EventField.TRANSP
+            EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
         })) {
+            return true;
+        }
+        if (eventUpdate.getUpdatedFields().contains(EventField.TRANSP) && Transp.TRANSPARENT.equals(eventUpdate.getOriginal().getTransp().getValue())) {
             return true;
         }
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
@@ -401,7 +411,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                             eventUpdate.removeRecurrenceRule();
                             break;
                         }
-                        throw OXException.general("not allowed change");
+                        // TODO: better ignore? com.openexchange.ajax.appointment.recurrence.UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
+                        //       vs. com.openexchange.ajax.appointment.recurrence.TestsForModifyingChangeExceptions.testShouldNotAllowTurningAChangeExceptionIntoASeries()
+                        throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
                     }
                     if (isSeriesMaster(originalEvent) && null == eventUpdate.getRecurrenceRule()) {
                         /*
@@ -438,7 +450,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         // ignore neutral value
                         break;
                     }
-                    throw OXException.general("not allowed change");
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
                 case UID:
                 case CREATED:
                 case CREATED_BY:
@@ -447,7 +459,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 case PUBLIC_FOLDER_ID:
                 case CHANGE_EXCEPTION_DATES:
                 case DELETE_EXCEPTION_DATES:
-                    throw OXException.general("not allowed change");
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
                 default:
                     break;
             }

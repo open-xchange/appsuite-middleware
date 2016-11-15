@@ -340,15 +340,6 @@ public class EventConverter {
         if (appointment.containsRecurrenceID()) {
             event.setSeriesId(appointment.getRecurrenceID());
         }
-        if (appointment.containsRecurrenceType()) {
-            if (0 == appointment.getRecurrenceType()) {
-                event.setRecurrenceRule(null);
-            } else {
-                RecurrenceData originalRecurrenceData = null != originalEventID ? loadRecurrenceData(session, originalEventID) : null;
-                recurrenceData = getRecurrenceData(session, appointment, originalRecurrenceData);
-                event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
-            }
-        }
         if (appointment.containsRecurrenceDatePosition()) {
             if (null == appointment.getRecurrenceDatePosition()) {
                 event.setRecurrenceId(null);
@@ -367,6 +358,17 @@ public class EventConverter {
                     recurrenceData = loadRecurrenceData(session, originalEventID);
                 }
                 event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceData, appointment.getRecurrencePosition()));
+            }
+        }
+        if (appointment.containsRecurrenceType()) {
+            if (0 == appointment.getRecurrenceType()) {
+                event.setRecurrenceRule(null);
+            } else {
+                if (null == recurrenceData && null != originalEventID) {
+                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                }
+                recurrenceData = getRecurrenceData(session, appointment, recurrenceData);
+                event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
             }
         }
         if (appointment.containsChangeExceptions()) {

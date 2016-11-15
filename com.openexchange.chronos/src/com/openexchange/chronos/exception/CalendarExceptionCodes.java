@@ -126,6 +126,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_CALENDAR_USER("Invalid calendar user [uri %1$s, id %1$d, type %1$s]", INVALID_CALENDAR_USER_MSG, Category.CATEGORY_USER_INPUT, 4034),
     /**
+     * <li>The operation could not be completed due to insufficient permissions.</li>
+     * <li>Forbidden change [id %1$d, field %2$s]</li>
+     */
+    FORBIDDEN_CHANGE("Forbidden change [id %1$d, field %2$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4035),
+    /**
      * <li>The operation could not be completed due to a concurrent modification. Please reload the data and try again.</li>
      * <li>Concurrent modification [id %1$d, client timestamp %2$d, actual timestamp %3$d]</li>
      */

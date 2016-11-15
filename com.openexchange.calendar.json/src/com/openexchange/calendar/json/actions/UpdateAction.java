@@ -171,7 +171,6 @@ public final class UpdateAction extends ChronosAction {
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setContext(request.getSession().getContext());
         new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
-        convertExternalToInternalUsersIfPossible(appointment, request.getSession().getContext(), LOG);
         if (appointment.containsNotification()) {
             session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }

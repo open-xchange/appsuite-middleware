@@ -169,7 +169,6 @@ public final class NewAction extends ChronosAction {
         if (false == appointment.containsParentFolderID()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
         }
-        convertExternalToInternalUsersIfPossible(appointment, request.getSession().getContext(), LOG);
         if (appointment.containsNotification()) {
             session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }

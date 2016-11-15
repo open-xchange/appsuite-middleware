@@ -107,6 +107,17 @@ public interface CalendarService {
     /**
      * Searches for events by pattern in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
      * {@link EventField#CATEGORIES}. The pattern is surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * </ul>
      *
      * @param session The calendar session
      * @param folderIDs The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
@@ -171,7 +182,6 @@ public interface CalendarService {
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
-     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -181,6 +191,22 @@ public interface CalendarService {
      */
     UpdatesResult getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
 
+    /**
+     * Gets lists of new and updated as well as deleted events since a specific timestamp of a user.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param updatedSince The timestamp since when the updates should be retrieved
+     * @return The updates result yielding lists of new/modified and deleted events
+     */
     UpdatesResult getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
 
     CalendarResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;

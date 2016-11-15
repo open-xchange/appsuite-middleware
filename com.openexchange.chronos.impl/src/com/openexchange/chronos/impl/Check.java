@@ -55,18 +55,17 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
-import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.SortOptions;
@@ -261,21 +260,7 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId recurrenceIdExists(Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
-        RecurrenceRule rule;
-        try {
-            rule = new RecurrenceRule(seriesMaster.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(e, seriesMaster.getRecurrenceRule());
-        }
-        DateTime start;
-        if (seriesMaster.isAllDay()) {
-            start = new DateTime(seriesMaster.getStartDate().getTime()).toAllDay();
-        } else {
-            start = new DateTime(TimeZone.getTimeZone(seriesMaster.getStartTimeZone()), seriesMaster.getStartDate().getTime());
-        }
-        RecurrenceRuleIterator iterator = rule.iterator(start);
-        iterator.fastForward(recurrenceID.getValue());
-        if (false == iterator.hasNext() || recurrenceID.getValue() != iterator.nextMillis()) {
+        if (false == Recurrence.isRecurrence(new DefaultRecurrenceData(seriesMaster), recurrenceID)) {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
         }
         return recurrenceID;

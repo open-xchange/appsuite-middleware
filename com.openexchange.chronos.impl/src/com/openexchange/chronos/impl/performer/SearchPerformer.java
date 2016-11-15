@@ -135,5 +135,4 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return userize(events, folder, isIncludePrivate(session));
     }
 
-
 }

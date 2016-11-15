@@ -70,6 +70,7 @@ import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -230,6 +231,19 @@ public class Recurrence {
             return now.after(CalendarUtils.getDateInTimeZone(new Date(occurrence.getTimestamp()), timeZone));
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether a certain recurrence identifier is actually part of a recurrence.
+     *
+     * @param recurrenceData The recurrence data to match against
+     * @param recurrenceId The recurrence identifier to check
+     * @return <code>true</code> if the recurrence identifier is a valid occurrence based on the recurrence data, <code>false</code>, otherwise
+     */
+    public static boolean isRecurrence(RecurrenceData recurrenceData, RecurrenceId recurrenceId) throws OXException {
+        RecurrenceRuleIterator iterator = getRecurrenceIterator(recurrenceData, true);
+        iterator.fastForward(recurrenceId.getValue());
+        return iterator.hasNext() && recurrenceId.getValue() == iterator.nextMillis();
     }
 
     /**
