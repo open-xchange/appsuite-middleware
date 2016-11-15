@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
@@ -76,31 +76,20 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
- * {@link HasOperation}
+ * {@link HasPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class HasOperation extends AbstractQueryOperation {
+public class HasPerformer extends AbstractQueryPerformer {
 
     /**
-     * Prepares a has operation.
-     *
-     * @param storage The underlying calendar storage
-     * @param session The calendar session
-     * @return The prepared has operation
-     */
-    public static HasOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
-        return new HasOperation(session, storage);
-    }
-
-    /**
-     * Initializes a new {@link HasOperation}.
+     * Initializes a new {@link HasPerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    private HasOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+    public HasPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
     }
 

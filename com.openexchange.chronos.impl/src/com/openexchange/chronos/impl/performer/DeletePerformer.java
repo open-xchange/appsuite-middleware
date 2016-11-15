@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -74,42 +74,33 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
+import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 
 /**
- * {@link DeleteOperation}
+ * {@link DeletePerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DeleteOperation extends AbstractUpdateOperation {
+public class DeletePerformer extends AbstractUpdatePerformer {
 
     /**
-     * Prepares a delete operation.
-     *
-     * @param storage The underlying calendar storage
-     * @param session The calendar session
-     * @param folder The calendar folder representing the current view on the events
-     * @return The prepared delete operation
-     */
-    public static DeleteOperation prepare(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        return new DeleteOperation(storage, session, folder);
-    }
-
-    /**
-     * Initializes a new {@link DeleteOperation}.
+     * Initializes a new {@link DeletePerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    private DeleteOperation(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public DeletePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super(storage, session, folder);
     }
 

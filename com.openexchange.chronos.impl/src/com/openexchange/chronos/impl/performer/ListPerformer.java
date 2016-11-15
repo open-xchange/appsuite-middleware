@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -78,31 +78,20 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 
 /**
- * {@link ListOperation}
+ * {@link ListPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ListOperation extends AbstractQueryOperation {
+public class ListPerformer extends AbstractQueryPerformer {
 
     /**
-     * Prepares a new {@link ListOperation}.
-     *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
-     * @return The prepared operation
-     */
-    public static ListOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
-        return new ListOperation(session, storage);
-    }
-
-    /**
-     * Initializes a new {@link ListOperation}.
+     * Initializes a new {@link ListPerformer}.
      *
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    private ListOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+    public ListPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
     }
 

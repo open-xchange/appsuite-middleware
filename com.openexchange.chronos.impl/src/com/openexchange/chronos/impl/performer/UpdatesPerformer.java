@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.appendCommonTerms;
@@ -79,31 +79,20 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
- * {@link UpdatesOperation}
+ * {@link UpdatesPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdatesOperation extends AbstractQueryOperation {
+public class UpdatesPerformer extends AbstractQueryPerformer {
 
     /**
-     * Prepares a new {@link UpdatesOperation}.
-     *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
-     * @return The prepared operation
-     */
-    public static UpdatesOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
-        return new UpdatesOperation(session, storage);
-    }
-
-    /**
-     * Initializes a new {@link UpdatesOperation}.
+     * Initializes a new {@link UpdatesPerformer}.
      *
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    private UpdatesOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+    public UpdatesPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
     }
 
@@ -117,7 +106,8 @@ public class UpdatesOperation extends AbstractQueryOperation {
         /*
          * construct search term
          */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUser().getId())));
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUser().getId())));
         appendCommonTerms(searchTerm, getFrom(session), getUntil(session), since);
         /*
          * perform search & userize the results for the current session's user

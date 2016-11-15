@@ -47,75 +47,69 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getFields;
+import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
+import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
- * {@link GetOperation}
+ * {@link ChangeExceptionsPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class GetOperation extends AbstractQueryOperation {
+public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
 
     /**
-     * Prepares a new {@link GetOperation}.
-     *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
-     * @return The prepared operation
-     */
-    public static GetOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
-        return new GetOperation(session, storage);
-    }
-
-    /**
-     * Initializes a new {@link GetOperation}.
+     * Initializes a new {@link ChangeExceptionsPerformer}.
      *
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    private GetOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+    public ChangeExceptionsPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
     }
 
     /**
      * Performs the operation.
      *
-     * @param folder The parent folder to get read the event in
-     * @param objectID The identifier if the event to get
-     * @return The loaded event
+     * @param seriesID The series identifier to get the change exceptions for
+     * @return The change exceptions
      */
-    public UserizedEvent perform(UserizedFolder folder, int objectID) throws OXException {
-        Event event = storage.getEventStorage().loadEvent(objectID, getFields(session));
-        if (null == event) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(I(objectID));
-        }
-        if (session.getUser().getId() != event.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        }
-        readAdditionalEventData(Collections.singletonList(event), getFields(session, EventField.ATTENDEES));
-        Check.eventIsInFolder(event, folder);
-        return userize(Collections.singletonList(event), folder, true).get(0);
+    public List<UserizedEvent> perform(UserizedFolder folder, int seriesID) throws OXException {
+        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        /*
+         * construct search term
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getFolderIdTerm(folder))
+            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, I(seriesID)))
+            .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+        ;
+        /*
+         * perform search & userize the results
+         */
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
+        readAdditionalEventData(events, getFields(session));
+        return userize(events, folder, true);
     }
 
 }

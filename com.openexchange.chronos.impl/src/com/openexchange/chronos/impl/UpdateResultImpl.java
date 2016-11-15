@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl;
 
 import java.util.List;
 import java.util.Set;

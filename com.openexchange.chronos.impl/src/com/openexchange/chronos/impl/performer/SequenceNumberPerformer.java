@@ -47,35 +47,63 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import java.util.Date;
+import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.service.SortOrder;
+import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.search.SearchTerm;
 
 /**
- * {@link DeleteResultImpl}
+ * {@link SequenceNumberPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DeleteResultImpl implements DeleteResult {
-
-    private final Event deletedEvent;
+public class SequenceNumberPerformer extends AbstractQueryPerformer {
 
     /**
-     * Initializes a new {@link DeleteResultImpl}.
+     * Initializes a new {@link SequenceNumberPerformer}.
      *
-     * @param deletedEvent The original event
+     * @param session The calendar session
+     * @param storage The underlying calendar storage
      */
-    public DeleteResultImpl(Event deletedEvent) throws OXException {
-        super();
-        this.deletedEvent = deletedEvent;
+    public SequenceNumberPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+        super(session, storage);
     }
 
-    @Override
-    public Event getDeletedEvent() {
-        return deletedEvent;
+    /**
+     * Performs the operation.
+     *
+     * @param folder The folder to determine the sequence number for
+     * @return The sequence number
+     */
+    public long perform(UserizedFolder folder) throws OXException {
+        requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
+        Date lastModified = folder.getLastModifiedUTC();
+        SearchTerm<?> searchTerm = getFolderIdTerm(folder);
+        SortOptions sortOptions = new SortOptions().addOrder(SortOrder.DESC(EventField.LAST_MODIFIED)).setLimits(0, 1);
+        EventField[] fields = { EventField.LAST_MODIFIED };
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, sortOptions, fields);
+        if (0 < events.size() && events.get(0).getLastModified().after(lastModified)) {
+            lastModified = events.get(0).getLastModified();
+        }
+        List<Event> deletedEvents = storage.getEventStorage().searchDeletedEvents(searchTerm, sortOptions, fields);
+        if (0 < deletedEvents.size() && deletedEvents.get(0).getLastModified().after(lastModified)) {
+            lastModified = deletedEvents.get(0).getLastModified();
+        }
+        return lastModified.getTime();
     }
 
 }

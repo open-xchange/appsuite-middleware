@@ -47,74 +47,92 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.appendCommonTerms;
+import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import static com.openexchange.chronos.impl.Utils.getFrom;
+import static com.openexchange.chronos.impl.Utils.getSearchTerm;
+import static com.openexchange.chronos.impl.Utils.getUntil;
+import static com.openexchange.chronos.impl.Utils.isIncludePrivate;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import java.util.Date;
+import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
-import com.openexchange.chronos.service.SortOrder;
+import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.search.SearchTerm;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
- * {@link SequenceNumberOperation}
+ * {@link AllPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class SequenceNumberOperation extends AbstractQueryOperation {
+public class AllPerformer extends AbstractQueryPerformer {
 
     /**
-     * Prepares a new {@link SequenceNumberOperation}.
-     *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
-     * @return The prepared operation
-     */
-    public static SequenceNumberOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
-        return new SequenceNumberOperation(session, storage);
-    }
-
-    /**
-     * Initializes a new {@link SequenceNumberOperation}.
+     * Initializes a new {@link AllPerformer}.
      *
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    private SequenceNumberOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+    public AllPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
     }
 
     /**
      * Performs the operation.
      *
-     * @param folder The folder to determine the sequence number for
-     * @return The sequence number
+     * @return The loaded events
      */
-    public long perform(UserizedFolder folder) throws OXException {
-        requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        Date lastModified = folder.getLastModifiedUTC();
-        SearchTerm<?> searchTerm = getFolderIdTerm(folder);
-        SortOptions sortOptions = new SortOptions().addOrder(SortOrder.DESC(EventField.LAST_MODIFIED)).setLimits(0, 1);
-        EventField[] fields = { EventField.LAST_MODIFIED };
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, sortOptions, fields);
-        if (0 < events.size() && events.get(0).getLastModified().after(lastModified)) {
-            lastModified = events.get(0).getLastModified();
-        }
-        List<Event> deletedEvents = storage.getEventStorage().searchDeletedEvents(searchTerm, sortOptions, fields);
-        if (0 < deletedEvents.size() && deletedEvents.get(0).getLastModified().after(lastModified)) {
-            lastModified = deletedEvents.get(0).getLastModified();
-        }
-        return lastModified.getTime();
+    public List<UserizedEvent> perform() throws OXException {
+        /*
+         * construct search term
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUser().getId())));
+        appendCommonTerms(searchTerm, getFrom(session), getUntil(session), null);
+        /*
+         * perform search & userize the results for the current session's user
+         */
+        EventField[] fields = getFields(session, EventField.ATTENDEES);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
+        readAdditionalEventData(events, fields);
+        return userize(events, session.getUser().getId(), isIncludePrivate(session));
+    }
+
+    /**
+     * Performs the operation.
+     *
+     * @param folder The parent folder to get all events from
+     * @return The loaded events
+     */
+    public List<UserizedEvent> perform(UserizedFolder folder) throws OXException {
+        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        /*
+         * construct search term
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder));
+        appendCommonTerms(searchTerm, getFrom(session), getUntil(session), null);
+        /*
+         * perform search & userize the results
+         */
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
+        readAdditionalEventData(events, getFields(session));
+        return userize(events, folder, true);
     }
 
 }

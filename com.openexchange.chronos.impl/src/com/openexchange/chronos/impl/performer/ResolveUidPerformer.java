@@ -47,80 +47,60 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getFields;
-import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
-import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
- * {@link ChangeExceptionsOperation}
+ * {@link ResolveUidPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ChangeExceptionsOperation extends AbstractQueryOperation {
+public class ResolveUidPerformer extends AbstractQueryPerformer {
 
     /**
-     * Prepares a new {@link ChangeExceptionsOperation}.
-     *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
-     * @return The prepared operation
-     */
-    public static ChangeExceptionsOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
-        return new ChangeExceptionsOperation(session, storage);
-    }
-
-    /**
-     * Initializes a new {@link ChangeExceptionsOperation}.
+     * Initializes a new {@link ResolveUidPerformer}.
      *
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    private ChangeExceptionsOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+    public ResolveUidPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
     }
 
     /**
      * Performs the operation.
      *
-     * @param seriesID The series identifier to get the change exceptions for
-     * @return The change exceptions
+     * @param uid The unique identifier to resolve
+     * @return The identifier of the resolved event, or <code>0</code> if not found
      */
-    public List<UserizedEvent> perform(UserizedFolder folder, int seriesID) throws OXException {
-        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+    public int perform(String uid) throws OXException {
         /*
          * construct search term
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getFolderIdTerm(folder))
-            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, I(seriesID)))
-            .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+            .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
+                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+            )
         ;
         /*
-         * perform search & userize the results
+         * search for an event matching the UID
          */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
-        readAdditionalEventData(events, getFields(session));
-        return userize(events, folder, true);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
+        return 0 < events.size() ? events.get(0).getId() : 0;
     }
 
 }

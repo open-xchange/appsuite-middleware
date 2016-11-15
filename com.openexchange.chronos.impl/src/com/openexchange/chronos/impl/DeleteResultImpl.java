@@ -47,34 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl;
 
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link CreateResultImpl}
+ * {@link DeleteResultImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CreateResultImpl implements CreateResult {
+public class DeleteResultImpl implements DeleteResult {
 
-    private final Event createdEvent;
+    private final Event deletedEvent;
 
     /**
-     * Initializes a new {@link CreateResultImpl}.
+     * Initializes a new {@link DeleteResultImpl}.
      *
-     * @param createdEvent The created event
+     * @param deletedEvent The original event
      */
-    public CreateResultImpl(Event createdEvent) {
+    public DeleteResultImpl(Event deletedEvent) throws OXException {
         super();
-        this.createdEvent = createdEvent;
+        this.deletedEvent = deletedEvent;
     }
 
     @Override
-    public Event getCreatedEvent() {
-        return createdEvent;
+    public Event getDeletedEvent() {
+        return deletedEvent;
     }
 
 }

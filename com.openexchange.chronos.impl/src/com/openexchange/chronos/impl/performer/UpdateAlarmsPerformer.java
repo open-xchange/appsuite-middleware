@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -66,7 +66,9 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AlarmMapper;
+import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -75,33 +77,21 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link UpdateAlarmsOperation}
+ * {@link UpdateAlarmsPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateAlarmsOperation extends AbstractUpdateOperation {
+public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
 
     /**
-     * Prepares an alarm update operation.
-     *
-     * @param storage The underlying calendar storage
-     * @param session The calendar session
-     * @param folder The calendar folder representing the current view on the events
-     * @return The prepared alarm update operation
-     */
-    public static UpdateAlarmsOperation prepare(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        return new UpdateAlarmsOperation(storage, session, folder);
-    }
-
-    /**
-     * Initializes a new {@link UpdateAlarmsOperation}.
+     * Initializes a new {@link UpdateAlarmsPerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    private UpdateAlarmsOperation(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public UpdateAlarmsPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super(storage, session, folder);
     }
 

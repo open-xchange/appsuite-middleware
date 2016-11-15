@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
@@ -106,23 +106,23 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
- * {@link AbstractQueryOperation}
+ * {@link AbstractQueryPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class AbstractQueryOperation {
+public abstract class AbstractQueryPerformer {
 
     protected final CalendarSession session;
     protected final CalendarStorage storage;
 
     /**
-     * Initializes a new {@link AbstractQueryOperation}.
+     * Initializes a new {@link AbstractQueryPerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    protected AbstractQueryOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+    protected AbstractQueryPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super();
         this.session = session;
         this.storage = storage;

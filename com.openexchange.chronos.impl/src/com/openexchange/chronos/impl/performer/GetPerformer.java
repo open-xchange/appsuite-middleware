@@ -47,52 +47,64 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
-import java.util.List;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.service.EventConflict;
+import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getFields;
+import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
+import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Collections;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UserizedEvent;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
 
 /**
- * {@link EventConflictImpl}
+ * {@link GetPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventConflictImpl implements EventConflict {
-
-    private final UserizedEvent conflictingEvent;
-    private final List<Attendee> conflictingAttendees;
-    private final boolean hardConflict;
+public class GetPerformer extends AbstractQueryPerformer {
 
     /**
-     * Initializes a new {@link EventConflictImpl}.
+     * Initializes a new {@link GetPerformer}.
      *
-     * @param conflictingEvent The conflicting event
-     * @param conflictingAttendees The conflicting attendees
-     * @param hardConflict <code>true</code> for a <i>hard</i>, i.e. non-ignorable conflict, <code>false</code>, otherwise
+     * @param session The calendar session
+     * @param storage The underlying calendar storage
      */
-    public EventConflictImpl(UserizedEvent conflictingEvent, List<Attendee> conflictingAttendees, boolean hardConflict) {
-        super();
-        this.conflictingEvent = conflictingEvent;
-        this.conflictingAttendees = conflictingAttendees;
-        this.hardConflict = hardConflict;
+    public GetPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+        super(session, storage);
     }
 
-    @Override
-    public UserizedEvent getConflictingEvent() {
-        return conflictingEvent;
-    }
-
-    @Override
-    public List<Attendee> getConflictingAttendees() {
-        return conflictingAttendees;
-    }
-
-    @Override
-    public boolean isHardConflict() {
-        return hardConflict;
+    /**
+     * Performs the operation.
+     *
+     * @param folder The parent folder to get read the event in
+     * @param objectID The identifier if the event to get
+     * @return The loaded event
+     */
+    public UserizedEvent perform(UserizedFolder folder, int objectID) throws OXException {
+        Event event = storage.getEventStorage().loadEvent(objectID, getFields(session));
+        if (null == event) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(I(objectID));
+        }
+        if (session.getUser().getId() != event.getCreatedBy()) {
+            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        }
+        readAdditionalEventData(Collections.singletonList(event), getFields(session, EventField.ATTENDEES));
+        Check.eventIsInFolder(event, folder);
+        return userize(Collections.singletonList(event), folder, true).get(0);
     }
 
 }

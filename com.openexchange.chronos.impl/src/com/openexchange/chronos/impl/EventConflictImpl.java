@@ -47,71 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.exception.OXException;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.UserizedEvent;
 
 /**
- * {@link ResolveUidOperation}
+ * {@link EventConflictImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ResolveUidOperation extends AbstractQueryOperation {
+public class EventConflictImpl implements EventConflict {
+
+    private final UserizedEvent conflictingEvent;
+    private final List<Attendee> conflictingAttendees;
+    private final boolean hardConflict;
 
     /**
-     * Prepares a new {@link ResolveUidOperation}.
+     * Initializes a new {@link EventConflictImpl}.
      *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
-     * @return The prepared operation
+     * @param conflictingEvent The conflicting event
+     * @param conflictingAttendees The conflicting attendees
+     * @param hardConflict <code>true</code> for a <i>hard</i>, i.e. non-ignorable conflict, <code>false</code>, otherwise
      */
-    public static ResolveUidOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
-        return new ResolveUidOperation(session, storage);
+    public EventConflictImpl(UserizedEvent conflictingEvent, List<Attendee> conflictingAttendees, boolean hardConflict) {
+        super();
+        this.conflictingEvent = conflictingEvent;
+        this.conflictingAttendees = conflictingAttendees;
+        this.hardConflict = hardConflict;
     }
 
-    /**
-     * Initializes a new {@link ResolveUidOperation}.
-     *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
-     */
-    private ResolveUidOperation(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    @Override
+    public UserizedEvent getConflictingEvent() {
+        return conflictingEvent;
     }
 
-    /**
-     * Performs the operation.
-     *
-     * @param uid The unique identifier to resolve
-     * @return The identifier of the resolved event, or <code>0</code> if not found
-     */
-    public int perform(String uid) throws OXException {
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            )
-        ;
-        /*
-         * search for an event matching the UID
-         */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
-        return 0 < events.size() ? events.get(0).getId() : 0;
+    @Override
+    public List<Attendee> getConflictingAttendees() {
+        return conflictingAttendees;
+    }
+
+    @Override
+    public boolean isHardConflict() {
+        return hardConflict;
     }
 
 }

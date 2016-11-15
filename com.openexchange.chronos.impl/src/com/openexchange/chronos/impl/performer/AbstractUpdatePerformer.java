@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
@@ -64,8 +64,11 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeMapper;
+import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.DeleteResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
+import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -76,12 +79,12 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link AbstractUpdateOperation}
+ * {@link AbstractUpdatePerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class AbstractUpdateOperation {
+public abstract class AbstractUpdatePerformer {
 
     protected final CalendarSession session;
     protected final CalendarStorage storage;
@@ -91,13 +94,13 @@ public abstract class AbstractUpdateOperation {
     protected final CalendarResultImpl result;
 
     /**
-     * Initializes a new {@link AbstractUpdateOperation}.
+     * Initializes a new {@link AbstractUpdatePerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    protected AbstractUpdateOperation(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super();
         this.folder = folder;
         this.calendarUser = getCalendarUser(folder);

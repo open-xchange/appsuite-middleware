@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
@@ -71,6 +71,7 @@ import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Recurrence;
+import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.UserizedEvent;

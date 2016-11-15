@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -76,8 +76,11 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeMapper;
+import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
+import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -85,33 +88,21 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 
 /**
- * {@link UpdateAttendeeOperation}
+ * {@link UpdateAttendeePerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateAttendeeOperation extends AbstractUpdateOperation {
+public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
 
     /**
-     * Prepares an update attendee operation.
-     *
-     * @param storage The underlying calendar storage
-     * @param session The calendar session
-     * @param folder The calendar folder representing the current view on the events
-     * @return The prepared update attendee operation
-     */
-    public static UpdateAttendeeOperation prepare(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        return new UpdateAttendeeOperation(storage, session, folder);
-    }
-
-    /**
-     * Initializes a new {@link UpdateAttendeeOperation}.
+     * Initializes a new {@link UpdateAttendeePerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    private UpdateAttendeeOperation(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public UpdateAttendeePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super(storage, session, folder);
     }
 

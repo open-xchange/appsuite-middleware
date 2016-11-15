@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getFields;
@@ -76,31 +76,20 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
- * {@link SearchOperation}
+ * {@link SearchPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class SearchOperation extends AbstractQueryOperation {
+public class SearchPerformer extends AbstractQueryPerformer {
 
     /**
-     * Prepares a new {@link SearchOperation}.
-     *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
-     * @return The prepared operation
-     */
-    public static SearchOperation prepare(CalendarSession session, CalendarStorage storage) throws OXException {
-        return new SearchOperation(session, storage);
-    }
-
-    /**
-     * Initializes a new {@link SearchOperation}.
+     * Initializes a new {@link SearchPerformer}.
      *
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    private SearchOperation(CalendarSession session, CalendarStorage storage) throws OXException {
+    public SearchPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
     }
 

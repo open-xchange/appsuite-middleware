@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.operation;
+package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.i;
@@ -68,8 +68,10 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
+import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
@@ -81,33 +83,21 @@ import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 
 /**
- * {@link CreateOperation}
+ * {@link CreatePerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CreateOperation extends AbstractUpdateOperation {
+public class CreatePerformer extends AbstractUpdatePerformer {
 
     /**
-     * Prepares a create operation.
-     *
-     * @param storage The underlying calendar storage
-     * @param session The calendar session
-     * @param folder The calendar folder representing the current view on the events
-     * @return The prepared create operation
-     */
-    public static CreateOperation prepare(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        return new CreateOperation(storage, session, folder);
-    }
-
-    /**
-     * Initializes a new {@link CreateOperation}.
+     * Initializes a new {@link CreatePerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    private CreateOperation(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public CreatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
