@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-10-15 18:19+0100\n"
+"PO-Revision-Date: 2016-11-09 05:48+0100\n"
 "Last-Translator: Arve Eriksson <031299870@telia.com>\n"
 "Language-Team: Swedish <ox@bureau-cornavin.com>\n"
 "Language: sv\n"
@@ -57,8 +57,8 @@ msgid ""
 "The server configuration cannot be retrieved due to an internal server "
 "error. Please try again later."
 msgstr ""
-"Serverkonfigurationen kan inte hämtas på grund av ett internt "
-"serverfel. Försök igen senare."
+"Serverkonfigurationen kan inte hämtas på grund av ett internt serverfel. "
+"Försök igen senare."
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -1683,8 +1683,7 @@ msgid ""
 "A DoveAdm server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
 msgstr ""
-"Ett DoveAdm-serverfel inträffade med HTTP-statuskod %1$s. Felmeddelande: "
-"%2$s"
+"Ett DoveAdm-serverfel inträffade med HTTP-statuskod %1$s. Felmeddelande: %2$s"
 
 #. Invalid DoveAdm URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:68
@@ -4056,13 +4055,18 @@ msgid ""
 "Your access token for '%1$s' is invalid. You have to reauthorize your "
 "account."
 msgstr ""
-"Din åtkomstbricka för '%1$s' är ogiltig. Du måste autentisera ditt konto "
-"på nytt."
+"Din åtkomstbricka för '%1$s' är ogiltig. Du måste autentisera ditt konto på "
+"nytt."
 
 #. You need to explicitly authorise %1$s to subscribe to %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
 msgstr "Du måste ge explicit behörighet till %1$s för att prenumerera på %2$s"
+
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr "Omfattningen %1$s stöds inte av leverantören"
 
 #. *
 #. * New password too short.
@@ -5582,8 +5586,8 @@ msgid ""
 "An E-Mail address is mandatory for external distribution list members. "
 "Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
-"En e-postadress är obligatorisk för externa sändlistemedlemmar. Lägg "
-"till en giltig e-postadress för kontakten \"%1$s\"."
+"En e-postadress är obligatorisk för externa sändlistemedlemmar. Lägg till en "
+"giltig e-postadress för kontakten \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -8459,9 +8463,8 @@ msgid ""
 "A temporary failure because a subsystem is down (maybe due to maintenance). "
 "Please try again later."
 msgstr ""
-"Ett tillfälligt misslyckande eftersom ett delsystem är nere (kanske för"
-" underhåll). "
-"Försök igen senare."
+"Ett tillfälligt misslyckande eftersom ett delsystem är nere (kanske för "
+"underhåll). Försök igen senare."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8521,8 +8524,8 @@ msgid ""
 "Send RFC822 data using primary account's transport. This requires master "
 "authentication to be active."
 msgstr ""
-"Skicka RFC822-data med primärkontots transport. Detta kräver "
-"master-autentisering för att vara aktivt."
+"Skicka RFC822-data med primärkontots transport. Detta kräver master-"
+"autentisering för att vara aktivt."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -8774,9 +8777,8 @@ msgid ""
 "The entered credential or authentication information does not work or are no "
 "longer accepted by provider. Please change them."
 msgstr ""
-"Den angivna inloggnings- eller autentiseringsinformationen fungerar inte"
-" eller "
-"accepteras inte längre av leverantören. Ändra dem."
+"Den angivna inloggnings- eller autentiseringsinformationen fungerar inte "
+"eller accepteras inte längre av leverantören. Ändra dem."
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62

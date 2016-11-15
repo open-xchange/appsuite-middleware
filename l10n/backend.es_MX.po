@@ -5,14 +5,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
+"PO-Revision-Date: 2016-11-11 00:32+0100\n"
 "Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
 "Language-Team: Spanish <es@bureau-cornavin.com>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -55,11 +55,11 @@ msgstr "aceptada provisionalmente"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
 msgid ""
-"The server configuration cannot be retrieved due to an internal server error. "
-"Please try again later."
+"The server configuration cannot be retrieved due to an internal server "
+"error. Please try again later."
 msgstr ""
-"La configuración del servidor no se puede recuperar debido a un error interno "
-"del servidor. Por favor, inténtelo de nuevo más tarde."
+"La configuración del servidor no se puede recuperar debido a un error "
+"interno del servidor. Por favor, inténtelo de nuevo más tarde."
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -404,8 +404,8 @@ msgid ""
 "This appointment has attachments. Click on the following link to view the "
 "appointment and to retrieve the attachments: %1$s."
 msgstr ""
-"Esta cita tiene adjuntos. Haga clic en el siguiente enlace para ver la cita y "
-"recuperar los adjuntos: %1$s."
+"Esta cita tiene adjuntos. Haga clic en el siguiente enlace para ver la cita "
+"y recuperar los adjuntos: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:69
 msgid ""
@@ -413,15 +413,15 @@ msgid ""
 "that could not be found. Either ignore this update, or ask the organizer to "
 "again send you the recurrence."
 msgstr ""
-"Al organizador le gustaría crear una excepción para una cita periódica que no "
-"se ha podido encontrar. Se puede ignorar esta actualización o pedir al "
+"Al organizador le gustaría crear una excepción para una cita periódica que "
+"no se ha podido encontrar. Se puede ignorar esta actualización o pedir al "
 "organizador que le envíe de nuevo la cita."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:70
 msgid ""
 "The organizer would like to change the occurrence of a recurrence on a day "
-"that already contains such a change. The server can only store one change for "
-"a series per day."
+"that already contains such a change. The server can only store one change "
+"for a series per day."
 msgstr ""
 "Al organizador le gustaría cambiar la ocurrencia de una serie en un día que "
 "ya contiene cambios. El servidor sólo puede almacenar un cambio en una serie "
@@ -434,8 +434,8 @@ msgstr "Al organizador le gustaría cancelar una cita que no se pudo encontrar."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:72
 msgid ""
-"An attendee wanted to change his/her participant state in an appointment that "
-"could not be found. Probably the appointment was already canceled."
+"An attendee wanted to change his/her participant state in an appointment "
+"that could not be found. Probably the appointment was already canceled."
 msgstr ""
 "Un asistente quería cambiar su estado de participación en una cita que no se "
 "ha podido encontrar. Probablemente la cita ya había sido cancelada."
@@ -471,7 +471,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:77
 msgid ""
 "An attendee wants to be brought up to date about an appointment that could "
-"not be found. It was probably deleted at some point. Best ignore this message."
+"not be found. It was probably deleted at some point. Best ignore this "
+"message."
 msgstr ""
 "Un asistente quiere ser puesto al día sobre una cita que parece no se ha "
 "podido encontrar. Probablemente fue borrada en algún momento. Lo mejor será  "
@@ -529,8 +530,8 @@ msgstr "%1$s ha rechazado su propuesta de cambio para la cita %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:96
 msgid ""
-"%1$s has declined your proposed changes on behalf of %2$s for the appointment "
-"%3$s."
+"%1$s has declined your proposed changes on behalf of %2$s for the "
+"appointment %3$s."
 msgstr ""
 "%1$s ha rechazado los cambios que usted ha propuesto en nombre de %2$s para "
 "la cita %3$s."
@@ -680,8 +681,8 @@ msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
 msgstr ""
-"%1$s ha borrado una cita en nombre de %2$s, o se le ha eliminado a usted como "
-"participante:"
+"%1$s ha borrado una cita en nombre de %2$s, o se le ha eliminado a usted "
+"como participante:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:192
 msgid "%1$s has deleted an appointment on your behalf:"
@@ -823,7 +824,8 @@ msgstr "Reprograme el evento. Fecha original: %1$s. Nueva fecha: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
-msgstr "Reprograme el evento. Fecha/hora original: %1$s. Nueva fecha/hora: %2$s"
+msgstr ""
+"Reprograme el evento. Fecha/hora original: %1$s. Nueva fecha/hora: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
@@ -922,7 +924,8 @@ msgstr "Falló la ejecución. Por favor elija otra opción."
 
 #. Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:82
-msgid "Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
+msgid ""
+"Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
 msgstr ""
 "Cuota de envío superada. Sólo se le permite enviar 1 SMS cada %1$s segundos."
 
@@ -1012,8 +1015,8 @@ msgid ""
 "to automatically configure your device, please download & install the "
 "attached configuration profile."
 msgstr ""
-"para configurar automáticamente su dispositivo, por favor descargue e instale "
-"el perfil de configuración adjunto."
+"para configurar automáticamente su dispositivo, por favor descargue e "
+"instale el perfil de configuración adjunto."
 
 #. The content of the E-Mail providing the profile attachment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:74
@@ -1021,8 +1024,8 @@ msgid ""
 "to automatically configure your device, please download & install the "
 "attached configuration profile \"%1$s\"."
 msgstr ""
-"para configurar automáticamente su dispositivo, por favor descargue e instale "
-"el perfil de configuración \"%1$s\" adjunto."
+"para configurar automáticamente su dispositivo, por favor descargue e "
+"instale el perfil de configuración \"%1$s\" adjunto."
 
 #. The subject of the E-Mail providing the profile attachment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:77
@@ -1032,8 +1035,8 @@ msgstr "Su configuración de dispositivo"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
 msgstr ""
-"Otro nodo está llevando a cabo la misma tarea actualmente. Inténtelo de nuevo "
-"más tarde."
+"Otro nodo está llevando a cabo la misma tarea actualmente. Inténtelo de "
+"nuevo más tarde."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
@@ -1745,7 +1748,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:64
 msgid ""
-"The file \"%1$s\" was not found at \"%2$s\". Please retry the synchronization."
+"The file \"%1$s\" was not found at \"%2$s\". Please retry the "
+"synchronization."
 msgstr ""
 "El archivo \"%1$s\" no se encontró en \"%2$s\". Por favor, reintente la "
 "sincronización."
@@ -1755,8 +1759,8 @@ msgid ""
 "Unable to access the file at the requested position. Please retry the "
 "synchronization."
 msgstr ""
-"No se pudo acceder al archivo en la posición solicitada. Por favor, reintente "
-"la sincronización."
+"No se pudo acceder al archivo en la posición solicitada. Por favor, "
+"reintente la sincronización."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:66
 msgid ""
@@ -1769,8 +1773,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:67
 msgid "Integrity checks failed for uploaded file \"%2$s\". Please try again."
 msgstr ""
-"Han fallado las comprobaciones de integridad del archivo subido \"%2$s\". Por "
-"favor, inténtelo de nuevo."
+"Han fallado las comprobaciones de integridad del archivo subido \"%2$s\". "
+"Por favor, inténtelo de nuevo."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:68
 msgid ""
@@ -1880,13 +1884,15 @@ msgstr ""
 "nombre en \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
-msgid "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
 msgstr ""
 "La ruta \"%1$s\" entra en conflicto con otra del mismo nombre en \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:91
 msgid ""
-"The directory \"%1$s\" is not synchronizable. Please select another directory."
+"The directory \"%1$s\" is not synchronizable. Please select another "
+"directory."
 msgstr ""
 "El directorio \"%1$s\" no es sincronizable. Por favor, seleccione otro "
 "directorio."
@@ -2049,7 +2055,8 @@ msgstr "La versión del archivo que ha solicitado no existe."
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
-msgid "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
+msgid ""
+"A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
 msgstr ""
 "Ya existe una carpeta con el nombre \"%1$s\" contenida en la carpeta padre "
 "\"%2$s\" ."
@@ -2069,7 +2076,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
-msgid "In order to accomplish the search, %1$d or more characters are required."
+msgid ""
+"In order to accomplish the search, %1$d or more characters are required."
 msgstr "Son necesarios %1$d o más caracteres para poder realizar la búsqueda."
 
 #. Invalid URL \"%1$s\". Please correct the value and try again.
@@ -2113,8 +2121,8 @@ msgid ""
 "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
 "into the account \"%3$s\"."
 msgstr ""
-"Las notas del archivo \"%1$s\" de la carpeta \"%2$s\" se perdieron al moverlo "
-"a la cuenta \"%3$s\"."
+"Las notas del archivo \"%1$s\" de la carpeta \"%2$s\" se perdieron al "
+"moverlo a la cuenta \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -2122,14 +2130,14 @@ msgid ""
 "All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when "
 "moving it into the account \"%3$s\"."
 msgstr ""
-"Todas las versiones anteriores del archivo \"%1$s\" de la carpeta \"%2$s\" se "
-"perdieron al moverlo a la cuenta \"%3$s\"."
+"Todas las versiones anteriores del archivo \"%1$s\" de la carpeta \"%2$s\" "
+"se perdieron al moverlo a la cuenta \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:107
 msgid ""
-"The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost when "
-"moving it into the account \"%3$s\"."
+"The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost "
+"when moving it into the account \"%3$s\"."
 msgstr ""
 "Las categorías asignadas del archivo \"%1$s\" de la carpeta \"%2$s\" se "
 "perdieron al moverlo a la cuenta \"%3$s\"."
@@ -2146,8 +2154,8 @@ msgstr ""
 #. The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:113
 msgid ""
-"The shared folder \"%1$s\" is no longer accessible by other users when moving "
-"it into the account \"%2$s\"."
+"The shared folder \"%1$s\" is no longer accessible by other users when "
+"moving it into the account \"%2$s\"."
 msgstr ""
 "La carpeta compartida \"%1$s\" dejó de ser accesible por otros usuarios al "
 "moverlo a la cuenta \"%2$s\"."
@@ -2158,8 +2166,8 @@ msgid ""
 "The file \"%1$s\" was not updated due to possible data loss. Please review "
 "the warnings for details."
 msgstr ""
-"El archivo \"%1$s\"no se actualizó debido a una posible pérdida de datos. Por "
-"favor, para más detalles revise las advertencias."
+"El archivo \"%1$s\"no se actualizó debido a una posible pérdida de datos. "
+"Por favor, para más detalles revise las advertencias."
 
 #. The %1$s URL does not denote a file: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:119
@@ -2218,8 +2226,8 @@ msgstr "No se admiten permisos individuales en la cuenta \"%1$s\"."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"No se admite el almacenamiento de notas para el archivo \"%1$s\" en la cuenta "
-"\"%2$s\"."
+"No se admite el almacenamiento de notas para el archivo \"%1$s\" en la "
+"cuenta \"%2$s\"."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
@@ -2301,16 +2309,17 @@ msgstr ""
 
 #. The e-mail address you provided is associated with more than one account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:71
-msgid "The e-mail address you provided is associated with more than one account"
+msgid ""
+"The e-mail address you provided is associated with more than one account"
 msgstr ""
-"La dirección de correo electrónico que ha indicado está asociada a más de una "
-"cuenta"
+"La dirección de correo electrónico que ha indicado está asociada a más de "
+"una cuenta"
 
 #. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:74
 msgid ""
-"The requested bucket name is not available. The bucket namespace is shared by "
-"all users of the system. Please select a different name and try again."
+"The requested bucket name is not available. The bucket namespace is shared "
+"by all users of the system. Please select a different name and try again."
 msgstr ""
 "El nombre de depósito solicitado no está disponible. El espacio de nombres "
 "del bucket está compartido por todos los usuarios del sistema. Por favor, "
@@ -2338,8 +2347,8 @@ msgstr "Esta petición no admite credenciales."
 #. Cross location logging not allowed. Buckets in one geographic location cannot log information to a bucket in another location.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:86
 msgid ""
-"Cross location logging not allowed. Buckets in one geographic location cannot "
-"log information to a bucket in another location."
+"Cross location logging not allowed. Buckets in one geographic location "
+"cannot log information to a bucket in another location."
 msgstr ""
 "El registro entre distintas ubicaciones no está permitido. Los depósitos de "
 "una ubicación geográfica no pueden registrar información en un depósito de "
@@ -2465,8 +2474,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:154
 msgid ""
 "The S3 storage responds with \"Bad Request\". Please check whether com."
-"openexchange.filestore.s3.[filestoreID].signerOverride is properly configured "
-"for this filestore."
+"openexchange.filestore.s3.[filestoreID].signerOverride is properly "
+"configured for this filestore."
 msgstr ""
 "El almacenamiento S3 responde con \"Solicitud incorrecta\". Por favor, "
 "compruebe si com.openexchange.filestore.s3.[filestoreID].signerOverride está "
@@ -2498,11 +2507,11 @@ msgstr "El cliente conectado cerró la conexión inesperadamente"
 #. * The allowed Quota is reached.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
 msgid ""
-"The allowed quota is reached. Please delete some items in order to create new "
-"ones."
+"The allowed quota is reached. Please delete some items in order to create "
+"new ones."
 msgstr ""
-"Ha cubierto la cuota permitida. Por favor, borre algunos elementos para poder "
-"crear otros nuevos."
+"Ha cubierto la cuota permitida. Por favor, borre algunos elementos para "
+"poder crear otros nuevos."
 
 #. The service you requested is currently not available. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
@@ -2515,7 +2524,8 @@ msgstr ""
 #. A filter for field '%1$s' is missing but is required to search in module %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:69
 msgid ""
-"A filter for field '%1$s' is missing but is required to search in module %2$s."
+"A filter for field '%1$s' is missing but is required to search in module "
+"%2$s."
 msgstr ""
 "No se encuentra un filtro para el campo '%1$s' pero es necesario para buscar "
 "en el módulo %2$s."
@@ -2572,8 +2582,8 @@ msgstr "No se le permite buscar en el módulo \"%1$s\"."
 #. The query yielded too many results to be displayed. Please refine your search options and try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:102
 msgid ""
-"The query yielded too many results to be displayed. Please refine your search "
-"options and try again."
+"The query yielded too many results to be displayed. Please refine your "
+"search options and try again."
 msgstr ""
 "La consulta ha devuelto demasiados resultados para mostrarlos, Por favor, "
 "ajuste las opciones de búsqueda e inténtelo de nuevo."
@@ -2947,8 +2957,8 @@ msgid ""
 "The widget with the id %1$s is protected and only positional information can "
 "be updated"
 msgstr ""
-"El widget con id %1$s está protegido y sólo se puede modificar su información "
-"de posición"
+"El widget con id %1$s está protegido y sólo se puede modificar su "
+"información de posición"
 
 #. The string cannot be parsed to a valid URL.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
@@ -2986,8 +2996,10 @@ msgstr "El nombre de usuario o la contraseña son incorrectos."
 #. This message is used if the password of the user expired and must be changed.
 #. %1$s is replaced by an URL for changing the password or by the name of the system that is able to do that.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:79
-msgid "Your password has expired. In order to change it, please log in to %1$s."
-msgstr "Su contraseña ha caducado. Para cambiarla, por favor, conéctese a %1$s."
+msgid ""
+"Your password has expired. In order to change it, please log in to %1$s."
+msgstr ""
+"Su contraseña ha caducado. Para cambiarla, por favor, conéctese a %1$s."
 
 #. Indicates whether indicated client is allowed to perform a login
 #. E.g. 'Client "OLOX20" is not activated.'
@@ -3000,7 +3012,8 @@ msgstr "No tiene los permisos adecuados para acceder con el cliente \"%1$s\"."
 #. %1$s is replaved with the not supported HTTP authorization header method.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:87
 msgid "Method \"%1$s\" in HTTP header authorization is not supported."
-msgstr "No se admite el método \"%1$s\" en la autorización de la cabecera HTTP."
+msgstr ""
+"No se admite el método \"%1$s\" en la autorización de la cabecera HTTP."
 
 #. Missing client capabilities.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:90
@@ -3080,8 +3093,8 @@ msgid ""
 "A temporary error occurred inside the server which prevented it from "
 "fulfilling the request. Please try again later."
 msgstr ""
-"Se ha producido un error temporal en el servidor que ha impedido la ejecución "
-"de la solicitud. Por favor, inténtelo de nuevo más tarde."
+"Se ha producido un error temporal en el servidor que ha impedido la "
+"ejecución de la solicitud. Por favor, inténtelo de nuevo más tarde."
 
 #. The default message displayed to user when processing was intentionally denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:72
@@ -3170,8 +3183,8 @@ msgid ""
 "The maximum number of sessions is exceeded for your account. Please logout "
 "from other clients and try again."
 msgstr ""
-"El número máximo de sesiones se ha superado para su cuenta. Por favor, cierre "
-"la sesión en otros clientes e inténtelo de nuevo."
+"El número máximo de sesiones se ha superado para su cuenta. Por favor, "
+"cierre la sesión en otros clientes e inténtelo de nuevo."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:64
 msgid "Your session expired. Please login again."
@@ -3311,12 +3324,12 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
 msgid ""
 "The composed rights could not be applied to new folder due to missing "
-"administer right in its initial rights specified by IMAP server. However, the "
-"folder has been created."
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
 msgstr ""
-"Los permisos compuestos no se pudieron aplicar a la nueva carpeta debido a la "
-"falta de permisos de administración entre los especificados inicialmente por "
-"el servidor IMAP. De todas formas, la carpeta se ha creado."
+"Los permisos compuestos no se pudieron aplicar a la nueva carpeta debido a "
+"la falta de permisos de administración entre los especificados inicialmente "
+"por el servidor IMAP. De todas formas, la carpeta se ha creado."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
 msgid "No administer permission specified for folder"
@@ -3362,10 +3375,11 @@ msgstr "La marca %1$s no se puede cambiar por la siguiente razón: \"%2$s\""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:156
-msgid "Number of search fields (%d) do not match number of search patterns (%d)"
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
 msgstr ""
-"El número de campos de búsqueda (%d) no coincide con el número de patrones de "
-"búsqueda (%d)"
+"El número de campos de búsqueda (%d) no coincide con el número de patrones "
+"de búsqueda (%d)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:112
 msgid ""
@@ -3395,8 +3409,8 @@ msgstr "La carpeta de correo no se debe mover a una de sus subcarpetas"
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
 "mailbox is nearly full.\n"
-"In that case, please try to empty your deleted items first, or delete smaller "
-"messages first."
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
 msgstr ""
 "Este mensaje no se pudo mover a la papelera, posiblemente porque su buzón de "
 "correo está casi lleno.\n"
@@ -3460,8 +3474,8 @@ msgid ""
 "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
 "Error message: %2$s"
 msgstr ""
-"Se produjo una excepción de protocolo mientras se ejecutaba la solicitud IMAP "
-"\"%1$s\".\n"
+"Se produjo una excepción de protocolo mientras se ejecutaba la solicitud "
+"IMAP \"%1$s\".\n"
 "Mensaje de error: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
@@ -3491,8 +3505,8 @@ msgstr "Se ha producido un error SQL: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
 msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
 msgstr ""
-"El renombrado de la carpeta \"%1$s\" a \"%2$s\" ha fallado con el error \"%3$s"
-"\"."
+"El renombrado de la carpeta \"%1$s\" a \"%2$s\" ha fallado con el error "
+"\"%3$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
 msgid "No rename access to mail folder %1$s"
@@ -3603,8 +3617,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:97
 msgid ""
-"File does not contain fields for assigning contact names: no name, company or "
-"E-Mail."
+"File does not contain fields for assigning contact names: no name, company "
+"or E-Mail."
 msgstr ""
 "El archivo no contiene campos para asignar nombres de contactos: no hay "
 "nombre, ni empresa, ni E-Mail."
@@ -3648,8 +3662,8 @@ msgid ""
 "Could not import an entry because one or more fields are too big for the "
 "database: %s"
 msgstr ""
-"No se pudo importar un elemento porque uno o más campos son demasiado grandes "
-"para la base de datos: %s"
+"No se pudo importar un elemento porque uno o más campos son demasiado "
+"grandes para la base de datos: %s"
 
 #. Pretty generic: Could not one element in an import
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:118
@@ -3774,8 +3788,8 @@ msgid ""
 "Please review your mail filter rules as they seem to be invalid. Response "
 "from server: \"%1$s\""
 msgstr ""
-"Por favor, revise las reglas de filtrado de correo electrónico ya que parecen "
-"no ser válidas. Respuesta del servidor: \"%1$s\""
+"Por favor, revise las reglas de filtrado de correo electrónico ya que "
+"parecen no ser válidas. Respuesta del servidor: \"%1$s\""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:68
 msgid "Managing mail filter rules is not available for your account."
@@ -3834,7 +3848,8 @@ msgstr "Índice de etiqueta de color desconocida: %1$s"
 #. A duplicate folder named "%1$s" already exists below parent folder "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:82
 msgid ""
-"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\"."
+"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
+"\"."
 msgstr ""
 "Ya existe una carpeta con el nombre \"%1$s\" contenida en la carpeta padre "
 "\"%2$s\" ."
@@ -3860,8 +3875,8 @@ msgid ""
 "No attachment found with section identifier %1$s in message %2$s in folder "
 "%3$s."
 msgstr ""
-"No se ha encontrado ningún adjunto con el identificador de sección %1$s en el "
-"mensaje %2$s en la carpeta %3$s."
+"No se ha encontrado ningún adjunto con el identificador de sección %1$s en "
+"el mensaje %2$s en la carpeta %3$s."
 
 #. Message %1$s not found in folder %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:97
@@ -3881,8 +3896,8 @@ msgstr "El certificado del dominio \"%1$s\" no es de confianza."
 #. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:66
 msgid ""
-"The certificate for domain \"%1$s\" is untrusted. You can change your general "
-"trust level in the settings."
+"The certificate for domain \"%1$s\" is untrusted. You can change your "
+"general trust level in the settings."
 msgstr ""
 "El certificado del dominio \"%1$s\" no es de confianza. Puede cambiar su "
 "nivel de confianza general en los ajustes."
@@ -4095,9 +4110,9 @@ msgid ""
 "Configuration -> Accounts. Then try again."
 msgstr ""
 "Su acceso a '%1$s' fue rechazado. Debe volver a autorizar al servidor para "
-"utilizar su cuenta con una contraseña nueva. Para ello, vaya a Configuración -"
-"> Mi configuración de redes sociales -> Cuentas. A continuación, inténtelo de "
-"nuevo."
+"utilizar su cuenta con una contraseña nueva. Para ello, vaya a Configuración "
+"-> Mi configuración de redes sociales -> Cuentas. A continuación, inténtelo "
+"de nuevo."
 
 #. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:106
@@ -4107,14 +4122,15 @@ msgid ""
 "Configuration -> Accounts. Then try again."
 msgstr ""
 "Su acceso a '%1$s' fue revocado. Debe volver a autorizar al servidor para "
-"utilizar su cuenta con una contraseña nueva. Para ello, vaya a Configuración -"
-"> Mi configuración de redes sociales -> Cuentas. A continuación, inténtelo de "
-"nuevo."
+"utilizar su cuenta con una contraseña nueva. Para ello, vaya a Configuración "
+"-> Mi configuración de redes sociales -> Cuentas. A continuación, inténtelo "
+"de nuevo."
 
 #. Your access token for '%1$s' is invalid. You have to reauthorize your account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:109
 msgid ""
-"Your access token for '%1$s' is invalid. You have to reauthorize your account."
+"Your access token for '%1$s' is invalid. You have to reauthorize your "
+"account."
 msgstr ""
 "Su token de acceso para '%1$s' no es válido. Tiene que autorizar de nuevo su "
 "cuenta."
@@ -4124,6 +4140,11 @@ msgstr ""
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
 msgstr ""
 "Es necesario que autorice expresamente a %1$s para que se suscriba a %2$s"
+
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr "El proveedor no admite el ámbito %1$s"
 
 #. *
 #. * New password too short.
@@ -4167,8 +4188,8 @@ msgstr "Uno o más temas especificados no son válidos."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:75
 msgid "User %1$s has no mail module access due to user configuration"
 msgstr ""
-"El usuario %1$s no tiene acceso al módulo de correo debido a la configuración "
-"del usuario"
+"El usuario %1$s no tiene acceso al módulo de correo debido a la "
+"configuración del usuario"
 
 #. *
 #. * No access to mail folder %1$s
@@ -4191,7 +4212,8 @@ msgstr "No tiene los permisos adecuados para leer la carpeta de correo %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:87
 msgid "You do not have the appropriate permissions to delete mail folder %1$s"
-msgstr "No tiene los permisos adecuados para eliminar la carpeta de correo %1$s"
+msgstr ""
+"No tiene los permisos adecuados para eliminar la carpeta de correo %1$s"
 
 #. *
 #. * No insert access on mail folder %1$s
@@ -4215,7 +4237,8 @@ msgstr ""
 #. * No write access to POP3 folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:99
-msgid "You do not have the appropriate permissions to write to POP3 folder %1$s"
+msgid ""
+"You do not have the appropriate permissions to write to POP3 folder %1$s"
 msgstr "No tiene los permisos adecuados para escribir en la carpeta POP3 %1$s"
 
 #. *
@@ -4254,8 +4277,8 @@ msgid ""
 "permissions. The folder has been created, though."
 msgstr ""
 "Los permisos indicados no se pudieron aplicar a la nueva carpeta %1$s. Sus "
-"permisos iniciales especificados por el servidor POP3 no incluyen permisos de "
-"administración. De todas formas, la carpeta se ha creado."
+"permisos iniciales especificados por el servidor POP3 no incluyen permisos "
+"de administración. De todas formas, la carpeta se ha creado."
 
 #. *
 #. * No admin permission specified for folder %1$s
@@ -4291,7 +4314,8 @@ msgstr "No se ha podido crear la carpeta  POP3 predeterminada %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:136
 msgid "Missing default %1$s folder in user mail settings"
 msgstr ""
-"Falta la carpeta predeterminada %1$s en las preferencias de correo del usuario"
+"Falta la carpeta predeterminada %1$s en las preferencias de correo del "
+"usuario"
 
 #. *
 #. * Update of folder %1$s failed
@@ -4528,8 +4552,8 @@ msgstr ""
 msgid ""
 "The POP3 storage is missing for user %1$s. Please provide one and try again"
 msgstr ""
-"Falta el almacenamiento POP3 del usuario %1$s. Proporcione uno e inténtelo de "
-"nuevo"
+"Falta el almacenamiento POP3 del usuario %1$s. Proporcione uno e inténtelo "
+"de nuevo"
 
 #. *
 #. * POP3 default folder %1$s must not be moved.
@@ -4585,7 +4609,8 @@ msgid ""
 "%5$s seconds. Error message from server: %6$s"
 msgstr ""
 "El retraso en la conexión no permite conectar al servidor %1$s con conexión "
-"%2$s. Inténtelo de nuevo en %5$s segundos. Mensaje de error del servidor: %6$s"
+"%2$s. Inténtelo de nuevo en %5$s segundos. Mensaje de error del servidor: "
+"%6$s"
 
 #. *
 #. * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
@@ -4603,14 +4628,14 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:295
 msgid ""
-"Validation of POP3 credentials is disabled due to possible login restrictions "
-"by provider. Otherwise subsequent login attempt might not work. Please be "
-"advised that while it is safe to ignore this warning, the POP3 account might "
-"not work if the supplied credentials are invalid."
+"Validation of POP3 credentials is disabled due to possible login "
+"restrictions by provider. Otherwise subsequent login attempt might not work. "
+"Please be advised that while it is safe to ignore this warning, the POP3 "
+"account might not work if the supplied credentials are invalid."
 msgstr ""
 "La validación de las credenciales POP3 está deshabilitada debido a las "
-"posibles restricciones del proveedor. Por otra parte, posteriores intentos de "
-"conexión podrían no funcionar. Por favor, tenga en cuenta que, aunque se "
+"posibles restricciones del proveedor. Por otra parte, posteriores intentos "
+"de conexión podrían no funcionar. Por favor, tenga en cuenta que, aunque se "
 "puede ignorar esta advertencia, la cuenta POP3 podría no funcionar si las "
 "credenciales indicadas no son válidas."
 
@@ -4643,11 +4668,11 @@ msgstr "La imagen de miniatura no está disponible."
 #. No preview service for MIME type %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:70
 msgid ""
-"The preview service for MIME type %1$s is currently not available. Please try "
-"again later"
+"The preview service for MIME type %1$s is currently not available. Please "
+"try again later"
 msgstr ""
-"El servicio de vista previa para el tipo MIME %1$s no está disponible en este "
-"momento. Por favor, inténtelo más adelante."
+"El servicio de vista previa para el tipo MIME %1$s no está disponible en "
+"este momento. Por favor, inténtelo más adelante."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:70
 msgid "Could not load data via proxy."
@@ -4684,8 +4709,8 @@ msgid ""
 "Privacy:\n"
 "The data and any references contained in this webpage are shared with you "
 "under the assumption that the owner of the data was entitled to make them "
-"available to you. Neither %s, nor any of its subsidiaries or affiliates shall "
-"be liable for its publication or re-publication.\n"
+"available to you. Neither %s, nor any of its subsidiaries or affiliates "
+"shall be liable for its publication or re-publication.\n"
 "Any unauthorized use or dissemination of this data is prohibited. If you "
 "intend to store, process, or pass on this data, please make sure that you "
 "have the right to do so.\n"
@@ -4696,17 +4721,17 @@ msgid ""
 "Data published by %s on %s\n"
 msgstr ""
 "Privacidad:\n"
-"Los datos y cualesquiera referencias contenidas en esta página web se ofrecen "
-"bajo el supuesto de que el propietario de los datos ha dado su consentimiento "
-"para ello. Ni %s, ni ninguna de sus subsidiarias o filiales, podrán ser "
-"responsabilizados de su publicación o republicación.\n"
+"Los datos y cualesquiera referencias contenidas en esta página web se "
+"ofrecen bajo el supuesto de que el propietario de los datos ha dado su "
+"consentimiento para ello. Ni %s, ni ninguna de sus subsidiarias o filiales, "
+"podrán ser responsabilizados de su publicación o republicación.\n"
 "Cualquier uso o distribución no autorizados de estos datos están prohibidos."
 "Si usted tiene intención de almacenar, procesar o ceder estos datos, por "
 "favor asegúrese de que tiene permiso para hacerlo.\n"
 "Si usted es una de las personas mencionadas, o responsable de un recurso "
-"mencionado en esta página, y no está de acuerdo con su publicación, por favor "
-"envíe un email a %s que contenga la URL (el enlace) a esta página web y el "
-"editor de los datos:\n"
+"mencionado en esta página, y no está de acuerdo con su publicación, por "
+"favor envíe un email a %s que contenga la URL (el enlace) a esta página web "
+"y el editor de los datos:\n"
 "Datos publicados por %s en %s\n"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:73
@@ -4743,8 +4768,8 @@ msgid ""
 "note: The quota refers to all items of all users in this context."
 msgstr ""
 "Cuota superada. Por favor, borre algunos elementos para poder crear otros "
-"nuevos. Por favor, tenga esto en cuenta: La cuota total comprende a todos los "
-"elementos de todos los usuarios de este contexto."
+"nuevos. Por favor, tenga esto en cuenta: La cuota total comprende a todos "
+"los elementos de todos los usuarios de este contexto."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:64
 msgid ""
@@ -4764,9 +4789,9 @@ msgid ""
 "refers to all contacts of all users in this context."
 msgstr ""
 "Cuota superada para los contactos. Límite de cuota: %2$s. Cuota usada: %1$s. "
-"Por favor, elimine algunos contactos para crear otros nuevos. Tenga en cuenta "
-"lo siguiente: La capacidad total comprende a todos los contactos de todos los "
-"usuarios de este contexto."
+"Por favor, elimine algunos contactos para crear otros nuevos. Tenga en "
+"cuenta lo siguiente: La capacidad total comprende a todos los contactos de "
+"todos los usuarios de este contexto."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
 msgid ""
@@ -4803,9 +4828,9 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
 msgid ""
-"Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please delete "
-"some shares in order to create new ones. Please note: The quota refers to all "
-"shares of one user in this context."
+"Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
 msgstr ""
 "Cuota de comparticiones superada. Límite de cuota: %2$s. Cuota usada: %1$s. "
 "Por favor, borre algunas comparticiones para poder crear otras nuevas. Por "
@@ -4815,8 +4840,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:76
 msgid ""
 "Quota exceeded for share links. Quota limit: %2$s. Quota used: %1$s. Please "
-"delete some shares in order to create new ones. Please note: The quota refers "
-"to all shares of one user in this context."
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
 msgstr ""
 "Cuota de enlaces compartidos superada. Límite de cuota: %2$s. Cuota usada: "
 "%1$s. Por favor, borre algunas comparticiones para poder crear otras nuevas. "
@@ -4826,8 +4851,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:78
 msgid ""
 "Quota exceeded for guest users. Quota limit: %2$s. Quota used: %1$s. Please "
-"delete some shares in order to create new ones. Please note: The quota refers "
-"to all shares of one user in this context."
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
 msgstr ""
 "Cuota de usuarios invitados compartidos superada. Límite de cuota: %2$s. "
 "Cuota usada: %1$s. Por favor, borre algunas comparticiones para poder crear "
@@ -5024,11 +5049,11 @@ msgstr "Falta DTSTART"
 #. Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:87
 msgid ""
-"Private appointments can not have attendees. Removing attendees and accepting "
-"appointment anyway."
+"Private appointments can not have attendees. Removing attendees and "
+"accepting appointment anyway."
 msgstr ""
-"Las citas privadas no pueden tener asistentes. Se eliminarán los asistentes y "
-"se aceptará la cita de todas formas."
+"Las citas privadas no pueden tener asistentes. Se eliminarán los asistentes "
+"y se aceptará la cita de todas formas."
 
 #. Not supported recurrence pattern: BYMONTH
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:90
@@ -5178,9 +5203,9 @@ msgstr "No se le permite crear grupos."
 #. or synchronize and try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:91
 msgid ""
-"Edit Conflict. Your change cannot be completed because somebody else has made "
-"a conflicting change to the same item. Please refresh or synchronize and try "
-"again."
+"Edit Conflict. Your change cannot be completed because somebody else has "
+"made a conflicting change to the same item. Please refresh or synchronize "
+"and try again."
 msgstr ""
 "Conflicto de Edición. Su cambio no puede completarse porque alguien ha hecho "
 "un cambio al mismo elemento que entra en conflicto con el suyo. Por favor, "
@@ -5249,11 +5274,11 @@ msgstr "Los metadatos adjuntos contienen caracteres no válidos."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:77
 msgid ""
-"Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not "
-"look like a number."
+"Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does "
+"not look like a number."
 msgstr ""
-"Se ha enviado un parámetro no válido en una petición. El parámetro '%1$s' era "
-"'%2$s', que no parece ser un número."
+"Se ha enviado un parámetro no válido en una petición. El parámetro '%1$s' "
+"era '%2$s', que no parece ser un número."
 
 #. The module attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
@@ -5320,8 +5345,8 @@ msgid ""
 "remove the \"Private\" mark."
 msgstr ""
 "Las citas marcadas como 'Cita privada' sólo pueden ser programadas por el "
-"usuario correspondiente (o el propietario del calendario). Por favor, elimine "
-"los participantes adicionales o quite la marca \"Cita privada\"."
+"usuario correspondiente (o el propietario del calendario). Por favor, "
+"elimine los participantes adicionales o quite la marca \"Cita privada\"."
 
 #. *
 #. * Unsupported \"shown as\" value %d.
@@ -5434,8 +5459,8 @@ msgid ""
 "You are trying to create a new recurring appointment from an exception. This "
 "is not possible."
 msgstr ""
-"Está intentando crear una nueva recurrencia a partir de una excepción. Eso no "
-"es posible."
+"Está intentando crear una nueva recurrencia a partir de una excepción. Eso "
+"no es posible."
 
 #. *
 #. * Moving an instance of a recurring appointment into another folder is not allowed.
@@ -5612,8 +5637,8 @@ msgid ""
 "The image you tried to attach is not a valid picture. It may be broken or is "
 "not a valid file."
 msgstr ""
-"La imagen que ha intentado adjuntar no es válida. Puede que esté defectuosa o "
-"que no sea un archivo válido."
+"La imagen que ha intentado adjuntar no es válida. Puede que esté defectuosa "
+"o que no sea un archivo válido."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:93
 msgid "Required  value \"first name\" was not supplied."
@@ -5659,8 +5684,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:109
 msgid "Image size too large. Image size: %1$s. Max. size: %2$s."
 msgstr ""
-"El tamaño de la imagen es demasiado grande. Tamaño de la imagen: %1$s. Tamaño "
-"máx: %2$s."
+"El tamaño de la imagen es demasiado grande. Tamaño de la imagen: %1$s. "
+"Tamaño máx: %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
 msgid "Primary E-Mail address in system contact must not be edited."
@@ -5682,8 +5707,8 @@ msgstr "No le está permitido modificar este contacto."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
-"An E-Mail address is mandatory for external distribution list members. Please "
-"add a valid E-Mail address to the contact \"%1$s\"."
+"An E-Mail address is mandatory for external distribution list members. "
+"Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
 "Es obligatoria una dirección de correo electrónico para miembros externos de "
 "la lista de distribución. Por favor, añada una dirección de correo "
@@ -5706,8 +5731,8 @@ msgid ""
 "Number of documents attached to this contact is below zero. You can not "
 "remove any more attachments."
 msgstr ""
-"La cantidad de documentos adjuntados a este contacto está por debajo de cero. "
-"No puede eliminar ningún adjunto más."
+"La cantidad de documentos adjuntados a este contacto está por debajo de "
+"cero. No puede eliminar ningún adjunto más."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:127
 msgid "Setting %s requires at least a contact and a value."
@@ -5754,8 +5779,8 @@ msgstr "La cuenta %1$d no se ha encontrado."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:63
 msgid "The server is currently down for maintenance. Please try again later."
 msgstr ""
-"El servidor está fuera de servicio por mantenimiento. Por favor, inténtelo de "
-"nuevo más tarde."
+"El servidor está fuera de servicio por mantenimiento. Por favor, inténtelo "
+"de nuevo más tarde."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
@@ -5972,8 +5997,8 @@ msgid ""
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
 "\n"
 "Note: This delivery receipt only acknowledges that the message was displayed "
-"on the recipients computer. There is no guarantee that the recipient has read "
-"or understood the message contents."
+"on the recipients computer. There is no guarantee that the recipient has "
+"read or understood the message contents."
 msgstr ""
 "Esto es un acuse de recibo del correo que envió el #DATE# a #RECIPIENT# con "
 "asunto \"#SUBJECT#\".\n"
@@ -6030,7 +6055,8 @@ msgstr "[Sin asunto]"
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:153
-msgid "The available attachments for this E-Mail can be accessed via the links:"
+msgid ""
+"The available attachments for this E-Mail can be accessed via the links:"
 msgstr ""
 "Se puede acceder a los adjuntos disponibles para este E-Mail mediante los "
 "enlaces:"
@@ -7262,7 +7288,8 @@ msgstr ""
 #. The folder %1$s you requested is not an Infostore folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
 msgid "The folder %1$s you requested is not an Infostore folder."
-msgstr "La carpeta requerida %1$s no es una carpeta del Almacén de información."
+msgstr ""
+"La carpeta requerida %1$s no es una carpeta del Almacén de información."
 
 #. You do not have the appropriate permissions to read the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
@@ -7329,7 +7356,8 @@ msgstr "No tiene los permisos adecuados para eliminar un documento."
 
 #. In order to accomplish the search, %1$s or more characters are required.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
-msgid "In order to accomplish the search, %1$s or more characters are required."
+msgid ""
+"In order to accomplish the search, %1$s or more characters are required."
 msgstr "Son necesarios %1$s o más caracteres para poder realizar la búsqueda."
 
 #. The document could not be updated because it was modified. Please try again.
@@ -7353,7 +7381,8 @@ msgstr "El nombre del archivo contiene caracteres no válidos."
 #. New file versions can't be saved with an offset.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:119
 msgid "New file versions can't be saved with an offset."
-msgstr "Las nuevas versiones de archivos no se pueden guardar con una posición."
+msgstr ""
+"Las nuevas versiones de archivos no se pueden guardar con una posición."
 
 #. This folder is a virtual folder that cannot contain documents. Please choose another folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:122
@@ -7383,11 +7412,11 @@ msgstr "Carácter no admitido. Por favor, corrija los datos."
 #. Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:131
 msgid ""
-"Due to limited capabilities of user \"%1$s\", it is not possible to apply the "
-"permission changes."
+"Due to limited capabilities of user \"%1$s\", it is not possible to apply "
+"the permission changes."
 msgstr ""
-"Debido a las limitadas capacidades del usuario \"%1$s\" no es posible aplicar "
-"los cambios de permisos."
+"Debido a las limitadas capacidades del usuario \"%1$s\" no es posible "
+"aplicar los cambios de permisos."
 
 #. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
@@ -7448,7 +7477,8 @@ msgstr "No se pudo usar la codificación \"%s\"."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:69
 msgid "No resource group found for identifier \"%1$d\"."
-msgstr "No se encontró ningún grupo de recursos para el identificador \"%1$d\"."
+msgstr ""
+"No se encontró ningún grupo de recursos para el identificador \"%1$d\"."
 
 #. Found resource groups with the same identifier %1$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:69
@@ -7479,8 +7509,8 @@ msgstr "No se puede encontrar un usuario con el correo electrónico \"%s\"."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:86
 msgid "Cannot find user with identifier \"%1$s\" in context %2$d."
 msgstr ""
-"No se puede encontrar un usuario con el identificador \"%1$s\" en el contexto "
-"%2$d."
+"No se puede encontrar un usuario con el identificador \"%1$s\" en el "
+"contexto %2$d."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:79
 msgid "Cannot find group with identifier \"%1$s\" in context %2$d."
@@ -7599,8 +7629,8 @@ msgid ""
 "Locking attributes of multiple users is not allowed. You tried to lock %1$d "
 "user's attributes."
 msgstr ""
-"No se permite bloquear atributos de múltiples usuarios. Ha intentado bloquear "
-"%1$d atributos de usuarios."
+"No se permite bloquear atributos de múltiples usuarios. Ha intentado "
+"bloquear %1$d atributos de usuarios."
 
 #. *
 #. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
@@ -7618,8 +7648,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
 msgid ""
-"The current password is incorrect. Please enter your correct current password "
-"and try again."
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
 msgstr ""
 "La contraseña actual no es válida. Por favor, introduzca correctamente su "
 "contraseña actual e inténtelo de nuevo."
@@ -7642,8 +7672,8 @@ msgstr ""
 msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr ""
-"La nueva contraseña no se encuentra. Por favor introduzca su nueva contraseña "
-"e inténtelo de nuevo."
+"La nueva contraseña no se encuentra. Por favor introduzca su nueva "
+"contraseña e inténtelo de nuevo."
 
 #. *
 #. * User is missing for the reminder.
@@ -7800,9 +7830,9 @@ msgstr "La carpeta %1$s no es una carpeta de tareas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid ""
-"Edit conflict. Your change cannot be completed because somebody else has made "
-"a conflicting change to the same item. Please refresh or synchronize and try "
-"again."
+"Edit conflict. Your change cannot be completed because somebody else has "
+"made a conflicting change to the same item. Please refresh or synchronize "
+"and try again."
 msgstr ""
 "Conflicto de Edición. Su cambio no puede completarse porque alguien ha hecho "
 "un cambio al mismo elemento que entra en conflicto con el suyo. Por favor, "
@@ -7837,7 +7867,8 @@ msgid ""
 "You do not have the appropriate permissions to read the contents of folder "
 "\"%1$s\"."
 msgstr ""
-"No tiene los permisos adecuados para leer el contenido de la carpeta \"%1$s\"."
+"No tiene los permisos adecuados para leer el contenido de la carpeta \"%1$s"
+"\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
 msgid "Tasks are disabled for you."
@@ -7903,9 +7934,9 @@ msgid ""
 "The task could not be saved. Please shorten the \"%1$s\" and try again. "
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
-"No se pudo guardar la tarea. Por favor, recorte el %1$s y pruebe de nuevo. La "
-"longitud actual de \"%3$d\" es mayor que la longitud permitida de \"%2$d\" "
-"caracteres."
+"No se pudo guardar la tarea. Por favor, recorte el %1$s y pruebe de nuevo. "
+"La longitud actual de \"%3$d\" es mayor que la longitud permitida de \"%2$d"
+"\" caracteres."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
@@ -7922,7 +7953,8 @@ msgstr "No se pueden añadir participantes externos sin dirección de E-Mail."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:118
 msgid ""
-"You do not have the appropriate permisson to see the task %1$d in folder %2$s."
+"You do not have the appropriate permisson to see the task %1$d in folder "
+"%2$s."
 msgstr ""
 "No tiene los permisos adecuados para ver la tarea %1$d en la carpeta %2$s."
 
@@ -7951,8 +7983,8 @@ msgstr "La prioridad es %d pero debe estar entre 1 y 3."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
-"The current version number %1$s is already lower than or equal to the desired "
-"version number %2$s."
+"The current version number %1$s is already lower than or equal to the "
+"desired version number %2$s."
 msgstr ""
 "El número de versión actual %1$s ya es menor o igual que el de la versión "
 "deseada %2$s."
@@ -7987,8 +8019,9 @@ msgid ""
 "Unable to determine next update task to execute. Executed: \"%1$s\". "
 "Enqueued: \"%2$s\". Scheduled: \"%3$s\"."
 msgstr ""
-"No es posible determinar cuál es la siguiente tarea de actualización que debe "
-"ejecutarse. Ejecutada: \"%1$s\". En cola: \"%2$s\". Programada: \"%3$s\"."
+"No es posible determinar cuál es la siguiente tarea de actualización que "
+"debe ejecutarse. Ejecutada: \"%1$s\". En cola: \"%2$s\". Programada: \"%3$s"
+"\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
 msgid ""
@@ -8007,8 +8040,8 @@ msgid ""
 "Blocking tasks (\"%1$s\") must be executed before background tasks can be "
 "executed (\"%2$s\")."
 msgstr ""
-"Las tareas de bloqueo (\"%1$s\") deben ser ejecutadas antes de que las tareas "
-"de segundo plano puedan ejecutarse (\"%2$s\")."
+"Las tareas de bloqueo (\"%1$s\") deben ser ejecutadas antes de que las "
+"tareas de segundo plano puedan ejecutarse (\"%2$s\")."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:80
 msgid "Unknown task: \"%1$s\"."
@@ -8084,7 +8117,8 @@ msgstr "No se pudo encontrar el archivo subido con id \"%1$s\"."
 #. Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:101
 msgid ""
-"Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"."
+"Upload file's content type \"%1$s\" does not match given file filter \"%2$s"
+"\"."
 msgstr ""
 "El tipo de contenido del archivo subido \"%1$s\" no se ajusta al filtro de "
 "archivo indicado \"%2$s\"."
@@ -8098,7 +8132,8 @@ msgstr "El archivo subido no es válido o no está permitido."
 #. Request rejected because its size exceeds the maximum configured size of %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:108
 msgid ""
-"Request rejected because its size exceeds the maximum configured size of %1$s."
+"Request rejected because its size exceeds the maximum configured size of "
+"%1$s."
 msgstr ""
 "Petición rechazada porque su tamaño excede el tamaño máximo configurado de "
 "%1$s."
@@ -8111,8 +8146,8 @@ msgstr "La conexión se cerró inesperadamente. Por favor, inténtelo de nuevo."
 #. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:114
 msgid ""
-"Request rejected because file size (%1$s) exceeds the maximum configured file "
-"size of %2$s."
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
 msgstr ""
 "Petición rechazada porque el tamaño del archivo (%1$s) excede el tamaño de "
 "archivo máximo configurado de %2$s."
@@ -8146,7 +8181,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:76
 msgid "User configuration could not be put into cache: \"%1$s\"."
-msgstr "No se pudo insertar la configuración del usuario en la caché: \"%1$s\"."
+msgstr ""
+"No se pudo insertar la configuración del usuario en la caché: \"%1$s\"."
 
 #. *
 #. * User configuration cache could not be cleared: %1$s
@@ -8160,7 +8196,8 @@ msgstr "No se pudo limpiar la caché de configuración del usuario: \"%1$s\"."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:86
 msgid "User configuration could not be removed from cache: \"%1$s\"."
-msgstr "No se pudo eliminar la configuración del usuario de la caché: \"%1$s\"."
+msgstr ""
+"No se pudo eliminar la configuración del usuario de la caché: \"%1$s\"."
 
 #. *
 #. * Mail settings for user %1$s could not be found in context %2$d
@@ -8255,8 +8292,8 @@ msgstr "No hay contenido disponible en esta parte del correo."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:94
 msgid ""
-"Message has been successfully sent. Due to exceeded quota a copy could not be "
-"placed in your sent folder though."
+"Message has been successfully sent. Due to exceeded quota a copy could not "
+"be placed in your sent folder though."
 msgstr ""
 "El mensaje se ha enviado correctamente. Debido a que se ha superado la cuota "
 "no se ha podido almacenar una copia en la carpeta de mensajes enviados."
@@ -8306,12 +8343,13 @@ msgid ""
 "The specified E-Mail address \"%1$s\" is not covered by allowed E-Mail "
 "address aliases."
 msgstr ""
-"La dirección de correo especificada \"%1$s\" no está incluida entre los alias "
-"de correo permitidos."
+"La dirección de correo especificada \"%1$s\" no está incluida entre los "
+"alias de correo permitidos."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:112
 msgid "Checking default folders failed for user %2$s."
-msgstr "Falló la comprobación de las carpetas predeterminadas del usuario %2$s."
+msgstr ""
+"Falló la comprobación de las carpetas predeterminadas del usuario %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:114
 msgid "The types of specified data source are not supported."
@@ -8374,8 +8412,8 @@ msgstr "No hay acceso de escritura a la carpeta de correo \"%1$s\"."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:146
 msgid "Mail could not be found in folder \"%1$s\" by message identifier."
 msgstr ""
-"No se ha podido encontrar correo en la carpeta \"%1$s\" para el identificador "
-"de mensaje."
+"No se ha podido encontrar correo en la carpeta \"%1$s\" para el "
+"identificador de mensaje."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:148
 msgid ""
@@ -8386,8 +8424,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:150
 msgid ""
-"Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' "
-"again."
+"Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
+"'Send' again."
 msgstr ""
 "Por favor, limite los destinatarios a %1$s (incluyendo los campos Para/Cc/"
 "Cco) y presione 'Enviar' otra vez."
@@ -8407,8 +8445,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
 msgid ""
-"Cannot forward more than %1$s messages at once. Please divide the messages to "
-"forward in chunks of appropriate size."
+"Cannot forward more than %1$s messages at once. Please divide the messages "
+"to forward in chunks of appropriate size."
 msgstr ""
 "No se pueden reenviar más de %1$s mensajes a la vez. Por favor, divida los "
 "mensajesque reenvíe en fragmentos de tamaño adecuado."
@@ -8427,10 +8465,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
 msgid ""
-"Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s."
+"Mail folder cannot be created/renamed. Folder name exceeds max length of "
+"%1$s."
 msgstr ""
-"La carpeta de correo no se puede ser crear/renombrar. El nombre de la carpeta "
-"excede la longitud máxima de %1$s. "
+"La carpeta de correo no se puede ser crear/renombrar. El nombre de la "
+"carpeta excede la longitud máxima de %1$s. "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:166
 msgid ""
@@ -8440,8 +8479,8 @@ msgid ""
 "then download the attachment."
 msgstr ""
 "Los adjuntos de este E-Mail exceden el límite de tamaño para adjuntos. En "
-"lugar de enviar el adjunto en el E-Mail, dicho adjunto ha sido publicado y el "
-"enlace se ha añadido a su E-Mail. Cualquier persona que reciba el E-Mail "
+"lugar de enviar el adjunto en el E-Mail, dicho adjunto ha sido publicado y "
+"el enlace se ha añadido a su E-Mail. Cualquier persona que reciba el E-Mail "
 "puede descargar el adjunto."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:168
@@ -8678,9 +8717,9 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:65
 msgid ""
-"There was an issue while authenticating. This may be due to a recent password "
-"change. To continue please log out and log back in with your most current "
-"password."
+"There was an issue while authenticating. This may be due to a recent "
+"password change. To continue please log out and log back in with your most "
+"current password."
 msgstr ""
 "Hubo un problema al autentificar. Esto puede deberse a algún cambio reciente "
 "de contraseña. Para continuar, por favor desconéctese y después vuelva a "
@@ -8692,8 +8731,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
 msgid "The provided login information seem to be wrong. Please try again."
 msgstr ""
-"La información de inicio de sesión proporcionada parece estar mal. Por favor, "
-"inténtelo de nuevo."
+"La información de inicio de sesión proporcionada parece estar mal. Por "
+"favor, inténtelo de nuevo."
 
 #. *
 #. * The provided login information to access mail server %1$s seem to be wrong. Please try again.
@@ -8764,8 +8803,8 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\"."
 msgstr ""
-"No tiene los permisos adecuados para cambiar el contenido de la carpeta \"%1$s"
-"\"."
+"No tiene los permisos adecuados para cambiar el contenido de la carpeta "
+"\"%1$s\"."
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
@@ -8775,8 +8814,8 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\" on mail server %2$s."
 msgstr ""
-"No tiene los permisos adecuados para cambiar el contenido de la carpeta \"%1$s"
-"\" del servidor de correo %2$s."
+"No tiene los permisos adecuados para cambiar el contenido de la carpeta "
+"\"%1$s\" del servidor de correo %2$s."
 
 #. *
 #. * Invalid search expression: %1$s
@@ -8804,7 +8843,8 @@ msgstr "No se ha podido enviar el mensaje porque es demasiado grande (%1$s)."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:135
 msgid "Message could not be sent to the following recipients: %1$s."
-msgstr "No se ha podido enviar el mensaje a los siguientes destinatarios: %1$s."
+msgstr ""
+"No se ha podido enviar el mensaje a los siguientes destinatarios: %1$s."
 
 #. *
 #. * Message could not be sent to following recipients: %1$s (%2$s)
@@ -9042,8 +9082,8 @@ msgstr ""
 #. Shown when no SSL port was set but SSL enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:110
 msgid ""
-"Default port specified for mail protocol \"%1$s\", but SSL is enabled. Please "
-"review if appropriate."
+"Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
 msgstr ""
 "El puerto predeterminado especificado para el protocolo de correo es \"%1$s"
 "\", pero SSL está activado. Por favor, revise si es correcto."
@@ -9063,8 +9103,8 @@ msgid ""
 "Default port specified for transport protocol \"%1$s\", but SSL is enabled. "
 "Please review if appropriate."
 msgstr ""
-"El puerto predeterminado especificado para el protocolo de trasporte es \"%1$s"
-"\", pero SSL está activado. Por favor, revise si es correcto."
+"El puerto predeterminado especificado para el protocolo de trasporte es "
+"\"%1$s\", pero SSL está activado. Por favor, revise si es correcto."
 
 #. Shown when SSL port was set for transport protocol but SSL not enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:119
@@ -9205,8 +9245,8 @@ msgstr ""
 msgid ""
 "Administrative permissions for a group are not allowed in a private folder."
 msgstr ""
-"Los permisos administrativos para un grupo no están permitidos en una carpeta "
-"privada."
+"Los permisos administrativos para un grupo no están permitidos en una "
+"carpeta privada."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:83
 msgid "Only the owner of a private folder may hold administrative permissions."
@@ -9273,8 +9313,8 @@ msgstr "La carpeta no se puede mover a una de sus subcarpetas."
 msgid ""
 "Folders of module \"%1$s\" cannot be moved to folders of module \"%2$s\"."
 msgstr ""
-"Las carpetas del módulo \"%1$s\" no se pueden mover a las carpetas del módulo "
-"\"%2$s\"."
+"Las carpetas del módulo \"%1$s\" no se pueden mover a las carpetas del "
+"módulo \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
 msgid "The shared folder cannot be updated."
@@ -9321,8 +9361,8 @@ msgstr "No es posible aplicar los cambios debido a lo limitado de los permisos"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"It is not possible to apply the changes as a result of restricted permissions "
-"of the user \"%1$s\"."
+"It is not possible to apply the changes as a result of restricted "
+"permissions of the user \"%1$s\"."
 msgstr ""
 "No es posible aplicar los cambios como resultado de la restricción de "
 "permisos del usuario \"%1$s\"."
@@ -9332,8 +9372,8 @@ msgid ""
 "The folder cannot be deleted since it contains a hidden subfolder you don't "
 "have the appropriate permissions for."
 msgstr ""
-"La carpeta no se puede eliminar dado que contiene una subcarpeta oculta en la "
-"que usted no dispone de los permisos adecuados."
+"La carpeta no se puede eliminar dado que contiene una subcarpeta oculta en "
+"la que usted no dispone de los permisos adecuados."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid ""
@@ -9359,7 +9399,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
 msgid "Duplicate permission defined. Only one permission per user is allowed."
-msgstr "Permiso definido por duplicado. Solo se permite un permiso por usuario."
+msgstr ""
+"Permiso definido por duplicado. Solo se permite un permiso por usuario."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
 msgid "Duplicate permission defined. Only one permission per group is allowed."
@@ -9491,8 +9532,8 @@ msgid ""
 "The value \"%1$s\" you set for attribute %2$s must not contain non digit "
 "characters."
 msgstr ""
-"El valor \"%1$s\" que ha proporcionado para el atributo %2$s no debe contener "
-"caracteres no numéricos."
+"El valor \"%1$s\" que ha proporcionado para el atributo %2$s no debe "
+"contener caracteres no numéricos."
 
 #. *
 #. * You inserted too many digits into field %1$s.
@@ -9615,8 +9656,8 @@ msgstr ""
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
 msgid ""
-"Access to the folder you're looking for has been removed. Please contact %1$s "
-"if you want access again."
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again."
 msgstr ""
 "El acceso a la carpeta que está buscando ha sido eliminado. Por favor, "
 "póngase en contacto con %1$s si desea acceder de nuevo."
@@ -9654,7 +9695,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:106
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click \"Continue\"."
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
 msgstr ""
 "El acceso al archivo que está buscando ha sido eliminado. Por favor, póngase "
 "en contacto con %1$s si desea acceder de nuevo. Para ver sus otros archivos "
@@ -9674,8 +9716,9 @@ msgstr ""
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:112
 msgid ""
-"Access to the folder you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click \"Continue\"."
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again. To view your other shared files, click "
+"\"Continue\"."
 msgstr ""
 "El acceso a la carpeta que está buscando ha sido eliminado. Por favor, "
 "póngase en contacto con %1$s si desea acceder de nuevo. Para ver sus otros "
@@ -9696,7 +9739,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:118
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click \"Continue\"."
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
 msgstr ""
 "El acceso a la compartición que está buscando ha sido eliminado. Por favor, "
 "póngase en contacto con %1$s si desea acceder de nuevo. Para ver sus otros "
@@ -9737,8 +9781,9 @@ msgstr ""
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:130
 msgid ""
-"Access to the folder you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, please log in."
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again. To view your other shared files, please log "
+"in."
 msgstr ""
 "El acceso a la carpeta que está buscando ha sido eliminado. Por favor, "
 "póngase en contacto con %1$s si desea acceder de nuevo. Para ver sus otros "
@@ -9941,8 +9986,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
 msgstr ""
-"%1$s (%2$s) ha compartido \"%3$s\" archivos con usted. Por favor, presione el "
-"botón inferior para visualizarlos."
+"%1$s (%2$s) ha compartido \"%3$s\" archivos con usted. Por favor, presione "
+"el botón inferior para visualizarlos."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:120
@@ -9956,11 +10001,11 @@ msgstr ""
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:123
 msgid ""
-"%1$s (%2$s) has shared %3$s images with you. Please click the button below to "
-"view them."
+"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
+"to view them."
 msgstr ""
-"%1$s (%2$s) ha compartido \"%3$s\" imágenes con usted. Por favor, presione el "
-"botón inferior para visualizarlas."
+"%1$s (%2$s) ha compartido \"%3$s\" imágenes con usted. Por favor, presione "
+"el botón inferior para visualizarlas."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:126
@@ -9968,8 +10013,8 @@ msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) ha compartido el elemento \"%3$s\" con usted. Por favor, presione "
-"el botón inferior para visualizarlo."
+"%1$s (%2$s) ha compartido el elemento \"%3$s\" con usted. Por favor, "
+"presione el botón inferior para visualizarlo."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
@@ -9992,11 +10037,11 @@ msgstr ""
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
 msgid ""
-"%1$s (%2$s) has shared %3$ folders with you. Please click the button below to "
-"view them."
+"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"to view them."
 msgstr ""
-"%1$s (%2$s) ha compartido \"%3$s\" carpetas con usted. Por favor, presione el "
-"botón inferior para visualizarlas."
+"%1$s (%2$s) ha compartido \"%3$s\" carpetas con usted. Por favor, presione "
+"el botón inferior para visualizarlas."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
@@ -10132,8 +10177,8 @@ msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
 "message:"
 msgstr ""
-"%1$s (%2$s) ha compartido el archivo \"%3$s\" con el grupo \"%4$s\" y dejó un "
-"mensaje:"
+"%1$s (%2$s) ha compartido el archivo \"%3$s\" con el grupo \"%4$s\" y dejó "
+"un mensaje:"
 
 #. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:190
@@ -10155,7 +10200,8 @@ msgstr ""
 #. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:196
 msgid ""
-"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a message:"
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
+"message:"
 msgstr ""
 "%1$s (%2$s) ha compartido %3$s imágenes con el grupo \"%4$s\" y dejó un "
 "mensaje:"
@@ -10163,11 +10209,11 @@ msgstr ""
 #. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:199
 msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
+"a message:"
 msgstr ""
-"%1$s (%2$s) ha compartido la carpeta \"%3$s\" con el grupo \"%4$s\" y dejó un "
-"mensaje:"
+"%1$s (%2$s) ha compartido la carpeta \"%3$s\" con el grupo \"%4$s\" y dejó "
+"un mensaje:"
 
 #. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:202
@@ -10231,8 +10277,8 @@ msgstr "Ver elementos"
 msgid ""
 "This link is password protected. You need the following password to open it:"
 msgstr ""
-"El enlace está protegido por contraseña. Es necesaria la siguiente contraseña "
-"para abrirlo:"
+"El enlace está protegido por contraseña. Es necesaria la siguiente "
+"contraseña para abrirlo:"
 
 #.
 #. * Password reset confirm mails
@@ -10317,8 +10363,8 @@ msgid ""
 "You have exceeded the maximum number of sms allowed. Please try again after "
 "%1$s hours"
 msgstr ""
-"Ha superado el número máximo de sms permitidos. Por favor, inténtelo de nuevo "
-"en %1$s horas"
+"Ha superado el número máximo de sms permitidos. Por favor, inténtelo de "
+"nuevo en %1$s horas"
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
@@ -10376,7 +10422,8 @@ msgstr "La imagen de la firma supera el tamaño máximo permitido de '%1$s'."
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
-msgid "The maximum allowed number of '%1$s' images in the signature is reached."
+msgid ""
+"The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr "Se ha alcanzado el número máximo de '%1$s' imágenes en la firma."
 
 #. The message displayed if the requested subscription cannot be found from the server.
@@ -10488,12 +10535,12 @@ msgstr "Su cuenta necesita ser verificada: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:89
 msgid ""
 "The service provider asked for an identity confirmation. This happens for "
-"some accounts and cannot fixed by us. It is in the provider's responsibility. "
-"For this reason, the subscription cannot be completed."
+"some accounts and cannot fixed by us. It is in the provider's "
+"responsibility. For this reason, the subscription cannot be completed."
 msgstr ""
-"El proveedor de servicios le pidió una confirmación de identidad. Esto sucede "
-"en algunas cuentas y no podemos corregirlo. Es responsabilidad del proveedor. "
-"Por esta razón, la suscripción no se puede completar."
+"El proveedor de servicios le pidió una confirmación de identidad. Esto "
+"sucede en algunas cuentas y no podemos corregirlo. Es responsabilidad del "
+"proveedor. Por esta razón, la suscripción no se puede completar."
 
 #. You already have such a subscription.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
@@ -10614,8 +10661,8 @@ msgstr "Nombre completo de la carpeta predeterminada desconocido: %1$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:106
 msgid "Move operation aborted. Source and destination folder are the same."
 msgstr ""
-"Se canceló las operación de traslado. Las carpetas de origen y destino son la "
-"misma."
+"Se canceló las operación de traslado. Las carpetas de origen y destino son "
+"la misma."
 
 #. Request aborted due to timeout of %1$s %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:109
@@ -10703,8 +10750,8 @@ msgstr "Dirección de correo electrónico no válida."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:86
 msgid "Already sent an invitation to E-Mail address: \"%1$s\""
 msgstr ""
-"Ya ha sido enviada una invitación a la dirección de correo electrónico: \"%1$s"
-"\""
+"Ya ha sido enviada una invitación a la dirección de correo electrónico: "
+"\"%1$s\""
 
 #. The E-Mail address already belongs to a XING user
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:89
@@ -12893,7 +12940,8 @@ msgstr "Zulú"
 #~ "listas de distribución. Por favor, añada una dirección de E-Mail válida."
 
 #~ msgid ""
-#~ "The available attachments for this E-Mail can be accessed via the link %1$s"
+#~ "The available attachments for this E-Mail can be accessed via the link "
+#~ "%1$s"
 #~ msgstr ""
 #~ "Se puede acceder a los adjuntos disponibles en este correo mediante el "
 #~ "enlace %1$s"
@@ -12911,8 +12959,8 @@ msgstr "Zulú"
 #~ "The maximum allowed size of '%1$s' for an image in the signature is "
 #~ "reached."
 #~ msgstr ""
-#~ "Se ha alcanzado el tamaño máximo permitido de '%1$s' para una imagen en la "
-#~ "firma."
+#~ "Se ha alcanzado el tamaño máximo permitido de '%1$s' para una imagen en "
+#~ "la firma."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Asia/Riad87"
@@ -13087,10 +13135,11 @@ msgstr "Zulú"
 #~ "\"%3$s\""
 
 #~ msgid ""
-#~ "The content type you provided is not allowed for the given folder \"%1$s\"."
-#~ msgstr ""
-#~ "El tipo de contenido proporcionado no está permitido para la carpeta \"%1$s"
+#~ "The content type you provided is not allowed for the given folder \"%1$s"
 #~ "\"."
+#~ msgstr ""
+#~ "El tipo de contenido proporcionado no está permitido para la carpeta "
+#~ "\"%1$s\"."
 
 #~ msgid "Move of the folder \"%1$s\" is not permitted."
 #~ msgstr "No se permite mover la carpeta \"%1$s\"."
@@ -13104,9 +13153,9 @@ msgstr "Zulú"
 #~ msgstr "No tiene los permisos adecuados para mover la carpeta \"%1$s\"."
 
 #~ msgid ""
-#~ "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". "
-#~ "Please rename one of the folders. There should be no two folders with the "
-#~ "same name."
+#~ "Found two folders named \"%1$s\" located below the parent folder \"%2$s"
+#~ "\". Please rename one of the folders. There should be no two folders with "
+#~ "the same name."
 #~ msgstr ""
 #~ "Se encontraron dos carpetas denominadas \"%1$s\" bajo la carpeta padre "
 #~ "\"%2$s\". Por favor, renombre una de las carpetas. No debe haber dos "
@@ -13119,12 +13168,13 @@ msgstr "Zulú"
 #~ "The folder \"%1$s\" was not updated due to possible data loss. Please "
 #~ "review the warnings for details."
 #~ msgstr ""
-#~ "La carpeta \"%1$s\" no se actualizó debido a una posible pérdida de datos. "
-#~ "Por favor, para más detalles revise las advertencias."
+#~ "La carpeta \"%1$s\" no se actualizó debido a una posible pérdida de "
+#~ "datos. Por favor, para más detalles revise las advertencias."
 
 #~ msgid "The document is already locked. Please try again later."
 #~ msgstr ""
-#~ "El documento ya está bloqueado. Por favor, inténtelo de nuevo más adelante."
+#~ "El documento ya está bloqueado. Por favor, inténtelo de nuevo más "
+#~ "adelante."
 
 #~ msgid "Files have been shared with you. Please log in to view them. "
 #~ msgstr ""
@@ -13141,8 +13191,8 @@ msgstr "Zulú"
 #~ "You do not have appropriate permissions to create subfolders in folder "
 #~ "\"%2$s\"."
 #~ msgstr ""
-#~ "No tiene los permisos adecuados para crear subcarpetas en la carpeta \"%2$s"
-#~ "\"."
+#~ "No tiene los permisos adecuados para crear subcarpetas en la carpeta "
+#~ "\"%2$s\"."
 
 #~ msgid "The folder \"%1$s\" does not exist."
 #~ msgstr "La carpeta \"%1$s\" no existe."
@@ -13212,14 +13262,15 @@ msgstr "Zulú"
 
 #~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
 #~ msgstr ""
-#~ "La carpeta \"%2$s\" es una carpeta predeterminada y no puede ser eliminada."
+#~ "La carpeta \"%2$s\" es una carpeta predeterminada y no puede ser "
+#~ "eliminada."
 
 #~ msgid ""
 #~ "You do not have appropriate permissions to delete all contained items in "
 #~ "the folder \"%2$s\"."
 #~ msgstr ""
-#~ "No tiene los permisos adecuados para borrar todos los elementos contenidos "
-#~ "en la carpeta \"%2$s\"."
+#~ "No tiene los permisos adecuados para borrar todos los elementos "
+#~ "contenidos en la carpeta \"%2$s\"."
 
 #~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
 #~ msgstr "La carpeta \"%1$s\" no se puede mover a una de sus subcarpetas."
@@ -13238,10 +13289,11 @@ msgstr "Zulú"
 #~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
 #~ "administrative permissions."
 #~ msgstr ""
-#~ "La carpeta \"%2$s\" es una carpeta predeterminada en la que el propietario "
-#~ "debe tener permisos de administración."
+#~ "La carpeta \"%2$s\" es una carpeta predeterminada en la que el "
+#~ "propietario debe tener permisos de administración."
 
-#~ msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
 #~ msgstr "No tiene los permisos adecuados para compartir la carpeta \"%2$s\"."
 
 #~ msgid ""
@@ -13252,8 +13304,8 @@ msgstr "Zulú"
 #~ "los cambios a la carpeta \"%2$s\"."
 
 #~ msgid ""
-#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-#~ "you don't have the appropriate permissions for."
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
 #~ msgstr ""
 #~ "La carpeta \"%1$s\" no se puede eliminar ya que contiene una subcarpeta "
 #~ "oculta en la que usted no tiene los permisos adecuados."
@@ -13287,8 +13339,8 @@ msgstr "Zulú"
 #~ "carpeta \"%1$s\"."
 
 #~ msgid ""
-#~ "Only individual user permissions, but no group permissions are allowed for "
-#~ "folder \"%1$s\"."
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
 #~ msgstr ""
 #~ "Sólo se permiten permisos individuales de usuario, pero no permisos de "
 #~ "grupo, para la carpeta \"%1$s\"."
@@ -13493,7 +13545,8 @@ msgstr "Zulú"
 
 #~ msgid "The provided roster identifier \"%1$s\" is invalid."
 #~ msgstr ""
-#~ "El identificador de lista de contactos proporcionado \"%1$s\" no es válido."
+#~ "El identificador de lista de contactos proporcionado \"%1$s\" no es "
+#~ "válido."
 
 #~ msgid "Posted message is too long."
 #~ msgstr "El mensaje publicado es demasiado largo."
@@ -13511,7 +13564,8 @@ msgstr "Zulú"
 #~ msgstr "Se ha producido un error de Box: %1$s"
 
 #~ msgid ""
-#~ "A Box server error occurred with HTTP status code %1$s. Error message: %2$s"
+#~ "A Box server error occurred with HTTP status code %1$s. Error message: "
+#~ "%2$s"
 #~ msgstr ""
 #~ "Se ha producido un error del servidor de Box con código de estado HTTP "
 #~ "%1$s. Mensaje de error: %2$s"
@@ -13626,8 +13680,8 @@ msgstr "Zulú"
 #~ "There are currently no logon servers available to service the logon "
 #~ "request."
 #~ msgstr ""
-#~ "No hay servidores disponibles en este momento para atender la solicitud de "
-#~ "inicio de sesión."
+#~ "No hay servidores disponibles en este momento para atender la solicitud "
+#~ "de inicio de sesión."
 
 #~ msgid "The specified user already exists."
 #~ msgstr "El usuario especificado ya existe."
@@ -13647,12 +13701,13 @@ msgstr "Zulú"
 
 #~ msgid "Logon failure: account logon time restriction violation."
 #~ msgstr ""
-#~ "Error de conexión: restricción de tiempo de conexión de la cuenta superada."
+#~ "Error de conexión: restricción de tiempo de conexión de la cuenta "
+#~ "superada."
 
 #~ msgid "Logon failure: user not allowed to log on to this computer."
 #~ msgstr ""
-#~ "Error de conexión: el usuario no tiene permiso para iniciar sesión en este "
-#~ "equipo."
+#~ "Error de conexión: el usuario no tiene permiso para iniciar sesión en "
+#~ "este equipo."
 
 #~ msgid "Logon failure: the specified account password has expired."
 #~ msgstr ""
@@ -13696,9 +13751,9 @@ msgstr "Zulú"
 #~ "within the domain are protected such that necessary information could not "
 #~ "be retrieved."
 #~ msgstr ""
-#~ "Indica que no se pudo establecer contacto con un servidor Windows NT o que "
-#~ "los objetos dentro del dominio están protegidos de tal manera que no se "
-#~ "pudo recuperar la información necesaria."
+#~ "Indica que no se pudo establecer contacto con un servidor Windows NT o "
+#~ "que los objetos dentro del dominio están protegidos de tal manera que no "
+#~ "se pudo recuperar la información necesaria."
 
 #~ msgid "The specified domain did not exist."
 #~ msgstr "El dominio especificado no existía."
@@ -13785,7 +13840,8 @@ msgstr "Zulú"
 #~ msgstr "La URL de Copy.com proporcionada: %1$s no es válida"
 
 #~ msgid "The provided Copy.com URL does not denote a directory: %1$s"
-#~ msgstr "La URL de Copy.com especificada no corresponde a un directorio: %1$s"
+#~ msgstr ""
+#~ "La URL de Copy.com especificada no corresponde a un directorio: %1$s"
 
 #~ msgid "The provided Copy.com resource does not exist: %1$s"
 #~ msgstr "El recurso de Copy.com especificado no existe: %1$s"
@@ -13801,8 +13857,8 @@ msgstr "Zulú"
 
 #~ msgid "Versioning not supported by Copy.com file storage."
 #~ msgstr ""
-#~ "Control de versiones no admitido por el almacenamiento de ficheros de Copy."
-#~ "com."
+#~ "Control de versiones no admitido por el almacenamiento de ficheros de "
+#~ "Copy.com."
 
 #~ msgid "The Copy.com resource does not exist"
 #~ msgstr "El recurso de Copy.com no existe"
@@ -13811,8 +13867,8 @@ msgstr "Zulú"
 #~ msgstr "Ocurrió un error de Dropbox: %1$s"
 
 #~ msgid ""
-#~ "A Dropbox server error occurred with HTTP status code %1$s. Error message: "
-#~ "%2$s"
+#~ "A Dropbox server error occurred with HTTP status code %1$s. Error "
+#~ "message: %2$s"
 #~ msgstr ""
 #~ "Se produjo un error del servidor de Dropbox con código de estado HTTP "
 #~ "%1$s. Mensaje de error: %2$s"
@@ -13847,8 +13903,8 @@ msgstr "Zulú"
 #~ "A Google Drive server error occurred with HTTP status code %1$s. Error "
 #~ "message: %2$s"
 #~ msgstr ""
-#~ "Se produjo un error del servidor de Google Drive con código de estado HTTP "
-#~ "%1$s. Mensaje de error: %2$s"
+#~ "Se produjo un error del servidor de Google Drive con código de estado "
+#~ "HTTP %1$s. Mensaje de error: %2$s"
 
 #~ msgid "The provided Google Drive URL does not denote a directory: %1$s"
 #~ msgstr ""
@@ -13889,7 +13945,8 @@ msgstr "Zulú"
 #~ msgstr "La URL de OneDrive proporcionada: %1$s no es válida"
 
 #~ msgid "The provided OneDrive URL does not denote a directory: %1$s"
-#~ msgstr "La URL de OneDrive especificada no corresponde a un directorio: %1$s"
+#~ msgstr ""
+#~ "La URL de OneDrive especificada no corresponde a un directorio: %1$s"
 
 #~ msgid "The provided OneDrive resource does not exist: %1$s"
 #~ msgstr "El recurso de OneDrive especificado no existe: %1$s"
@@ -13937,8 +13994,8 @@ msgstr "Zulú"
 
 #~ msgid "Missing Facebook configuration. Please re-create Facebook account."
 #~ msgstr ""
-#~ "Falta la configuración de Facebook. Por favor, vuelva a crear la cuenta de "
-#~ "Facebook."
+#~ "Falta la configuración de Facebook. Por favor, vuelva a crear la cuenta "
+#~ "de Facebook."
 
 #~ msgid ""
 #~ "Missing Facebook configuration parameter \"%1$s\". Please re-create "
@@ -13960,7 +14017,8 @@ msgstr "Zulú"
 #~ msgstr ""
 #~ "No se ha encontrado la cuenta con identificador %1$s para el usuario %2$s"
 
-#~ msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
+#~ msgid ""
+#~ "Account not found with identifier %1$s for user %2$s in context %3$s."
 #~ msgstr ""
 #~ "No se ha encontrado la cuenta con identificador %1$s para el usuario %2$s "
 #~ "en el contexto %3$s."
@@ -13981,11 +14039,11 @@ msgstr "Zulú"
 #~ "más adelante."
 
 #~ msgid ""
-#~ "You do not have the appropriate permission to change objects in the folder "
-#~ "\"%2$s\"."
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
 #~ msgstr ""
-#~ "No tiene los permisos adecuados para modificar objetos en la carpeta \"%2$s"
-#~ "\"."
+#~ "No tiene los permisos adecuados para modificar objetos en la carpeta "
+#~ "\"%2$s\"."
 
 #~ msgid "in appointments"
 #~ msgstr "en citas"
@@ -14108,8 +14166,8 @@ msgstr "Zulú"
 #~ msgstr "La tubería ha sido finalizada."
 
 #~ msgid ""
-#~ "The SAM database on the Windows NT Server does not have a computer account "
-#~ "for this workstation trust relationship."
+#~ "The SAM database on the Windows NT Server does not have a computer "
+#~ "account for this workstation trust relationship."
 #~ msgstr ""
 #~ "La base de datos SAM en el servidor Windows NT no tiene una cuenta de "
 #~ "equipo para esta relación de confianza con la estación de trabajo."
@@ -14207,8 +14265,8 @@ msgstr "Zulú"
 #~ "An I/O error occurred while creating the socket connection to IMAP server "
 #~ "(%1$s): %2$s"
 #~ msgstr ""
-#~ "Se ha producido un error de E/S al crear el socket de conexión al servidor "
-#~ "IMAP (%1$s): %2$s"
+#~ "Se ha producido un error de E/S al crear el socket de conexión al "
+#~ "servidor IMAP (%1$s): %2$s"
 
 #~ msgid "Missing property %1$s in imap.properties."
 #~ msgstr "Falta la propiedad %1$s en imap.properties."
@@ -14294,8 +14352,8 @@ msgstr "Zulú"
 #~ msgstr "La operación no está soportada por el servicio %1$s."
 
 #~ msgid ""
-#~ "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of "
-#~ "user %4$s in context %5$s."
+#~ "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" "
+#~ "of user %4$s in context %5$s."
 #~ msgstr ""
 #~ "No se encuentra la carpeta \"%1$s\" en la cuenta %2$s del servicio \"%3$s"
 #~ "\" del usuario %4$s en el contexto %5$s."
@@ -14333,8 +14391,8 @@ msgstr "Zulú"
 #~ "You do not have the appropriate permissions to keep seen messages in mail "
 #~ "folder %1$s"
 #~ msgstr ""
-#~ "No tiene los permisos adecuados para marcar como leídos los mensajes de la "
-#~ "carpeta de correo %1$s"
+#~ "No tiene los permisos adecuados para marcar como leídos los mensajes de "
+#~ "la carpeta de correo %1$s"
 
 #~ msgid "Appending to messages is not supported by the server."
 #~ msgstr "El servidor no permite añadir a mensajes."
@@ -14393,7 +14451,8 @@ msgstr "Zulú"
 
 #~ msgid "Could not find a builder for the given element: . \"%1$s\""
 #~ msgstr ""
-#~ "No se pudo encontrar un constructor para el elemento especificado: \"%1$s\""
+#~ "No se pudo encontrar un constructor para el elemento especificado: \"%1$s"
+#~ "\""
 
 #~ msgid "Error while building Stanza: \"%1$s\""
 #~ msgstr "Error al crear stanza: \"%1$s\""
@@ -14404,7 +14463,8 @@ msgstr "Zulú"
 
 #~ msgid "Could not find an initializer for the given stanza: . \"%1$s\""
 #~ msgstr ""
-#~ "No se pudo encontrar un inicializador para la stanza especificada: \"%1$s\""
+#~ "No se pudo encontrar un inicializador para la stanza especificada: \"%1$s"
+#~ "\""
 
 #~ msgid "Error while transforming a PayloadElement: \"%1$s, %2$s\""
 #~ msgstr "Error al transformar un PayloadElement: \"%1$s, %2$s\""
@@ -14519,8 +14579,8 @@ msgstr "Zulú"
 
 #~ msgid "No storage access because mail connection is not connected"
 #~ msgstr ""
-#~ "No puede accederse al almacenamiento debido a que la conexión de correo no "
-#~ "está conectada"
+#~ "No puede accederse al almacenamiento debido a que la conexión de correo "
+#~ "no está conectada"
 
 #~ msgid "Unable to parse SMTP server URI \"%1$s\"."
 #~ msgstr "No se ha podido tratar la URI del servidor SMTP \"%1$s\"."
@@ -14529,8 +14589,9 @@ msgstr "Zulú"
 #~ "The SMTP server %1$s cannot be accessed using a secure SSL connection for "
 #~ "user %2$s. Please change configuration accordingly."
 #~ msgstr ""
-#~ "No se puede acceder al servidor SMTP %1$s mediante una conexión SSL segura "
-#~ "para el usuario %2$s. Por favor, cambie la configuración en consecuencia."
+#~ "No se puede acceder al servidor SMTP %1$s mediante una conexión SSL "
+#~ "segura para el usuario %2$s. Por favor, cambie la configuración en "
+#~ "consecuencia."
 
 #~ msgid "Could not coerce value %1$s into class %2$s"
 #~ msgstr "No se ha podido forzar el valor %1$s en la clase %2$s"

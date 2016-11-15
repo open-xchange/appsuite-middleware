@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-10-29 19:02+0100\n"
+"PO-Revision-Date: 2016-11-13 21:32+0100\n"
 "Last-Translator: Robert Kratky <kratky@rob.cz>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
@@ -59,8 +59,8 @@ msgid ""
 "The server configuration cannot be retrieved due to an internal server "
 "error. Please try again later."
 msgstr ""
-"Konfiguraci serveru se nepodařilo získat kvůli interní chybě serveru. Zkuste"
-" to, prosím, později."
+"Konfiguraci serveru se nepodařilo získat kvůli interní chybě serveru. Zkuste "
+"to, prosím, později."
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -3824,8 +3824,8 @@ msgid ""
 "The certificate for domain \"%1$s\" is untrusted. You can change your "
 "general trust level in the settings."
 msgstr ""
-"Certifikát pro doménu „%1$s“ není důvěryhodný. Úroveň důvěry můžete změnit v"
-" Nastavení."
+"Certifikát pro doménu „%1$s“ není důvěryhodný. Úroveň důvěry můžete změnit v "
+"Nastavení."
 
 #.
 #. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
@@ -4059,6 +4059,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
 msgstr "Chcete-li odebírat %2$s, musíte výslovně autorizovat %1$s"
+
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr "Zdroj %1$s není podporovaný"
 
 #. *
 #. * New password too short.
@@ -5574,8 +5579,8 @@ msgid ""
 "An E-Mail address is mandatory for external distribution list members. "
 "Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
-"Pro externí členy distribučního seznamu je povinná e-mailová adresa. Zadejte,"
-" prosím, platnou e-mailovou adresu pro kontakt „%1$s“."
+"Pro externí členy distribučního seznamu je povinná e-mailová adresa. "
+"Zadejte, prosím, platnou e-mailovou adresu pro kontakt „%1$s“."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -8416,8 +8421,8 @@ msgid ""
 "Please change mail settings and configure a secure connection (if Transport "
 "Layer Security (TLS) is not in use, the client could try STARTTLS)"
 msgstr ""
-"Upravte, prosím, nastavení pošty a použijte zabezpečené spojení (pokud se"
-" nepoužívá TLS, klient by mohl zkusit STARTTLS)."
+"Upravte, prosím, nastavení pošty a použijte zabezpečené spojení (pokud se "
+"nepoužívá TLS, klient by mohl zkusit STARTTLS)."
 
 #. A temporary failure because a subsystem is down. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:243
@@ -8425,8 +8430,8 @@ msgid ""
 "A temporary failure because a subsystem is down (maybe due to maintenance). "
 "Please try again later."
 msgstr ""
-"Dočasné selhání kvůli výpadku subsystému (možná kvůli údržbě). Zkuste to,"
-" prosím, později."
+"Dočasné selhání kvůli výpadku subsystému (možná kvůli údržbě). Zkuste to, "
+"prosím, později."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8486,8 +8491,8 @@ msgid ""
 "Send RFC822 data using primary account's transport. This requires master "
 "authentication to be active."
 msgstr ""
-"Pošlete data RFC288 prostřednictvím primárního účtu. To vyžaduje aktivní"
-" hlavní autentizaci."
+"Pošlete data RFC288 prostřednictvím primárního účtu. To vyžaduje aktivní "
+"hlavní autentizaci."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -8737,8 +8742,8 @@ msgid ""
 "The entered credential or authentication information does not work or are no "
 "longer accepted by provider. Please change them."
 msgstr ""
-"Zadané přístupové údaje nefungují nebo je poskytovatel již neakceptuje."
-" Změňte je, prosím."
+"Zadané přístupové údaje nefungují nebo je poskytovatel již neakceptuje. "
+"Změňte je, prosím."
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
