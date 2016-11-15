@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-10-21 17:11+0200\n"
+"PO-Revision-Date: 2016-11-10 12:22+0100\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -3718,6 +3718,11 @@ msgstr "'%1$s' のアクセストークンは無効です。アカウントを�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
 msgstr "はっきりと%1$sを認証して、%2$sを登録してください。"
+
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr "スコープ %1$s はプロバイダにサポートされていません"
 
 #. *
 #. * New password too short.

@@ -663,7 +663,7 @@ public final class IMAPFolderConverter {
             mailFolder.setSupportsUserFlags(false);
             return mailFolder;
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 
