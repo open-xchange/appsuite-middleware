@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.EventField;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -72,23 +73,98 @@ public interface CalendarService {
      */
     CalendarSession init(Session session) throws OXException;
 
+    /**
+     * Resolves an UID to the identifier of an existing event. The lookup is performed context-wise, independently of the current session
+     * user's access rights. If an event series with change exceptions is matched, the identifier of the recurring <i>master</i> event is
+     * returned.
+     *
+     * @param session The calendar session
+     * @param uid The UID to resolve
+     * @return The identifier of the resolved event, or <code>0</code> if not found
+     */
     int resolveByUID(CalendarSession session, String uid) throws OXException;
 
+    /**
+     * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
+     * contents. Distinct object access permissions (e.g. "read own") are not considered.
+     *
+     * @param session The calendar session
+     * @param folderID The identifier of the folder to get the sequence number for
+     * @return The sequence number
+     */
     long getSequenceNumber(CalendarSession session, int folderID) throws OXException;
 
+    /**
+     * Gets an array of <code>boolean</code> values representing the days where the current session's user has events at.
+     *
+     * @param session The calendar session
+     * @param from The start date of the period to consider
+     * @param until The end date of the period to consider
+     * @return The "has" result, i.e. an array of <code>boolean</code> values representing the days where the user has events at
+     */
     boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException;
 
+    /**
+     * Searches for events by pattern in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
+     * {@link EventField#CATEGORIES}. The pattern is surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
+     *
+     * @param session The calendar session
+     * @param folderIDs The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     * @param pattern The pattern to search for
+     * @return The found events, or an empty list if there are none
+     */
     List<UserizedEvent> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException;
 
-    List<UserizedEvent> getChangeExceptions(CalendarSession session, int folderID, int objectID) throws OXException;
+    /**
+     * Gets all change exceptions of a recurring event series.
+     *
+     * @param session The calendar session
+     * @param folderID The identifier of the folder representing the current user's calendar view
+     * @param seriesID The identifier of the series to get the change exceptions for
+     * @return The change exceptions, or an empty list if there are none
+     */
+    List<UserizedEvent> getChangeExceptions(CalendarSession session, int folderID, int seriesID) throws OXException;
 
+    /**
+     * Gets a specific event.
+     *
+     * @param session The calendar session
+     * @param folderID The identifier of the folder representing the current user's calendar view
+     * @param objectID The identifier of the event to get
+     * @return The event
+     */
     UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
 
+    /**
+     * Gets a list of events.
+     *
+     * @param session The calendar session
+     * @param folderID The identifier of the folder representing the current user's calendar view
+     * @param eventIDs A list of the identifiers of the events to get
+     * @return The events
+     */
     List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
 
+    /**
+     * Gets all events in a specific calendar folder.
+     *
+     * @param session The calendar session
+     * @param folderID The identifier of the folder to get the events from
+     * @return The events
+     */
     List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException;
 
+    /**
+     * Gets all events of the session's user.
+     *
+     * @param session The calendar session
+     * @return The events
+     */
     List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException;
+
+    UpdatesResult getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
+
+    UpdatesResult getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
 
     CalendarResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;
 
@@ -97,9 +173,5 @@ public interface CalendarService {
     CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee) throws OXException;
 
     Map<EventID, CalendarResult> deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
-
-    UpdatesResult getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
-
-    UpdatesResult getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
 
 }

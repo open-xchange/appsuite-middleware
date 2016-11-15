@@ -109,8 +109,8 @@ public class HasOperation extends AbstractQueryOperation {
      *
      * @param userID The identifier of the user to evaluate the "has" flags for
      * @param from The start date of the period to consider
-     * @param end The end date of the period to consider
-     * @return The "has" result, i.e. an array of <code>boolean</code>'s representing the days where appointments are in
+     * @param until The end date of the period to consider
+     * @return The "has" result, i.e. an array of <code>boolean</code> values representing the days where appointments are in
      */
     public boolean[] perform(int userID, Date from, Date until) throws OXException {
         /*
