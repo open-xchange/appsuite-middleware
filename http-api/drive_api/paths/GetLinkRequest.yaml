@@ -35,7 +35,7 @@
              "path": "/",
              "name": "photo.jpg",
              "checksum": "bdf3bf1da3405725be763540d6601144"
-           }
+            }
 
           <== HTTP 200 OK (311.8978 ms elapsed, 118 bytes received)
           <   Content: 
