@@ -301,7 +301,7 @@ public final class ThreadSortUtil {
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    log.info("\"{}\" for \"{}\" ({}) took {}msec.", command, imapFolder.getFullName(), imapFolder.getStore(), Long.valueOf(dur));
+                    log.debug("\"{}\" for \"{}\" ({}) took {}msec.", command, imapFolder.getFullName(), imapFolder.getStore(), Long.valueOf(dur));
                     mailInterfaceMonitor.addUseTime(dur);
                 }
                 final Response response = r[r.length - 1];
