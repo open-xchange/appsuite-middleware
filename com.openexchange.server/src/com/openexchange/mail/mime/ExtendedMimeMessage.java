@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.util.Date;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -126,8 +127,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
         if (null == hasAttachment) {
             final ContentType ct = getContentType0();
             try {
-                hasAttachment =
-                    Boolean.valueOf(ct.startsWith(MULTI) && deepAttachmentCheck(ct.getSubType()));
+                hasAttachment = deepAttachmentCheck(ct.getSubType());
             } catch (final OXException e) {
                 LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
@@ -152,7 +152,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
             /*
              * Message body is available
              */
-            return MimeMessageUtility.hasAttachments((Multipart) getContent(), subType);
+            return MimeMessageUtility.hasAttachments((Part) getContent());
         }
         /*
          * Not enough information to deeply check for (file) attachments

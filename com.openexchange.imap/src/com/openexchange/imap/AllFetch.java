@@ -174,7 +174,7 @@ public final class AllFetch {
                     logger.warn("", e);
                     m.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 }
-                m.setHasAttachment(bs.isMulti() && MimeMessageUtility.hasAttachments(bs));
+                m.setHasAttachment(MimeMessageUtility.hasAttachments(bs));
             }
         }),
         /**
