@@ -11,5 +11,5 @@ sed -e '/OX_MARKDOWN_APPENDIX/r../backend/documentation-generic/drive_api/docume
 cp ./html/index.html tmp.html
 sed -e 's/<!--OX_MARKDOWN_TITLE-->/OX Drive API/' > ./html/index.html < tmp.html
 cp ./html/index.html tmp.html
-sed -e 's/<!--OX_MARKDOWN_SWAGGER_FOLDER-->/drive_api/' > ./html/index.html < tmp.html
+sed -e 's/<!--OX_MARKDOWN_SWAGGER_FOLDER-->/drive/' > ./html/index.html < tmp.html
 rm tmp.html
