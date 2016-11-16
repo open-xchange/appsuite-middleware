@@ -226,7 +226,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             String path = toPath(file.getFolderId(), file.getId());
 
             // Rename
-            if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
+            if (modifiedFields != null && modifiedFields.contains(Field.FILENAME)) {
                 String toPath = toPath(file.getFolderId(), file.getFileName());
                 if (!path.equals(toPath)) {
                     try {
@@ -249,7 +249,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
 
             // Restore version
-            if (modifiedFields == null || modifiedFields.contains(Field.VERSION)) {
+            if (modifiedFields != null && modifiedFields.contains(Field.VERSION)) {
                 if (file.getVersion() != null) {
                     try {
                         FileMetadata metadata = client.files().restore(path, file.getVersion());
@@ -846,16 +846,20 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         long fileSize = file.getFileSize();
 
         WriteMode writeMode;
-        boolean autorename;
         if (addVersion) {
             writeMode = WriteMode.OVERWRITE;
-            autorename = false;
+            // Dropbox uses the path as the unique identifier of a file. Hence use the 
+            // original file's identifier as the filename. If the name of the file of 
+            // the version that is being uploaded conflicts with any other file in the 
+            // same path, Dropbox creates a new file of a new version of the original file.  
+            file.setFileName(file.getId());
         } else {
             writeMode = Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION) ? WriteMode.ADD : WriteMode.OVERWRITE;
-            autorename = true;
         }
 
-        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data, writeMode, autorename) : singleUpload(file, data, writeMode, autorename);
+        // If a new version is uploaded, then no rename is required as it is handled previously. 
+        // If a new file is uploaded then automatic rename is requested.
+        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data, writeMode, !addVersion) : singleUpload(file, data, writeMode, !addVersion);
         file.copyFrom(dbxFile, copyFields);
 
         // Adjust metadata if needed
