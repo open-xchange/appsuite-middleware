@@ -68,6 +68,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -93,6 +94,7 @@ import com.openexchange.mailaccount.Password;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailConfig} - The user-specific mail properties; e.g. containing user's login data.
@@ -288,20 +290,18 @@ public abstract class MailConfig {
         /*
          * Fetch mail account
          */
-        int userId = session.getUserId();
-        int contextId = session.getContextId();
-        MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, userId, contextId);
+        MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, session.getUserId(), session.getContextId());
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
-        fillLoginAndPassword(mailConfig, session, UserStorage.getInstance().getUser(userId, contextId).getLoginInfo(), mailAccount);
+        fillLoginAndPassword(mailConfig, session, getUser(session).getLoginInfo(), mailAccount);
         UrlInfo urlInfo = MailConfig.getMailServerURL(mailAccount);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
                 throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties");
             }
-            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(" in context ").append(contextId).toString());
+            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
         }
         {
             /*
@@ -315,6 +315,13 @@ public abstract class MailConfig {
 
         mailConfig.parseServerURL(urlInfo);
         return mailConfig;
+    }
+
+    private static User getUser(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+        return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
     }
 
     /**
