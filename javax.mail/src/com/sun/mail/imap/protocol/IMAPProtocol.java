@@ -1142,6 +1142,121 @@ public class IMAPProtocol extends Protocol {
     }
 
     /**
+     * The AUTHENTICATE command with AUTH=OAUTHBEARER authentication scheme.
+     * This is based heavily on the {@link #authlogin} method.
+     *
+     * @param  u        the username
+     * @param  p        the password
+     * @throws ProtocolException as thrown by {@link Protocol#handleResult}.
+     * @see "RFC7628"
+     * @since  JavaMail 1.5.6
+     */
+    public synchronized void authoauthbearer(String u, String p)
+                throws ProtocolException {
+    authenticatedStatusChanging0(true, u, p);
+    try {
+    List<Response> v = new ArrayList<Response>();
+    String tag = null;
+    Response r = null;
+    boolean done = false;
+
+    try {
+
+    if (noauthdebug && isTracing()) {
+        logger.fine("AUTHENTICATE OAUTHBEARER command trace suppressed");
+        suspendTracing();
+    }
+
+    try {
+        Argument args = new Argument();
+        args.writeAtom("OAUTHBEARER");
+        if (hasCapability("SASL-IR")) {
+        // From https://tools.ietf.org/html/rfc7628#section-4.1
+        // n,a=user@example.com,^Ahost=server.example.com^Aport=143^A
+        // auth=Bearer vF9dft4qmTc2Nvb3RlckBhbHRhdmlzdGEuY29tCg==^A^A
+        String resp = "n,a=" + u + ",\001host=" + host + "\001port=" + port + "\001auth=Bearer " + p + "\001\001";
+        byte[] ba = BASE64EncoderStream.encode(
+                        ASCIIUtility.getBytes(resp));
+        String irs = ASCIIUtility.toString(ba, 0, ba.length);
+        args.writeAtom(irs);
+        }
+        tag = writeCommand("AUTHENTICATE", args);
+    } catch (Exception ex) {
+        // Convert this into a BYE response
+        r = Response.byeResponse(ex);
+        done = true;
+    }
+
+    OutputStream os = getOutputStream(); // stream to IMAP server
+
+    while (!done) { // loop till we are done
+        try {
+        r = readResponse();
+        if (r.isContinuation()) {
+            // Server challenge ..
+            String resp = "n,a=" + u + ",\001host=" + host + "\001port=" + port + "\001auth=Bearer " + p + "\001\001";
+            byte[] b = BASE64EncoderStream.encode(
+                        ASCIIUtility.getBytes(resp));
+            os.write(b);    // write out response
+            os.write(CRLF);     // CRLF termination
+            os.flush();     // flush the stream
+        } else if (r.isTagged() && r.getTag().equals(tag))
+            // Ah, our tagged response
+            done = true;
+        else if (r.isBYE()) // outta here
+            done = true;
+        else // hmm .. unsolicited response here ?!
+            v.add(r);
+        } catch (Exception ioex) {
+        // convert this into a BYE response
+        r = Response.byeResponse(ioex);
+        done = true;
+        }
+    }
+
+    } finally {
+        resumeTracing();
+    }
+
+    /* Dispatch untagged responses.
+     * NOTE: in our current upper level IMAP classes, we add the
+     * responseHandler to the Protocol object only *after* the
+     * connection has been authenticated. So, for now, the below
+     * code really ends up being just a no-op.
+     */
+    Response[] responses = v.toArray(new Response[v.size()]);
+    notifyResponseHandlers(responses);
+
+    // Handle the final OK, NO, BAD or BYE response
+    if (noauthdebug && isTracing())
+        logger.fine("AUTHENTICATE XOAUTH2 command result: " + r);
+    handleLoginResult(r);
+    // If the response includes a CAPABILITY response code, process it
+    boolean hasCaps = setCapabilities(r);
+    if (hasCaps) {
+        capabilities.remove("__PRELOGIN__");
+    } else {
+        // Check for any unsolicited response that might provide capabilities
+        if (responses.length > 0) {
+            for (int i = responses.length; !hasCaps && i-- > 0;) {
+                Response unsolicited = responses[i];
+                hasCaps = setCapabilities(unsolicited);
+                if (hasCaps) {
+                    capabilities.remove("__PRELOGIN__");
+                }
+            }
+        }
+    }
+    // if we get this far without an exception, we're authenticated
+    authenticated = true;
+    } finally {
+        if (!authenticated) {
+            authenticatedStatusChanging0(false, u, p);
+        }
+    }
+    }
+
+    /**
      * SASL-based login.
      */
     public void sasllogin(final String[] allowed, final String realm, final String authzid,
