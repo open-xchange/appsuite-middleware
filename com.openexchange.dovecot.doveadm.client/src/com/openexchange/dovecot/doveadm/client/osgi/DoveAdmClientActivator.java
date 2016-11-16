@@ -91,8 +91,16 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Logger logger = org.slf4j.LoggerFactory.getLogger(DoveAdmClientActivator.class);
 
+        // Check if enabled
+        ConfigurationService configurationService = getService(ConfigurationService.class);
+        boolean enabled = configurationService.getBoolProperty("com.openexchange.dovecot.doveadm.enabled", false);
+        if (false == enabled) {
+            logger.info("Connector for Dovecot DoveAdm REST interface is disabled as per property \"com.openexchange.dovecot.doveadm.enabled\". DoveAdm client will not be initialized.");
+            return;
+        }
+
         // Check API secret
-        String apiSecret = getService(ConfigurationService.class).getProperty("com.openexchange.dovecot.doveadm.apiSecret");
+        String apiSecret = configurationService.getProperty("com.openexchange.dovecot.doveadm.apiSecret");
         if (Strings.isEmpty(apiSecret)) {
             logger.error("Missing API secret from property \"com.openexchange.dovecot.doveadm.apiSecret\". DoveAdm client will not be initialized.");
             return;
@@ -102,7 +110,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
         EndpointManagerFactory factory = getService(EndpointManagerFactory.class);
         HttpDoveAdmEndpointManager endpointManager = new HttpDoveAdmEndpointManager();
         HttpDoveAdmEndpointAvailableStrategy availableStrategy = new HttpDoveAdmEndpointAvailableStrategy(apiSecret);
-        boolean anyAvailable = endpointManager.init(factory, availableStrategy, getService(ConfigurationService.class));
+        boolean anyAvailable = endpointManager.init(factory, availableStrategy, configurationService);
         if (false == anyAvailable) {
             logger.error("Missing end-points for Dovecot DoveAdm REST interface. DoveAdm client will not be initialized.");
             return;
