@@ -103,4 +103,11 @@ public interface Grant {
      */
     Scope getScope();
 
+    /**
+     * Gets the identifier of the client this grant belongs to.
+     *
+     * @return The client identifier
+     */
+    String getClientId();
+
 }

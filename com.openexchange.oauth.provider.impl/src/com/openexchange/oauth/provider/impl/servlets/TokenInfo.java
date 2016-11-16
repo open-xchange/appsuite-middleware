@@ -143,6 +143,7 @@ public class TokenInfo extends OAuthEndpoint {
                             jResponse = new JSONObject(2).put("error", "invalid_token");
                         } else {
                             jResponse = new JSONObject(6);
+                            jResponse.put("audience", grant.getClientId());
                             jResponse.put("context_id", grant.getContextId());
                             jResponse.put("user_id", grant.getUserId());
                             jResponse.put("expiration_date", ISO8601Utils.format(grant.getExpirationDate(), false, TIME_ZONE_UTC));

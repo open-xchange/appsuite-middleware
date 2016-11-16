@@ -134,9 +134,10 @@ Provided that the Open-Xchange Server is also acting as authorization server ver
 
     GET /appsuite/api/oauth/provider/tokeninfo??access_token=ae113KfFBGRNJru1FQd44AzqT3Zg...
 
-That endpoint accepts an access token and returns information about that access token the scopes the user consented to, the remaining lifetime of the token, and the context/user identifiers. Example:
+That endpoint accepts an access token and returns information about that access token including which application was it issued to, the scopes the user consented to, the remaining lifetime of the token, and the context/user identifiers. Example:
 
     {
+      "audience": "ZGVmYXVsdA/4ecafb74...b94b0a8e4e0e325d07f6d0",
       "context_id": 1,
       "user_id": 2,
       "expiration_date": "2016-09-15T00:00:00",
