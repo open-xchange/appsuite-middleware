@@ -155,6 +155,17 @@ public class GrantManagementImpl implements GrantManagement {
         return new OAuthGrantImpl(storedGrant);
     }
 
+    @Override
+    public Grant getGrantByAccessToken(String accessTokenString) throws OXException {
+        if (!UserizedToken.isValid(accessTokenString)) {
+            return null;
+        }
+
+        UserizedToken accessToken = UserizedToken.parse(accessTokenString);
+        StoredGrant storedGrant = grantStorage.getGrantByAccessToken(accessToken);
+        return null == storedGrant ? null : new OAuthGrantImpl(storedGrant);
+    }
+
     /**
      * Checks validity of passed value in comparison to given time stamp (and session).
      *
