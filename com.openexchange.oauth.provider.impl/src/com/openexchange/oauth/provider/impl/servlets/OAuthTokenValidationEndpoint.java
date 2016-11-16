@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -84,8 +83,6 @@ public abstract class OAuthTokenValidationEndpoint extends OAuthEndpoint {
     private static final long serialVersionUID = 1337205004658187201L;
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthTokenValidationEndpoint.class);
-
-    private static final TimeZone TIME_ZONE_UTC = TimeZone.getTimeZone("UTC");
 
     // ------------------------------------------------------------------------------------------------------------------
 
