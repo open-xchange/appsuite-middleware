@@ -53,6 +53,7 @@ import java.io.IOException;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.internet.ParameterList;
 import javax.mail.internet.ParseException;
 import org.junit.Before;
@@ -85,7 +86,7 @@ public class MimeMessageUtilityTest extends TestCase {
     private static final String NOT_PROPERLY_UNFOLDED_DECODED = "Not properly unfolded/decoded.";
     private static final String ATTACHMENT_NOT_IDENTIFIED = "Attachment was not identified";
     @Mock
-    private Multipart multipart;
+    private Part part;
     @Mock
     private MailPart mailpart;
     @Mock
@@ -146,13 +147,11 @@ public class MimeMessageUtilityTest extends TestCase {
     @Test
     public void testHasAttachment_MultipartDisposition() {
         boolean result = false;
-        BodyPart bodyPart = Mockito.mock(BodyPart.class);
         try {
-            Mockito.when(multipart.getBodyPart(org.mockito.Matchers.anyInt())).thenReturn(bodyPart);
-            Mockito.when(multipart.getCount()).thenReturn(1);
-            Mockito.when(bodyPart.getContentType()).thenReturn(PLAIN_TEXT);
-            Mockito.when(bodyPart.getDisposition()).thenReturn("attachment; random=value");
-            result = MimeMessageUtility.hasAttachments(multipart, MIXED_SUBTYPE);
+            Mockito.when(part.getContentType()).thenReturn("inline");
+            Mockito.when(part.getContentType()).thenReturn(PLAIN_TEXT);
+            Mockito.when(part.getDisposition()).thenReturn("attachment; random=value");
+            result = MimeMessageUtility.hasAttachments(part);
         } catch (MessagingException | OXException | IOException e) {
             e.printStackTrace();
         }
@@ -161,13 +160,11 @@ public class MimeMessageUtilityTest extends TestCase {
 
     public void testHasAttachment_MultipartFilename() {
         boolean result = false;
-        BodyPart bodyPart = Mockito.mock(BodyPart.class);
         try {
-            Mockito.when(multipart.getBodyPart(org.mockito.Matchers.anyInt())).thenReturn(bodyPart);
-            Mockito.when(multipart.getCount()).thenReturn(1);
-            Mockito.when(bodyPart.getContentType()).thenReturn(PLAIN_TEXT);
-            Mockito.when(bodyPart.getDisposition()).thenReturn(TESTFILE_RTF);
-            result = MimeMessageUtility.hasAttachments(multipart, MIXED_SUBTYPE);
+            Mockito.when(part.getContentType()).thenReturn("inline");
+            Mockito.when(part.getContentType()).thenReturn(PLAIN_TEXT);
+            Mockito.when(part.getDisposition()).thenReturn(TESTFILE_RTF);
+            result = MimeMessageUtility.hasAttachments(part);
         } catch (MessagingException | OXException | IOException e) {
             e.printStackTrace();
         }
@@ -176,12 +173,10 @@ public class MimeMessageUtilityTest extends TestCase {
 
     public void testHasAttachment_MultipartSignature() {
         boolean result = true;
-        BodyPart bodyPart = Mockito.mock(BodyPart.class);
         try {
-            Mockito.when(multipart.getBodyPart(org.mockito.Matchers.anyInt())).thenReturn(bodyPart);
-            Mockito.when(multipart.getCount()).thenReturn(1);
-            Mockito.when(bodyPart.getContentType()).thenReturn("application/pkcs7-signature");
-            result = MimeMessageUtility.hasAttachments(multipart, MIXED_SUBTYPE);
+            Mockito.when(part.getContentType()).thenReturn("inline");
+            Mockito.when(part.getContentType()).thenReturn("application/pkcs7-signature");
+            result = MimeMessageUtility.hasAttachments(part);
         } catch (MessagingException | OXException | IOException e) {
             e.printStackTrace();
         }

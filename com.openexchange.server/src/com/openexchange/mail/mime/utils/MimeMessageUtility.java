@@ -742,38 +742,22 @@ public final class MimeMessageUtility {
         if (null == mp) {
             return false;
         }
-        // The value determined by this routine will outsmart exact examination
-        // See bug 42695 & 42862
-        if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
-            int count = mp.getEnclosedCount();
-            if (count > 2) {
-                return true;
-            }
-            return hasAttachments0(mp, count);
-        } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype) || MULTI_SUBTYPE_MIXED.equalsIgnoreCase(subtype)) {
-            return hasAttachments0(mp, mp.getEnclosedCount());
-        }
 
-        // TODO: Think about special check for multipart/signed
-        /*
-         * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
-         */
         int count = mp.getEnclosedCount();
-        if (count > 1) {
-            return true;
-        }
         return hasAttachments0(mp, count);
     }
 
     private static boolean hasAttachments0(MailPart mp, int count) throws MessagingException, OXException, IOException {
+        if (count == MailPart.NO_ENCLOSED_PARTS) {
+            return hasAttachmentInMetadata(mp);
+        }
+        
         boolean found = false;
         ContentType ct = new ContentType();
         for (int i = count; !found && i-- > 0;) {
             MailPart part = mp.getEnclosedMailPart(i);
-            if (!(part.getContentType().getBaseType().toLowerCase().startsWith("application") && part.getContentType().getSubType().toLowerCase().endsWith("-signature"))) {
-                if (hasAttachmentInMetadata(part)) {
-                    return true;
-                }
+            if (hasAttachmentInMetadata(part)) {
+                return true;
             }
             String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
@@ -787,6 +771,10 @@ public final class MimeMessageUtility {
     }
 
     private static boolean hasAttachmentInMetadata(MailPart part) {
+        if (part.getContentType().getBaseType().toLowerCase().startsWith("application") && part.getContentType().getSubType().toLowerCase().endsWith("-signature")) {
+            return false;
+        }
+        
         ContentDisposition contentDisposition = part.getContentDisposition();
         if (contentDisposition != null) {
             if (contentDisposition.getFilenameParameter() != null) {
@@ -810,31 +798,16 @@ public final class MimeMessageUtility {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException, OXException, IOException {
+    public static boolean hasAttachments(final Part mp) throws MessagingException, OXException, IOException {
         if (null == mp) {
             return false;
         }
-        // The value determined by this routine will outsmart exact examination
-        // See bug 42695 & 42862
-        if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
-            int count = mp.getCount();
-            if (count > 2) {
-                return true;
-            }
-            return hasAttachments0(mp, count);
-        } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype) || MULTI_SUBTYPE_MIXED.equalsIgnoreCase(subtype)) {
-            return hasAttachments0(mp, mp.getCount());
+        
+        if (mp.getContentType().toLowerCase().startsWith("multipart/")) {
+            int count = ((Multipart) mp).getCount();
+            return hasAttachments0((Multipart) mp, count);
         }
-
-        // TODO: Think about special check for multipart/signed
-        /*
-         * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
-         */
-        int count = mp.getCount();
-        if (count > 1) {
-            return true;
-        }
-        return hasAttachments0(mp, count);
+        return hasAttachmentInMetadata(mp);
     }
 
     private static boolean hasAttachments0(Multipart mp, int count) throws MessagingException, OXException, IOException {
@@ -842,23 +815,25 @@ public final class MimeMessageUtility {
         ContentType ct = new ContentType();
         for (int i = count; !found && i-- > 0;) {
             BodyPart part = mp.getBodyPart(i);
-            if (!(part.getContentType().toLowerCase().startsWith("application") && part.getContentType().toLowerCase().endsWith("-signature"))) {
-                if (hasAttachmentInMetadata(part)) {
-                    return true;
-                }
+            if (hasAttachmentInMetadata(part)) {
+                return true;
             }
             String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
                 if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-                    found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
+                    found |= hasAttachments(part);
                 }
             }
         }
         return found;
     }
 
-    private static boolean hasAttachmentInMetadata(BodyPart part) throws MessagingException, OXException {
+    private static boolean hasAttachmentInMetadata(Part part) throws MessagingException, OXException {
+        if (part.getContentType().toLowerCase().startsWith("application") && part.getContentType().toLowerCase().endsWith("-signature")) {
+            return false;
+        }
+        
         String disposition = part.getDisposition();
         if (disposition != null) {
             ContentDisposition cd = new ContentDisposition(disposition);
@@ -882,23 +857,6 @@ public final class MimeMessageUtility {
         // The value determined by this routine will outsmart exact examination
         // See bug 42695 & 42862
         if (bodystructure.isMulti()) {
-            if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype)) {
-                if (bodystructure.bodies.length > 2) {
-                    return true;
-                }
-                return hasAttachments0(bodystructure);
-            } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(bodystructure.subtype) || MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bodystructure.subtype)) {
-                return hasAttachments0(bodystructure);
-            }
-
-            // TODO: Think about special check for multipart/signed
-            /*
-             * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) { if (bodystructure.bodies.length > 2) { return true; }
-             * return hasAttachments0(bodystructure); }
-             */
-            if (bodystructure.bodies.length > 1) {
-                return true;
-            }
             return hasAttachments0(bodystructure);
         }
 
