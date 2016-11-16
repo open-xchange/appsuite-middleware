@@ -56,8 +56,6 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.java.ISO8601Utils;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.grant.Grant;
@@ -75,8 +73,6 @@ import com.openexchange.server.ServiceLookup;
 public class TokenInfo extends OAuthTokenValidationEndpoint {
 
     private static final long serialVersionUID = 1337205004658187201L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(TokenInfo.class);
 
     private static final TimeZone TIME_ZONE_UTC = TimeZone.getTimeZone("UTC");
 
