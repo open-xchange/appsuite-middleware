@@ -2164,6 +2164,11 @@ msgstr ""
 msgid "File name must not end with a dot or whitespace."
 msgstr ""
 
+#. A file with that name already exists.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:181
+msgid "A file with that name already exists."
+msgstr ""
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
