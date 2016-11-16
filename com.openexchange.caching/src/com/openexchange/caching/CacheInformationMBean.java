@@ -49,6 +49,9 @@
 
 package com.openexchange.caching;
 
+import javax.management.MBeanException;
+import com.openexchange.management.MBeanMethodAnnotation;
+
 /**
  * {@link CacheInformationMBean} - The MBean for cache information.
  *
@@ -56,6 +59,7 @@ package com.openexchange.caching;
  */
 public interface CacheInformationMBean {
 
+    /** The domain name for cache MBean */
     public static final String CACHE_DOMAIN = "com.openexchange.caching";
 
     /**
@@ -63,23 +67,28 @@ public interface CacheInformationMBean {
      *
      * @return The names of all available cache regions as an array of {@link String}
      */
-    public String[] listRegionNames();
+    @MBeanMethodAnnotation (description="Gets the names of all available cache regions", parameters={}, parameterDescriptions={})
+    String[] listRegionNames();
 
     /**
      * Gets the number of elements contained in specified region's memory cache
      *
      * @param name The region name
      * @return The number of elements contained in specified region's memory cache
+     * @throws MBeanException If region name is invalid or unknown
      */
-    public long getMemoryCacheCount(String name);
+    @MBeanMethodAnnotation (description="Gets the number of elements contained in specified region's memory cache", parameters={"name"}, parameterDescriptions={"The region name"})
+    long getMemoryCacheCount(String name) throws MBeanException;
 
     /**
-     * Gets the data gathered for this region and all the auxiliaries it currently uses.
+     * Gets the data gathered for specified region and all the auxiliaries it currently uses.
      *
      * @param name The region name or "*" to return statistics for all regions
      * @return The data gathered for this region and all the auxiliaries it currently uses.
+     * @throws MBeanException If region name is invalid or unknown
      */
-    public String getCacheStatistics(String name);
+    @MBeanMethodAnnotation (description="Gets the data gathered for specified region and all the auxiliaries it currently uses.", parameters={"name"}, parameterDescriptions={"The region name or \"*\" to return statistics for all regions"})
+    String getCacheStatistics(String name) throws MBeanException;
 
     /**
      * Tries to estimate how much data is in a region. This is expensive. If there are any non serializable objects in the region, the count
@@ -87,6 +96,19 @@ public interface CacheInformationMBean {
      *
      * @param name The region name
      * @return The estimated data size in bytes
+     * @throws MBeanException If region name is invalid or unknown
      */
-    public long getMemoryCacheDataSize(String name);
+    @MBeanMethodAnnotation (description="Tries to estimate how much data is in a region.", parameters={"name"}, parameterDescriptions={"The region name"})
+    long getMemoryCacheDataSize(String name) throws MBeanException;
+
+    /**
+     * Clears the specified cache region
+     *
+     * @param name The region name
+     * @param localOnly <code>true</code> to only clear local cache (on connected node); otherwise to flush cache in whole cluster
+     * @return The estimated data size in bytes
+     * @throws MBeanException If clear attempt fails or region name is invalid/unknown
+     */
+    @MBeanMethodAnnotation (description="Clears the specified cache region.", parameters={"name"}, parameterDescriptions={"The region name or \"*\" to clear all regions"})
+    void clear(String name, boolean localOnly) throws MBeanException;
 }

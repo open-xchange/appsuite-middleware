@@ -137,11 +137,11 @@ public final class CacheActivator extends HousekeepingActivator {
         /*
          * Register service
          */
+        final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
         if (service.getBoolProperty("com.openexchange.caching.jcs.enabled", true)) {
             final Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
             dictionary.put("name", "oxcache");
             dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-            final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
             registerService(CacheService.class, jcsCacheService, dictionary);
             cacheService = jcsCacheService;
         } else {
@@ -171,7 +171,7 @@ public final class CacheActivator extends HousekeepingActivator {
             @Override
             public ManagementService addingService(final ServiceReference<ManagementService> reference) {
                 final ManagementService management = bundleContext.getService(reference);
-                registerCacheMBean(management);
+                registerCacheMBean(jcsCacheService, management);
                 return management;
             }
 
@@ -217,13 +217,13 @@ public final class CacheActivator extends HousekeepingActivator {
         JCSCacheServiceInit.releaseInstance();
     }
 
-    void registerCacheMBean(final ManagementService management) {
+    void registerCacheMBean(JCSCacheService jcsCacheService, ManagementService management) {
         ObjectName objectName = this.objectName;
         if (objectName == null) {
             try {
                 objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
                 this.objectName = objectName;
-                management.registerMBean(objectName, new JCSCacheInformation());
+                management.registerMBean(objectName, new JCSCacheInformation(jcsCacheService));
             } catch (final MalformedObjectNameException e) {
                 LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
@@ -234,7 +234,7 @@ public final class CacheActivator extends HousekeepingActivator {
         }
     }
 
-    void unregisterCacheMBean(final ManagementService management) {
+    void unregisterCacheMBean(ManagementService management) {
         final ObjectName objectName = this.objectName;
         if (objectName != null) {
             try {
