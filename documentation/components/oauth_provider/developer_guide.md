@@ -132,7 +132,7 @@ It's up to you if you want to invalidate by access or refresh token, as long as 
 
 Provided that the Open-Xchange Server is also acting as authorization server verifying a token using the Open-Xchange Authorization Server endpoint is relatively simple. Your application includes the access token in the `access_token` parameter for the following endpoint:
 
-    GET /appsuite/api/oauth/provider/tokeninfo??access_token=ae113KfFBGRNJru1FQd44AzqT3Zg...
+    GET /appsuite/api/oauth/provider/tokeninfo?access_token=ae113KfFBGRNJru1FQd44AzqT3Zg...
 
 That endpoint accepts an access token and returns information about that access token including which application was it issued to, the scopes the user consented to, the remaining lifetime of the token, and the context/user identifiers. Example:
 
