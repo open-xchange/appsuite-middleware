@@ -54,8 +54,6 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 import com.openexchange.ajax.simple.SimpleOXClient;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.junit.Test;
 
 /**
@@ -66,11 +64,8 @@ import org.junit.Test;
  */
 public class OmitUserInputTest extends AbstractSimpleClientTest {
 
-    private static String TITLE="404 Not found";
-    private static String HEADING="Not found";
-    private static String PARAGRAPH="Resource does not exist.";
     private static String USER_INPUT="i_do_not_exist_at_all";
-    
+
     @Test
     public void test() throws Exception {
         SimpleOXClient oxClient = createClient();
@@ -79,17 +74,5 @@ public class OmitUserInputTest extends AbstractSimpleClientTest {
         int status = httpClient.executeMethod(getMissing);
 
         assertEquals(404, status);
-
-        String bodyAsString = getMissing.getResponseBodyAsString();
-        assertFalse(bodyAsString.contains(USER_INPUT));
-
-        Document document = Jsoup.parse(bodyAsString);
-        String title = document.getElementsByTag("title").first().text();
-        String heading = document.getElementsByTag("h1").first().text();
-        String paragraph = document.getElementsByTag("p").first().text();
-
-        assertEquals(TITLE, title);
-        assertEquals(HEADING, heading);
-        assertEquals(PARAGRAPH, paragraph);
     }
 }
