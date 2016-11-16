@@ -61,7 +61,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link FolderIdTestAjax}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class FolderIdTestAjax extends AbstractAJAXSession {
@@ -116,7 +116,7 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
     public void testSomething() throws Exception {
         ctm.setClient(client2);
         appointment.setParentFolderID(folderB.getObjectID());
-        ctm.update(appointment);
+        ctm.update(folderA.getObjectID(), appointment);
         Appointment loaded = ctm.get(folderB.getObjectID(), appointment.getObjectID());
         System.out.println(loaded.getTitle());
     }

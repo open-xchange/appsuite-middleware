@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -61,6 +61,8 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Nov 15 2016 Thorben Betten <thorben.betten@open-xchange.com>
+Third preview for 7.8.3 release
 * Sat Oct 29 2016 Thorben Betten <thorben.betten@open-xchange.com>
 Second preview for 7.8.3 release
 * Fri Oct 14 2016 Thorben Betten <thorben.betten@open-xchange.com>
