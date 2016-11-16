@@ -51,8 +51,11 @@ package com.openexchange.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -60,6 +63,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
@@ -75,7 +84,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class FreeBusyAction extends AppointmentAction {
+public final class FreeBusyAction extends ChronosAction {
 
     /**
      * Initializes a new {@link FreeBusyAction}.
@@ -124,6 +133,36 @@ public final class FreeBusyAction extends AppointmentAction {
                 it.close();
             }
         }
+    }
+
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_TIMEZONE
+    );
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+    @Override
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        Attendee attendee = new Attendee();
+        attendee.setEntity(request.checkInt(AJAXServlet.PARAMETER_ID));
+        attendee.setCuType(Appointment2Event.getCalendarUserType(request.checkInt("type")));
+        Map<Attendee, List<UserizedEvent>> eventsPerAttendee = session.getCalendarService().getFreeBusy(session, Collections.singletonList(attendee), from, until);
+        List<UserizedEvent> events = eventsPerAttendee.get(attendee);
+        return getAppointmentResultWithTimestamp(session, null == events ? Collections.<UserizedEvent> emptyList() : events);
     }
 
 }

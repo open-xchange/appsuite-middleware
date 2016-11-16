@@ -107,7 +107,7 @@ public interface EventStorage {
      */
     List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
 
-    List<Event> searchConflictingEvents(Date from, Date until, List<Attendee> attendees, SortOptions sortOptions, EventField[] fields) throws OXException;
+    List<Event> searchOverlappingEvents(Date from, Date until, List<Attendee> attendees, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws OXException;
 
     /**
      * Generates the next object unique identifier for inserting new event data.

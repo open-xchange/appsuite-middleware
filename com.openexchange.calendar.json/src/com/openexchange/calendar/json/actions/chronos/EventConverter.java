@@ -473,7 +473,7 @@ public class EventConverter {
         if (event.containsColor()) {
             appointment.setLabel(Event2Appointment.getColorLabel(event.getColor()));
         } else {
-            appointment.setLabel(0);
+            //            appointment.setLabel(0);
         }
         if (event.containsAttachments()) {
             List<Attachment> attachments = event.getAttachments();
@@ -621,7 +621,7 @@ public class EventConverter {
         if (event.containsSequence()) {
             appointment.setSequence(event.getSequence());
         } else {
-            appointment.setSequence(0);
+            //            appointment.setSequence(0);
         }
         if (event.containsLocation()) {
             appointment.setLocation(event.getLocation());

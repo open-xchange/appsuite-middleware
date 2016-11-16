@@ -135,7 +135,7 @@ public class ConflictChecker {
         /*
          * get potentially conflicting events from storage & resolve occurrences
          */
-        List<Event> conflictingEvents = storage.getEventStorage().searchConflictingEvents(from, until, checkedAttendees, null, null);
+        List<Event> conflictingEvents = storage.getEventStorage().searchOverlappingEvents(from, until, checkedAttendees, false, null, null);
         List<Event> checkedEvents = new ArrayList<Event>(conflictingEvents.size());
         for (Event conflictingEvent : conflictingEvents) {
             if (event.getId() == conflictingEvent.getId()) {

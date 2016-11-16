@@ -359,16 +359,16 @@ public class CalendarUtils {
      * @param attendees The attendees to filter
      * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
      *            or <code>null</code> to not filter by internal/external
-     * @param cuType The {@link CalendarUserType} to consider, or <code>null</code> to not filter by calendar user type
+     * @param cuTypes The {@link CalendarUserType}s to consider, or <code>null</code> to not filter by calendar user type
      * @return The filtered attendees
      */
-    public static List<Attendee> filter(List<Attendee> attendees, Boolean internal, CalendarUserType cuType) {
+    public static List<Attendee> filter(List<Attendee> attendees, Boolean internal, CalendarUserType... cuTypes) {
         if (null == attendees) {
             return null;
         }
         List<Attendee> filteredAttendees = new ArrayList<Attendee>(attendees.size());
         for (Attendee attendee : attendees) {
-            if (null == cuType || cuType.equals(attendee.getCuType())) {
+            if (null == cuTypes || com.openexchange.tools.arrays.Arrays.contains(cuTypes, attendee.getCuType())) {
                 if (null == internal || internal.booleanValue() == isInternal(attendee)) {
                     filteredAttendees.add(attendee);
                 }

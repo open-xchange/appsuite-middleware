@@ -49,10 +49,8 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.i;
@@ -65,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
@@ -135,6 +132,9 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
          */
         EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
         List<Event> events = storage.getEventStorage().searchOverlappingEvents(from, until, attendees, true, new SortOptions(session), fields);
+        if (0 == events.size()) {
+            return Collections.emptyMap();
+        }
         readAdditionalEventData(events, new EventField[] { EventField.ATTENDEES });
         List<UserizedFolder> visibleFolders = Utils.getVisibleFolders(session);
         /*
@@ -147,19 +147,18 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
                 if (null == eventAttendee || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
                     continue;
                 }
-                int folderID = 0 < event.getPublicFolderId() ? event.getPublicFolderId() : eventAttendee.getFolderID();
+                // TODO: com.openexchange.ajax.appointment.FreeBusyTest.testResourceParticipantStatusFree() still expects 0 for resource attendee
+                int folderID = chooseFolderID(event, visibleFolders);
                 if (isSeriesMaster(event)) {
-                    Iterator<Event> iterator = resolveOccurrences(event, from, until);
                     DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+                    Iterator<Event> iterator = resolveOccurrences(event, from, until);
                     while (iterator.hasNext()) {
                         Event occurrence = iterator.next();
                         occurrence.setRecurrenceId(new DataAwareRecurrenceId(recurrenceData, occurrence.getRecurrenceId().getValue()));
-                        UserizedEvent resultingEvent = getResultingEvent(occurrence, folderID, visibleFolders);
-                        com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, resultingEvent);
+                        com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, getResultingEvent(event, folderID));
                     }
                 } else {
-                    UserizedEvent resultingEvent = getResultingEvent(event, folderID, visibleFolders);
-                    com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, resultingEvent);
+                    com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, getResultingEvent(event, folderID));
                 }
             }
         }
@@ -171,68 +170,131 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
      * over, and a folder identifier is applied optionally, depending on the user's access permissions for the actual event data.
      *
      * @param event The event data to get the result for
-     * @param folderId The folder identifier representing the actual attendee's view on the event
-     * @param visibleFolders A collection of calendar folder the current session user has access to
+     * @param folderID The folder identifier representing the user's view on the event, or <code>-1</code> if not accessible in any folder
      * @return The resulting event representing the free/busy slot
      */
-    private UserizedEvent getResultingEvent(Event event, int folderID, Collection<UserizedFolder> visibleFolders) throws OXException {
-        int userID = session.getUser().getId();
-        /*
-         * never anonymize if user is attendee, organizer or creator
-         */
-        if (event.getCreatedBy() == userID || contains(event.getAttendees(), userID) || isOrganizer(event, userID)) {
-            return getResultingEvent(event, folderID, FREEBUSY_FIELDS);
+    private UserizedEvent getResultingEvent(Event event, int folderID) throws OXException {
+        Event resultingEvent = new Event();
+        if (0 < folderID) {
+            EventMapper.getInstance().copy(event, resultingEvent, FREEBUSY_FIELDS);
+            return Utils.anonymizeIfNeeded(new UserizedEvent(session.getSession(), resultingEvent, folderID, null));
+        } else {
+            EventMapper.getInstance().copy(event, resultingEvent, RESTRICTED_FREEBUSY_FIELDS);
+            return new UserizedEvent(session.getSession(), resultingEvent);
         }
-        /*
-         * always anonymize if event is classified private/confidential (and user is not attendee, organizer or creator)
-         */
-        if (null != event.getClassification() && false == Classification.PUBLIC.equals(event.getClassification())) {
-            return getResultingEvent(event, -1, RESTRICTED_FREEBUSY_FIELDS);
-        }
-        /*
-         * don't anonymize if event appears in a folder visible to the user
-         */
-        if (null != visibleFolders && 0 < visibleFolders.size()) {
-            for (UserizedFolder folder : visibleFolders) {
-                int readPermission = folder.getOwnPermission().getReadPermission();
-                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == userID) {
-                    if (0 < event.getPublicFolderId()) {
-                        if (event.getPublicFolderId() == i(folder)) {
-                            return getResultingEvent(event, folderID, FREEBUSY_FIELDS);
-                        }
-                    } else {
-                        for (Attendee eventAttendee : filter(event.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-                            if (eventAttendee.getFolderID() == i(folder)) {
-                                return getResultingEvent(event, folderID, FREEBUSY_FIELDS);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        /*
-         * anonymize resulting event, otherwise
-         */
-        return getResultingEvent(event, -1, RESTRICTED_FREEBUSY_FIELDS);
     }
 
     /**
-     * Gets a resulting userized event for the free/busy result based on the supplied event data. Only a subset of properties is copied
-     * over, and a folder identifier is applied optionally.
+     * Chooses the most appropriate parent folder identifier to render an event in for the current session's user. This is
+     * <ul>
+     * <li>the common parent folder identifier for an event in a public folder, in case the user has appropriate folder permissions</li>
+     * <li><code>-1</code> for an event in a public folder, in case the user has no appropriate folder permissions</li>
+     * <li>the user attendee's personal folder identifier for an event in a non-public folder, in case the user is attendee of the event</li>
+     * <li>another attendee's personal folder identifier for an event in a non-public folder, in case the user does not attend on his own, but has appropriate folder permissions for this attendee's folder</li>
+     * <li><code>-1</code> for an event in a non-public folder, in case the user has no appropriate folder permissions for any of the attendees</li>
+     * </ul>
      *
-     * @param event The event data to get the result for
-     * @param folderId The folder identifier to take over, or a value <code><= 0</code> if unknown
-     * @param copiedFields The event fields to take over for the result
-     * @return The resulting event representing the free/busy slot
+     * @param event The event to choose the folder identifier for
+     * @param visibleFolders A collection of calendar folder the current session user has access to
+     * @return The chosen folder identifier, or <code>-1</code> if there is none
      */
-    private UserizedEvent getResultingEvent(Event event, int folderId, EventField[] copiedFields) throws OXException {
-        Event resultingEvent = new Event();
-        EventMapper.getInstance().copy(event, resultingEvent, copiedFields);
-        if (0 < folderId) {
-            return new UserizedEvent(session.getSession(), resultingEvent, folderId, null);
-        } else {
-            return new UserizedEvent(session.getSession(), resultingEvent);
+    private int chooseFolderID(Event event, Collection<UserizedFolder> visibleFolders) throws OXException {
+        /*
+         * check common folder permissions for events in public folders
+         */
+        if (0 < event.getPublicFolderId()) {
+            UserizedFolder folder = findFolder(visibleFolders, event.getPublicFolderId());
+            if (null != folder) {
+                int readPermission = folder.getOwnPermission().getReadPermission();
+                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUser().getId()) {
+                    return event.getPublicFolderId();
+                }
+            }
+            return -1;
         }
+        /*
+         * prefer user's personal folder if user is attendee
+         */
+        Attendee ownAttendee = find(event.getAttendees(), session.getUser().getId());
+        if (null != ownAttendee) {
+            return ownAttendee.getFolderID();
+        }
+        /*
+         * choose the most appropriate attendee folder, otherwise
+         */
+        UserizedFolder chosenFolder = null;
+        for (Attendee attendee : event.getAttendees()) {
+            UserizedFolder folder = findFolder(visibleFolders, attendee.getFolderID());
+            if (null != folder) {
+                int readPermission = folder.getOwnPermission().getReadPermission();
+                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUser().getId()) {
+                    chosenFolder = chooseFolder(chosenFolder, folder);
+                }
+            }
+        }
+        return null == chosenFolder ? -1 : i(chosenFolder);
+    }
+
+    /**
+     * Chooses a folder from two candidates based on the <i>highest</i> own permissions.
+     *
+     * @param folder1 The first candidate, or <code>null</code> to always choose the second candidate
+     * @param folder2 The second candidate, or <code>null</code> to always choose the first candidate
+     * @return The chosen folder, or <code>null</code> in case both candidates were <code>null</code>
+     */
+    private static UserizedFolder chooseFolder(UserizedFolder folder1, UserizedFolder folder2) {
+        if (null == folder1) {
+            return folder2;
+        }
+        if (null == folder2) {
+            return folder1;
+        }
+        Permission permission1 = folder1.getOwnPermission();
+        Permission permission2 = folder2.getOwnPermission();
+        if (permission1.getReadPermission() > permission2.getReadPermission()) {
+            return folder1;
+        }
+        if (permission1.getReadPermission() < permission2.getReadPermission()) {
+            return folder2;
+        }
+        if (permission1.getWritePermission() > permission2.getWritePermission()) {
+            return folder1;
+        }
+        if (permission1.getWritePermission() < permission2.getWritePermission()) {
+            return folder2;
+        }
+        if (permission1.getDeletePermission() > permission2.getDeletePermission()) {
+            return folder1;
+        }
+        if (permission1.getDeletePermission() < permission2.getDeletePermission()) {
+            return folder2;
+        }
+        if (permission1.getFolderPermission() > permission2.getFolderPermission()) {
+            return folder1;
+        }
+        if (permission1.getFolderPermission() < permission2.getFolderPermission()) {
+            return folder2;
+        }
+        return permission1.isAdmin() ? folder1 : permission2.isAdmin() ? folder2 : folder1;
+    }
+
+    /**
+     * Searches a userized folder in a collection of folders by its numerical identifier.
+     *
+     * @param folders The folders to search
+     * @param id The identifier of the folder to lookup
+     * @return The matching folder, or <code>null</code> if not found
+     */
+    private static UserizedFolder findFolder(Collection<UserizedFolder> folders, int id) {
+        if (null != folders) {
+            String folderID = String.valueOf(id);
+            for (UserizedFolder folder : folders) {
+                if (folderID.equals(folder.getID())) {
+                    return folder;
+                }
+            }
+        }
+        return null;
     }
 
 }

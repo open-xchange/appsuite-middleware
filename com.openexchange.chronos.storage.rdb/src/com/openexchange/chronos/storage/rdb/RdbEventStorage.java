@@ -124,7 +124,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public List<Event> searchConflictingEvents(Date from, Date until, List<Attendee> attendees, SortOptions sortOptions, EventField[] fields) throws OXException {
+    public List<Event> searchOverlappingEvents(Date from, Date until, List<Attendee> attendees, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws OXException {
         Set<Integer> userIDs = new HashSet<Integer>();
         Set<Integer> resourceIDs = new HashSet<Integer>();
         for (Attendee attendee : attendees) {
@@ -137,7 +137,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectConflictingEvents(connection, context.getContextId(), from, until, I2i(userIDs), I2i(resourceIDs), sortOptions, fields);
+            return selectOverlappingEvents(connection, context.getContextId(), from, until, I2i(userIDs), I2i(resourceIDs), includeTransparent, sortOptions, fields);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
@@ -389,7 +389,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         return events;
     }
 
-    private static List<Event> selectConflictingEvents(Connection connection, int contextID, Date from, Date until, int[] userIDs, int[] resourceIDs, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
+    private static List<Event> selectOverlappingEvents(Connection connection, int contextID, Date from, Date until, int[] userIDs, int[] resourceIDs, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d");
@@ -399,7 +399,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         if (null != resourceIDs && 0 < resourceIDs.length) {
             stringBuilder.append(" LEFT JOIN prg_date_rights AS r ON d.cid=r.cid AND d.intfield01=r.object_id");
         }
-        stringBuilder.append(" WHERE d.cid=? AND d.intfield06<>4");
+        stringBuilder.append(" WHERE d.cid=?");
+        if (false == includeTransparent) {
+            stringBuilder.append(" AND d.intfield06<>4");
+        }
         if (null != from) {
             stringBuilder.append(" AND d.timestampfield02>=?");
         }

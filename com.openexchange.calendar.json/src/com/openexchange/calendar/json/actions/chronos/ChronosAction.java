@@ -153,7 +153,7 @@ public abstract class ChronosAction extends AppointmentAction {
                 legacy = false;
                 break;
             case "freebusy":
-                legacy = true;
+                legacy = false;
                 break;
             case "new":
                 legacy = false;
