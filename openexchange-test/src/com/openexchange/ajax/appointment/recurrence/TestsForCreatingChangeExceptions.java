@@ -291,9 +291,10 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
             "Should get exception when trying to get create delete exception on top of change exception",
             calendarManager.hasLastException());
 
-        OXException expected = new OXException(11);
+        OXException expected1 = new OXException(11);
+        OXException expected2 = OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create();
         OXException actual = (OXException) calendarManager.getLastException();
-        assertTrue("Expecting " + expected + ", but got " + actual, expected.similarTo(actual));
+        assertTrue("Expecting " + expected1 + " or " + expected2 + ", but got " + actual, expected1.similarTo(actual) || expected2.similarTo(actual));
     }
 
     public void testShouldFailChangeExceptionIfCreatingOneOnADeleteException() {
@@ -316,19 +317,19 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
     public void testShouldSilentlyIgnoreNumberOfAttachmentsOnExceptionCreation() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
-        
+
         calendarManager.insert(app);
-        
+
         Appointment changeEx = calendarManager.createIdentifyingCopy(app);
         changeEx.setNumberOfAttachments(23);
         changeEx.setRecurrencePosition(2);
         changeEx.setTitle("Bla");
         changeEx.setRecurrenceType(CalendarObject.NO_RECURRENCE);
         calendarManager.update(changeEx);
-        
-        
+
+
         Appointment loaded = calendarManager.get(changeEx);
-        
+
         assertEquals(0, loaded.getNumberOfAttachments());
     }
 
