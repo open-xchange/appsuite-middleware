@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -89,7 +90,11 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 6);
 
-        negativeAssertionOnDeleteException.check(app, changes, new OXException(11));
+        try {
+            negativeAssertionOnDeleteException.check(app, changes, new OXException(11));
+        } catch (AssertionError e) {
+            negativeAssertionOnDeleteException.check(app, changes, OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create());
+        }
     }
 
     public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() throws Exception {
