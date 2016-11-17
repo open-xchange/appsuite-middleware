@@ -70,7 +70,6 @@ import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.ListRevisionsErrorException;
 import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
@@ -101,7 +100,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
-import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
@@ -121,7 +119,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(DropboxFileAccess.class);
 
@@ -248,22 +246,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 }
             }
 
-            // Restore version
-            if (modifiedFields != null && modifiedFields.contains(Field.VERSION)) {
-                if (file.getVersion() != null) {
-                    try {
-                        FileMetadata metadata = client.files().restore(path, file.getVersion());
-                        DropboxFile dbxFile = new DropboxFile(metadata, userId);
-                        file.copyFrom(dbxFile, copyFields);
-                        return dbxFile.getIDTuple();
-                    } catch (RestoreErrorException e) {
-                        throw DropboxExceptionHandler.handleRestoreErrorException(e, file.getFolderId(), file.getId());
-                    } catch (DbxException e) {
-                        throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
-                    }
-                }
-            }
-
             return new IDTuple(file.getFolderId(), file.getId());
         }
     }
@@ -344,7 +326,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
         try {
-            DbxDownloader<FileMetadata> download = client.files().download(toPath(folderId, id), version);
+            DbxDownloader<FileMetadata> download = client.files().download(toPath(folderId, id));
             return new SizeKnowingInputStream(download.getInputStream(), download.getResult().getSize());
         } catch (DownloadErrorException e) {
             throw DropboxExceptionHandler.handleDownloadErrorException(e, folderId, id);
@@ -370,7 +352,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return saveDocument(file, data, null != modifiedFields && modifiedFields.contains(Field.VERSION_COMMENT));
+        return saveDocument(file, data);
     }
 
     /*
@@ -698,81 +680,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#removeVersion(java.lang.String, java.lang.String, java.lang.String[])
-     */
-    @Override
-    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        // The Dropbox API does not support removing revisions of a file
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
-            }
-        }
-        try {
-            client.files().delete(toPath(folderId, id));
-            return new String[0];
-        } catch (DeleteErrorException e) {
-            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, id);
-        } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String)
-     */
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        return getVersions(folderId, id, null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List)
-     */
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
-     */
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        try {
-            // Fetch all revisions
-            ListRevisionsResult revisions = client.files().listRevisions(toPath(folderId, id), 100);
-            int numberOfVersions = revisions.getEntries().size();
-            List<File> files = new ArrayList<File>(numberOfVersions);
-
-            // Convert to DropboxFiles
-            int i = 0;
-            for (FileMetadata fileMetadata : revisions.getEntries()) {
-                DropboxFile dbxFile = new DropboxFile(fileMetadata, userId);
-                dbxFile.setNumberOfVersions(numberOfVersions);
-                dbxFile.setIsCurrentVersion(0 == i++);
-                files.add(dbxFile);
-            }
-
-            // Sort & return
-            sort(files, sort, order);
-            return new FileTimedResult(files);
-        } catch (ListRevisionsErrorException e) {
-            throw DropboxExceptionHandler.handleListRevisionsErrorException(e, folderId, id);
-        } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see com.openexchange.file.storage.FileStorageSequenceNumberProvider#getSequenceNumbers(java.util.List)
      */
     @Override
@@ -837,37 +744,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      *
      * @param file The {@link File} containing all metadata information
      * @param data The actual data to save
-     * @param addVersion Flag determining whether a new version of the file will be added
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If the file cannot be uploaded or any other error is occurred
      */
-    private IDTuple saveDocument(File file, InputStream data, boolean addVersion) throws OXException {
-        String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
+    private IDTuple saveDocument(File file, InputStream data) throws OXException {
         long fileSize = file.getFileSize();
-
-        WriteMode writeMode;
-        if (addVersion) {
-            writeMode = WriteMode.OVERWRITE;
-            // Dropbox uses the path as the unique identifier of a file. Hence use the 
-            // original file's identifier as the filename. If the name of the file of 
-            // the version that is being uploaded conflicts with any other file in the 
-            // same path, Dropbox creates a new file of a new version of the original file.  
-            file.setFileName(file.getId());
-        } else {
-            writeMode = Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION) ? WriteMode.ADD : WriteMode.OVERWRITE;
-        }
-
-        // If a new version is uploaded, then no rename is required as it is handled previously. 
-        // If a new file is uploaded then automatic rename is requested.
-        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data, writeMode, !addVersion) : singleUpload(file, data, writeMode, !addVersion);
+        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data) : singleUpload(file, data);
         file.copyFrom(dbxFile, copyFields);
-
-        // Adjust metadata if needed
-        if (writeMode.equals(WriteMode.OVERWRITE)) {
-            file.setId(dbxFile.getFileName());
-            file.setVersion(dbxFile.getVersion());
-        }
-
         return dbxFile.getIDTuple();
     }
 
@@ -879,7 +762,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If an error is occurred
      */
-    private DropboxFile sessionUpload(File file, InputStream data, WriteMode writeMode, boolean autorename) throws OXException {
+    private DropboxFile sessionUpload(File file, InputStream data) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
@@ -904,7 +787,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             // Upload the remaining chunk
             long remaining = sink.getCount() - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), writeMode, autorename, file.getLastModified(), false);
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.ADD, true, file.getLastModified(), false);
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
@@ -927,12 +810,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException if an error is occurred
      */
-    private DropboxFile singleUpload(File file, InputStream data, WriteMode writeMode, boolean autorename) throws OXException {
+    private DropboxFile singleUpload(File file, InputStream data) throws OXException {
         String name = file.getFileName();
         String fileName = name;
         String path = new StringBuilder(file.getFolderId()).append('/').append(fileName).toString();
         try {
-            UploadBuilder builder = client.files().uploadBuilder(path).withMode(writeMode).withAutorename(autorename);
+            UploadBuilder builder = client.files().uploadBuilder(path).withAutorename(true);
             FileMetadata metadata = builder.uploadAndFinish(data);
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
