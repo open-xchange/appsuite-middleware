@@ -77,6 +77,7 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
@@ -157,6 +158,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(TemplateService.class);
         trackService(TranslatorFactory.class);
         trackService(HtmlService.class);
+        trackService(MailService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
 
         boolean isAuthorizationServer = configService.getBoolProperty(OAuthProviderProperties.IS_AUTHORIZATION_SERVER, true);
