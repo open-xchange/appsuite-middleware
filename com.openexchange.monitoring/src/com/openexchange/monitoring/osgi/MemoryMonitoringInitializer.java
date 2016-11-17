@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,63 +49,59 @@
 
 package com.openexchange.monitoring.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.management.ManagementService;
-import com.openexchange.monitoring.MonitorService;
-import com.openexchange.monitoring.internal.MonitorImpl;
-import com.openexchange.monitoring.internal.MonitoringInit;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import java.util.concurrent.TimeUnit;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.monitoring.internal.memory.MemoryMonitoring;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link MonitoringActivator} - The {@link BundleActivator activator} for monitoring bundle.
+ * {@link MemoryMonitoringInitializer}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class MonitoringActivator extends HousekeepingActivator {
+public class MemoryMonitoringInitializer implements ServiceTrackerCustomizer<TimerService, TimerService> {
 
-    private MonitoringInit init;
+    private final BundleContext context;
+    private ScheduledTimerTask timerTask;
 
     /**
-     * Initializes a new {@link MonitoringActivator}
+     * Initializes a new {@link MemoryMonitoringInitializer}.
      */
-    public MonitoringActivator() {
+    public MemoryMonitoringInitializer(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class, SessiondService.class };
+    public synchronized TimerService addingService(ServiceReference<TimerService> reference) {
+        TimerService timerService = context.getService(reference);
+
+        int periodMinutes = 1;
+        Runnable task = new MemoryMonitoring(periodMinutes);
+        timerTask = timerService.scheduleAtFixedRate(task, periodMinutes, periodMinutes, TimeUnit.MINUTES);
+
+        return timerService;
     }
 
     @Override
-    public synchronized void startBundle() throws Exception {
-        MonitoringInit init = MonitoringInit.newInstance(this);
-        init.start();
-        this.init = init;
-
-        rememberTracker(new MailCounterServiceTracker(context));
-        rememberTracker(new MailIdleCounterServiceTracker(context));
-        track(TimerService.class, new MemoryMonitoringInitializer(context));
-        openTrackers();
-
-        /*
-         * Register monitor service
-         */
-        registerService(MonitorService.class, new MonitorImpl(), null);
+    public void modifiedService(ServiceReference<TimerService> reference, TimerService service) {
+        // Don't care
     }
 
     @Override
-    public synchronized void stopBundle() throws Exception {
-        MonitoringInit init = this.init;
-        if (null != init) {
-            this.init = null;
-            init.stop();
+    public synchronized void removedService(ServiceReference<TimerService> reference, TimerService service) {
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            this.timerTask = null;
+            timerTask.cancel();
         }
+        service.purge();
 
-        super.stopBundle();
+        context.ungetService(reference);
     }
 
 }
