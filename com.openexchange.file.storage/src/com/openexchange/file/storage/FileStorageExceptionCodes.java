@@ -344,10 +344,16 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * File name must not end with a dot or whitespace.
      */
     WHITESPACE_END("File name must not end with a dot or whitespace.", Category.CATEGORY_USER_INPUT, 68, FileStorageExceptionMessages.WHITESPACE_END_MSG),
+
+    /**
+     * A file with that name already exists.
+     */
+    FILE_ALREADY_EXISTS("A file with that name already exists.", Category.CATEGORY_USER_INPUT, 69, FileStorageExceptionMessages.FILE_ALREADY_EXISTS),
+
     /**
      * The file(s) were not moved due to possible data loss. Please review the warnings for details.
      */
-    FILE_MOVE_ABORTED("The file(s) were not moved due to possible data loss. Please review the warnings for details.", Category.CATEGORY_CONFLICT, 69, FileStorageExceptionMessages.FILE_MOVE_ABORTED_MSG),
+    FILE_MOVE_ABORTED("The file(s) were not moved due to possible data loss. Please review the warnings for details.", Category.CATEGORY_CONFLICT, 70, FileStorageExceptionMessages.FILE_MOVE_ABORTED_MSG),
 
     ;
 

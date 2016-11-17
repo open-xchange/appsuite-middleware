@@ -52,15 +52,21 @@ package com.openexchange.caching.internal;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.apache.jcs.admin.CountingOnlyOutputStream;
 import org.apache.jcs.engine.behavior.ICacheElement;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import org.apache.jcs.engine.memory.behavior.IMemoryCache;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheInformationMBean;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 
 /**
  * {@link JCSCacheInformation} - The {@link CacheInformationMBean} implementation of <a href="http://jakarta.apache.org/jcs/">JCS</a>
@@ -73,24 +79,95 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JCSCacheInformation.class);
 
     private final CompositeCacheManager cacheHub;
+    private final JCSCacheService cacheService;
 
     /**
      * Initializes a new {@link JCSCacheInformation}.
      *
+     * @param cacheService The JCS cache service instance
      * @throws NotCompliantMBeanException
      */
-    public JCSCacheInformation() throws NotCompliantMBeanException {
+    public JCSCacheInformation(JCSCacheService cacheService) throws NotCompliantMBeanException {
         super(CacheInformationMBean.class);
+        this.cacheService = cacheService;
         cacheHub = CompositeCacheManager.getInstance();
     }
 
     @Override
-    public long getMemoryCacheCount(final String name) {
+    public void clear(String name, boolean localOnly) throws MBeanException {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JCSCacheInformation.class);
+
+        if ("*".equals(name)) {
+            List<String> failees = new LinkedList<>();
+            for (String cacheName : cacheHub.getCacheNames()) {
+                try {
+                    Cache cache = cacheService.getCache(cacheName);
+                    if (localOnly) {
+                        cache.localClear();
+                    } else {
+                        cache.clear();
+                    }
+                } catch (Exception e) {
+                    logger.error("", e);
+                    failees.add(cacheName);
+                }
+            }
+            if (false == failees.isEmpty()) {
+                StringBuilder sb = new StringBuilder("Failed to clear the following cache regions: ");
+                boolean first = true;
+                for (String cacheName : failees) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(cacheName);
+                }
+                String message = sb.toString();
+                sb = null;
+                throw new MBeanException(new Exception(message), message);
+            }
+        } else {
+            if (Strings.isEmpty(name)) {
+                String message = "Invalid or missing cache name";
+                throw new MBeanException(new Exception(message), message);
+            }
+            if (false == ImmutableSet.copyOf(cacheHub.getCacheNames()).contains(name)) {
+                String message = "No suche cache: " + name;
+                throw new MBeanException(new Exception(message), message);
+            }
+
+            try {
+                Cache cache = cacheService.getCache(name);
+                if (localOnly) {
+                    cache.localClear();
+                } else {
+                    cache.clear();
+                }
+            } catch (Exception e) {
+                logger.error("", e);
+                String message = e.getMessage();
+                throw new MBeanException(new Exception(message), message);
+            }
+        }
+    }
+
+    @Override
+    public long getMemoryCacheCount(final String name) throws MBeanException {
+        if (Strings.isEmpty(name)) {
+            String message = "Invalid or missing cache name";
+            throw new MBeanException(new Exception(message), message);
+        }
+        if (false == ImmutableSet.copyOf(cacheHub.getCacheNames()).contains(name)) {
+            String message = "No suche cache: " + name;
+            throw new MBeanException(new Exception(message), message);
+        }
+
         return cacheHub.getCache(name).getMemoryCache().getKeyArray().length;
     }
 
     @Override
-    public String getCacheStatistics(final String name) {
+    public String getCacheStatistics(final String name) throws MBeanException {
         if ("*".equals(name)) {
             final String[] cacheNames = cacheHub.getCacheNames();
             final StringBuilder sb = new StringBuilder(512 * cacheNames.length);
@@ -99,11 +176,29 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
             }
             return sb.toString();
         }
+
+        if (Strings.isEmpty(name)) {
+            String message = "Invalid or missing cache name";
+            throw new MBeanException(new Exception(message), message);
+        }
+        if (false == ImmutableSet.copyOf(cacheHub.getCacheNames()).contains(name)) {
+            String message = "No suche cache: " + name;
+            throw new MBeanException(new Exception(message), message);
+        }
         return cacheHub.getCache(name).getStats();
     }
 
     @Override
-    public long getMemoryCacheDataSize(final String name) {
+    public long getMemoryCacheDataSize(final String name) throws MBeanException {
+        if (Strings.isEmpty(name)) {
+            String message = "Invalid or missing cache name";
+            throw new MBeanException(new Exception(message), message);
+        }
+        if (false == ImmutableSet.copyOf(cacheHub.getCacheNames()).contains(name)) {
+            String message = "No suche cache: " + name;
+            throw new MBeanException(new Exception(message), message);
+        }
+
         final IMemoryCache memCache = cacheHub.getCache(name).getMemoryCache();
 
         final Iterator<?> iter = memCache.getIterator();

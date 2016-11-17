@@ -71,6 +71,11 @@ public interface OAuthProviderConstants {
      */
     public static final String REVOKE_SERVLET_ALIAS = "oauth/provider/revoke";
 
+    /**
+     * Servlet alias of the endpoint for token validation
+     */
+    public static final String TOKEN_INFO_SERVLET_ALIAS = "oauth/provider/tokeninfo";
+
 
     // ---------------- Parameters ---------------------------------------------------------------------------
 
@@ -118,6 +123,9 @@ public interface OAuthProviderConstants {
 
     /** The language parameter defining a locale for i18n */
     public static final String PARAM_LANGUAGE = "language";
+
+    /** The access token parameter */
+    public static final String PARAM_ACCESS_TOKEN = "access_token";
 
     // ---------------- Common parameter values --------------------------------------------------------------
 

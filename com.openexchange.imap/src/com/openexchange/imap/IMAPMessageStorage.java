@@ -3131,7 +3131,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     if (MimeMailException.isOverQuotaException(e)) {
                         throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
                     }
-                    
+
                     OXException oxe = handleMessagingException(destFullName, e);
                     if (MimeMailExceptionCode.PROCESSING_ERROR.equals(oxe)) {
                         throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
@@ -3323,7 +3323,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     if (MimeMailException.isOverQuotaException(e)) {
                         throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
                     }
-                    
+
                     OXException oxe = handleMessagingException(destFullName, e);
                     if (MimeMailExceptionCode.PROCESSING_ERROR.equals(oxe)) {
                         throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
@@ -3426,6 +3426,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             Part part = ((MimeRawSource) m).getPart();
             if (part instanceof Message) {
                 message = (Message) part;
+                messageId = null;
             } else {
                 message = MimeMessageConverter.convertMailMessage(m, behavior);
             }
@@ -4209,25 +4210,24 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Remove gathered user flags from message's flags; flags which do not occur in flags object are unaffected.
              */
-            try {
-                message.setFlags(remove, false);
-            } catch (MessagingException e) {
-                // Is read-only -- create a copy from first message
-                LOG.trace("", e);
-                final MimeMessage newMessage;
-                if (message instanceof ReadableMime) {
-                    newMessage = MimeMessageUtility.newMimeMessage(((ReadableMime) message).getMimeStream(), message.getReceivedDate());
-                    Flags flags = new Flags(message.getFlags()).removeAllUserFlags();
-                    newMessage.setFlags(flags, true);
-                } else {
-                    newMessage = MimeMessageUtility.cloneMessage(message, message.getReceivedDate());
-                    Flags flags = new Flags(message.getFlags()).removeAllUserFlags();
-                    newMessage.setFlags(flags, true);
-                }
-                return newMessage;
-            }
+            return removeUserFlagsFromCopyOf(message);
         }
         return message;
+    }
+
+    private static Message removeUserFlagsFromCopyOf(Message message) throws OXException, MessagingException {
+        // Copy/clone given message
+        MimeMessage newMessage;
+        if (message instanceof ReadableMime) {
+            newMessage = MimeMessageUtility.newMimeMessage(((ReadableMime) message).getMimeStream(), message.getReceivedDate());
+        } else {
+            newMessage = MimeMessageUtility.cloneMessage(message, message.getReceivedDate());
+        }
+
+        // Drop user flags from it
+        Flags flags = new Flags(message.getFlags()).removeAllUserFlags();
+        newMessage.setFlags(flags, true);
+        return newMessage;
     }
 
     /**

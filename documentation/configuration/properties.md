@@ -108,6 +108,16 @@ If you would like to add a reference to another property use the following appro
 
 ## Doveadm 
 
+| Key | <span style="font-weight:normal">com.openexchange.dovecot.doveadm.enabled</span> |
+|:----------------|:--------|
+| __Description__ | Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.3  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | doveadm.properties  |
+
+---
 | Key | <span style="font-weight:normal">com.openexchange.dovecot.doveadm.endpoints</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the URIs to the Dovecot DoveAdm REST interface end-points. <br>e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"<br><br>Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of total connections held in HTTP connection pool<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds<br><br>Full example :<br>com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections=100<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout=2500<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout=1500<br><br>The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.<br> |
