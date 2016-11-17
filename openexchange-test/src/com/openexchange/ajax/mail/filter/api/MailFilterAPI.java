@@ -86,7 +86,7 @@ public class MailFilterAPI {
 
     /**
      * Initialises a new {@link MailFilterAPI}.
-     * 
+     *
      * @param client The {@link AJAXClient}
      */
     public MailFilterAPI(AJAXClient client) {
@@ -114,7 +114,7 @@ public class MailFilterAPI {
 
     /**
      * Returns the configuration of the mail filter backend
-     * 
+     *
      * @return the {@link MailFilterConfiguration} of the mail filter backend
      * @throws Exception if the operation fails
      */
@@ -126,7 +126,7 @@ public class MailFilterAPI {
 
     /**
      * Creates the specified mail filter {@link Rule}
-     * 
+     *
      * @param rule The mail filter {@link Rule} to create
      * @return The identifier of the created rule
      * @throws Exception if the operation fails
@@ -139,7 +139,7 @@ public class MailFilterAPI {
 
     /**
      * Updates the specified mail filter {@link Rule}
-     * 
+     *
      * @param rule The mail filter {@link Rule} to update
      * @throws Exception if the operation fails
      */
@@ -150,7 +150,7 @@ public class MailFilterAPI {
 
     /**
      * Reorders the mail filters with the specified identifiers
-     * 
+     *
      * @param ids The identifiers of the mail filters to reorder
      * @throws Exception if the operation fails
      */
@@ -165,7 +165,7 @@ public class MailFilterAPI {
 
     /**
      * Get all rules for the user
-     * 
+     *
      * @return an unmodifiable list with all the rules for the user
      * @throws Exception
      */
@@ -175,18 +175,19 @@ public class MailFilterAPI {
 
     /**
      * Gets all rules for the specified user
-     * 
+     *
      * @param username The user for which to get the rules
+     * @param failOnError Defines whether the request should fail on error or not
      * @return The list of all rules
      * @throws Exception if the operation fails
      */
-    public List<Rule> listRules(String username) throws Exception {
-        return listRules(new AllRequest(username));
+    public List<Rule> listRules(String username, boolean failOnError) throws Exception {
+        return listRules(new AllRequest(username, failOnError));
     }
 
     /**
      * Deletes the rule with the specified identifier
-     * 
+     *
      * @param id The rule's identifier
      * @throws Exception if the operation fails
      */
@@ -197,7 +198,7 @@ public class MailFilterAPI {
 
     /**
      * Purges all mail filters for the specified user
-     * 
+     *
      * @throws Exception if the operation fails
      */
     public void purge() throws Exception {
@@ -209,7 +210,7 @@ public class MailFilterAPI {
 
     /**
      * Deletes the entire script of the user
-     * 
+     *
      * @throws Exception if the operation fails
      */
     public void deleteScript() throws Exception {
@@ -219,7 +220,7 @@ public class MailFilterAPI {
 
     /**
      * Gets the whole script of the user as string
-     * 
+     *
      * @return The script
      * @throws Exception if the operation fails
      */
@@ -234,7 +235,7 @@ public class MailFilterAPI {
     /**
      * Execute the specified {@link AbstractMailFilterRequest} while considering the 'failOnError' flag. If an {@link OXException} is thrown from the
      * server and the 'failOnError' flag is set to false, then that exception is also thrown from this method.
-     * 
+     *
      * @param request The {@link AbstractMailFilterRequest} to execute
      * @return The {@link T} response
      * @throws OXException if a server error occurs
@@ -253,14 +254,13 @@ public class MailFilterAPI {
 
     /**
      * Executes the specified {@link AllRequest} and returns the list with rules
-     * 
+     *
      * @param request The {@link AllRequest} to execute
      * @return An unmodifiable list with all rules
      * @throws Exception if execution fails
      */
     private List<Rule> listRules(AllRequest request) throws Exception {
         AllResponse response = execute(request);
-
         Rule[] ruleArray = response.getRules();
         List<Rule> rules = new ArrayList<>(ruleArray.length);
         Collections.addAll(rules, ruleArray);

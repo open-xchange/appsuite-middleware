@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.junit.Assume;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -70,6 +71,7 @@ import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 public class AdminListTest extends AbstractMailFilterTest {
@@ -153,17 +155,24 @@ public class AdminListTest extends AbstractMailFilterTest {
         final String userImapLogin = description.getLogin();
 
         MailFilterAPI adminFilterAPI = new MailFilterAPI(adminClient);
-        List<Rule> adminRules = adminFilterAPI.listRules(userImapLogin);
-
-        for (final Rule ur : rules) {
-            boolean foundRule = false;
-            inner: for (final Rule ar : adminRules) {
-                if (ar.getId() == ur.getId()) {
-                    foundRule = true;
-                    break inner;
+        try{
+            List<Rule> adminRules = adminFilterAPI.listRules(userImapLogin, false);
+            for (final Rule ur : rules) {
+                boolean foundRule = false;
+                inner: for (final Rule ar : adminRules) {
+                    if (ar.getId() == ur.getId()) {
+                        foundRule = true;
+                        break inner;
+                    }
                 }
+                assertTrue("Did not find rule.", foundRule);
             }
-            assertTrue("Did not find rule.", foundRule);
+        }catch(OXException e){
+            if(e.getPrefix().equals("MAIL_FILTER") && e.getCode()==2){
+                Assume.assumeTrue("The context admin is unable to login to the sieve server. This is probably a configuration problem (e.g. imaplogin==null).", false);
+            }else {
+                throw e;
+            }
         }
     }
 
