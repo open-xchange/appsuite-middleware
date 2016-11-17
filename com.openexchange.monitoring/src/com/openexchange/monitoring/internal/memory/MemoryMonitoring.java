@@ -76,27 +76,30 @@ public class MemoryMonitoring implements Runnable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MemoryMonitoring.class);
 
-    private static final double THRESHOLD = 10.0d;
-
     private final DecimalFormat decimalFormat;
     private final Map<String, Long[]> lastMeasurement;
     private final MBeanServer server;
     private final int periodMinutes;
+    private final double threshold;
 
     /**
      * Initializes a new {@link MemoryMonitoring}.
      */
-    public MemoryMonitoring(int periodMinutes) {
-        this(periodMinutes, ManagementFactory.getPlatformMBeanServer());
+    public MemoryMonitoring(int periodMinutes, double threshold) {
+        this(periodMinutes, threshold, ManagementFactory.getPlatformMBeanServer());
     }
 
     /**
      * Initializes a new {@link MemoryMonitoring}.
      */
-    public MemoryMonitoring(int periodMinutes, MBeanServer server) {
+    public MemoryMonitoring(int periodMinutes, double threshold, MBeanServer server) {
         super();
+        this.threshold = threshold;
         if (periodMinutes <= 0) {
             throw new IllegalArgumentException("periodMinutes must be greater than zero");
+        }
+        if (threshold <= 0) {
+            throw new IllegalArgumentException("threshold must be greater than zero");
         }
         this.periodMinutes = periodMinutes;
         this.server = server;
@@ -109,7 +112,7 @@ public class MemoryMonitoring implements Runnable {
         try {
             GarbageCollectionInfos infos = getGarbageCollectionInfos(false);
             double gcTimePercentSum = infos.gcTimePercentSum;
-            if (gcTimePercentSum > THRESHOLD) {
+            if (gcTimePercentSum > threshold) {
                 // accumulated collection elapsed time in milliseconds
                 LOG.warn("{}\tHigh GC activity detected!!!{}\tGarbage collection consumed {}% of uptime within {}{}", Strings.getLineSeparator(), Strings.getLineSeparator(), decimalFormat.format(gcTimePercentSum), extracted(), Strings.getLineSeparator());
             } else {

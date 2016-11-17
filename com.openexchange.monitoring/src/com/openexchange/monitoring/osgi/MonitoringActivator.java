@@ -50,6 +50,7 @@
 package com.openexchange.monitoring.osgi;
 
 import org.osgi.framework.BundleActivator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
@@ -77,7 +78,7 @@ public final class MonitoringActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class, SessiondService.class };
+        return new Class<?>[] { ConfigurationService.class, ManagementService.class, SessiondService.class };
     }
 
     @Override
@@ -86,9 +87,13 @@ public final class MonitoringActivator extends HousekeepingActivator {
         init.start();
         this.init = init;
 
+        ConfigurationService service = getService(ConfigurationService.class);
+        int periodMinutes = service.getIntProperty("com.openexchange.monitoring.memory.periodMinutes", 5);
+        double threshold = Double.parseDouble(service.getProperty("com.openexchange.monitoring.memory.threshold", "10.0").trim());
+
         rememberTracker(new MailCounterServiceTracker(context));
         rememberTracker(new MailIdleCounterServiceTracker(context));
-        track(TimerService.class, new MemoryMonitoringInitializer(context));
+        track(TimerService.class, new MemoryMonitoringInitializer(periodMinutes, threshold, context));
         openTrackers();
 
         /*

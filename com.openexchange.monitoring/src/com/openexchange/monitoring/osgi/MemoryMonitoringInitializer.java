@@ -66,13 +66,17 @@ import com.openexchange.timer.TimerService;
 public class MemoryMonitoringInitializer implements ServiceTrackerCustomizer<TimerService, TimerService> {
 
     private final BundleContext context;
+    private final int periodMinutes;
+    private final double threshold;
     private ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link MemoryMonitoringInitializer}.
      */
-    public MemoryMonitoringInitializer(BundleContext context) {
+    public MemoryMonitoringInitializer(int periodMinutes, double threshold, BundleContext context) {
         super();
+        this.periodMinutes = periodMinutes;
+        this.threshold = threshold;
         this.context = context;
     }
 
@@ -80,8 +84,7 @@ public class MemoryMonitoringInitializer implements ServiceTrackerCustomizer<Tim
     public synchronized TimerService addingService(ServiceReference<TimerService> reference) {
         TimerService timerService = context.getService(reference);
 
-        int periodMinutes = 1;
-        Runnable task = new MemoryMonitoring(periodMinutes);
+        Runnable task = new MemoryMonitoring(periodMinutes, threshold);
         timerTask = timerService.scheduleAtFixedRate(task, periodMinutes, periodMinutes, TimeUnit.MINUTES);
 
         return timerService;
