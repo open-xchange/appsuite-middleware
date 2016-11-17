@@ -74,7 +74,6 @@ import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
-import com.dropbox.core.v2.files.RestoreErrorException;
 import com.dropbox.core.v2.files.SearchErrorException;
 import com.dropbox.core.v2.files.SearchMatch;
 import com.dropbox.core.v2.files.SearchResult;
