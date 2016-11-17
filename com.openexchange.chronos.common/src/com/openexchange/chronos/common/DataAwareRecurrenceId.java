@@ -62,7 +62,7 @@ import com.openexchange.java.util.TimeZones;
  */
 public class DataAwareRecurrenceId extends DefaultRecurrenceId implements RecurrenceData {
 
-    private final RecurrenceData recurrenceData;
+    protected final RecurrenceData recurrenceData;
 
     /**
      * Initializes a new {@link DataAwareRecurrenceId}.

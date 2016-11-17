@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 /**
- * {@link Event2}
+ * {@link Event}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0

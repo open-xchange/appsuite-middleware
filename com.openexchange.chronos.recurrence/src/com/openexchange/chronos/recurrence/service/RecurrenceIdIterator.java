@@ -52,21 +52,22 @@ package com.openexchange.chronos.recurrence.service;
 import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 
 /**
- * {@link RecurrenceIterator}
+ * {@link RecurrenceIdIterator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
+public class RecurrenceIdIterator extends AbstractRecurrenceIterator<RecurrenceId> {
 
     /**
-     * Initializes a new {@link RecurrenceIterator}.
+     * Initializes a new {@link RecurrenceIdIterator}.
      *
      * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
      * @param start The left side boundary for the calculation. Optional, can be null.
@@ -74,32 +75,14 @@ public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
      * @param limit The maximum number of calculated instances. Optional, can be null.
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
-    public RecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
+    public RecurrenceIdIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
         super(master, start, end, limit, ignoreExceptions);
     }
 
     @Override
-    protected Event nextInstance() {
-        // TODO:
-        Event retval = master.clone();
-        retval.setRecurrenceId(new PositionAwareRecurrenceId(recurrenceData, next.longValue(), count, CalendarUtils.truncateTime(new Date(next.longValue()), TimeZones.UTC)));
-        //        retval.removeId();
-        //        retval.removeRecurrenceRule();
-        retval.removeDeleteExceptionDates();
-        retval.removeChangeExceptionDates();
-        retval.setStartDate(new Date(next));
-        retval.setEndDate(calculateEnd(master, retval.getStartDate()));
-        if (master.containsAllDay()) {
-            retval.setAllDay(master.getAllDay());
-        }
-        return retval;
-    }
-
-    private Date calculateEnd(Event master, Date start) {
-        long startMillis = master.getStartDate().getTime();
-        long endMillis = master.getEndDate().getTime();
-        long duration = endMillis - startMillis;
-        return new Date(start.getTime() + duration);
+    protected RecurrenceId nextInstance() {
+        long value = next.longValue();
+        return new PositionAwareRecurrenceId(recurrenceData, value, count, CalendarUtils.truncateTime(new Date(value), TimeZones.UTC));
     }
 
 }

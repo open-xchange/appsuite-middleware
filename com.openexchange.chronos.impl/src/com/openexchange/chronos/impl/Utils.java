@@ -112,14 +112,14 @@ import com.openexchange.user.UserService;
 public class Utils {
 
     /** A collection of fields that are always included when querying events from the storage */
-    static final List<EventField> MANDATORY_FIELDS = Arrays.asList(
+    public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.PUBLIC_FOLDER_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY,
         EventField.CLASSIFICATION, EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE,
         EventField.START_TIMEZONE, EventField.RECURRENCE_RULE, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
     );
 
     /** The event fields that are also available if an event's classification is not {@link Classification#PUBLIC} */
-    static final EventField[] NON_CLASSIFIED_FIELDS = {
+    public static final EventField[] NON_CLASSIFIED_FIELDS = {
         EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
         EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
         EventField.MODIFIED_BY, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE,
@@ -129,13 +129,13 @@ public class Utils {
     /**
      * Gets the event fields to include when querying events from the storage based on the client-requested fields defined in the
      * supplied calendar parameters. <p/>
-     * Specific {@link Utils#MANDATORY_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
+     * Specific {@link Utils#DEFAULT_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
      *
      * @param parameters The calendar parameters to get the requested fields from
      * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
      * @return The fields to use when querying events from the storage
      * @see CalendarParameters#PARAMETER_FIELDS
-     * @see Utils#MANDATORY_FIELDS
+     * @see Utils#DEFAULT_FIELDS
      */
     public static EventField[] getFields(CalendarParameters parameters, EventField... requiredFields) {
         return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), requiredFields);
@@ -200,19 +200,19 @@ public class Utils {
 
     /**
      * Gets the event fields to include when querying events from the storage based on the supplied client-requested fields. <p/>
-     * Specific {@link Utils#MANDATORY_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
+     * Specific {@link Utils#DEFAULT_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
      *
      * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
      * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
      * @return The fields to use when querying events from the storage
-     * @see Utils#MANDATORY_FIELDS
+     * @see Utils#DEFAULT_FIELDS
      */
     public static EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
         if (null == requestedFields) {
             return EventField.values();
         }
         Set<EventField> fields = new HashSet<EventField>();
-        fields.addAll(MANDATORY_FIELDS);
+        fields.addAll(DEFAULT_FIELDS);
         if (null != requiredFields && 0 < requestedFields.length) {
             fields.addAll(Arrays.asList(requiredFields));
         }

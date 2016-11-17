@@ -59,6 +59,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -121,6 +122,22 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
+    }
+
+    @Override
+    public List<Event> searchOverlappingEvents(Date from, Date until, Attendee attendee, boolean includeTransparent, boolean includeDeclined, SortOptions sortOptions, EventField[] fields) throws OXException {
+        if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
+            Connection connection = null;
+            try {
+                connection = dbProvider.getReadConnection(context);
+                return selectOverlappingEvents(connection, context.getContextId(), from, until, attendee.getEntity(), includeTransparent, includeDeclined, sortOptions, fields);
+            } catch (SQLException e) {
+                throw EventExceptionCode.MYSQL.create(e);
+            } finally {
+                dbProvider.releaseReadConnection(context, connection);
+            }
+        }
+        return searchOverlappingEvents(from, until, Collections.singletonList(attendee), includeTransparent, sortOptions, fields);
     }
 
     @Override
@@ -450,6 +467,41 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 for (int id : resourceIDs) {
                     stmt.setInt(parameterIndex++, id);
                 }
+            }
+            ResultSet resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                events.add(readEvent(resultSet, mappedFields, "d."));
+            }
+        }
+        return events;
+    }
+
+    private static List<Event> selectOverlappingEvents(Connection connection, int contextID, Date from, Date until, int userID, boolean includeDeclined, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
+        EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
+        StringBuilder stringBuilder = new StringBuilder().append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d").append(" LEFT JOIN prg_dates_members AS m ON d.cid=m.cid AND d.intfield01=m.object_id").append(" WHERE d.cid=? AND m.member_uid=?");
+        if (false == includeTransparent) {
+            stringBuilder.append(" AND d.intfield06<>4");
+        }
+        if (false == includeDeclined) {
+            stringBuilder.append(" AND m.confirm<>2");
+        }
+        if (null != from) {
+            stringBuilder.append(" AND d.timestampfield02>=?");
+        }
+        if (null != until) {
+            stringBuilder.append(" AND d.timestampfield01<=?");
+        }
+        stringBuilder.append(getSortOptions(sortOptions, "d.")).append(';');
+        List<Event> events = new ArrayList<Event>();
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, userID);
+            if (null != from) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
+            }
+            if (null != until) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
             }
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {

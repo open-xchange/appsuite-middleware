@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 import com.openexchange.chronos.Event;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ChangeExceptionAwareRecurrenceIterator}
@@ -77,7 +78,7 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
     private Integer limit;
     private int count = 0;
 
-    public ChangeExceptionAwareRecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions) {
+    public ChangeExceptionAwareRecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions) throws OXException {
         if (limit != null && limit == 0) {
             //Nothing to do.
             return;

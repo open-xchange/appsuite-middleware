@@ -74,127 +74,127 @@ public class MultipleTimeZonesHourly extends AbstractMultipleTimeZoneTest {
     private static final int YEAR = 2016;
 
     @Test
-    public void _00() {
+    public void _00() throws Exception {
         test(0);
     }
 
     @Test
-    public void _01() {
+    public void _01() throws Exception {
         test(1);
     }
 
     @Test
-    public void _02() {
+    public void _02() throws Exception {
         test(2);
     }
 
     @Test
-    public void _03() {
+    public void _03() throws Exception {
         test(3);
     }
 
     @Test
-    public void _04() {
+    public void _04() throws Exception {
         test(4);
     }
 
     @Test
-    public void _05() {
+    public void _05() throws Exception {
         test(5);
     }
 
     @Test
-    public void _06() {
+    public void _06() throws Exception {
         test(6);
     }
 
     @Test
-    public void _07() {
+    public void _07() throws Exception {
         test(7);
     }
 
     @Test
-    public void _08() {
+    public void _08() throws Exception {
         test(8);
     }
 
     @Test
-    public void _09() {
+    public void _09() throws Exception {
         test(9);
     }
 
     @Test
-    public void _10() {
+    public void _10() throws Exception {
         test(10);
     }
 
     @Test
-    public void _11() {
+    public void _11() throws Exception {
         test(11);
     }
 
     @Test
-    public void _12() {
+    public void _12() throws Exception {
         test(12);
     }
 
     @Test
-    public void _13() {
+    public void _13() throws Exception {
         test(13);
     }
 
     @Test
-    public void _14() {
+    public void _14() throws Exception {
         test(14);
     }
 
     @Test
-    public void _15() {
+    public void _15() throws Exception {
         test(15);
     }
 
     @Test
-    public void _16() {
+    public void _16() throws Exception {
         test(16);
     }
 
     @Test
-    public void _17() {
+    public void _17() throws Exception {
         test(17);
     }
 
     @Test
-    public void _18() {
+    public void _18() throws Exception {
         test(18);
     }
 
     @Test
-    public void _19() {
+    public void _19() throws Exception {
         test(19);
     }
 
     @Test
-    public void _20() {
+    public void _20() throws Exception {
         test(20);
     }
 
     @Test
-    public void _21() {
+    public void _21() throws Exception {
         test(21);
     }
 
     @Test
-    public void _22() {
+    public void _22() throws Exception {
         test(22);
     }
 
     @Test
-    public void _23() {
+    public void _23() throws Exception {
         test(23);
     }
 
     @Test
-    public void fullTime() {
+    public void fullTime() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone utc = TimeZone.getTimeZone("UTC");
@@ -234,12 +234,12 @@ public class MultipleTimeZonesHourly extends AbstractMultipleTimeZoneTest {
         }
     }
 
-    private void test(int hourOfDay) {
+    private void test(int hourOfDay) throws Exception {
         oneHourLong(hourOfDay);
         moreThanOneDay(hourOfDay);
     }
 
-    private void moreThanOneDay(int hourOfDay) {
+    private void moreThanOneDay(int hourOfDay) throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone startTz = TimeZone.getTimeZone(startTimeZone);
@@ -276,7 +276,7 @@ public class MultipleTimeZonesHourly extends AbstractMultipleTimeZoneTest {
         }
     }
 
-    private void oneHourLong(int hourOfDay) {
+    private void oneHourLong(int hourOfDay) throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone startTz = TimeZone.getTimeZone(startTimeZone);

@@ -54,26 +54,22 @@ import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
-import static com.openexchange.chronos.impl.Utils.getSearchTerm;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link HasPerformer}
@@ -112,15 +108,11 @@ public class HasPerformer extends AbstractQueryPerformer {
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         Date rangeEnd = calendar.getTime();
         /*
-         * search events
+         * search overlapping events
          */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_THAN, rangeStart))
-            .addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, rangeEnd))
-            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(userID)))
-            //TODO .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.NOT_EQUALS, ParticipationStatus.DECLINED))
-        ;
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, null);
+        EventField[] fields = Utils.getFields(Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]), EventField.ATTENDEES);
+        List<Attendee> attendees = Collections.singletonList(session.getEntityResolver().applyEntityData(new Attendee(), userID));
+        List<Event> events = storage.getEventStorage().searchOverlappingEvents(rangeStart, rangeEnd, attendees, true, null, fields);
         readAdditionalEventData(events, new EventField[] { EventField.ATTENDEES });
         /*
          * step through events day-wise & check for present events

@@ -53,6 +53,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link RecurrenceService}
@@ -73,7 +75,7 @@ public interface RecurrenceService {
      * @param limit The maximum number of calculated instances. Optional, can be null.
      * @return
      */
-    public Iterator<Event> calculateInstances(Event master, Calendar start, Calendar end, Integer limit);
+    public Iterator<Event> calculateInstances(Event master, Calendar start, Calendar end, Integer limit) throws OXException;
 
     /**
      * Calculates the expanded instances of a recurring event with optional boundaries and an optional limit.
@@ -87,7 +89,7 @@ public interface RecurrenceService {
      * @param changeExceptions List of changeExceptions. Make sure this matches the change exception dates of the master, otherwise you might get weird results. Optional, can be null;
      * @return
      */
-    public Iterator<Event> calculateInstancesRespectExceptions(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions);
+    public Iterator<Event> calculateInstancesRespectExceptions(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions) throws OXException;
 
     /**
      * Calculates a reccurrence date position for a given 1-based position of a recurring event.
@@ -106,5 +108,7 @@ public interface RecurrenceService {
      * @return The Position of the given datePosition. 1-based. 0 if not found or out of boundaries.
      */
     public int calculateRecurrencePosition(Event master, Calendar datePosition);
+
+    Iterator<RecurrenceId> getRecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException;
 
 }

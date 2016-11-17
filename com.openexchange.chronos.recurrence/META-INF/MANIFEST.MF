@@ -8,7 +8,10 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.common,
+ com.openexchange.chronos.compat,
  com.openexchange.chronos.service,
+ com.openexchange.exception,
+ com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.server,
  org.dmfs.rfc5545,

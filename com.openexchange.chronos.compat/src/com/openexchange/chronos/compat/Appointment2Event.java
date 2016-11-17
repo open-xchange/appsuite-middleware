@@ -64,7 +64,6 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -259,14 +258,16 @@ public class Appointment2Event {
     public static RecurrenceId getRecurrenceID(RecurrenceData recurrenceData, Date recurrenceDatePosition) throws OXException {
         Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, recurrenceData.getSeriesStart());
         RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData);
+        int position = 0;
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             calendar.setTimeInMillis(nextMillis);
-            long nextPosition = CalendarUtils.truncateTime(calendar).getTimeInMillis();
-            if (recurrenceDatePosition.getTime() == nextPosition) {
-                return new DataAwareRecurrenceId(recurrenceData, nextMillis);
+            long nextDatePosition = CalendarUtils.truncateTime(calendar).getTimeInMillis();
+            position++;
+            if (recurrenceDatePosition.getTime() == nextDatePosition) {
+                return new PositionAwareRecurrenceId(recurrenceData, nextMillis, position, new Date(nextDatePosition));
             }
-            if (nextPosition > recurrenceDatePosition.getTime()) {
+            if (nextDatePosition > recurrenceDatePosition.getTime()) {
                 break;
             }
         }
@@ -311,7 +312,8 @@ public class Appointment2Event {
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (++position == recurrencePosition) {
-                return new DataAwareRecurrenceId(recurrenceData, nextMillis);
+                Date datePosition = CalendarUtils.truncateTime(new Date(nextMillis), TimeZones.UTC);
+                return new PositionAwareRecurrenceId(recurrenceData, nextMillis, position, datePosition);
             }
         }
         throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence position " + recurrencePosition, recurrenceData.getRecurrenceRule());

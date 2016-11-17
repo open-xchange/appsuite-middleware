@@ -68,6 +68,7 @@ import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -521,15 +522,20 @@ public class EventConverter {
                 appointment.setRecurrencePosition(0);
                 appointment.setRecurrenceDatePosition(null);
             } else {
-                if (null == recurrenceData) {
-                    if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                        recurrenceData = (RecurrenceData) event.getRecurrenceId();
-                    } else {
-                        recurrenceData = loadRecurrenceData(session, new EventID(userizedEvent.getFolderId(), event.getSeriesId()));
+                if (PositionAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                    appointment.setRecurrenceDatePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrenceDatePosition());
+                    appointment.setRecurrencePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrencePosition());
+                } else {
+                    if (null == recurrenceData) {
+                        if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                            recurrenceData = (RecurrenceData) event.getRecurrenceId();
+                        } else {
+                            recurrenceData = loadRecurrenceData(session, new EventID(userizedEvent.getFolderId(), event.getSeriesId()));
+                        }
                     }
+                    appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
+                    appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(recurrenceData, event.getRecurrenceId()));
                 }
-                appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
-                appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(recurrenceData, event.getRecurrenceId()));
             }
         }
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule() && false == CalendarUtils.isSeriesException(event)) {

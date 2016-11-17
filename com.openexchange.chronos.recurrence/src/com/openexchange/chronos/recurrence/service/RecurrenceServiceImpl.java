@@ -59,7 +59,9 @@ import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link RecurrenceServiceImpl}
@@ -70,11 +72,12 @@ import com.openexchange.chronos.service.RecurrenceService;
 public class RecurrenceServiceImpl implements RecurrenceService {
 
     @Override
-    public Iterator<Event> calculateInstances(Event master, final Calendar start, final Calendar end, Integer limit) {
+    public Iterator<Event> calculateInstances(Event master, final Calendar start, final Calendar end, Integer limit) throws OXException {
         return new RecurrenceIterator(master, start, end, limit, true);
     }
 
-    public Iterator<Event> calculateInstancesRespectExceptions(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions) {
+    @Override
+    public Iterator<Event> calculateInstancesRespectExceptions(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions) throws OXException {
         return new ChangeExceptionAwareRecurrenceIterator(master, start, end, limit, changeExceptions);
     }
 
@@ -137,6 +140,11 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             position++;
         }
         return 0;
+    }
+
+    @Override
+    public Iterator<RecurrenceId> getRecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
+        return new RecurrenceIdIterator(master, start, end, limit, ignoreExceptions);
     }
 
 }

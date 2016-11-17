@@ -79,13 +79,14 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         super(timeZone);
     }
 
+    @Override
     @Before
     public void setUp() {
         super.setUp();
     }
 
     @Test
-    public void simple() {
+    public void simple() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -122,7 +123,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void multiple() {
+    public void multiple() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -158,7 +159,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void limit() {
+    public void limit() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -194,7 +195,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void leftAndRightBoundary() {
+    public void leftAndRightBoundary() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -233,7 +234,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void leftAndRightBoundaryAndLimit() {
+    public void leftAndRightBoundaryAndLimit() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -269,7 +270,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void allDeleted() {
+    public void allDeleted() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;COUNT=3");
         TimeZone tz = TimeZone.getTimeZone(timeZone);

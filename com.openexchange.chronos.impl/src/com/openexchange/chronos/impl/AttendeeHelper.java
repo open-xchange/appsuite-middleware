@@ -264,7 +264,7 @@ public class AttendeeHelper {
         /*
          * take over any external attendees
          */
-        for (Attendee attendee : filter(newAttendees, Boolean.FALSE, null)) {
+        for (Attendee attendee : filter(newAttendees, Boolean.FALSE, (CalendarUserType[]) null)) {
             if (contains(existingAttendees, attendee) || contains(attendees, attendee)) {
                 LOG.debug("Skipping duplicate external attendee {}", attendee);
                 continue;

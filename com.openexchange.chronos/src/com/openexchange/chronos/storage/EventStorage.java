@@ -109,6 +109,8 @@ public interface EventStorage {
 
     List<Event> searchOverlappingEvents(Date from, Date until, List<Attendee> attendees, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws OXException;
 
+    List<Event> searchOverlappingEvents(Date from, Date until, Attendee attendee, boolean includeTransparent, boolean includeDeclined, SortOptions sortOptions, EventField[] fields) throws OXException;
+
     /**
      * Generates the next object unique identifier for inserting new event data.
      * <p/>

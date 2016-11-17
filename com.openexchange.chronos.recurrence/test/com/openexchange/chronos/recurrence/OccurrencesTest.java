@@ -73,7 +73,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void noLimits() {
+    public void noLimits() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -110,7 +110,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void limit() {
+    public void limit() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -141,87 +141,87 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void leftBoundaryBeforeStart() {
+    public void leftBoundaryBeforeStart() throws Exception {
         leftBoundary("02.10.2008 14:00:00", false);
     }
 
     @Test
-    public void leftBoundaryAtStart() {
+    public void leftBoundaryAtStart() throws Exception {
         leftBoundary("02.10.2008 14:45:00", false);
     }
 
     @Test
-    public void leftBoundaryInside() {
+    public void leftBoundaryInside() throws Exception {
         leftBoundary("02.10.2008 15:00:00", false);
     }
 
     @Test
-    public void leftBoundaryAtEnd() {
+    public void leftBoundaryAtEnd() throws Exception {
         leftBoundary("02.10.2008 15:45:00", true);
     }
 
     @Test
-    public void leftBoundaryBeforeStartAndLimit() {
+    public void leftBoundaryBeforeStartAndLimit() throws Exception {
         leftBoundaryWithLimit("02.10.2008 14:00:00", false);
     }
 
     @Test
-    public void leftBoundaryAtStartAndLimit() {
+    public void leftBoundaryAtStartAndLimit() throws Exception {
         leftBoundaryWithLimit("02.10.2008 14:45:00", false);
     }
 
     @Test
-    public void leftBoundaryInsideAndLimit() {
+    public void leftBoundaryInsideAndLimit() throws Exception {
         leftBoundaryWithLimit("02.10.2008 15:00:00", false);
     }
 
     @Test
-    public void leftBoundaryAtEndAndLimit() {
+    public void leftBoundaryAtEndAndLimit() throws Exception {
         leftBoundaryWithLimit("02.10.2008 15:45:00", true);
     }
 
     @Test
-    public void rightBoundaryAtStart() {
+    public void rightBoundaryAtStart() throws Exception {
         rightBoundary("05.10.2008 14:45:00", true);
     }
 
     @Test
-    public void rightBoundaryInside() {
+    public void rightBoundaryInside() throws Exception {
         rightBoundary("05.10.2008 15:00:00", false);
     }
 
     @Test
-    public void rightBoundaryAtEnd() {
+    public void rightBoundaryAtEnd() throws Exception {
         rightBoundary("05.10.2008 15:45:00", false);
     }
 
     @Test
-    public void rightBoundaryAfterEnd() {
+    public void rightBoundaryAfterEnd() throws Exception {
         rightBoundary("05.10.2008 16:45:00", false);
     }
 
     @Test
-    public void rightBoundaryAtStartAndLimit() {
+    public void rightBoundaryAtStartAndLimit() throws Exception {
         rightBoundaryWithLimit("05.10.2008 14:45:00");
     }
 
     @Test
-    public void rightBoundaryInsideAndLimit() {
+    public void rightBoundaryInsideAndLimit() throws Exception {
         rightBoundaryWithLimit("05.10.2008 15:00:00");
     }
 
     @Test
-    public void rightBoundaryAtEndAndLimit() {
+    public void rightBoundaryAtEndAndLimit() throws Exception {
         rightBoundaryWithLimit("05.10.2008 15:45:00");
     }
 
     @Test
-    public void rightBoundaryAfterEndAndLimit() {
+    public void rightBoundaryAfterEndAndLimit() throws Exception {
         rightBoundaryWithLimit("05.10.2008 16:45:00");
     }
 
     @Test
-    public void leftAndRightBoundary() {
+    public void leftAndRightBoundary() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -258,7 +258,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void leftAndRightBoundaryAndLimit() {
+    public void leftAndRightBoundaryAndLimit() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -288,7 +288,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         assertEquals("Missing instance.", 3, count);
     }
 
-    private void leftBoundary(String leftBoundary, boolean atEnd) {
+    private void leftBoundary(String leftBoundary, boolean atEnd) throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -324,7 +324,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         assertEquals("Missing instance.", 5, count);
     }
 
-    private void leftBoundaryWithLimit(String leftBoundary, boolean atEnd) {
+    private void leftBoundaryWithLimit(String leftBoundary, boolean atEnd) throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -352,7 +352,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         assertEquals("Missing instance.", 1, count);
     }
 
-    private void rightBoundary(String rightBoundary, boolean atStart) {
+    private void rightBoundary(String rightBoundary, boolean atStart) throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -392,7 +392,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         assertEquals("Missing instance.", atStart ? 4 : 5, count);
     }
 
-    private void rightBoundaryWithLimit(String rightBoundary) {
+    private void rightBoundaryWithLimit(String rightBoundary) throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);

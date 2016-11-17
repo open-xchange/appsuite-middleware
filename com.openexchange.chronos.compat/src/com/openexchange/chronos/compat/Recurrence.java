@@ -253,7 +253,7 @@ public class Recurrence {
      * @return The recurrence rule iterator
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData) throws OXException {
+    public static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData) throws OXException {
         return getRecurrenceIterator(recurrenceData, false);
     }
 
@@ -267,7 +267,7 @@ public class Recurrence {
      * @return The recurrence rule iterator
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence) throws OXException {
+    public static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence) throws OXException {
         RecurrenceRule rule = null;
         try {
             rule = new RecurrenceRule(recurrenceData.getRecurrenceRule());

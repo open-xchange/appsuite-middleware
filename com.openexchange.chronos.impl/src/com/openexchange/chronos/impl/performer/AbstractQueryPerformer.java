@@ -89,6 +89,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -215,12 +216,19 @@ public abstract class AbstractQueryPerformer {
         return event;
     }
 
-    protected Iterator<Event> resolveOccurrences(Event masterEvent, Date from, Date until) {
+    protected Iterator<Event> resolveOccurrences(Event masterEvent, Date from, Date until) throws OXException {
         TimeZone timeZone = getTimeZone(session);
         Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
         Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
         return Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(masterEvent, fromCalendar, untilCalendar, null, null);
         //        return Services.getService(RecurrenceService.class).calculateInstances(masterEvent, fromCalendar, untilCalendar, null);
+    }
+
+    protected Iterator<RecurrenceId> getRecurrenceIterator(Event masterEvent, Date from, Date until, Integer limit) throws OXException {
+        TimeZone timeZone = getTimeZone(session);
+        Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
+        Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
+        return Services.getService(RecurrenceService.class).getRecurrenceIterator(masterEvent, fromCalendar, untilCalendar, limit, true);
     }
 
     protected List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder, boolean includePrivate) throws OXException {

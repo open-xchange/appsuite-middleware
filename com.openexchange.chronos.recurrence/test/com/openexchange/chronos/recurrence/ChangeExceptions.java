@@ -78,13 +78,14 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         super(timeZone);
     }
 
+    @Override
     @Before
     public void setUp() {
         super.setUp();
     }
 
     @Test
-    public void simple() {
+    public void simple() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -128,7 +129,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void multiple() {
+    public void multiple() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -173,7 +174,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void moveBeforeFirst() {
+    public void moveBeforeFirst() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -217,7 +218,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void moveOnAnother() {
+    public void moveOnAnother() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -261,7 +262,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void limit() {
+    public void limit() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -299,7 +300,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void changeOutsideLimit() {
+    public void changeOutsideLimit() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -337,7 +338,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void moveOutsideRightBoundary() {
+    public void moveOutsideRightBoundary() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -375,7 +376,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void moveOutsideLeftBoundary() {
+    public void moveOutsideLeftBoundary() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -412,7 +413,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void createFullTimeException() {
+    public void createFullTimeException() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone utc = TimeZone.getTimeZone("UTC");
@@ -470,7 +471,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void createNormalExceptionFromFullTimeSeries() {
+    public void createNormalExceptionFromFullTimeSeries() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone utc = TimeZone.getTimeZone("UTC");
@@ -529,7 +530,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void afterLastRegularOccurrence() {
+    public void afterLastRegularOccurrence() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;COUNT=3");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -567,7 +568,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void changeAndDeleteException() {
+    public void changeAndDeleteException() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);

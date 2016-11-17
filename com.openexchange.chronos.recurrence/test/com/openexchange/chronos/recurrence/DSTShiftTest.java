@@ -79,6 +79,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         super("Europe/Berlin");
     }
 
+    @Override
     @Before
     public void setUp() {
         super.setUp();
@@ -92,7 +93,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void dstToNormal() {
+    public void dstToNormal() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -127,7 +128,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void normalToDst() {
+    public void normalToDst() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -162,7 +163,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void forsakenTimes() {
+    public void forsakenTimes() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -191,7 +192,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void ambiguousStart() {
+    public void ambiguousStart() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
@@ -220,7 +221,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void ambiguousEnd() {
+    public void ambiguousEnd() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);

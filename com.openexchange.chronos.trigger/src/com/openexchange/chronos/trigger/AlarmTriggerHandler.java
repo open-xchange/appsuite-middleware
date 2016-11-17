@@ -415,7 +415,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
         return nextTrigger.after(new Date()) ? nextTrigger : null;
     }
 
-    private Event getNextOccurrence(Event event, TimeZone timeZone) {
+    private Event getNextOccurrence(Event event, TimeZone timeZone) throws OXException {
         Date now = new Date();
         if (false == isSeriesMaster(event)) {
             return now.before(event.getStartDate()) ? event : null;
