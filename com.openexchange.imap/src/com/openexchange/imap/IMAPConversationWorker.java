@@ -937,13 +937,31 @@ public final class IMAPConversationWorker {
                 /*
                  * Output as flat list
                  */
-                final List<MailMessage> flatList = new LinkedList<>();
+                List<MailMessage> flatList = new LinkedList<>();
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     for (final MailMessage mail : flatList) {
                         imapMessageStorage.setAccountInfo(mail);
                     }
                 }
                 ThreadSortUtil.toFlatList(structuredList, flatList);
+                /*
+                 * Apply index range (if any)
+                 */
+                if (indexRange != null) {
+                    int fromIndex = indexRange.start;
+                    int toIndex = indexRange.end;
+                    int size = flatList.size();
+                    if (size == 0 || fromIndex >= size) {
+                        return IMailMessageStorage.EMPTY_RETVAL;
+                    }
+                    /*
+                     * Reset end index if out of range
+                     */
+                    if (toIndex >= size) {
+                        toIndex = size;
+                    }
+                    flatList = flatList.subList(fromIndex, toIndex);
+                }
                 return flatList.toArray(new MailMessage[flatList.size()]);
             }
             /*
