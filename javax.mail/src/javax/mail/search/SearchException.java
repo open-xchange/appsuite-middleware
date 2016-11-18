@@ -67,4 +67,13 @@ public class SearchException extends MessagingException {
     public SearchException(String s) {
 	super(s);
     }
+
+    /**
+     * Constructs a SearchException with the specified detail message.
+     * @param s     the detail message
+     * @param cause the cause
+     */
+    public SearchException(String s, Exception cause) {
+    super(s, cause);
+    }
 }
