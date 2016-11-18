@@ -51,7 +51,13 @@ package com.openexchange.mail.api;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailThread;
+import com.openexchange.mail.search.SearchTerm;
 
 /**
  * {@link IMailMessageStorageThreadReferences} - Extends basic folder storage by requesting a mailbox' conversation threads.
@@ -72,9 +78,16 @@ public interface IMailMessageStorageThreadReferences extends IMailMessageStorage
      * Gets the thread references (aka. mail conversations) for specified full name.
      *
      * @param fullName the folder full name
+     * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
+     *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
+     *            range is <code>end - start</code>.
+     * @param sortField The sort field
+     * @param order Whether ascending or descending sort order
+     * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The thread references
      * @throws OXException If an error occurs
      */
-    List<MailThread> getThreadReferences(String fullName) throws OXException;
+    List<MailThread> getThreadReferences(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
 }
