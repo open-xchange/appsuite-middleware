@@ -66,7 +66,7 @@ public interface IMailMessageStorageThreadReferences extends IMailMessageStorage
      * @return <code>true</code> if supported; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    boolean isThreadReferences() throws OXException;
+    boolean isThreadReferencesSupported() throws OXException;
 
     /**
      * Gets the thread references (aka. mail conversations) for specified full name.
