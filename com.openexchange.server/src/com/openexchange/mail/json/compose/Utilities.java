@@ -415,9 +415,6 @@ public enum Utilities {
         if (source.containsUserFlags()) {
             composedMail.addUserFlags(source.getUserFlags());
         }
-        if (source.containsUserFlags()) {
-            composedMail.addUserFlags(source.getUserFlags());
-        }
         if (source.containsHeaders()) {
             composedMail.addHeaders(source.getHeaders());
         }
