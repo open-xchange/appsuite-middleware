@@ -49,6 +49,7 @@
 
 package com.openexchange.http.requestwatcher.internal;
 
+import static com.eaio.util.text.HumanTime.exactly;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Iterator;
@@ -239,7 +240,12 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 }
                 trace.setStackTrace(stackTrace);
             }
-            logBuilder.append("Request with age ").append(ageInfo.sAge).append("ms exceeds max. age of ").append(ageInfo.sMaxAge).append("ms.");
+            try {
+                logBuilder.append("Request with age ").append(ageInfo.sAge).append("ms (").append(exactly(entry.getAge())).append(") exceeds max. age of ").append(ageInfo.sMaxAge).append("ms (").append(exactly(entry.getAge())).append(").") ;
+            } catch (Exception e) {
+                LOG.trace("", e);
+                logBuilder.append("Request with age ").append(ageInfo.sAge).append("ms exceeds max. age of ").append(ageInfo.sMaxAge).append("ms.");
+            }
 
             // Append log properties from the ThreadLocal to logBuilder
             if (false == appendLogProperties(entry, logBuilder)) {
