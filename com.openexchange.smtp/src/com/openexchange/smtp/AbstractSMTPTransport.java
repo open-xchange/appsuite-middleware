@@ -109,6 +109,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAware;
@@ -760,7 +761,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      * @throws OXException If transport fails
      */
     protected MimeMessage transport(MimeMessage smtpMessage, Address[] recipients, javax.mail.Session smtpSession, SMTPConfig smtpConfig) throws OXException {
-        return transport(smtpMessage, recipients, smtpSession, smtpConfig, null);
+        return transport(smtpMessage, recipients, smtpSession, smtpConfig, null, null);
     }
 
     /**
@@ -771,10 +772,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      * @param smtpSession The associated SMTP session
      * @param smtpConfig The associated SMTP configuration
      * @param mtaInfo The optional MTA info to fill
+     * @param securitySettings The optional security settings to consider or <code>null</code>
      * @return The sent MIME message
      * @throws OXException If transport fails
      */
-    protected MimeMessage transport(MimeMessage smtpMessage, Address[] recipients, javax.mail.Session smtpSession, SMTPConfig smtpConfig, MtaStatusInfo mtaInfo) throws OXException {
+    protected MimeMessage transport(MimeMessage smtpMessage, Address[] recipients, javax.mail.Session smtpSession, SMTPConfig smtpConfig, MtaStatusInfo mtaInfo, SecuritySettings securitySettings) throws OXException {
         // Prepare addresses
         prepareAddresses(recipients);
 
@@ -788,7 +790,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             Exception exception = null;
             try {
                 // Check listener chain
-                Result result = listenerChain.onBeforeMessageTransport(messageToSend, session);
+                Result result = listenerChain.onBeforeMessageTransport(messageToSend, securitySettings, session);
 
                 // Examine reply of the listener chain
                 {
@@ -1058,7 +1060,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
 
-            MimeMessage sentMimeMessage = sendMimeMessage(mimeMessage, allRecipients, mtaStatusInfo);
+            MimeMessage sentMimeMessage = sendMimeMessage(mimeMessage, allRecipients, mtaStatusInfo, composedMail.getSecuritySettings());
             return MimeMessageConverter.convertMessage(sentMimeMessage);
         } catch (final MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
@@ -1163,7 +1165,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             throw handleMessagingException(e, smtpConfig);
         }
 
-        MimeMessage sentMimeMessage = sendMimeMessage(smtpMessage, allRecipients, null);
+        MimeMessage sentMimeMessage = sendMimeMessage(smtpMessage, allRecipients, null, null);
         return MimeMessageConverter.convertMessage(sentMimeMessage);
     }
 
@@ -1178,15 +1180,15 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             throw handleMessagingException(e, smtpConfig);
         }
 
-        sendMimeMessage(smtpMessage, allRecipients, null);
+        sendMimeMessage(smtpMessage, allRecipients, null, null);
     }
 
     @Override
     public void sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients) throws OXException {
-        sendMimeMessage(mimeMessage, allRecipients, null);
+        sendMimeMessage(mimeMessage, allRecipients, null, null);
     }
 
-    private MimeMessage sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients, MtaStatusInfo mtaStatusInfo) throws OXException {
+    private MimeMessage sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients, MtaStatusInfo mtaStatusInfo, SecuritySettings securitySettings) throws OXException {
         SMTPConfig smtpConfig = getTransportConfig();
         try {
             // Check recipients
@@ -1203,7 +1205,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             }
 
             // Do the transport
-            return transport(mimeMessage, recipients, getSMTPSession(smtpConfig), smtpConfig, mtaStatusInfo);
+            return transport(mimeMessage, recipients, getSMTPSession(smtpConfig), smtpConfig, mtaStatusInfo, securitySettings);
         } catch (MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
         }
