@@ -64,19 +64,24 @@ import static com.openexchange.chronos.impl.Utils.loadAdditionalEventData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.impl.EventMapper;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -85,6 +90,9 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -98,6 +106,8 @@ public class ConflictChecker {
     private final CalendarSession session;
     private final CalendarStorage storage;
     private final Date today;
+
+    private Map<Integer, Permission> folderPermissions;
 
     /**
      * Initializes a new {@link ConflictChecker}.
@@ -358,6 +368,50 @@ public class ConflictChecker {
             }
         }
         return 0 < conflictingAttendees.size() ? conflictingAttendees : null;
+    }
+
+    private boolean detailsVisible(Event conflictingEvent) throws OXException {
+        int userID = session.getUser().getId();
+        /*
+         * details available if user is creator or attendee
+         */
+        if (conflictingEvent.getCreatedBy() == userID || CalendarUtils.isAttendee(conflictingEvent, userID)) {
+            return true;
+        }
+        /*
+         * no details for non-public events
+         */
+        if (false == Classification.PUBLIC.equals(conflictingEvent.getClassification())) {
+            return false;
+        }
+        /*
+         * details available based on folder permissions
+         */
+        if (0 < conflictingEvent.getPublicFolderId()) {
+            Permission permission = getFolderPermissions().get(Autoboxing.I(conflictingEvent.getPublicFolderId()));
+            return null != permission && Permission.READ_ALL_OBJECTS <= permission.getReadPermission();
+        } else {
+            for (Attendee attendee : conflictingEvent.getAttendees()) {
+                if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
+                    Permission permission = getFolderPermissions().get(Autoboxing.I(attendee.getFolderID()));
+                    if (null != permission && Permission.READ_ALL_OBJECTS <= permission.getReadPermission()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    private Map<Integer, Permission> getFolderPermissions() throws OXException {
+        if (null == folderPermissions) {
+            List<UserizedFolder> folders = Utils.getVisibleFolders(session);
+            folderPermissions = new HashMap<Integer, Permission>(folders.size());
+            for (UserizedFolder folder : folders) {
+                folderPermissions.put(Integer.valueOf(folder.getID()), folder.getOwnPermission());
+            }
+        }
+        return folderPermissions;
     }
 
     /**
