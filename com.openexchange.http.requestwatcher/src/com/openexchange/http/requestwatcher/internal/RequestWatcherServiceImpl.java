@@ -298,7 +298,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         sorted.put(propertyName, value);
                     }
                 }
-                logBuilder.append("Request's properties:").append(lineSeparator);
+                logBuilder.append(" Request's properties:").append(lineSeparator);
 
                 // And add them to the logBuilder
                 Iterator<Entry<String, String>> it = sorted.entrySet().iterator();
@@ -335,7 +335,14 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     } // End of class Watcher
 
-    private static AgeInfo newAgeInfo(long age, int requestMaxAge) {
+    /**
+     * Creates a new age info for given arguments.
+     *
+     * @param age The current age
+     * @param requestMaxAge The age threshold
+     * @return The gae info
+     */
+    protected static AgeInfo newAgeInfo(long age, int requestMaxAge) {
         if (MILLIS_FORMAT_LOCK.tryLock()) {
             try {
                 return new AgeInfo(MILLIS_FORMAT.format(age), MILLIS_FORMAT.format(requestMaxAge));
