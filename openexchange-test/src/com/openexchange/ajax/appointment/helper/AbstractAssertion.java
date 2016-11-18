@@ -124,6 +124,7 @@ public class AbstractAssertion extends Assert {
         update.setParentFolderID(app.getParentFolderID());
         update.setObjectID(app.getObjectID());
         update.setLastModified(app.getLastModified());
+        update.setIgnoreConflicts(app.getIgnoreConflicts());
 
         changes.update(update);
         manager.update(update);
