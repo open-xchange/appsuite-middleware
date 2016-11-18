@@ -58,7 +58,7 @@ import com.openexchange.mail.dataobjects.MailThread;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMailFolderStorageThreadReferences extends IMailFolderStorage {
+public interface IMailFolderStorageThreadReferences extends IMailMessageStorage {
 
     /**
      * Indicates if thread references are supported.
