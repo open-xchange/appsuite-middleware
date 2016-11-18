@@ -65,6 +65,8 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.Period;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -133,9 +135,12 @@ public class HasPerformer extends AbstractQueryPerformer {
                     continue; // skip
                 }
                 if (isSeriesMaster(event)) {
-                    Iterator<Event> occurrences = resolveOccurrences(event, minimumEndTime, maximumStartTime);
-                    while (occurrences.hasNext() && hasEvents == false) {
-                        hasEvents |= isInRange(occurrences.next(), minimumEndTime, maximumStartTime, timeZone);
+                    long duration = event.getEndDate().getTime() - event.getStartDate().getTime();
+                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(event, minimumEndTime, maximumStartTime);
+                    while (iterator.hasNext() && false == hasEvents) {
+                        RecurrenceId recurrenceId = iterator.next();
+                        Period occurence = new Period(new Date(recurrenceId.getValue()), new Date(recurrenceId.getValue() + duration), event.isAllDay());
+                        hasEvents |= isInRange(occurence, minimumEndTime, maximumStartTime, timeZone);
                     }
                 } else {
                     hasEvents |= isInRange(event, minimumEndTime, maximumStartTime, timeZone);

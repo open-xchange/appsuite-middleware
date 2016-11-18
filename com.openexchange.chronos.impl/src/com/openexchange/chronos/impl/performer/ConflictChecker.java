@@ -49,31 +49,39 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
+import static com.openexchange.chronos.impl.Utils.asList;
+import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.isIgnoreConflicts;
-import static com.openexchange.chronos.impl.Utils.isInPast;
+import static com.openexchange.chronos.impl.Utils.loadAdditionalEventData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.Period;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.compat.Recurrence;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.impl.EventConflictImpl;
+import com.openexchange.chronos.impl.EventMapper;
+import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -89,7 +97,7 @@ public class ConflictChecker {
 
     private final CalendarSession session;
     private final CalendarStorage storage;
-    private final Date now;
+    private final Date today;
 
     /**
      * Initializes a new {@link ConflictChecker}.
@@ -101,114 +109,298 @@ public class ConflictChecker {
         super();
         this.session = session;
         this.storage = storage;
-        this.now = new Date();
+        this.today = truncateTime(new Date(), getTimeZone(session));
     }
 
+    /**
+     * Checks for conflicts.
+     *
+     * @param event The event being inserted/updated
+     * @param attendees The event's list of attendees
+     * @return The conflicts, or an empty list if there are none
+     */
     public List<EventConflict> checkConflicts(Event event, List<Attendee> attendees) throws OXException {
-        if (isInPast(event, truncateTime(now, TimeZones.UTC), getTimeZone(session))) {
-            return Collections.emptyList();
-        }
-        List<Attendee> checkedAttendees = new ArrayList<Attendee>();
-        checkedAttendees.addAll(filter(attendees, Boolean.TRUE, CalendarUserType.RESOURCE));
-        if (false == isIgnoreConflicts(session) && (false == event.containsTransp() || false == TimeTransparency.TRANSPARENT.equals(event.getTransp()))) {
-            checkedAttendees.addAll(filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL));
-        }
-        if (0 == checkedAttendees.size()) {
-            return Collections.emptyList();
-        }
-        TimeZone eventTimeZone = CalendarUtils.isFloating(event) ? getTimeZone(session) : TimeZone.getTimeZone(event.getTimeZone());
-        Date from;
-        Date until;
-        if (isSeriesMaster(event)) {
-            Period period = Recurrence.getImplicitSeriesPeriod(new DefaultRecurrenceData(event), new Period(event));
-            from = period.getStartDate();
-            until = period.getEndDate();
-        } else {
-            //TODO: more clever expansion of queried range; need to ensure that floating events are matched by query
-            from = new Date(event.getStartDate().getTime() - 86400000L);
-            until = new Date(event.getEndDate().getTime() + 86400000L);
-        }
-        if (until.before(truncateTime(now, TimeZones.UTC))) {
-            // TODO: com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries fails, otherwise
+        /*
+         * check which attendees need to be checked
+         */
+        List<Attendee> attendeesToCheck = getAttendeesToCheck(event, attendees);
+        if (attendeesToCheck.isEmpty()) {
             return Collections.emptyList();
         }
         /*
-         * get potentially conflicting events from storage & resolve occurrences
+         * get conflicts for series or regular event
          */
-        List<Event> conflictingEvents = storage.getEventStorage().searchOverlappingEvents(from, until, checkedAttendees, false, null, null);
-        List<Event> checkedEvents = new ArrayList<Event>(conflictingEvents.size());
-        for (Event conflictingEvent : conflictingEvents) {
-            if (event.getId() == conflictingEvent.getId()) {
-                continue;
-            }
-            conflictingEvent.setAttendees(storage.getAttendeeStorage().loadAttendees(conflictingEvent.getId()));
-            if (isSeriesMaster(conflictingEvent)) {
-                //TODO
-                //                Calendar startCalendar = CalendarUtils.initCalendar(eventTimeZone, from);
-                //                Calendar endCalendar = CalendarUtils.initCalendar(eventTimeZone, until);
-                //                Iterator<Event> occurrencesIterator = Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(conflictingEvent, startCalendar, endCalendar, null, null);
-                //                while (occurrencesIterator.hasNext()) {
-                //                    checkedEvents.add(occurrencesIterator.next());
-                //                }
-            } else {
-                checkedEvents.add(conflictingEvent);
-            }
-        }
-        /*
-         * check against created/updated event
-         */
-        if (isSeriesMaster(event)) {
-            List<EventConflict> conflicts = new ArrayList<EventConflict>();
-            //TODO
-            //            Calendar startCalendar = CalendarUtils.initCalendar(eventTimeZone, from);
-            //            Calendar endCalendar = CalendarUtils.initCalendar(eventTimeZone, until);
-            //            Iterator<Event> occurrencesIterator = Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(event, startCalendar, endCalendar, null, null);
-            //            while (occurrencesIterator.hasNext()) {
-            //                conflicts.addAll(getConflicts(occurrencesIterator.next(), checkedAttendees, conflictingEvents));
-            //            }
-            return conflicts;
-        }
-        return getConflicts(event, checkedAttendees, conflictingEvents);
+        return isSeriesMaster(event) ? getSeriesConflicts(event, attendeesToCheck) : getEventConflicts(event, attendeesToCheck);
     }
 
-    private List<EventConflict> getConflicts(Event event, List<Attendee> attendees, List<Event> conflictingEvents) throws OXException {
-
-        TimeZone timeZone = getTimeZone(session);
+    /**
+     * Checks for conflicts for a single, non recurring event (or a single exception event of a series).
+     *
+     * @param event The event being inserted/updated
+     * @param attendeesToCheck The attendees to check
+     * @return The conflicts, or an empty list if there are none
+     */
+    private List<EventConflict> getEventConflicts(Event event, List<Attendee> attendeesToCheck) throws OXException {
+        /*
+         * derive checked period (+/- one day to cover floating events in different timezone)
+         */
+        Date until = new Date(event.getEndDate().getTime() + 86400000);
+        if (today.after(until)) {
+            return Collections.emptyList();
+        }
+        Date from = new Date(event.getStartDate().getTime() - 86400000);
+        /*
+         * search for potentially conflicting events in period
+         */
+        List<Event> eventsInPeriod = getOverlappingEvents(from, until, attendeesToCheck);
+        if (eventsInPeriod.isEmpty()) {
+            return Collections.emptyList();
+        }
+        /*
+         * check against each event in period
+         */
+        TimeZone eventTimeZone = isFloating(event) || null == event.getTimeZone() ? getTimeZone(session) : TimeZone.getTimeZone(event.getTimeZone());
         List<EventConflict> conflicts = new ArrayList<EventConflict>();
-
-        Period period = new Period(event);
-        for (Event conflictingEvent : conflictingEvents) {
-            if (event.getId() == conflictingEvent.getId()) {
+        for (Event eventInPeriod : eventsInPeriod) {
+            if (eventInPeriod.getId() == event.getId()) {
                 continue;
             }
-            if (isInRange(conflictingEvent, period.getStartDate(), period.getEndDate(), timeZone)) {
-                List<Attendee> conflictingAttendees = new ArrayList<Attendee>();
-                List<Attendee> allAttendees = conflictingEvent.containsAttendees() ? conflictingEvent.getAttendees() : storage.getAttendeeStorage().loadAttendees(conflictingEvent.getId());
-                for (Attendee checkedAttendee : attendees) {
-                    Attendee matchingAttendee = find(allAttendees, checkedAttendee);
-                    if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
-                        conflictingAttendees.add(matchingAttendee);
+            /*
+             * determine intersecting attendees
+             */
+            List<Attendee> conflictingAttendees = getConflictingAttendees(attendeesToCheck, eventInPeriod);
+            if (null == conflictingAttendees || 0 == conflictingAttendees.size()) {
+                continue;
+            }
+            boolean hardConflict = isHardConflict(eventInPeriod, conflictingAttendees);
+            if (isSeriesMaster(eventInPeriod)) {
+                /*
+                 * expand & check all occurrences of event series in period
+                 */
+                long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
+                Iterator<RecurrenceId> iterator = Services.getService(RecurrenceService.class)
+                    .getRecurrenceIterator(eventInPeriod, initCalendar(TimeZones.UTC, from), initCalendar(TimeZones.UTC, until), false);
+                while (iterator.hasNext()) {
+                    RecurrenceId recurrenceId = iterator.next();
+                    if (event.getStartDate().getTime() < recurrenceId.getValue() + duration && event.getEndDate().getTime() > recurrenceId.getValue()) {
+                        /*
+                         * add conflict for occurrence
+                         */
+                        conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict));
                     }
                 }
-                if (0 < conflictingAttendees.size()) {
-                    conflictingEvent.setAttendees(allAttendees);
-                    int folderID = conflictingEvent.getPublicFolderId();
-                    Attendee userAttendee = find(allAttendees, session.getUser().getId());
-                    if (null != userAttendee && 0 < userAttendee.getFolderID()) {
-                        folderID = userAttendee.getFolderID();
-                    }
-                    //TODO: check further possible parent folder candidates, anonymize if not visible
-                    UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), conflictingEvent, folderID, null);
-                    conflicts.add(new EventConflictImpl(userizedEvent, conflictingAttendees, isHardConflict(conflictingEvent, conflictingAttendees)));
+            } else {
+                if (isInRange(eventInPeriod, event, eventTimeZone)) {
+                    //                if (event.getStartDate().getTime() < eventInPeriod.getEndDate().getTime() && event.getEndDate().getTime() > eventInPeriod.getStartDate().getTime()) {
+                    /*
+                     * add conflict
+                     */
+                    conflicts.add(getEventConflict(eventInPeriod, conflictingAttendees, hardConflict));
                 }
             }
         }
         return conflicts;
     }
 
+    /**
+     * Checks for conflicts for a recurring event, considering every occurrence of the series.
+     *
+     * @param masterEvent The series master event being inserted/updated
+     * @param attendeesToCheck The attendees to check
+     * @return The conflicts, or an empty list if there are none
+     */
+    private List<EventConflict> getSeriesConflicts(Event masterEvent, List<Attendee> attendeesToCheck) throws OXException {
+        /*
+         * resolve occurrences for event series & derive checked period
+         */
+        List<RecurrenceId> eventRecurrenceIds = asList(Services.getService(RecurrenceService.class)
+            .getRecurrenceIterator(masterEvent, initCalendar(TimeZones.UTC, today), null, false));
+        if (0 == eventRecurrenceIds.size()) {
+            return Collections.emptyList();
+        }
+        long masterEventDuration = masterEvent.getEndDate().getTime() - masterEvent.getStartDate().getTime();
+        Date until = new Date(eventRecurrenceIds.get(eventRecurrenceIds.size() - 1).getValue() + masterEventDuration);
+        if (today.after(until)) {
+            return Collections.emptyList();
+        }
+        Date from = new Date(eventRecurrenceIds.get(0).getValue());
+        /*
+         * search for potentially conflicting events in period
+         */
+        List<Event> eventsInPeriod = getOverlappingEvents(from, until, attendeesToCheck);
+        if (eventsInPeriod.isEmpty()) {
+            return Collections.emptyList();
+        }
+        /*
+         * check against each event in period
+         */
+        List<EventConflict> conflicts = new ArrayList<EventConflict>();
+        for (Event eventInPeriod : eventsInPeriod) {
+            if (eventInPeriod.getId() == masterEvent.getId()) {
+                continue;
+            }
+            /*
+             * determine intersecting attendees
+             */
+            List<Attendee> conflictingAttendees = getConflictingAttendees(attendeesToCheck, eventInPeriod);
+            if (null == conflictingAttendees || 0 == conflictingAttendees.size()) {
+                continue;
+            }
+            boolean hardConflict = isHardConflict(eventInPeriod, conflictingAttendees);
+            if (isSeriesMaster(eventInPeriod)) {
+                /*
+                 * expand & check all occurrences of event series in period
+                 */
+                long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
+                Iterator<RecurrenceId> iterator = Services.getService(RecurrenceService.class)
+                    .getRecurrenceIterator(eventInPeriod, initCalendar(TimeZones.UTC, from), initCalendar(TimeZones.UTC, until), false);
+                while (iterator.hasNext()) {
+                    RecurrenceId recurrenceId = iterator.next();
+                    for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
+                        if (eventRecurrenceId.getValue() >= recurrenceId.getValue() + duration) {
+                            /*
+                             * further occurrences are also "after" the checked event occurrence
+                             */
+                            break;
+                        } else if (eventRecurrenceId.getValue() + masterEventDuration > recurrenceId.getValue()) {
+                            /*
+                             * add conflict for occurrence
+                             */
+                            conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict));
+                        }
+                    }
+                }
+            } else {
+                for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
+                    if (eventRecurrenceId.getValue() >= eventInPeriod.getEndDate().getTime()) {
+                        /*
+                         * further occurrences are also "after" the checked event
+                         */
+                        break;
+                    } else if (eventRecurrenceId.getValue() + masterEventDuration > eventInPeriod.getStartDate().getTime()) {
+                        /*
+                         * add conflict
+                         */
+                        conflicts.add(getEventConflict(eventInPeriod, conflictingAttendees, hardConflict));
+                    }
+                }
+            }
+        }
+        return conflicts;
+    }
+
+    /**
+     * Creates an event conflict for a single event.
+     *
+     * @param event The conflicting event
+     * @param conflictingAttendees The conflicting attendees to apply
+     * @param hardConflict <code>true</code> to mark as <i>hard</i> conflict, <code>false</code>, otherwise
+     * @return The event conflict
+     */
+    private EventConflict getEventConflict(Event event, List<Attendee> conflictingAttendees, boolean hardConflict) throws OXException {
+        Event eventData = new Event();
+        EventMapper.getInstance().copy(event, eventData, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.ALL_DAY, EventField.ID, EventField.CREATED_BY, EventField.SUMMARY, EventField.LOCATION);
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), eventData);
+        return new EventConflictImpl(userizedEvent, conflictingAttendees, hardConflict);
+    }
+
+    /**
+     * Creates an event conflict for a specific occurrence of an event series.
+     *
+     * @param seriesMaster The series master event of the conflicting occurrence
+     * @param recurrenceId The recurrence identifier of the conflicting occurrence
+     * @param conflictingAttendees The conflicting attendees to apply
+     * @param hardConflict <code>true</code> to mark as <i>hard</i> conflict, <code>false</code>, otherwise
+     * @return The event conflict
+     */
+    private EventConflict getSeriesConflict(Event seriesMaster, RecurrenceId recurrenceId, List<Attendee> conflictingAttendees, boolean hardConflict) throws OXException {
+        Event eventData = new Event();
+        EventMapper.getInstance().copy(seriesMaster, eventData, EventField.TRANSP, EventField.ALL_DAY, EventField.ID, EventField.CREATED_BY, EventField.SUMMARY, EventField.LOCATION);
+        eventData.setStartDate(new Date(recurrenceId.getValue()));
+        eventData.setEndDate(new Date(recurrenceId.getValue() + (seriesMaster.getEndDate().getTime() - seriesMaster.getStartDate().getTime())));
+        eventData.setRecurrenceId(recurrenceId);
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), eventData);
+        return new EventConflictImpl(userizedEvent, conflictingAttendees, hardConflict);
+    }
+
+    /**
+     * Gets a list of potentially conflicting events within a specific period where at least one of the checked attendees participate in.
+     *
+     * @param from The start date of the period
+     * @param until The end date of the period
+     * @param attendeesToCheck The attendees to check
+     * @return The overlapping events of the attendees, or an empty list if there are none
+     */
+    private List<Event> getOverlappingEvents(Date from, Date until, List<Attendee> attendeesToCheck) throws OXException {
+        EventField[] fields = getFields(new EventField[] { EventField.TRANSP, EventField.SUMMARY });
+        List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(from, until, attendeesToCheck, false, null, fields);
+        if (0 == eventsInPeriod.size()) {
+            return Collections.emptyList();
+        }
+        return loadAdditionalEventData(storage, eventsInPeriod, new EventField[] { EventField.ATTENDEES });
+    }
+
+    /**
+     * Gets those attendees of a conflicting event that are actually part of the current conflict check, and do not have a participation
+     * status of {@link ParticipationStatus#DECLINED}.
+     *
+     * @param checkedAttendees The attendees where conflicts are checked for
+     * @param conflictingEvent The conflicting event
+     * @return The conflicting attendees, i.e. those checked attendees that also attend the conflicting event
+     */
+    private List<Attendee> getConflictingAttendees(List<Attendee> checkedAttendees, Event conflictingEvent) throws OXException {
+        List<Attendee> conflictingAttendees = new ArrayList<Attendee>();
+        List<Attendee> allAttendees = conflictingEvent.containsAttendees() ? conflictingEvent.getAttendees() : storage.getAttendeeStorage().loadAttendees(conflictingEvent.getId());
+        for (Attendee checkedAttendee : checkedAttendees) {
+            Attendee matchingAttendee = find(allAttendees, checkedAttendee);
+            if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
+                conflictingAttendees.add(matchingAttendee);
+            }
+        }
+        return 0 < conflictingAttendees.size() ? conflictingAttendees : null;
+    }
+
+    /**
+     * Determines which attendees should be included in the conflict check during inserting/updating a certain event.
+     * <ul>
+     * <li>events marked as {@link Transp#TRANSPARENT} are never checked</li>
+     * <li><i>hard</i>-conflicting attendees are always checked, while other internal attendees are included based on
+     * {@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}.</li>
+     * </ul>
+     *
+     * @param event The event being inserted/updated
+     * @param attendees The event's list of attendees
+     * @return <code>true</code> if the event is in the past, <code>false</code>, otherwise
+     */
+    private List<Attendee> getAttendeesToCheck(Event event, List<Attendee> attendees) throws OXException {
+        if (event.containsTransp() && TimeTransparency.TRANSPARENT.equals(event.getTransp())) {
+            return Collections.emptyList();
+        }
+        boolean includeUserAttendees = false == isIgnoreConflicts(session);
+        List<Attendee> checkedAttendees = new ArrayList<Attendee>();
+        for (Attendee attendee : attendees) {
+            if (isInternal(attendee)) {
+                switch (attendee.getCuType()) {
+                    case RESOURCE:
+                    case ROOM:
+                        checkedAttendees.add(attendee);
+                        break;
+                    case INDIVIDUAL:
+                        if (includeUserAttendees) {
+                            checkedAttendees.add(attendee);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return checkedAttendees;
+    }
+
     private static boolean isHardConflict(Event conflictingEvent, List<Attendee> conflictingAttendees) {
         for (Attendee attendee : conflictingAttendees) {
-            if (CalendarUserType.RESOURCE.equals(attendee.getCuType())) {
+            if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
                 return true;
             }
         }

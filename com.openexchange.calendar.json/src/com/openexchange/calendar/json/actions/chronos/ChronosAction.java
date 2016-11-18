@@ -71,6 +71,7 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.calendar.json.actions.AppointmentAction;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
@@ -82,6 +83,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject.Marker;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -218,6 +222,14 @@ public abstract class ChronosAction extends AppointmentAction {
             CalendarDataObject appointment = getEventConverter().getAppointment(session, conflict.getConflictingEvent());
             if (conflict.isHardConflict()) {
                 appointment.setHardConflict();
+            }
+            if (null != conflict.getConflictingAttendees()) {
+                List<Participant> participants = new ArrayList<Participant>();
+                for (Attendee attendee : conflict.getConflictingAttendees()) {
+                    getEventConverter().convertAttendee(attendee, participants, new ArrayList<UserParticipant>(), new ArrayList<ConfirmableParticipant>());
+                }
+                appointment.setParticipants(participants);
+                appointment.setConfirmations(new ConfirmableParticipant[0]);
             }
             appointmentWriter.writeAppointment(appointment, jsonObject);
             jsonArray.put(jsonObject);

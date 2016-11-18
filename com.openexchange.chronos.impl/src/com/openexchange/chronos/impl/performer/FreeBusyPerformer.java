@@ -52,7 +52,9 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.getFields;
+import static com.openexchange.chronos.impl.Utils.getVisibleFolders;
 import static com.openexchange.chronos.impl.Utils.i;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,10 +68,8 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.DataAwareRecurrenceId;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.impl.EventMapper;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -131,38 +131,57 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
          * search (potentially) overlapping events for the attendees
          */
         EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
-        List<Event> events = storage.getEventStorage().searchOverlappingEvents(from, until, attendees, true, new SortOptions(session), fields);
-        if (0 == events.size()) {
+        List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(from, until, attendees, true, new SortOptions(session), fields);
+        if (0 == eventsInPeriod.size()) {
             return Collections.emptyMap();
         }
-        readAdditionalEventData(events, new EventField[] { EventField.ATTENDEES });
-        List<UserizedFolder> visibleFolders = Utils.getVisibleFolders(session);
+        readAdditionalEventData(eventsInPeriod, new EventField[] { EventField.ATTENDEES });
+        List<UserizedFolder> visibleFolders = getVisibleFolders(session);
         /*
          * step through events & build free/busy per requested attendee
          */
         Map<Attendee, List<UserizedEvent>> eventsPerAttendee = new HashMap<Attendee, List<UserizedEvent>>(attendees.size());
-        for (Event event : events) {
+        for (Event eventInPeriod : eventsInPeriod) {
             for (Attendee attendee : attendees) {
-                Attendee eventAttendee = find(event.getAttendees(), attendee);
+                Attendee eventAttendee = find(eventInPeriod.getAttendees(), attendee);
                 if (null == eventAttendee || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
                     continue;
                 }
                 // TODO: com.openexchange.ajax.appointment.FreeBusyTest.testResourceParticipantStatusFree() still expects 0 for resource attendee
-                int folderID = chooseFolderID(event, visibleFolders);
-                if (isSeriesMaster(event)) {
-                    DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
-                    Iterator<Event> iterator = resolveOccurrences(event, from, until);
+                //                int folderID = chooseFolderID(eventInPeriod, visibleFolders);
+                int folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod, visibleFolders) : -1;
+                if (isSeriesMaster(eventInPeriod)) {
+                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
                     while (iterator.hasNext()) {
-                        Event occurrence = iterator.next();
-                        occurrence.setRecurrenceId(new DataAwareRecurrenceId(recurrenceData, occurrence.getRecurrenceId().getValue()));
-                        com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, getResultingEvent(event, folderID));
+                        com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
                     }
                 } else {
-                    com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, getResultingEvent(event, folderID));
+                    com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, getResultingEvent(eventInPeriod, folderID));
                 }
             }
         }
         return eventsPerAttendee;
+    }
+
+    /**
+     * Gets a resulting userized event occurrence for the free/busy result based on the supplied data of the master event. Only a subset
+     * of properties is copied over, and a folder identifier is applied optionally, depending on the user's access permissions for the
+     * actual event data.
+     *
+     * @param masterEvent The event data to get the result for
+     * @param recurrenceId The recurrence identifier of the occurrence
+     * @param folderID The folder identifier representing the user's view on the event, or <code>-1</code> if not accessible in any folder
+     * @return The resulting event occurrence representing the free/busy slot
+     */
+    private UserizedEvent getResultingOccurrence(Event masterEvent, RecurrenceId recurrenceId, int folderID) throws OXException {
+        UserizedEvent userizedEvent = getResultingEvent(masterEvent, folderID);
+        userizedEvent.getEvent().setRecurrenceRule(null);
+        userizedEvent.getEvent().removeSeriesId();
+        userizedEvent.getEvent().removeClassification();
+        userizedEvent.getEvent().setRecurrenceId(recurrenceId);
+        userizedEvent.getEvent().setStartDate(new Date(recurrenceId.getValue()));
+        userizedEvent.getEvent().setEndDate(new Date(recurrenceId.getValue() + (masterEvent.getStartDate().getTime() - masterEvent.getEndDate().getTime())));
+        return userizedEvent;
     }
 
     /**
@@ -177,7 +196,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
         Event resultingEvent = new Event();
         if (0 < folderID) {
             EventMapper.getInstance().copy(event, resultingEvent, FREEBUSY_FIELDS);
-            return Utils.anonymizeIfNeeded(new UserizedEvent(session.getSession(), resultingEvent, folderID, null));
+            return anonymizeIfNeeded(new UserizedEvent(session.getSession(), resultingEvent, folderID, null));
         } else {
             EventMapper.getInstance().copy(event, resultingEvent, RESTRICTED_FREEBUSY_FIELDS);
             return new UserizedEvent(session.getSession(), resultingEvent);

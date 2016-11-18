@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -73,7 +72,6 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -85,13 +83,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -188,32 +186,11 @@ public abstract class AbstractQueryPerformer {
     }
 
     protected List<Event> readAdditionalEventData(List<Event> events, EventField[] fields) throws OXException {
-        if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS))) {
-            int[] objectIDs = getObjectIDs(events);
-            if (null == fields || contains(fields, EventField.ATTENDEES)) {
-                Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
-                for (Event event : events) {
-                    event.setAttendees(attendeesById.get(I(event.getId())));
-                }
-            }
-            if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
-                Map<Integer, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
-                for (Event event : events) {
-                    event.setAttachments(attachmentsById.get(I(event.getId())));
-                }
-            }
-        }
-        return events;
+        return Utils.loadAdditionalEventData(storage, events, fields);
     }
 
     protected Event readAdditionalEventData(Event event, EventField[] fields) throws OXException {
-        if (null != event && (null == fields || contains(fields, EventField.ATTENDEES))) {
-            event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
-        }
-        if (null != event && (null == fields || contains(fields, EventField.ATTACHMENTS))) {
-            event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
-        }
-        return event;
+        return Utils.loadAdditionalEventData(storage, event, fields);
     }
 
     protected Iterator<Event> resolveOccurrences(Event masterEvent, Date from, Date until) throws OXException {
@@ -224,11 +201,20 @@ public abstract class AbstractQueryPerformer {
         //        return Services.getService(RecurrenceService.class).calculateInstances(masterEvent, fromCalendar, untilCalendar, null);
     }
 
-    protected Iterator<RecurrenceId> getRecurrenceIterator(Event masterEvent, Date from, Date until, Integer limit) throws OXException {
+    /**
+     * Gets a recurrence iterator for the supplied series master event, iterating over the recurrence identifiers of the event. Any change-
+     * and delete exceptions (as per {@link Event#getChangeExceptionDates()} and Event#getDeleteExceptionDates()} are skipped implicitly).
+     *
+     * @param masterEvent The recurring event master
+     * @param from The start of the iteration interval, or <code>null</code> to start with the first occurrence
+     * @param until The end of the iteration interval, or <code>null</code> to iterate until the last occurrence
+     * @return The recurrence iterator
+     */
+    protected Iterator<RecurrenceId> getRecurrenceIterator(Event masterEvent, Date from, Date until) throws OXException {
         TimeZone timeZone = getTimeZone(session);
         Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
         Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
-        return Services.getService(RecurrenceService.class).getRecurrenceIterator(masterEvent, fromCalendar, untilCalendar, limit, true);
+        return Services.getService(RecurrenceService.class).getRecurrenceIterator(masterEvent, fromCalendar, untilCalendar, true);
     }
 
     protected List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder, boolean includePrivate) throws OXException {

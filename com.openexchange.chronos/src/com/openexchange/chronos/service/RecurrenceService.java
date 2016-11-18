@@ -109,6 +109,6 @@ public interface RecurrenceService {
      */
     public int calculateRecurrencePosition(Event master, Calendar datePosition);
 
-    Iterator<RecurrenceId> getRecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException;
+    Iterator<RecurrenceId> getRecurrenceIterator(Event master, Calendar start, Calendar end, boolean ignoreExceptions) throws OXException;
 
 }

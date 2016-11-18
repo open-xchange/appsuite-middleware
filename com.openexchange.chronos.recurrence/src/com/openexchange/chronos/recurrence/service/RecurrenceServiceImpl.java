@@ -143,8 +143,8 @@ public class RecurrenceServiceImpl implements RecurrenceService {
     }
 
     @Override
-    public Iterator<RecurrenceId> getRecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        return new RecurrenceIdIterator(master, start, end, limit, ignoreExceptions);
+    public Iterator<RecurrenceId> getRecurrenceIterator(Event master, Calendar start, Calendar end, boolean ignoreExceptions) throws OXException {
+        return new RecurrenceIdIterator(master, start, end, null, ignoreExceptions);
     }
 
 }

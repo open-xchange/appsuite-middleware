@@ -836,7 +836,7 @@ public class EventConverter {
         return pattern;
     }
 
-    private static void convertAttendee(Attendee attendee, List<Participant> participants, List<UserParticipant> users, List<ConfirmableParticipant> confirmations) {
+    public void convertAttendee(Attendee attendee, List<Participant> participants, List<UserParticipant> users, List<ConfirmableParticipant> confirmations) {
         if (null == attendee.getCuType()) {
             return;
         }

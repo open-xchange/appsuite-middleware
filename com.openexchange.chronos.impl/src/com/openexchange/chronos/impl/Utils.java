@@ -50,9 +50,11 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.arrays.Arrays.contains;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,9 +63,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -79,6 +85,7 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UserizedEvent;
+import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -545,7 +552,7 @@ public class Utils {
      * Gets a value indicating whether an event lies in the past or not, i.e. it's end-time is before the <i>current</i> time.
      * <p/>
      * For event series, the recurrence rule's <code>UNTIL</code>- and <code>COUNT</code>-parameters are evaluated accordingly; for
-     * <i>never-ending</i> event series, this method always returns <code>false</code>;
+     * <i>never-ending</i> event series, this method always returns <code>false</code>.
      *
      * @param event The event to check
      * @param now The date to consider as <i>now</i> in the comparison
@@ -590,6 +597,73 @@ public class Utils {
             }
             throw e;
         }
+    }
+
+    /**
+     * Loads additional event data from the storage, based on the requested fields. This currently includes
+     * <ul>
+     * <li>{@link EventField#ATTENDEES}</li>
+     * <li>{@link EventField#ATTACHMENTS}</li>
+     * </ul>
+     *
+     * @param storage A reference to the calendar storage to use
+     * @param events The events to load additional data for
+     * @param fields The requested fields, or <code>null</code> to assume all fields are requested
+     * @return The events, enriched by the additionally loaded data
+     */
+    public static List<Event> loadAdditionalEventData(CalendarStorage storage, List<Event> events, EventField[] fields) throws OXException {
+        if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS))) {
+            int[] objectIDs = getObjectIDs(events);
+            if (null == fields || contains(fields, EventField.ATTENDEES)) {
+                Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
+                for (Event event : events) {
+                    event.setAttendees(attendeesById.get(I(event.getId())));
+                }
+            }
+            if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
+                Map<Integer, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
+                for (Event event : events) {
+                    event.setAttachments(attachmentsById.get(I(event.getId())));
+                }
+            }
+        }
+        return events;
+    }
+
+    /**
+     * Loads additional event data from the storage, based on the requested fields. This currently includes
+     * <ul>
+     * <li>{@link EventField#ATTENDEES}</li>
+     * <li>{@link EventField#ATTACHMENTS}</li>
+     * </ul>
+     *
+     * @param storage A reference to the calendar storage to use
+     * @param event The event to load additional data for
+     * @param fields The requested fields, or <code>null</code> to assume all fields are requested
+     * @return The event, enriched by the additionally loaded data
+     */
+    public static Event loadAdditionalEventData(CalendarStorage storage, Event event, EventField[] fields) throws OXException {
+        if (null != event && (null == fields || contains(fields, EventField.ATTENDEES))) {
+            event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
+        }
+        if (null != event && (null == fields || contains(fields, EventField.ATTACHMENTS))) {
+            event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
+        }
+        return event;
+    }
+
+    /**
+     * Gets a list containing all elements provided by the supplied iterator.
+     *
+     * @param itrerator The iterator to get the list for
+     * @return The list
+     */
+    public static <T> List<T> asList(Iterator<T> itrerator) {
+        List<T> list = new ArrayList<T>();
+        while (itrerator.hasNext()) {
+            list.add(itrerator.next());
+        }
+        return list;
     }
 
     public static List<UserizedFolder> getVisibleFolders(CalendarSession session) throws OXException {
