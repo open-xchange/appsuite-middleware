@@ -68,8 +68,8 @@ public class MobileNotifierLifecycleTest extends AbstractAJAXSession {
      * Initializes a new {@link MobileNotifierLifecycleTest}.
      * @param name
      */
-    public MobileNotifierLifecycleTest(String name) {
-        super(name);
+    public MobileNotifierLifecycleTest() {
+        super();
     }
 
     public void testSubscriptionLifecycle() throws Exception {

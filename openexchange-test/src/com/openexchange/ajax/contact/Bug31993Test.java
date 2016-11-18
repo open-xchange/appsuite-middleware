@@ -66,8 +66,8 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug31993Test extends AbstractManagedContactTest {
 
-    public Bug31993Test(String name) {
-        super(name);
+    public Bug31993Test() {
+        super();
     }
 
 	@Override

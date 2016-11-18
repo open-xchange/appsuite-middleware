@@ -67,8 +67,8 @@ public class GetQuotaTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public GetQuotaTest(String name) {
-        super(name);
+    public GetQuotaTest() {
+        super();
     }
 
     public void testGetQuota() throws Exception {

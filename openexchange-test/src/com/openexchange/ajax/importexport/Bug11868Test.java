@@ -78,8 +78,8 @@ public final class Bug11868Test extends AbstractAJAXSession {
     /**
      * @param name
      */
-    public Bug11868Test(final String name) {
-        super(name);
+    public Bug11868Test() {
+        super();
     }
 
     /**

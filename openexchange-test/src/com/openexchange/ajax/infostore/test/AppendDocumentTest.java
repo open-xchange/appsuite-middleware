@@ -79,8 +79,8 @@ public class AppendDocumentTest extends AbstractInfostoreTest {
      *
      * @param name The test name
      */
-    public AppendDocumentTest(String name) {
-        super(name);
+    public AppendDocumentTest() {
+        super();
     }
 
     @Test

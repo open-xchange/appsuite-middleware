@@ -59,7 +59,7 @@ import com.openexchange.groupware.tasks.TestTask;
 public class TaskRecurrenceTest extends AbstractTaskTestForAJAXClient {
 
     public TaskRecurrenceTest(String name) {
-        super(name);
+        super();
     }
 
     /* unlimited recurrences */

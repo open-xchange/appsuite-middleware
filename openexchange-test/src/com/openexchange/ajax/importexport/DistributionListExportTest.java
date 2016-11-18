@@ -63,8 +63,8 @@ import com.openexchange.groupware.importexport.csv.CSVParser;
 
 public class DistributionListExportTest extends AbstractManagedContactTest {
 
-	public DistributionListExportTest(String name) {
-		super(name);
+	public DistributionListExportTest() {
+		super();
 	}
 
 	public void testCsvDistributionListsAreExported () throws OXException, IOException, JSONException {

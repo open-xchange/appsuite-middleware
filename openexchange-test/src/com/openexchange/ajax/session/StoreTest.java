@@ -63,8 +63,8 @@ import com.openexchange.groupware.calendar.TimeTools;
  */
 public class StoreTest extends AbstractSimpleClientTest{
 
-    public StoreTest(String name) {
-        super(name);
+    public StoreTest() {
+        super();
     }
 
     public void testStoreStoresSessionInCookie() throws Exception {

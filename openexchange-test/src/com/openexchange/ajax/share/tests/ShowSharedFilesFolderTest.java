@@ -75,8 +75,8 @@ public class ShowSharedFilesFolderTest extends ShareTest {
     private File file;
     private ExtendedPermissionEntity guest;
 
-    public ShowSharedFilesFolderTest(String name) {
-        super(name);
+    public ShowSharedFilesFolderTest() {
+        super();
     }
 
     @Override

@@ -81,8 +81,8 @@ public abstract class ReminderTest extends AbstractAJAXTest {
 
     private static final String REMINDER_URL = "/ajax/reminder";
 
-    public ReminderTest(final String name) {
-        super(name);
+    public ReminderTest() {
+        super();
     }
 
     /**

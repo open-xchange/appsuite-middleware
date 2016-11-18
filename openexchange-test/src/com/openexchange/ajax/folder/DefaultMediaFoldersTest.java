@@ -88,8 +88,8 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
     /**
      * Initializes a new {@link DefaultMediaFoldersTest}.
      */
-    public DefaultMediaFoldersTest(String name) {
-        super(name);
+    public DefaultMediaFoldersTest() {
+        super();
         folders = new int[4];
         types = new int[4];
     }

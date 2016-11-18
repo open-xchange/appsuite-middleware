@@ -68,8 +68,8 @@ public final class ListTest extends AbstractSpellCheckTest {
 	 *
 	 * @param name
 	 */
-	public ListTest(final String name) {
-		super(name);
+	public ListTest() {
+		super();
 	}
 
 	/**

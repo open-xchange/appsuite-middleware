@@ -85,8 +85,8 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
      * Initializes a new {@link DeleteMultipleFilesTest}.
      * @param name
      */
-    public DeleteMultipleFilesTest(final String name) {
-        super(name);
+    public DeleteMultipleFilesTest() {
+        super();
 
     }
 

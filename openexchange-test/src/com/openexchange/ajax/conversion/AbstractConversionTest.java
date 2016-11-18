@@ -68,8 +68,8 @@ public abstract class AbstractConversionTest extends AbstractAJAXSession {
 	 * Initializes a new {@link AbstractConversionTest}
 	 * @param name
 	 */
-	public AbstractConversionTest(final String name) {
-		super(name);
+	public AbstractConversionTest() {
+		super();
 	}
 
 	/**

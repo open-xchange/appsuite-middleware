@@ -81,7 +81,7 @@ public final class MailMessageSerializationTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailMessageSerializationTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public void testMailSerialization() {

@@ -12,8 +12,8 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class DeleteTest extends AttachmentTest {
 
-	public DeleteTest(final String name) {
-		super(name);
+	public DeleteTest() {
+		super();
 	}
 
 	public void testDeleteAttachment() throws Exception {

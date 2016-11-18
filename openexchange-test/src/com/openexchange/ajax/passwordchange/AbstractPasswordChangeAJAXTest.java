@@ -70,8 +70,8 @@ public abstract class AbstractPasswordChangeAJAXTest extends AbstractAJAXSession
 	 * @param name
 	 *            name of the test.
 	 */
-	protected AbstractPasswordChangeAJAXTest(final String name) {
-		super(name);
+	protected AbstractPasswordChangeAJAXTest() {
+		super();
 	}
 
 	/**

@@ -63,7 +63,7 @@ public final class ParseCookiesTest extends TestCase {
      * @param name
      */
     public ParseCookiesTest(final String name) {
-        super(name);
+        super();
     }
 
     public void testCookie() throws Throwable {

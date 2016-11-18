@@ -71,8 +71,8 @@ public final class Bug19696Test extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public Bug19696Test(final String name) {
-        super(name);
+    public Bug19696Test() {
+        super();
     }
 
     @Override

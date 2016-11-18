@@ -72,8 +72,8 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
     private FolderTestManager folderManager;
     private FolderObject folder;
 
-	public ExemplaryContactTestManagerTest(final String name) {
-		super(name);
+	public ExemplaryContactTestManagerTest() {
+		super();
 	}
 
 	@Override

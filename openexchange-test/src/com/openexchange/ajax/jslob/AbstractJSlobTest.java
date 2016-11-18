@@ -67,8 +67,8 @@ public abstract class AbstractJSlobTest extends AbstractAJAXSession {
      *
      * @param name name of the test.
      */
-    protected AbstractJSlobTest(final String name) {
-        super(name);
+    protected AbstractJSlobTest() {
+        super();
     }
 
     @Override

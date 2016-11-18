@@ -92,8 +92,8 @@ public class BasicAuthTest extends ShareTest {
      *
      * @param name The test name
      */
-    public BasicAuthTest(String name) {
-        super(name);
+    public BasicAuthTest() {
+        super();
     }
 
     @Override

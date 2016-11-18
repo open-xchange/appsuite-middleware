@@ -64,8 +64,8 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class NewTest extends TaskTest {
 
-    public NewTest(final String name) {
-        super(name);
+    public NewTest() {
+        super();
     }
 
     public void testNewTask() throws Exception {

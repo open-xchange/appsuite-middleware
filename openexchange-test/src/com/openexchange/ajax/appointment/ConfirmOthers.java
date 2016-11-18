@@ -53,6 +53,8 @@ import static com.openexchange.ajax.folder.Create.ocl;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -75,6 +77,7 @@ import com.openexchange.server.impl.OCLPermission;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
+@RunWith(ConcurrentTestRunner.class)
 public class ConfirmOthers extends AbstractAJAXSession {
 
     private AJAXClient clientA, clientB, clientC;
@@ -85,8 +88,8 @@ public class ConfirmOthers extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    public ConfirmOthers(String name) {
-        super(name);
+    public ConfirmOthers() {
+        super();
     }
 
     @Override

@@ -79,8 +79,8 @@ public class Bug38782Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Task task;
 
-    public Bug38782Test(String name) {
-        super(name);
+    public Bug38782Test() {
+        super();
     }
 
     @Before

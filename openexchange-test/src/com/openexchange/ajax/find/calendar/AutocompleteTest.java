@@ -82,8 +82,8 @@ public class AutocompleteTest extends CalendarFindTest {
      *
      * @param name The test name
      */
-    public AutocompleteTest(String name) {
-        super(name);
+    public AutocompleteTest() {
+        super();
     }
 
     public void noTestAutocompleteCurrentUser() throws Exception {

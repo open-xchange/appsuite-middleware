@@ -4,8 +4,8 @@ import com.openexchange.ajax.contact.action.InsertRequest;
 
 public class Bug17513Test extends AbstractManagedContactTest {
 
-    public Bug17513Test(String name) {
-        super(name);
+    public Bug17513Test() {
+        super();
     }
 
     private final String json =

@@ -74,8 +74,8 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
     private int userId;
     private TestTask task;
 
-    public ConfirmTest(String name) {
-        super(name);
+    public ConfirmTest() {
+        super();
     }
 
     @Override

@@ -76,8 +76,8 @@ public class CalendarFindTest extends AbstractFindTest {
      *
      * @param name The test name
      */
-    public CalendarFindTest(String name) {
-        super(name);
+    public CalendarFindTest() {
+        super();
     }
 
     @Override

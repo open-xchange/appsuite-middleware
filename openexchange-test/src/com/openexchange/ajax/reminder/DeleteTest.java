@@ -61,8 +61,8 @@ import com.openexchange.groupware.reminder.ReminderObject;
 
 public class DeleteTest extends ReminderTest {
 
-    public DeleteTest(final String name) {
-        super(name);
+    public DeleteTest() {
+        super();
     }
 
     public void testDelete() throws Exception {

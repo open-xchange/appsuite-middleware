@@ -58,15 +58,6 @@ import com.openexchange.java.util.TimeZones;
 
 public class Bug8317Test extends AppointmentTest {
 
-    public Bug8317Test(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
     /**
      * INFO: This test case must be done at least today + 1 days because otherwise
      * no conflict resolution is made because past appointments do not conflict!

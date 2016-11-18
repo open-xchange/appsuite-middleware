@@ -91,8 +91,8 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 	 * @param name
 	 *            The name
 	 */
-	public VCardMailPartImportTest(final String name) {
-		super(name);
+	public VCardMailPartImportTest() {
+		super();
 	}
 
 	/**

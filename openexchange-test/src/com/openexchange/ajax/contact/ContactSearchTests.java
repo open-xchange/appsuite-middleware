@@ -14,7 +14,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
     private static final String BOB_DEPARTMENT = "Department_"+new UID().toString();
 
 	public ContactSearchTests(String name) {
-		super(name);
+		super();
 	}
 
 	@Override

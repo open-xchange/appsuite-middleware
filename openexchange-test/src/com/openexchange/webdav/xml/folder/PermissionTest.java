@@ -8,8 +8,8 @@ import com.openexchange.webdav.xml.GroupUserTest;
 
 public class PermissionTest extends FolderTest {
 
-	public PermissionTest(final String name) {
-		super(name);
+	public PermissionTest() {
+		super();
 	}
 
 	public void testDummy() {

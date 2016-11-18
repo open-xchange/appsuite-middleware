@@ -69,8 +69,8 @@ public final class Bug12364Test extends AbstractAJAXSession {
     /**
      * Default constructor.
      */
-    public Bug12364Test(final String name) {
-        super(name);
+    public Bug12364Test() {
+        super();
     }
 
     public void testMoveTasks() throws Throwable {

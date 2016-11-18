@@ -64,8 +64,8 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug36943Test extends AbstractManagedContactTest {
 
-    public Bug36943Test(String name) {
-        super(name);
+    public Bug36943Test() {
+        super();
     }
 
     public void testCreateWithAstralSymbols() throws Exception {

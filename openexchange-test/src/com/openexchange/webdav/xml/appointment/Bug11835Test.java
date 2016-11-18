@@ -60,8 +60,8 @@ import com.openexchange.webdav.xml.AppointmentTest;
  */
 public class Bug11835Test extends AppointmentTest {
 
-    public Bug11835Test(String name) {
-        super(name);
+    public Bug11835Test() {
+        super();
     }
 
     public void testBug() throws Throwable {

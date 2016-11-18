@@ -89,8 +89,8 @@ public final class FunctionTest extends AbstractAJAXSession {
     /**
      * @param name
      */
-    public FunctionTest(final String name) {
-        super(name);
+    public FunctionTest() {
+        super();
     }
 
     @Override

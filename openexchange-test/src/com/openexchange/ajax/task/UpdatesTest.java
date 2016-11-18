@@ -86,8 +86,8 @@ public class UpdatesTest extends AbstractTaskTest {
     /**
      * @param name
      */
-    public UpdatesTest(final String name) {
-        super(name);
+    public UpdatesTest() {
+        super();
     }
 
     public void testUpdates() throws Throwable {

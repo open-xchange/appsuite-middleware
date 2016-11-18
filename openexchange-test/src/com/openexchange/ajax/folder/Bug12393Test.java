@@ -96,7 +96,7 @@ public class Bug12393Test extends AbstractAJAXSession {
     List<OCLPermission> originalSubFolderPermissions;
 
     public Bug12393Test (final String name) {
-        super(name);
+        super();
     }
 
     @Override

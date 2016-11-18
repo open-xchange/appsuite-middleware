@@ -63,8 +63,8 @@ import com.openexchange.groupware.container.Expectations;
  */
 public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppointmentTest {
 
-    public TestsForDeleteExceptionsAndFixedEndsOfSeries(String name) {
-        super(name);
+    public TestsForDeleteExceptionsAndFixedEndsOfSeries() {
+        super();
     }
 
 

@@ -73,8 +73,8 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
 
     protected ContactTestManager contactManager;
 
-    public AbstractReplyTest(String name){
-        super(name);
+    public AbstractReplyTest(){
+        super();
     }
 
     @Override

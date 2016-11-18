@@ -37,8 +37,8 @@ public class Bug12495Test extends AbstractAJAXSession {
 	private int privateFolderOfUser1;
 	private int privateFolderOfUser2;
 
-	public Bug12495Test(String name) {
-		super(name);
+	public Bug12495Test() {
+		super();
 	}
 
 	public Appointment createAppointmentInOneHour(String title){

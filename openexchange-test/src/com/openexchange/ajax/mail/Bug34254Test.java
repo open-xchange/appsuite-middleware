@@ -67,8 +67,8 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
  */
 public class Bug34254Test extends AbstractMailTest {
 
-    public Bug34254Test(String name) {
-        super(name);
+    public Bug34254Test() {
+        super();
     }
 
     public void testDeleteNormalDraft() throws Exception {

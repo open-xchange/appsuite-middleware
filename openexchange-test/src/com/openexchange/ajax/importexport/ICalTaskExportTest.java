@@ -8,8 +8,8 @@ import com.openexchange.groupware.tasks.Task;
 
 public class ICalTaskExportTest extends ManagedTaskTest {
 
-	public ICalTaskExportTest(String name) {
-		super(name);
+	public ICalTaskExportTest() {
+		super();
 	}
 
 	public void testExportICalTask() throws Exception {

@@ -64,8 +64,8 @@ public class MailQuotaTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public MailQuotaTest(String name) {
-        super(name);
+    public MailQuotaTest() {
+        super();
     }
 
     public void testMailQuota() throws Exception {

@@ -61,8 +61,8 @@ import com.openexchange.ajax.simple.AbstractSimpleClientTest;
  */
 public class AbstractLoginTest extends AbstractSimpleClientTest {
 
-    public AbstractLoginTest(String name) {
-        super(name);
+    public AbstractLoginTest() {
+        super();
     }
 
     protected void assertNoOXCookies() {

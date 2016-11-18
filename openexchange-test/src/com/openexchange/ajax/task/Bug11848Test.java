@@ -76,8 +76,8 @@ public final class Bug11848Test extends AbstractAJAXSession {
     /**
      * Default constructor.
      */
-    public Bug11848Test(final String name) {
-        super(name);
+    public Bug11848Test() {
+        super();
     }
 
     public void testSorting() throws Throwable {

@@ -80,7 +80,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
      * @param name
      */
     public MailParserWriterTest(final String name) {
-        super(name);
+        super();
     }
 
     private static final MailField[] COMMON_LIST_FIELDS =

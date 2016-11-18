@@ -93,8 +93,8 @@ public final class Bug32044Test extends AbstractAJAXSession {
     private Task task;
     private FolderObject folder1, folder2;
 
-    public Bug32044Test(String name) {
-        super(name);
+    public Bug32044Test() {
+        super();
     }
 
     @Before

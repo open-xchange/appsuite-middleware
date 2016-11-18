@@ -12,15 +12,6 @@ public class Bug9089Test extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9089Test.class);
 
-	public Bug9089Test(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	/**
 	 * Creates a normal appointment in a public folder and then try to modify the private flag.
 	 * Expected result is that an error message is thrown

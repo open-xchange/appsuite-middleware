@@ -70,8 +70,8 @@ public class Bug19109Test extends AbstractAJAXSession {
     private Appointment appointment;
     private Appointment updateAppointment;
 
-    public Bug19109Test(String name) {
-        super(name);
+    public Bug19109Test() {
+        super();
     }
 
     @Override

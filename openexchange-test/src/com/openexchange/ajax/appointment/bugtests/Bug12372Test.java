@@ -68,8 +68,8 @@ public final class Bug12372Test extends AbstractAJAXSession {
     /**
      * @param name test name.
      */
-    public Bug12372Test(final String name) {
-        super(name);
+    public Bug12372Test() {
+        super();
     }
 
     public void testDeleteOfStrangeApp() throws Throwable {

@@ -10,8 +10,8 @@ import com.openexchange.exception.OXException;
 public class Bug20453Test_emptyDTEND extends ManagedAppointmentTest {
 
 
-	public Bug20453Test_emptyDTEND(final String name) {
-		super(name);
+	public Bug20453Test_emptyDTEND() {
+		super();
 	}
 
 	public void testWhatever() throws IOException, JSONException, OXException {

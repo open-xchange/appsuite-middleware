@@ -74,8 +74,8 @@ public class Bug22305Test extends AbstractTaskTest {
     private TimeZone bertaTZ;
     private Task task, bertaTask;
 
-    public Bug22305Test(String name) {
-        super(name);
+    public Bug22305Test() {
+        super();
     }
 
     @Override

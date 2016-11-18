@@ -54,7 +54,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     }
 
     protected MessageStorageTest(final String name) {
-        super(name);
+        super();
     }
 
 

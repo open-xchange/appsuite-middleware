@@ -9,6 +9,10 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -23,16 +27,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.URLParameter;
 
+@RunWith(ConcurrentTestRunner.class)
 public class ConflictTest extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConflictTest.class);
 
-	public ConflictTest(final String name) {
-		super(name);
+	public ConflictTest() {
+		super();
 	}
 
-	@Override
-	protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
 		super.setUp();
 
 		final Calendar c = Calendar.getInstance();
@@ -55,6 +60,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 8:00
 	 * Conflict End: 10:00
 	 */
+    @Test
 	public void testConflict1() throws Exception {
 		final Calendar calendar = Calendar.getInstance(timeZone);
 		calendar.setTimeInMillis(startTime);
@@ -134,6 +140,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 8:00
 	 * Conflict End: 9:00
 	 */
+    @Test
 	public void testConflict2() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testConflict2");
@@ -171,6 +178,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 8:00
 	 * Conflict End: 11:00
 	 */
+    @Test
 	public void testConflict3() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testConflict3");
@@ -208,6 +216,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 7:00
 	 * Conflict End: 10:00
 	 */
+    @Test
 	public void testConflict4() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testConflict4");
@@ -245,6 +254,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 9:00
 	 * Conflict End: 10:00
 	 */
+    @Test
 	public void testConflict5() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testConflict5");
@@ -282,6 +292,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 9:00
 	 * Conflict End: 9:30
 	 */
+    @Test
 	public void testConflict6() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testConflict6");
@@ -320,6 +331,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 7:00
 	 * Conflict End: 11:00
 	 */
+    @Test
 	public void testConflict7() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testConflict7");
@@ -358,6 +370,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 7:00
 	 * Conflict End: 8:00
 	 */
+    @Test
 	public void testNonConflict1() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testNonConflict1");
@@ -397,6 +410,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 10:00
 	 * Conflict End: 11:00
 	 */
+    @Test
 	public void testNonConflict2() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testNonConflict2");
@@ -436,6 +450,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: 8:00
 	 * Conflict End: 10:00
 	 */
+    @Test
 	public void testFullTimeConflict1() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testFullTimeConflict1");
@@ -475,6 +490,7 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict Start: Today FullTime
 	 * Conflict End: +24 Std
 	 */
+    @Test
 	public void testFullTimeConflict2() throws Exception {
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testFullTimeConflict2");

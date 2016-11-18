@@ -75,8 +75,8 @@ public class NotifyFolderSharesTest extends ShareTest {
      *
      * @param name The test name
      */
-    public NotifyFolderSharesTest(String name) {
-        super(name);
+    public NotifyFolderSharesTest() {
+        super();
     }
 
     public void testNotifyGuest() throws Exception {

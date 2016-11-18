@@ -13,10 +13,10 @@ import com.openexchange.test.OXTestToolkit;
 
 public class SaveAsTest extends InfostoreAJAXTest {
 
-	private final SimpleAttachmentTest attachmentTest = new SimpleAttachmentTest("TaskAttachmentTest");
+	private final SimpleAttachmentTest attachmentTest = new SimpleAttachmentTest();
 
-	public SaveAsTest(final String name) {
-		super(name);
+	public SaveAsTest() {
+		super();
 	}
 
 	public void testBasic() throws Exception {

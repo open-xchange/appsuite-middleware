@@ -77,8 +77,8 @@ public class Bug13911Test extends AbstractAJAXSession {
 
     private Contact contact;
 
-    public Bug13911Test(final String name) {
-        super(name);
+    public Bug13911Test() {
+        super();
     }
 
     @Override

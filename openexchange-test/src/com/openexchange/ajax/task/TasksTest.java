@@ -95,8 +95,8 @@ public class TasksTest extends AbstractAJAXTest {
      * Default constructor.
      * @param name Name of this test.
      */
-    public TasksTest(final String name) {
-        super(name);
+    public TasksTest() {
+        super();
     }
 
     /**

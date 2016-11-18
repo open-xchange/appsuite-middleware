@@ -61,8 +61,8 @@ public class Bug18862Test extends AbstractManagedContactTest {
 	
 	private static final String EXPECTED_CODE = "CON-0101";
 
-	public Bug18862Test(String name) {
-		super(name);
+	public Bug18862Test() {
+		super();
 	}
 	
 	public void testUploadTooLargeImage() throws Exception {

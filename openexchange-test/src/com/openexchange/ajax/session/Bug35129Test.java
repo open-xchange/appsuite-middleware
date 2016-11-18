@@ -72,8 +72,8 @@ public class Bug35129Test extends AbstractAJAXSession {
 
     private AJAXClient myClient;
 
-    public Bug35129Test(String name) {
-        super(name);
+    public Bug35129Test() {
+        super();
     }
 
     @Before

@@ -69,8 +69,8 @@ public class Bug15491Test extends AppointmentTest {
      *
      * @param name
      */
-    public Bug15491Test(String name) {
-        super(name);
+    public Bug15491Test() {
+        super();
     }
 
     @Override

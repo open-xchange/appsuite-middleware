@@ -101,8 +101,8 @@ public class Bug29437Test extends AbstractMailTest {
      * Initializes a new {@link Bug29437Test}.
      * @param name
      */
-    public Bug29437Test(String name) {
-        super(name);
+    public Bug29437Test() {
+        super();
     }
 
     public void setUp() throws Exception {

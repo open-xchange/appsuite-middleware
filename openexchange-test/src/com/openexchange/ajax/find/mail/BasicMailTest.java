@@ -100,8 +100,8 @@ public class BasicMailTest extends AbstractMailFindTest {
 
     private FolderObject testFolder;
 
-    public BasicMailTest(String name) {
-        super(name);
+    public BasicMailTest() {
+        super();
     }
 
     @Override

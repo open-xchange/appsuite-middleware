@@ -73,8 +73,8 @@ public final class Bug26431Test extends AbstractAJAXSession {
     private AJAXClient client;
     private int userId;
 
-    public Bug26431Test(String name) {
-        super(name);
+    public Bug26431Test() {
+        super();
     }
 
     @Override

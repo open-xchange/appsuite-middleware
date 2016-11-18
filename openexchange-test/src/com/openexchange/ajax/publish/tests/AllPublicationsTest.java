@@ -80,8 +80,8 @@ import com.openexchange.test.TestInit;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AllPublicationsTest extends AbstractPublicationTest {
-	public AllPublicationsTest(String name) {
-        super(name);
+	public AllPublicationsTest() {
+        super();
     }
 
     public void testShouldNotFindNonExistingPublication() throws OXException, IOException, SAXException, JSONException{

@@ -70,8 +70,8 @@ public class Bug15995Test extends AbstractAJAXSession {
     private AJAXClient client;
     private Locale locale;
 
-    public Bug15995Test(String name) {
-        super(name);
+    public Bug15995Test() {
+        super();
     }
 
     @Override

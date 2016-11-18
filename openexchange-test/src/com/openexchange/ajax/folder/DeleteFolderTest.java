@@ -83,8 +83,8 @@ public class DeleteFolderTest extends AbstractAJAXSession {
      * Initializes a new {@link DeleteFolderTest}.
      * @param name name of the test.
      */
-    public DeleteFolderTest(String name) {
-        super(name);
+    public DeleteFolderTest() {
+        super();
     }
 
     @Override

@@ -68,8 +68,8 @@ import com.openexchange.tools.arrays.Arrays;
 
 public class AllTest extends AbstractManagedContactTest {
 
-	public AllTest(final String name) {
-		super(name);
+	public AllTest() {
+		super();
 	}
 
 	@Override

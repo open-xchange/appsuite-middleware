@@ -10,7 +10,7 @@ import com.openexchange.ajax.task.actions.GetResponse;
 public class Bug20405Test_TaskWithoutDueDate extends ManagedTaskTest {
 
 	public Bug20405Test_TaskWithoutDueDate(String name) {
-		super(name);
+		super();
 	}
 
 	public String ical = "BEGIN:VCALENDAR\n" +

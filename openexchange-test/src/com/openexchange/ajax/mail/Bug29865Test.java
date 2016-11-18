@@ -81,8 +81,8 @@ public class Bug29865Test extends AbstractMailTest {
      * Initializes a new {@link Bug29865Test}.
      * @param name
      */
-    public Bug29865Test(final String name) {
-        super(name);
+    public Bug29865Test() {
+        super();
     }
     
     @Override

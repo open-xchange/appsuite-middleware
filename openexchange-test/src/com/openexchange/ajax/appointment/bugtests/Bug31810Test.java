@@ -69,8 +69,8 @@ public class Bug31810Test extends AbstractAJAXSession {
     private Appointment single;
     private Appointment conflict;
 
-    public Bug31810Test(String name) {
-        super(name);
+    public Bug31810Test() {
+        super();
     }
 
     @Override

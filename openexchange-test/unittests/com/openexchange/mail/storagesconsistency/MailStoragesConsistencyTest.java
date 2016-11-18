@@ -92,7 +92,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
      * @param name
      */
     public MailStoragesConsistencyTest(final String name) {
-        super(name);
+        super();
     }
 
     public void testMailStoragesConsistency1() {

@@ -80,8 +80,8 @@ public class Bug13960Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Contact contact;
 
-    public Bug13960Test(String name) {
-        super(name);
+    public Bug13960Test() {
+        super();
     }
 
     @Override

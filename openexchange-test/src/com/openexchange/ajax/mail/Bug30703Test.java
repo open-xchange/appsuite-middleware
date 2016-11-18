@@ -74,8 +74,8 @@ public class Bug30703Test extends AbstractAJAXSession {
 
     private MailAccountDescription mailAccountDescription;
 
-    public Bug30703Test(String name) {
-        super(name);
+    public Bug30703Test() {
+        super();
     }
 
     @Override

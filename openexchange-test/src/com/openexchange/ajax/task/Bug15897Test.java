@@ -76,8 +76,8 @@ public class Bug15897Test extends AbstractTaskTest {
     private Task task;
     private int participantId;
 
-    public Bug15897Test(String name) {
-        super(name);
+    public Bug15897Test() {
+        super();
     }
 
     @Override

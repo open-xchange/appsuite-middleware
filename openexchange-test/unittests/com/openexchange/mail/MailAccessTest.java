@@ -75,7 +75,7 @@ public final class MailAccessTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailAccessTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public void testMailAccess() throws OXException, InterruptedException {

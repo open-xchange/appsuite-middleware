@@ -89,8 +89,8 @@ public class AnonymousGuestTest extends ShareTest {
      * Initializes a new {@link AnonymousGuestTest}.
      * @param name
      */
-    public AnonymousGuestTest(String name) {
-        super(name);
+    public AnonymousGuestTest() {
+        super();
     }
 
     @Override

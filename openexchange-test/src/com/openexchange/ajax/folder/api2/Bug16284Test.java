@@ -76,8 +76,8 @@ public class Bug16284Test extends AbstractAJAXSession {
 
     private AJAXClient client;
 
-    public Bug16284Test(final String name) {
-        super(name);
+    public Bug16284Test() {
+        super();
     }
 
     @Override

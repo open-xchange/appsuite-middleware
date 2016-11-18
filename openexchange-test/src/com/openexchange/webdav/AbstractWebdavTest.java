@@ -106,8 +106,8 @@ public abstract class AbstractWebdavTest extends TestCase {
 
     public static final String AUTHORIZATION = "authorization";
 
-    public AbstractWebdavTest(final String name) {
-        super(name);
+    public AbstractWebdavTest() {
+        super();
     }
 
     /**

@@ -39,8 +39,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 
 	private long dateTime = 0;
 
-	public ContactTest(final String name) {
-		super(name);
+	public ContactTest() {
+		super();
 	}
 
 	protected static Date decrementDate(final Date date) {

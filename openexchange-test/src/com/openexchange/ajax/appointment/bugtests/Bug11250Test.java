@@ -20,15 +20,6 @@ public class Bug11250Test extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug11250Test.class);
 
-	public Bug11250Test(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	public void testBug11250() throws Exception {
 		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testBug11250" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
 		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");

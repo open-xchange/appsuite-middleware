@@ -77,8 +77,8 @@ public class UpdateTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public UpdateTest(final String name) {
-        super(name);
+    public UpdateTest() {
+        super();
     }
 
     @Override

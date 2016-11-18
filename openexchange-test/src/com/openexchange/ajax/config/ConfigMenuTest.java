@@ -80,8 +80,8 @@ public class ConfigMenuTest extends AbstractAJAXSession {
      *
      * @param name Name of this test.
      */
-    public ConfigMenuTest(final String name) {
-        super(name);
+    public ConfigMenuTest() {
+        super();
     }
 
     /**

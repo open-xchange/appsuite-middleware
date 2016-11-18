@@ -70,8 +70,8 @@ public class Bug40826Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40826Test(String name) {
-        super(name);
+    public Bug40826Test() {
+        super();
     }
 
     public void testShareCalendarToAuthor() throws Exception {

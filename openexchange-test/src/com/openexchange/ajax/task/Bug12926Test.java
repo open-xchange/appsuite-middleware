@@ -92,8 +92,8 @@ public final class Bug12926Test extends AbstractTaskTest {
      * Default constructor.
      * @param name test name.
      */
-    public Bug12926Test(final String name) {
-        super(name);
+    public Bug12926Test() {
+        super();
     }
 
     @Override

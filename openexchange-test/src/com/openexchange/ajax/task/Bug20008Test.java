@@ -22,8 +22,8 @@ public class Bug20008Test extends AbstractAJAXSession {
     private Task task;
     private TimeZone tz;
 
-    public Bug20008Test(String name) {
-        super(name);
+    public Bug20008Test() {
+        super();
     }
 
     @Override

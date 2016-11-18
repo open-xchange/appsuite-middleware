@@ -53,6 +53,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
@@ -69,6 +73,7 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 
+@RunWith(ConcurrentTestRunner.class)
 public class NewTest extends AppointmentTest {
 
     private int targetFolder;
@@ -77,20 +82,20 @@ public class NewTest extends AppointmentTest {
     private int folderId;
     private int folderId2;
 
-    public NewTest(final String name) {
-        super(name);
+    public NewTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         targetFolder = 0;
         objectId = 0;
         objectId2 = 0;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (0 != objectId) {
             deleteAppointment(getWebConversation(), objectId, folderId, PROTOCOL + getHostName(), getSessionId(), false);
         }

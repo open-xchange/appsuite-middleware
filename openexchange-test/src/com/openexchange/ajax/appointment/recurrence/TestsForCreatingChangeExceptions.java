@@ -77,8 +77,8 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         return changes;
     }
 
-    public TestsForCreatingChangeExceptions(String name) {
-        super(name);
+    public TestsForCreatingChangeExceptions() {
+        super();
     }
 
     public void testShouldAllowMovingAnExceptionBehindEndOfSeries() throws OXException {

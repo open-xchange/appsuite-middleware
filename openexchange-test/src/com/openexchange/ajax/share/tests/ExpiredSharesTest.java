@@ -75,8 +75,8 @@ public class ExpiredSharesTest extends ShareTest {
 	 * @param name
 	 *            The test name
 	 */
-	public ExpiredSharesTest(String name) {
-		super(name);
+	public ExpiredSharesTest() {
+		super();
 	}
 
 	public void testAccessExpiredShareRandomly() throws Exception {

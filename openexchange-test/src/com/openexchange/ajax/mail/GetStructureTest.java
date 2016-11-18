@@ -200,8 +200,8 @@ public class GetStructureTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public GetStructureTest(final String name) {
-        super(name);
+    public GetStructureTest() {
+        super();
     }
 
     @Override

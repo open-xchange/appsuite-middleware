@@ -72,8 +72,8 @@ public class Bug38404Test extends AbstractAJAXSession {
     private CalendarTestManager ctm2;
     private Appointment appointment;
 
-    public Bug38404Test(String name) {
-        super(name);
+    public Bug38404Test() {
+        super();
     }
 
     @Override

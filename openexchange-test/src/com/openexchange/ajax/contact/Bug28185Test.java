@@ -64,8 +64,8 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  */
 public class Bug28185Test extends AbstractManagedContactTest {
 
-    public Bug28185Test(String name) {
-        super(name);
+    public Bug28185Test() {
+        super();
     }
 
 	@Override

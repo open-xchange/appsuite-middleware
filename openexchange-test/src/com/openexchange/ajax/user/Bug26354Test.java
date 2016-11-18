@@ -98,8 +98,8 @@ public final class Bug26354Test extends AbstractAJAXSession {
     private boolean origBetaValue;
 	private String origTimeZoneValue;
 
-    public Bug26354Test(String name) {
-        super(name);
+    public Bug26354Test() {
+        super();
     }
 
     @Override

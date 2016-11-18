@@ -104,8 +104,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
     private static final String TASK_URL = "/servlet/webdav.tasks";
 
-    public TaskTest(final String name) {
-        super(name);
+    public TaskTest() {
+        super();
     }
 
     protected static Date decrementDate(final Date date) {

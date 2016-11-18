@@ -51,6 +51,8 @@ package com.openexchange.ajax.appointment;
 
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -75,12 +77,12 @@ public class AllAliasTest extends AppointmentTest {
      *
      * @param name
      */
-    public AllAliasTest(final String name) {
-        super(name);
+    public AllAliasTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
 
@@ -96,8 +98,8 @@ public class AllAliasTest extends AppointmentTest {
         insertResponse.fillAppointment(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         final DeleteRequest deleteRequest = new DeleteRequest(appointment);
         client.execute(deleteRequest);
         super.tearDown();

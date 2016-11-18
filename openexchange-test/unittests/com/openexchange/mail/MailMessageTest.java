@@ -78,7 +78,7 @@ public final class MailMessageTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailMessageTest(final String name) {
-		super(name);
+		super();
 	}
 
 	private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID, MailField.FROM,

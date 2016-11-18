@@ -76,7 +76,7 @@ public class Bug18846StructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public Bug18846StructureTest(final String name) {
-        super(name);
+        super();
     }
 
     private static final byte[] SOURCE = ("Date: Wed, 18 May 2011 12:05:12 +0200 (CEST)\n" +

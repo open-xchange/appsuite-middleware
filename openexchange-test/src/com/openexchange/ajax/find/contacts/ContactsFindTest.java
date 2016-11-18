@@ -135,8 +135,8 @@ public abstract class ContactsFindTest extends AbstractFindTest {
      *
      * @param name The test name
      */
-    public ContactsFindTest(String name) {
-        super(name);
+    public ContactsFindTest() {
+        super();
     }
 
     @Override

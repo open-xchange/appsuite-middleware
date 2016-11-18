@@ -99,8 +99,8 @@ public class EmptyEmailTest extends AbstractContactTest {
      * 
      * @param name
      */
-    public EmptyEmailTest(String name) {
-        super(name);
+    public EmptyEmailTest() {
+        super();
     }
 
     /**

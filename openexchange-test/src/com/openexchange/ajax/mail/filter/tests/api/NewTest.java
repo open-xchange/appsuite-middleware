@@ -83,8 +83,8 @@ public class NewTest extends AbstractMailFilterTest {
      * 
      * @param name The test case's name
      */
-    public NewTest(String name) {
-        super(name);
+    public NewTest() {
+        super();
     }
 
     /**

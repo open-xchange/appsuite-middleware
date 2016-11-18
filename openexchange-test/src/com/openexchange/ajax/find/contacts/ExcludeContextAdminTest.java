@@ -80,8 +80,8 @@ import com.openexchange.java.util.TimeZones;
  */
 public class ExcludeContextAdminTest extends AbstractFindTest {
 
-    public ExcludeContextAdminTest(String name) {
-        super(name);
+    public ExcludeContextAdminTest() {
+        super();
     }
 
     /*

@@ -72,8 +72,8 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
  */
 public class DeletePublicationTest extends AbstractPublicationTest {
 
-    public DeletePublicationTest(String name) {
-        super(name);
+    public DeletePublicationTest() {
+        super();
     }
 
     public void testDeletingAFolderDeletesThePublication() throws OXException, IOException, SAXException, JSONException, InterruptedException {

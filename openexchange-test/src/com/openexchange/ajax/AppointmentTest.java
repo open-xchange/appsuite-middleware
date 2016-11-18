@@ -62,6 +62,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -110,8 +111,8 @@ import com.openexchange.tools.URLParameter;
  */
 public class AppointmentTest extends AbstractAJAXTest {
 
-    public AppointmentTest(final String name) {
-        super(name);
+    public AppointmentTest() {
+        super();
     }
 
     public static final int[] APPOINTMENT_FIELDS = {
@@ -148,8 +149,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     private final List<Appointment> clean = new ArrayList<Appointment>();
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         try {

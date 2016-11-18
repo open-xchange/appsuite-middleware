@@ -78,8 +78,8 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
      * 
      * @param name
      */
-    public CopySharedFilesPermissionRemovalTest(String name) {
-        super(name);
+    public CopySharedFilesPermissionRemovalTest() {
+        super();
     }
 
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {

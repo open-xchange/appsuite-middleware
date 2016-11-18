@@ -88,8 +88,8 @@ public class QuotaTest extends ShareTest {
      *
      * @param name The test name
      */
-    public QuotaTest(String name) {
-        super(name);
+    public QuotaTest() {
+        super();
     }
 
     @Override

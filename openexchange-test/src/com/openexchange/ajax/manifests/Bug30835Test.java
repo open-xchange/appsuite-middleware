@@ -69,8 +69,8 @@ public class Bug30835Test extends AbstractAJAXSession {
     /**
      * Initializes a new {@link Bug30835Test}.
      */
-    public Bug30835Test(String name) {
-        super(name);
+    public Bug30835Test() {
+        super();
     }
 
     @Override

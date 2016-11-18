@@ -84,8 +84,8 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
 
     private InfostoreTestManager infostoreMgr;
 
-    public AbstractPubSubTest(String name) {
-        super(name);
+    public AbstractPubSubTest() {
+        super();
     }
 
     public void setFolderManager(FolderTestManager folderMgr) {

@@ -68,8 +68,8 @@ public class Bug13173Test extends AbstractAJAXSession {
 
     ArrayList<Task> duplicates;
 
-    public Bug13173Test(String name) {
-        super(name);
+    public Bug13173Test() {
+        super();
     }
 
     @Override

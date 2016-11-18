@@ -60,15 +60,6 @@ import com.openexchange.groupware.container.Contact;
 
 public class GetTest extends ContactTest {
 
-    public GetTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
     public void testGet() throws Exception {
         final Contact contactObj = createContactObject("testGet");
         final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());

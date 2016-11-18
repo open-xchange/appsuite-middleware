@@ -80,8 +80,8 @@ public class SubscribeTest extends AbstractAJAXSession {
      *
      * @param name The name
      */
-    public SubscribeTest(final String name) {
-        super(name);
+    public SubscribeTest() {
+        super();
     }
 
     @Override

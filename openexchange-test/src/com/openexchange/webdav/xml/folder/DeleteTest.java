@@ -5,8 +5,8 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class DeleteTest extends FolderTest {
 
-	public DeleteTest(final String name) {
-		super(name);
+	public DeleteTest() {
+		super();
 	}
 
 	public void testDeleteFolder() throws Exception {

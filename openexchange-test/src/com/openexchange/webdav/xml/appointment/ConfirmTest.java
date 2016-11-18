@@ -8,8 +8,8 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class ConfirmTest extends AppointmentTest {
 
-	public ConfirmTest(final String name) {
-		super(name);
+	public ConfirmTest() {
+		super();
 	}
 
 	@Override

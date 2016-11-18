@@ -1,7 +1,6 @@
 package com.openexchange.ajax.importexport;
 
 import java.util.TimeZone;
-
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
@@ -11,8 +10,8 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug22059Test extends ManagedAppointmentTest {
 
-	public Bug22059Test(String name) {
-		super(name);
+	public Bug22059Test() {
+		super();
 	}
 	
 	public static String ical = "BEGIN:VCALENDAR\n" + 

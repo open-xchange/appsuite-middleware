@@ -66,7 +66,7 @@ public class ThirdpartyInfostoreTestSuite extends AbstractInfostoreThirdpartyTes
      * @param name
      */
     public ThirdpartyInfostoreTestSuite(String name) {
-        super(name);
+        super();
     }
 
     public static Test suite() {

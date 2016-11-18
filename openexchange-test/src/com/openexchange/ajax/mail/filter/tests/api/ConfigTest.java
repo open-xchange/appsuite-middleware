@@ -64,8 +64,8 @@ public class ConfigTest extends AbstractMailFilterTest {
      * 
      * @param name The test case's name
      */
-    public ConfigTest(String name) {
-        super(name);
+    public ConfigTest() {
+        super();
     }
 
     /**

@@ -76,8 +76,8 @@ public class Bug44622Test extends AbstractInfostoreTest {
      * Initializes a new {@link Bug44622Test}.
      * @param name
      */
-    public Bug44622Test(String name) {
-        super(name);
+    public Bug44622Test() {
+        super();
     }
 
     @Override

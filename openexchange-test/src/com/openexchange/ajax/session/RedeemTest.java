@@ -58,8 +58,8 @@ import com.openexchange.java.Strings;
  */
 public class RedeemTest extends AbstractLoginTest {
 
-    public RedeemTest(String name) {
-        super(name);
+    public RedeemTest() {
+        super();
     }
 
     public void testRedeemRandom() throws Exception {

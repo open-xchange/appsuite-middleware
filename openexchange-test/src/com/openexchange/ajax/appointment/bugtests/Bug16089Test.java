@@ -36,8 +36,8 @@ public class Bug16089Test extends AbstractAJAXSession {
 
     Calendar cal;
 
-    public Bug16089Test(String name) {
-        super(name);
+    public Bug16089Test() {
+        super();
 
     }
 

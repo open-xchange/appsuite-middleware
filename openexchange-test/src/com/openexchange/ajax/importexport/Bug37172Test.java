@@ -25,8 +25,8 @@ public class Bug37172Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-    public Bug37172Test(String name) {
-        super(name);
+    public Bug37172Test() {
+        super();
     }
 
     public void testNotLosingPhoneNumbers() throws Exception {

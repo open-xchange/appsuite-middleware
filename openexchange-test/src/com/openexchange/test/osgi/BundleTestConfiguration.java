@@ -65,12 +65,12 @@ public final class BundleTestConfiguration extends AbstractBundleTest {
      * Initializes a new {@link BundleTestConfiguration}
      */
     public BundleTestConfiguration(final String name) {
-        super(name);
+        super();
     }
 
     public void testConfigurationAbsence() {
         try {
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject jsonObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),

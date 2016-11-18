@@ -31,8 +31,8 @@ public class MailTest extends AbstractAJAXTest {
 
 	private String sessionId = null;
 
-	public MailTest(final String name) {
-		super(name);
+	public MailTest() {
+		super();
 	}
 
 	private static final String MAIL_URL = "/ajax/mail";

@@ -60,8 +60,8 @@ import com.openexchange.groupware.container.Expectations;
  */
 public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentTest {
 
-    public TestsForChangingAmongMonthlyRecurrences(String name) {
-        super(name);
+    public TestsForChangingAmongMonthlyRecurrences() {
+        super();
     }
 
     private Changes generateMonthlyChanges() {

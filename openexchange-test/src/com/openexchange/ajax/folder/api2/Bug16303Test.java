@@ -78,8 +78,8 @@ public class Bug16303Test extends AbstractAJAXSession {
     private AJAXClient clientB;
     private FolderObject createdFolder;
 
-    public Bug16303Test(String name) {
-        super(name);
+    public Bug16303Test() {
+        super();
     }
 
     @Override

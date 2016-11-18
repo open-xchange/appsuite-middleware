@@ -67,8 +67,8 @@ public final class SuggestionsTest extends AbstractSpellCheckTest {
 	 *
 	 * @param name
 	 */
-	public SuggestionsTest(final String name) {
-		super(name);
+	public SuggestionsTest() {
+		super();
 	}
 
 	/**

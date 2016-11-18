@@ -8,8 +8,8 @@ import com.openexchange.groupware.importexport.ImportResult;
 public class Bug19046Test_SeriesWithExtraneousStartDate extends
 		ManagedAppointmentTest {
 
-	public Bug19046Test_SeriesWithExtraneousStartDate(String name) {
-		super(name);
+	public Bug19046Test_SeriesWithExtraneousStartDate() {
+		super();
 	}
 
 	/*

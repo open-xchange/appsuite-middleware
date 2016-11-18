@@ -72,8 +72,8 @@ public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 	 *
 	 * @param name
 	 */
-	public NetsolTestMailMessageDelete(final String name) {
-		super(name);
+	public NetsolTestMailMessageDelete() {
+		super();
 	}
 
 	public void testMailDelete() throws Throwable {

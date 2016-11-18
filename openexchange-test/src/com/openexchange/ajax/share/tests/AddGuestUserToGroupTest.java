@@ -71,8 +71,8 @@ public class AddGuestUserToGroupTest extends ShareTest {
 
     //    private AJAXClient adminClient;
 
-    public AddGuestUserToGroupTest(String name) {
-        super(name);
+    public AddGuestUserToGroupTest() {
+        super();
     }
 
     @Override

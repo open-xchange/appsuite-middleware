@@ -74,8 +74,8 @@ public class Bug39105Test extends AbstractMailFindTest {
 
     private FolderObject testFolder;
 
-    public Bug39105Test(String name) {
-        super(name);
+    public Bug39105Test() {
+        super();
     }
 
     @Override

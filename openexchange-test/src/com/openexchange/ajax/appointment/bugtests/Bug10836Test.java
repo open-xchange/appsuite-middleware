@@ -76,8 +76,8 @@ public final class Bug10836Test extends AbstractAJAXSession {
 	 * Default constructor.
 	 * @param name Name of the test.
 	 */
-	public Bug10836Test(final String name) {
-		super(name);
+	public Bug10836Test() {
+		super();
 	}
 
 	/**

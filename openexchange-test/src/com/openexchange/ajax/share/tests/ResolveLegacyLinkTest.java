@@ -76,8 +76,8 @@ public class ResolveLegacyLinkTest extends ShareTest {
      * Initializes a new {@link ResolveLegacyLinkTest}.
      * @param name
      */
-    public ResolveLegacyLinkTest(String name) {
-        super(name);
+    public ResolveLegacyLinkTest() {
+        super();
     }
 
     public void testOpeningALegacyLinkWorks() throws Exception {

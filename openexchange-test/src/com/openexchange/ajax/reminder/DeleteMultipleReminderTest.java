@@ -82,8 +82,8 @@ public class DeleteMultipleReminderTest extends ReminderTest {
      * Initializes a new {@link DeleteMultipleReminderTest}.
      * @param name
      */
-    public DeleteMultipleReminderTest(String name) {
-        super(name);
+    public DeleteMultipleReminderTest() {
+        super();
     }
     
     @Override

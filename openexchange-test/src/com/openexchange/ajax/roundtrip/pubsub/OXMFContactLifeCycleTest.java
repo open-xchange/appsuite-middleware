@@ -69,8 +69,8 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
 
     protected FolderObject subFolder;
 
-    public OXMFContactLifeCycleTest(String name) {
-        super(name);
+    public OXMFContactLifeCycleTest() {
+        super();
     }
 
     @Override

@@ -55,11 +55,14 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -73,6 +76,7 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.AjaxInit;
+import junit.framework.TestCase;
 
 /**
  * This class implements inheritable methods for AJAX tests.
@@ -80,6 +84,7 @@ import com.openexchange.test.AjaxInit;
  * @deprecated use {@link AbstractAJAXSession}.
  */
 @Deprecated
+@RunWith(ConcurrentTestRunner.class)
 public abstract class AbstractAJAXTest extends TestCase {
 
     public static final String PROTOCOL = "http://";
@@ -114,9 +119,9 @@ public abstract class AbstractAJAXTest extends TestCase {
 
     protected static final int APPEND_MODIFIED = 1000000;
 
-    public AbstractAJAXTest(final String name) {
-        super(name);
 
+    @Before
+    public void setUp() throws Exception {
         try {
             AJAXConfig.init();
         } catch (final OXException ex) {
@@ -127,8 +132,8 @@ public abstract class AbstractAJAXTest extends TestCase {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         logout();
         super.tearDown();
     }

@@ -2,7 +2,6 @@ package com.openexchange.ajax.importexport;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -10,8 +9,8 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 
-	public Bug20896Test_AlarmsChange(String name) {
-		super(name);
+	public Bug20896Test_AlarmsChange() {
+		super();
 	}
 	
 	public String ical = 

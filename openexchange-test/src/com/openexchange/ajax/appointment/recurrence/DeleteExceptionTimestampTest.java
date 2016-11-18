@@ -72,8 +72,8 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
     private CalendarTestManager manager;
     private Appointment appointment;
 
-    public DeleteExceptionTimestampTest(String name) {
-        super(name);
+    public DeleteExceptionTimestampTest() {
+        super();
     }
 
     @Override

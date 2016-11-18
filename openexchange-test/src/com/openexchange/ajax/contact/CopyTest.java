@@ -25,9 +25,9 @@ public class CopyTest extends AbstractContactTest {
     private FolderObject folder;
 
 
-    public CopyTest(final String name) {
+    public CopyTest() {
 
-		super(name);
+		super();
 	}
 
 	@Override

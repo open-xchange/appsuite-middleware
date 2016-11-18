@@ -88,8 +88,8 @@ public class SharedFilesFolderTest extends ShareTest {
      * Initializes a new {@link SharedFilesFolderTest}.
      * @param name
      */
-    public SharedFilesFolderTest(String name) {
-        super(name);
+    public SharedFilesFolderTest() {
+        super();
     }
 
     @Override

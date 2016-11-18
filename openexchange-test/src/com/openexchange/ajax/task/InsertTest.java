@@ -70,8 +70,8 @@ public class InsertTest extends AbstractTaskTest {
     /**
      * @param name
      */
-    public InsertTest(final String name) {
-        super(name);
+    public InsertTest() {
+        super();
     }
 
     /**

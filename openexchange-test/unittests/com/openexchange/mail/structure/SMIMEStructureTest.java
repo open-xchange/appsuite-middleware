@@ -75,7 +75,7 @@ public class SMIMEStructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public SMIMEStructureTest(final String name) {
-        super(name);
+        super();
     }
 
     public void testAnotherMIMEStructure() {

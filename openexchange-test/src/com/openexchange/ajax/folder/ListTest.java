@@ -82,8 +82,8 @@ public class ListTest extends AbstractAJAXSession {
      *
      * @param name name of the test.
      */
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
     @Override

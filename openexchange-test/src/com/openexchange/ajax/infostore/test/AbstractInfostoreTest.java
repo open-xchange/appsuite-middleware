@@ -80,8 +80,8 @@ public class AbstractInfostoreTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    public AbstractInfostoreTest(String name) {
-        super(name);
+    public AbstractInfostoreTest() {
+        super();
     }
 
     public FolderObject generateInfostoreFolder(String name) throws OXException, IOException, SAXException, JSONException{

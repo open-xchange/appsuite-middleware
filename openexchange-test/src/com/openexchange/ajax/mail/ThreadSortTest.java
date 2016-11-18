@@ -72,8 +72,8 @@ public final class ThreadSortTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public ThreadSortTest(final String name) {
-        super(name);
+    public ThreadSortTest() {
+        super();
     }
 
     @Override

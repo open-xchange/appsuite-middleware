@@ -142,8 +142,8 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 
     /* @formatter:on */
 
-    public AbstractImportExportServletTest(final String name) {
-        super(name);
+    public AbstractImportExportServletTest() {
+        super();
     }
 
     @Override

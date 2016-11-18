@@ -69,8 +69,8 @@ import com.openexchange.subscribe.Subscription;
  */
 public class RefreshSubscriptionTest extends AbstractSubscriptionTest {
 
-    public RefreshSubscriptionTest(String name) {
-        super(name);
+    public RefreshSubscriptionTest() {
+        super();
     }
 
     public void testShouldFailOnNonExistingSubscription() throws OXException, IOException, SAXException, JSONException{

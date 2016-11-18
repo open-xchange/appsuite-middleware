@@ -73,8 +73,8 @@ public final class PasswordChangeUpdateAJAXTest extends AbstractPasswordChangeAJ
 	 * @param name
 	 *            The test name
 	 */
-	public PasswordChangeUpdateAJAXTest(final String name) {
-		super(name);
+	public PasswordChangeUpdateAJAXTest() {
+		super();
 	}
 
 	/**

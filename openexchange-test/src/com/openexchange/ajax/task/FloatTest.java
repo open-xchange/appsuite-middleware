@@ -66,8 +66,8 @@ public class FloatTest extends AbstractTaskTest {
     /**
      * @param name
      */
-    public FloatTest(String name) {
-        super(name);
+    public FloatTest() {
+        super();
     }
 
     /**

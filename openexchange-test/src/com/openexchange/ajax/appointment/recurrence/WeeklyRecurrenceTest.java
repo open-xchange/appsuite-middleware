@@ -9,8 +9,8 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WeeklyRecurrenceTest.class);
 
-	public WeeklyRecurrenceTest(final String name) {
-		super(name);
+	public WeeklyRecurrenceTest() {
+		super();
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 	}
 

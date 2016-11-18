@@ -81,8 +81,8 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
      *
      * @param name
      */
-    public CalendarTestManagerTest(String name) {
-        super(name);
+    public CalendarTestManagerTest() {
+        super();
     }
 
     @Override

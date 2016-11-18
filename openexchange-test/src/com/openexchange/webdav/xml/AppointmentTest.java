@@ -122,8 +122,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
     @Deprecated
     private static final String APPOINTMENT_URL = AbstractAppointmentRequest.URL;
 
-    public AppointmentTest(final String name) {
-        super(name);
+    public AppointmentTest() {
+        super();
     }
 
     /**

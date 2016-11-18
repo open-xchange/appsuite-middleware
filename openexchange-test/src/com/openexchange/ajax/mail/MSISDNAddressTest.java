@@ -88,8 +88,8 @@ public class MSISDNAddressTest extends AbstractMailTest {
 
     private final String invalidTestCellPhoneNumber = "491501234567890";
 
-    public MSISDNAddressTest(final String name) {
-        super(name);
+    public MSISDNAddressTest() {
+        super();
     }
 
     @Override

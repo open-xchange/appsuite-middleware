@@ -72,8 +72,8 @@ public class VacationTest extends AbstractMailFilterTest {
      * 
      * @param name The test case's name
      */
-    public VacationTest(String name) {
-        super(name);
+    public VacationTest() {
+        super();
     }
 
     /**

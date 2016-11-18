@@ -76,8 +76,8 @@ public final class AttachmentTest extends AbstractMailTest {
 	 * @param name
 	 *            Name of this test.
 	 */
-	public AttachmentTest(final String name) {
-		super(name);
+	public AttachmentTest() {
+		super();
 	}
 
 	/**

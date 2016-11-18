@@ -66,8 +66,8 @@ public class MoveMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public MoveMailTest(String name) {
-        super(name);
+    public MoveMailTest() {
+        super();
     }
 
     @Override

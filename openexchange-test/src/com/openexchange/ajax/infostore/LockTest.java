@@ -79,8 +79,8 @@ public class LockTest extends InfostoreAJAXTest {
 
 	protected File testFile;
 
-	public LockTest(final String name){
-		super(name);
+	public LockTest(){
+		super();
 	}
 
 	@Override

@@ -64,8 +64,8 @@ public class FilestoreQuotaTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public FilestoreQuotaTest(String name) {
-        super(name);
+    public FilestoreQuotaTest() {
+        super();
     }
 
     public void testFilestoreQuota() throws Exception {

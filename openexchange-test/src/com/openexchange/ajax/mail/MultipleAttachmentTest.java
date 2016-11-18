@@ -77,8 +77,8 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 	 * @param name
 	 *            Name of this test.
 	 */
-	public MultipleAttachmentTest(final String name) {
-		super(name);
+	public MultipleAttachmentTest() {
+		super();
 	}
 
 	/**

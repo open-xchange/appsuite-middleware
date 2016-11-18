@@ -73,8 +73,8 @@ public class Bug7380Test extends AbstractTaskTest {
     /**
      * @param name
      */
-    public Bug7380Test(final String name) {
-        super(name);
+    public Bug7380Test() {
+        super();
     }
 
     /**

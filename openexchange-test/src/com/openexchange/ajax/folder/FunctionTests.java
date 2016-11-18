@@ -81,7 +81,7 @@ public class FunctionTests extends AbstractAJAXSession {
     private AJAXClient client2;
 
     public FunctionTests(String name) {
-        super(name);
+        super();
     }
 
     @Override

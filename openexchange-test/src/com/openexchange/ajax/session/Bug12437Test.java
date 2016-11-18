@@ -69,8 +69,8 @@ public final class Bug12437Test extends TestCase {
 
     private String password;
 
-    public Bug12437Test(final String name) {
-        super(name);
+    public Bug12437Test() {
+        super();
     }
 
     @Override

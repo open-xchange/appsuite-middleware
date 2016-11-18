@@ -57,8 +57,8 @@ public class ModulesTest extends AbstractAJAXSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ModulesTest.class);
 
-    public ModulesTest(final String name) {
-        super(name);
+    public ModulesTest() {
+        super();
     }
 
     /**

@@ -77,8 +77,8 @@ public class ListTest extends AbstractTaskTest {
     private static final int DELETES = 2;
     private AJAXClient client;
 
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
     @Override

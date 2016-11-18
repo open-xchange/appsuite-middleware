@@ -80,8 +80,8 @@ public class GuestContactTest extends ShareTest {
      * Initializes a new {@link GuestContactTest}.
      * @param name
      */
-    public GuestContactTest(String name) {
-        super(name);
+    public GuestContactTest() {
+        super();
     }
 
     public void testCreateGuestContact() throws Exception {

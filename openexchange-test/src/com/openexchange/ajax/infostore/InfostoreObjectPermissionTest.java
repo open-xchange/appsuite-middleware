@@ -104,8 +104,8 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
      * Initializes a new {@link InfostoreObjectPermissionTest}.
      * @param name
      */
-    public InfostoreObjectPermissionTest(String name) {
-        super(name);
+    public InfostoreObjectPermissionTest() {
+        super();
     }
 
     @Override

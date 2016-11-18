@@ -12,8 +12,8 @@ public class Bug36522Test extends AbstractMailFindTest {
 
     private Contact contact;
 
-    public Bug36522Test(String name) {
-        super(name);
+    public Bug36522Test() {
+        super();
     }
 
     @Override

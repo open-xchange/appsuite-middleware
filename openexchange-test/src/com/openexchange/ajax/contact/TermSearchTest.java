@@ -4,8 +4,8 @@ import org.json.JSONObject;
 
 public class TermSearchTest extends AbstractManagedContactTest {
 
-	public TermSearchTest(String name) {
-		super(name);
+	public TermSearchTest() {
+		super();
 	}
 
 	public void testSearchForFirstLetter() throws Exception{

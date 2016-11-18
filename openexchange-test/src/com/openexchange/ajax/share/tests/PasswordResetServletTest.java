@@ -95,8 +95,8 @@ public final class PasswordResetServletTest extends ShareTest {
      *
      * @param name The test name
      */
-    public PasswordResetServletTest(final String name) {
-        super(name);
+    public PasswordResetServletTest() {
+        super();
     }
 
     @Override

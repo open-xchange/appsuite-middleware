@@ -56,7 +56,7 @@ public class InfostoreClient {
         super();
     }
 
-    private static InfostoreAJAXTest test = new InfostoreAJAXTest("InfostoreClient");
+    private static InfostoreAJAXTest test = new InfostoreAJAXTest();
 
 //    public static Response all(final WebConversation webConv, final String hostname, final String sessionId, final int folderId, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
 //        return test.all(webConv, hostname, sessionId, folderId, columns, sort, order);

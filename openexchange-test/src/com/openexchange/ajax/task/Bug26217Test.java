@@ -85,8 +85,8 @@ public final class Bug26217Test extends AbstractTaskTest {
     private TimeZone tz;
     private FolderObject moveTo;
 
-    public Bug26217Test(String name) {
-        super(name);
+    public Bug26217Test() {
+        super();
     }
 
     @Before

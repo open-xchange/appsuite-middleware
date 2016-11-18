@@ -62,8 +62,8 @@ public class MoveTest extends AbstractContactTest {
     private int targetFolder;
     private int objectId;
 
-    public MoveTest(final String name) {
-        super(name);
+    public MoveTest() {
+        super();
     }
 
     @Override

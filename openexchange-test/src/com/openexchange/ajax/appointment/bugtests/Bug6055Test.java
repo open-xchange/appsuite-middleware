@@ -58,15 +58,6 @@ public class Bug6055Test extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6055Test.class);
 
-    public Bug6055Test(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
     public void testBug6055() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testBug6055");
         appointmentObj.setParentFolderID(appointmentFolderId);

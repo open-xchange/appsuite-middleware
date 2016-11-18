@@ -100,8 +100,8 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      *
      * @param name name of the test.
      */
-    protected AbstractFindTest(final String name) {
-        super(name);
+    protected AbstractFindTest() {
+        super();
     }
 
     @Override

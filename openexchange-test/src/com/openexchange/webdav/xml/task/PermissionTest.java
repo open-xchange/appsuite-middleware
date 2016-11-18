@@ -10,8 +10,8 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class PermissionTest extends TaskTest {
 
-	public PermissionTest(final String name) {
-		super(name);
+	public PermissionTest() {
+		super();
 	}
 
 	public void testDummy() {

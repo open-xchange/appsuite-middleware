@@ -1,6 +1,8 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -8,6 +10,7 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 
+@RunWith(ConcurrentTestRunner.class)
 public class UpdatesTest extends AppointmentTest {
 
 	private final static int[] _appointmentFields = {
@@ -40,19 +43,6 @@ public class UpdatesTest extends AppointmentTest {
 	};
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesTest.class);
-
-	public UpdatesTest(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	public void testDummy() throws Exception {
-
-	}
 
 	public void testModified() throws Exception {
 		AppointmentTest.listModifiedAppointment(getWebConversation(), appointmentFolderId, new Date(), new Date(), new Date(System.currentTimeMillis()-(dayInMillis*7)), _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());

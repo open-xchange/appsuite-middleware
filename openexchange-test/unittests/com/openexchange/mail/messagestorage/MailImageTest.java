@@ -169,7 +169,7 @@ public final class MailImageTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailImageTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public void testRFC2231() {

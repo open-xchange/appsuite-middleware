@@ -133,8 +133,8 @@ public class Bug20758Test extends AbstractConversionTest {
     private String ical1;
     private String ical2;
 
-    public Bug20758Test(String name) {
-        super(name);
+    public Bug20758Test() {
+        super();
     }
 
     @Override

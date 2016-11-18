@@ -76,7 +76,7 @@ public class MailTNEFStructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public MailTNEFStructureTest(final String name) {
-        super(name);
+        super();
     }
 
 

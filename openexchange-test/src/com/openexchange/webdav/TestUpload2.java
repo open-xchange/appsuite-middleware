@@ -78,7 +78,7 @@ public class TestUpload2 extends TestCase {
      * @param name
      */
     public TestUpload2(final String name) {
-        super(name);
+        super();
         // TODO Auto-generated constructor stub
     }
 

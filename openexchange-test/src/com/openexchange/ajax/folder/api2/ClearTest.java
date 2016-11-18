@@ -83,8 +83,8 @@ public class ClearTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public ClearTest(final String name) {
-        super(name);
+    public ClearTest() {
+        super();
     }
 
     @Override

@@ -21,8 +21,8 @@ import com.openexchange.groupware.search.ContactSearchObject;
 
 public class SearchTest extends AbstractContactTest {
 
-    public SearchTest(final String name) {
-        super(name);
+    public SearchTest() {
+        super();
     }
 
     @Override

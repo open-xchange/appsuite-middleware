@@ -29,11 +29,11 @@ public class RegisterTest extends TestCase {
 	private int contextId = 0;
 
 	public RegisterTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public RegisterTest(final String name, final DatagramSocket datagramSocket, final int userId, final int contextId) {
-		super(name);
+		super();
 		this.datagramSocket = datagramSocket;
 		this.userId = userId;
 		this.contextId = contextId;

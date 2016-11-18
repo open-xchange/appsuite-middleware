@@ -8,8 +8,8 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class ConfirmTest extends TaskTest {
 
-	public ConfirmTest(final String name) {
-		super(name);
+	public ConfirmTest() {
+		super();
 	}
 
 	public void testDummy() {

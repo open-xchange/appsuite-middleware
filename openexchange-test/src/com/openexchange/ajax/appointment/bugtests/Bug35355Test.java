@@ -93,8 +93,8 @@ public class Bug35355Test extends AbstractAJAXSession {
 
     private int nextYear;
 
-    public Bug35355Test(String name) {
-        super(name);
+    public Bug35355Test() {
+        super();
     }
 
     @Override

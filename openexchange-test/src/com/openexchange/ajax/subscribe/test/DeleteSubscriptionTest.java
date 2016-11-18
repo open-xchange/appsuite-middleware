@@ -72,8 +72,8 @@ import com.openexchange.subscribe.Subscription;
  */
 public class DeleteSubscriptionTest extends AbstractSubscriptionTest {
 
-    public DeleteSubscriptionTest(String name) {
-        super(name);
+    public DeleteSubscriptionTest() {
+        super();
     }
 
     public void testDeleteOMXFSubscriptionShouldAlwaysWork() throws OXException, IOException, SAXException, JSONException{

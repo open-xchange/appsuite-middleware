@@ -11,8 +11,8 @@ public class Bug6056Test extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6056Test.class);
 
-	public Bug6056Test(final String name) {
-		super(name);
+	public Bug6056Test() {
+		super();
 	}
 
 	@Override

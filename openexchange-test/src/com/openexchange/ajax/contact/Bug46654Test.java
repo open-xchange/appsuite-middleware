@@ -71,8 +71,8 @@ public class Bug46654Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-	public Bug46654Test(String name) {
-		super(name);
+	public Bug46654Test() {
+		super();
 	}
 
     public void testSortUnnamedList() throws Exception {

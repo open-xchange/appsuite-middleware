@@ -84,8 +84,8 @@ public class DuplicateAuthIdTest extends TestCase {
 
     private String password2;
 
-    public DuplicateAuthIdTest(String name) {
-        super(name);
+    public DuplicateAuthIdTest() {
+        super();
     }
 
     @Override

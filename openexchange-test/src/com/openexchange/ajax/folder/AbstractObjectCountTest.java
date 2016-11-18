@@ -80,8 +80,8 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
 
     protected AJAXClient client2;
 
-    protected AbstractObjectCountTest(String name) {
-        super(name);
+    protected AbstractObjectCountTest() {
+        super();
     }
 
     @Override

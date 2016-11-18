@@ -12,8 +12,8 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class NewTest extends AttachmentTest {
 
-	public NewTest(final String name) {
-		super(name);
+	public NewTest() {
+		super();
 	}
 
 	public void testInsertAttachment() throws Exception {

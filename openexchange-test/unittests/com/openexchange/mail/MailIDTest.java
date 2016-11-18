@@ -79,7 +79,7 @@ public final class MailIDTest extends AbstractMailTest {
     }
 
     public MailIDTest(final String name) {
-        super(name);
+        super();
     }
 
     public void testMailID() throws OXException, MessagingException, IOException {

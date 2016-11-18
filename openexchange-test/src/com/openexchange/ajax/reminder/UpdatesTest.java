@@ -67,8 +67,8 @@ import com.openexchange.groupware.reminder.ReminderObject;
 
 public class UpdatesTest extends ReminderTest {
 
-    public UpdatesTest(final String name) {
-        super(name);
+    public UpdatesTest() {
+        super();
     }
 
     public void testRange() throws Exception {

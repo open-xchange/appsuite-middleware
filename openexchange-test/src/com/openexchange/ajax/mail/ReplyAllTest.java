@@ -73,8 +73,8 @@ import com.openexchange.groupware.search.ContactSearchObject;
  */
 public class ReplyAllTest extends AbstractReplyTest {
 
-    public ReplyAllTest(final String name) {
-        super(name);
+    public ReplyAllTest() {
+        super();
     }
 
     public List<Contact> extract(final int amount, final Contact[] source, final List<String> excludedEmail){

@@ -77,8 +77,8 @@ public class Bug40369Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40369Test(String name) {
-        super(name);
+    public Bug40369Test() {
+        super();
     }
 
     public void testCreateFolderLinkConcurrentlyRandomly() throws Exception {

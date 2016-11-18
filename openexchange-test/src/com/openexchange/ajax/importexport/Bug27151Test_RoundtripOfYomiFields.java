@@ -68,7 +68,7 @@ public class Bug27151Test_RoundtripOfYomiFields extends AbstractManagedContactTe
     private Contact contact;
 
 	public Bug27151Test_RoundtripOfYomiFields(String name) {
-		super(name);
+		super();
 	}
 	
 	public void testShouldImportXPhoneticAsYomiField() throws Exception, Exception, Exception {

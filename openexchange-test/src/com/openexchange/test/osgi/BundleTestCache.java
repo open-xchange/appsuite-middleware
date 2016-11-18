@@ -84,12 +84,12 @@ public final class BundleTestCache extends AbstractBundleTest {
      * Initializes a new {@link BundleTestCache}
      */
     public BundleTestCache(final String name) {
-        super(name);
+        super();
     }
 
     public void testCacheAbsence() {
         try {
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject jsonObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),

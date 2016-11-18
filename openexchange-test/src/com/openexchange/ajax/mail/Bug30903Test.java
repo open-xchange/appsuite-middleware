@@ -92,8 +92,8 @@ public class Bug30903Test extends AbstractMailTest {
      *
      * @param name
      */
-    public Bug30903Test(String name) {
-        super(name);
+    public Bug30903Test() {
+        super();
     }
 
     @Override

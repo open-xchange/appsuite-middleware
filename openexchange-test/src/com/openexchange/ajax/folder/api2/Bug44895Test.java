@@ -70,8 +70,8 @@ public class Bug44895Test extends AbstractFolderTest {
      * Initializes a new {@link Bug44895Test}.
      * @param name
      */
-    public Bug44895Test(String name) {
-        super(name);
+    public Bug44895Test() {
+        super();
     }
 
     @Override

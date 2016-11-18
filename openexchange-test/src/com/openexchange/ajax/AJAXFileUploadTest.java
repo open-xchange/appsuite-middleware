@@ -95,8 +95,8 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 	 * @param name
 	 *            The name
 	 */
-	public AJAXFileUploadTest(final String name) {
-		super(name);
+	public AJAXFileUploadTest() {
+	    super();
 	}
 
 	/*

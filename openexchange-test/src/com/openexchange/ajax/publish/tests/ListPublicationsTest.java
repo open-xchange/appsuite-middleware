@@ -73,8 +73,8 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
  */
 public class ListPublicationsTest extends AbstractPublicationTest {
 
-    public ListPublicationsTest(String name) {
-        super(name);
+    public ListPublicationsTest() {
+        super();
     }
 
     public void testListExistingPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException{

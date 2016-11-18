@@ -38,15 +38,6 @@ public class Bug4392Test extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4392Test.class);
 
-	public Bug4392Test(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	/**
 	 * This test case check the until date of recurrence appointments
 	 */

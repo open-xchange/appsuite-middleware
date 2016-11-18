@@ -36,15 +36,6 @@ public class Bug8724Test extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug8724Test.class);
 
-	public Bug8724Test(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	/**
 	 * This test checks if the list action return an object not found exception
 	 * if one id is requested trhat doesn't exist

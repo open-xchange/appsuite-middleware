@@ -83,8 +83,8 @@ public final class Bug28089Test extends AbstractTaskTest {
     private Task task;
     private FolderObject folder;
 
-    public Bug28089Test(String name) {
-        super(name);
+    public Bug28089Test() {
+        super();
     }
 
     @Before

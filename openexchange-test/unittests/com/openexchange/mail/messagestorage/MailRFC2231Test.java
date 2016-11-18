@@ -291,7 +291,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailRFC2231Test(final String name) {
-		super(name);
+		super();
 	}
 
 	public void testRFC2231Part1() {

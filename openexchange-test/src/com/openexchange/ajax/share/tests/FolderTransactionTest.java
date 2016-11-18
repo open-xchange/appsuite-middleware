@@ -74,8 +74,8 @@ public class FolderTransactionTest extends ShareTest {
      *
      * @param name
      */
-    public FolderTransactionTest(String name) {
-        super(name);
+    public FolderTransactionTest() {
+        super();
     }
 
     public void testDontCreateShareOnFailingFolderCreate() throws Exception {

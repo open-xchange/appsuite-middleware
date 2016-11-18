@@ -63,8 +63,8 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
 
     private String originalLocale;
 
-	public SortingInJapanTest(String name) {
-		super(name);
+	public SortingInJapanTest() {
+		super();
 	}
 
     @Override

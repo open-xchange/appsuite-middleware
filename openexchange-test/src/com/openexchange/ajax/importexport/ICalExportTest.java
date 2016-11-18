@@ -56,15 +56,6 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class ICalExportTest extends AbstractICalTest {
 
-	public ICalExportTest(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	public void testExportICalAppointment() throws Exception {
 		final String title = "testExportICalAppointment" + System.currentTimeMillis();
 

@@ -61,8 +61,8 @@ public class GetTest extends AbstractAJAXSession {
 
     private int userId;
 
-    public GetTest(final String name) {
-        super(name);
+    public GetTest() {
+        super();
     }
 
     @Override

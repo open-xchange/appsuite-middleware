@@ -73,8 +73,8 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 	 *
 	 * @param name
 	 */
-	public NetsolTestMailInboxSort(final String name) {
-		super(name);
+	public NetsolTestMailInboxSort() {
+		super();
 	}
 
 	protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(),

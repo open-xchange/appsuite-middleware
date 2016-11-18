@@ -76,7 +76,7 @@ public class MailUUEncodedStructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public MailUUEncodedStructureTest(final String name) {
-        super(name);
+        super();
     }
 
     private static final byte[] SIMPLE = ("Date: Mon, 2 Nov 2009 06:50:42 +0100 (CET)\n" +

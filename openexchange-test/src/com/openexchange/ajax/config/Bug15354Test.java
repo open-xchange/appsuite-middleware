@@ -74,8 +74,8 @@ public class Bug15354Test extends AbstractAJAXSession {
     private boolean origValue;
     private Object[] origAliases;
 
-    public Bug15354Test(String name) {
-        super(name);
+    public Bug15354Test() {
+        super();
     }
 
     @Override

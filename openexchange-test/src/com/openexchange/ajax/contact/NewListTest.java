@@ -78,8 +78,8 @@ public class NewListTest extends AbstractAJAXSession {
     /**
      * Default constructor.
      */
-    public NewListTest(final String name) {
-        super(name);
+    public NewListTest() {
+        super();
     }
 
     /**

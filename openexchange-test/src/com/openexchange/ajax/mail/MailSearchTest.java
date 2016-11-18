@@ -69,8 +69,8 @@ public class MailSearchTest extends AbstractMailTest {
 
     private String folder;
 
-    public MailSearchTest(final String name) {
-        super(name);
+    public MailSearchTest() {
+        super();
     }
 
     @Override

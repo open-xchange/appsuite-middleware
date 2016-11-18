@@ -59,8 +59,8 @@ import com.openexchange.ajax.appointment.action.GetChangeExceptionsResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.cache.OXCachingExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -78,8 +78,8 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
 
     private Appointment exception2;
 
-    public GetChangeExceptionsTest(String name) {
-        super(name);
+    public GetChangeExceptionsTest() {
+        super();
     }
 
     @Override

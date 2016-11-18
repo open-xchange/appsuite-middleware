@@ -69,8 +69,8 @@ public class AuxiliaryAPITest extends AbstractMailFilterTest {
      * 
      * @param name test case's name
      */
-    public AuxiliaryAPITest(String name) {
-        super(name);
+    public AuxiliaryAPITest() {
+        super();
     }
 
     @Override

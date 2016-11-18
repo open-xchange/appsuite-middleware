@@ -83,8 +83,8 @@ public class RedirectTest extends AbstractAJAXSession {
 
     private boolean insecure;
 
-    public RedirectTest(final String name) {
-        super(name);
+    public RedirectTest() {
+        super();
     }
 
     @Override

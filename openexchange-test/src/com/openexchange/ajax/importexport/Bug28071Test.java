@@ -67,8 +67,8 @@ import com.openexchange.tools.arrays.Arrays;
  */
 public class Bug28071Test extends ManagedAppointmentTest {
 
-    public Bug28071Test(String name) {
-        super(name);
+    public Bug28071Test() {
+        super();
     }
 
     public void testIgnoreUIDs() throws Exception {

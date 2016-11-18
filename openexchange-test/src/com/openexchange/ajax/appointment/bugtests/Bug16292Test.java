@@ -58,8 +58,8 @@ public class Bug16292Test extends AbstractAJAXSession {
 
     private Contact contact;
 
-    public Bug16292Test(final String name) {
-        super(name);
+    public Bug16292Test() {
+        super();
     }
 
     @Override

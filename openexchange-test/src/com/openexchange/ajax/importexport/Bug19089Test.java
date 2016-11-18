@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import org.junit.Before;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
@@ -65,12 +66,12 @@ public class Bug19089Test extends ManagedAppointmentTest {
 
     private final String tzid = "Europe/Berlin";
 
-    public Bug19089Test(String name) {
-        super(name);
+    public Bug19089Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         appointment = new Appointment();

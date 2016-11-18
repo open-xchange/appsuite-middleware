@@ -82,8 +82,8 @@ public final class Bug30015Test extends AbstractAJAXSession {
     private Task first;
     private Task second;
 
-    public Bug30015Test(String name) {
-        super(name);
+    public Bug30015Test() {
+        super();
     }
 
     @Before

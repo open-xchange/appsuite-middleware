@@ -88,8 +88,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     protected String hostName = null;
 
-    public InfostoreAJAXTest(final String name){
-        super(name);
+    public InfostoreAJAXTest(){
+        super();
     }
 
     @Override

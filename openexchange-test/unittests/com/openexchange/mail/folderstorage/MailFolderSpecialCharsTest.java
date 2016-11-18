@@ -81,7 +81,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailFolderSpecialCharsTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public void testFolderCreateAndSubfolders() throws OXException {

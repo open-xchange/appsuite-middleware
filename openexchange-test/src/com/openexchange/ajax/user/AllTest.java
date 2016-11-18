@@ -20,8 +20,8 @@ public class AllTest extends AbstractAJAXSession {
      *
      * @param name
      */
-    public AllTest(final String name) {
-        super(name);
+    public AllTest() {
+        super();
     }
 
     @Override

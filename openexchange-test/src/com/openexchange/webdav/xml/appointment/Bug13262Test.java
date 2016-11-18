@@ -69,8 +69,8 @@ public class Bug13262Test extends AppointmentTest {
     private Appointment appointment;
     private Calendar thirdOccurrence;
 
-    public Bug13262Test(final String name) {
-        super(name);
+    public Bug13262Test() {
+        super();
     }
 
     @Override

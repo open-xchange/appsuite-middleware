@@ -74,8 +74,8 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug13027Test extends AbstractAJAXSession {
 
-    public Bug13027Test(String name) {
-        super(name);
+    public Bug13027Test() {
+        super();
     }
 
     public void testNegativeTimeZone() throws Exception {

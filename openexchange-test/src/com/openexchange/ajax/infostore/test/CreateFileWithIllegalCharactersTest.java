@@ -71,8 +71,8 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
      * Initializes a new {@link CreateFileWithIllegalCharactersTest}.
      * @param name
      */
-    public CreateFileWithIllegalCharactersTest(String name) {
-        super(name);
+    public CreateFileWithIllegalCharactersTest() {
+        super();
     }
 
     @Override

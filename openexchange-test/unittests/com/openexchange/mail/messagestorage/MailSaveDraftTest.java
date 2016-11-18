@@ -82,7 +82,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
      * @param name
      */
     public MailSaveDraftTest(final String name) {
-        super(name);
+        super();
     }
 
     public void testMailDraft() {

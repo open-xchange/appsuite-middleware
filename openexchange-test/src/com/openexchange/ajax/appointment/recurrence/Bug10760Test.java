@@ -3,6 +3,7 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -16,8 +17,8 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 
 	private int objectId;
 
-    public Bug10760Test(final String name) {
-		super(name);
+    public Bug10760Test() {
+		super();
 	}
 
 	@Override
@@ -68,8 +69,8 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 
 	}
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         super.tearDown();
         if(objectId != -1){
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);

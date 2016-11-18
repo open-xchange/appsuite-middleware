@@ -74,8 +74,8 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
      *
      * @param name
      */
-    public InfostoreObjectCountTest(String name) {
-        super(name);
+    public InfostoreObjectCountTest() {
+        super();
     }
 
     @Test

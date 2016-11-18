@@ -78,8 +78,8 @@ public class AddGuestPermissionTest extends ShareTest {
      *
      * @param name The test name
      */
-    public AddGuestPermissionTest(String name) {
-        super(name);
+    public AddGuestPermissionTest() {
+        super();
     }
 
     public void testUpdateSharedFolderRandomly() throws Exception {

@@ -66,8 +66,8 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
      * Initializes a new {@link CheckNameActionTest}.
      * @param name
      */
-    public CheckNameActionTest(String name) {
-        super(name);
+    public CheckNameActionTest() {
+        super();
     }
 
     @Override

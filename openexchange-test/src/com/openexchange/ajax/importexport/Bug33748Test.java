@@ -19,8 +19,8 @@ public class Bug33748Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-	public Bug33748Test(final String name) {
-		super(name);
+	public Bug33748Test() {
+		super();
 	}
 
 	public void testImportUTF16LE() throws Exception {

@@ -86,7 +86,7 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
      * @param name
      */
     public PListDownloadTestHelper(String name) {
-        super(name);
+        super();
     }
 
     private static final String[] PLIST_BASIC_KEYS = new String[] { "PayloadIdentifier", "PayloadType", "PayloadUUID", "PayloadVersion", "PayloadDisplayName", "PayloadContent" };

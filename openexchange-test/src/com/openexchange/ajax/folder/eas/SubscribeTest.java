@@ -77,8 +77,8 @@ public class SubscribeTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public SubscribeTest(final String name) {
-        super(name);
+    public SubscribeTest() {
+        super();
     }
 
     @Override

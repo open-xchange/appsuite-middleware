@@ -83,14 +83,14 @@ public final class BundleTestSMTP extends AbstractBundleTest {
      * Initializes a new {@link BundleTestSMTP}
      */
     public BundleTestSMTP(final String name) {
-        super(name);
+        super();
     }
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss", Locale.GERMAN);
 
     public void testSMTPAbsence() {
         try {
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject jsonObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),

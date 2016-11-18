@@ -92,8 +92,8 @@ public class FileStorageTransactionTest extends ShareTest {
      * Initializes a new {@link FileStorageTransactionTest}.
      * @param name
      */
-    public FileStorageTransactionTest(String name) {
-        super(name);
+    public FileStorageTransactionTest() {
+        super();
     }
 
     @Override

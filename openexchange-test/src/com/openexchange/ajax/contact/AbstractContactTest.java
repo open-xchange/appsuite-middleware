@@ -128,8 +128,8 @@ public class AbstractContactTest extends AbstractAJAXSession {
      *
      * @param name
      */
-    protected AbstractContactTest(final String name) {
-        super(name);
+    protected AbstractContactTest() {
+        super();
     }
 
     @Override

@@ -68,8 +68,8 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class Bug10119Test extends AbstractTaskTest {
 
-    public Bug10119Test(final String name) {
-        super(name);
+    public Bug10119Test() {
+        super();
     }
 
     /**

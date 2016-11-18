@@ -68,8 +68,8 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
     private Appointment series;
     private Appointment exception;
 
-    public CreateExceptionWithBadDate(String name) {
-        super(name);
+    public CreateExceptionWithBadDate() {
+        super();
     }
 
     @Override

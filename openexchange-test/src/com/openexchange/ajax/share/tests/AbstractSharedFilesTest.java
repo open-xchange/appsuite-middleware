@@ -90,8 +90,8 @@ public abstract class AbstractSharedFilesTest extends ShareTest {
         infoMgr = new InfostoreTestManager(getClient());
     }
     
-    protected AbstractSharedFilesTest(String name) {
-        super(name);
+    protected AbstractSharedFilesTest() {
+        super();
     }
 
     protected void addUserPermission(int userId) throws OXException, IOException, JSONException {

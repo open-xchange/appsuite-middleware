@@ -62,8 +62,8 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  */
 public class DistListTest extends AbstractManagedContactTest {
 	
-    public DistListTest(String name) {
-        super(name);
+    public DistListTest() {
+        super();
     }
     
 	@Override

@@ -65,8 +65,8 @@ public class ArchiveMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public ArchiveMailTest(String name) {
-        super(name);
+    public ArchiveMailTest() {
+        super();
     }
 
     @Override

@@ -70,8 +70,8 @@ public final class AllTest extends AbstractTaskTest {
     private static final int NUMBER = 10;
     private AJAXClient client;
 
-    public AllTest(final String name) {
-        super(name);
+    public AllTest() {
+        super();
     }
 
     @Override

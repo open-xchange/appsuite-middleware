@@ -16,8 +16,8 @@ public class ICalTest extends AbstractWebdavTest {
 
 	private static final String ICAL_URL = "/servlet/webdav.ical";
 
-	public ICalTest(final String name) {
-		super(name);
+	public ICalTest() {
+		super();
 	}
 
 	@Override

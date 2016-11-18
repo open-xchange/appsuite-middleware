@@ -69,8 +69,8 @@ public class Bug27469Test extends AbstractAJAXSession {
      * Initializes a new {@link Bug27469Test}.
      * @param name
      */
-    public Bug27469Test(String name) {
-        super(name);
+    public Bug27469Test() {
+        super();
     }
     
     public void testSetAliases() throws Exception {

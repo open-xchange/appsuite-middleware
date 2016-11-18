@@ -76,8 +76,8 @@ public class Bug15752Test extends AbstractAJAXSession {
     private String[] mailIds;
     private FolderObject testFolder;
 
-    public Bug15752Test(String name) {
-        super(name);
+    public Bug15752Test() {
+        super();
     }
 
     @Override

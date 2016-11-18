@@ -75,7 +75,7 @@ public class MailSimpleStructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public MailSimpleStructureTest(final String name) {
-        super(name);
+        super();
     }
 
 

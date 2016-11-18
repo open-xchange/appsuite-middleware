@@ -71,8 +71,8 @@ public class MoveTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public MoveTest(final String name) {
-        super(name);
+    public MoveTest() {
+        super();
     }
 
     @Override

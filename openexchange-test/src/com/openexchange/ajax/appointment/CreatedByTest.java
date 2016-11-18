@@ -78,8 +78,8 @@ public class CreatedByTest extends AbstractAJAXSession {
      *
      * @param name
      */
-    public CreatedByTest(String name) {
-        super(name);
+    public CreatedByTest() {
+        super();
     }
 
     @Override

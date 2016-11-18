@@ -93,8 +93,8 @@ public class IMipImportTest extends AbstractConversionTest {
     private int objectId;
     private int folder;
 
-    public IMipImportTest(String name) {
-        super(name);
+    public IMipImportTest() {
+        super();
     }
 
     @Override

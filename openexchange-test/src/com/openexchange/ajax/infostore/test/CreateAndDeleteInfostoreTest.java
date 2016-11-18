@@ -66,8 +66,8 @@ import com.openexchange.test.TestInit;
  */
 public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
 
-    public CreateAndDeleteInfostoreTest(String name) {
-        super(name);
+    public CreateAndDeleteInfostoreTest() {
+        super();
     }
 
     public void testCreatingOneItem() throws OXException, IOException, SAXException, JSONException, OXException {

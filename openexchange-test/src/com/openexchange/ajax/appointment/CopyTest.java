@@ -3,6 +3,10 @@ package com.openexchange.ajax.appointment;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -17,6 +21,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.URLParameter;
 
+@RunWith(ConcurrentTestRunner.class)
 public class CopyTest extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyTest.class);
@@ -25,12 +30,12 @@ public class CopyTest extends AppointmentTest {
     private String context;
     private String password;
 
-	public CopyTest(final String name) {
-		super(name);
+	public CopyTest() {
+		super();
 	}
 
-	@Override
-	protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
 	    super.setUp();
 	    targetFolderId = 0;
 	    login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
@@ -38,8 +43,8 @@ public class CopyTest extends AppointmentTest {
 	    password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
 	}
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (0 != targetFolderId) {
             com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolderId }, PROTOCOL + getHostName(), login, password, context);
         }

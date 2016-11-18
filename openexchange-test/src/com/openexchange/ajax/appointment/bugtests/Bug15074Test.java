@@ -74,8 +74,8 @@ public class Bug15074Test extends AbstractAJAXSession {
      *
      * @param name
      */
-    public Bug15074Test(String name) {
-        super(name);
+    public Bug15074Test() {
+        super();
     }
 
     /*

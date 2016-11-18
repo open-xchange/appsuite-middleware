@@ -79,12 +79,12 @@ public final class BundleTestConfigJump extends AbstractBundleTest {
      * Initializes a new {@link BundleTestConfigJump}
      */
     public BundleTestConfigJump(final String name) {
-        super(name);
+        super();
     }
 
     public void testConfighJumpAbsence() {
         try {
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject jsonObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),

@@ -67,8 +67,8 @@ public final class CheckTest extends AbstractSpellCheckTest {
 	 *
 	 * @param name
 	 */
-	public CheckTest(final String name) {
-		super(name);
+	public CheckTest() {
+		super();
 	}
 
 	/**

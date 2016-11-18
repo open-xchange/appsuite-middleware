@@ -80,8 +80,8 @@ public class Bug31253Test extends AbstractMailFilterTest {
      * 
      * @param name
      */
-    public Bug31253Test(String name) {
-        super(name);
+    public Bug31253Test() {
+        super();
     }
 
     @Override

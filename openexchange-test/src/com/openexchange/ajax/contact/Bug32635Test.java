@@ -69,8 +69,8 @@ public class Bug32635Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-    public Bug32635Test(String name) {
-        super(name);
+    public Bug32635Test() {
+        super();
     }
 
 	@Override

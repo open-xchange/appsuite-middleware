@@ -71,8 +71,8 @@ public class AllSeenMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public AllSeenMailTest(final String name) {
-        super(name);
+    public AllSeenMailTest() {
+        super();
     }
 
     @Override

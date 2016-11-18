@@ -72,8 +72,8 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 
     protected static final int APPEND_MODIFIED = 1000000;
 
-    public AbstractWebdavXMLTest(final String name) {
-        super(name);
+    public AbstractWebdavXMLTest() {
+        super();
     }
 
     protected static int parseResponse(final Document response, final boolean delete) throws Exception {

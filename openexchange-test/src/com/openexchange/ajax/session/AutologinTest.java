@@ -61,8 +61,8 @@ import com.openexchange.ajax.LoginServlet;
  */
 public class AutologinTest extends AbstractLoginTest {
 
-    public AutologinTest(String name) {
-        super(name);
+    public AutologinTest() {
+        super();
     }
 
     public void testGeeIForgotMySessionIDCanYouGiveItBack() throws Exception {

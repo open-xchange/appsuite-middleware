@@ -69,8 +69,8 @@ import com.openexchange.subscribe.Subscription;
  */
 public class NewSubscriptionTest extends AbstractSubscriptionTest {
 
-    public NewSubscriptionTest(String name) {
-        super(name);
+    public NewSubscriptionTest() {
+        super();
     }
 
     public void testShouldSurviveBasicOXMFSubscriptionCreation() throws OXException, IOException, SAXException, JSONException{

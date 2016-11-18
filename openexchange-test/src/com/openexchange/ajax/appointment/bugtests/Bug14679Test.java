@@ -22,8 +22,8 @@ public class Bug14679Test extends AbstractAJAXSession {
 
     private Appointment update;
 
-    public Bug14679Test(String name) {
-        super(name);
+    public Bug14679Test() {
+        super();
     }
 
     @Override

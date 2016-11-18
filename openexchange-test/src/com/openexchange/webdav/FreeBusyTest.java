@@ -18,8 +18,8 @@ public class FreeBusyTest extends AbstractWebdavTest {
 
 	private static final String FREEBUSY_URL = "/servlet/webdav.freebusy";
 
-	public FreeBusyTest(final String name) {
-		super(name);
+	public FreeBusyTest() {
+		super();
 	}
 
 	@Override

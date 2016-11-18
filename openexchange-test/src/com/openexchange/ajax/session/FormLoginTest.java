@@ -69,8 +69,8 @@ public class FormLoginTest extends AbstractAJAXSession {
 
     private String password;
 
-    public FormLoginTest(String name) {
-        super(name);
+    public FormLoginTest() {
+        super();
     }
 
     @Override

@@ -10,8 +10,8 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class ListTest extends ContactTest {
 
-	public ListTest(final String name) {
-		super(name);
+	public ListTest() {
+		super();
 	}
 
 	public void testPropFindWithModified() throws Exception {

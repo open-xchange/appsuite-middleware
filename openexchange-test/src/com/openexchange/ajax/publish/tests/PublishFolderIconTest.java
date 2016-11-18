@@ -76,8 +76,8 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
 
     private FolderObject folder;
 
-    public PublishFolderIconTest(String name) {
-        super(name);
+    public PublishFolderIconTest() {
+        super();
     }
 
     @Override

@@ -82,8 +82,8 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     private Contact referencedContact1;
     private Contact referencedContact2;
 
-    public DistListPermissionsTest(String name) {
-        super(name);
+    public DistListPermissionsTest() {
+        super();
     }
     
     @Override

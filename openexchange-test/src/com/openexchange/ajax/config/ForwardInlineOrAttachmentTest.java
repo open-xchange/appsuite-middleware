@@ -79,8 +79,8 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
      * Default constructor.
      * @param name Name of the test.
      */
-    public ForwardInlineOrAttachmentTest(final String name) {
-        super(name);
+    public ForwardInlineOrAttachmentTest() {
+        super();
     }
 
     /**

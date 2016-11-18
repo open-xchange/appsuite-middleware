@@ -67,8 +67,8 @@ import com.openexchange.test.TestInit;
 
 public class CopyTest extends InfostoreAJAXTest {
 
-    public CopyTest(final String name){
-        super(name);
+    public CopyTest(){
+        super();
     }
 
     private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(
@@ -199,12 +199,12 @@ public class CopyTest extends InfostoreAJAXTest {
     public void testVirtualFolder() throws Exception{
 
         for(int folderId : virtualFolders) {
-            virtualFolderTest( folderId );
+            virtualFolderTest();
         }
     }
 
     //Bug 4269
-    public void virtualFolderTest(int folderId) throws Exception{
+    public void virtualFolderTest() throws Exception{
         try {
             final String id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m("folder_id" , ""+folderId));
             clean.add(id);

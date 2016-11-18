@@ -73,8 +73,8 @@ public class Bug40993Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40993Test(String name) {
-        super(name);
+    public Bug40993Test() {
+        super();
     }
 
     public void testAccessSubfolderRandomly() throws Exception {

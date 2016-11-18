@@ -81,8 +81,8 @@ public class TestSnippetSignature extends AbstractAJAXSession {
      * 
      * @param name
      */
-    public TestSnippetSignature(String name) {
-        super(name);
+    public TestSnippetSignature() {
+        super();
     }
 
     public void testCreateSignatureWithImageWorkflow() throws Exception {

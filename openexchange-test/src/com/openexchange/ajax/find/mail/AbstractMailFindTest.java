@@ -34,8 +34,8 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
 
     protected ContactTestManager contactManager;
 
-    public AbstractMailFindTest(String name) {
-        super(name);
+    public AbstractMailFindTest() {
+        super();
     }
 
     @Override

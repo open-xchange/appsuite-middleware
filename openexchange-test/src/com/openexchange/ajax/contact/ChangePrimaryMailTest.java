@@ -72,8 +72,8 @@ public class ChangePrimaryMailTest extends AbstractAJAXSession {
     private Contact userContact;
     private int contactId;
 
-    public ChangePrimaryMailTest(String name) {
-        super(name);
+    public ChangePrimaryMailTest() {
+        super();
     }
 
     @Override

@@ -73,8 +73,8 @@ public class Bug29566Test extends AbstractAJAXSession {
     private CalendarTestManager ctm2;
     private Appointment appointment;
 
-    public Bug29566Test(String name) {
-        super(name);
+    public Bug29566Test() {
+        super();
     }
     @Override
     public void setUp() throws Exception {

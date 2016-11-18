@@ -74,8 +74,8 @@ public class GetMailInboxTest extends AbstractAJAXSession {
      * Initializes a new {@link GetMailInboxTest}.
      * @param name name of the test.
      */
-    public GetMailInboxTest(String name) {
-        super(name);
+    public GetMailInboxTest() {
+        super();
     }
 
     @Override

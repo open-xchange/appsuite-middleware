@@ -12,7 +12,12 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -23,6 +28,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
 
+@RunWith(ConcurrentTestRunner.class)
 public class AllTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
@@ -30,20 +36,21 @@ public class AllTest extends AppointmentTest {
     private static final int[] SIMPLE_COLUMNS = new int[] {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };
 
-    public AllTest(final String name) {
-        super(name);
+    public AllTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        clean();
+    @After
+    public void tearDown() throws Exception {
+//        clean();
     }
 
+    @Test
     public void testShouldListAppointmentsInPrivateFolder() throws Exception {
         final Appointment appointment = new Appointment();
         appointment.setStartDate(D("24/02/1998 12:00"));
@@ -103,6 +110,7 @@ public class AllTest extends AppointmentTest {
         }
     }
 
+    @Test
     public void testShouldOnlyListAppointmentsInSpecifiedTimeRange() throws JSONException, OXException, IOException, SAXException {
         final Appointment appointment = new Appointment();
         appointment.setStartDate(D("24/02/1998 12:00"));
@@ -178,6 +186,7 @@ public class AllTest extends AppointmentTest {
         }
     }
 
+    @Test
     public void testShowAppointmentsBetween() throws Exception {
         final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 7));
         final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 7));
@@ -196,6 +205,7 @@ public class AllTest extends AppointmentTest {
             getSessionId());
     }
 
+    @Test
     public void testShowAllAppointmentWhereIAmParticipant() throws Exception {
         final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 7));
         final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 7));
@@ -214,6 +224,7 @@ public class AllTest extends AppointmentTest {
             getSessionId());
     }
 
+    @Test
     public void testShowFullTimeAppointments() throws Exception {
         final int cols[] = new int[] { Appointment.OBJECT_ID };
 
@@ -311,6 +322,7 @@ public class AllTest extends AppointmentTest {
     }
 
     // Bug 12171
+    @Test
     public void testShowOcurrences() throws Exception {
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_COUNT };
 
@@ -341,6 +353,7 @@ public class AllTest extends AppointmentTest {
     }
 
     // Node 2652
+    @Test
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC };

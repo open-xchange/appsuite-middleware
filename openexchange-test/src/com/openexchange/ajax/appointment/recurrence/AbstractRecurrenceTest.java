@@ -44,8 +44,8 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 		Appointment.TIMEZONE
 	};
 
-	public AbstractRecurrenceTest(final String name) {
-		super(name);
+	public AbstractRecurrenceTest() {
+		super();
 	}
 
 	@Override

@@ -65,7 +65,7 @@ import com.openexchange.subscribe.Subscription;
 public class DoNotLoseContactsWhenPublishingAndSubscribing extends OXMFContactLifeCycleTest {
 
     public DoNotLoseContactsWhenPublishingAndSubscribing(String name) {
-        super(name);
+        super();
     }
 
     public void testShouldNotLoseContactsWhileRoundtripping() throws Exception {

@@ -92,7 +92,7 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
      * Initializes a new {@link FindTasksQueryTests}.
      */
     public FindTasksQueryTests(String name) {
-        super(name);
+        super();
     }
 
     /**

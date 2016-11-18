@@ -70,8 +70,8 @@ public final class ViewTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public ViewTest(final String name) {
-        super(name);
+    public ViewTest() {
+        super();
     }
 
     /**

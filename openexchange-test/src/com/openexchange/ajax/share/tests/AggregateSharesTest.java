@@ -89,8 +89,8 @@ public class AggregateSharesTest extends ShareTest {
      *
      * @param name The test name
      */
-    public AggregateSharesTest(String name) {
-        super(name);
+    public AggregateSharesTest() {
+        super();
     }
 
     @Override

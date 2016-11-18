@@ -75,7 +75,7 @@ public class Bug16174StructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public Bug16174StructureTest(final String name) {
-        super(name);
+        super();
     }
 
 

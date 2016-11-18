@@ -63,6 +63,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -98,8 +99,8 @@ import com.openexchange.tools.URLParameter;
 
 public class ContactTest extends AbstractAJAXTest {
 
-    public ContactTest(final String name) {
-        super(name);
+    public ContactTest() {
+        super();
     }
 
     protected final static int[] CONTACT_FIELDS = {
@@ -133,8 +134,8 @@ public class ContactTest extends AbstractAJAXTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactTest.class);
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         final FolderObject folderObj = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId());

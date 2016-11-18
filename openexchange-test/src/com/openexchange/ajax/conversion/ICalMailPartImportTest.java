@@ -86,8 +86,8 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
      * @param name
      *            The name
      */
-    public ICalMailPartImportTest(final String name) {
-        super(name);
+    public ICalMailPartImportTest() {
+        super();
     }
 
     /**

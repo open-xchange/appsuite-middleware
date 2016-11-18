@@ -30,8 +30,8 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 
 	public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
 
-	public GroupUserTest(final String name) {
-		super(name);
+	public GroupUserTest() {
+		super();
 	}
 
 	@Override

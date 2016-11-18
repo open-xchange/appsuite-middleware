@@ -74,8 +74,8 @@ public class FolderItemCountTest extends ShareTest {
      *
      * @param name The test name
      */
-    public FolderItemCountTest(String name) {
-        super(name);
+    public FolderItemCountTest() {
+        super();
     }
 
     public void testFolderItemCount() throws Exception {

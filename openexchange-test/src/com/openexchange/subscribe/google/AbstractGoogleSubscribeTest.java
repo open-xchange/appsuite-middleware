@@ -77,8 +77,8 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
      *
      * @param name
      */
-    protected AbstractGoogleSubscribeTest(String name) {
-        super(name);
+    protected AbstractGoogleSubscribeTest() {
+        super();
     }
 
     public void setUp() throws Exception {

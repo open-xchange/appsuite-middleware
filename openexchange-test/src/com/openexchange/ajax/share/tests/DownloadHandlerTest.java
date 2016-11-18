@@ -81,8 +81,8 @@ public class DownloadHandlerTest extends ShareTest {
      *
      * @param name The test name
      */
-    public DownloadHandlerTest(String name) {
-        super(name);
+    public DownloadHandlerTest() {
+        super();
     }
 
     public void testDownloadSharedFileRandomly() throws Exception {

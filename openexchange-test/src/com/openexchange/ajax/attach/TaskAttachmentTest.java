@@ -61,8 +61,8 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskAttachmentTest extends AbstractAttachmentTest {
 
-    public TaskAttachmentTest(final String name) {
-        super(name);
+    public TaskAttachmentTest() {
+        super();
     }
 
     /**

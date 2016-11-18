@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import org.junit.Before;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
@@ -68,13 +69,13 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
     private Changes changes;
     private Appointment update;
 
-    public TestsForUsingRecurrencePositionToGetChangeExceptions(String name) {
-        super(name);
+    public TestsForUsingRecurrencePositionToGetChangeExceptions() {
+        super();
     }
 
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         app = generateDailyAppointment();
         app.setOccurrence(3);

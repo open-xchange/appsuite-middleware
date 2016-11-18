@@ -472,7 +472,7 @@ public class MailConverterTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailConverterTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public void testMIMEConverter() {

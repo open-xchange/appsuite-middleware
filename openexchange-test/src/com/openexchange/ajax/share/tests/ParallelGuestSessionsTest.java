@@ -73,8 +73,8 @@ public class ParallelGuestSessionsTest extends ShareTest {
      *
      * @param name The test name
      */
-    public ParallelGuestSessionsTest(String name) {
-        super(name);
+    public ParallelGuestSessionsTest() {
+        super();
     }
 
     public void testParallelInvitedGuestSessions() throws Exception {

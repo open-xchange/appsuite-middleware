@@ -15,8 +15,8 @@ import com.openexchange.test.TestInit;
 
 public class AllTest extends InfostoreAJAXTest {
 
-	public AllTest(final String name) {
-		super(name);
+	public AllTest() {
+		super();
 	}
 
 	public void testBasic() throws Exception{

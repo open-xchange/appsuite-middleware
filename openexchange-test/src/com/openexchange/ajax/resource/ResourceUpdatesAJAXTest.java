@@ -71,8 +71,8 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
      * Initializes a new {@link ResourceUpdatesAJAXTest}.
      * @param name
      */
-    public ResourceUpdatesAJAXTest(String name) {
-        super(name);
+    public ResourceUpdatesAJAXTest() {
+        super();
     }
 
 

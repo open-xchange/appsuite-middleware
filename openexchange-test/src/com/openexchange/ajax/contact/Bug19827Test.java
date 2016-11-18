@@ -71,8 +71,8 @@ public class Bug19827Test extends AbstractAJAXSession {
     private AJAXClient client;
     private Contact contact;
 
-    public Bug19827Test(String name) {
-        super(name);
+    public Bug19827Test() {
+        super();
     }
 
     @Override

@@ -7,8 +7,8 @@ public class Bug7915Test extends AbstractRecurrenceTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug7915Test.class);
 
-	public Bug7915Test(final String name) {
-		super(name);
+	public Bug7915Test() {
+		super();
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 	}
 

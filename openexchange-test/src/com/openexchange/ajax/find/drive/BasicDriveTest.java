@@ -120,8 +120,8 @@ public class BasicDriveTest extends AbstractFindTest {
      *
      * @param name
      */
-    public BasicDriveTest(String name) {
-        super(name);
+    public BasicDriveTest() {
+        super();
     }
 
     @Override

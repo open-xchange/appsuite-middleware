@@ -15,8 +15,8 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
 	protected Task actual;
 	private FolderTestManager fManager;
 
-	public ManagedTaskTest(String name) {
-		super(name);
+	public ManagedTaskTest() {
+		super();
 	}
 
 	@Override

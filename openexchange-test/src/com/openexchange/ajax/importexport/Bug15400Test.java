@@ -71,8 +71,8 @@ public class Bug15400Test extends AbstractManagedContactTest {
 	 *
 	 * @param name The test name
 	 */
-	public Bug15400Test(String name) {
-		super(name);
+	public Bug15400Test() {
+		super();
 	}
 
     public void testBug15400() throws Exception {

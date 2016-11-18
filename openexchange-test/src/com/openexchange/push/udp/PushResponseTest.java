@@ -18,11 +18,11 @@ public class PushResponseTest extends TestCase {
 	private int contextId = 0;
 
 	public PushResponseTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public PushResponseTest(final String name, final DatagramSocket datagramSocket, final int folderId, final int contextId) {
-		super(name);
+		super();
 		this.datagramSocket = datagramSocket;
 		this.folderId = folderId;
 		this.contextId = contextId;

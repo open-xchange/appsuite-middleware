@@ -75,8 +75,8 @@ public final class FunambolTest extends AbstractAJAXSession {
     private TimeZone timeZone;
     private List<Appointment> toDelete;
 
-    public FunambolTest(final String name) {
-        super(name);
+    public FunambolTest() {
+        super();
     }
 
     @Override

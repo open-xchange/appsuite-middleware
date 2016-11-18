@@ -88,8 +88,8 @@ public class UpdatesTest extends AbstractAJAXSession {
     private File urlDoc;
     private InfostoreTestManager itm;
 
-    public UpdatesTest(String name) {
-        super(name);
+    public UpdatesTest() {
+        super();
     }
 
     @Override

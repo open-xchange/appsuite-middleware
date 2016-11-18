@@ -18,9 +18,8 @@ import com.openexchange.test.TestInit;
 
 public class VersionsTest extends InfostoreAJAXTest {
 
-
-	public VersionsTest(final String name) {
-		super(name);
+	public VersionsTest() {
+		super();
 	}
 
 	public void testVersions() throws Exception{

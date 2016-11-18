@@ -74,8 +74,8 @@ public class Bug10400Test extends AbstractTaskTest {
      * Default constructor.
      * @param name Name of the test.
      */
-    public Bug10400Test(final String name) {
-        super(name);
+    public Bug10400Test() {
+        super();
     }
 
     /**

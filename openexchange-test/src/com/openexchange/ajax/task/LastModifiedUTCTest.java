@@ -84,8 +84,8 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
      *
      * @param name name of the test.
      */
-    public LastModifiedUTCTest(final String name) throws JSONException, OXException, IOException, SAXException {
-        super(name);
+    public LastModifiedUTCTest() throws JSONException, OXException, IOException, SAXException {
+        super();
     }
 
     @Override

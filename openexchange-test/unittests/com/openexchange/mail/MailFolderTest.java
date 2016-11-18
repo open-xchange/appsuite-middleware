@@ -73,7 +73,7 @@ public class MailFolderTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailFolderTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public void testGetINBOXFolder() {

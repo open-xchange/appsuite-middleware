@@ -10,8 +10,8 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DailyRecurrenceTest.class);
 
-	public DailyRecurrenceTest(final String name) {
-		super(name);
+	public DailyRecurrenceTest() {
+		super();
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 	}
 

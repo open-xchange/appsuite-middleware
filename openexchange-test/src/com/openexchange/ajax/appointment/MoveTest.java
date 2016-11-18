@@ -1,12 +1,17 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 
+@RunWith(ConcurrentTestRunner.class)
 public class MoveTest extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MoveTest.class);
@@ -16,12 +21,12 @@ public class MoveTest extends AppointmentTest {
     private int targetFolder;
     private int objectId;
 
-	public MoveTest(final String name) {
-		super(name);
+	public MoveTest() {
+		super();
 	}
 
-	@Override
-	protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
 	    super.setUp();
 	    login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
 	    context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultcontext");
@@ -29,8 +34,8 @@ public class MoveTest extends AppointmentTest {
 	    targetFolder = 0;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
         if (0 != objectId) {
             deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
         }

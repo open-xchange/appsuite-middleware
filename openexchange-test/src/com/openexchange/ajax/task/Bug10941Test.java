@@ -65,8 +65,8 @@ public class Bug10941Test extends AbstractAJAXSession {
 
     private TestTask task;
 
-    public Bug10941Test(String name) {
-        super(name);
+    public Bug10941Test() {
+        super();
     }
 
     @Override

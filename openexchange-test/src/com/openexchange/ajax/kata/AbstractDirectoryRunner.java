@@ -71,7 +71,7 @@ public abstract class AbstractDirectoryRunner extends AbstractAJAXSession {
     private final Class aClass;
 
     public AbstractDirectoryRunner(String name, String dirName, Class aClass) {
-        super(name);
+        super();
         this.dirName = dirName;
         this.aClass = aClass;
     }

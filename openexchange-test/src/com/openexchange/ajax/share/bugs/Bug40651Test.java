@@ -82,8 +82,8 @@ public class Bug40651Test extends ShareTest {
      * Initializes a new {@link Bug40651Test}.
      * @param name
      */
-    public Bug40651Test(String name) {
-        super(name);
+    public Bug40651Test() {
+        super();
     }
 
     public void testShareFileLinkAndSearchForItAsGuest() throws Exception {

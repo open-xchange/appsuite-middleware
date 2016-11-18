@@ -76,8 +76,8 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
      *
      * @param name
      */
-    public ThirdpartyLifecycleTest(String name) {
-        super(name);
+    public ThirdpartyLifecycleTest() {
+        super();
     }
 
     @Override

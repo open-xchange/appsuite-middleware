@@ -60,8 +60,8 @@ import com.openexchange.groupware.container.UserParticipant;
 public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends
 		ManagedAppointmentTest {
 
-	public Bug7883Test_ReminderIsSyncedAndCrashesOutlook(String name) {
-		super(name);
+	public Bug7883Test_ReminderIsSyncedAndCrashesOutlook() {
+		super();
 	}
 
 	public void testIt() throws Exception{

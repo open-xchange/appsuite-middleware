@@ -69,8 +69,8 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
  */
 public class EASSyncProfileTest extends AbstractAJAXSession {
 
-    public EASSyncProfileTest(String name) {
-        super(name);
+    public EASSyncProfileTest() {
+        super();
     }
 
     @Override

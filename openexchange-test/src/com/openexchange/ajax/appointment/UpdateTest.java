@@ -54,6 +54,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
@@ -70,6 +72,7 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 
+@RunWith(ConcurrentTestRunner.class)
 public class UpdateTest extends AppointmentTest {
 
     private final static int[] _appointmentFields = {
@@ -97,15 +100,6 @@ public class UpdateTest extends AppointmentTest {
         Appointment.TIMEZONE,
         Appointment.RECURRENCE_START
     };
-
-    public UpdateTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
 
     public void testSimple() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testSimple");

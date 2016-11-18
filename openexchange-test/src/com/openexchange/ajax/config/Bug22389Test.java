@@ -66,8 +66,8 @@ public class Bug22389Test extends AbstractAJAXSession {
     private static final String EXPRESSION = "[67]\\.[0-9]+\\.[0-9]-Rev[0-9]+";
     private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
 
-    public Bug22389Test(String name) {
-        super(name);
+    public Bug22389Test() {
+        super();
     }
 
     public void testVersion() throws Exception {

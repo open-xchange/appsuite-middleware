@@ -78,8 +78,8 @@ public class Bug40548Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40548Test(String name) {
-        super(name);
+    public Bug40548Test() {
+        super();
     }
 
     public void testFilePreviewWithParallelGuestSessions() throws Exception {

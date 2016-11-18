@@ -76,7 +76,7 @@ public class Bug18981StructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public Bug18981StructureTest(final String name) {
-        super(name);
+        super();
     }
 
     private static final byte[] SOURCE = ("Reply-To: <orderstatus_notification@barfoo.com>\n" +

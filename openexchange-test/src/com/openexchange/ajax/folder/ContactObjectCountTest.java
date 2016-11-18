@@ -66,8 +66,8 @@ public final class ContactObjectCountTest extends AbstractObjectCountTest {
 
     private static final Random rand = new Random(System.currentTimeMillis());
 
-    public ContactObjectCountTest(String name) {
-        super(name);
+    public ContactObjectCountTest() {
+        super();
     }
 
     @Test

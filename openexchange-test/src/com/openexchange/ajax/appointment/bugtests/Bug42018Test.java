@@ -70,8 +70,8 @@ public class Bug42018Test extends AbstractAJAXSession {
     
     boolean works = false;
 
-    public Bug42018Test(String name) {
-        super(name);
+    public Bug42018Test() {
+        super();
     }
 
     @Before

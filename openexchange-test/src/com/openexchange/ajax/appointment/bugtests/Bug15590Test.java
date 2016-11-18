@@ -40,8 +40,8 @@ public class Bug15590Test extends AbstractAJAXSession {
 
     UserValues secondUserValues;
 
-    public Bug15590Test(String name) {
-        super(name);
+    public Bug15590Test() {
+        super();
     }
 
     @Override

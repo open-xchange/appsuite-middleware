@@ -49,7 +49,6 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -64,8 +63,8 @@ import com.openexchange.groupware.container.UserParticipant;
 public class Bug5144Test_UserGetsRemovedFromParticipantList extends
 		ManagedAppointmentTest {
 
-	public Bug5144Test_UserGetsRemovedFromParticipantList(String name) {
-		super(name);
+	public Bug5144Test_UserGetsRemovedFromParticipantList() {
+		super();
 	}
 	
 	public void testIt() throws Exception{

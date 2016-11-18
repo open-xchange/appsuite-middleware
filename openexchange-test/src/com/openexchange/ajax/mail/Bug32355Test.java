@@ -79,8 +79,8 @@ public class Bug32355Test extends AbstractMailTest {
 
     String[][] fmid;
 
-    public Bug32355Test(final String name) {
-        super(name);
+    public Bug32355Test() {
+        super();
     }
 
     @Override

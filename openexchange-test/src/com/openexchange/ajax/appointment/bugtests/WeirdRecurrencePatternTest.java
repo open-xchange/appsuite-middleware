@@ -80,8 +80,8 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
      * Initializes a new {@link WeirdRecurrencePatternTest}.
      * @param name
      */
-    public WeirdRecurrencePatternTest(String name) {
-        super(name);
+    public WeirdRecurrencePatternTest() {
+        super();
     }
 
     @Override

@@ -65,8 +65,8 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
 
-    public AnotherCreateAndDeleteInfostoreTest(String name) {
-        super(name);
+    public AnotherCreateAndDeleteInfostoreTest() {
+        super();
     }
 
     public void testCreatingOneItem() throws OXException, IOException, SAXException, JSONException, OXException {

@@ -57,7 +57,7 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest{
 	private Contact contact;
 
 	public Bug13915FileAsViaJSON(String name) {
-		super(name);
+		super();
 	}
 
 	@Override

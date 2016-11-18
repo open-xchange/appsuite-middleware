@@ -5,8 +5,8 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class NewTest extends FolderTest {
 
-	public NewTest(final String name) {
-		super(name);
+	public NewTest() {
+		super();
 	}
 
 	public void testInsertPrivateFolderCalendar() throws Exception {

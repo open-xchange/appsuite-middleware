@@ -69,8 +69,8 @@ public class Bug16515Test extends AbstractAJAXSession {
 
     private final String FILE_AS_VALUE = "I'm the file_as field of Herbert Meier";
 
-    public Bug16515Test(String name) {
-        super(name);
+    public Bug16515Test() {
+        super();
     }
 
     @Override

@@ -66,8 +66,8 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
 	 *
 	 * @param name
 	 */
-	public NetsolTestViewFolders(final String name) {
-		super(name);
+	public NetsolTestViewFolders() {
+		super();
 	}
 
 	public void testViewFolders() throws Throwable {

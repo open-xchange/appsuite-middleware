@@ -16,19 +16,6 @@ import com.openexchange.groupware.container.Contact;
 
 public class MultipleTest extends ContactTest {
 
-    public MultipleTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    public void testDummy() {
-
-    }
-
     public void testMultipleInsert() throws Exception {
         final Contact contactObj = new Contact();
         contactObj.setSurName("testMultipleInsert");

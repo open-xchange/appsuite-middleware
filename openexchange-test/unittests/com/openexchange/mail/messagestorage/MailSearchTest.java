@@ -109,7 +109,7 @@ public final class MailSearchTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailSearchTest(final String name) {
-		super(name);
+		super();
 	}
 
 	private static final MailField[] FIELDS_ID = { MailField.ID };

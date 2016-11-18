@@ -81,8 +81,8 @@ public class AbstractPubSubRoundtripTest extends AbstractPubSubTest{
         return pubMgr;
     }
 
-    public AbstractPubSubRoundtripTest(String name) {
-        super(name);
+    public AbstractPubSubRoundtripTest() {
+        super();
     }
 
     @Override

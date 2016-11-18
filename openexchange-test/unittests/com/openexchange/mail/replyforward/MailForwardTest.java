@@ -91,7 +91,7 @@ public final class MailForwardTest extends AbstractMailTest {
      * @param name
      */
     public MailForwardTest(final String name) {
-        super(name);
+        super();
     }
 
     private static final String RFC822_SRC = "Date: Wed, 2 Apr 2008 07:41:24 +0200 (CEST)\n" +

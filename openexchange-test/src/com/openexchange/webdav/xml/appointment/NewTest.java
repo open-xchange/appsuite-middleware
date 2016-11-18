@@ -74,8 +74,8 @@ import com.openexchange.webdav.xml.GroupUserTest;
 
 public class NewTest extends AppointmentTest {
 
-    public NewTest(final String name) {
-        super(name);
+    public NewTest() {
+        super();
     }
 
     public void testNewAppointment() throws Exception {

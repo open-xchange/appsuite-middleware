@@ -69,8 +69,8 @@ public class Bug32060Test extends AbstractFindTest {
      *
      * @param name The test name
      */
-    public Bug32060Test(String name) {
-        super(name);
+    public Bug32060Test() {
+        super();
     }
 
     public void testUnknownModule() throws Exception {

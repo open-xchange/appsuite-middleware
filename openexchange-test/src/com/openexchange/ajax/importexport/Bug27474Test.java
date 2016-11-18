@@ -68,8 +68,8 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
  */
 public class Bug27474Test extends ManagedAppointmentTest {
 
-    public Bug27474Test(String name) {
-        super(name);
+    public Bug27474Test() {
+        super();
     }
 
     public void testRepeatedImportOfASeriesWithChangeException() throws Exception {

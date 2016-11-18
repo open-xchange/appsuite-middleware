@@ -79,8 +79,8 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
      * @param name
      *            The name
      */
-    public VCardMailPartAttachTest(final String name) {
-        super(name);
+    public VCardMailPartAttachTest() {
+        super();
     }
 
     /**

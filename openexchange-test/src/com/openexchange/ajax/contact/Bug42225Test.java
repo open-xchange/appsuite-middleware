@@ -65,8 +65,8 @@ public class Bug42225Test extends AbstractManagedContactTest {
      * Initializes a new {@link Bug42225Test}.
      * @param name
      */
-    public Bug42225Test(String name) {
-        super(name);
+    public Bug42225Test() {
+        super();
     }
 
     public void testBug42225() throws Exception {

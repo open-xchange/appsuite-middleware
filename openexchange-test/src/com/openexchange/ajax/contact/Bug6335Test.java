@@ -72,19 +72,6 @@ import com.openexchange.tools.URLParameter;
  */
 public class Bug6335Test extends ContactTest {
 
-    /**
-     * @param name
-     */
-    public Bug6335Test(final String name) {
-        super(name);
-    }
-
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	public void testBug6335() throws Exception {
 
 		final Contact contactObj = new Contact();

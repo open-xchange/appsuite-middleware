@@ -70,8 +70,8 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
  */
 public class CreatePublicationTest extends AbstractPublicationTest {
 
-    public CreatePublicationTest(String name) {
-        super(name);
+    public CreatePublicationTest() {
+        super();
     }
 
     public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException{

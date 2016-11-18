@@ -70,8 +70,8 @@ public class CopyTest extends AbstractMailTest {
 
     private String mailObject_25kb;
 
-    public CopyTest(String name) {
-        super(name);
+    public CopyTest() {
+        super();
     }
 
     @Override

@@ -67,7 +67,7 @@ import com.openexchange.test.FolderTestManager;
 public class FolderIdTestAjax extends AbstractAJAXSession {
 
     public FolderIdTestAjax(String name) {
-        super(name);
+        super();
     }
 
     private Appointment appointment;

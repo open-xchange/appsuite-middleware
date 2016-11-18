@@ -71,8 +71,8 @@ public final class TaskObjectCountTest extends AbstractObjectCountTest {
 
     private static final Random rand = new Random(System.currentTimeMillis());
 
-    public TaskObjectCountTest(String name) {
-        super(name);
+    public TaskObjectCountTest() {
+        super();
     }
 
     @Test

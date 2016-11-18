@@ -72,8 +72,8 @@ public class Bug15937Test extends AbstractAJAXSession {
     private Appointment appointment;
     private TimeZone timeZone;
 
-    public Bug15937Test(String name) {
-        super(name);
+    public Bug15937Test() {
+        super();
     }
 
     @Override

@@ -64,8 +64,8 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 	protected FolderTestManager folderManager;
 	protected int folderID;
 
-	public AbstractManagedContactTest(String name) {
-		super(name);
+	public AbstractManagedContactTest() {
+		super();
 	}
 
 	@Override

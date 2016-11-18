@@ -82,8 +82,8 @@ public class UpdateMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public UpdateMailTest(final String name) {
-        super(name);
+    public UpdateMailTest() {
+        super();
     }
 
     @Override

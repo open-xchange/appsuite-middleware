@@ -71,8 +71,8 @@ public class SpotlightTest extends AbstractAJAXSession {
      * Initializes a new {@link SpotlightTest}.
      * @param name
      */
-    public SpotlightTest(String name) {
-        super(name);
+    public SpotlightTest() {
+        super();
     }
 
     @Test

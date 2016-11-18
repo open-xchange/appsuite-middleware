@@ -89,8 +89,8 @@ public class ResourceCacheTest extends AbstractAJAXSession {
 
     private String current = FS;
 
-    public ResourceCacheTest(String name) {
-        super(name);
+    public ResourceCacheTest() {
+        super();
     }
 
     @Override

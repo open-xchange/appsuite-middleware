@@ -9,8 +9,8 @@ public class Bug6960Test extends AbstractRecurrenceTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6960Test.class);
 
-	public Bug6960Test(final String name) {
-		super(name);
+	public Bug6960Test() {
+		super();
 	}
 
 	public void testDummy() {

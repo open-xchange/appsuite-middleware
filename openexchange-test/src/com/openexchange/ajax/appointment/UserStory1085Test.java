@@ -80,8 +80,8 @@ public class UserStory1085Test extends AppointmentTest {
 
     private Date start, end;
 
-    public UserStory1085Test(final String name) {
-        super(name);
+    public UserStory1085Test() {
+        super();
     }
 
     @Override

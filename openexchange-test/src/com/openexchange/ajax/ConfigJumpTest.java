@@ -68,8 +68,8 @@ public class ConfigJumpTest extends AbstractAJAXTest {
      * Default constructor.
      * @param name Name of this test.
      */
-    public ConfigJumpTest(final String name) {
-        super(name);
+    public ConfigJumpTest() {
+        super();
     }
 
     /**

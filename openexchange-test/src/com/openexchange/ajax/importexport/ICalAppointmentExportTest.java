@@ -57,15 +57,6 @@ import com.openexchange.groupware.container.Appointment;
 
 public class ICalAppointmentExportTest extends ManagedAppointmentTest {
 
-	public ICalAppointmentExportTest(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	public void testExportICalAppointment() throws Exception {
 		final String title = "testExportICalAppointment" + System.currentTimeMillis();
 		int folderID = folder.getObjectID();

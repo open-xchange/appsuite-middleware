@@ -72,8 +72,8 @@ public class Bug13625Test extends AbstractAJAXSession {
 
     private final int[] columns = new int[] { Appointment.OBJECT_ID };
 
-    public Bug13625Test(String name) {
-        super(name);
+    public Bug13625Test() {
+        super();
     }
 
     @Override

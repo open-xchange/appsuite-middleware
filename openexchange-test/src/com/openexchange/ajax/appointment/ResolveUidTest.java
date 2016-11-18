@@ -61,8 +61,8 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class ResolveUidTest extends AppointmentTest {
 
-    public ResolveUidTest(final String name) {
-        super(name);
+    public ResolveUidTest() {
+        super();
     }
 
     public void testWithUid() throws Exception {

@@ -53,6 +53,8 @@ import static com.openexchange.java.Autoboxing.L;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.task.actions.AbstractTaskRequest;
@@ -69,13 +71,14 @@ import com.openexchange.groupware.tasks.Task;
  * Implements test case 1803 partly.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@RunWith(ConcurrentTestRunner.class)
 public class SmokeTest extends AbstractTaskTest {
 
     /**
      * @param name
      */
-    public SmokeTest(final String name) {
-        super(name);
+    public SmokeTest() {
+        super();
     }
 
     /**

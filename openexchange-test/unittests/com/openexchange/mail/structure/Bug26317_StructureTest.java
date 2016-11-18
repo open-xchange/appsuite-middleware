@@ -79,7 +79,7 @@ public class Bug26317_StructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public Bug26317_StructureTest(final String name) {
-        super(name);
+        super();
     }
 
     @Override

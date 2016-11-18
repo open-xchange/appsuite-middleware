@@ -74,8 +74,8 @@ public class UpdatesTest extends AbstractFolderTest {
      * Initializes a new {@link UpdatesTest}.
      * @param name
      */
-    public UpdatesTest(String name) {
-        super(name);
+    public UpdatesTest() {
+        super();
     }
 
     public void testUpdates() throws Throwable {

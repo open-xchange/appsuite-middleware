@@ -70,9 +70,9 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public abstract class AbstractDriveShareTest extends ShareTest {
 
-    protected AbstractDriveShareTest(String name) {
+    protected AbstractDriveShareTest() {
         // TODO Auto-generated constructor stub
-        super(name);
+        super();
     }
 
     protected void checkFilePermission(int entity, int expectedBits, File file) {

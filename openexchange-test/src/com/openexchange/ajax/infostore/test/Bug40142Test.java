@@ -68,8 +68,8 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class Bug40142Test extends AbstractInfostoreTest {
 
-    public Bug40142Test(final String name) {
-        super(name);
+    public Bug40142Test() {
+        super();
     }
 
     public void testCreatingTwoEquallyNamedFiles() throws OXException, IOException, SAXException, JSONException {

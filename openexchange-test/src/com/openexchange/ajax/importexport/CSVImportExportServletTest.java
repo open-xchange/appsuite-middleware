@@ -71,8 +71,8 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest  {
 	String CSV = "Given name,Email 1, Display name\n Prinz, tobias.prinz@open-xchange.com, Tobias Prinz\nLaguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
 	private ContactField field;
 
-	public CSVImportExportServletTest(final String name) {
-		super(name);
+	public CSVImportExportServletTest() {
+		super();
 	}
 
 	public Map<ContactField, Integer> getPositions(List<List<String>> csv){

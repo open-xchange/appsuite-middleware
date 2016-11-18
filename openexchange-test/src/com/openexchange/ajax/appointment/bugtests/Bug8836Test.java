@@ -8,15 +8,6 @@ public class Bug8836Test extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug8836Test.class);
 
-	public Bug8836Test(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	public void testBug8836() throws Exception {
 		final Appointment appointmentObj = createAppointmentObject("testBug8836");
 		appointmentObj.setIgnoreConflicts(true);

@@ -84,7 +84,7 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
     private Date creationDate;
 
     public ContactAttachmentTests(String name) {
-        super(name);
+        super();
     }
 
     @Override

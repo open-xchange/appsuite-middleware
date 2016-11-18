@@ -21,8 +21,8 @@ public class Bug17261Test extends AbstractAJAXSession {
     private FolderTestManager ftm2;
     private String folderName;
 
-    public Bug17261Test(final String name) {
-        super(name);
+    public Bug17261Test() {
+        super();
     }
 
     @Override

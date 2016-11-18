@@ -68,8 +68,8 @@ public final class IdentityTokenTest extends AbstractJumpTest {
      *
      * @param name
      */
-    public IdentityTokenTest(final String name) {
-        super(name);
+    public IdentityTokenTest() {
+        super();
     }
 
     @BeforeClass

@@ -53,6 +53,8 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -70,6 +72,7 @@ import com.openexchange.test.CalendarTestManager;
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
+@RunWith(ConcurrentTestRunner.class)
 public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     private AJAXClient client1;
@@ -95,8 +98,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
      * 
      * @param name
      */
-    public ConfirmOccurrencesTest(String name) {
-        super(name);
+    public ConfirmOccurrencesTest() {
+        super();
     }
 
     @Override

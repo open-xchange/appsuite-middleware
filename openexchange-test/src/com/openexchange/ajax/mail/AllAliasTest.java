@@ -67,8 +67,8 @@ public class AllAliasTest extends AbstractMailTest {
      *
      * @param name
      */
-    public AllAliasTest(final String name) {
-        super(name);
+    public AllAliasTest() {
+        super();
     }
 
     @Override

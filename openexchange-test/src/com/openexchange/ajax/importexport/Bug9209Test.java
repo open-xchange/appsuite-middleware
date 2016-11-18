@@ -78,8 +78,8 @@ public final class Bug9209Test extends AbstractAJAXSession {
      * Default constructor.
      * @param name name of the test.
      */
-    public Bug9209Test(final String name) {
-        super(name);
+    public Bug9209Test() {
+        super();
     }
 
     /**

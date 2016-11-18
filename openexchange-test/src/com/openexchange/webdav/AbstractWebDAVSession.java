@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav;
 
-import junit.framework.TestCase;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
 import com.openexchange.webdav.xml.framework.WebDAVClient.User;
+import junit.framework.TestCase;
 
 /**
  *
@@ -65,8 +65,8 @@ public abstract class AbstractWebDAVSession extends TestCase {
      * Default constructor.
      * @param name test name.
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    public AbstractWebDAVSession() {
+        super();
     }
 
     /**

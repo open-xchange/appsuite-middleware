@@ -65,8 +65,8 @@ public class Bug12050Test extends AppointmentTest {
     private Appointment exception;
     private Appointment exceptionUpdate;
 
-    public Bug12050Test(String name) {
-        super(name);
+    public Bug12050Test() {
+        super();
     }
 
     @Override

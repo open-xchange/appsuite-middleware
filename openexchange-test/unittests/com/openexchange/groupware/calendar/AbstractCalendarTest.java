@@ -259,7 +259,7 @@ public abstract class AbstractCalendarTest extends TestCase {
     }
 
     public AbstractCalendarTest(final String name) {
-        super(name);
+        super();
     }
 
     protected CalendarCollection getTools() {

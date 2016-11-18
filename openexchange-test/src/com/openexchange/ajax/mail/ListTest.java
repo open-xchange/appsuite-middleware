@@ -71,8 +71,8 @@ public final class ListTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
     /**

@@ -53,13 +53,14 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -98,12 +99,12 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     private Appointment privateAppointment;
     private Appointment publicAppointment;
 
-    public SharedFoldersShowOwnersPrivateAppointmentsAsBlocks(String name) {
-        super(name);
+    public SharedFoldersShowOwnersPrivateAppointmentsAsBlocks() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         User user2 = AJAXClient.User.User2;

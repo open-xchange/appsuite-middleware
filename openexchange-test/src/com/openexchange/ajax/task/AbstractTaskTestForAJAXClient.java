@@ -61,8 +61,8 @@ import com.openexchange.test.TaskTestManager;
 
 public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession {
 
-    protected AbstractTaskTestForAJAXClient(String name) {
-        super(name);
+    protected AbstractTaskTestForAJAXClient() {
+        super();
     }
 
     public TestTask getNewTask() {

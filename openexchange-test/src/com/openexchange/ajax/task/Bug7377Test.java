@@ -86,8 +86,8 @@ public class Bug7377Test extends AbstractTaskTest {
     private int folder1;
     private int folder2;
 
-    public Bug7377Test(String name) {
-        super(name);
+    public Bug7377Test() {
+        super();
     }
 
     @Before

@@ -90,8 +90,8 @@ public class MultipleGetTest extends AbstractMailTest {
     private UserValues values;
     private List<String[][]> fmids = new LinkedList<String[][]>();
 
-    public MultipleGetTest(final String name) {
-        super(name);
+    public MultipleGetTest() {
+        super();
     }
 
     @Override

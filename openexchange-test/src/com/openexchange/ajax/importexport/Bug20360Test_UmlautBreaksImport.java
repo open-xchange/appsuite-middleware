@@ -73,7 +73,7 @@ public class Bug20360Test_UmlautBreaksImport extends AbstractManagedContactTest 
 		"END:VCARD\n";
 
 	public Bug20360Test_UmlautBreaksImport(String name) {
-		super(name);
+		super();
 	}
 	
 	public void testUmlaut() throws IOException, JSONException, OXException{

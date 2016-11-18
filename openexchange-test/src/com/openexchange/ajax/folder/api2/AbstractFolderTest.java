@@ -87,8 +87,8 @@ public class AbstractFolderTest extends AbstractAJAXSession {
      *
      * @param name
      */
-    protected AbstractFolderTest(String name) {
-        super(name);
+    protected AbstractFolderTest() {
+        super();
     }
 
     @Override

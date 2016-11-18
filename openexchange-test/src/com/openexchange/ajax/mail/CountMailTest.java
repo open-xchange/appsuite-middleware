@@ -60,8 +60,8 @@ import com.openexchange.ajax.mail.actions.NewMailRequest;
  */
 public class CountMailTest extends AbstractMailTest {
 
-    public CountMailTest(final String name) {
-        super(name);
+    public CountMailTest() {
+        super();
     }
 
     @Override

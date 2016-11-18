@@ -71,8 +71,8 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
      *
      * @param name
      */
-    public NetsolTestMailInbox(final String name) {
-        super(name);
+    public NetsolTestMailInbox() {
+        super();
     }
 
     public void testInbox() throws Throwable {

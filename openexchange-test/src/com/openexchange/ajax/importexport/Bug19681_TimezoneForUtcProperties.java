@@ -26,8 +26,8 @@ public class Bug19681_TimezoneForUtcProperties extends ManagedAppointmentTest {
 		+"END:VEVENT\n"
 		+"END:VCALENDAR\n";
 
-	public Bug19681_TimezoneForUtcProperties(String name) {
-		super(name);
+	public Bug19681_TimezoneForUtcProperties() {
+		super();
 	}
 
 	public void noTestErroneousFile() throws Exception {

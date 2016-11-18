@@ -74,8 +74,8 @@ public class ListFolderSharesTest extends ShareTest {
      *
      * @param name The test name
      */
-    public ListFolderSharesTest(String name) {
-        super(name);
+    public ListFolderSharesTest() {
+        super();
     }
 
     public void testListSharedFoldersToAnonymous() throws Exception {

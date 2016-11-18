@@ -5,8 +5,8 @@ import com.openexchange.groupware.container.Appointment;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
-	public DailyRecurrenceTest(final String name) {
-		super(name);
+	public DailyRecurrenceTest() {
+		super();
 	}
 
 	public void testDailyRecurrenceFromWinter2SummerTime() throws Exception {

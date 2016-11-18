@@ -97,8 +97,8 @@ public class Bug41184Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug41184Test(String name) {
-        super(name);
+    public Bug41184Test() {
+        super();
     }
 
     public void testAccessSharedFileInSharedFolder() throws Exception {

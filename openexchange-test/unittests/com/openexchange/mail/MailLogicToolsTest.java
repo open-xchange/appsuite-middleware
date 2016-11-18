@@ -154,7 +154,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 	 *            The test case name
 	 */
 	public MailLogicToolsTest(final String name) {
-		super(name);
+		super();
 	}
 
 	private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID, MailField.FROM,

@@ -78,8 +78,8 @@ public class ShareFolderTest extends AbstractAJAXSession {
      * Initializes a new {@link ShareFolderTest}.
      * @param name name of the test.
      */
-    public ShareFolderTest(String name) {
-        super(name);
+    public ShareFolderTest() {
+        super();
     }
 
     @Override

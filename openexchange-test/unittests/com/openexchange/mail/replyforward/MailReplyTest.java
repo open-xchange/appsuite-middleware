@@ -91,7 +91,7 @@ public final class MailReplyTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailReplyTest(final String name) {
-		super(name);
+		super();
 	}
 
 	private static final String RFC822_SRC = "Return-Path: <manuel.kraft@open-xchange.com>\n" +

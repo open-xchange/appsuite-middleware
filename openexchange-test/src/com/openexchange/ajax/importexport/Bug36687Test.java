@@ -23,8 +23,8 @@ public class Bug36687Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-	public Bug36687Test(final String name) {
-		super(name);
+	public Bug36687Test() {
+		super();
 	}
 
     public void testDetectSemicolonDelimiter() throws Exception {

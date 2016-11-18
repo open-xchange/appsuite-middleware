@@ -68,8 +68,8 @@ public class Bug37198Test extends AbstractAJAXSession {
     private Appointment app;
     private TimeZone utc;
 
-    public Bug37198Test(String name) {
-        super(name);
+    public Bug37198Test() {
+        super();
     }
 
     @Override

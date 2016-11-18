@@ -79,8 +79,8 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
      * Initializes a new {@link DeleteMultipleTaskTest}.
      * @param name
      */
-    public DeleteMultipleTaskTest(final String name) {
-        super(name);
+    public DeleteMultipleTaskTest() {
+        super();
     }
 
     @Override

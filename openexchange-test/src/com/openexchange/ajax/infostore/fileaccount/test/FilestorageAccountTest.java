@@ -76,8 +76,8 @@ public final class FilestorageAccountTest extends AbstractAJAXSession {
      * 
      * @param name
      */
-    public FilestorageAccountTest(String name) {
-        super(name);
+    public FilestorageAccountTest() {
+        super();
     }
 
     

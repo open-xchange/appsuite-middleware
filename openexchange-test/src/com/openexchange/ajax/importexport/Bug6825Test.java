@@ -76,8 +76,8 @@ public class Bug6825Test extends AbstractAJAXSession {
 
 	private FolderTestManager folderTestManager;
 
-	public Bug6825Test(String name) {
-		super(name);
+	public Bug6825Test() {
+		super();
 	}
 
 	@Override

@@ -74,8 +74,8 @@ public final class Bug12338Test extends AbstractWebDAVSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug12338Test.class);
 
-    public Bug12338Test(final String name) {
-        super(name);
+    public Bug12338Test() {
+        super();
     }
 
     public void testStrangeExternal() throws Throwable {

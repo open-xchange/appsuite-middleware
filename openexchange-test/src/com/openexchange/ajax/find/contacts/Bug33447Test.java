@@ -77,8 +77,8 @@ public class Bug33447Test extends ContactsFindTest {
      *
      * @param name The test name
      */
-    public Bug33447Test(String name) {
-        super(name);
+    public Bug33447Test() {
+        super();
     }
 
     public void testSearchContactFromPersonalContactsFolder() throws Exception {

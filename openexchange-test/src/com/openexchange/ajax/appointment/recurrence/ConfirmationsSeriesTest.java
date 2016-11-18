@@ -94,8 +94,8 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
     private Appointment appointment;
     private ExternalUserParticipant participant;
 
-    public ConfirmationsSeriesTest(String name) {
-        super(name);
+    public ConfirmationsSeriesTest() {
+        super();
     }
 
     @Override

@@ -65,8 +65,8 @@ import com.openexchange.groupware.container.Contact;
  */
 public class BirthdayAndAnniversaryTest extends AbstractManagedContactTest {
 	
-    public BirthdayAndAnniversaryTest(String name) {
-        super(name);
+    public BirthdayAndAnniversaryTest() {
+        super();
     }
     
 	@Override

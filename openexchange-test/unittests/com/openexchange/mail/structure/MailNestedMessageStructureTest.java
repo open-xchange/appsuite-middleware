@@ -77,7 +77,7 @@ public class MailNestedMessageStructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public MailNestedMessageStructureTest(final String name) {
-        super(name);
+        super();
     }
 
     private static final byte[] MP_NESTED_MESSAGE = ("Date: Sat, 14 Nov 2009 17:34:32 +0100 (CET)\n" +

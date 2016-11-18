@@ -68,8 +68,8 @@ public final class ChangeIPTest extends AbstractAJAXSession {
 
     private AJAXClient client;
 
-    public ChangeIPTest(String name) {
-        super(name);
+    public ChangeIPTest() {
+        super();
     }
 
     @Override

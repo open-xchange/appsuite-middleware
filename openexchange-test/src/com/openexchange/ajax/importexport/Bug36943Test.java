@@ -27,8 +27,8 @@ public class Bug36943Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-	public Bug36943Test(String name) {
-		super(name);
+	public Bug36943Test() {
+		super();
 	}
 
     public void testImportCSVWithAstralSymbols() throws Exception {

@@ -71,8 +71,8 @@ import com.openexchange.groupware.tasks.Task;
 
 public class Bug11190Test extends AbstractAJAXSession {
 
-    public Bug11190Test(String name) {
-        super(name);
+    public Bug11190Test() {
+        super();
     }
 
     /*

@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Before;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
@@ -65,13 +66,12 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
 
     private Appointment app;
 
-    public UsmFailureDuringRecurrenceTest(String name) {
-        super(name);
+    public UsmFailureDuringRecurrenceTest() {
+        super();
     }
 
-
-  @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         app = generateYearlyAppointment();
         calendarManager.setTimezone(TimeZone.getTimeZone("UTC"));

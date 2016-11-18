@@ -89,8 +89,8 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * 
      * @param name
      */
-    public PermissionsCascadeTest(String name) {
-        super(name);
+    public PermissionsCascadeTest() {
+        super();
     }
 
     @Override

@@ -81,8 +81,8 @@ public class TokenLoginTest extends AbstractAJAXSession {
 
     private String password;
 
-    public TokenLoginTest(String name) {
-        super(name);
+    public TokenLoginTest() {
+        super();
     }
 
     @Override

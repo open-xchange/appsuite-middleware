@@ -73,8 +73,8 @@ public final class AllTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public AllTest(final String name) {
-        super(name);
+    public AllTest() {
+        super();
     }
 
     @Override

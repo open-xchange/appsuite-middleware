@@ -1,25 +1,15 @@
 package com.openexchange.ajax.appointment;
 
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 
+@RunWith(ConcurrentTestRunner.class)
 public class ConfirmTest extends AppointmentTest {
-
-	public ConfirmTest(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	public void testDummy() throws Exception {
-
-	}
 
     public void testConfirm() throws Exception {
 		final FolderObject sharedFolderObject = FolderTest.getStandardCalendarFolder(getSecondWebConversation(), getHostName(), getSecondSessionId());

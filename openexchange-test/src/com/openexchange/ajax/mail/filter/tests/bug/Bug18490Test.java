@@ -85,8 +85,8 @@ public class Bug18490Test extends AbstractMailFilterTest {
      *
      * @param name
      */
-    public Bug18490Test(final String name) {
-        super(name);
+    public Bug18490Test() {
+        super();
     }
 
     public void testBug18490() throws Exception {

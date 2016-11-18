@@ -74,8 +74,8 @@ public class ReorderTest extends AbstractMailFilterTest {
      * 
      * @param name
      */
-    public ReorderTest(String name) {
-        super(name);
+    public ReorderTest() {
+        super();
     }
 
     /**

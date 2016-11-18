@@ -70,8 +70,8 @@ public final class UserWordTest extends AbstractSpellCheckTest {
 	 *
 	 * @param name
 	 */
-	public UserWordTest(final String name) {
-		super(name);
+	public UserWordTest() {
+		super();
 	}
 
 	/**

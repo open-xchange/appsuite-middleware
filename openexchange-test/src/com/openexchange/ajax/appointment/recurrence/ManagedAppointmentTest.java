@@ -52,6 +52,8 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
@@ -105,12 +107,12 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
 
     protected PositiveAssertionOnDeleteException positiveAssertionOnDeleteException;
 
-    public ManagedAppointmentTest(String name) {
-        super(name);
+    public ManagedAppointmentTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         calendarManager = new CalendarTestManager(getClient());
         folderManager = new FolderTestManager(getClient());
@@ -136,8 +138,8 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
 
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         try {
             calendarManager.cleanUp();
         } finally {

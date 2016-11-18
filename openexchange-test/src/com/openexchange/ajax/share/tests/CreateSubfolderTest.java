@@ -74,8 +74,8 @@ public class CreateSubfolderTest extends ShareTest {
      *
      * @param name The test name
      */
-    public CreateSubfolderTest(String name) {
-        super(name);
+    public CreateSubfolderTest() {
+        super();
     }
 
     public void testCreateSubfolderWithAdminFlagRandomly() throws Exception {

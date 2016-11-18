@@ -70,8 +70,8 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
      * Initializes a new {@link AbstractInfostoreThirdpartyTest}.
      * @param name
      */
-    public AbstractInfostoreThirdpartyTest(String name) {
-        super(name);
+    public AbstractInfostoreThirdpartyTest() {
+        super();
     }
 
     public FolderTestManager fMgr;

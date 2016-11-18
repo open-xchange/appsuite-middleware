@@ -66,8 +66,8 @@ import com.openexchange.java.util.UUIDs;
  */
 public class Bug35059Test extends AbstractManagedContactTest {
 
-    public Bug35059Test(String name) {
-        super(name);
+    public Bug35059Test() {
+        super();
     }
 
 	@Override

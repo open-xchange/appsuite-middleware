@@ -71,8 +71,8 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
 
     private int folderId;
 
-    public VCardImportExportServletTest(final String name) {
-        super(name);
+    public VCardImportExportServletTest() {
+        super();
     }
 
     @Override

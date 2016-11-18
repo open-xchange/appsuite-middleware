@@ -81,8 +81,8 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
     private FolderObject folder;
     private DefaultFile file;
 
-    public DeleteLinkTest(String name) {
-        super(name);
+    public DeleteLinkTest() {
+        super();
     }
 
     @Override

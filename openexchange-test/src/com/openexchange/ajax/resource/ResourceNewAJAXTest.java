@@ -72,8 +72,8 @@ public final class ResourceNewAJAXTest extends AbstractResourceTest {
 	 * @param name
 	 *            The test name
 	 */
-	public ResourceNewAJAXTest(final String name) {
-		super(name);
+	public ResourceNewAJAXTest() {
+		super();
 	}
 
 	/**

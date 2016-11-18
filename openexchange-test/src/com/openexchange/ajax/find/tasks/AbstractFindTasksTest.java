@@ -74,8 +74,8 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
     /**
      * Initializes a new {@link AbstractFindTasksTest}.
      */
-    public AbstractFindTasksTest(String name) {
-        super(name);
+    public AbstractFindTasksTest() {
+        super();
 
     }
     

@@ -75,8 +75,8 @@ public class Bug13501Test extends AbstractAJAXSession {
 
     private Date startSearch, endSearch;
 
-    public Bug13501Test(String name) {
-        super(name);
+    public Bug13501Test() {
+        super();
     }
 
     public void testBug13501() throws Exception {

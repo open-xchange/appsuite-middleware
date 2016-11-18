@@ -103,8 +103,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 
     protected String groupParticipant = null;
 
-    public FolderTest(final String name) {
-        super(name);
+    public FolderTest() {
+        super();
     }
 
     @Override

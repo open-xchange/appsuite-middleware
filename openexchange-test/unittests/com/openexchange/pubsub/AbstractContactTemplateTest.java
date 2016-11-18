@@ -100,7 +100,7 @@ public abstract class AbstractContactTemplateTest extends TestCase {
      * @param name
      */
     public AbstractContactTemplateTest(String name) {
-        super(name);
+        super();
     }
 
     public Contact generateContact(String identifier) {

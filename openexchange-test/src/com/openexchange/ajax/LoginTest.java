@@ -85,8 +85,8 @@ public class LoginTest extends AbstractAJAXTest {
      * 
      * @param name Name of the test.
      */
-    public LoginTest(final String name) {
-        super(name);
+    public LoginTest() {
+        super();
     }
 
     /**

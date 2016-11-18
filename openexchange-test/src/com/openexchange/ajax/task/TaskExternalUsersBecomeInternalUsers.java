@@ -13,7 +13,7 @@ import com.openexchange.groupware.tasks.Task;
 public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
 
 	public TaskExternalUsersBecomeInternalUsers(String name) {
-		super(name);
+		super();
 	}
 
 	public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception{

@@ -69,8 +69,8 @@ import com.openexchange.subscribe.Subscription;
  */
 public class DoNotDuplicateEmptyContactsTest extends OXMFContactLifeCycleTest {
 
-    public DoNotDuplicateEmptyContactsTest(String name) {
-        super(name);
+    public DoNotDuplicateEmptyContactsTest() {
+        super();
     }
 
     public void testShouldNotDuplicateEmptyContacts() throws OXException, OXException, OXException, IOException, SAXException, JSONException{

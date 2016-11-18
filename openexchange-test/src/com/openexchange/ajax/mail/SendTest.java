@@ -79,8 +79,8 @@ public final class SendTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public SendTest(final String name) {
-        super(name);
+    public SendTest() {
+        super();
     }
 
     @Override

@@ -9,8 +9,8 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointmentTest {
 
-	public Bug20132Test_WrongRecurrenceDatePosition(String name) {
-		super(name);
+	public Bug20132Test_WrongRecurrenceDatePosition() {
+		super();
 	}
 
 	public void testForCorrectRecurrenceDatePositionCalculation() throws Exception{

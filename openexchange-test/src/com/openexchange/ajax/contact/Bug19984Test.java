@@ -54,8 +54,8 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 
 public class Bug19984Test extends ManagedAppointmentTest {
 	
-	public Bug19984Test(String name) {
-		super(name);
+	public Bug19984Test() {
+		super();
 	}
 
 	String ical = "BEGIN:VCALENDAR\n" + 

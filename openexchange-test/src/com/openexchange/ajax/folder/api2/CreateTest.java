@@ -73,8 +73,8 @@ public class CreateTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public CreateTest(final String name) {
-        super(name);
+    public CreateTest() {
+        super();
     }
 
     @Override

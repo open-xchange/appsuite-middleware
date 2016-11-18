@@ -96,8 +96,8 @@ public class SharedFolderTest extends AbstractAJAXSession {
 
     TimeZone tz, tz2;
 
-    public SharedFolderTest(final String name) {
-        super(name);
+    public SharedFolderTest() {
+        super();
     }
 
     @Override

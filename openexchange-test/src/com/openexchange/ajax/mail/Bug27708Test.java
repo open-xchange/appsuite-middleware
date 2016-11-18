@@ -87,8 +87,8 @@ public final class Bug27708Test extends AbstractMailTest {
     private String[] identifier;
     private List<String[]>[] sentMails;
 
-    public Bug27708Test(final String name) {
-        super(name);
+    public Bug27708Test() {
+        super();
     }
 
     @BeforeClass

@@ -19,8 +19,8 @@ public class SearchTest extends InfostoreAJAXTest {
 	protected String[] all = null;
 	private static final int[] COLS = new int[]{Metadata.TITLE, Metadata.DESCRIPTION};
 
-	public SearchTest(final String name) {
-		super(name);
+	public SearchTest() {
+		super();
 	}
 
 	@Override

@@ -71,8 +71,8 @@ public class GetVirtualTest extends AbstractAJAXSession {
      *
      * @param name name of the test.
      */
-    public GetVirtualTest(final String name) {
-        super(name);
+    public GetVirtualTest() {
+        super();
     }
 
     @Override

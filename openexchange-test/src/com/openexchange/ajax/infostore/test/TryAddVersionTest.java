@@ -73,8 +73,8 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
     private final String[] COLUMNS = new String[] { "700", "702", "710", "711" };
     private final String filename = "bug.eml";
 
-    public TryAddVersionTest(String name) {
-        super(name);
+    public TryAddVersionTest() {
+        super();
     }
 
     @Override

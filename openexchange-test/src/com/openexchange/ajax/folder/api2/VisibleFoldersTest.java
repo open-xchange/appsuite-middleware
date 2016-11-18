@@ -80,8 +80,8 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
 
     private FolderObject createdSharedFolder;
 
-    public VisibleFoldersTest(final String name) {
-        super(name);
+    public VisibleFoldersTest() {
+        super();
     }
 
     @Override

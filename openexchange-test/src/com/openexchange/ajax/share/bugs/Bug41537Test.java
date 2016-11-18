@@ -80,8 +80,8 @@ public class Bug41537Test extends ShareTest {
      * Initializes a new {@link Bug41537Test}.
      * @param name
      */
-    public Bug41537Test(String name) {
-        super(name);
+    public Bug41537Test() {
+        super();
     }
 
     public void testGuestCanUpdateHisContactImage() throws Exception {

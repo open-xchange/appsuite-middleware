@@ -70,8 +70,8 @@ public final class NetsolTestMailMessageSend extends AbstractNetsolTest {
 	 *
 	 * @param name
 	 */
-	public NetsolTestMailMessageSend(final String name) {
-		super(name);
+	public NetsolTestMailMessageSend() {
+		super();
 	}
 
 	public void testMailSend() throws Throwable {

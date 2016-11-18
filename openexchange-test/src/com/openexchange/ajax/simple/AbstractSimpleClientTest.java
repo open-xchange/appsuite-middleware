@@ -57,10 +57,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import junit.framework.TestCase;
 import org.apache.commons.httpclient.HttpMethod;
 import org.json.JSONObject;
 import com.openexchange.test.json.JSONAssertion;
+import junit.framework.TestCase;
 
 
 /**
@@ -86,11 +86,7 @@ public class AbstractSimpleClientTest extends TestCase {
     protected JSONObject rawResponse;
 
     public AbstractSimpleClientTest() {
-
-    }
-
-    public AbstractSimpleClientTest(String name) {
-        super(name);
+        super();
     }
 
     public SimpleOXClient createClient() throws Exception{

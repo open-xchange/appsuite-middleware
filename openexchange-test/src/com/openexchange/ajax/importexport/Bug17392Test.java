@@ -7,6 +7,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -38,8 +39,8 @@ public class Bug17392Test extends ManagedAppointmentTest {
 	protected String start = "20101015T"+startHour+"0000";
 	protected String end =   "20101015T"+(startHour+1)+"0000";
 
-	public Bug17392Test(String name) {
-		super(name);
+	public Bug17392Test() {
+		super();
 	}
 
 	public Appointment importAndGet(String ical) throws Exception{
@@ -55,8 +56,8 @@ public class Bug17392Test extends ManagedAppointmentTest {
 	}
 
 
-	@Override
-	protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
 		super.setUp();
 		calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendar.set(Calendar.YEAR, 2010);

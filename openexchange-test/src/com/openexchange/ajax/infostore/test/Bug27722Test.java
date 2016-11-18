@@ -82,8 +82,8 @@ public final class Bug27722Test extends AbstractInfostoreTest {
      *
      * @param name
      */
-    public Bug27722Test(String name) {
-        super(name);
+    public Bug27722Test() {
+        super();
     }
 
     @Override

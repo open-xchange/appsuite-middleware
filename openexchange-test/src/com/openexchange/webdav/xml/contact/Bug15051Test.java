@@ -72,8 +72,8 @@ public class Bug15051Test extends AbstractWebDAVSession {
     private AJAXClient client2;
     private Contact contact;
 
-    public Bug15051Test(String name) {
-        super(name);
+    public Bug15051Test() {
+        super();
     }
 
     @Override

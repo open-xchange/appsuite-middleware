@@ -66,8 +66,8 @@ public class FindTasksAutocompleteTests extends AbstractFindTasksTest {
     /**
      * Initializes a new {@link FindTasksAutocompleteTests}.
      */
-    public FindTasksAutocompleteTests(String n) {
-        super(n);
+    public FindTasksAutocompleteTests() {
+        super();
     }
 
     /**

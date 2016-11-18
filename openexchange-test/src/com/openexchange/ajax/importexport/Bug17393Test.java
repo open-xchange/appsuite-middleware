@@ -7,8 +7,8 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 /** @author Tobias Prinz */
 public class Bug17393Test extends ManagedAppointmentTest {
 
-	public Bug17393Test(String name) {
-		super(name);
+	public Bug17393Test() {
+		super();
 	}
 
 	public static String CULPRIT = "BEGIN:VCALENDAR\n"

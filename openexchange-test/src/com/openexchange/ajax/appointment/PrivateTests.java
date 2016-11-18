@@ -89,8 +89,8 @@ public class PrivateTests extends AbstractAJAXSession {
 
     private Appointment app;
 
-    public PrivateTests(String name) {
-        super(name);
+    public PrivateTests() {
+        super();
     }
 
     @Override

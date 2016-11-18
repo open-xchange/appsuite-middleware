@@ -5,8 +5,8 @@ import com.openexchange.groupware.container.Contact;
 
 public class Bug18608Test_SpecialCharsInEmailTest extends AbstractManagedContactTest {
 
-	public Bug18608Test_SpecialCharsInEmailTest(String name) {
-		super(name);
+	public Bug18608Test_SpecialCharsInEmailTest() {
+		super();
 	}
 
 	public void testUmlaut(){

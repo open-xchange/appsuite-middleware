@@ -103,8 +103,8 @@ public abstract class JUnit3WebDAVTest extends AbstractAJAXSession {
 	private List<FolderObject> foldersToCleanUp;
 	private Map<Long, WebDAVClient> webDAVClients;
 
-	public JUnit3WebDAVTest(String name) {
-		super(name);
+	public JUnit3WebDAVTest() {
+		super();
 	}
 
     @Override

@@ -70,8 +70,8 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug15903Test extends CalendarTestManagerTest {
 
-    public Bug15903Test(String name) {
-        super(name);
+    public Bug15903Test() {
+        super();
     }
 
     // Tests Bug 15903

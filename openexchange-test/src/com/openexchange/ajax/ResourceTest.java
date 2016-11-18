@@ -20,8 +20,8 @@ import com.openexchange.tools.URLParameter;
 
 public class ResourceTest extends AbstractAJAXTest {
 
-    public ResourceTest(final String name) {
-        super(name);
+    public ResourceTest() {
+        super();
     }
 
     private static final String RESOURCE_URL = "/ajax/resource";

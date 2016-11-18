@@ -75,7 +75,7 @@ public class CSSMatcherTest extends TestCase {
      * @param name
      */
     public CSSMatcherTest(String name) {
-        super(name);
+        super();
     }
 
     public void notestCss() {

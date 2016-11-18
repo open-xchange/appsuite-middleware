@@ -106,8 +106,8 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      * 
      * @param name The name of the test
      */
-    protected AbstractAppointmentTest(String name) {
-        super(name);
+    protected AbstractAppointmentTest() {
+        super();
     }
 
     protected int appointmentFolderId = -1;

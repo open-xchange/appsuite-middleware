@@ -82,8 +82,8 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
     /**
      * Initializes a new {@link TaskDurationAndCostsTest}.
      */
-    public TaskDurationAndCostsTest(String name) {
-        super(name);
+    public TaskDurationAndCostsTest() {
+        super();
     }
 
     @Override

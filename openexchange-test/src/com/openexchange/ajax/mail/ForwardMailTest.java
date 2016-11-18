@@ -65,8 +65,8 @@ public class ForwardMailTest extends AbstractReplyTest {
 
     MailTestManager manager;
 
-    public ForwardMailTest(String name) {
-        super(name);
+    public ForwardMailTest() {
+        super();
     }
 
     @Override

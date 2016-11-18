@@ -77,12 +77,12 @@ public final class BundleTestIMAP extends AbstractBundleTest {
      * Initializes a new {@link BundleTestIMAP}
      */
     public BundleTestIMAP(final String name) {
-        super(name);
+        super();
     }
 
     public void testIMAPAbsence() {
         try {
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject jsonObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),

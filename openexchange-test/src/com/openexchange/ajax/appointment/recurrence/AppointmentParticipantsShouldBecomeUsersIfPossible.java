@@ -12,27 +12,8 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedAppointmentTest {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
-
-
-	public AppointmentParticipantsShouldBecomeUsersIfPossible(String name) {
-		super(name);
-	}
-
-	public void testExternalParticipantIsRemovedIfAddressMatchesCreator(){
-
-	}
-
-	public void testExternalParticipantStaysIfTwoInternalUsersHaveTheSameSecondaryAddress(){
-
+	public AppointmentParticipantsShouldBecomeUsersIfPossible() {
+		super();
 	}
 
 	public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception{

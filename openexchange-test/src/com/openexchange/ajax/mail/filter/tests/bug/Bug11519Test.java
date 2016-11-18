@@ -69,8 +69,8 @@ public class Bug11519Test extends AbstractMailFilterTest {
      * 
      * @param name
      */
-    public Bug11519Test(String name) {
-        super(name);
+    public Bug11519Test() {
+        super();
     }
 
     /**

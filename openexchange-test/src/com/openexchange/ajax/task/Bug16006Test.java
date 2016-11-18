@@ -78,8 +78,8 @@ public class Bug16006Test extends AbstractAJAXSession {
     private TimeZone origTimeZone;
     private Date alarm;
 
-    public Bug16006Test(String name) {
-        super(name);
+    public Bug16006Test() {
+        super();
     }
 
     @Override

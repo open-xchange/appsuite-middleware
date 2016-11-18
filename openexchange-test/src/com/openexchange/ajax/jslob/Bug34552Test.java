@@ -69,8 +69,8 @@ public class Bug34552Test extends AbstractJSlobTest {
      * Initializes a new {@link Bug34552Test}.
      * @param name
      */
-    public Bug34552Test(String name) {
-        super(name);
+    public Bug34552Test() {
+        super();
     }
 
     public void testUpdateIsVisibleImmediately() throws Exception {

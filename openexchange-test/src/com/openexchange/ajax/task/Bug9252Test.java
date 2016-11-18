@@ -74,8 +74,8 @@ public class Bug9252Test extends AbstractTaskTest {
     /**
      * @param name
      */
-    public Bug9252Test(final String name) {
-        super(name);
+    public Bug9252Test() {
+        super();
     }
 
     /**

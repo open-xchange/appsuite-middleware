@@ -72,7 +72,7 @@ public class SMIMEStructureTest2 extends AbstractMailTest {
     private byte[] smime;
 
     public SMIMEStructureTest2(final String name) {
-        super(name);
+        super();
     }
 
     @Override

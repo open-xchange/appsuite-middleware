@@ -69,8 +69,8 @@ public class Bug32004Test extends AbstractInfostoreTest {
      *
      * @param name The test name
      */
-    public Bug32004Test(final String name) {
-        super(name);
+    public Bug32004Test() {
+        super();
     }
 
     public void testCreateFolderBelowTrash() throws Exception {

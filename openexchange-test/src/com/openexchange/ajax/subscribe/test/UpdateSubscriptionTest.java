@@ -66,8 +66,8 @@ import com.openexchange.subscribe.Subscription;
  */
 public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
 
-    public UpdateSubscriptionTest(String name) {
-        super(name);
+    public UpdateSubscriptionTest() {
+        super();
     }
 
     public void testUpdatingAnExistingValueWithinAnOMXFSubscription() throws OXException, IOException, SAXException, JSONException{

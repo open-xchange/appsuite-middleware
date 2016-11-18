@@ -8,8 +8,8 @@ import com.openexchange.webdav.xml.AppointmentTest;
 
 public class Bug6455Test extends AppointmentTest {
 
-	public Bug6455Test(final String name) {
-		super(name);
+	public Bug6455Test() {
+		super();
 	}
 
 	public void testDummy() {

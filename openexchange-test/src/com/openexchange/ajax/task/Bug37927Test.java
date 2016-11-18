@@ -87,8 +87,8 @@ public class Bug37927Test extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public Bug37927Test(String name) {
-        super(name);
+    public Bug37927Test() {
+        super();
     }
 
     @Before

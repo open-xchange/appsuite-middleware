@@ -70,8 +70,8 @@ public class Bug15937Test extends AbstractAJAXSession {
     private Task task;
     private TimeZone timeZone;
 
-    public Bug15937Test(String name) {
-        super(name);
+    public Bug15937Test() {
+        super();
     }
 
     @Override

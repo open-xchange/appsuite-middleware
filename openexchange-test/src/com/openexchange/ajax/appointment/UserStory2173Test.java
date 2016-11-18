@@ -84,8 +84,8 @@ public class UserStory2173Test extends AbstractAJAXSession {
 
     private Appointment appointmentPrivate, appointmentPublic;
 
-    public UserStory2173Test(String name) {
-        super(name);
+    public UserStory2173Test() {
+        super();
     }
 
     @Override

@@ -7,8 +7,8 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug19500Test_NewAppointmentRequestWeirdBehaviour extends ManagedAppointmentTest{
 
-	public Bug19500Test_NewAppointmentRequestWeirdBehaviour(String name) {
-		super(name);
+	public Bug19500Test_NewAppointmentRequestWeirdBehaviour() {
+		super();
 	}
 
 	public void testNewappointmentsRequestConsistency(){

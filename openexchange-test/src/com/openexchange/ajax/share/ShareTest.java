@@ -156,8 +156,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    protected ShareTest(String name) {
-        super(name);
+    protected ShareTest() {
+        super();
     }
 
     @Override

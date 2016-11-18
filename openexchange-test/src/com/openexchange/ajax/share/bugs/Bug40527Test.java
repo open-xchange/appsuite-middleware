@@ -75,8 +75,8 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class Bug40527Test extends ShareTest {
 
-    public Bug40527Test(String name) {
-        super(name);
+    public Bug40527Test() {
+        super();
     }
 
     public void testInternalFileShareLinkOnSharedCreation() throws Exception {

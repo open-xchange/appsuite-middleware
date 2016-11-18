@@ -78,8 +78,8 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
 
     private FolderTestManager fMgr;
 
-    public SubscriptionFolderIconTest(String name) {
-        super(name);
+    public SubscriptionFolderIconTest() {
+        super();
     }
 
     private FolderObject folder;

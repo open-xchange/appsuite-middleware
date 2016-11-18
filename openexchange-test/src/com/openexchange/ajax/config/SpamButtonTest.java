@@ -62,8 +62,8 @@ public class SpamButtonTest extends AbstractAJAXTest {
      * Default constructor.
      * @param name Name of the test.
      */
-    public SpamButtonTest(final String name) {
-        super(name);
+    public SpamButtonTest() {
+        super();
     }
 
     /**

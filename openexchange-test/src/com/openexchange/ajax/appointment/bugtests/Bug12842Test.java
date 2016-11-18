@@ -66,8 +66,8 @@ import com.openexchange.groupware.container.CalendarObject;
  */
 public class Bug12842Test extends AbstractAJAXSession {
 
-    public Bug12842Test(final String name) {
-        super(name);
+    public Bug12842Test() {
+        super();
     }
 
     /**

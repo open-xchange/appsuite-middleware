@@ -57,8 +57,8 @@ import com.openexchange.webdav.xml.GroupUserTest;
 
 public class UpdateTest extends FolderTest {
 
-    public UpdateTest(final String name) {
-        super(name);
+    public UpdateTest() {
+        super();
     }
 
     public void testRenameFolder() throws Throwable {

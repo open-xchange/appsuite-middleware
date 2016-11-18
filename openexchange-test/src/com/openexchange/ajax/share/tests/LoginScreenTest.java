@@ -80,8 +80,8 @@ public class LoginScreenTest extends ShareTest {
 
     private FolderObject folder;
 
-    public LoginScreenTest(String name) {
-        super(name);
+    public LoginScreenTest() {
+        super();
     }
 
     @Override

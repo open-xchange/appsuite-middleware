@@ -60,8 +60,8 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class ListTest extends FolderTest {
 
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
     public void testPropFindWithModified() throws Exception {

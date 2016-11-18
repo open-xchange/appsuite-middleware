@@ -116,7 +116,7 @@ public abstract class AbstractMailTest extends TestCase {
      * @param name
      */
     public AbstractMailTest(final String name) {
-        super(name);
+        super();
     }
 
     @Override

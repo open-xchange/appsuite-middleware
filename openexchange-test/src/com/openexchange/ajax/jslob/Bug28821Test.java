@@ -74,8 +74,8 @@ public final class Bug28821Test extends AbstractJSlobTest {
      *
      * @param name
      */
-    public Bug28821Test(final String name) {
-        super(name);
+    public Bug28821Test() {
+        super();
     }
 
     @BeforeClass

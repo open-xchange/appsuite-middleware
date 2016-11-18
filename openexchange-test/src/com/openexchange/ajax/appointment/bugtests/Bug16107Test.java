@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
+import org.junit.Before;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 
@@ -65,12 +66,12 @@ public class Bug16107Test extends ManagedAppointmentTest {
 
     private Appointment updateAppointment;
 
-    public Bug16107Test(String name) throws Exception {
-        super(name);
+    public Bug16107Test() throws Exception {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         startAppointment = new Appointment();
         startAppointment.setParentFolderID(folder.getObjectID());
@@ -98,13 +99,6 @@ public class Bug16107Test extends ManagedAppointmentTest {
         link(startAppointment, updateAppointment);
         updateAppointment.setRecurrenceID(startAppointment.getObjectID());
     }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-
 
     public void testFirstMonthView(){
         Date start = D("26.04.2010 00:00");

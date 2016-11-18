@@ -3,7 +3,6 @@ package com.openexchange.ajax.importexport;
 import java.util.Calendar;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -11,8 +10,8 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest {
 
-	public Bug20413Test_CompletelyWrongDTStart(String name) {
-		super(name);
+	public Bug20413Test_CompletelyWrongDTStart() {
+		super();
 	}
 	
 	private final String ical = 

@@ -62,8 +62,8 @@ import com.openexchange.ajax.task.BasicManagedTaskTests;
  */
 public class FunambolTests extends AbstractAJAXSession {
 
-    public FunambolTests(String name) {
-        super(name);
+    public FunambolTests() {
+        super();
     }
 
     public void testLoginAndLogout() {
@@ -98,7 +98,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 4608000000&columns=1%2C4%2C5%2C20%2C209%2C207
          */
 
-        CalendarTestManagerTest test = new CalendarTestManagerTest("funambol: all appointments");
+        CalendarTestManagerTest test = new CalendarTestManagerTest();
         try {
             test.setUp();
             test.testGetAllInFolder();
@@ -142,7 +142,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 90221&ignore=none&columns=1%2C4%2C5%2C209% 2C207&start=10000000&end=2524608000000
          */
 
-        CalendarTestManagerTest test = new CalendarTestManagerTest("funambol: updates for appointments");
+        CalendarTestManagerTest test = new CalendarTestManagerTest();
         try {
             test.setUp();
             test.testUpdates();
@@ -188,7 +188,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://oxptftest.schlund.de/ajax/calendar? action=get&session=f9d94265fea7c0fc57a4f550269904c3&folder=256&id=1436
          */
 
-        CalendarTestManagerTest test = new CalendarTestManagerTest("funambol: get appointment");
+        CalendarTestManagerTest test = new CalendarTestManagerTest();
         try {
             test.setUp();
             test.testGet();
@@ -234,7 +234,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * action=update&session=f9d94265fea7c0fc57a4f550269904c3&id=1436&folder=256&timestamp= 1206016523153
          */
 
-        CalendarTestManagerTest test = new CalendarTestManagerTest("funambol: update appointment");
+        CalendarTestManagerTest test = new CalendarTestManagerTest();
         try {
             test.setUp();
             test.testUpdate();
@@ -279,7 +279,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://oxptftest.schlund.de/ajax/calendar? action=new&session=f3abe0fc28b004289575a4a01887ef6e
          */
 
-        CalendarTestManagerTest test = new CalendarTestManagerTest("funambol: add appointment");
+        CalendarTestManagerTest test = new CalendarTestManagerTest();
         try {
             test.setUp();
             test.testCreate();
@@ -323,7 +323,7 @@ public class FunambolTests extends AbstractAJAXSession {
         /*
          * Request: http://192.168.0.76/ajax/calendar? action=delete&session=f75cd157f27e5b756c663e8121bd6ee7&timestamp=1212761477393
          */
-        CalendarTestManagerTest test = new CalendarTestManagerTest("funambol:delete appointment");
+        CalendarTestManagerTest test = new CalendarTestManagerTest();
         try {
             test.setUp();
             test.testRemove();

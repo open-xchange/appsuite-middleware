@@ -72,8 +72,8 @@ public class Bug29853Test extends AbstractFolderTest {
 
     private FolderObject folder;
 
-    public Bug29853Test(String name) {
-        super(name);
+    public Bug29853Test() {
+        super();
     }
 
     @Override

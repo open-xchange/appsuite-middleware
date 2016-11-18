@@ -80,8 +80,8 @@ public class Bug7590Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    public Bug7590Test(final String name) {
-        super(name);
+    public Bug7590Test() {
+        super();
     }
 
     @Override

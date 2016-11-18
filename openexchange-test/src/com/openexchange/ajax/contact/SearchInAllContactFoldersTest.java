@@ -76,8 +76,8 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
     private Contact contact2;
     private FolderObject newFolder;
 
-    public SearchInAllContactFoldersTest(final String name) {
-        super(name);
+    public SearchInAllContactFoldersTest() {
+        super();
     }
 
     @Override

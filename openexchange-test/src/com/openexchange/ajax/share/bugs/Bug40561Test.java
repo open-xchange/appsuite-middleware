@@ -82,8 +82,8 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug40561Test extends ShareTest {
 
-    public Bug40561Test(String name) {
-        super(name);
+    public Bug40561Test() {
+        super();
     }
 
     public void testShareFileAndSearchForItAsGuest() throws Exception {

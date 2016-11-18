@@ -73,8 +73,8 @@ public final class NetsolTestEmptyTrash extends AbstractNetsolTest {
 	 *
 	 * @param name
 	 */
-	public NetsolTestEmptyTrash(final String name) {
-		super(name);
+	public NetsolTestEmptyTrash() {
+		super();
 	}
 
 	public void testEmptyTrash() throws Throwable {

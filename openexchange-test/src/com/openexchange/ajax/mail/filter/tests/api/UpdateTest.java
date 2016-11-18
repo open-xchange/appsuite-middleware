@@ -16,8 +16,8 @@ public class UpdateTest extends AbstractMailFilterTest {
 
     private Rule rule;
 
-    public UpdateTest(String name) {
-        super(name);
+    public UpdateTest() {
+        super();
     }
 
     @Override

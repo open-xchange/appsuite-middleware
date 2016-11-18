@@ -72,8 +72,8 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
      *
      * @param name
      */
-    public GoogleSubscribeContactTest(String name) {
-        super(name);
+    public GoogleSubscribeContactTest() {
+        super();
     }
 
     public void testContacts() {

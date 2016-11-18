@@ -9,8 +9,8 @@ import com.openexchange.ajax.importexport.actions.CSVImportResponse;
 
 public class Bug20516Test extends AbstractManagedContactTest {
 
-	public Bug20516Test(String name) {
-		super(name);
+	public Bug20516Test() {
+		super();
 	}
 
 	public void testEmail() throws Exception{

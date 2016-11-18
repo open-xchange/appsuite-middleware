@@ -78,8 +78,8 @@ public class Bug13931Test extends AbstractAJAXSession {
 
     private final int[] columns = new int[] { Contact.OBJECT_ID, Contact.SUR_NAME };
 
-    public Bug13931Test(final String name) {
-        super(name);
+    public Bug13931Test() {
+        super();
     }
 
     @Override

@@ -71,8 +71,8 @@ public class RangeTest extends AbstractAJAXSession {
      * Default constructor.
      * @param name Test name.
      */
-    public RangeTest(final String name) {
-        super(name);
+    public RangeTest() {
+        super();
     }
 
     public void testRange() throws Exception {

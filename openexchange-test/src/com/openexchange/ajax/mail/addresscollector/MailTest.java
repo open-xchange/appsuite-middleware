@@ -36,8 +36,8 @@ public class MailTest extends AbstractMailTest {
 
     private AJAXClient client;
 
-    public MailTest(final String name) {
-        super(name);
+    public MailTest() {
+        super();
     }
 
     @Override

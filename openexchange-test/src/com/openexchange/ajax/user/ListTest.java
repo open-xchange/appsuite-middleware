@@ -65,8 +65,8 @@ public class ListTest extends AbstractAJAXSession {
      * Initializes a new {@link ListTest}.
      * @param name
      */
-    public ListTest(String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
     public void testListUser() throws Exception {

@@ -75,8 +75,8 @@ public class HttpAuthTest extends TestCase {
     private String login;
     private String password;
 
-    public HttpAuthTest(final String name) {
-        super(name);
+    public HttpAuthTest() {
+        super();
     }
 
     @Override

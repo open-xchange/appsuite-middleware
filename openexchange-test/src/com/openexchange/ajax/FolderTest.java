@@ -64,6 +64,9 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -95,10 +98,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 public class FolderTest extends AbstractAJAXTest {
 
     private String sessionId;
-
-    public FolderTest(final String name) {
-        super(name);
-    }
 
     public static final String FOLDER_URL = "/ajax/folders";
 
@@ -576,22 +575,25 @@ public class FolderTest extends AbstractAJAXTest {
         throw new TestException("Private infostore folder not found!");
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
+        super.setUp();
         sessionId = getSessionId();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         logout();
         super.tearDown();
 
     }
 
+    @Test
     public void testGetUserId() throws OXException, OXException, IOException, SAXException, JSONException {
         getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
     }
 
+    @Test
     public void testGetRootFolders() throws OXException, IOException, SAXException, JSONException, OXException {
         final int[] assumedIds = { 1, 2, 3, 9 };
         final List<FolderObject> l = getRootFolders(getWebConversation(), getHostName(), getSessionId(), true);
@@ -604,6 +606,7 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testDeleteFolder() throws OXException, JSONException, IOException, SAXException, OXException, OXException {
         final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
         final int parent = insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "DeleteMeImmediately" + System.currentTimeMillis(), "calendar", FolderObject.PUBLIC, -1, true);
@@ -623,6 +626,7 @@ public class FolderTest extends AbstractAJAXTest {
         assertTrue((failedIds == null || failedIds.length == 0));
     }
 
+    @Test
     public void testCheckFolderPermissions() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
         final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
         final int fuid = insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "CheckMyPermissions", "calendar", FolderObject.PUBLIC, -1, true);
@@ -633,6 +637,7 @@ public class FolderTest extends AbstractAJAXTest {
         deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
     }
 
+    @Test
     public void testInsertRenameFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException, OXException {
         int fuid = -1;
         int[] failedIds = null;
@@ -680,6 +685,7 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testGetSubfolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
         int fuid = -1;
         int[] subfuids = null;
@@ -730,6 +736,7 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testMoveFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
         int parent01 = -1;
         int parent02 = -1;
@@ -754,6 +761,7 @@ public class FolderTest extends AbstractAJAXTest {
         assertFalse((failedIds != null && failedIds.length > 0));
     }
 
+    @Test
     public void testFolderNamesShouldBeEqualRegardlessOfRequestMethod() {
         try {
             final List<FolderObject> rootFolders = getRootFolders(getWebConversation(), getHostName(), getSessionId(), true);
@@ -769,6 +777,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     // Node 2652
 
+    @Test
     public void testLastModifiedUTCInGet() throws JSONException, OXException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         // Load an existing folder
@@ -779,6 +788,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     // Node 2652
 
+    @Test
     public void testLastModifiedUTCInList() throws JSONException, IOException, SAXException, OXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         // List known folder
@@ -797,6 +807,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     // Node 2652
 
+    @Test
     public void testLastModifiedUTCInUpdates() throws JSONException, OXException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         // List known folder

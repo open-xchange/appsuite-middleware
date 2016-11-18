@@ -59,10 +59,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.json.JSONException;
+import org.junit.Before;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -128,12 +127,12 @@ public class AbstractICalTest extends AbstractAJAXTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractICalTest.class);
 
-    public AbstractICalTest(final String name) {
-        super(name);
+    public AbstractICalTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         final FolderObject appointmentFolderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());

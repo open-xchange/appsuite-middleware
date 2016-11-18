@@ -72,8 +72,8 @@ public class AutocompleteTest extends ContactsFindTest {
      *
      * @param name The test name
      */
-    public AutocompleteTest(String name) {
-        super(name);
+    public AutocompleteTest() {
+        super();
     }
 
     public void testAutocompleteCurrentUser() throws Exception {

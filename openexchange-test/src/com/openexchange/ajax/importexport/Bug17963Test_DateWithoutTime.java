@@ -7,8 +7,8 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug17963Test_DateWithoutTime extends ManagedAppointmentTest{
 
-	public Bug17963Test_DateWithoutTime(String name) {
-		super(name);
+	public Bug17963Test_DateWithoutTime() {
+		super();
 	}
 
 	public void testDateWithoutTime() throws Exception{

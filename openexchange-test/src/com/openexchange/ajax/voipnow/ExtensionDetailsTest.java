@@ -63,8 +63,8 @@ public class ExtensionDetailsTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public ExtensionDetailsTest(final String name) {
-        super(name);
+    public ExtensionDetailsTest() {
+        super();
     }
 
     @Override

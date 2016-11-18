@@ -79,8 +79,8 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
     /**
      * Initializes a new {@link PermissionsHandDownTest}.
      */
-    public PermissionsHandDownTest(final String name) {
-        super(name);
+    public PermissionsHandDownTest() {
+        super();
     }
 
     @Override

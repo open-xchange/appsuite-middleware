@@ -93,8 +93,8 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     private Appointment exception;
 
-    public Bug33242Test(String name) {
-        super(name);
+    public Bug33242Test() {
+        super();
     }
 
     /*

@@ -70,8 +70,8 @@ public class YomiTest extends AbstractAJAXSession {
 
     private Contact updateContact;
 
-    public YomiTest(String name) {
-        super(name);
+    public YomiTest() {
+        super();
     }
 
     @Override

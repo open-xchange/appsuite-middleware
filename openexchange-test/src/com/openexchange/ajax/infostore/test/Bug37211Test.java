@@ -66,8 +66,8 @@ public class Bug37211Test extends AbstractInfostoreTest {
      *
      * @param name The test name
      */
-    public Bug37211Test(final String name) {
-        super(name);
+    public Bug37211Test() {
+        super();
     }
 
     public void testMoveFolderFromTrash() throws Exception {

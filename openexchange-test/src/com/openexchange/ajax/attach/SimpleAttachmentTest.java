@@ -50,8 +50,8 @@
 package com.openexchange.ajax.attach;
 public class SimpleAttachmentTest extends AbstractAttachmentTest {
 
-	public SimpleAttachmentTest(final String name) {
-		super(name);
+	public SimpleAttachmentTest() {
+		super();
 	}
 
 	@Override

@@ -66,8 +66,8 @@ import com.openexchange.exception.OXException;
  */
 public class ReplyTest extends AbstractReplyTest {
 
-    public ReplyTest(String name) {
-        super(name);
+    public ReplyTest() {
+        super();
     }
 
     public void testShouldReplyToSenderOnly() throws OXException, IOException, SAXException, JSONException, OXException {

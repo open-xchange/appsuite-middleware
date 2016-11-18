@@ -22,8 +22,8 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
     private FolderTestManager ftm2;
     private String folderName;
 
-    public ChangePermissionsTest(final String name) {
-        super(name);
+    public ChangePermissionsTest() {
+        super();
     }
 
     @Override

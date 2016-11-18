@@ -69,8 +69,8 @@ public class AggregatingContactTest extends AbstractAJAXSession{
 
     // FIXME: Reactivate me, when the update task is ready.
 
-    public AggregatingContactTest(String name) throws Exception{
-        super(name);
+    public AggregatingContactTest() throws Exception{
+        super();
     }
 
     /*

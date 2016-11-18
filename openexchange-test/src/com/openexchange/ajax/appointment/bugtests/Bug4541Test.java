@@ -11,15 +11,6 @@ public class Bug4541Test extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4541Test.class);
 
-	public Bug4541Test(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	public void testBug4541() throws Exception {
 		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testBug4541" + System.currentTimeMillis());

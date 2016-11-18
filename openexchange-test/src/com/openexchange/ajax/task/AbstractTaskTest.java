@@ -63,8 +63,8 @@ public abstract class AbstractTaskTest extends AbstractAJAXSession {
     private int folderId;
     private TimeZone timeZone;
 
-    protected AbstractTaskTest(final String name) {
-        super(name);
+    protected AbstractTaskTest() {
+        super();
     }
 
     @Override

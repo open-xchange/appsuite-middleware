@@ -76,8 +76,8 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
      * 
      * @param name
      */
-    public GoogleSubscribeCalendarTest(String name) {
-        super(name);
+    public GoogleSubscribeCalendarTest() {
+        super();
     }
 
     public void testSingleAppointment() throws OXException, IOException, JSONException {

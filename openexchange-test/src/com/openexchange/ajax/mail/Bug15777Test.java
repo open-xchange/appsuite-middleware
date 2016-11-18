@@ -36,8 +36,8 @@ public class Bug15777Test extends AbstractAJAXSession {
 
     FolderObject subFolder;
 
-    public Bug15777Test(final String name) {
-        super(name);
+    public Bug15777Test() {
+        super();
     }
 
     @Override

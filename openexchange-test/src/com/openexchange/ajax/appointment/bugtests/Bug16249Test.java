@@ -96,8 +96,8 @@ public class Bug16249Test extends AttachmentTest {
 
     private static final String APPOINTMENT_URL = "/ajax/calendar";
 
-    public Bug16249Test(String name) {
-        super(name);
+    public Bug16249Test() {
+        super();
     }
 
     @Override

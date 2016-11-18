@@ -109,8 +109,8 @@ public class Bug14234Test extends AbstractMailTest {
 
     private UserValues values;
 
-    public Bug14234Test(final String name) {
-        super(name);
+    public Bug14234Test() {
+        super();
     }
 
     @Override

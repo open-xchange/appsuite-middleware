@@ -52,8 +52,8 @@ public class Bug19463Test_TimezoneOffsetsWith4Digits extends
 		+"END:VEVENT\n"
 		+"END:VCALENDAR\n";
 
-	public Bug19463Test_TimezoneOffsetsWith4Digits(String name) {
-		super(name);
+	public Bug19463Test_TimezoneOffsetsWith4Digits() {
+		super();
 	}
 
 	public void testTimezoneOffsetWith4DigitsIsPassed() throws Exception{

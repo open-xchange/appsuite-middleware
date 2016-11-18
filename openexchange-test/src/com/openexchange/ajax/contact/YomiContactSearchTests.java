@@ -10,7 +10,7 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
 	private Contact contact;
 
 	public YomiContactSearchTests(String name) {
-		super(name);
+		super();
 	}
 
 	@Override

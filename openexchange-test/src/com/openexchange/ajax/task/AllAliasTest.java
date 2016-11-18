@@ -75,8 +75,8 @@ public class AllAliasTest extends AbstractTaskTest {
      *
      * @param name
      */
-    public AllAliasTest(final String name) {
-        super(name);
+    public AllAliasTest() {
+        super();
     }
 
     @Override

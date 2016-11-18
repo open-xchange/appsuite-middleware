@@ -87,8 +87,8 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      * @param name
      *            name of the test.
      */
-    protected AbstractMailTest(final String name) {
-        super(name);
+    protected AbstractMailTest() {
+        super();
     }
 
     @Override

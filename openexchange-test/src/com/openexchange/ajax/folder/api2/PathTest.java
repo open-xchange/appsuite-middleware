@@ -78,8 +78,8 @@ public class PathTest extends AbstractAJAXSession {
      *
      * @param name name of the test.
      */
-    public PathTest(final String name) {
-        super(name);
+    public PathTest() {
+        super();
     }
 
     @Override

@@ -79,7 +79,7 @@ public abstract class BasicContactTemplateTest extends AbstractContactTemplateTe
      * @param name
      */
     public BasicContactTemplateTest(String name) {
-        super(name);
+        super();
     }
 
     protected abstract OXTemplate getTemplate() throws Exception;

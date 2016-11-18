@@ -91,8 +91,8 @@ public class GetLinkTest extends AbstractDriveShareTest {
      *
      * @param name
      */
-    public GetLinkTest(String name) {
-        super(name);
+    public GetLinkTest() {
+        super();
     }
 
     @Override

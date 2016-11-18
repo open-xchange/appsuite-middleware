@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.framework;
 
-import junit.framework.TestCase;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import junit.framework.TestCase;
 
+@RunWith(ConcurrentTestRunner.class)
 public abstract class AbstractAJAXSession extends TestCase {
 
     protected AJAXClient client;
@@ -60,8 +63,8 @@ public abstract class AbstractAJAXSession extends TestCase {
      * Default constructor.
      * @param name name of the test.
      */
-    protected AbstractAJAXSession(final String name) {
-        super(name);
+    protected AbstractAJAXSession() {
+        super();
     }
 
     /**

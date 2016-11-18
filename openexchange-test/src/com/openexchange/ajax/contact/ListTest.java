@@ -18,8 +18,8 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 
 public class ListTest extends AbstractContactTest {
 
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
     @Override

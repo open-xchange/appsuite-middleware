@@ -122,8 +122,8 @@ public class MailNotificationTest extends ShareTest {
      *
      * @param name
      */
-    public MailNotificationTest(String name) {
-        super(name);
+    public MailNotificationTest() {
+        super();
     }
 
     @Override

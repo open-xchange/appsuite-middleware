@@ -63,8 +63,8 @@ import com.openexchange.groupware.container.Expectations;
  */
 public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTest {
 
-    public TestsToCreateMinimalAppointmentSeries(String name) {
-        super(name);
+    public TestsToCreateMinimalAppointmentSeries() {
+        super();
     }
 
     public void _testShouldFailWhenSendingUnneccessaryDayInformationForDailyAppointment() throws Exception {

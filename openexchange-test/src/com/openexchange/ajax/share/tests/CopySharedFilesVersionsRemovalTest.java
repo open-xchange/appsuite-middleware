@@ -85,8 +85,8 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
      * 
      * @param name
      */
-    public CopySharedFilesVersionsRemovalTest(String name) {
-        super(name);
+    public CopySharedFilesVersionsRemovalTest() {
+        super();
     }
 
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {

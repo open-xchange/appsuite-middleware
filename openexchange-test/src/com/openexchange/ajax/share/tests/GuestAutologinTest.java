@@ -81,8 +81,8 @@ public class GuestAutologinTest extends ShareTest {
      *
      * @param name
      */
-    public GuestAutologinTest(String name) {
-        super(name);
+    public GuestAutologinTest() {
+        super();
     }
 
     public void testGuestAutologin() throws Exception {

@@ -66,8 +66,8 @@ public class CopyMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public CopyMailTest(String name) {
-        super(name);
+    public CopyMailTest() {
+        super();
     }
 
     @Override

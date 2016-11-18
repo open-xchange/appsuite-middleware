@@ -63,8 +63,8 @@ public class NewCallTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public NewCallTest(final String name) {
-        super(name);
+    public NewCallTest() {
+        super();
     }
 
     @Override

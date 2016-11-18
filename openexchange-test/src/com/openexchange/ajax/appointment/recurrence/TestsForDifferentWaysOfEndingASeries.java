@@ -63,8 +63,8 @@ import com.openexchange.groupware.container.Expectations;
  */
 public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest {
 
-    public TestsForDifferentWaysOfEndingASeries(String name) {
-        super(name);
+    public TestsForDifferentWaysOfEndingASeries() {
+        super();
     }
 
     public void testShouldNotSetUntilIfOccurrencesIsUsed() throws Exception {

@@ -66,8 +66,8 @@ public final class Bug10859Test2 extends AbstractWebDAVSession {
      * Default constructor.
      * @param name test name
      */
-    public Bug10859Test2(final String name) {
-        super(name);
+    public Bug10859Test2() {
+        super();
     }
 
     public void testYearly() throws Throwable {

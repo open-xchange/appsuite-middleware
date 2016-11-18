@@ -76,8 +76,8 @@ public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTes
 	 *
 	 * @param name
 	 */
-	public NetsolTestMailMessageSendAttachment(final String name) {
-		super(name);
+	public NetsolTestMailMessageSendAttachment() {
+		super();
 	}
 
 	private static final byte[] a200kbBytes;

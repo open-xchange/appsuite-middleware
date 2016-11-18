@@ -77,8 +77,8 @@ public final class Bug21264Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Appointment app;
 
-    public Bug21264Test(final String name) {
-        super(name);
+    public Bug21264Test() {
+        super();
     }
 
     @Override

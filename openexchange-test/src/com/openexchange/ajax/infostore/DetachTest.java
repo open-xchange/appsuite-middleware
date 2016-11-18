@@ -12,8 +12,8 @@ import com.openexchange.test.TestInit;
 
 public class DetachTest extends InfostoreAJAXTest {
 
-	public DetachTest(final String name){
-		super(name);
+	public DetachTest(){
+		super();
 	}
 
 	@Override

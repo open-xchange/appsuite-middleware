@@ -78,8 +78,8 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
      * Initializes a new {@link GetSortedMailFolderTest}.
      * @param name test name.
      */
-    public GetSortedMailFolderTest(String name) {
-        super(name);
+    public GetSortedMailFolderTest() {
+        super();
     }
 
     @Override

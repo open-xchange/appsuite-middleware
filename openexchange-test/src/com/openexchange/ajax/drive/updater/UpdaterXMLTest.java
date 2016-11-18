@@ -107,8 +107,8 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
      *
      * @param name
      */
-    public UpdaterXMLTest(String name) {
-        super(name);
+    public UpdaterXMLTest() {
+        super();
     }
 
     @Override

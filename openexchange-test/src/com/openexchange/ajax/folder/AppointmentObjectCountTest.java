@@ -80,8 +80,8 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
      * 
      * @param name
      */
-    public AppointmentObjectCountTest(String name) {
-        super(name);
+    public AppointmentObjectCountTest() {
+        super();
     }
 
     @Override

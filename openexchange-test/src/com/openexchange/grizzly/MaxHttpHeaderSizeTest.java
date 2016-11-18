@@ -149,7 +149,7 @@ public class MaxHttpHeaderSizeTest extends AbstractSimpleClientTest {
         + "l4II4gAAAAAAAAAAAAAAAAAAAAAGAbEdAAAADw";
 
     @Test
-    public void test() throws Exception {
+    public void Test() throws Exception {
         SimpleOXClient oxClient = createClient();
         HttpClient httpClient = oxClient.getClient();
         Header bigHeader= new Header("bigheader", bigValue);

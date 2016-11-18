@@ -98,8 +98,8 @@ public abstract class AbstractBundleTest extends TestCase {
      *
      * @param name The test case name
      */
-    protected AbstractBundleTest(final String name) {
-        super(name);
+    protected AbstractBundleTest() {
+        super();
     }
 
     protected String getJMXHost() {

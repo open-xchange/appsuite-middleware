@@ -89,8 +89,8 @@ public class Bug41622Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug41622Test(String name) {
-        super(name);
+    public Bug41622Test() {
+        super();
     }
 
     @Override

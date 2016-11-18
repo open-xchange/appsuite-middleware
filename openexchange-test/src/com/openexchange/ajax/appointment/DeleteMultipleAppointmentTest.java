@@ -77,8 +77,8 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
      * Initializes a new {@link DeleteMultipleAppointmentTest}.
      * @param name
      */
-    public DeleteMultipleAppointmentTest(String name) {
-        super(name);
+    public DeleteMultipleAppointmentTest() {
+        super();
     }
 
     @Override

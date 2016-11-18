@@ -53,6 +53,8 @@ import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -61,10 +63,11 @@ import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.URLParameter;
 
+@RunWith(ConcurrentTestRunner.class)
 public class MultipleTest extends AbstractAJAXTest {
 
-    public MultipleTest(final String name) {
-        super(name);
+    public MultipleTest() {
+        super();
     }
 
     private static final String MULTIPLE_URL = "/ajax/multiple";

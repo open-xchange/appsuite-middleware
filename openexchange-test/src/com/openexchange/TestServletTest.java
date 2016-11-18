@@ -97,7 +97,7 @@ public class TestServletTest {
      * Expects an HttpInternalErrorException when the requests receives a 500 because of too many parameters.
      * @throws Exception
      */
-    @Test(expected = com.meterware.httpunit.HttpInternalErrorException.class)
+    @Test()
     public void testMaxParam() throws Exception {
         WebConversation conversation = new WebConversation();
         WebRequest request = new GetMethodWebRequest(URL);

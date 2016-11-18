@@ -10,8 +10,8 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class Bug10991Test extends TaskTest {
 
-	public Bug10991Test(final String name) {
-		super(name);
+	public Bug10991Test() {
+		super();
 	}
 
 	public void testBug10991() throws Exception {

@@ -53,7 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import junit.framework.AssertionFailedError;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -67,6 +66,7 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
+import junit.framework.AssertionFailedError;
 
 /**
  * Attachment tests for appointments.
@@ -85,8 +85,8 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
 
     private Date creationDate;
 
-    public AppointmentAttachmentTests(String name) {
-        super(name);
+    public AppointmentAttachmentTests() {
+        super();
     }
 
     @Override

@@ -11,8 +11,8 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class DeleteTest extends AppointmentTest {
 
-	public DeleteTest(final String name) {
-		super(name);
+	public DeleteTest() {
+		super();
 	}
 
 	public void testDelete() throws Exception {

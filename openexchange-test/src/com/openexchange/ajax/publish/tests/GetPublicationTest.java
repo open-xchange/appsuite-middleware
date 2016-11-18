@@ -66,8 +66,8 @@ import com.openexchange.exception.OXException;
  */
 public class GetPublicationTest extends AbstractPublicationTest {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    public GetPublicationTest() {
+        super();
     }
 
     public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {

@@ -35,8 +35,8 @@ public class Bug12264Test extends AbstractAJAXSession {
     private TimeZone tz = null;
     private Appointment appointment = null;
 
-    public Bug12264Test(String name) {
-        super(name);
+    public Bug12264Test() {
+        super();
     }
 
     //Tests

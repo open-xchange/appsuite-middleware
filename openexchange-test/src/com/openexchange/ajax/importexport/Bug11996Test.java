@@ -69,8 +69,8 @@ public final class Bug11996Test extends AbstractAJAXSession {
      * Default constructor.
      * @param name test name
      */
-    public Bug11996Test(final String name) {
-        super(name);
+    public Bug11996Test() {
+        super();
     }
 
     public void testNotMatchingStatusAndPercentComplete() throws Throwable {

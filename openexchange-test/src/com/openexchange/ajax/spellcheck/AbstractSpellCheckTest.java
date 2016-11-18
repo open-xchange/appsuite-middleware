@@ -68,8 +68,8 @@ public abstract class AbstractSpellCheckTest extends AbstractAJAXSession {
 	 * Initializes a new {@link AbstractSpellCheckTest}
 	 * @param name
 	 */
-	public AbstractSpellCheckTest(final String name) {
-		super(name);
+	public AbstractSpellCheckTest() {
+		super();
 	}
 
 	/**

@@ -77,8 +77,8 @@ public class Bug19014Test_HugeCalendarsProvokeOOM extends ManagedAppointmentTest
 	private static final int MAX_NUM_APP = 200; // should be a multiple of the batch size
 	private static final int BATCH_SIZE = 100;
 
-	public Bug19014Test_HugeCalendarsProvokeOOM(String name) {
-		super(name);
+	public Bug19014Test_HugeCalendarsProvokeOOM() {
+		super();
 	}
 
 	protected long insertAppointments(int numberOfApps, int batchSize) throws Exception {

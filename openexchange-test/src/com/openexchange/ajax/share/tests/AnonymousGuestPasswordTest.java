@@ -77,8 +77,8 @@ public class AnonymousGuestPasswordTest extends ShareTest {
      *
      * @param name The test name
      */
-    public AnonymousGuestPasswordTest(String name) {
-        super(name);
+    public AnonymousGuestPasswordTest() {
+        super();
     }
 
     public void testUpdatePasswordForAnonymousGuest() throws Exception {

@@ -86,7 +86,7 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
     private Date creationDate;
 
     public TaskAttachmentTests(String name) {
-        super(name);
+        super();
     }
 
     @Override

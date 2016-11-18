@@ -70,8 +70,8 @@ public class AutocompleteTest extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-    public AutocompleteTest(String name) {
-        super(name);
+    public AutocompleteTest() {
+        super();
     }
 
 	@Override

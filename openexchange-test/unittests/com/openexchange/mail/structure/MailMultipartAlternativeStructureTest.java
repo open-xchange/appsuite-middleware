@@ -76,7 +76,7 @@ public class MailMultipartAlternativeStructureTest extends AbstractMailTest {
      * @param name The test name
      */
     public MailMultipartAlternativeStructureTest(final String name) {
-        super(name);
+        super();
     }
 
 

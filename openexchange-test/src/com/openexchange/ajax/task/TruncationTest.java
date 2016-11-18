@@ -67,8 +67,8 @@ public class TruncationTest extends AbstractTaskTest {
      * Default constructor.
      * @param name Name of the test.
      */
-    public TruncationTest(final String name) {
-        super(name);
+    public TruncationTest() {
+        super();
     }
 
     /**

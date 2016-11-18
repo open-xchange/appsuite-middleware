@@ -59,7 +59,7 @@ import com.openexchange.groupware.tasks.Task;
 public class BasicManagedTaskTests extends ManagedTaskTest {
 
     public BasicManagedTaskTests(String name) {
-        super(name);
+        super();
     }
 
     public void testCreateAndGet() {

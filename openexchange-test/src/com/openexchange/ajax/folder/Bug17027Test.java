@@ -81,8 +81,8 @@ public class Bug17027Test extends AbstractAJAXSession {
     private Date before;
     private boolean folderDeleted = false;
 
-    public Bug17027Test(String name) {
-        super(name);
+    public Bug17027Test() {
+        super();
     }
 
     @Override

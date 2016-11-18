@@ -63,8 +63,8 @@ import com.openexchange.find.mail.MailFacetType;
  */
 public class Bug35442Test extends AbstractMailFindTest {
 
-    public Bug35442Test(String name) {
-        super(name);
+    public Bug35442Test() {
+        super();
     }
 
     public void testDefaultContactOptionIsSwitchedToToInSentFolder() throws Exception {

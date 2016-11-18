@@ -14,8 +14,8 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class UpdateTest extends TaskTest {
 
-	public UpdateTest(final String name) {
-		super(name);
+	public UpdateTest() {
+		super();
 	}
 
 	public void testUpdateTask() throws Exception {

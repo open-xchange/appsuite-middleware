@@ -76,8 +76,8 @@ public class Bug40821Test extends AbstractAJAXSession {
     private AJAXClient clientToLogin;
     private String language;
 
-    public Bug40821Test(String name) {
-        super(name);
+    public Bug40821Test() {
+        super();
     }
 
     @Override

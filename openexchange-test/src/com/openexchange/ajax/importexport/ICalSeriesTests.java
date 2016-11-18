@@ -69,8 +69,8 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class ICalSeriesTests extends ManagedAppointmentTest {
 
-	public ICalSeriesTests(String name) {
-		super(name);
+	public ICalSeriesTests() {
+		super();
 	}
 
 	public void testDeleteException() throws OXException, IOException, JSONException{

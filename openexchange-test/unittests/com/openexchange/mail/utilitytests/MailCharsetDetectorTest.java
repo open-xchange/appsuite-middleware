@@ -72,7 +72,7 @@ public final class MailCharsetDetectorTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailCharsetDetectorTest(final String name) {
-		super(name);
+		super();
 	}
 
 	public void testCharsetDetection() {

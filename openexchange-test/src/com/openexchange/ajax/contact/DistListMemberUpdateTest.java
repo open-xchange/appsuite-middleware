@@ -70,8 +70,8 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
 	
 	private Contact referencedContact1, referencedContact2;
 	
-    public DistListMemberUpdateTest(String name) {
-        super(name);
+    public DistListMemberUpdateTest() {
+        super();
     }
     
 	@Override

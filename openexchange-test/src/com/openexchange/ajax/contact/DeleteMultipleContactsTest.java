@@ -72,8 +72,8 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
      * Initializes a new {@link DeleteMultipleContactsTest}.
      * @param name
      */
-    public DeleteMultipleContactsTest(String name) {
-        super(name);
+    public DeleteMultipleContactsTest() {
+        super();
     }
     
     @Override

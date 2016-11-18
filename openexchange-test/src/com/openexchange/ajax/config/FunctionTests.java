@@ -78,7 +78,7 @@ public class FunctionTests extends AbstractAJAXSession {
      * @param name Name of the test.
      */
     public FunctionTests(final String name) {
-        super(name);
+        super();
     }
 
     @Override

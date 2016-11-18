@@ -95,7 +95,7 @@ public final class ResourceDeleteTest extends TestCase {
 	 *            The test's name
 	 */
 	public ResourceDeleteTest(final String name) {
-		super(name);
+		super();
 	}
 
 	private static Context resolveContext(final String ctxStr) throws Exception {

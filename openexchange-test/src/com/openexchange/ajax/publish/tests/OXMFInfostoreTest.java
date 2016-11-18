@@ -66,8 +66,8 @@ import com.openexchange.test.TestInit;
  */
 public class OXMFInfostoreTest extends AbstractPublicationTest {
 
-    public OXMFInfostoreTest(String name) {
-        super(name);
+    public OXMFInfostoreTest() {
+        super();
     }
 
     public void testLifeCycleOfInfostoreFolderPublication() throws Exception {

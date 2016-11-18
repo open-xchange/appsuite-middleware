@@ -64,7 +64,7 @@ import com.openexchange.test.ContactTestManager;
 public class BasicManagedContactTests extends AbstractManagedContactTest {
 
     public BasicManagedContactTests(String name) {
-        super(name);
+        super();
     }
 
     public void testCreateAndGetContact() {

@@ -51,6 +51,8 @@ package com.openexchange.ajax.mailaccount;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
 import com.openexchange.configuration.MailConfig;
@@ -62,10 +64,11 @@ import com.openexchange.mailaccount.MailAccountDescription;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RunWith(ConcurrentTestRunner.class)
 public class MailAccountValidateTest extends AbstractMailAccountTest {
 
-    public MailAccountValidateTest(final String name) {
-        super(name);
+    public MailAccountValidateTest() {
+        super();
     }
 
     @Override

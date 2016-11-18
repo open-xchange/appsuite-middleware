@@ -86,7 +86,7 @@ public abstract class BasicCensoredContactTemplateTest extends BasicContactTempl
      * @param name
      */
     public BasicCensoredContactTemplateTest(String name) {
-        super(name);
+        super();
     }
 
     /**

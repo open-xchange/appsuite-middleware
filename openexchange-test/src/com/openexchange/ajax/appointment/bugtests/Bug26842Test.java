@@ -71,8 +71,8 @@ public class Bug26842Test extends AbstractAJAXSession {
 
     private CalendarTestManager ctm;
 
-    public Bug26842Test(String name) {
-        super(name);
+    public Bug26842Test() {
+        super();
     }
 
     public void setUp() throws Exception {

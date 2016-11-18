@@ -26,8 +26,8 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
 	protected String folder;
 	String mailObject_25kb;
 
-    public AllRequestAndResponseTest(String name) throws OXException, IOException, SAXException, JSONException {
-        super(name);
+    public AllRequestAndResponseTest() throws OXException, IOException, SAXException, JSONException {
+        super();
         this.client = new AJAXClient(User.User1);
     }
 

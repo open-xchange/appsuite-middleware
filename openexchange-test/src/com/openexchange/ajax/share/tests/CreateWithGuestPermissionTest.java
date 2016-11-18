@@ -72,8 +72,8 @@ public class CreateWithGuestPermissionTest extends ShareTest {
      *
      * @param name The test name
      */
-    public CreateWithGuestPermissionTest(String name) {
-        super(name);
+    public CreateWithGuestPermissionTest() {
+        super();
     }
 
     public void testCreateSharedFolderRandomly() throws Exception {

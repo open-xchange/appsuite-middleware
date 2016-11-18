@@ -69,8 +69,8 @@ public class ConfigTest extends AbstractAJAXSession {
     private final List<Device> EXPECTED_DEVICES = Arrays.asList(Device.values());
     private final List<Platform> EXPECTED_PLATFORMS = Arrays.asList(Platform.values());
 
-    public ConfigTest(String name) {
-        super(name);
+    public ConfigTest() {
+        super();
     }
 
     @Override

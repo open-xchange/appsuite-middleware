@@ -16,8 +16,8 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug12432Test extends AbstractAJAXSession {
 
-    public Bug12432Test(String name) {
-        super(name);
+    public Bug12432Test() {
+        super();
     }
 
     public void testFirstReservedThenFree() throws Throwable {

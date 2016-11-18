@@ -78,8 +78,8 @@ public class MailPushTest extends AbstractMailTest {
      * Initializes a new {@link MailPushTest}.
      * @param name
      */
-    public MailPushTest(String name) {
-        super(name);
+    public MailPushTest() {
+        super();
     }
 
     @Override

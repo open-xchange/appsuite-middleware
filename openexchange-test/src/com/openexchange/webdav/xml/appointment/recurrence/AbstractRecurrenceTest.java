@@ -12,8 +12,8 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractRecurrenceTest.class);
 
-	public AbstractRecurrenceTest(final String name) {
-		super(name);
+	public AbstractRecurrenceTest() {
+		super();
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 	}
 }

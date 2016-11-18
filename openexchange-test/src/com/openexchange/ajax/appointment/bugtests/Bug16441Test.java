@@ -65,8 +65,8 @@ import com.openexchange.groupware.container.Appointment;
 public class Bug16441Test extends AbstractAJAXSession {
 
     private Appointment appointment;
-    public Bug16441Test(String name) {
-        super(name);
+    public Bug16441Test() {
+        super();
     }
 
     @Override

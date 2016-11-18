@@ -90,8 +90,8 @@ public class Bug40627Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40627Test(String name) {
-        super(name);
+    public Bug40627Test() {
+        super();
     }
 
     public void testCheckExtendedFolderPermissionAsAnonymousGuest() throws Exception {

@@ -75,8 +75,8 @@ public class Bug25701Test extends AbstractManagedContactTest {
 	 *
 	 * @param name The test name
 	 */
-	public Bug25701Test(String name) {
-		super(name);
+	public Bug25701Test() {
+		super();
 	}
 
     public void testCombinedTypes() throws Exception {

@@ -105,7 +105,7 @@ public final class MailBugfixTest extends AbstractMailTest {
 	 *            The name
 	 */
 	public MailBugfixTest(final String name) {
-		super(name);
+		super();
 	}
 
 	/**

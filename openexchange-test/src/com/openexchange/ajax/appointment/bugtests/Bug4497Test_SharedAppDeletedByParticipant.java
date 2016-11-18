@@ -49,22 +49,21 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 
 public class Bug4497Test_SharedAppDeletedByParticipant extends	ManagedAppointmentTest {
 
-	public Bug4497Test_SharedAppDeletedByParticipant(String name) {
-		super(name);
+	public Bug4497Test_SharedAppDeletedByParticipant() {
+		super();
 	}
 	
 	public void testIt() throws Exception{

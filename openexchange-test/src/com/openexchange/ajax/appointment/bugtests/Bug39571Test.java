@@ -73,8 +73,8 @@ public class Bug39571Test extends AbstractAJAXSession {
     private int nextYear;
     private Appointment single;
 
-    public Bug39571Test(String name) {
-        super(name);
+    public Bug39571Test() {
+        super();
     }
 
     @Override

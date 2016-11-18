@@ -83,8 +83,8 @@ public class Bug13090Test extends AbstractAJAXSession {
      * Initializes a new {@link Bug13090Test}.
      * @param name
      */
-    public Bug13090Test(String name) {
-        super(name);
+    public Bug13090Test() {
+        super();
     }
 
     @Override

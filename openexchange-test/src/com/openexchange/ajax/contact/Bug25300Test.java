@@ -56,8 +56,8 @@ public class Bug25300Test extends AbstractManagedContactTest {
 
     private Contact contact;
 
-    public Bug25300Test(String name) {
-        super(name);
+    public Bug25300Test() {
+        super();
     }
 
     @Override

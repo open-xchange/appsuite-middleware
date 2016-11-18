@@ -33,15 +33,6 @@ public class PortalSearchTest extends AppointmentTest {
 		Appointment.COLOR_LABEL
 	};
 
-	public PortalSearchTest(final String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
     public void testNewAppointmentsSearch() throws Exception {
 		final Calendar calendar = Calendar.getInstance(timeZone);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);

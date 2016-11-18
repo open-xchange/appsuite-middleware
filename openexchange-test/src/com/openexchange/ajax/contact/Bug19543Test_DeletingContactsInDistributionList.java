@@ -13,7 +13,7 @@ public class Bug19543Test_DeletingContactsInDistributionList extends
 	private static final int MAX_ATTEMPTS = 5;
 
 	public Bug19543Test_DeletingContactsInDistributionList(String name) {
-		super(name);
+		super();
 	}
 
 

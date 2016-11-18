@@ -80,8 +80,8 @@ public class NewMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public NewMailTest(final String name) {
-        super(name);
+    public NewMailTest() {
+        super();
     }
 
     @Override

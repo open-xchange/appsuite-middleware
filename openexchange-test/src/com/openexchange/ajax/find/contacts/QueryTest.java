@@ -99,8 +99,8 @@ public class QueryTest extends ContactsFindTest {
      *
      * @param name The test name
      */
-    public QueryTest(String name) {
-        super(name);
+    public QueryTest() {
+        super();
     }
 
     public void testFilterChaining() throws Exception {

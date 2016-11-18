@@ -1,7 +1,6 @@
 package com.openexchange.ajax.importexport;
 
 import java.util.Calendar;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -10,8 +9,8 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20718Test_JumpDuringDstCrossing extends ManagedAppointmentTest {
 
-	public Bug20718Test_JumpDuringDstCrossing(String name) {
-		super(name);
+	public Bug20718Test_JumpDuringDstCrossing() {
+		super();
 	}
 
 	private String ical(String tzid){

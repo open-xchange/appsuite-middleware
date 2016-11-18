@@ -91,8 +91,8 @@ public class Bug17264Test extends AbstractAJAXSession {
      *
      * @param name
      */
-    public Bug17264Test(String name) {
-        super(name);
+    public Bug17264Test() {
+        super();
     }
 
     @Override

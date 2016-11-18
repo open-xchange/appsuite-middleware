@@ -58,7 +58,9 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -77,11 +79,7 @@ public class ExamineTest extends AbstractMailTest {
 
     FolderObject subFolder;
 
-	public ExamineTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         clearFolder(getInboxFolder());
@@ -89,7 +87,7 @@ public class ExamineTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if(subFolder!=null){
             com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
@@ -101,6 +99,7 @@ public class ExamineTest extends AbstractMailTest {
         super.tearDown();
     }
 
+    @Test
     public void testExamineTest() throws OXException, IOException, JSONException {
 
 		AJAXClient client = getClient();

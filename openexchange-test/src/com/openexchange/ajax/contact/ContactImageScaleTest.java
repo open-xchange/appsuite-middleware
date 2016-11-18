@@ -63,8 +63,8 @@ import com.openexchange.groupware.container.Contact;
  */
 public class ContactImageScaleTest extends AbstractContactTest {
 
-    public ContactImageScaleTest(final String name) {
-        super(name);
+    public ContactImageScaleTest() {
+        super();
     }
 
     @Override

@@ -62,8 +62,8 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class ListTest extends AppointmentTest {
 
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
     public void testPropFindWithModified() throws Exception {

@@ -67,8 +67,8 @@ public abstract class AbstractJumpTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    protected AbstractJumpTest(final String name) {
-        super(name);
+    protected AbstractJumpTest() {
+        super();
     }
 
     @Override

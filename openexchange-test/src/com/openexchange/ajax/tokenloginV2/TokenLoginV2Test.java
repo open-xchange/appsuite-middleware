@@ -73,8 +73,8 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
 
     private static final String SECRET_2 = "4321";
 
-    public TokenLoginV2Test(String name) {
-        super(name);
+    public TokenLoginV2Test() {
+        super();
     }
 
     @Override

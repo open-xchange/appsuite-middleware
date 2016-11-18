@@ -78,8 +78,8 @@ import com.openexchange.test.OXTestToolkit;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
 
-	public AbstractAttachmentTest(final String name) {
-		super(name);
+	public AbstractAttachmentTest() {
+		super();
 	}
 
 

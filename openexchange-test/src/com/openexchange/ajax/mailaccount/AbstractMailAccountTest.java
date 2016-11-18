@@ -68,8 +68,8 @@ import com.openexchange.mailaccount.MailAccountDescription;
  *
  */
 public class AbstractMailAccountTest extends AbstractAJAXSession {
-    protected AbstractMailAccountTest(final String name) {
-        super(name);
+    protected AbstractMailAccountTest() {
+        super();
     }
 
     protected MailAccountDescription mailAccountDescription;

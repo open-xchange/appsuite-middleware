@@ -88,8 +88,8 @@ public class TrashTest extends AbstractInfostoreTest {
      *
      * @param name The test name
      */
-    public TrashTest(final String name) {
-        super(name);
+    public TrashTest() {
+        super();
     }
 
     @Override

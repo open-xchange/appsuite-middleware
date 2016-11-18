@@ -78,7 +78,7 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
 	 * @param name
 	 */
 	public MailJSONHandlerTest(final String name) {
-		super(name);
+		super();
 	}
 
 	private static final String SRC = "Return-Path: <Colton-reboil@READINGCHILDREN.COM>\n" +

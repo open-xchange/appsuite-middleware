@@ -9,8 +9,8 @@ import com.openexchange.test.TestInit;
 
 public class GetTest extends InfostoreAJAXTest {
 
-	public GetTest(final String name) {
-		super(name);
+	public GetTest() {
+		super();
 	}
 
 	public void testBasic() throws Exception{

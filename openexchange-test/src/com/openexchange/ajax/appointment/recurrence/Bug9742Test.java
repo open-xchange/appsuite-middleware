@@ -31,8 +31,8 @@ public class Bug9742Test extends AbstractAJAXSession {
 			CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS,
 			Appointment.FULL_TIME, Appointment.COLOR_LABEL };
 
-	public Bug9742Test(final String name) {
-		super(name);
+	public Bug9742Test() {
+		super();
 	}
 
 	@Override

@@ -72,8 +72,8 @@ public final class ResourceDeleteAJAXTest extends AbstractResourceTest {
 	 * @param name
 	 *            The test name
 	 */
-	public ResourceDeleteAJAXTest(final String name) {
-		super(name);
+	public ResourceDeleteAJAXTest() {
+		super();
 	}
 
 	/**

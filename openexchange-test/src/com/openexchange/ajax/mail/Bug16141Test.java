@@ -86,8 +86,8 @@ public class Bug16141Test extends AbstractAJAXSession {
 
     private String address;
 
-    public Bug16141Test(String name) {
-        super(name);
+    public Bug16141Test() {
+        super();
     }
 
     @Override

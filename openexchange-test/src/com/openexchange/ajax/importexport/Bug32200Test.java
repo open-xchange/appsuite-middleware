@@ -23,8 +23,8 @@ public class Bug32200Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-	public Bug32200Test(String name) {
-		super(name);
+	public Bug32200Test() {
+		super();
 	}
 
 	public void testImportCategories() throws Exception {

@@ -73,8 +73,8 @@ public class Bug40722Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40722Test(String name) {
-        super(name);
+    public Bug40722Test() {
+        super();
     }
 
     public void testRemoveGuestPassword() throws Exception {

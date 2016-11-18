@@ -2,6 +2,8 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -14,18 +16,10 @@ import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.container.Appointment;
 
+@RunWith(ConcurrentTestRunner.class)
 public class MultipleTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleTest.class);
-
-    public MultipleTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
 
     public void testMultipleInsert() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testMultipleInsert");

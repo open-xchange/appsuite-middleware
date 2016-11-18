@@ -94,7 +94,7 @@ public class GetALinkTest extends ShareTest {
      * @param name
      */
     public GetALinkTest(String name) {
-        super(name);
+        super();
     }
 
     @Override

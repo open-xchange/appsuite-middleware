@@ -76,8 +76,8 @@ public class Bug18204Test extends AbstractAJAXSession {
     Calendar due;
     Task task;
 
-    public Bug18204Test(String name) throws Exception {
-        super(name);
+    public Bug18204Test() throws Exception {
+        super();
     }
 
     @Override

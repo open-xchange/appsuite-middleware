@@ -14,8 +14,8 @@ public class Bug4395Test extends AppointmentTest {
 
     private int parentFolderId;
 
-	public Bug4395Test(final String name) {
-		super(name);
+	public Bug4395Test() {
+		super();
 	}
 
 	@Override

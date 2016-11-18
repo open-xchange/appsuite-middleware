@@ -2,6 +2,7 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.After;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -16,8 +17,8 @@ public class Bug9497Test extends AbstractRecurrenceTest {
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9497Test.class);
     private int objectId = -1;
 
-	public Bug9497Test(final String name) {
-		super(name);
+	public Bug9497Test() {
+		super();
 	}
 
 	/**
@@ -45,8 +46,8 @@ public class Bug9497Test extends AbstractRecurrenceTest {
 		loadAppointment(getWebConversation(), objectId, 39,  appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 	}
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         super.tearDown();
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL+getHostName(), getSessionId(), false);
     }

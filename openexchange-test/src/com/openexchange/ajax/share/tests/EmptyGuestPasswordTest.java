@@ -74,8 +74,8 @@ public class EmptyGuestPasswordTest extends ShareTest {
 
     private FolderObject folder;
 
-    public EmptyGuestPasswordTest(String name) {
-        super(name);
+    public EmptyGuestPasswordTest() {
+        super();
     }
 
     @Override

@@ -92,8 +92,8 @@ public class QueryTest extends CalendarFindTest {
      *
      * @param name The test name
      */
-    public QueryTest(String name) {
-        super(name);
+    public QueryTest() {
+        super();
     }
 
     public void testFilterChaining() throws Exception {

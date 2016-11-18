@@ -21,8 +21,8 @@ public class Bug34499Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-	public Bug34499Test(final String name) {
-		super(name);
+	public Bug34499Test() {
+		super();
 	}
 
 	public void testImportEmptyDatesAndDistinguishedNames() throws Exception {

@@ -49,13 +49,12 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug20980Test_DateOnMissingDSTHour extends ManagedAppointmentTest {
-	public Bug20980Test_DateOnMissingDSTHour(String name) {
-		super(name);
+	public Bug20980Test_DateOnMissingDSTHour() {
+		super();
 	}
 
 	public void testBugWithDST() throws Exception{

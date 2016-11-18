@@ -93,7 +93,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
      * @param name
      */
     public FindTasksTestsFilterCombinations(String name) {
-        super(name);
+        super();
     }
 
     /**

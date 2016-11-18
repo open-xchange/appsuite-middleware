@@ -87,12 +87,12 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
      * Initializes a new {@link BundleTestEventAdmin}
      */
     public BundleTestEventAdmin(final String name) {
-        super(name);
+        super();
     }
 
     public void testEventAdminAbsence() {
         try {
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject loginObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),

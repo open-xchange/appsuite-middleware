@@ -92,8 +92,8 @@ public final class DateTimeTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public DateTimeTest(String name) {
-        super(name);
+    public DateTimeTest() {
+        super();
     }
 
     @Before

@@ -74,8 +74,8 @@ public abstract class AbstractNetsolTest extends AbstractMailTest {
 	 *
 	 * @param name
 	 */
-	protected AbstractNetsolTest(final String name) {
-		super(name);
+	protected AbstractNetsolTest() {
+		super();
 	}
 
 	protected static final int[] COLUMNS_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };

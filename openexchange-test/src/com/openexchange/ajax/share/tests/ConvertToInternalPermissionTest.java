@@ -74,8 +74,8 @@ public class ConvertToInternalPermissionTest extends ShareTest {
      *
      * @param name The test name
      */
-    public ConvertToInternalPermissionTest(String name) {
-        super(name);
+    public ConvertToInternalPermissionTest() {
+        super();
     }
 
     public void testConvertToInternalPermissionRandomly() throws Exception {

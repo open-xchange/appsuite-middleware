@@ -69,8 +69,8 @@ public class PGPTest extends AbstractMailFilterTest {
      * 
      * @param name test case's name
      */
-    public PGPTest(String name) {
-        super(name);
+    public PGPTest() {
+        super();
     }
 
     /**

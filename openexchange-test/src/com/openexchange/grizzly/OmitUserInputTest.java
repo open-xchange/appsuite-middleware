@@ -67,7 +67,7 @@ public class OmitUserInputTest extends AbstractSimpleClientTest {
     private static String USER_INPUT="i_do_not_exist_at_all";
 
     @Test
-    public void test() throws Exception {
+    public void Test() throws Exception {
         SimpleOXClient oxClient = createClient();
         HttpClient httpClient = oxClient.getClient();
         HttpMethod getMissing = new GetMethod("/servlet/" + USER_INPUT);

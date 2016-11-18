@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONException;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -84,13 +85,13 @@ public class FreeBusyTest extends ManagedAppointmentTest {
     private int contextId;
     private final DateFormat formatter = new SimpleDateFormat("yyyyMMdd"); //used by freebusy.java
 
-    public FreeBusyTest(String name) {
-        super(name);
+    public FreeBusyTest() {
+        super();
     }
 
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
 
@@ -103,14 +104,6 @@ public class FreeBusyTest extends ManagedAppointmentTest {
         appointment.setEndDate( inAnHour );
         appointment.setParentFolderID(folder.getObjectID());
     }
-
-
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
 
     public void testReserved() throws Exception{
         checkFreeBusy(appointment, Appointment.RESERVED);

@@ -72,8 +72,8 @@ public class RemindAgainTest extends AbstractAJAXSession {
      * Default constructor.
      * @param name Test name.
      */
-    public RemindAgainTest(final String name) {
-        super(name);
+    public RemindAgainTest() {
+        super();
     }
 
     @Override

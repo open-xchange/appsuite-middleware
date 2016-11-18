@@ -80,8 +80,8 @@ public final class ZipDocumentsTest extends AbstractObjectCountTest {
      *
      * @param name
      */
-    public ZipDocumentsTest(String name) {
-        super(name);
+    public ZipDocumentsTest() {
+        super();
     }
 
     @Test

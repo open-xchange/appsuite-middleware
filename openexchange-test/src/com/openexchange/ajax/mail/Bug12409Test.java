@@ -107,8 +107,8 @@ public class Bug12409Test extends AbstractMailTest {
 		clearFolder(getDraftsFolder());
 		super.tearDown();
 	}
-	public Bug12409Test(final String name) {
-		super(name);
+	public Bug12409Test() {
+		super();
 	}
 
 	public void testSavedDispositionNotificationReturnedWhenEditing() throws IOException, SAXException, JSONException, OXException {

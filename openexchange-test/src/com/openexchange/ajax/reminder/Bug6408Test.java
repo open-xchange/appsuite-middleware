@@ -12,8 +12,8 @@ import com.openexchange.groupware.reminder.ReminderObject;
 
 public class Bug6408Test extends ReminderTest {
 
-	public Bug6408Test(final String name) {
-		super(name);
+	public Bug6408Test() {
+		super();
 	}
 
 	public void testBug6408() throws Exception {

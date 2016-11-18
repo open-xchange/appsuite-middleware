@@ -78,8 +78,8 @@ public class MultipleSubscribeTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public MultipleSubscribeTest(final String name) {
-        super(name);
+    public MultipleSubscribeTest() {
+        super();
     }
 
     @Override

@@ -73,8 +73,8 @@ public class MaxMailSizeTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public MaxMailSizeTest(String name) {
-        super(name);
+    public MaxMailSizeTest() {
+        super();
     }
 
     @Override

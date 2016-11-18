@@ -69,8 +69,8 @@ public class ClearTest extends AbstractMailTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearTest.class);
 
-	public ClearTest(final String name) {
-		super(name);
+	public ClearTest() {
+		super();
 	}
 
 	@Override

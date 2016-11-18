@@ -134,8 +134,8 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
      * 
      * @param name The name of the test case
      */
-    public AbstractMailFilterTest(String name) {
-        super(name);
+    public AbstractMailFilterTest() {
+        super();
     }
 
     @Override

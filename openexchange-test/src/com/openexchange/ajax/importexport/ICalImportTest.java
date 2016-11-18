@@ -67,8 +67,8 @@ import com.openexchange.webdav.xml.AppointmentTest;
 
 public class ICalImportTest extends AbstractICalTest {
 
-    public ICalImportTest(final String name) {
-        super(name);
+    public ICalImportTest() {
+        super();
     }
 
     // Bug 12177

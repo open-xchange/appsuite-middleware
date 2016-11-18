@@ -70,8 +70,8 @@ public class ChangeTimeZoneTest extends AbstractAJAXSession {
     private CalendarTestManager ctm;
     private Appointment app;
 
-    public ChangeTimeZoneTest(String name) {
-        super(name);
+    public ChangeTimeZoneTest() {
+        super();
     }
 
     @Override

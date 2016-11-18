@@ -58,6 +58,7 @@ import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.MailTest;
@@ -109,12 +110,12 @@ public class AlwaysTest extends AbstractAJAXTest {
 
     private AJAXClient client;
 
-    public AlwaysTest(final String name) {
-        super(name);
+    public AlwaysTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
     }

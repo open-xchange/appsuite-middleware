@@ -66,8 +66,8 @@ public class Bug15315Test extends AbstractAJAXSession {
     private static final int RANGE = 100;
     private TimeZone tz;
 
-    public Bug15315Test(String name) {
-        super(name);
+    public Bug15315Test() {
+        super();
     }
 
     @Override

@@ -11,8 +11,8 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug8447Test.class);
 
-	public Bug8447Test(final String name) {
-		super(name);
+	public Bug8447Test() {
+		super();
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 	}
 

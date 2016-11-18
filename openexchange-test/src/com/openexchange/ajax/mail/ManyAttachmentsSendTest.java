@@ -70,8 +70,8 @@ public final class ManyAttachmentsSendTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public ManyAttachmentsSendTest(final String name) {
-        super(name);
+    public ManyAttachmentsSendTest() {
+        super();
     }
 
     @Override

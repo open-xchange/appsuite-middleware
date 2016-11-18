@@ -70,8 +70,8 @@ public class Bug33576Test extends ContactsFindTest {
      *
      * @param name The test name
      */
-    public Bug33576Test(String name) {
-        super(name);
+    public Bug33576Test() {
+        super();
     }
 
     public void testAutocompleteContactWithoutEMailAddress() throws Exception {

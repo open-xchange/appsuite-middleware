@@ -68,8 +68,8 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
 
     protected SubscriptionTestManager subMgr;
 
-    public AbstractSubscriptionTest(String name) {
-        super(name);
+    public AbstractSubscriptionTest() {
+        super();
     }
 
     @Override

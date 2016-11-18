@@ -66,8 +66,8 @@ public abstract class AbstractPublicationTest extends AbstractPubSubTest {
 
     protected PublicationTestManager pubMgr;
 
-    public AbstractPublicationTest(String name) {
-        super(name);
+    public AbstractPublicationTest() {
+        super();
     }
 
     public void setPublishManager(PublicationTestManager pubMgr) {

@@ -91,7 +91,7 @@ public class DowngradeTest extends TestCase {
     private Session session;
 
     public DowngradeTest(final String name) {
-        super(name);
+        super();
     }
 
     private static String getUsername(final String un) {

@@ -15,8 +15,8 @@ import com.openexchange.groupware.container.Contact;
 
 public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
 
-    public UpdateNotAllowedFieldsTest(String name) {
-        super(name);
+    public UpdateNotAllowedFieldsTest() {
+        super();
     }
 
     public void testTryUpdateContextID() throws Exception {

@@ -73,8 +73,8 @@ public class LinkUpdateTest extends ShareTest {
      *
      * @param name The test name
      */
-    public LinkUpdateTest(String name) {
-        super(name);
+    public LinkUpdateTest() {
+        super();
     }
 
     public void testLinkExpiryDateRandomly() throws Exception {

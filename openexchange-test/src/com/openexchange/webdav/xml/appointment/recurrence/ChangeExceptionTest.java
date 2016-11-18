@@ -5,8 +5,8 @@ import com.openexchange.groupware.container.Appointment;
 
 public class ChangeExceptionTest extends AbstractRecurrenceTest {
 
-    public ChangeExceptionTest(String name) {
-        super(name);
+    public ChangeExceptionTest() {
+        super();
     }
 
     public void testExceptionInTime() throws Throwable {

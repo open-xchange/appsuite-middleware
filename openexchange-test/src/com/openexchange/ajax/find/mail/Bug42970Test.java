@@ -69,8 +69,8 @@ public class Bug42970Test extends AbstractMailFindTest {
      * 
      * @param name The test case's name
      */
-    public Bug42970Test(String name) {
-        super(name);
+    public Bug42970Test() {
+        super();
     }
 
     /**

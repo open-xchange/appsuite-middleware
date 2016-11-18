@@ -77,8 +77,8 @@ public class Bug40596Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40596Test(String name) {
-        super(name);
+    public Bug40596Test() {
+        super();
     }
 
     public void testBug40596() throws Exception {

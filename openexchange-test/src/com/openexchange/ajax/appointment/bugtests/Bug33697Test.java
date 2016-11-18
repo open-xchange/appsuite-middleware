@@ -86,8 +86,8 @@ public class Bug33697Test extends AbstractAppointmentTest {
      * Initializes a new {@link Bug33697Test}.
      * @param name The test name
      */
-    public Bug33697Test(String name) {
-        super(name);
+    public Bug33697Test() {
+        super();
     }
 
     @Before

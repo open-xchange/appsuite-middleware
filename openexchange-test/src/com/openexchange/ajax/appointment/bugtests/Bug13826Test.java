@@ -82,8 +82,8 @@ public class Bug13826Test extends AbstractAJAXSession {
 
     private Date lastModified;
 
-    public Bug13826Test(String name) {
-        super(name);
+    public Bug13826Test() {
+        super();
     }
 
     @Override

@@ -72,8 +72,8 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class LoginTest extends AbstractLoginTest {
 
-    public LoginTest(final String name) {
-        super(name);
+    public LoginTest() {
+        super();
     }
 
     @Override

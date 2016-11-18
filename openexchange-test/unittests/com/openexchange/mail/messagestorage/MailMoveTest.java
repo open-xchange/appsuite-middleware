@@ -74,7 +74,7 @@ public final class MailMoveTest extends MessageStorageTest {
      * @param name
      */
     public MailMoveTest(final String name) {
-        super(name);
+        super();
     }
 
     private static final MailField[] FIELDS_ID = { MailField.ID };

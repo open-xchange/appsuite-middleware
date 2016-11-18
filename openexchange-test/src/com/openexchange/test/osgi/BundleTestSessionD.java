@@ -68,7 +68,7 @@ public final class BundleTestSessionD extends AbstractBundleTest {
      * @param name
      */
     public BundleTestSessionD(final String name) {
-        super(name);
+        super();
     }
 
     @Override
@@ -78,7 +78,7 @@ public final class BundleTestSessionD extends AbstractBundleTest {
 
     public void testSessionDAbsenceThroughLogin() {
         try {
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject jsonObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),
@@ -109,7 +109,7 @@ public final class BundleTestSessionD extends AbstractBundleTest {
              */
             startBundle.start(BUNDLE_ID);
 
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject loginObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),

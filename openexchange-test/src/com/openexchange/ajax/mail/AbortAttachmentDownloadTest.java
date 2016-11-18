@@ -91,8 +91,8 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
 
     String[][] fmid;
 
-    public AbortAttachmentDownloadTest(final String name) {
-        super(name);
+    public AbortAttachmentDownloadTest() {
+        super();
     }
 
     @Override

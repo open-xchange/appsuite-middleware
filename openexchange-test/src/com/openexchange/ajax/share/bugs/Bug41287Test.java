@@ -72,8 +72,8 @@ public class Bug41287Test extends ShareTest {
     private FolderObject subfolder;
     private ShareTarget target;
 
-    public Bug41287Test(String name) {
-        super(name);
+    public Bug41287Test() {
+        super();
     }
 
     @Override

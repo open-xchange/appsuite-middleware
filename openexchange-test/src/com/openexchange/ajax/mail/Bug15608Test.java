@@ -79,8 +79,8 @@ public class Bug15608Test extends AbstractAJAXSession {
     private String address;
     private String[][] ids;
 
-    public Bug15608Test(final String name) {
-        super(name);
+    public Bug15608Test() {
+        super();
     }
 
     @Override

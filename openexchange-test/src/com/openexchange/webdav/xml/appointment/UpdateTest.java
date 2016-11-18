@@ -17,8 +17,8 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class UpdateTest extends AppointmentTest {
 
-	public UpdateTest(final String name) {
-		super(name);
+	public UpdateTest() {
+		super();
 	}
 
 	public void testUpdate() throws Exception {

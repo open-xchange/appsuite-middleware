@@ -77,8 +77,8 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
      * Default constructor.
      * @param name test name.
      */
-    public Bug12727Test(final String name) {
-        super(name);
+    public Bug12727Test() {
+        super();
     }
 
     /**

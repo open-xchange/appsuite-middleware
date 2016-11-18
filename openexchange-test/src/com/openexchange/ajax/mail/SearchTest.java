@@ -77,8 +77,8 @@ public final class SearchTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public SearchTest(final String name) {
-        super(name);
+    public SearchTest() {
+        super();
     }
 
     @Override

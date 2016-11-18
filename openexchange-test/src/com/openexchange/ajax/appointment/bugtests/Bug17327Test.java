@@ -86,8 +86,8 @@ public class Bug17327Test extends AbstractAJAXSession {
     TimeZone tz, tz2;
     Calendar cal;
 
-    public Bug17327Test(String name) {
-        super(name);
+    public Bug17327Test() {
+        super();
     }
 
     @Override

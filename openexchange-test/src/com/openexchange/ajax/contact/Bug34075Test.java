@@ -69,8 +69,8 @@ public class Bug34075Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-    public Bug34075Test(String name) {
-		super(name);
+    public Bug34075Test() {
+		super();
 	}
 
 	public void testAssignNewUidDuringCopy() throws Exception {

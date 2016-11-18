@@ -75,8 +75,8 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
      * 
      * @param name
      */
-    public SubscribeMSLiveContactsTest(String name) {
-        super(name);
+    public SubscribeMSLiveContactsTest() {
+        super();
     }
 
     public void setUp() throws Exception {

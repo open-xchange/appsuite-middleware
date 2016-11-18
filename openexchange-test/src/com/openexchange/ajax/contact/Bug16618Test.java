@@ -83,8 +83,8 @@ public class Bug16618Test extends AbstractAJAXSession {
 
     private int folderId;
 
-    public Bug16618Test(final String name) {
-        super(name);
+    public Bug16618Test() {
+        super();
     }
 
     private Contact createContactWithImage() throws Exception {

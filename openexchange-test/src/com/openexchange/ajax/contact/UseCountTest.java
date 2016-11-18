@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import java.util.Random;
 import org.json.JSONArray;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
@@ -85,8 +84,8 @@ public class UseCountTest extends ContactTest {
      * Initializes a new {@link UseCountTest}.
      * @param name
      */
-    public UseCountTest(String name) {
-        super(name);
+    public UseCountTest() {
+        super();
     }
 
     @Override

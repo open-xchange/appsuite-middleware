@@ -73,8 +73,8 @@ import com.openexchange.groupware.container.Appointment;
 public class Bug12212Test extends AbstractAJAXSession {
 	final String bugname = "Test for bug 12212";
 
-	public Bug12212Test(final String name) {
-		super(name);
+	public Bug12212Test() {
+		super();
 	}
 
 	public Appointment createDailyRecurringAppointment(final TimeZone timezone, final int folderId){

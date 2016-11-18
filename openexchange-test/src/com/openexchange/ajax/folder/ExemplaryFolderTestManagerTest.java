@@ -71,8 +71,8 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
 
     FolderObject folderObject2;
 
-    public ExemplaryFolderTestManagerTest(final String name) {
-        super(name);
+    public ExemplaryFolderTestManagerTest() {
+        super();
     }
 
     @Override

@@ -63,8 +63,8 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class CharsetTest extends AbstractTaskTest {
 
-    public CharsetTest(final String name) {
-        super(name);
+    public CharsetTest() {
+        super();
     }
 
     /**

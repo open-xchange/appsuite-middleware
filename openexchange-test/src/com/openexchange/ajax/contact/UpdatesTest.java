@@ -17,8 +17,8 @@ import com.openexchange.groupware.container.Contact;
 
 public class UpdatesTest extends AbstractContactTest {
 
-    public UpdatesTest(final String name) {
-        super(name);
+    public UpdatesTest() {
+        super();
     }
 
     @Override

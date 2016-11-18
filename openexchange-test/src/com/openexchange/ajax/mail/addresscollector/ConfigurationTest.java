@@ -10,8 +10,8 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 public class ConfigurationTest extends AbstractAJAXSession {
 
-    public ConfigurationTest(final String name) {
-        super(name);
+    public ConfigurationTest() {
+        super();
     }
 
     public void testEnableAttribute() throws Throwable {

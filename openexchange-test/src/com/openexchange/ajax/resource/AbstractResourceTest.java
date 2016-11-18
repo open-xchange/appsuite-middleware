@@ -77,8 +77,8 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 	 * @param name
 	 *            name of the test.
 	 */
-	protected AbstractResourceTest(final String name) {
-		super(name);
+	protected AbstractResourceTest() {
+		super();
 	}
 
 	/**

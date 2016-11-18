@@ -55,8 +55,8 @@ import com.openexchange.webdav.xml.ContactTest;
 
 public class Bug8182Test extends ContactTest {
 
-    public Bug8182Test(final String name) {
-        super(name);
+    public Bug8182Test() {
+        super();
     }
 
     public void testBug8182() throws Throwable {

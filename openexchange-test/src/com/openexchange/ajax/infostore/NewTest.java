@@ -20,8 +20,8 @@ public class NewTest extends InfostoreAJAXTest {
 
     private static final byte[] megabyte = new byte[1000000];
 
-    public NewTest(final String name) {
-        super(name);
+    public NewTest() {
+        super();
     }
 
     public void testNothing() {

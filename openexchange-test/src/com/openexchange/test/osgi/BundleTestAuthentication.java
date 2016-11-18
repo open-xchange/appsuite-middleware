@@ -66,12 +66,12 @@ public final class BundleTestAuthentication extends AbstractBundleTest {
      * Initializes a new {@link BundleTestAuthentication}
      */
     public BundleTestAuthentication(final String name) {
-        super(name);
+        super();
     }
 
     public void testAuthenticationAbsence() {
         try {
-            final LoginTest loginTest = new LoginTest("LoginTest");
+            final LoginTest loginTest = new LoginTest();
             final JSONObject jsonObject = login(
                 getWebConversation(),
                 loginTest.getHostName(),

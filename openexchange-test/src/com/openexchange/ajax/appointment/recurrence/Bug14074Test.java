@@ -81,8 +81,8 @@ public final class Bug14074Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    public Bug14074Test(final String name) {
-        super(name);
+    public Bug14074Test() {
+        super();
     }
 
     /**

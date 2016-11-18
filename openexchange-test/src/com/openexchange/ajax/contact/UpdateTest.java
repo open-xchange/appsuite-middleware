@@ -11,8 +11,8 @@ import com.openexchange.test.OXTestToolkit;
 
 public class UpdateTest extends AbstractContactTest {
 
-    public UpdateTest(final String name) {
-        super(name);
+    public UpdateTest() {
+        super();
     }
 
     @Override

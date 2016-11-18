@@ -67,8 +67,8 @@ import com.openexchange.importexport.formats.Format;
  */
 public class ICalImportExportServletTest extends AbstractImportExportServletTest {
 
-	public ICalImportExportServletTest(final String name) {
-		super(name);
+	public ICalImportExportServletTest() {
+		super();
 	}
 
 	public void testIcalMessage() throws Exception{

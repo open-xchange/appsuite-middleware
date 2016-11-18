@@ -6,8 +6,8 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 
 public class Bug20945Test_UnexpectedError26 extends ManagedAppointmentTest {
 
-	public Bug20945Test_UnexpectedError26(final String name) {
-		super(name);
+	public Bug20945Test_UnexpectedError26() {
+		super();
 	}
 	
 	public String ical = "BEGIN:VCALENDAR\n" + 

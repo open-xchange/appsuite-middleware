@@ -83,8 +83,8 @@ public class AdminListTest extends AbstractMailFilterTest {
     private Rule rule;
     private int rid = -1;
 
-    public AdminListTest(final String name) {
-        super(name);
+    public AdminListTest() {
+        super();
     }
 
     @Override

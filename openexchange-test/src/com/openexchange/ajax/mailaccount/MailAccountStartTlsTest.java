@@ -50,6 +50,8 @@
 package com.openexchange.ajax.mailaccount;
 
 import java.util.UUID;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
@@ -63,12 +65,13 @@ import com.openexchange.mailaccount.MailAccountDescription;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.2
  */
+@RunWith(ConcurrentTestRunner.class)
 public class MailAccountStartTlsTest extends AbstractMailAccountTest {
 
     private MailAccountDescription mailAccount;
 
-    public MailAccountStartTlsTest(String name) {
-        super(name);
+    public MailAccountStartTlsTest() {
+        super();
     }
 
     @Override

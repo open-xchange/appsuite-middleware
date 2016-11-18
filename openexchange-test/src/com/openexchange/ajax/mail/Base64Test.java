@@ -81,8 +81,8 @@ public class Base64Test extends AbstractMailTest {
      * Initializes a new {@link Base64Test}.
      * @param name
      */
-    public Base64Test(final String name) {
-        super(name);
+    public Base64Test() {
+        super();
     }
 
     @Override

@@ -16,8 +16,8 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class NewTest extends ContactTest {
 
-	public NewTest(final String name) {
-		super(name);
+	public NewTest() {
+		super();
 	}
 
 	public void testNewContact() throws Exception {

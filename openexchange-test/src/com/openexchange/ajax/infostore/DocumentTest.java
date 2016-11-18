@@ -14,8 +14,8 @@ public class DocumentTest extends InfostoreAJAXTest {
 	protected File upload;
 	protected String id;
 
-	public DocumentTest(final String name){
-		super(name);
+	public DocumentTest(){
+		super();
 	}
 
 	@Override

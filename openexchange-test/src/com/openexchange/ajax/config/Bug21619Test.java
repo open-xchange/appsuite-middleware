@@ -71,8 +71,8 @@ public final class Bug21619Test extends AbstractAJAXSession {
     private final ValueWriter[] writers = new ValueWriter[2];
     private final Thread[] threads = new Thread[writers.length];
 
-    public Bug21619Test(final String name) {
-        super(name);
+    public Bug21619Test() {
+        super();
     }
 
     @Override

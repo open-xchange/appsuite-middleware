@@ -54,6 +54,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
@@ -74,6 +77,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
 
+@RunWith(ConcurrentTestRunner.class)
 public class ListTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListTest.class);
@@ -86,12 +90,12 @@ public class ListTest extends AppointmentTest {
 
     private FolderObject folder;
 
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client1 = new AJAXClient(User.User1);
 

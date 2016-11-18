@@ -73,8 +73,8 @@ public final class NetsolTestMailMessageOpen extends AbstractNetsolTest {
 	 *
 	 * @param name
 	 */
-	public NetsolTestMailMessageOpen(final String name) {
-		super(name);
+	public NetsolTestMailMessageOpen() {
+		super();
 	}
 
 	public void testMailOpen() throws Throwable {
