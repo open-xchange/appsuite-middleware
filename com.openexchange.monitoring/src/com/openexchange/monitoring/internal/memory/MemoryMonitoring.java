@@ -55,9 +55,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.management.MBeanServer;
@@ -76,8 +78,24 @@ public class MemoryMonitoring implements Runnable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MemoryMonitoring.class);
 
-    private final DecimalFormat decimalFormatPercent;
-    private final DecimalFormat decimalFormatCount;
+    /**
+     * Creates a new {@code DecimalFormat} instance.
+     *
+     * @return The format instance
+     */
+    private static NumberFormat newNumberFormat(String pattern) {
+        NumberFormat f = NumberFormat.getInstance(Locale.US);
+        if (f instanceof DecimalFormat) {
+            DecimalFormat df = (DecimalFormat) f;
+            df.applyPattern(pattern);
+        }
+        return f;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    private final NumberFormat decimalFormatPercent;
+    private final NumberFormat decimalFormatCount;
     private final Map<String, Measurement> lastMeasurement;
     private final MBeanServer server;
     private final int periodMinutes;
@@ -105,8 +123,8 @@ public class MemoryMonitoring implements Runnable {
         this.periodMinutes = periodMinutes;
         this.server = server;
         lastMeasurement = new HashMap<>(4);
-        decimalFormatPercent = new DecimalFormat("0.0");
-        decimalFormatCount = new DecimalFormat("#,##0");
+        decimalFormatPercent = newNumberFormat("0.0");
+        decimalFormatCount = newNumberFormat("#,##0");
     }
 
     @Override

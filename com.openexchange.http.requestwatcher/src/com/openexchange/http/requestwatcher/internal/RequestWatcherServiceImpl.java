@@ -49,12 +49,17 @@
 
 package com.openexchange.http.requestwatcher.internal;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigurationService;
@@ -80,6 +85,26 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     /** The request number */
     private static final AtomicLong NUMBER = new AtomicLong();
+
+    /** The decimal format to use when printing milliseconds */
+    protected static final NumberFormat MILLIS_FORMAT = newNumberFormat();
+
+    /** The accompanying lock for shared decimal format */
+    protected static final Lock MILLIS_FORMAT_LOCK = new ReentrantLock();
+
+    /**
+     * Creates a new {@code DecimalFormat} instance.
+     *
+     * @return The format instance
+     */
+    protected static NumberFormat newNumberFormat() {
+        NumberFormat f = NumberFormat.getInstance(Locale.US);
+        if (f instanceof DecimalFormat) {
+            DecimalFormat df = (DecimalFormat) f;
+            df.applyPattern("#,##0");
+        }
+        return f;
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------
 
@@ -196,8 +221,11 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         }
 
         private boolean handleEntry(RequestRegistryEntry entry, StringBuilder logBuilder) {
+            // Age info
+            AgeInfo ageInfo = newAgeInfo(entry.getAge(), requestMaxAge);
+
             // Get trace for associated thread's trace
-            Throwable trace = new RequestTrace((int) entry.getAge(), requestMaxAge, entry.getThread().getName());
+            Throwable trace = new RequestTrace(ageInfo.sAge, ageInfo.sMaxAge, entry.getThread().getName());
             boolean interrupt;
             {
                 StackTraceElement[] stackTrace = entry.getStackTrace();
@@ -211,7 +239,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 }
                 trace.setStackTrace(stackTrace);
             }
-            logBuilder.append("Request with age ").append(entry.getAge()).append("ms exceeds max. age of ").append(requestMaxAge).append("ms.");
+            logBuilder.append("Request with age ").append(ageInfo.sAge).append("ms exceeds max. age of ").append(ageInfo.sMaxAge).append("ms.");
 
             // Append log properties from the ThreadLocal to logBuilder
             if (false == appendLogProperties(entry, logBuilder)) {
@@ -297,6 +325,33 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 }
             }
             return false;
+        }
+
+    } // End of class Watcher
+
+    private static AgeInfo newAgeInfo(long age, int requestMaxAge) {
+        if (MILLIS_FORMAT_LOCK.tryLock()) {
+            try {
+                return new AgeInfo(MILLIS_FORMAT.format(age), MILLIS_FORMAT.format(requestMaxAge));
+            } finally {
+                MILLIS_FORMAT_LOCK.unlock();
+            }
+        }
+
+        // Use thread-specific DecimalFormat instance
+        NumberFormat format = newNumberFormat();
+        return new AgeInfo(format.format(age), format.format(requestMaxAge));
+    }
+
+    private final static class AgeInfo {
+
+        final String sAge;
+        final String sMaxAge;
+
+        AgeInfo(String sAge, String sMaxAge) {
+            super();
+            this.sAge = sAge;
+            this.sMaxAge = sMaxAge;
         }
     }
 

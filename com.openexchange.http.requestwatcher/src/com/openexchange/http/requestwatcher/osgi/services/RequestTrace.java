@@ -63,11 +63,11 @@ public final class RequestTrace extends Throwable {
     /**
      * Initializes a new {@link RequestTrace}.
      *
-     * @param age
-     * @param maxAge
-     * @param threadName
+     * @param age The current age
+     * @param maxAge The age threshold
+     * @param threadName The thread name
      */
-    public RequestTrace(int age, int maxAge, String threadName) {
+    public RequestTrace(String age, String maxAge, String threadName) {
         super(new StringBuffer(96).append("tracked request (age=").append(age).append(", max-age=").append(maxAge).append(", thread-name=").append(threadName).append(')').toString());
     }
 
