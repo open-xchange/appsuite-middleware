@@ -54,11 +54,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailThread;
 
 /**
- * {@link IMailFolderStorageThreadReferences} - Extends basic folder storage by requesting a mailbox' conversation threads.
+ * {@link IMailMessageStorageThreadReferences} - Extends basic folder storage by requesting a mailbox' conversation threads.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMailFolderStorageThreadReferences extends IMailMessageStorage {
+public interface IMailMessageStorageThreadReferences extends IMailMessageStorage {
 
     /**
      * Indicates if thread references are supported.
