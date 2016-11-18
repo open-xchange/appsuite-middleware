@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,33 +47,64 @@
  *
  */
 
-package com.openexchange.monitoring.services;
+package com.openexchange.monitoring.osgi;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.TimeUnit;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.monitoring.internal.memory.MemoryMonitoring;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
- * {@link MonitoringServiceRegistry} - A registry for services needed by IMAP bundle
+ * {@link MemoryMonitoringInitializer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class MonitoringServiceRegistry {
+public class MemoryMonitoringInitializer implements ServiceTrackerCustomizer<TimerService, TimerService> {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private final BundleContext context;
+    private final int periodMinutes;
+    private final double threshold;
+    private ScheduledTimerTask timerTask;
 
     /**
-     * Gets the service registry
-     *
-     * @return The service registry
+     * Initializes a new {@link MemoryMonitoringInitializer}.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    public MemoryMonitoringInitializer(int periodMinutes, double threshold, BundleContext context) {
+        super();
+        this.periodMinutes = periodMinutes;
+        this.threshold = threshold;
+        this.context = context;
     }
 
-    /**
-     * Initializes a new {@link MonitoringServiceRegistry}
-     */
-    private MonitoringServiceRegistry() {
-        super();
+    @Override
+    public synchronized TimerService addingService(ServiceReference<TimerService> reference) {
+        TimerService timerService = context.getService(reference);
+
+        Runnable task = new MemoryMonitoring(periodMinutes, threshold);
+        timerTask = timerService.scheduleAtFixedRate(task, periodMinutes, periodMinutes, TimeUnit.MINUTES);
+
+        return timerService;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<TimerService> reference, TimerService service) {
+        // Don't care
+    }
+
+    @Override
+    public synchronized void removedService(ServiceReference<TimerService> reference, TimerService service) {
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            this.timerTask = null;
+            timerTask.cancel();
+        }
+        service.purge();
+
+        context.ungetService(reference);
     }
 
 }
