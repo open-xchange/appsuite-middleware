@@ -76,8 +76,9 @@ public class MemoryMonitoring implements Runnable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MemoryMonitoring.class);
 
-    private final DecimalFormat decimalFormat;
-    private final Map<String, Long[]> lastMeasurement;
+    private final DecimalFormat decimalFormatPercent;
+    private final DecimalFormat decimalFormatCount;
+    private final Map<String, Measurement> lastMeasurement;
     private final MBeanServer server;
     private final int periodMinutes;
     private final double threshold;
@@ -104,7 +105,8 @@ public class MemoryMonitoring implements Runnable {
         this.periodMinutes = periodMinutes;
         this.server = server;
         lastMeasurement = new HashMap<>(4);
-        decimalFormat = new DecimalFormat("0.0");
+        decimalFormatPercent = new DecimalFormat("0.0");
+        decimalFormatCount = new DecimalFormat("#,##0");
     }
 
     @Override
@@ -113,17 +115,32 @@ public class MemoryMonitoring implements Runnable {
             GarbageCollectionInfos infos = getGarbageCollectionInfos(false);
             double gcTimePercentSum = infos.gcTimePercentSum;
             if (gcTimePercentSum > threshold) {
-                // accumulated collection elapsed time in milliseconds
-                LOG.warn("{}\tHigh GC activity detected!!!{}\tGarbage collection consumed {}% of uptime within {}{}", Strings.getLineSeparator(), Strings.getLineSeparator(), decimalFormat.format(gcTimePercentSum), extracted(), Strings.getLineSeparator());
+                /*-
+                 * Example:
+                 *
+                 *    High GC activity detected!!!
+                 *    Garbage collection consumed 12.5% of uptime within 5 minutes. Thereof:
+                 *        ParNewGc consumed 8.5% (4,533 collections)
+                 *        ConcuurentMarkSweep consumed 4.0% (524 collections)
+                 *
+                 */
+                StringBuilder msg = new StringBuilder(256);
+                msg.append(Strings.getLineSeparator()).append("\tHigh GC activity detected!!!");
+                msg.append(Strings.getLineSeparator()).append("\tGarbage collection consumed ").append(decimalFormatPercent.format(gcTimePercentSum)).append("% of uptime within ").append(getTimeInfo()).append(". Thereof:");
+                for (GarbageCollectionInfo gcInfo : infos.gcSingles) {
+                    msg.append(Strings.getLineSeparator()).append("\t\t").append(gcInfo.gcName).append(" consumed ").append(decimalFormatPercent.format(gcInfo.gcTimePercent)).append(" (").append(decimalFormatCount.format(gcInfo.gcCountPerPeriod)).append(" collections)");
+                }
+                msg.append(Strings.getLineSeparator());
+                LOG.warn(msg.toString());
             } else {
-                LOG.info("{}\tGarbage collection consumed {}% of uptime within {}{}", Strings.getLineSeparator(), decimalFormat.format(gcTimePercentSum), extracted(), Strings.getLineSeparator());
+                LOG.info("{}\tGarbage collection consumed {}% of uptime within {}. All fine.{}", Strings.getLineSeparator(), decimalFormatPercent.format(gcTimePercentSum), getTimeInfo(), Strings.getLineSeparator());
             }
         } catch (Exception e) {
             LOG.warn("Failed to collect Garbage Collection information", e);
         }
     }
 
-    private String extracted() {
+    private String getTimeInfo() {
         if (1 == periodMinutes) {
             return "1 minute";
         }
@@ -144,23 +161,23 @@ public class MemoryMonitoring implements Runnable {
 
             gcInfo.gcName = gc.getName();
 
-            Long[] gcLast = lastMeasurement.get(gcInfo.gcName);
+            Measurement gcLast = lastMeasurement.get(gcInfo.gcName);
             if (gcLast == null) {
                 // First run...
                 gcInfo.gcCountPerPeriod = gc.getCollectionCount() * periodMinutes * 60 * 1000 / rtUptimeMs;
                 gcInfo.gcTimePercent = (gc.getCollectionTime() * 1000 / rtUptimeMs) / 10.;
             } else {
-                gcInfo.gcCountPerPeriod = gc.getCollectionCount() - gcLast[0].longValue();
-                gcInfo.gcTimePercent = ((gc.getCollectionTime() - gcLast[1].longValue()) / (periodMinutes * 60)) / 10.;
+                gcInfo.gcCountPerPeriod = gc.getCollectionCount() - gcLast.first;
+                gcInfo.gcTimePercent = ((gc.getCollectionTime() - gcLast.second) / (periodMinutes * 60)) / 10.;
 
                 if (gcInfo.gcCountPerPeriod < 0 || gcInfo.gcTimePercent < 0) {
                     gcInfo.gcCountPerPeriod = gc.getCollectionCount() * periodMinutes * 60 * 1000 / rtUptimeMs;
                     gcInfo.gcTimePercent = (gc.getCollectionTime() * 1000 / rtUptimeMs) / 10.;
                 }
             }
-            lastMeasurement.put(gcInfo.gcName, new Long[] { Long.valueOf(gc.getCollectionCount()), Long.valueOf(gc.getCollectionTime()) });
+            lastMeasurement.put(gcInfo.gcName, new Measurement(gc.getCollectionCount(), gc.getCollectionTime()));
 
-            //gcInfos.gcSingles.add(gcInfo);
+            gcInfos.gcSingles.add(gcInfo);
             gcInfos.gcTimePercentSum += gcInfo.gcTimePercent;
         }
 
@@ -180,15 +197,15 @@ public class MemoryMonitoring implements Runnable {
                 return -1;
             }
 
-            Long[] lastCpuTimeVals = lastMeasurement.get("ProcessCpuTime::java.lang:type=OperatingSystem");
-            lastMeasurement.put("ProcessCpuTime::java.lang:type=OperatingSystem", new Long[] { Long.valueOf(rtUptimeMs), cpuTime });
+            Measurement lastCpuTimeVals = lastMeasurement.get("ProcessCpuTime");
+            lastMeasurement.put("ProcessCpuTime", new Measurement(rtUptimeMs, cpuTime.longValue()));
             OperatingSystemMXBean op = getOperatingSystemMXBean();
             long cpuCount = Math.max(1, op.getAvailableProcessors());
             long lastRtUptimeMs = 0;
             long lastCpuTime = 0;
-            if (lastCpuTimeVals != null && lastCpuTimeVals.length > 1) {
-                lastRtUptimeMs = lastCpuTimeVals[0].longValue();
-                lastCpuTime = lastCpuTimeVals[1].longValue();
+            if (lastCpuTimeVals != null) {
+                lastRtUptimeMs = lastCpuTimeVals.first;
+                lastCpuTime = lastCpuTimeVals.second;
             }
             return (int) Math.min(99, (cpuTime.longValue() - lastCpuTime) / ((rtUptimeMs - lastRtUptimeMs) * cpuCount * 10000));
         } catch (Exception x) {
@@ -224,7 +241,7 @@ public class MemoryMonitoring implements Runnable {
     /** Information for all available GC types and CPU time */
     private static final class GarbageCollectionInfos {
 
-        // List<GarbageCollectionInfo> gcSingles = new ArrayList<GarbageCollectionInfo>();
+        List<GarbageCollectionInfo> gcSingles = new ArrayList<GarbageCollectionInfo>(4);
         double gcTimePercentSum;
         long cpuTimePercent;
 
@@ -242,6 +259,19 @@ public class MemoryMonitoring implements Runnable {
 
         GarbageCollectionInfo() {
             super();
+        }
+    }
+
+    /** A measurement of two long values */
+    private static final class Measurement {
+
+        final long first;
+        final long second;
+
+        Measurement(long first, long second) {
+            super();
+            this.first = first;
+            this.second = second;
         }
     }
 
