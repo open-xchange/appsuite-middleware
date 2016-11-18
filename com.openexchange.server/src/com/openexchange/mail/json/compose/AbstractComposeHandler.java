@@ -831,6 +831,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                 if (null != jSecuritySettings) {
                     SecuritySettings settings = SecuritySettings.builder()
                         .encrypt(jSecuritySettings.optBoolean("encrypt", false))
+                        .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
                         .sign(jSecuritySettings.optBoolean("sign", false))
                         .authentication(jSecuritySettings.optString("authentication", null))
                         .build();

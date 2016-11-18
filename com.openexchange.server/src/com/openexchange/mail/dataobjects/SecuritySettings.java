@@ -71,6 +71,7 @@ public class SecuritySettings {
 
         private boolean encrypt;
         private boolean sign;
+        private boolean pgpInline;
         private String authentication;
 
         /**
@@ -88,6 +89,16 @@ public class SecuritySettings {
          */
         public Builder encrypt(boolean encrypt) {
             this.encrypt = encrypt;
+            return this;
+        }
+
+        /**
+         * Sets if PGP Inline should be used.
+         * @param pgpInline
+         * @return
+         */
+        public Builder pgpInline(boolean pgpInline) {
+            this.pgpInline = pgpInline;
             return this;
         }
 
@@ -127,6 +138,7 @@ public class SecuritySettings {
 
     private final boolean encrypt;
     private final boolean sign;
+    private final boolean pgpInline;
     private final String authentication;
 
     /**
@@ -135,6 +147,15 @@ public class SecuritySettings {
     SecuritySettings(boolean encrypt, boolean sign, String authentication) {
         super();
         this.encrypt = encrypt;
+        this.sign = sign;
+        this.pgpInline = false;
+        this.authentication = authentication;
+    }
+
+    SecuritySettings(boolean encrypt, boolean pgpInline, boolean sign, String authentication) {
+        super();
+        this.encrypt = encrypt;
+        this.pgpInline = pgpInline;
         this.sign = sign;
         this.authentication = authentication;
     }
@@ -173,6 +194,14 @@ public class SecuritySettings {
      */
     public boolean isSign() {
         return sign;
+    }
+
+    /**
+     * Gets the pgp Inline flag
+     * @return
+     */
+    public boolean isPgpInline() {
+        return pgpInline;
     }
 
     /**
