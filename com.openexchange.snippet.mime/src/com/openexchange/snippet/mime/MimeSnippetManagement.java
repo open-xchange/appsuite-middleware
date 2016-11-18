@@ -89,8 +89,9 @@ import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.filestore.FileStorageCodes;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
@@ -108,7 +109,6 @@ import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
@@ -120,9 +120,6 @@ import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetUtils;
-import com.openexchange.filestore.FileStorageCodes;
-import com.openexchange.filestore.FileStorages;
-import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -450,17 +447,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 attachment.setId(header);
             }
             attachment.setStreamProvider(new InputStreamProviderImpl(part));
-
-            ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
-            if (null == mfm) {
-                throw ServiceExceptionCode.absentService(ManagedFileManagement.class);
-            }
-            if (!mfm.contains(header)) {
-                ManagedFile mf = mfm.createManagedFile(header, attachment.getInputStream());
-                mf.setContentDisposition(attachment.getContentDisposition());
-                mf.setContentType(attachment.getContentType());
-            }
-
             snippet.addAttachment(attachment);
         }
     }
@@ -533,9 +519,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     final MimeBodyPart miscPart = new MimeBodyPart();
                     miscPart.setDataHandler(new DataHandler(new MessageDataSource(misc.toString(), "text/javascript; charset=UTF-8")));
                     miscPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                    miscPart.setHeader(
-                        MessageHeaders.HDR_CONTENT_TYPE,
-                        MimeMessageUtility.foldContentType("text/javascript; charset=UTF-8"));
+                    miscPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("text/javascript; charset=UTF-8"));
                     multipart.addBodyPart(miscPart);
                 }
                 // Attachments
@@ -690,32 +674,32 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 final List<String> propNames = new LinkedList<String>();
                 for (final Property property : properties) {
                     switch (property) {
-                    case ACCOUNT_ID:
-                        updateMessage.setHeader(Property.ACCOUNT_ID.getPropName(), Integer.toString(snippet.getAccountId()));
-                        propNames.add(Snippet.PROP_ACCOUNT_ID);
-                        break;
-                    case CREATED_BY:
-                        updateMessage.setHeader(Property.CREATED_BY.getPropName(), Integer.toString(snippet.getCreatedBy()));
-                        propNames.add(Snippet.PROP_CREATED_BY);
-                        break;
-                    case DISPLAY_NAME:
-                        updateMessage.setHeader(Property.DISPLAY_NAME.getPropName(), encode(snippet.getDisplayName()));
-                        propNames.add(Snippet.PROP_DISPLAY_NAME);
-                        break;
-                    case MODULE:
-                        updateMessage.setHeader(Property.MODULE.getPropName(), snippet.getModule());
-                        propNames.add(Snippet.PROP_MODULE);
-                        break;
-                    case SHARED:
-                        updateMessage.setHeader(Property.SHARED.getPropName(), Boolean.toString(snippet.isShared()));
-                        propNames.add(Snippet.PROP_SHARED);
-                        break;
-                    case TYPE:
-                        updateMessage.setHeader(Property.TYPE.getPropName(), snippet.getType());
-                        propNames.add(Snippet.PROP_TYPE);
-                        break;
-                    default:
-                        break;
+                        case ACCOUNT_ID:
+                            updateMessage.setHeader(Property.ACCOUNT_ID.getPropName(), Integer.toString(snippet.getAccountId()));
+                            propNames.add(Snippet.PROP_ACCOUNT_ID);
+                            break;
+                        case CREATED_BY:
+                            updateMessage.setHeader(Property.CREATED_BY.getPropName(), Integer.toString(snippet.getCreatedBy()));
+                            propNames.add(Snippet.PROP_CREATED_BY);
+                            break;
+                        case DISPLAY_NAME:
+                            updateMessage.setHeader(Property.DISPLAY_NAME.getPropName(), encode(snippet.getDisplayName()));
+                            propNames.add(Snippet.PROP_DISPLAY_NAME);
+                            break;
+                        case MODULE:
+                            updateMessage.setHeader(Property.MODULE.getPropName(), snippet.getModule());
+                            propNames.add(Snippet.PROP_MODULE);
+                            break;
+                        case SHARED:
+                            updateMessage.setHeader(Property.SHARED.getPropName(), Boolean.toString(snippet.isShared()));
+                            propNames.add(Snippet.PROP_SHARED);
+                            break;
+                        case TYPE:
+                            updateMessage.setHeader(Property.TYPE.getPropName(), snippet.getType());
+                            propNames.add(Snippet.PROP_TYPE);
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -821,7 +805,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
             // Removed
             if (notEmpty(removeAttachments)) {
-                for ( Attachment attachment : removeAttachments) {
+                for (Attachment attachment : removeAttachments) {
                     for (Iterator<MimeBodyPart> iterator = attachmentParts.iterator(); iterator.hasNext();) {
                         final String header = iterator.next().getHeader("attachmentid", null);
                         if (null != header && header.equals(attachment.getId())) {
@@ -918,9 +902,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                             stmt.setNull(++pos, Types.INTEGER);
                         }
                     }
-                    stmt.setString(
-                        ++pos,
-                        properties.contains(Property.DISPLAY_NAME) ? getObject(snippet.getDisplayName(), displayName) : displayName);
+                    stmt.setString(++pos, properties.contains(Property.DISPLAY_NAME) ? getObject(snippet.getDisplayName(), displayName) : displayName);
                     stmt.setString(++pos, properties.contains(Property.MODULE) ? getObject(snippet.getModule(), module) : module);
                     stmt.setString(++pos, properties.contains(Property.TYPE) ? getObject(snippet.getType(), type) : type);
                     stmt.setInt(++pos, properties.contains(Property.SHARED) ? (snippet.isShared() ? 1 : 0) : (shared ? 1 : 0));
@@ -1017,10 +999,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
     private static <V> V getObject(V o1, V o2) {
         return o1 == null ? (o2 == null ? o1 : o2) : o1;
-    }
-
-    private static int getInt(int i1, int i2) {
-        return i1 > 0 ? i1 : (i2 > 0 ? i2 : i1);
     }
 
     @Override
