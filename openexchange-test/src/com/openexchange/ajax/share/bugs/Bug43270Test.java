@@ -53,6 +53,7 @@ import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -119,162 +120,202 @@ public class Bug43270Test extends ShareTest {
         }
     }
 
+    @Test
     public void testGetFolderLinkWithShareLinks() throws Exception {
         getFolderLink(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
+    @Test
     public void testGetFolderLinkWithShareLinksAndInviteGuests() throws Exception {
         getFolderLink(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testGetFolderLinkWithShareLinksAndInviteGuestsAndReadCreateSharedFolders() throws Exception {
         getFolderLink(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontGetFolderLink() throws Exception {
         getFolderLink(false, Boolean.FALSE, Boolean.FALSE, "SHR-0018");
     }
 
+    @Test
     public void testDontGetFolderLinkWithInviteGuests() throws Exception {
         getFolderLink(false, Boolean.FALSE, Boolean.TRUE, "SHR-0018");
     }
 
+    @Test
     public void testDontGetFolderLinkWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         getFolderLink(true, Boolean.FALSE, Boolean.TRUE, "SHR-0018");
     }
 
+    @Test
     public void testGetFileLinkWithShareLinks() throws Exception {
         getFileLink(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
+    @Test
     public void testGetFileLinkWithShareLinksAndInviteGuests() throws Exception {
         getFileLink(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testGetFileLinkWithShareLinksAndInviteGuestsAndReadCreateSharedFiles() throws Exception {
         getFileLink(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontGetFileLink() throws Exception {
         getFileLink(false, Boolean.FALSE, Boolean.FALSE, "SHR-0018");
     }
 
+    @Test
     public void testDontGetFileLinkWithInviteGuests() throws Exception {
         getFileLink(false, Boolean.FALSE, Boolean.TRUE, "SHR-0018");
     }
 
+    @Test
     public void testDontGetFileLinkWithInviteGuestsAndReadCreateSharedFiles() throws Exception {
         getFileLink(true, Boolean.FALSE, Boolean.TRUE, "SHR-0018");
     }
 
+    @Test
     public void testInviteGuestToFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(true, Boolean.FALSE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteGuestToFolderWithInviteGuestsAndShareLinksAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToFolder() throws Exception {
         inviteGuestToFolder(false, Boolean.FALSE, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testInviteGuestToFolderWithInviteGuests() throws Exception {
         inviteGuestToFolder(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToFolderWithShareLinks() throws Exception {
         inviteGuestToFolder(false, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testInviteGuestToFolderWithInviteGuestsAndShareLinks() throws Exception {
         inviteGuestToFolder(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToFolderWithShareLinksAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(true, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testInviteGuestToFileWithInviteGuestsAndReadCreateSharedFiles() throws Exception {
         inviteGuestToFile(true, Boolean.FALSE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteGuestToFileWithInviteGuestsAndShareLinksAndReadCreateSharedFiles() throws Exception {
         inviteGuestToFile(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToFile() throws Exception {
         inviteGuestToFile(false, Boolean.FALSE, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testInviteGuestToFileWithInviteGuests() throws Exception {
         inviteGuestToFile(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToFileWithShareLinks() throws Exception {
         inviteGuestToFile(false, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testInviteGuestToFileWithInviteGuestsAndShareLinks() throws Exception {
         inviteGuestToFile(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToFileWithShareLinksAndReadCreateSharedFiles() throws Exception {
         inviteGuestToFile(true, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testInviteUserToFolderWithReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(true, Boolean.FALSE, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(true, Boolean.FALSE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToFolderWithInviteGuestsAndShareLinksAndReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToFolder() throws Exception {
         inviteUserToFolder(false, Boolean.FALSE, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToFolderWithInviteGuests() throws Exception {
         inviteUserToFolder(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToFolderWithShareLinks() throws Exception {
         inviteUserToFolder(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToFolderWithInviteGuestsAndShareLinks() throws Exception {
         inviteUserToFolder(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToFileWithReadCreateSharedFolders() throws Exception {
         inviteUserToFile(true, Boolean.FALSE, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToFileWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteUserToFile(true, Boolean.FALSE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToFileWithInviteGuestsAndShareLinksAndReadCreateSharedFolders() throws Exception {
         inviteUserToFile(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToFile() throws Exception {
         inviteUserToFile(false, Boolean.FALSE, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToFileWithInviteGuests() throws Exception {
         inviteUserToFile(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToFileWithShareLinks() throws Exception {
         inviteUserToFile(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToFileWithInviteGuestsAndShareLinks() throws Exception {
         inviteUserToFile(false, Boolean.TRUE, Boolean.TRUE, null);
     }
@@ -287,7 +328,7 @@ public class Bug43270Test extends ShareTest {
         UserModuleAccess moduleAccess = userInterface.getModuleAccess(context, user, credentials);
         moduleAccess.setReadCreateSharedFolders(readCreateSharedFolders);
         userInterface.changeModuleAccess(context, user, moduleAccess, credentials);
-	}
+    }
 
     private void setInviteGuests(Boolean inviteGuests) throws Exception {
         changeCapability("invite_guests", inviteGuests);
@@ -303,11 +344,11 @@ public class Bug43270Test extends ShareTest {
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
         com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(client2.getValues().getContextId());
         if (null == value) {
-            userInterface.changeCapabilities(context, user, Collections.<String>emptySet(), Collections.<String>emptySet(), Collections.singleton(capability), credentials);
+            userInterface.changeCapabilities(context, user, Collections.<String> emptySet(), Collections.<String> emptySet(), Collections.singleton(capability), credentials);
         } else if (Boolean.TRUE.equals(value)) {
-            userInterface.changeCapabilities(context, user, Collections.singleton(capability), Collections.<String>emptySet(), Collections.<String>emptySet(), credentials);
+            userInterface.changeCapabilities(context, user, Collections.singleton(capability), Collections.<String> emptySet(), Collections.<String> emptySet(), credentials);
         } else {
-            userInterface.changeCapabilities(context, user, Collections.<String>emptySet(), Collections.singleton(capability), Collections.<String>emptySet(), credentials);
+            userInterface.changeCapabilities(context, user, Collections.<String> emptySet(), Collections.singleton(capability), Collections.<String> emptySet(), credentials);
         }
     }
 

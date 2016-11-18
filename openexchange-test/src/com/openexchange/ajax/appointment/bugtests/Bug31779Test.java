@@ -110,6 +110,7 @@ public class Bug31779Test extends AbstractAJAXSession {
 
     /**
      * Tests the bug as written in the report: If the creator deletes an exception, the whole exception should disappear.
+     * 
      * @throws Exception
      */
     @Test
@@ -127,9 +128,10 @@ public class Bug31779Test extends AbstractAJAXSession {
         assertTrue("Error expected.", ctm2.getLastResponse().hasError());
         assertTrue("No object expected.", ctm2.getLastResponse().getErrorMessage().contains("Object not found"));
     }
-    
+
     /**
      * Tests the case, that a participant deletes an exception: Only the participant should be removed.
+     * 
      * @throws Exception
      */
     @Test

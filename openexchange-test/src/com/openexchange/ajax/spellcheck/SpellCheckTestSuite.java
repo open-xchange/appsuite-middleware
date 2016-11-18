@@ -60,22 +60,22 @@ import junit.framework.TestSuite;
  */
 public final class SpellCheckTestSuite extends TestSuite {
 
-	/**
-	 * Initializes a new {@link SpellCheckTestSuite}
-	 */
-	private SpellCheckTestSuite() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SpellCheckTestSuite}
+     */
+    private SpellCheckTestSuite() {
+        super();
+    }
 
-	/**
-	 * @return a test suite containing smoke tests.
-	 */
-	public static Test suite() {
-		final TestSuite suite = new TestSuite();
-		suite.addTestSuite(com.openexchange.ajax.spellcheck.CheckTest.class);
-		suite.addTestSuite(com.openexchange.ajax.spellcheck.SuggestionsTest.class);
-		suite.addTestSuite(com.openexchange.ajax.spellcheck.UserWordTest.class);
-		suite.addTestSuite(com.openexchange.ajax.spellcheck.ListTest.class);
-		return suite;
-	}
+    /**
+     * @return a test suite containing smoke tests.
+     */
+    public static Test suite() {
+        final TestSuite suite = new TestSuite();
+        suite.addTestSuite(com.openexchange.ajax.spellcheck.CheckTest.class);
+        suite.addTestSuite(com.openexchange.ajax.spellcheck.SuggestionsTest.class);
+        suite.addTestSuite(com.openexchange.ajax.spellcheck.UserWordTest.class);
+        suite.addTestSuite(com.openexchange.ajax.spellcheck.ListTest.class);
+        return suite;
+    }
 }

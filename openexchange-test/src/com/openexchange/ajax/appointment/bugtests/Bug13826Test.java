@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -122,6 +123,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         updateAppointment.setOccurrence(5);
     }
 
+    @Test
     public void testBug13826() throws Exception {
         UpdateRequest update = new UpdateRequest(sourceFolderId, updateAppointment, getClient().getValues().getTimeZone(), false);
         UpdateResponse updateResponse = getClient().execute(update);

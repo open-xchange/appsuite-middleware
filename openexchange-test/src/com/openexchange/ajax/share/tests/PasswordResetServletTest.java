@@ -65,6 +65,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -137,11 +138,7 @@ public final class PasswordResetServletTest extends ShareTest {
         this.guestPermission = lGuestPermission;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testResetPassword_passwordReset() throws Exception {
         // http://localhost/ajax/share/1100ba1e0f0652b8849d7f3f066049e390589313a77026ef
         URI shareUrl = new URI(shareURL);
@@ -159,21 +156,12 @@ public final class PasswordResetServletTest extends ShareTest {
         }
         DefaultHttpClient httpClient = getSession().getHttpClient();
         // http://localhost/ajax/share/reset/password?share=1100ba1e0f0652b8849d7f3f066049e390589313a77026ef&confirm=FIMvTtnmQ7Dv_N97CRENJy6rTYw
-        HttpGet getConfirmationMail = new HttpGet(new URIBuilder()
-            .setScheme(client.getProtocol())
-            .setHost(client.getHostname())
-            .setPath("/ajax/share/reset/password")
-            .setParameter("share", token)
-            .build());
+        HttpGet getConfirmationMail = new HttpGet(new URIBuilder().setScheme(client.getProtocol()).setHost(client.getHostname()).setPath("/ajax/share/reset/password").setParameter("share", token).build());
         HttpResponse getConfirmationMailResponse = httpClient.execute(getConfirmationMail);
         EntityUtils.consume(getConfirmationMailResponse.getEntity());
 
         PWResetData resetData = getConfirmationToken();
-        HttpPost confirmPWReset = new HttpPost(new URIBuilder()
-            .setScheme(client.getProtocol())
-            .setHost(client.getHostname())
-            .setPath("/ajax/share/reset/password")
-            .build());
+        HttpPost confirmPWReset = new HttpPost(new URIBuilder().setScheme(client.getProtocol()).setHost(client.getHostname()).setPath("/ajax/share/reset/password").build());
         String newPW = UUIDs.getUnformattedStringFromRandom();
         List<BasicNameValuePair> params = new ArrayList<>(3);
         params.add(new BasicNameValuePair("share", resetData.shareToken));
@@ -231,6 +219,7 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     private static final class PWResetData {
+
         private String shareToken;
         private String confirmationToken;
     }

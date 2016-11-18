@@ -49,20 +49,20 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
 
-public class VCardTestSuite extends TestSuite{
+public class VCardTestSuite extends TestSuite {
 
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
-		tests.addTestSuite(VCardMailPartAttachTest.class);
-		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
+    public static Test suite() {
+        TestSuite tests = new TestSuite();
+        tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
+        tests.addTestSuite(VCardMailPartAttachTest.class);
+        tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
         tests.addTestSuite(Bug25701Test.class);
         tests.addTestSuite(Bug15400Test.class);
         tests.addTestSuite(VCardImportExportServletTest.class);
-		return tests;
-	}
+        return tests;
+    }
 }

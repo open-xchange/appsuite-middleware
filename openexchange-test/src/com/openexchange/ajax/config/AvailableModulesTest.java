@@ -50,6 +50,7 @@
 package com.openexchange.ajax.config;
 
 import java.util.Arrays;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.Tree;
@@ -58,6 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 /**
  * This test case tests the AJAX interface of the config system for the AJAX
  * GUI.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AvailableModulesTest extends AbstractAJAXSession {
@@ -71,6 +73,7 @@ public class AvailableModulesTest extends AbstractAJAXSession {
     /**
      * Tests if the modules can be read from the server.
      */
+    @Test
     public void testReadModules() throws Throwable {
         final GetRequest request = new GetRequest(Tree.AvailableModules);
         final GetResponse response = getClient().execute(request);

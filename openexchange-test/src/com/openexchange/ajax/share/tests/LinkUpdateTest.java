@@ -51,6 +51,7 @@ package com.openexchange.ajax.share.tests;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
@@ -77,6 +78,7 @@ public class LinkUpdateTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testLinkExpiryDateRandomly() throws Exception {
         testLinkExpiryDate(randomFolderAPI(), randomModule());
     }
@@ -159,6 +161,7 @@ public class LinkUpdateTest extends ShareTest {
         assertEquals("expiry date wrong", null, updatedLink.getExpiry());
     }
 
+    @Test
     public void testLinkPasswordRandomly() throws Exception {
         testLinkPassword(randomFolderAPI(), randomModule());
     }

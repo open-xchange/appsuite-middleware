@@ -68,8 +68,7 @@ public class CommonInsertParser extends AbstractInsertParser<CommonInsertRespons
      * {@inheritDoc}
      */
     @Override
-    protected CommonInsertResponse instantiateResponse(
-        final Response response) {
+    protected CommonInsertResponse instantiateResponse(final Response response) {
         return new CommonInsertResponse(response);
     }
 }

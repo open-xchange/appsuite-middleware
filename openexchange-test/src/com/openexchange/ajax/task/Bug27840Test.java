@@ -83,20 +83,18 @@ public final class Bug27840Test extends AbstractTaskTest {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = getTimeZone();
         task = Create.createWithDefaults(getPrivateFolder(), "Task to test for bug 27840");
         // NUMERIC(12,2) in the database. The following should be the corresponding maximal and minimal possible values.
-        task.setTargetCosts(new BigDecimal( "9999999999.99"));
+        task.setTargetCosts(new BigDecimal("9999999999.99"));
         task.setActualCosts(new BigDecimal("-9999999999.99"));
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(task));
         super.tearDown();
     }

@@ -63,6 +63,7 @@ import com.openexchange.i18n.LocaleTools;
 
 /**
  * Help and caching class for values of the preferences tree.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UserValues {

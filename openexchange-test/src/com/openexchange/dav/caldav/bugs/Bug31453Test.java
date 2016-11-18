@@ -76,7 +76,7 @@ public class Bug31453Test extends CalDAVTest {
     private FolderObject publicFolder = null;
     private String publicFolderID = null;
 
-    private static final String[] DUMMY_ALARM_INDICATORS = new String[] {"TRIGGER;VALUE=DATE-TIME:19760401T005545Z", "X-APPLE-LOCAL-DEFAULT-ALARM:TRUE", "X-APPLE-DEFAULT-ALARM:TRUE"};
+    private static final String[] DUMMY_ALARM_INDICATORS = new String[] { "TRIGGER;VALUE=DATE-TIME:19760401T005545Z", "X-APPLE-LOCAL-DEFAULT-ALARM:TRUE", "X-APPLE-DEFAULT-ALARM:TRUE" };
 
     @Before
     public void setUp() throws Exception {
@@ -85,57 +85,14 @@ public class Bug31453Test extends CalDAVTest {
     }
 
     @Test
-	public void testCreateReminderInClient() throws Exception {
+    public void testCreateReminderInClient() throws Exception {
         /*
          * create appointment
          */
         String uid = randomUID();
         Date start = TimeTools.D("next sunday at 14:15");
         Date end = TimeTools.D("next sunday at 15:30");
-        String iCal =
-                "BEGIN:VCALENDAR" + "\r\n" +
-                "VERSION:2.0" + "\r\n" +
-                "METHOD:REQUEST" + "\r\n" +
-                "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN" + "\r\n" +
-                "CALSCALE:GREGORIAN" + "\r\n" +
-                "BEGIN:VTIMEZONE" + "\r\n" +
-                "TZID:Europe/Berlin" + "\r\n" +
-                "BEGIN:DAYLIGHT" + "\r\n" +
-                "TZOFFSETFROM:+0100" + "\r\n" +
-                "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" +
-                "DTSTART:19810329T020000" + "\r\n" +
-                "TZNAME:CEST" + "\r\n" +
-                "TZOFFSETTO:+0200" + "\r\n" +
-                "END:DAYLIGHT" + "\r\n" +
-                "BEGIN:STANDARD" + "\r\n" +
-                "TZOFFSETFROM:+0200" + "\r\n" +
-                "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" +
-                "DTSTART:19961027T030000" + "\r\n" +
-                "TZNAME:CET" + "\r\n" +
-                "TZOFFSETTO:+0100" + "\r\n" +
-                "END:STANDARD" + "\r\n" +
-                "END:VTIMEZONE" + "\r\n" +
-                "BEGIN:VEVENT" + "\r\n" +
-                "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-                "TRANSP:OPAQUE" + "\r\n" +
-                "UID:" + uid + "\r\n" +
-                "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-                "LOCATION:loc" + "\r\n" +
-                "DESCRIPTION:stripped" + "\r\n" +
-                "SEQUENCE:2" + "\r\n" +
-                "SUMMARY:test" + "\r\n" +
-                "BEGIN:VALARM" + "\r\n" +
-                "X-WR-ALARMUID:" + uid + "\r\n" +
-                "UID:" + uid + "\r\n" +
-                "TRIGGER:-PT15M" + "\r\n" +
-                "DESCRIPTION:Ereignisbenachrichtigung" + "\r\n" +
-                "ACTION:DISPLAY" + "\r\n" +
-                "END:VALARM" + "\r\n" +
-                "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-                "CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" +
-                "END:VEVENT" + "\r\n" +
-                "END:VCALENDAR"
-        ;
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "VERSION:2.0" + "\r\n" + "METHOD:REQUEST" + "\r\n" + "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VTIMEZONE" + "\r\n" + "TZID:Europe/Berlin" + "\r\n" + "BEGIN:DAYLIGHT" + "\r\n" + "TZOFFSETFROM:+0100" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" + "DTSTART:19810329T020000" + "\r\n" + "TZNAME:CEST" + "\r\n" + "TZOFFSETTO:+0200" + "\r\n" + "END:DAYLIGHT" + "\r\n" + "BEGIN:STANDARD" + "\r\n" + "TZOFFSETFROM:+0200" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" + "DTSTART:19961027T030000" + "\r\n" + "TZNAME:CET" + "\r\n" + "TZOFFSETTO:+0100" + "\r\n" + "END:STANDARD" + "\r\n" + "END:VTIMEZONE" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "UID:" + uid + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "LOCATION:loc" + "\r\n" + "DESCRIPTION:stripped" + "\r\n" + "SEQUENCE:2" + "\r\n" + "SUMMARY:test" + "\r\n" + "BEGIN:VALARM" + "\r\n" + "X-WR-ALARMUID:" + uid + "\r\n" + "UID:" + uid + "\r\n" + "TRIGGER:-PT15M" + "\r\n" + "DESCRIPTION:Ereignisbenachrichtigung" + "\r\n" + "ACTION:DISPLAY" + "\r\n" + "END:VALARM" + "\r\n" + "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" + "CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(publicFolderID, uid, iCal));
         /*
          * verify appointment on server
@@ -153,7 +110,7 @@ public class Bug31453Test extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-	}
+    }
 
     @Test
     public void testRemoveReminderInClient() throws Exception {
@@ -163,50 +120,7 @@ public class Bug31453Test extends CalDAVTest {
         String uid = randomUID();
         Date start = TimeTools.D("next sunday at 14:15");
         Date end = TimeTools.D("next sunday at 15:30");
-        String iCal =
-                "BEGIN:VCALENDAR" + "\r\n" +
-                "VERSION:2.0" + "\r\n" +
-                "METHOD:REQUEST" + "\r\n" +
-                "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN" + "\r\n" +
-                "CALSCALE:GREGORIAN" + "\r\n" +
-                "BEGIN:VTIMEZONE" + "\r\n" +
-                "TZID:Europe/Berlin" + "\r\n" +
-                "BEGIN:DAYLIGHT" + "\r\n" +
-                "TZOFFSETFROM:+0100" + "\r\n" +
-                "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" +
-                "DTSTART:19810329T020000" + "\r\n" +
-                "TZNAME:CEST" + "\r\n" +
-                "TZOFFSETTO:+0200" + "\r\n" +
-                "END:DAYLIGHT" + "\r\n" +
-                "BEGIN:STANDARD" + "\r\n" +
-                "TZOFFSETFROM:+0200" + "\r\n" +
-                "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" +
-                "DTSTART:19961027T030000" + "\r\n" +
-                "TZNAME:CET" + "\r\n" +
-                "TZOFFSETTO:+0100" + "\r\n" +
-                "END:STANDARD" + "\r\n" +
-                "END:VTIMEZONE" + "\r\n" +
-                "BEGIN:VEVENT" + "\r\n" +
-                "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-                "TRANSP:OPAQUE" + "\r\n" +
-                "UID:" + uid + "\r\n" +
-                "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-                "LOCATION:loc" + "\r\n" +
-                "DESCRIPTION:stripped" + "\r\n" +
-                "SEQUENCE:2" + "\r\n" +
-                "SUMMARY:test" + "\r\n" +
-                "BEGIN:VALARM" + "\r\n" +
-                "X-WR-ALARMUID:" + uid + "\r\n" +
-                "UID:" + uid + "\r\n" +
-                "TRIGGER:-PT15M" + "\r\n" +
-                "DESCRIPTION:Ereignisbenachrichtigung" + "\r\n" +
-                "ACTION:DISPLAY" + "\r\n" +
-                "END:VALARM" + "\r\n" +
-                "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-                "CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" +
-                "END:VEVENT" + "\r\n" +
-                "END:VCALENDAR"
-        ;
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "VERSION:2.0" + "\r\n" + "METHOD:REQUEST" + "\r\n" + "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VTIMEZONE" + "\r\n" + "TZID:Europe/Berlin" + "\r\n" + "BEGIN:DAYLIGHT" + "\r\n" + "TZOFFSETFROM:+0100" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" + "DTSTART:19810329T020000" + "\r\n" + "TZNAME:CEST" + "\r\n" + "TZOFFSETTO:+0200" + "\r\n" + "END:DAYLIGHT" + "\r\n" + "BEGIN:STANDARD" + "\r\n" + "TZOFFSETFROM:+0200" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" + "DTSTART:19961027T030000" + "\r\n" + "TZNAME:CET" + "\r\n" + "TZOFFSETTO:+0100" + "\r\n" + "END:STANDARD" + "\r\n" + "END:VTIMEZONE" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "UID:" + uid + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "LOCATION:loc" + "\r\n" + "DESCRIPTION:stripped" + "\r\n" + "SEQUENCE:2" + "\r\n" + "SUMMARY:test" + "\r\n" + "BEGIN:VALARM" + "\r\n" + "X-WR-ALARMUID:" + uid + "\r\n" + "UID:" + uid + "\r\n" + "TRIGGER:-PT15M" + "\r\n" + "DESCRIPTION:Ereignisbenachrichtigung" + "\r\n" + "ACTION:DISPLAY" + "\r\n" + "END:VALARM" + "\r\n" + "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" + "CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(publicFolderID, uid, iCal));
         /*
          * verify appointment on server
@@ -254,50 +168,7 @@ public class Bug31453Test extends CalDAVTest {
         String uid = randomUID();
         Date start = TimeTools.D("next sunday at 14:15");
         Date end = TimeTools.D("next sunday at 15:30");
-        String iCal =
-                "BEGIN:VCALENDAR" + "\r\n" +
-                "VERSION:2.0" + "\r\n" +
-                "METHOD:REQUEST" + "\r\n" +
-                "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN" + "\r\n" +
-                "CALSCALE:GREGORIAN" + "\r\n" +
-                "BEGIN:VTIMEZONE" + "\r\n" +
-                "TZID:Europe/Berlin" + "\r\n" +
-                "BEGIN:DAYLIGHT" + "\r\n" +
-                "TZOFFSETFROM:+0100" + "\r\n" +
-                "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" +
-                "DTSTART:19810329T020000" + "\r\n" +
-                "TZNAME:CEST" + "\r\n" +
-                "TZOFFSETTO:+0200" + "\r\n" +
-                "END:DAYLIGHT" + "\r\n" +
-                "BEGIN:STANDARD" + "\r\n" +
-                "TZOFFSETFROM:+0200" + "\r\n" +
-                "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" +
-                "DTSTART:19961027T030000" + "\r\n" +
-                "TZNAME:CET" + "\r\n" +
-                "TZOFFSETTO:+0100" + "\r\n" +
-                "END:STANDARD" + "\r\n" +
-                "END:VTIMEZONE" + "\r\n" +
-                "BEGIN:VEVENT" + "\r\n" +
-                "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-                "TRANSP:OPAQUE" + "\r\n" +
-                "UID:" + uid + "\r\n" +
-                "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-                "LOCATION:loc" + "\r\n" +
-                "DESCRIPTION:stripped" + "\r\n" +
-                "SEQUENCE:2" + "\r\n" +
-                "SUMMARY:test" + "\r\n" +
-                "BEGIN:VALARM" + "\r\n" +
-                "X-WR-ALARMUID:" + uid + "\r\n" +
-                "UID:" + uid + "\r\n" +
-                "TRIGGER:-PT15M" + "\r\n" +
-                "DESCRIPTION:Ereignisbenachrichtigung" + "\r\n" +
-                "ACTION:DISPLAY" + "\r\n" +
-                "END:VALARM" + "\r\n" +
-                "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-                "CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" +
-                "END:VEVENT" + "\r\n" +
-                "END:VCALENDAR"
-        ;
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "VERSION:2.0" + "\r\n" + "METHOD:REQUEST" + "\r\n" + "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VTIMEZONE" + "\r\n" + "TZID:Europe/Berlin" + "\r\n" + "BEGIN:DAYLIGHT" + "\r\n" + "TZOFFSETFROM:+0100" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" + "DTSTART:19810329T020000" + "\r\n" + "TZNAME:CEST" + "\r\n" + "TZOFFSETTO:+0200" + "\r\n" + "END:DAYLIGHT" + "\r\n" + "BEGIN:STANDARD" + "\r\n" + "TZOFFSETFROM:+0200" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" + "DTSTART:19961027T030000" + "\r\n" + "TZNAME:CET" + "\r\n" + "TZOFFSETTO:+0100" + "\r\n" + "END:STANDARD" + "\r\n" + "END:VTIMEZONE" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "UID:" + uid + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "LOCATION:loc" + "\r\n" + "DESCRIPTION:stripped" + "\r\n" + "SEQUENCE:2" + "\r\n" + "SUMMARY:test" + "\r\n" + "BEGIN:VALARM" + "\r\n" + "X-WR-ALARMUID:" + uid + "\r\n" + "UID:" + uid + "\r\n" + "TRIGGER:-PT15M" + "\r\n" + "DESCRIPTION:Ereignisbenachrichtigung" + "\r\n" + "ACTION:DISPLAY" + "\r\n" + "END:VALARM" + "\r\n" + "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" + "CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(publicFolderID, uid, iCal));
         /*
          * verify appointment on server

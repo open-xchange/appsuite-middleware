@@ -50,6 +50,8 @@
 package com.openexchange.ajax.user;
 
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -65,8 +67,8 @@ public class GetTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         // TODO check context admin, too. Currently this user does not have aliases until bug 14646 is fixed.
         AJAXClient client2 = new AJAXClient(User.User2);
@@ -74,6 +76,7 @@ public class GetTest extends AbstractAJAXSession {
         client2.logout();
     }
 
+    @Test
     public void testGet() throws Exception {
         final GetRequest getRequest = new GetRequest(userId, client.getValues().getTimeZone());
         final GetResponse getResponse = Executor.execute(client, getRequest);

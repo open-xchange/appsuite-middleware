@@ -51,14 +51,15 @@ package com.openexchange.webdav;
 
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
-import junit.framework.TestCase;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.junit.Test;
 import com.meterware.httpunit.Base64;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
+import junit.framework.TestCase;
 
 /**
  *
@@ -96,6 +97,7 @@ public class TestUpload2 extends TestCase {
 
     private static final int PAKETS = 10;
 
+    @Test
     public void testUpload() throws Throwable {
         final HttpClient client = new HttpClient();
         // TODO read home infostore dir
@@ -110,8 +112,7 @@ public class TestUpload2 extends TestCase {
         }
         put.setRequestBody(new ByteArrayInputStream(bytes));
         put.setRequestContentLength(EntityEnclosingMethod.CONTENT_LENGTH_CHUNKED);
-        put.addRequestHeader(new Header("Authorization", "Basic " + Base64
-            .encode(login + ":" + password)));
+        put.addRequestHeader(new Header("Authorization", "Basic " + Base64.encode(login + ":" + password)));
 
         client.executeMethod(put);
         assertEquals(201, put.getStatusCode());

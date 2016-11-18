@@ -50,9 +50,9 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
-
 
 /**
  * {@link ResolveUidTest}
@@ -65,6 +65,7 @@ public class ResolveUidTest extends AppointmentTest {
         super();
     }
 
+    @Test
     public void testWithUid() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSimple");
@@ -84,6 +85,7 @@ public class ResolveUidTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testWithoutUid() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSimple");
@@ -104,6 +106,7 @@ public class ResolveUidTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testInsertSameUidTwice() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSimple");

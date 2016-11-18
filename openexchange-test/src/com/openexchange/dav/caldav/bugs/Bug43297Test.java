@@ -95,8 +95,7 @@ public class Bug43297Test extends CalDAVTest {
     public void setUp() throws Exception {
         manager2 = new CalendarTestManager(new AJAXClient(User.User2));
         manager2.setFailOnError(true);
-        FolderObject calendarFolder = manager2.getClient().execute(
-            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
+        FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
         folder.setFolderName(subFolderName);

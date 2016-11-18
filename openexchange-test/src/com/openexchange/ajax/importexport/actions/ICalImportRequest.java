@@ -69,8 +69,7 @@ public final class ICalImportRequest extends AbstractImportRequest<ICalImportRes
         this(folderId, iCal, true);
     }
 
-    public ICalImportRequest(final int folderId, final InputStream iCal,
-        final boolean failOnError) {
+    public ICalImportRequest(final int folderId, final InputStream iCal, final boolean failOnError) {
         super(Action.ICal, folderId, iCal);
         this.failOnError = failOnError;
     }
@@ -79,8 +78,7 @@ public final class ICalImportRequest extends AbstractImportRequest<ICalImportRes
         this(folderId, new ByteArrayInputStream(Charsets.getBytes(iCal, Charsets.UTF_8)), true);
     }
 
-    public ICalImportRequest(final int folderId, final String iCal,
-        final boolean failOnError) {
+    public ICalImportRequest(final int folderId, final String iCal, final boolean failOnError) {
         this(folderId, new ByteArrayInputStream(Charsets.getBytes(iCal, Charsets.UTF_8)), failOnError);
     }
 

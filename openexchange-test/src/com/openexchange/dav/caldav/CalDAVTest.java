@@ -245,8 +245,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     protected int move(ICalResource iCalResource, String targetFolderID) throws Exception {
         MoveMethod move = null;
         try {
-            String targetHref = "/caldav/" + targetFolderID + "/" +
-                iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/'));
+            String targetHref = "/caldav/" + targetFolderID + "/" + iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/'));
             move = new MoveMethod(getBaseUri() + iCalResource.getHref(), getBaseUri() + targetHref, false);
             if (null != iCalResource.getETag()) {
                 move.addRequestHeader(Headers.IF_MATCH, iCalResource.getETag());
@@ -342,8 +341,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     protected Appointment getAppointment(String folderID, String uid) throws OXException {
-        Appointment[] appointments = this.testManager.all(parse(folderID), new Date(0), new Date(100000000000000L),
-            new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.FOLDER_ID, Appointment.UID });
+        Appointment[] appointments = this.testManager.all(parse(folderID), new Date(0), new Date(100000000000000L), new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.FOLDER_ID, Appointment.UID });
         for (Appointment appointment : appointments) {
             if (uid.equals(appointment.getUid())) {
                 if (0 >= appointment.getRecurrenceID() || appointment.getRecurrenceID() == appointment.getObjectID()) {
@@ -355,8 +353,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     protected List<Appointment> getChangeExcpetions(Appointment appointment) throws OXException {
-        List<Appointment> exceptions = testManager.getChangeExceptions(
-            appointment.getParentFolderID(), appointment.getObjectID(), new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.UID });
+        List<Appointment> exceptions = testManager.getChangeExceptions(appointment.getParentFolderID(), appointment.getObjectID(), new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.UID });
         if (null != exceptions && 0 < exceptions.size()) {
             for (int i = 0; i < exceptions.size(); i++) {
                 exceptions.set(i, testManager.get(exceptions.get(i)));
@@ -417,31 +414,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     protected static String generateICal(Date start, Date end, String uid, String summary, String location) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder
-        .append("BEGIN:VCALENDAR").append("\r\n")
-        .append("VERSION:2.0").append("\r\n")
-        .append("PRODID:-//Apple Inc.//iCal 5.0.2//EN").append("\r\n")
-        .append("CALSCALE:GREGORIAN").append("\r\n")
-        .append("BEGIN:VTIMEZONE").append("\r\n")
-        .append("TZID:Europe/Amsterdam").append("\r\n")
-        .append("BEGIN:DAYLIGHT").append("\r\n")
-        .append("TZOFFSETFROM:+0100").append("\r\n")
-        .append("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU").append("\r\n")
-        .append("DTSTART:19810329T020000").append("\r\n")
-        .append("TZNAME:CEST").append("\r\n")
-        .append("TZOFFSETTO:+0200").append("\r\n")
-        .append("END:DAYLIGHT").append("\r\n")
-        .append("BEGIN:STANDARD").append("\r\n")
-        .append("TZOFFSETFROM:+0200").append("\r\n")
-        .append("RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU").append("\r\n")
-        .append("DTSTART:19961027T030000").append("\r\n")
-        .append("TZNAME:CET").append("\r\n")
-        .append("TZOFFSETTO:+0100").append("\r\n")
-        .append("END:STANDARD").append("\r\n")
-        .append("END:VTIMEZONE").append("\r\n")
-        .append("BEGIN:VEVENT").append("\r\n")
-        .append("CREATED:").append(formatAsUTC(new Date())).append("\r\n")
-        ;
+        stringBuilder.append("BEGIN:VCALENDAR").append("\r\n").append("VERSION:2.0").append("\r\n").append("PRODID:-//Apple Inc.//iCal 5.0.2//EN").append("\r\n").append("CALSCALE:GREGORIAN").append("\r\n").append("BEGIN:VTIMEZONE").append("\r\n").append("TZID:Europe/Amsterdam").append("\r\n").append("BEGIN:DAYLIGHT").append("\r\n").append("TZOFFSETFROM:+0100").append("\r\n").append("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU").append("\r\n").append("DTSTART:19810329T020000").append("\r\n").append("TZNAME:CEST").append("\r\n").append("TZOFFSETTO:+0200").append("\r\n").append("END:DAYLIGHT").append("\r\n").append("BEGIN:STANDARD").append("\r\n").append("TZOFFSETFROM:+0200").append("\r\n").append("RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU").append("\r\n").append("DTSTART:19961027T030000").append("\r\n").append("TZNAME:CET").append("\r\n").append("TZOFFSETTO:+0100").append("\r\n").append("END:STANDARD").append("\r\n").append("END:VTIMEZONE").append("\r\n").append("BEGIN:VEVENT").append("\r\n").append("CREATED:").append(formatAsUTC(new Date())).append("\r\n");
         if (null != uid) {
             stringBuilder.append("UID:").append(uid).append("\r\n");
         }
@@ -458,43 +431,14 @@ public abstract class CalDAVTest extends WebDAVTest {
         if (null != start) {
             stringBuilder.append("DTSTART;TZID=Europe/Amsterdam:").append(format(start, "Europe/Amsterdam")).append("\r\n");
         }
-        stringBuilder
-        .append("DTSTAMP:").append(formatAsUTC(new Date())).append("\r\n")
-        .append("SEQUENCE:0").append("\r\n")
-        .append("END:VEVENT").append("\r\n")
-        .append("END:VCALENDAR").append("\r\n")
-        ;
+        stringBuilder.append("DTSTAMP:").append(formatAsUTC(new Date())).append("\r\n").append("SEQUENCE:0").append("\r\n").append("END:VEVENT").append("\r\n").append("END:VCALENDAR").append("\r\n");
 
         return stringBuilder.toString();
     }
 
     protected static String generateVTodo(Date start, Date due, String uid, String summary, String location) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder
-            .append("BEGIN:VCALENDAR").append("\r\n")
-            .append("VERSION:2.0").append("\r\n")
-            .append("PRODID:-//Apple Inc.//iCal 5.0.2//EN").append("\r\n")
-            .append("CALSCALE:GREGORIAN").append("\r\n")
-            .append("BEGIN:VTIMEZONE").append("\r\n")
-            .append("TZID:Europe/Amsterdam").append("\r\n")
-            .append("BEGIN:DAYLIGHT").append("\r\n")
-            .append("TZOFFSETFROM:+0100").append("\r\n")
-            .append("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU").append("\r\n")
-            .append("DTSTART:19810329T020000").append("\r\n")
-            .append("TZNAME:CEST").append("\r\n")
-            .append("TZOFFSETTO:+0200").append("\r\n")
-            .append("END:DAYLIGHT").append("\r\n")
-            .append("BEGIN:STANDARD").append("\r\n")
-            .append("TZOFFSETFROM:+0200").append("\r\n")
-            .append("RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU").append("\r\n")
-            .append("DTSTART:19961027T030000").append("\r\n")
-            .append("TZNAME:CET").append("\r\n")
-            .append("TZOFFSETTO:+0100").append("\r\n")
-            .append("END:STANDARD").append("\r\n")
-            .append("END:VTIMEZONE").append("\r\n")
-            .append("BEGIN:VTODO").append("\r\n")
-            .append("CREATED:").append(formatAsUTC(new Date())).append("\r\n")
-        ;
+        stringBuilder.append("BEGIN:VCALENDAR").append("\r\n").append("VERSION:2.0").append("\r\n").append("PRODID:-//Apple Inc.//iCal 5.0.2//EN").append("\r\n").append("CALSCALE:GREGORIAN").append("\r\n").append("BEGIN:VTIMEZONE").append("\r\n").append("TZID:Europe/Amsterdam").append("\r\n").append("BEGIN:DAYLIGHT").append("\r\n").append("TZOFFSETFROM:+0100").append("\r\n").append("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU").append("\r\n").append("DTSTART:19810329T020000").append("\r\n").append("TZNAME:CEST").append("\r\n").append("TZOFFSETTO:+0200").append("\r\n").append("END:DAYLIGHT").append("\r\n").append("BEGIN:STANDARD").append("\r\n").append("TZOFFSETFROM:+0200").append("\r\n").append("RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU").append("\r\n").append("DTSTART:19961027T030000").append("\r\n").append("TZNAME:CET").append("\r\n").append("TZOFFSETTO:+0100").append("\r\n").append("END:STANDARD").append("\r\n").append("END:VTIMEZONE").append("\r\n").append("BEGIN:VTODO").append("\r\n").append("CREATED:").append(formatAsUTC(new Date())).append("\r\n");
         if (null != uid) {
             stringBuilder.append("UID:").append(uid).append("\r\n");
         }
@@ -511,18 +455,12 @@ public abstract class CalDAVTest extends WebDAVTest {
         if (null != start) {
             stringBuilder.append("DTSTART;TZID=Europe/Amsterdam:").append(format(start, "Europe/Amsterdam")).append("\r\n");
         }
-        stringBuilder
-            .append("DTSTAMP:").append(formatAsUTC(new Date())).append("\r\n")
-            .append("SEQUENCE:0").append("\r\n")
-            .append("END:VTODO").append("\r\n")
-            .append("END:VCALENDAR").append("\r\n")
-        ;
+        stringBuilder.append("DTSTAMP:").append(formatAsUTC(new Date())).append("\r\n").append("SEQUENCE:0").append("\r\n").append("END:VTODO").append("\r\n").append("END:VCALENDAR").append("\r\n");
 
         return stringBuilder.toString();
     }
 
-    public static void assertAppointmentEquals(Appointment appointment, Date expectedStart, Date expectedEnd, String expectedUid,
-        String expectedTitle, String expectedLocation) {
+    public static void assertAppointmentEquals(Appointment appointment, Date expectedStart, Date expectedEnd, String expectedUid, String expectedTitle, String expectedLocation) {
         assertNotNull("appointment is null", appointment);
         Assert.assertEquals("start date wrong", expectedStart, appointment.getStartDate());
         Assert.assertEquals("end date wrong", expectedEnd, appointment.getEndDate());
@@ -559,18 +497,17 @@ public abstract class CalDAVTest extends WebDAVTest {
         return appointment;
     }
 
-    protected FolderObject createPublicFolder() throws OXException, IOException, JSONException  {
+    protected FolderObject createPublicFolder() throws OXException, IOException, JSONException {
         return createPublicFolder(randomUID());
     }
 
-    protected FolderObject createPublicFolder(String name) throws OXException, IOException, JSONException  {
+    protected FolderObject createPublicFolder(String name) throws OXException, IOException, JSONException {
         FolderObject folder = new FolderObject();
         folder.setModule(FolderObject.CALENDAR);
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         folder.setPermissions(PermissionTools.P(Integer.valueOf(client.getValues().getUserId()), PermissionTools.ADMIN));
         folder.setFolderName(name);
-        com.openexchange.ajax.folder.actions.InsertRequest request =
-            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
+        com.openexchange.ajax.folder.actions.InsertRequest request = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
         com.openexchange.ajax.folder.actions.InsertResponse response = client.execute(request);
         response.fillObject(folder);
         folder.setLastModified(new Date());

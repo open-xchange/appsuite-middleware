@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml.appointment;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -73,7 +74,7 @@ public class Bug12050Test extends AppointmentTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        FolderTest.clearFolder(webCon, new int[] {appointmentFolderId}, new String[] {"calendar"}, new Date(), PROTOCOL + hostName, login, password, context);
+        FolderTest.clearFolder(webCon, new int[] { appointmentFolderId }, new String[] { "calendar" }, new Date(), PROTOCOL + hostName, login, password, context);
 
         appointment = new Appointment();
         appointment.setTitle("testBug12050");
@@ -98,6 +99,7 @@ public class Bug12050Test extends AppointmentTest {
         exceptionUpdate.setEndDate(exceptionEnd);
     }
 
+    @Test
     public void testBug12050() throws Exception {
         createAppointment();
         createException();
@@ -106,7 +108,7 @@ public class Bug12050Test extends AppointmentTest {
 
     @Override
     public void tearDown() throws Exception {
-        if (objectId  != -1) {
+        if (objectId != -1) {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         }
 

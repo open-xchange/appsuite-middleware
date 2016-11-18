@@ -63,63 +63,63 @@ import com.openexchange.ajax.spellcheck.actions.AbstractSpellCheckRequest;
  */
 public final class CheckRequest extends AbstractSpellCheckRequest {
 
-	private final String htmlContent;
+    private final String htmlContent;
 
-	private final String locale;
+    private final String locale;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link CheckRequest}
-	 */
-	public CheckRequest(final String htmlContent, final String locale, final boolean failOnError) {
-		super();
-		this.htmlContent = htmlContent;
-		this.locale = locale;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link CheckRequest}
+     */
+    public CheckRequest(final String htmlContent, final String locale, final boolean failOnError) {
+        super();
+        this.htmlContent = htmlContent;
+        this.locale = locale;
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return htmlContent;
-	}
+        return htmlContent;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "check"));
-		params.add(new Parameter("lang", locale));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "check"));
+        params.add(new Parameter("lang", locale));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public CheckParser getParser() {
-		return new CheckParser(failOnError);
-	}
+        return new CheckParser(failOnError);
+    }
 
 }

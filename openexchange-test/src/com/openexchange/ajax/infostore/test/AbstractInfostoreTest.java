@@ -51,6 +51,8 @@ package com.openexchange.ajax.infostore.test;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
@@ -63,18 +65,19 @@ import com.openexchange.test.FolderTestManager;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AbstractInfostoreTest extends AbstractAJAXSession {
+
     protected FolderTestManager fMgr;
     protected InfostoreTestManager infoMgr;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         fMgr = new FolderTestManager(getClient());
         infoMgr = new InfostoreTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         infoMgr.cleanUp();
         fMgr.cleanUp();
         super.tearDown();
@@ -84,7 +87,7 @@ public class AbstractInfostoreTest extends AbstractAJAXSession {
         super();
     }
 
-    public FolderObject generateInfostoreFolder(String name) throws OXException, IOException, SAXException, JSONException{
+    public FolderObject generateInfostoreFolder(String name) throws OXException, IOException, SAXException, JSONException {
         //create a folder
         FolderObject myFolder = new FolderObject();
         myFolder.setFolderName(name);
@@ -96,12 +99,8 @@ public class AbstractInfostoreTest extends AbstractAJAXSession {
         perm1.setEntity(getClient().getValues().getUserId());
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
-        myFolder.setPermissionsAsArray(new OCLPermission[] { perm1});
+        perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        myFolder.setPermissionsAsArray(new OCLPermission[] { perm1 });
         return myFolder;
     }
 

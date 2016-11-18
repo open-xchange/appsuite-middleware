@@ -51,6 +51,7 @@ package com.openexchange.ajax.onboarding.tests;
 
 import java.util.List;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
@@ -59,7 +60,6 @@ import com.openexchange.ajax.onboarding.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
-
 
 /**
  * {@link DAVSyncProfileTest}
@@ -89,6 +89,7 @@ public class DAVSyncProfileTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testDAVsyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();
         body.put("email", client.getValues().getDefaultAddress());
@@ -101,6 +102,7 @@ public class DAVSyncProfileTest extends AbstractAJAXSession {
         assertEquals(1, messages.size());
     }
 
+    @Test
     public void testDAVSyncProfileViaDisplay() throws Exception {
         ExecuteRequest req = new ExecuteRequest("apple.mac/davmanual", "display", null, false);
         OnboardingTestResponse resp = client.execute(req);

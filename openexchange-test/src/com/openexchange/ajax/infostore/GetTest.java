@@ -1,56 +1,57 @@
+
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.test.TestInit;
 
-
 public class GetTest extends InfostoreAJAXTest {
 
-	public GetTest() {
-		super();
-	}
+    public GetTest() {
+        super();
+    }
 
-	public void testBasic() throws Exception{
+    public void testBasic() throws Exception {
 
-		final Response res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0));
+        final Response res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 
-		assertNoError(res);
+        assertNoError(res);
 
-		final JSONObject obj = (JSONObject) res.getData();
+        final JSONObject obj = (JSONObject) res.getData();
 
-		assertEquals("test knowledge",obj.getString("title"));
-		assertEquals("test knowledge description",obj.getString("description"));
+        assertEquals("test knowledge", obj.getString("title"));
+        assertEquals("test knowledge description", obj.getString("description"));
 
-	}
+    }
 
-	public void getVersion() throws Exception {
-		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("description","New description"), upload, "text/plain");
-		assertNoError(res);
+    public void getVersion() throws Exception {
+        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("description", "New description"), upload, "text/plain");
+        assertNoError(res);
 
-		res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0),0);
+        res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0), 0);
 
-		assertNoError(res);
+        assertNoError(res);
 
-		JSONObject obj = (JSONObject) res.getData();
+        JSONObject obj = (JSONObject) res.getData();
 
-		assertEquals("test knowledge",obj.getString("title"));
-		assertEquals("test knowledge description",obj.getString("description"));
+        assertEquals("test knowledge", obj.getString("title"));
+        assertEquals("test knowledge description", obj.getString("description"));
 
-		res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0),1);
+        res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0), 1);
 
-		assertNoError(res);
+        assertNoError(res);
 
-		obj = (JSONObject) res.getData();
+        obj = (JSONObject) res.getData();
 
-		assertEquals("test knowledge description",obj.getString("New description"));
+        assertEquals("test knowledge description", obj.getString("New description"));
 
-	}
+    }
 
-    // Node 2652
+    // Node 2652    @Test
     public void testLastModifiedUTC() throws Exception {
         final Response res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 
@@ -62,19 +63,18 @@ public class GetTest extends InfostoreAJAXTest {
     }
 
     // Bug 12427
-
+    @Test
     public void testNumberOfVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("description","New description"), upload, "text/plain");
+        Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("description", "New description"), upload, "text/plain");
         assertNoError(res);
 
-        res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0),0);
+        res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0), 0);
         assertNoError(res);
 
         JSONObject obj = (JSONObject) res.getData();
         assertTrue(obj.has("number_of_versions"));
         assertEquals(1, obj.getInt("number_of_versions"));
     }
-
 
 }

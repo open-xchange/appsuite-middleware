@@ -57,6 +57,9 @@ import java.io.InputStreamReader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
@@ -83,20 +86,22 @@ public class Bug32355Test extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         if (null != fmid) {
             client.execute(new DeleteRequest(fmid, true).ignoreError());
         }
         super.tearDown();
     }
 
+    @Test
     public void testBug32355() throws OXException, IOException, JSONException {
         StringBuilder sb = new StringBuilder(8192);
         {

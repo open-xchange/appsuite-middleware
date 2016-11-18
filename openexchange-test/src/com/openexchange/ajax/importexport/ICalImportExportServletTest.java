@@ -67,25 +67,24 @@ import com.openexchange.importexport.formats.Format;
  */
 public class ICalImportExportServletTest extends AbstractImportExportServletTest {
 
-	public ICalImportExportServletTest() {
-		super();
-	}
+    public ICalImportExportServletTest() {
+        super();
+    }
 
-	public void testIcalMessage() throws Exception{
-		final InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
-		final WebConversation webconv = getWebConversation();
-		final Format format = Format.ICAL;
-		final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		try {
-			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format), true);
-			req.selectFile("file", "empty.ics", is, format.getMimeType());
-			final WebResponse webRes = webconv.getResource(req);
-			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error ", "I_E-1100", response.optString("code"));
-		} finally {
-			removeFolder(folderId);
-		}
-	}
+    public void testIcalMessage() throws Exception {
+        final InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
+        final WebConversation webconv = getWebConversation();
+        final Format format = Format.ICAL;
+        final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(), FolderObject.CONTACT);
+        try {
+            final WebRequest req = new PostMethodWebRequest(getCSVColumnUrl(IMPORT_SERVLET, folderId, format), true);
+            req.selectFile("file", "empty.ics", is, format.getMimeType());
+            final WebResponse webRes = webconv.getResource(req);
+            final JSONObject response = extractFromCallback(webRes.getText());
+            assertEquals("Must contain error ", "I_E-1100", response.optString("code"));
+        } finally {
+            removeFolder(folderId);
+        }
+    }
 
 }

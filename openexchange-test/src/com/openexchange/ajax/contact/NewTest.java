@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -59,20 +60,13 @@ import com.openexchange.groupware.container.Contact;
 
 public class NewTest extends AbstractContactTest {
 
-    public NewTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testNew() throws Exception {
         final Contact contactObj = createContactObject("testNew");
         insertContact(contactObj);
     }
 
+    @Test
     public void testNewWithDistributionList() throws Exception {
         final Contact contactEntry = createContactObject("internal contact");
         contactEntry.setEmail1("internalcontact@x.de");
@@ -82,6 +76,7 @@ public class NewTest extends AbstractContactTest {
         createContactWithDistributionList("testNewWithDistributionList", contactEntry);
     }
 
+    @Test
     public void testNewContactWithAttachment() throws Exception {
         final Contact contactObj = createContactObject("testNewContactWithAttachment");
         final int objectId = insertContact(contactObj);

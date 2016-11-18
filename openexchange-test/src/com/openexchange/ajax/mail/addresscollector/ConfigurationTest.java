@@ -1,5 +1,7 @@
+
 package com.openexchange.ajax.mail.addresscollector;
 
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -14,6 +16,7 @@ public class ConfigurationTest extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testEnableAttribute() throws Throwable {
         final AJAXClient client = getClient();
         SetRequest setRequest = new SetRequest(Tree.ContactCollectEnabled, true);
@@ -33,6 +36,7 @@ public class ConfigurationTest extends AbstractAJAXSession {
         assertFalse(getResponse.getBoolean());
     }
 
+    @Test
     public void testFolderId() throws Throwable {
         final AJAXClient client = getClient();
         SetRequest setRequest = new SetRequest(Tree.ContactCollectFolder, 100);

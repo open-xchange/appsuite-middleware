@@ -52,6 +52,7 @@ package com.openexchange.ajax.task;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -80,6 +81,7 @@ public final class Bug11848Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testSorting() throws Throwable {
         final AJAXClient client = getClient();
         final int folder = client.getValues().getPrivateTaskFolder();

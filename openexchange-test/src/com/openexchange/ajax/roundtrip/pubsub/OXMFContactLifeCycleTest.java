@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.ContactTestManager;
@@ -73,30 +75,22 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         this.cMgr = getContactManager();
         this.fMgr = getFolderManager();
 
         // setup folders
-        this.pubFolder = fMgr.generatePublicFolder(
-            "publishRoundtripTest",
-            FolderObject.CONTACT,
-            getClient().getValues().getPrivateContactFolder(),
-            getClient().getValues().getUserId());
-        this.subFolder = fMgr.generatePublicFolder(
-            "subscribeRoundtripTest",
-            FolderObject.CONTACT,
-            getClient().getValues().getPrivateContactFolder(),
-            getClient().getValues().getUserId());
+        this.pubFolder = fMgr.generatePublicFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        this.subFolder = fMgr.generatePublicFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer(pubFolder);
         fMgr.insertFolderOnServer(subFolder);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         cMgr.cleanUp();
         fMgr.cleanUp();
         super.tearDown();

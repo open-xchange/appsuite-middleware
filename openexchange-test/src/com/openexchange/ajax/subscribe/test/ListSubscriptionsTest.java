@@ -54,13 +54,13 @@ import java.util.Arrays;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.ListSubscriptionsResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
-
 
 /**
  *
@@ -72,7 +72,8 @@ public class ListSubscriptionsTest extends AbstractSubscriptionTest {
         super();
     }
 
-    public void testShouldSurviveBasicOXMFSubscription() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testShouldSurviveBasicOXMFSubscription() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
 
         DynamicFormDescription formDescription = generateFormDescription();
@@ -80,10 +81,10 @@ public class ListSubscriptionsTest extends AbstractSubscriptionTest {
         subscription.setFolderId(String.valueOf(folder.getObjectID()));
 
         subMgr.newAction(subscription);
-        assertFalse("Precondition: Creation of subscription should work",subMgr.getLastResponse().hasError());
+        assertFalse("Precondition: Creation of subscription should work", subMgr.getLastResponse().hasError());
 
-        List<String> columns = Arrays.asList("id","folder", "source");
-        List<Integer> ids = Arrays.asList(Integer.valueOf( subscription.getId() ) );
+        List<String> columns = Arrays.asList("id", "folder", "source");
+        List<Integer> ids = Arrays.asList(Integer.valueOf(subscription.getId()));
         JSONArray list = subMgr.listAction(ids, columns);
 
         ListSubscriptionsResponse listResp = (ListSubscriptionsResponse) subMgr.getLastResponse();

@@ -52,7 +52,9 @@ package com.openexchange.ajax.share.bugs;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -83,14 +85,13 @@ public class Bug41184Test extends ShareTest {
         client2 = new AJAXClient(User.User2);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != client2) {
             client2.logout();
         }
         super.tearDown();
     }
-
 
     /**
      * Initializes a new {@link Bug41184Test}.
@@ -101,14 +102,14 @@ public class Bug41184Test extends ShareTest {
         super();
     }
 
+    @Test
     public void testAccessSharedFileInSharedFolder() throws Exception {
         /*
          * create folder shared to other user
          */
         int userId = client2.getValues().getUserId();
         OCLPermission permission = new OCLPermission(userId, 0);
-        permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE), permission);
         /*
          * fetch & check internal link from notification mail

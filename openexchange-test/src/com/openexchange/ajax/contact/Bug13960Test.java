@@ -54,6 +54,9 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
@@ -84,8 +87,8 @@ public class Bug13960Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -95,12 +98,13 @@ public class Bug13960Test extends AbstractAJAXSession {
         response.fillObject(contact);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(contact));
         super.tearDown();
     }
 
+    @Test
     public void testJSONValues() throws Throwable {
         {
             GetRequest request = new GetRequest(contact, timeZone);

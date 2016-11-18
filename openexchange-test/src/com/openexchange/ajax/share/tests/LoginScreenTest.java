@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -96,6 +97,7 @@ public class LoginScreenTest extends ShareTest {
         super.tearDown();
     }
 
+    @Test
     public void testGuestWithPassword() throws Exception {
         /*
          * Create guest and permission
@@ -143,6 +145,7 @@ public class LoginScreenTest extends ShareTest {
         assertNotNull(resp.getMessage());
     }
 
+    @Test
     public void testLinkWithPassword() throws Exception {
         /*
          * Create link and set password

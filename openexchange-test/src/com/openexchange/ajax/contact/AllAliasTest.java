@@ -52,6 +52,7 @@ package com.openexchange.ajax.contact;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -87,6 +88,7 @@ public class AllAliasTest extends ContactTest {
         super.tearDown();
     }
 
+    @Test
     public void testAllAlias() throws Exception {
         final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateContactFolder(), "all");
         final CommonAllResponse allAliasResponse = client.execute(allAliasRequest);

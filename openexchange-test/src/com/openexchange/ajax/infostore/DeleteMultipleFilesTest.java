@@ -69,7 +69,6 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 
-
 /**
  * {@link DeleteMultipleFilesTest}
  *
@@ -83,6 +82,7 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
 
     /**
      * Initializes a new {@link DeleteMultipleFilesTest}.
+     * 
      * @param name
      */
     public DeleteMultipleFilesTest() {
@@ -122,19 +122,21 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
     }
 
     private void writeBytes(final String string, final java.io.File ods) {
-    	PrintWriter p = null;
-    	try {
-			p = new PrintWriter(new FileWriter(ods));
-			p.write(string);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} finally {
-			if (p != null) { p.close(); }
-		}
-	}
+        PrintWriter p = null;
+        try {
+            p = new PrintWriter(new FileWriter(ods));
+            p.write(string);
+        } catch (final IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        } finally {
+            if (p != null) {
+                p.close();
+            }
+        }
+    }
 
-	@Override
+    @Override
     public void tearDown() throws Exception {
         super.tearDown();
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -57,7 +58,6 @@ import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.infostore.test.AbstractInfostoreTest;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
-
 
 /**
  * {@link Bug44891Test}
@@ -71,6 +71,7 @@ public class Bug44891Test extends AbstractInfostoreTest {
 
     /**
      * Initializes a new {@link Bug44891Test}.
+     * 
      * @param name
      */
     public Bug44891Test() {
@@ -95,6 +96,7 @@ public class Bug44891Test extends AbstractInfostoreTest {
         super.tearDown();
     }
 
+    @Test
     public void testBug44891() throws Exception {
         folder.setFolderName("shouldFail<>");
         UpdateRequest req = new UpdateRequest(EnumAPI.OX_NEW, folder, false);

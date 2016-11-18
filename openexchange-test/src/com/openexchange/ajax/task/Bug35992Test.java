@@ -82,8 +82,7 @@ public final class Bug35992Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         timeZone = client1.getValues().getTimeZone();
@@ -96,8 +95,7 @@ public final class Bug35992Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         if (task.containsObjectID()) {
             client1.execute(new DeleteRequest(task));
         }

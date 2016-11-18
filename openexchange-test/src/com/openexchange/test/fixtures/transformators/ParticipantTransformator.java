@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import java.util.ArrayList;
@@ -71,87 +72,88 @@ import com.openexchange.test.fixtures.SimpleCredentials;
  */
 public class ParticipantTransformator implements Transformator {
 
-	private final FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
-	public ParticipantTransformator(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Object transform(final String value) throws OXException {
-		if (null == value || 1 > value.length()) { return null; }
-		String fixtureName = "users";
-		String fixtureEntry = "";
-		final String[] splitted = value.split(",");
-		final List<Participant> participants = new ArrayList<Participant>(splitted.length);
-		for (int i = 0; i < splitted.length; i++) {
-			final int idx = splitted[i].indexOf(':');
-			if (0 < idx && splitted[i].length() > idx) {
-				fixtureName = splitted[i].substring(0, idx);
-				fixtureEntry = splitted[i].substring(idx + 1);
-			} else {
-				fixtureEntry = splitted[i];
-			}
-			participants.add(getParticipant(fixtureName, fixtureEntry));
-		}
-		return participants;
+    public ParticipantTransformator(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-	private Participant getParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
-		if ("users".equals(fixtureName)) {
-			return getUserParticipant(fixtureName, fixtureEntry);
-		} else if ("groups".equals(fixtureName)) {
-			return getGroupParticipant(fixtureName, fixtureEntry);
-		} else if ("contacts".equals(fixtureName)) {
-			return getExternalUserParticipant(fixtureName, fixtureEntry);
-		} else if ("resources".equals(fixtureName)) {
-			return getResourceParticipant(fixtureName, fixtureEntry);
-		} else {
-			throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a participant.");
-		}
-	}
+    @Override
+    public Object transform(final String value) throws OXException {
+        if (null == value || 1 > value.length()) {
+            return null;
+        }
+        String fixtureName = "users";
+        String fixtureEntry = "";
+        final String[] splitted = value.split(",");
+        final List<Participant> participants = new ArrayList<Participant>(splitted.length);
+        for (int i = 0; i < splitted.length; i++) {
+            final int idx = splitted[i].indexOf(':');
+            if (0 < idx && splitted[i].length() > idx) {
+                fixtureName = splitted[i].substring(0, idx);
+                fixtureEntry = splitted[i].substring(idx + 1);
+            } else {
+                fixtureEntry = splitted[i];
+            }
+            participants.add(getParticipant(fixtureName, fixtureEntry));
+        }
+        return participants;
+    }
 
-	private Participant getExternalUserParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
-		final Contact contact = fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry();
-		String email = null;
-		if (contact.containsEmail1()) {
-			email = contact.getEmail1();
-		} else if (contact.containsEmail2()) {
-			email = contact.getEmail2();
-		} else if (contact.containsEmail3()) {
-			email = contact.getEmail3();
-		}
-		if (null == email) { throw OXException.general("External participants must contain an email address"); }
-		final ExternalUserParticipant participant = new ExternalUserParticipant(email);
-		participant.setDisplayName(contact.getDisplayName());
-		participant.setIdentifier(contact.getObjectID());
-		return participant;
-	}
+    private Participant getParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
+        if ("users".equals(fixtureName)) {
+            return getUserParticipant(fixtureName, fixtureEntry);
+        } else if ("groups".equals(fixtureName)) {
+            return getGroupParticipant(fixtureName, fixtureEntry);
+        } else if ("contacts".equals(fixtureName)) {
+            return getExternalUserParticipant(fixtureName, fixtureEntry);
+        } else if ("resources".equals(fixtureName)) {
+            return getResourceParticipant(fixtureName, fixtureEntry);
+        } else {
+            throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a participant.");
+        }
+    }
 
-	private GroupParticipant getGroupParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
-		final Group group = fixtureLoader.getFixtures(fixtureName, Group.class).getEntry(fixtureEntry).getEntry();
-		final GroupParticipant participant = new GroupParticipant(group.getIdentifier());
-		participant.setDisplayName(group.getDisplayName());
-		return participant;
-	}
+    private Participant getExternalUserParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
+        final Contact contact = fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry();
+        String email = null;
+        if (contact.containsEmail1()) {
+            email = contact.getEmail1();
+        } else if (contact.containsEmail2()) {
+            email = contact.getEmail2();
+        } else if (contact.containsEmail3()) {
+            email = contact.getEmail3();
+        }
+        if (null == email) {
+            throw OXException.general("External participants must contain an email address");
+        }
+        final ExternalUserParticipant participant = new ExternalUserParticipant(email);
+        participant.setDisplayName(contact.getDisplayName());
+        participant.setIdentifier(contact.getObjectID());
+        return participant;
+    }
 
-	private UserParticipant getUserParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
-		final Contact user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class)
-		    .getEntry(fixtureEntry)
-		        .getEntry()
-		            .asContact();
-		final UserParticipant participant = new UserParticipant(user.getObjectID());
-		participant.setDisplayName(user.getDisplayName());
-		participant.setEmailAddress(user.getEmail1());
-		return participant;
-	}
+    private GroupParticipant getGroupParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
+        final Group group = fixtureLoader.getFixtures(fixtureName, Group.class).getEntry(fixtureEntry).getEntry();
+        final GroupParticipant participant = new GroupParticipant(group.getIdentifier());
+        participant.setDisplayName(group.getDisplayName());
+        return participant;
+    }
 
-	private ResourceParticipant getResourceParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
-		final Resource resource = fixtureLoader.getFixtures(fixtureName, Resource.class).getEntry(fixtureEntry).getEntry();
-		final ResourceParticipant participant = new ResourceParticipant(resource.getIdentifier());
-		participant.setDisplayName(resource.getDisplayName());
-		participant.setEmailAddress(resource.getMail());
-		return participant;
-	}
+    private UserParticipant getUserParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
+        final Contact user = fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact();
+        final UserParticipant participant = new UserParticipant(user.getObjectID());
+        participant.setDisplayName(user.getDisplayName());
+        participant.setEmailAddress(user.getEmail1());
+        return participant;
+    }
+
+    private ResourceParticipant getResourceParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
+        final Resource resource = fixtureLoader.getFixtures(fixtureName, Resource.class).getEntry(fixtureEntry).getEntry();
+        final ResourceParticipant participant = new ResourceParticipant(resource.getIdentifier());
+        participant.setDisplayName(resource.getDisplayName());
+        participant.setEmailAddress(resource.getMail());
+        return participant;
+    }
 }

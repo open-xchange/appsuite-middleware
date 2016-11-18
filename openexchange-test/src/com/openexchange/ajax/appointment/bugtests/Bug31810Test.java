@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
@@ -76,7 +77,7 @@ public class Bug31810Test extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         ctm = new CalendarTestManager(client);
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         single = new Appointment();
@@ -86,7 +87,7 @@ public class Bug31810Test extends AbstractAJAXSession {
         single.setIgnoreConflicts(true);
         single.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         ctm.insert(single);
-        
+
         conflict = new Appointment();
         conflict.setTitle("Bug 31810 appointment.");
         conflict.setStartDate(D("03.03." + nextYear + " 08:00"));
@@ -96,7 +97,8 @@ public class Bug31810Test extends AbstractAJAXSession {
         conflict.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         ctm.insert(conflict);
     }
-    
+
+    @Test
     public void testBug31810() throws Exception {
         conflict.setFullTime(true);
         conflict.removeShownAs();

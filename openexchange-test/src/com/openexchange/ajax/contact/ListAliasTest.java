@@ -52,6 +52,7 @@ package com.openexchange.ajax.contact;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ListRequest;
@@ -90,6 +91,7 @@ public class ListAliasTest extends ContactTest {
         super.tearDown();
     }
 
+    @Test
     public void testListAlias() throws Exception {
         final AllRequest allRequest = new AllRequest(client.getValues().getPrivateContactFolder(), new int[] { 20, 1 });
         final CommonAllResponse allResponse = client.execute(allRequest);
@@ -99,8 +101,7 @@ public class ListAliasTest extends ContactTest {
         final CommonListResponse aliasResponse = client.execute(aliasRequest);
         final Object[][] aliasContacts = aliasResponse.getArray();
 
-        final ListRequest request = new ListRequest(ids, new int[] {
-            20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 });
+        final ListRequest request = new ListRequest(ids, new int[] { 20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 });
         final CommonListResponse response = client.execute(request);
         final Object[][] contacts = response.getArray();
 

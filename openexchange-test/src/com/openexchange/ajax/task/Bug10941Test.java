@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
@@ -73,20 +74,19 @@ public class Bug10941Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         taskManager = new TaskTestManager(getClient());
-        task = taskManager.newTask(getName() + " Task")
-            .startsTomorrow()
-            .endsTheFollowingDay();
+        task = taskManager.newTask(getName() + " Task").startsTomorrow().endsTheFollowingDay();
 
         taskManager.insertTaskOnServer(task);
     }
 
+    @Test
     public void testRemoveStartAndEndDateOnUpdate() {
-        TestTask update = new TestTask().relatedTo( task );
+        TestTask update = new TestTask().relatedTo(task);
 
         update.setStartDate(null);
         update.setEndDate(null);
 
-        taskManager.updateTaskOnServer( update );
+        taskManager.updateTaskOnServer(update);
 
         Task saved = taskManager.getTaskFromServer(update);
 
@@ -99,6 +99,5 @@ public class Bug10941Test extends AbstractAJAXSession {
         taskManager.cleanUp();
         super.tearDown();
     }
-
 
 }

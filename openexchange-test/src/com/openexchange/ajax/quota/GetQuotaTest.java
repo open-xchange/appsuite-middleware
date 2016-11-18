@@ -53,6 +53,7 @@ import java.util.Random;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
@@ -71,6 +72,7 @@ public class GetQuotaTest extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testGetQuota() throws Exception {
         /*
          * get quota from all available modules
@@ -103,7 +105,7 @@ public class GetQuotaTest extends AbstractAJAXSession {
                 assertTrue("No quota or countquota found", randomAccount.hasAndNotNull("quota") || randomAccount.hasAndNotNull("countquota"));
                 request = new GetQuotaRequest(randomModule, randomAccount.getString("account_id"));
                 response = client.execute(request);
-                JSONObject jsonAccount = (JSONObject)response.getData();
+                JSONObject jsonAccount = (JSONObject) response.getData();
                 assertTrue("No account_id found", jsonAccount.hasAndNotNull("account_id"));
                 assertTrue("No account_name found", jsonAccount.hasAndNotNull("account_name"));
                 assertTrue("No quota or countquota found", jsonAccount.hasAndNotNull("quota") || randomAccount.hasAndNotNull("countquota"));

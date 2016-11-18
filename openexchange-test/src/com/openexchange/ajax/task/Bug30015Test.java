@@ -87,8 +87,7 @@ public final class Bug30015Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         timeZone = client1.getValues().getTimeZone();
@@ -106,8 +105,7 @@ public final class Bug30015Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         client1.execute(new DeleteRequest(first));
         client1.execute(new DeleteRequest(second));
         super.tearDown();

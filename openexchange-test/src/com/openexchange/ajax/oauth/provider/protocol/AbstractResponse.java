@@ -88,7 +88,7 @@ abstract class AbstractResponse {
     }
 
     public void assertStatus(int statusCode) {
-        assertEquals("Unexpected status code", statusCode,  this.statusCode);
+        assertEquals("Unexpected status code", statusCode, this.statusCode);
     }
 
     public void assertOK() {

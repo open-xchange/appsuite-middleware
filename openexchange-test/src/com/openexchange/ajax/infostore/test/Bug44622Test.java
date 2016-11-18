@@ -53,12 +53,13 @@ import java.io.File;
 import java.util.Date;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetDocumentRequest;
 import com.openexchange.ajax.infostore.actions.GetDocumentResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.test.TestInit;
 
@@ -74,6 +75,7 @@ public class Bug44622Test extends AbstractInfostoreTest {
 
     /**
      * Initializes a new {@link Bug44622Test}.
+     * 
      * @param name
      */
     public Bug44622Test() {
@@ -99,6 +101,7 @@ public class Bug44622Test extends AbstractInfostoreTest {
         super.tearDown();
     }
 
+    @Test
     public void testBug44622() throws Exception {
         GetDocumentRequest req = new GetDocumentRequest(String.valueOf(client.getValues().getPrivateInfostoreFolder()), fileID);
         req.setAdditionalParameters(new Parameter("content_disposition", ""));

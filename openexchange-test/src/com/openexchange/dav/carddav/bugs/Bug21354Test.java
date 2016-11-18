@@ -73,83 +73,83 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug21354Test extends CardDAVTest {
 
-	public Bug21354Test() {
-		super();
-	}
+    public Bug21354Test() {
+        super();
+    }
 
-	@Test
-	public void testDeleteFromGAB_10_6() throws Exception {
-		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
-		/*
-		 * store current sync state via all ETags and CTag properties
-		 */
-		Map<String, String> eTags = super.getAllETags();
-		String cTag = super.getCTag();
-		/*
-		 * pick random contact from global address book
-		 */
-		List<Contact> contacts = super.getContacts(super.getGABFolderID());
-		String uid = contacts.get(new Random().nextInt(contacts.size())).getUid();
-		/*
-		 * try to delete contact, asserting positive response
-		 */
-		super.removeFromETags(eTags, uid);
+    @Test
+    public void testDeleteFromGAB_10_6() throws Exception {
+        super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
+        /*
+         * store current sync state via all ETags and CTag properties
+         */
+        Map<String, String> eTags = super.getAllETags();
+        String cTag = super.getCTag();
+        /*
+         * pick random contact from global address book
+         */
+        List<Contact> contacts = super.getContacts(super.getGABFolderID());
+        String uid = contacts.get(new Random().nextInt(contacts.size())).getUid();
+        /*
+         * try to delete contact, asserting positive response
+         */
+        super.removeFromETags(eTags, uid);
         assertEquals("response code wrong", StatusCodes.SC_NO_CONTENT, super.delete(uid));
-		/*
-		 * verify that contact was not deleted on server
-		 */
-		assertNotNull("Contact deleted on server", super.getContact(uid));
-		/*
-		 * check for updates via ctag
-		 */
-		String cTag2 = super.getCTag();
-		assertFalse("No changes indicated by CTag", cTag.equals(cTag2));
-		/*
-		 * check Etag collection
-		 */
-		Map<String, String> eTags2 = super.getAllETags();
-		List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
-		assertTrue("less than 1 change reported in Etags", 0 < changedHrefs.size());
-		/*
-		 * check updated vCard for deleted member
-		 */
+        /*
+         * verify that contact was not deleted on server
+         */
+        assertNotNull("Contact deleted on server", super.getContact(uid));
+        /*
+         * check for updates via ctag
+         */
+        String cTag2 = super.getCTag();
+        assertFalse("No changes indicated by CTag", cTag.equals(cTag2));
+        /*
+         * check Etag collection
+         */
+        Map<String, String> eTags2 = super.getAllETags();
+        List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
+        assertTrue("less than 1 change reported in Etags", 0 < changedHrefs.size());
+        /*
+         * check updated vCard for deleted member
+         */
         final List<VCardResource> addressData = super.addressbookMultiget(changedHrefs);
         assertContains(uid, addressData);
-	}
+    }
 
-	@Test
-	public void testDeleteFromGAB_10_7() throws Exception {
-		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
-		/*
-		 * store current sync state via all ETags and sync-token properties
-		 */
-		Map<String, String> eTags = super.getAllETags();
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * pick random contact from global address book
-		 */
-		List<Contact> contacts = super.getContacts(super.getGABFolderID());
-		String uid =  contacts.get(new Random().nextInt(contacts.size())).getUid();
-		/*
-		 * try to delete contact, asserting positive response
-		 */
-		super.removeFromETags(eTags, uid);
-		assertEquals("response code wrong", StatusCodes.SC_NO_CONTENT, super.delete(uid));
-		/*
-		 * verify that contact was not deleted on server
-		 */
-		assertNotNull("Contact deleted on server", super.getContact(uid));
-		/*
-		 * check for updates via Etags with sync-token
-		 */
+    @Test
+    public void testDeleteFromGAB_10_7() throws Exception {
+        super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
+        /*
+         * store current sync state via all ETags and sync-token properties
+         */
+        Map<String, String> eTags = super.getAllETags();
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * pick random contact from global address book
+         */
+        List<Contact> contacts = super.getContacts(super.getGABFolderID());
+        String uid = contacts.get(new Random().nextInt(contacts.size())).getUid();
+        /*
+         * try to delete contact, asserting positive response
+         */
+        super.removeFromETags(eTags, uid);
+        assertEquals("response code wrong", StatusCodes.SC_NO_CONTENT, super.delete(uid));
+        /*
+         * verify that contact was not deleted on server
+         */
+        assertNotNull("Contact deleted on server", super.getContact(uid));
+        /*
+         * check for updates via Etags with sync-token
+         */
         Map<String, String> eTags2 = super.syncCollection(syncToken).getETagsStatusOK();
-		List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
-		assertTrue("less than 1 change reported in Etags", 0 < changedHrefs.size());
-		/*
-		 * check updated vCards for deleted member and global address book
-		 */
+        List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
+        assertTrue("less than 1 change reported in Etags", 0 < changedHrefs.size());
+        /*
+         * check updated vCards for deleted member and global address book
+         */
         final List<VCardResource> addressData = super.addressbookMultiget(changedHrefs);
         assertContains(uid, addressData);
-	}
+    }
 
 }

@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GenJSONRequest;
@@ -97,8 +98,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, String.valueOf(client.getValues().getPrivateInfostoreFolder()), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS,
-            FolderObject.TYPE, FolderObject.STANDARD_FOLDER }, true);
+        ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, String.valueOf(client.getValues().getPrivateInfostoreFolder()), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.TYPE, FolderObject.STANDARD_FOLDER }, true);
         ListResponse listResponse = client.execute(listRequest);
         Iterator<FolderObject> it = listResponse.getFolder();
         while (it.hasNext()) {
@@ -127,12 +127,12 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
                 folders[3] = folder.getObjectID();
                 types[3] = FolderObject.VIDEOS;
             }
-//            if (folder.getType() == FolderObject.TEMPLATES) {
-//                assertEquals("Wrong folder name.", FolderStrings.SYSTEM_USER_TEMPLATES_FOLDER_NAME, folder.getFolderName());
-//                assertTrue("Folder is not a default folder.", folder.isDefaultFolder());
-//                folders[4] = folder.getObjectID();
-//                types[4] = FolderObject.TEMPLATES;
-//            }
+            //            if (folder.getType() == FolderObject.TEMPLATES) {
+            //                assertEquals("Wrong folder name.", FolderStrings.SYSTEM_USER_TEMPLATES_FOLDER_NAME, folder.getFolderName());
+            //                assertTrue("Folder is not a default folder.", folder.isDefaultFolder());
+            //                folders[4] = folder.getObjectID();
+            //                types[4] = FolderObject.TEMPLATES;
+            //            }
         }
     }
 
@@ -141,6 +141,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testDelete() throws Exception {
         for (int folderId : folders) {
             DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, folderId, new Date());
@@ -155,6 +156,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testRename() throws Exception {
         for (int folderId : folders) {
             GetRequest getRequest = new GetRequest(EnumAPI.OX_NEW, folderId);
@@ -173,6 +175,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testMove() throws Exception {
         int random = new Random(System.currentTimeMillis()).nextInt(4);
         GetRequest getRequest = new GetRequest(EnumAPI.OX_NEW, folders[random]);
@@ -191,6 +194,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         assertEquals(OXFolderExceptionCode.NO_DEFAULT_FOLDER_MOVE.getNumber(), e.getCode());
     }
 
+    @Test
     public void testSubfoldersInheritType() throws Exception {
         int random = new Random(System.currentTimeMillis()).nextInt(4);
         FolderObject folder = new FolderObject();
@@ -221,6 +225,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testSubfolderChangeTypeOnMove() throws Exception {
         int random = new Random(System.currentTimeMillis()).nextInt(4);
         FolderObject folder = new FolderObject();

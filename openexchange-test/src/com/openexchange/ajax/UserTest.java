@@ -54,6 +54,7 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -76,13 +77,7 @@ import com.openexchange.tools.URLParameter;
 @RunWith(ConcurrentTestRunner.class)
 public class UserTest extends AbstractAJAXTest {
 
-    public final static int[] CONTACT_FIELDS = {
-        DataObject.OBJECT_ID,
-        Contact.INTERNAL_USERID,
-        Contact.EMAIL1,
-        Contact.GIVEN_NAME,
-        Contact.SUR_NAME,
-        Contact.DISPLAY_NAME
+    public final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, Contact.INTERNAL_USERID, Contact.EMAIL1, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.DISPLAY_NAME
     };
 
     public UserTest() {
@@ -91,11 +86,13 @@ public class UserTest extends AbstractAJAXTest {
 
     private static final String USER_URL = "/ajax/contacts";
 
+    @Test
     public void testSearch() throws Exception {
         final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
     }
 
+    @Test
     public void testList() throws Exception {
         com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
@@ -109,11 +106,13 @@ public class UserTest extends AbstractAJAXTest {
         assertTrue("user array size > 0", users.length > 0);
     }
 
+    @Test
     public void testSearchUsers() throws Exception {
         final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
     }
 
+    @Test
     public void testGet() throws Exception {
         final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getWebConversation(), getHostName(), "*", getSessionId());
         assertTrue("user array size > 0", users.length > 0);
@@ -158,7 +157,7 @@ public class UserTest extends AbstractAJAXTest {
 
         assertNotNull("timestamp", response.getTimestamp());
 
-        final JSONArray jsonArray = (JSONArray)response.getData();
+        final JSONArray jsonArray = (JSONArray) response.getData();
         final UserImpl4Test[] user = new UserImpl4Test[jsonArray.length()];
         for (int a = 0; a < user.length; a++) {
             final JSONArray jsonContactArray = jsonArray.getJSONArray(a);

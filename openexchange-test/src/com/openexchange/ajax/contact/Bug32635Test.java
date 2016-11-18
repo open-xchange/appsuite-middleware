@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import java.util.List;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.container.Contact;
@@ -73,15 +74,16 @@ public class Bug32635Test extends AbstractManagedContactTest {
         super();
     }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
+    @Test
     public void testAutocomplete() throws Exception {
-    	/*
-    	 * create contact
-    	 */
+        /*
+         * create contact
+         */
         Contact contact = super.generateContact("Preu\u00df");
         contact.setGivenName("Stefan");
         contact.setDisplayName("Preu\u00df, Stefan");

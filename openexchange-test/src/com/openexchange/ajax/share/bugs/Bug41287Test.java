@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
-
 
 /**
  * {@link Bug41287Test}
@@ -98,6 +98,7 @@ public class Bug41287Test extends ShareTest {
         }
     }
 
+    @Test
     public void testBug41287() throws Exception {
         ShareTarget t = new ShareTarget(FolderObject.INFOSTORE, String.valueOf(parent.getObjectID()));
         GetLinkRequest req = new GetLinkRequest(t);

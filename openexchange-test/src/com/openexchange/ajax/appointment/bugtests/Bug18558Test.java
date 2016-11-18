@@ -53,6 +53,7 @@ import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -105,23 +106,7 @@ public class Bug18558Test extends AbstractAJAXSession {
         FolderObject folderA = new FolderObject();
         folderA.setObjectID(clientA.getValues().getPrivateAppointmentFolder());
         folderA.setLastModified(new Date(Long.MAX_VALUE));
-        folderA.setPermissionsAsArray(new OCLPermission[] {
-            ocl(
-                clientA.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                clientD.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION) });
+        folderA.setPermissionsAsArray(new OCLPermission[] { ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientD.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderA));
         response.fillObject(folderA);
@@ -129,23 +114,7 @@ public class Bug18558Test extends AbstractAJAXSession {
         FolderObject folderB = new FolderObject();
         folderB.setObjectID(clientB.getValues().getPrivateAppointmentFolder());
         folderB.setLastModified(new Date(Long.MAX_VALUE));
-        folderB.setPermissionsAsArray(new OCLPermission[] {
-            ocl(
-                clientB.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                clientD.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION) });
+        folderB.setPermissionsAsArray(new OCLPermission[] { ocl(clientB.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientD.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
         response = clientB.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderB));
         response.fillObject(folderB);
@@ -156,14 +125,15 @@ public class Bug18558Test extends AbstractAJAXSession {
         appointment.setEndDate(D("01.04.2011 09:00"));
         appointment.setParentFolderID(clientC.getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        appointment.setUsers(new UserParticipant[] {new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
-        appointment.setParticipants(new Participant[] {new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
+        appointment.setUsers(new UserParticipant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
+        appointment.setParticipants(new Participant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
 
         InsertRequest insertRequest = new InsertRequest(appointment, clientC.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientC.execute(insertRequest);
         insertResponse.fillObject(appointment);
     }
 
+    @Test
     public void testBug18558Test() throws Exception {
         SearchRequest search = new SearchRequest(appointment.getTitle(), -1, new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.USERS, Appointment.PARTICIPANTS });
         SearchResponse searchResponse = clientD.execute(search);

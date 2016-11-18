@@ -60,6 +60,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
  * This class stores the values for searching users.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
@@ -84,8 +85,9 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
 
     /**
      * Default constructor.
+     * 
      * @param search Object with search information. Currently only the pattern
-     * is supported.
+     *            is supported.
      */
     public SearchRequest(final ContactSearchObject search, final int[] columns, final boolean failOnError) {
         this(search, columns, failOnError, null);
@@ -99,7 +101,7 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
         this.parameters = new ArrayList<Parameter>();
         this.parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
         this.parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-        if( parameters != null ){
+        if (parameters != null) {
             this.parameters.addAll(parameters);
         }
     }

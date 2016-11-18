@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -67,12 +68,14 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * Checks if bug 11650 appears again.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug11650Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * 
      * @param name Name of the test.
      */
     public Bug11650Test() {
@@ -81,18 +84,18 @@ public class Bug11650Test extends AbstractTaskTest {
 
     /**
      * Checks if the search in shared task folder is broken.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testSearchInSharedFolder() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
         final AJAXClient berta = new AJAXClient(User.User2);
-        final FolderObject folder = createFolder(anton.getValues().getUserId(),
-            berta.getValues().getUserId());
+        final FolderObject folder = createFolder(anton.getValues().getUserId(), berta.getValues().getUserId());
         folder.setParentFolderID(antonFID);
         // Share a folder.
-        final CommonInsertResponse fResponse = anton.execute(
-            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
+        final CommonInsertResponse fResponse = anton.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         fResponse.fillObject(folder);
         final Task task = Create.createWithDefaults();
         task.setTitle("Bug11650Test");
@@ -100,8 +103,7 @@ public class Bug11650Test extends AbstractTaskTest {
         try {
             {
                 // Insert a task for searching for it.
-                final InsertResponse insert = Executor.execute(anton,
-                    new InsertRequest(task, anton.getValues().getTimeZone()));
+                final InsertResponse insert = Executor.execute(anton, new InsertRequest(task, anton.getValues().getTimeZone()));
                 insert.fillTask(task);
             }
             {
@@ -109,10 +111,8 @@ public class Bug11650Test extends AbstractTaskTest {
                 final TaskSearchObject search = new TaskSearchObject();
                 search.setPattern("*");
                 search.addFolder(folder.getObjectID());
-                final SearchResponse response = Executor.execute(berta,
-                    new SearchRequest(search, SearchRequest.GUI_COLUMNS));
-                assertFalse("Searching for tasks in a shared folder failed.",
-                    response.hasError());
+                final SearchResponse response = Executor.execute(berta, new SearchRequest(search, SearchRequest.GUI_COLUMNS));
+                assertFalse("Searching for tasks in a shared folder failed.", response.hasError());
             }
         } finally {
             anton.execute(new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
@@ -128,20 +128,12 @@ public class Bug11650Test extends AbstractTaskTest {
         perm1.setEntity(anton);
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         final OCLPermission perm2 = new OCLPermission();
         perm2.setEntity(berta);
         perm2.setGroupPermission(false);
         perm2.setFolderAdmin(false);
-        perm2.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        perm2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         folder.setPermissionsAsArray(new OCLPermission[] { perm1, perm2 });
         return folder;
     }

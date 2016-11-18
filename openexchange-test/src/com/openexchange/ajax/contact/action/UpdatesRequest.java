@@ -67,16 +67,12 @@ public class UpdatesRequest extends AbstractUpdatesRequest<ContactUpdatesRespons
      * @param order
      * @param lastModified
      */
-    public UpdatesRequest(final int folderId, final int[] columns,
-        final int sort, final Order order, final Date lastModified) {
+    public UpdatesRequest(final int folderId, final int[] columns, final int sort, final Order order, final Date lastModified) {
         this(folderId, columns, sort, order, lastModified, Ignore.DELETED);
     }
 
-    public UpdatesRequest(final int folderId, final int[] columns,
-        final int sort, final Order order, final Date lastModified,
-        final Ignore ignore) {
-        super(AbstractContactRequest.URL, folderId, columns, sort, order,
-            lastModified, ignore, true);
+    public UpdatesRequest(final int folderId, final int[] columns, final int sort, final Order order, final Date lastModified, final Ignore ignore) {
+        super(AbstractContactRequest.URL, folderId, columns, sort, order, lastModified, ignore, true);
         this.columns = columns;
     }
 

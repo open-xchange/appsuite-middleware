@@ -99,15 +99,9 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testFlow() throws Exception {
-        GETRequest getLoginForm = new GETRequest()
-            .setHostname(hostname)
-            .setClientId(getClientId())
-            .setRedirectURI(getRedirectURI())
-            .setState(csrfState);
+        GETRequest getLoginForm = new GETRequest().setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState);
         GETResponse loginFormResponse = getLoginForm.execute(client);
-        POSTRequest loginRequest = loginFormResponse.preparePOSTRequest()
-            .setLogin(login)
-            .setPassword(password);
+        POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(login).setPassword(password);
         POSTResponse loginResponse = loginRequest.submit(client);
         GETResponse getAuthForm = loginResponse.followRedirect(client);
         POSTRequest authRequest = getAuthForm.preparePOSTRequest();
@@ -133,11 +127,7 @@ public class ProtocolFlowTest extends EndpointTest {
         redeemRefreshTokenParams.add(new BasicNameValuePair("redirect_uri", getRedirectURI()));
         redeemRefreshTokenParams.add(new BasicNameValuePair("refresh_token", refreshToken));
 
-        HttpPost redeemRefreshToken = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(EndpointTest.TOKEN_ENDPOINT)
-            .build());
+        HttpPost redeemRefreshToken = new HttpPost(new URIBuilder().setScheme("https").setHost(hostname).setPath(EndpointTest.TOKEN_ENDPOINT).build());
         redeemRefreshToken.setEntity(new UrlEncodedFormEntity(redeemRefreshTokenParams));
 
         HttpResponse accessTokenResponse = client.execute(redeemRefreshToken);
@@ -165,12 +155,7 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testRedeemIsDeniedWhenRedirectURIChanges() throws Exception {
-        OAuthParams params = new OAuthParams()
-            .setHostname(hostname)
-            .setClientId(getClientId())
-            .setClientSecret(getClientSecret())
-            .setRedirectURI(getRedirectURI())
-            .setScope(getScope().toString());
+        OAuthParams params = new OAuthParams().setHostname(hostname).setClientId(getClientId()).setClientSecret(getClientSecret()).setRedirectURI(getRedirectURI()).setScope(getScope().toString());
         String sessionId = Protocol.login(client, params, login, password);
         String authCode = Protocol.authorize(client, params, sessionId);
 
@@ -181,11 +166,7 @@ public class ProtocolFlowTest extends EndpointTest {
         redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", getSecondRedirectURI())); // <- wrong redirect URI
         redeemAuthCodeParams.add(new BasicNameValuePair("code", authCode));
 
-        HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(params.getHostname())
-            .setPath(EndpointTest.TOKEN_ENDPOINT)
-            .build());
+        HttpPost redeemAuthCode = new HttpPost(new URIBuilder().setScheme("https").setHost(params.getHostname()).setPath(EndpointTest.TOKEN_ENDPOINT).build());
         redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
         HttpResponse accessTokenResponse = client.execute(redeemAuthCode);
         assertEquals(HttpStatus.SC_BAD_REQUEST, accessTokenResponse.getStatusLine().getStatusCode());
@@ -200,11 +181,7 @@ public class ProtocolFlowTest extends EndpointTest {
         redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", getRedirectURI())); // <- correct redirect URI
         redeemAuthCodeParams.add(new BasicNameValuePair("code", authCode));
 
-        redeemAuthCode = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(params.getHostname())
-            .setPath(EndpointTest.TOKEN_ENDPOINT)
-            .build());
+        redeemAuthCode = new HttpPost(new URIBuilder().setScheme("https").setHost(params.getHostname()).setPath(EndpointTest.TOKEN_ENDPOINT).build());
         redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
         accessTokenResponse = client.execute(redeemAuthCode);
         assertEquals(HttpStatus.SC_BAD_REQUEST, accessTokenResponse.getStatusLine().getStatusCode());
@@ -214,12 +191,7 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testAuthCodeReplay() throws Exception {
-        OAuthParams params = new OAuthParams()
-            .setHostname(hostname)
-            .setClientId(getClientId())
-            .setClientSecret(getClientSecret())
-            .setRedirectURI(getRedirectURI())
-            .setScope(getScope().toString());
+        OAuthParams params = new OAuthParams().setHostname(hostname).setClientId(getClientId()).setClientSecret(getClientSecret()).setRedirectURI(getRedirectURI()).setScope(getScope().toString());
         String sessionId = Protocol.login(client, params, login, password);
         String authCode = Protocol.authorize(client, params, sessionId);
         Protocol.redeemAuthCode(client, params, authCode);
@@ -234,11 +206,7 @@ public class ProtocolFlowTest extends EndpointTest {
         redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", getRedirectURI()));
         redeemAuthCodeParams.add(new BasicNameValuePair("code", authCode));
 
-        HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(params.getHostname())
-            .setPath(EndpointTest.TOKEN_ENDPOINT)
-            .build());
+        HttpPost redeemAuthCode = new HttpPost(new URIBuilder().setScheme("https").setHost(params.getHostname()).setPath(EndpointTest.TOKEN_ENDPOINT).build());
         redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
         HttpResponse replayResponse = client.execute(redeemAuthCode);
         assertEquals(HttpStatus.SC_BAD_REQUEST, replayResponse.getStatusLine().getStatusCode());

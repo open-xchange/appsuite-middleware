@@ -53,7 +53,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 
-
 /**
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -64,7 +63,7 @@ public class ListSubscriptionsResponse extends AbstractSubscriptionResponse {
         super(response);
     }
 
-    public JSONArray getList() throws JSONException{
+    public JSONArray getList() throws JSONException {
         return (JSONArray) getData();
     }
 

@@ -53,6 +53,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -105,18 +106,13 @@ public class AllAliasTest extends AppointmentTest {
         super.tearDown();
     }
 
+    @Test
     public void testAllAlias() throws Exception {
-        final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), "all", new Date(0), new Date(
-            Long.MAX_VALUE), client.getValues().getTimeZone());
+        final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), "all", new Date(0), new Date(Long.MAX_VALUE), client.getValues().getTimeZone());
         final CommonAllResponse allAliasResponse = client.execute(allAliasRequest);
         final Object[][] aliasAppointments = allAliasResponse.getArray();
 
-        final AllRequest allRequest = new AllRequest(
-            client.getValues().getPrivateAppointmentFolder(),
-            new int[] { 1, 20, 207, 206, 2 },
-            new Date(0),
-            new Date(Long.MAX_VALUE),
-            client.getValues().getTimeZone());
+        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), new int[] { 1, 20, 207, 206, 2 }, new Date(0), new Date(Long.MAX_VALUE), client.getValues().getTimeZone());
         final CommonAllResponse allResponse = client.execute(allRequest);
         final Object[][] appointments = allResponse.getArray();
 

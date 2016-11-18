@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -97,39 +99,39 @@ public class Bug25672Test extends CalDAVTest {
     }
 
     @Test
-	public void testUpdateWithDeleteExceptions() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create appointment series on server as user b
-		 */
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
-	    Appointment appointment = new Appointment();
-	    appointment.setUid(randomUID());
-	    appointment.setTitle("Bug25672Test");
-	    appointment.setIgnoreConflicts(true);
+    public void testUpdateWithDeleteExceptions() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create appointment series on server as user b
+         */
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(randomUID());
+        appointment.setTitle("Bug25672Test");
+        appointment.setIgnoreConflicts(true);
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
-	    appointment.setStartDate(calendar.getTime());
-	    calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(super.getAJAXClient().getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
-		Date clientLastModified = manager2.getLastModification();
+        Date clientLastModified = manager2.getLastModification();
         /*
          * create delete exception on server as user b
          */
-		Appointment exception = new Appointment();
-		exception.setTitle("Bug23167Test_edit");
-		exception.setObjectID(appointment.getObjectID());
-		exception.setRecurrencePosition(2);
-		exception.setLastModified(clientLastModified);
-		exception.setParentFolderID(appointment.getParentFolderID());
-		manager2.delete(exception);
+        Appointment exception = new Appointment();
+        exception.setTitle("Bug23167Test_edit");
+        exception.setObjectID(appointment.getObjectID());
+        exception.setRecurrencePosition(2);
+        exception.setLastModified(clientLastModified);
+        exception.setParentFolderID(appointment.getParentFolderID());
+        manager2.delete(exception);
         clientLastModified = manager2.getLastModification();
         /*
          * verify appointment series on client as user a
@@ -154,8 +156,6 @@ public class Bug25672Test extends CalDAVTest {
         appointment = super.getAppointment(appointment.getUid());
         assertNotNull("appointment not found on server", appointment);
         assertEquals("title wrong", editedTitle, appointment.getTitle());
-	}
+    }
 
 }
-
-

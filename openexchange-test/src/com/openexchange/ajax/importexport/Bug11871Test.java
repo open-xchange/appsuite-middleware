@@ -52,6 +52,7 @@ package com.openexchange.ajax.importexport;
 import java.io.StringReader;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
@@ -75,6 +76,7 @@ public final class Bug11871Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name
      */
     public Bug11871Test() {
@@ -85,16 +87,15 @@ public final class Bug11871Test extends AbstractAJAXSession {
      * Creates a daily appointment over several days and checks if the DTEND
      * contains the end of the first occurrence and not the end of the series.
      */
+    @Test
     public void testDtEndNotOnSeriesEnd() throws Throwable {
         final AJAXClient myClient = getClient();
         final int folderId = myClient.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = myClient.getValues().getTimeZone();
-        final FolderObject folder = Create.createPrivateFolder("Bug 11871 test folder " + System.currentTimeMillis(),
-            FolderObject.CALENDAR, myClient.getValues().getUserId());
+        final FolderObject folder = Create.createPrivateFolder("Bug 11871 test folder " + System.currentTimeMillis(), FolderObject.CALENDAR, myClient.getValues().getUserId());
         {
             folder.setParentFolderID(folderId);
-            final CommonInsertResponse response = Executor.execute(myClient,
-                new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
+            final CommonInsertResponse response = Executor.execute(myClient, new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
             folder.setObjectID(response.getId());
             folder.setLastModified(response.getTimestamp());
         }
@@ -132,10 +133,8 @@ public final class Bug11871Test extends AbstractAJAXSession {
             final ICalFile ical = new ICalFile(new StringReader(response.getICal()));
             Assert.assertStandardAppFields(ical, appointment.getStartDate(), appointment.getEndDate(), tz);
         } finally {
-            Executor.execute(myClient, new DeleteRequest(appointment.getObjectID(),
-                appointment.getParentFolderID(), appointment.getLastModified()));
-            Executor.execute(myClient, new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(),
-                folder.getLastModified()));
+            Executor.execute(myClient, new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
+            Executor.execute(myClient, new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
         }
     }
 }

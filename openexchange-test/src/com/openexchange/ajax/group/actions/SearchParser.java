@@ -68,8 +68,7 @@ public final class SearchParser extends AbstractAJAXParser<SearchResponse> {
     }
 
     @Override
-    protected SearchResponse createResponse(final Response response)
-        throws JSONException {
+    protected SearchResponse createResponse(final Response response) throws JSONException {
         assertNotNull("Timestamp is missing.", response.getTimestamp());
         return new SearchResponse(response);
     }

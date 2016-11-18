@@ -62,25 +62,25 @@ public class RefreshSecretRequest extends AbstractRequest<RefreshSecretResponse>
 
     private final boolean failOnError;
 
-	public RefreshSecretRequest(final boolean failOnError) {
-		super(new Parameter[] {
-		    new URLParameter(LoginServlet.PARAMETER_ACTION, LoginServlet.ACTION_REFRESH_SECRET)
-		});
-		this.failOnError = failOnError;
-	}
+    public RefreshSecretRequest(final boolean failOnError) {
+        super(new Parameter[] { new URLParameter(LoginServlet.PARAMETER_ACTION, LoginServlet.ACTION_REFRESH_SECRET)
+        });
+        this.failOnError = failOnError;
+    }
 
-	@Override
+    @Override
     public AbstractAJAXParser<RefreshSecretResponse> getParser() {
-		return new AbstractAJAXParser<RefreshSecretResponse>(failOnError) {
-			@Override
-			protected RefreshSecretResponse createResponse(Response response) {
-				return new RefreshSecretResponse(response);
-			}
-		};
-	}
-	
-	@Override
-	public Method getMethod() {
-	    return Method.GET;
-	}
+        return new AbstractAJAXParser<RefreshSecretResponse>(failOnError) {
+
+            @Override
+            protected RefreshSecretResponse createResponse(Response response) {
+                return new RefreshSecretResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
 }

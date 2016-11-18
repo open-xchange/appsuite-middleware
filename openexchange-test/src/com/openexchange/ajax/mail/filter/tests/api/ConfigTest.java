@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
@@ -71,6 +72,7 @@ public class ConfigTest extends AbstractMailFilterTest {
     /**
      * Test the GET /ajax/mailfilter?action=config API call
      */
+    @Test
     public void testConfig() throws Exception {
         MailFilterConfiguration mailFilterConfiguration = mailFilterAPI.getConfiguration();
 

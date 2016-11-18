@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
@@ -77,7 +78,7 @@ public class Bug13262Test extends AppointmentTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        FolderTest.clearFolder(webCon, new int[] {appointmentFolderId}, new String[] {"calendar"}, new Date(), PROTOCOL + hostName, login, password, context);
+        FolderTest.clearFolder(webCon, new int[] { appointmentFolderId }, new String[] { "calendar" }, new Date(), PROTOCOL + hostName, login, password, context);
 
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.setTime(startTime);
@@ -111,6 +112,7 @@ public class Bug13262Test extends AppointmentTest {
         super.tearDown();
     }
 
+    @Test
     public void testBugAsWritten() throws Exception {
         // Create Appointment
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);

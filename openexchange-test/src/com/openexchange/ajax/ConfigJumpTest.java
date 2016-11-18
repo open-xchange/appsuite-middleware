@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -50,6 +51,7 @@ import com.openexchange.ajax.container.Response;
 
 /**
  * This test case tests the AJAX interface of the config jump URL generator.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigJumpTest extends AbstractAJAXTest {
@@ -66,6 +68,7 @@ public class ConfigJumpTest extends AbstractAJAXTest {
 
     /**
      * Default constructor.
+     * 
      * @param name Name of this test.
      */
     public ConfigJumpTest() {
@@ -74,37 +77,34 @@ public class ConfigJumpTest extends AbstractAJAXTest {
 
     /**
      * Tests if the url can be read from the server.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testReadSettings() throws Throwable {
-        final URL control = readURL(getWebConversation(), getHostName(),
-            getSessionId());
-        assertTrue("Got no value from server.", control.toString().length()
-            > 0);
+        final URL control = readURL(getWebConversation(), getHostName(), getSessionId());
+        assertTrue("Got no value from server.", control.toString().length() > 0);
     }
 
     /**
      * Reads a configuration setting. A tree of configuration settings can also
      * be read. This tree will be returned as a string in JSON.
+     * 
      * @param conversation web conversation.
      * @param hostName host name of the server.
      * @param sessionId session identifier of the user.
      * @return the value of the setting or a string with the tree of settings in
-     * JSON.
+     *         JSON.
      * @throws SAXException if parsing of the response fails.
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
      */
-    public static URL readURL(final WebConversation conversation,
-        final String hostName, final String sessionId)
-        throws IOException, SAXException, JSONException {
+    public static URL readURL(final WebConversation conversation, final String hostName, final String sessionId) throws IOException, SAXException, JSONException {
         LOG.trace("Reading control center URL.");
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
-            + CONTROL_URL);
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + CONTROL_URL);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: \"" + body + "\"");
         final Response response = Response.parse(body);

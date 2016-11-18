@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -107,6 +108,7 @@ public class Bug48165Test extends AbstractAJAXSession {
         series.setParticipants(new Participant[] { new UserParticipant(client.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
     }
 
+    @Test
     public void testBug48165() throws Exception {
         ctm2.insert(conflict);
         ctm1.insert(series);

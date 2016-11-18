@@ -50,14 +50,11 @@
 package com.openexchange.ajax.user;
 
 import static com.openexchange.java.Autoboxing.B;
-
 import java.util.Random;
 import java.util.TimeZone;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.openexchange.ajax.config.AttributeWriter;
 import com.openexchange.ajax.config.BetaWriter;
 import com.openexchange.ajax.config.actions.GetRequest;
@@ -82,12 +79,12 @@ public final class Bug26354Test extends AbstractAJAXSession {
     private static final String ATTRIBUTE_NAME = "testForBug26354";
 
     private static final int ITERATIONS = 100;
-    
+
     private static final TimeZone[] TIME_ZONES = new TimeZone[3];
     static {
-    	TIME_ZONES[0] = TimeZones.PST;
-    	TIME_ZONES[1] = TimeZones.UTC;
-    	TIME_ZONES[2] = TimeZones.EET;
+        TIME_ZONES[0] = TimeZones.PST;
+        TIME_ZONES[1] = TimeZones.UTC;
+        TIME_ZONES[2] = TimeZones.EET;
     }
 
     private final AttributeWriter[] writer = new AttributeWriter[2];
@@ -96,7 +93,7 @@ public final class Bug26354Test extends AbstractAJAXSession {
     private AJAXClient client;
     private int userId;
     private boolean origBetaValue;
-	private String origTimeZoneValue;
+    private String origTimeZoneValue;
 
     public Bug26354Test() {
         super();
@@ -110,18 +107,20 @@ public final class Bug26354Test extends AbstractAJAXSession {
         userId = client.getValues().getUserId();
         origBetaValue = client.execute(new GetRequest(Tree.Beta)).getBoolean();
         origTimeZoneValue = client.execute(new GetRequest(Tree.TimeZone)).getString();
-        
+
         writer[0] = new BetaWriter(User.User1);
         thread[0] = new Thread(writer[0]);
-        writer[1] = new AttributeWriter(Tree.TimeZone, User.User1) {	
-        	private final Random r = new Random();
-			@Override
-			protected Object getValue() {
-				return TIME_ZONES[r.nextInt(3)].getID();
-			}
-		};
-		thread[1] = new Thread(writer[1]);
-        
+        writer[1] = new AttributeWriter(Tree.TimeZone, User.User1) {
+
+            private final Random r = new Random();
+
+            @Override
+            protected Object getValue() {
+                return TIME_ZONES[r.nextInt(3)].getID();
+            }
+        };
+        thread[1] = new Thread(writer[1]);
+
         for (int i = 0; i < thread.length; i++) {
             thread[i].start();
         }

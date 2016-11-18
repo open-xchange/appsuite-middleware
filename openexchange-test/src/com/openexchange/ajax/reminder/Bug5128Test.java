@@ -51,6 +51,7 @@ package com.openexchange.ajax.reminder;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
@@ -65,6 +66,7 @@ public class Bug5128Test extends ReminderTest {
         super();
     }
 
+    @Test
     public void testBug5128() throws Exception {
         final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 

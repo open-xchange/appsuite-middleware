@@ -91,39 +91,7 @@ public class Bug44144Test extends CalDAVTest {
         Date end = TimeTools.D("tomorrow at 8am");
         Date lastModified = TimeTools.D("Last month");
         Date created = TimeTools.D("Last month");
-        String iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "CALSCALE:GREGORIAN\r\n" +
-            "PRODID:-//Apple Inc.//iOS 9.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "DTSTART:19810329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" +
-            "TZNAME:MESZ\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "DTSTART:19961027T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" +
-            "TZNAME:MEZ\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(created) + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(lastModified) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(lastModified) + "\r\n" +
-            "SUMMARY:testimport\r\n" +
-            "UID:" + uid + "\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
+        String iCal = "BEGIN:VCALENDAR\r\n" + "CALSCALE:GREGORIAN\r\n" + "PRODID:-//Apple Inc.//iOS 9.1//EN\r\n" + "VERSION:2.0\r\n" + "BEGIN:VTIMEZONE\r\n" + "TZID:Europe/Berlin\r\n" + "BEGIN:DAYLIGHT\r\n" + "DTSTART:19810329T020000\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" + "TZNAME:MESZ\r\n" + "TZOFFSETFROM:+0100\r\n" + "TZOFFSETTO:+0200\r\n" + "END:DAYLIGHT\r\n" + "BEGIN:STANDARD\r\n" + "DTSTART:19961027T030000\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" + "TZNAME:MEZ\r\n" + "TZOFFSETFROM:+0200\r\n" + "TZOFFSETTO:+0100\r\n" + "END:STANDARD\r\n" + "END:VTIMEZONE\r\n" + "BEGIN:VEVENT\r\n" + "CREATED:" + formatAsUTC(created) + "\r\n" + "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" + "DTSTAMP:" + formatAsUTC(lastModified) + "\r\n" + "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" + "LAST-MODIFIED:" + formatAsUTC(lastModified) + "\r\n" + "SUMMARY:testimport\r\n" + "UID:" + uid + "\r\n" + "END:VEVENT\r\n" + "END:VCALENDAR\r\n";
         /*
          * import iCal appointment on server
          */
@@ -164,39 +132,7 @@ public class Bug44144Test extends CalDAVTest {
         Date end = TimeTools.D("tomorrow at 8am");
         Date lastModified = TimeTools.D("Last month");
         Date created = TimeTools.D("Last month");
-        String iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "CALSCALE:GREGORIAN\r\n" +
-            "PRODID:-//Apple Inc.//iOS 9.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "DTSTART:19810329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" +
-            "TZNAME:MESZ\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "DTSTART:19961027T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" +
-            "TZNAME:MEZ\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(created) + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(lastModified) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(lastModified) + "\r\n" +
-            "SUMMARY:testimport\r\n" +
-            "UID:" + uid + "\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
+        String iCal = "BEGIN:VCALENDAR\r\n" + "CALSCALE:GREGORIAN\r\n" + "PRODID:-//Apple Inc.//iOS 9.1//EN\r\n" + "VERSION:2.0\r\n" + "BEGIN:VTIMEZONE\r\n" + "TZID:Europe/Berlin\r\n" + "BEGIN:DAYLIGHT\r\n" + "DTSTART:19810329T020000\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" + "TZNAME:MESZ\r\n" + "TZOFFSETFROM:+0100\r\n" + "TZOFFSETTO:+0200\r\n" + "END:DAYLIGHT\r\n" + "BEGIN:STANDARD\r\n" + "DTSTART:19961027T030000\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" + "TZNAME:MEZ\r\n" + "TZOFFSETFROM:+0200\r\n" + "TZOFFSETTO:+0100\r\n" + "END:STANDARD\r\n" + "END:VTIMEZONE\r\n" + "BEGIN:VEVENT\r\n" + "CREATED:" + formatAsUTC(created) + "\r\n" + "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" + "DTSTAMP:" + formatAsUTC(lastModified) + "\r\n" + "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" + "LAST-MODIFIED:" + formatAsUTC(lastModified) + "\r\n" + "SUMMARY:testimport\r\n" + "UID:" + uid + "\r\n" + "END:VEVENT\r\n" + "END:VCALENDAR\r\n";
         /*
          * import iCal file from client and sync
          */

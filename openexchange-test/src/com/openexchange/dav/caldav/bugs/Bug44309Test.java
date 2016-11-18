@@ -106,40 +106,40 @@ public class Bug44309Test extends CalDAVTest {
     }
 
     @Test
-	public void testAccessDeletedSoleException() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(fetchSyncToken());
-		/*
-		 * create appointment series on server as user b with user c
-		 */
-		String uid = randomUID();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
-	    Appointment appointment = new Appointment();
-	    appointment.setUid(uid);
-	    appointment.setTitle("Bug43521Test");
-	    appointment.setIgnoreConflicts(true);
+    public void testAccessDeletedSoleException() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment series on server as user b with user c
+         */
+        String uid = randomUID();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle("Bug43521Test");
+        appointment.setIgnoreConflicts(true);
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
-	    appointment.setStartDate(calendar.getTime());
-	    calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
-		Date clientLastModified = manager2.getLastModification();
+        Date clientLastModified = manager2.getLastModification();
         /*
          * create change exception on server as user b, and invite user a there
          */
-		Appointment exception = new Appointment();
-		exception.setTitle("Bug43521Test_edit");
-		exception.setObjectID(appointment.getObjectID());
-		exception.setRecurrencePosition(2);
-		exception.setLastModified(clientLastModified);
-		exception.setParentFolderID(appointment.getParentFolderID());
+        Appointment exception = new Appointment();
+        exception.setTitle("Bug43521Test_edit");
+        exception.setObjectID(appointment.getObjectID());
+        exception.setRecurrencePosition(2);
+        exception.setLastModified(clientLastModified);
+        exception.setParentFolderID(appointment.getParentFolderID());
         exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
         exception.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
@@ -181,8 +181,6 @@ public class Bug44309Test extends CalDAVTest {
         MultiStatusResponse response = responses[0];
         assertEquals(iCalResource.getHref(), response.getHref());
         assertTrue(null != response.getStatus() && 1 == response.getStatus().length && StatusCodes.SC_NOT_FOUND == response.getStatus()[0].getStatusCode());
-	}
+    }
 
 }
-
-

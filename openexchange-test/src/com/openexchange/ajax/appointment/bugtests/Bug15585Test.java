@@ -51,6 +51,9 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -79,8 +82,8 @@ public class Bug15585Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -99,12 +102,13 @@ public class Bug15585Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
+    @Test
     public void testConflictTitle() throws Throwable {
         InsertRequest request = new InsertRequest(appointment2, timeZone);
         AppointmentInsertResponse response = client.execute(request);

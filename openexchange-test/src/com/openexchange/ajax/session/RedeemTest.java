@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session;
 
+import org.junit.Test;
 import com.openexchange.java.Strings;
 
 /**
@@ -62,6 +63,7 @@ public class RedeemTest extends AbstractLoginTest {
         super();
     }
 
+    @Test
     public void testRedeemRandom() throws Exception {
         createClient();
         String[] credentials = credentials(USER1);

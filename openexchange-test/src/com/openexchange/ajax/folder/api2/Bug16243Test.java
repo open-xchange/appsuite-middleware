@@ -51,6 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.AllowedModules;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -68,11 +70,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug16243Test extends AbstractAJAXSession {
 
-    private static final int[] COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.CREATED_BY, FolderObject.MODIFIED_BY, FolderObject.FOLDER_NAME,
-        FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS,
-        FolderObject.SUMMARY, FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD,
-        FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS, 316 };
+    private static final int[] COLUMNS = { FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.CREATED_BY, FolderObject.MODIFIED_BY, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.SUMMARY, FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD, FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS, 316 };
 
     private AJAXClient client;
 
@@ -80,17 +78,13 @@ public class Bug16243Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testListWithoutInfoStore() throws Throwable {
         ListRequest request = new ListRequest(EnumAPI.OUTLOOK, FolderStorage.PRIVATE_ID, COLUMNS, false);
         request.setAllowedModules(AllowedModules.CALENDAR, AllowedModules.MAIL, AllowedModules.CONTACTS, AllowedModules.TASKS);

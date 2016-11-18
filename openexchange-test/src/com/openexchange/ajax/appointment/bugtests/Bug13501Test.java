@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -79,6 +80,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testBug13501() throws Exception {
         final InsertRequest request = new InsertRequest(appointment, tz);
         final CommonInsertResponse response = client.execute(request);
@@ -97,7 +99,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         Object[][] objects = allResponse.getArray();
         int count = 0;
         for (Object[] object : objects) {
-            if ((Integer)object[0] == appointment.getObjectID()) {
+            if ((Integer) object[0] == appointment.getObjectID()) {
                 count++;
             }
         }
@@ -164,10 +166,7 @@ public class Bug13501Test extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         if (appointment.getObjectID() > 0) {
-            client.execute(new DeleteRequest(
-                appointment.getObjectID(),
-                client.getValues().getPrivateAppointmentFolder(),
-                appointment.getLastModified()));
+            client.execute(new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
         }
         super.tearDown();
     }

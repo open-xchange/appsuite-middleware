@@ -52,7 +52,6 @@ package com.openexchange.ajax.mailaccount;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-
 /**
  * {@link MailAccountSuite}
  *
@@ -60,6 +59,7 @@ import junit.framework.TestSuite;
  *
  */
 public class MailAccountSuite {
+
     public static Test suite() {
         final TestSuite tests = new TestSuite("com.openexchange.ajax.mailaccount.MailAccountSuite");
         tests.addTestSuite(MailAccountLifecycleTest.class);

@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 
-
 /**
  * {@link AllParser}
  *

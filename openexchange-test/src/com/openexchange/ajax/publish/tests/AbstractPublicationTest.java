@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.file.storage.File;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
@@ -82,16 +84,16 @@ public abstract class AbstractPublicationTest extends AbstractPubSubTest {
         return data.getId().split("/")[1];
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         pubMgr = new PublicationTestManager(getClient());
         cMgr = new ContactTestManager(getClient());
         fMgr = new FolderTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         pubMgr.cleanUp();
         cMgr.cleanUp();
         fMgr.cleanUp();

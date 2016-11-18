@@ -51,6 +51,7 @@ package com.openexchange.ajax.roundtrip.pubsub;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.tests.PublicationTestManager;
 import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
@@ -73,7 +74,8 @@ public class DoNotDuplicateEmptyContactsTest extends OXMFContactLifeCycleTest {
         super();
     }
 
-    public void testShouldNotDuplicateEmptyContacts() throws OXException, OXException, OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testShouldNotDuplicateEmptyContacts() throws OXException, OXException, OXException, IOException, SAXException, JSONException {
         Contact emptyContact = new Contact();
         emptyContact.setParentFolderID(pubFolder.getObjectID());
         cMgr.newAction(emptyContact);

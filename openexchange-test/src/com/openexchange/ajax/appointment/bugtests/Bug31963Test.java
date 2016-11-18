@@ -51,6 +51,9 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -78,18 +81,19 @@ public class Bug31963Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         ctm = new CalendarTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();
     }
 
+    @Test
     public void testNotConflictingAppointment() throws Exception {
         int folderID = super.getClient().getValues().getPrivateAppointmentFolder();
         /*

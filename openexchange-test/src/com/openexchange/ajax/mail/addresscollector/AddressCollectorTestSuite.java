@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.mail.addresscollector;
 
 import junit.framework.Test;

@@ -71,7 +71,7 @@ public class ICalImportTest extends AbstractICalTest {
         super();
     }
 
-    // Bug 12177
+    // Bug 12177    @Test
     public void testWarnings() throws JSONException, OXException, IOException, SAXException {
         StringBuilder icalText = new StringBuilder(1500);
         icalText.append("BEGIN:VCALENDAR\n");
@@ -90,8 +90,7 @@ public class ICalImportTest extends AbstractICalTest {
 
         final AJAXSession aSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
         final AJAXClient client = new AJAXClient(aSession, false);
-        final ICalImportRequest request = new ICalImportRequest(appointmentFolderId, new ByteArrayInputStream(icalText.toString().getBytes(
-            com.openexchange.java.Charsets.UTF_8)), false);
+        final ICalImportRequest request = new ICalImportRequest(appointmentFolderId, new ByteArrayInputStream(icalText.toString().getBytes(com.openexchange.java.Charsets.UTF_8)), false);
         final ICalImportResponse iResponse = client.execute(request);
         final ImportResult[] importResult = iResponse.getImports();
 
@@ -107,8 +106,7 @@ public class ICalImportTest extends AbstractICalTest {
             assertEquals(1, warnings.size());
 
         } finally {
-            DeleteRequest delete = new DeleteRequest(Integer.valueOf(resultWithWarnings.getObjectId()), appointmentFolderId, new Date(
-                Long.MAX_VALUE), true);
+            DeleteRequest delete = new DeleteRequest(Integer.valueOf(resultWithWarnings.getObjectId()), appointmentFolderId, new Date(Long.MAX_VALUE), true);
             client.execute(delete);
         }
 
@@ -154,12 +152,7 @@ public class ICalImportTest extends AbstractICalTest {
 
         stringBuffer.append("END:VCALENDAR").append('\n');
 
-        final ImportResult[] importResult = importICal(
-            getWebConversation(),
-            new ByteArrayInputStream(stringBuffer.toString().getBytes()),
-            appointmentFolderId,
-            getHostName(),
-            getSessionId());
+        final ImportResult[] importResult = importICal(getWebConversation(), new ByteArrayInputStream(stringBuffer.toString().getBytes()), appointmentFolderId, getHostName(), getSessionId());
 
         assertEquals("invalid import result array size", 3, importResult.length);
 
@@ -169,22 +162,8 @@ public class ICalImportTest extends AbstractICalTest {
 
         exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
 
-        AppointmentTest.deleteAppointment(
-            getWebConversation(),
-            Integer.parseInt(importResult[0].getObjectId()),
-            appointmentFolderId,
-            getHostName(),
-            getLogin(),
-            getPassword(),
-            "");
-        AppointmentTest.deleteAppointment(
-            getWebConversation(),
-            Integer.parseInt(importResult[2].getObjectId()),
-            appointmentFolderId,
-            getHostName(),
-            getLogin(),
-            getPassword(),
-            "");
+        AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
+        AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
     }
 
 }

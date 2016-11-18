@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
 public class Bug25300Test extends AbstractManagedContactTest {
@@ -73,10 +74,9 @@ public class Bug25300Test extends AbstractManagedContactTest {
         manager.newAction(contact);
     }
 
+    @Test
     public void testYomiAndAddressFields() throws Exception {
-        int columnIDs[] = new int[] {
-            Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.YOMI_FIRST_NAME, Contact.YOMI_LAST_NAME, Contact.YOMI_COMPANY,
-            Contact.ADDRESS_HOME, Contact.ADDRESS_BUSINESS, Contact.ADDRESS_OTHER };
+        int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.YOMI_FIRST_NAME, Contact.YOMI_LAST_NAME, Contact.YOMI_COMPANY, Contact.ADDRESS_HOME, Contact.ADDRESS_BUSINESS, Contact.ADDRESS_OTHER };
         Contact[] contacts = manager.allAction(contact.getParentFolderID(), columnIDs);
         assertNotNull("got no contacts", contacts);
         assertTrue("got no contacts", 0 < contacts.length);
@@ -107,6 +107,7 @@ public class Bug25300Test extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testBackwardCompatibilityWithExchangedColumnsId() throws Exception {
         // old column ids in contact details
         final int yomiFirstName = 610;
@@ -116,8 +117,7 @@ public class Bug25300Test extends AbstractManagedContactTest {
         final int addressBusiness = 614;
         final int addressOther = 615;
 
-        int columnIDs[] = new int[] {
-            Contact.OBJECT_ID, Contact.FOLDER_ID, yomiFirstName, yomiLastName, yomiCompany, addressHome, addressBusiness, addressOther };
+        int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, yomiFirstName, yomiLastName, yomiCompany, addressHome, addressBusiness, addressOther };
         Contact[] contacts = manager.allAction(contact.getParentFolderID(), columnIDs);
         assertNotNull("got no contacts", contacts);
         assertTrue("got no contacts", 0 < contacts.length);

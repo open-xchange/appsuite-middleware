@@ -51,7 +51,8 @@ package com.openexchange.ajax.contact;
 
 import java.util.Random;
 import java.util.TimeZone;
-
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -70,15 +71,16 @@ public class Bug15315Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         tz = getClient().getValues().getTimeZone();
     }
 
+    @Test
     public void testLoadContactsWithRandomFolder() throws Throwable {
         final Random rand = new Random(System.currentTimeMillis());
-        for (int i=1; i <= RANGE; i++) {
+        for (int i = 1; i <= RANGE; i++) {
             GetRequest request = new GetRequest(rand.nextInt(), i, tz, false);
             GetResponse response = client.execute(request);
             if (!response.hasError()) {

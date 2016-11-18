@@ -58,6 +58,9 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -98,8 +101,8 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateAppointmentFolder();
@@ -121,12 +124,13 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
+    @Test
     public void testGet() throws Throwable {
         GetResponse response = client.execute(new GetRequest(appointment));
         Appointment test = response.getAppointment(tz);
@@ -147,6 +151,7 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testAll() throws Throwable {
         CommonAllResponse response = client.execute(new AllRequest(folderId, COLUMNS, appointment.getStartDate(), appointment.getEndDate(), tz));
         checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
@@ -164,11 +169,13 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         return jsonConfirmations;
     }
 
+    @Test
     public void testList() throws Throwable {
         CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] { folderId, appointment.getObjectID() }), COLUMNS));
         checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
     }
 
+    @Test
     public void testSearch() throws Throwable {
         SearchResponse response = client.execute(new SearchRequest("*", folderId, COLUMNS));
         checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
@@ -186,6 +193,7 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         checkConfirmations(expected, confirmations.toArray(new ConfirmableParticipant[confirmations.size()]));
     }
 
+    @Test
     public void testUpdate() throws Throwable {
         Appointment updated = new Appointment();
         updated.setObjectID(appointment.getObjectID());

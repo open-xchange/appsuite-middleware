@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -82,6 +83,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
         super();
     }
 
+    @Test
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
 
@@ -110,6 +112,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
         }
     }
 
+    @Test
     public void testCopySharedFile_guestCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
         userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), lGuestPermission);
@@ -165,6 +168,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
         }
     }
 
+    @Test
     public void testCopySharedFile_internalUserCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         int userId = client2.getValues().getUserId();

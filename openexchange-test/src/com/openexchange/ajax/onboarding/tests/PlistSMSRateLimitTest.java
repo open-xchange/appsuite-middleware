@@ -76,8 +76,7 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
      * 
      * @param name
      */
-    public PlistSMSRateLimitTest() {
-    }
+    public PlistSMSRateLimitTest() {}
 
     @Test
     public void testRateLimit() throws OXException, IOException, JSONException, InterruptedException {

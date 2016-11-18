@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.contact;
 
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
-
 
 /**
  * {@link Bug42225Test} - Empty query string leads to SQLException
@@ -63,12 +63,14 @@ public class Bug42225Test extends AbstractManagedContactTest {
 
     /**
      * Initializes a new {@link Bug42225Test}.
+     * 
      * @param name
      */
     public Bug42225Test() {
         super();
     }
 
+    @Test
     public void testBug42225() throws Exception {
         AutocompleteRequest req = new AutocompleteRequest("", false, String.valueOf(client.getValues().getPrivateContactFolder()), new int[] { 500 }, false);
         CommonSearchResponse resp = client.execute(req);

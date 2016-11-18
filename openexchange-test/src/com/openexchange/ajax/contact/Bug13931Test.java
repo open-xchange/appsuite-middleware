@@ -52,6 +52,7 @@ package com.openexchange.ajax.contact;
 import static com.openexchange.ajax.folder.Create.ocl;
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
@@ -88,15 +89,8 @@ public class Bug13931Test extends AbstractAJAXSession {
 
         userId = getClient().getValues().getUserId();
         privateFolderId = getClient().getValues().getPrivateContactFolder();
-        final OCLPermission ocl = ocl(
-            userId,
-            false,
-            true,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
-        folder = Create.folder(privateFolderId, "Folder to test bug 13931 ("+new Date().getTime()+")", FolderObject.CONTACT, FolderObject.PRIVATE, ocl);
+        final OCLPermission ocl = ocl(userId, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        folder = Create.folder(privateFolderId, "Folder to test bug 13931 (" + new Date().getTime() + ")", FolderObject.CONTACT, FolderObject.PRIVATE, ocl);
         final CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
         folderId = folder.getObjectID();
@@ -122,6 +116,7 @@ public class Bug13931Test extends AbstractAJAXSession {
         client.execute(new InsertRequest(bbb)).fillObject(bbb);
     }
 
+    @Test
     public void testBug13931() throws Exception {
         final AllRequest allRequest = new AllRequest(folderId, columns);
         final CommonAllResponse allResponse = client.execute(allRequest);

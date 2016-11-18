@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
@@ -100,6 +101,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
     }
 
+    @Test
     public void testMailImport() throws Exception {
         InputStream[] is = createABunchOfMails();
 

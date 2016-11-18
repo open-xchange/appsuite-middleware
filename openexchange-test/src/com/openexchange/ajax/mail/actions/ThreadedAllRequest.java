@@ -86,7 +86,6 @@ public class ThreadedAllRequest implements AJAXRequest<ConversationResponse> {
     private int rightHandLimit;
     private int leftHandLimit;
 
-
     /**
      * Initializes a new {@link ThreadedAllRequest}.
      */

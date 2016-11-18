@@ -72,10 +72,10 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
     private final Ignore ignore;
 
     /**
-     * Initializes a new {@link UpdatesRequest} that doesn't show private appointments and ignores updates for deleted. 
+     * Initializes a new {@link UpdatesRequest} that doesn't show private appointments and ignores updates for deleted.
      * 
      * @param folderId Folder id to use for the request
-     * @param columns  Columns to use for the request
+     * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
      */
@@ -87,7 +87,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * Initializes a new {@link UpdatesRequest} that ignores updates for deleted.
      * 
      * @param folderId Folder id to use for the request
-     * @param columns  Columns to use for the request
+     * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
      * @param showPrivates When true, shows private appointments of the folder owner (Only works in shared folders)
@@ -100,7 +100,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * Initializes a new {@link UpdatesRequest}. Ignores private appointments by default.
      * 
      * @param folderId Folder id to use for the request
-     * @param columns  Columns to use for the request
+     * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
      * @param ignore What kind of updates should be ignored
@@ -113,7 +113,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * Initializes a new {@link UpdatesRequest}.
      * 
      * @param folderId Folder id to use for the request
-     * @param columns  Columns to use for the request
+     * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
      * @param showPrivates When true, shows private appointments of the folder owner (Only works in shared folders)

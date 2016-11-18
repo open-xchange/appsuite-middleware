@@ -50,6 +50,9 @@
 package com.openexchange.ajax.mail;
 
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.mail.actions.ListRequest;
@@ -72,17 +75,19 @@ public class ListAliasTest extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void testListAlias() throws Exception {
         final String[][] folderAndIds = getFolderAndIDs(client.getValues().getInboxFolder());
 

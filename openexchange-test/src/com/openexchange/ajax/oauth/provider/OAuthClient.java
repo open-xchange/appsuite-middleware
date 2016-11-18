@@ -74,8 +74,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.exceptions.OAuthRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.exceptions.OAuthRequestException;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 /**

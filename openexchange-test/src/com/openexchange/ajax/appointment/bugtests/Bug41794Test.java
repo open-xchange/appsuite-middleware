@@ -53,6 +53,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -109,9 +110,10 @@ public class Bug41794Test extends AbstractAJAXSession {
         appointment.setParticipants(new Participant[] { up, gp });
     }
 
+    @Test
     public void testBug41794() throws Exception {
         ctm1.insert(appointment);
-        
+
         appointment.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
         ctm2.delete(appointment);
 

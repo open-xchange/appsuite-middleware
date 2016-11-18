@@ -70,6 +70,7 @@ public abstract class AttributeWriter implements Runnable {
 
     /**
      * Can be overridden for custom exception handling.
+     * 
      * @param t The exception
      * @return The exception to stop execution immediately and to preserve it for {@link AttributeWriter#getThrowable()}.
      *         If <code>null</code>, the execution continues.

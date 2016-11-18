@@ -63,19 +63,19 @@ import com.openexchange.groupware.container.CommonObject;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentResponse> {
-    
+
     private final int attached;
-    
+
     private final int moduleID;
-    
+
     private final int folderID;
-    
+
     private final boolean failOnError;
 
     private final String contentType;
-    
+
     private final int attachmentID;
-    
+
     private final int off;
 
     private final int len;
@@ -93,10 +93,12 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         attachmentID = aid;
         this.off = off;
         this.len = len;
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
@@ -104,7 +106,9 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         return Method.GET;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
@@ -118,11 +122,13 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, attached));
         parameters.add(new URLParameter("off", off));
         parameters.add(new URLParameter("len", len));
-        
+
         return parameters.toArray(new Parameter[parameters.size()]);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -130,7 +136,9 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         return new GetDocumentParser(failOnError);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     @Override

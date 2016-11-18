@@ -70,10 +70,12 @@ public class GoogleTestSuite extends TestSuite {
         suite.addTestSuite(GoogleSubscribeContactTest.class);
 
         TestSetup setup = new TestSetup(suite) {
+
             @Override
             protected void setUp() {
                 GoogleSubscribeTestEnvironment.getInstance().init();
             }
+
             @Override
             protected void tearDown() throws Exception {
                 GoogleSubscribeTestEnvironment.getInstance().cleanup();

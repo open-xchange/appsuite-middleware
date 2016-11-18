@@ -69,41 +69,41 @@ import com.openexchange.dav.carddav.CardDAVTest;
  */
 public class CurrentUserPrincipalTest extends CardDAVTest {
 
-	public CurrentUserPrincipalTest() {
-		super();
-	}
+    public CurrentUserPrincipalTest() {
+        super();
+    }
 
-	/**
-	 * Checks if the CardDAV server reports the current user principal, it's url and resource type.
-	 * @throws Exception
-	 */
-	@Test
-	public void testDiscoverCurrentUserPrincipal() throws Exception {
-		final DavPropertyNameSet props = new DavPropertyNameSet();
+    /**
+     * Checks if the CardDAV server reports the current user principal, it's url and resource type.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testDiscoverCurrentUserPrincipal() throws Exception {
+        final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/",
-        		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         final String principal = super.extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
-    	assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principal.contains("/" +  getClient().getValues().getUserId()));
-    	final Node node = super.extractNodeValue(PropertyNames.RESOURCETYPE, response);
-    	assertMatches(PropertyNames.COLLECTION, node);
-	}
+        assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principal.contains("/" + getClient().getValues().getUserId()));
+        final Node node = super.extractNodeValue(PropertyNames.RESOURCETYPE, response);
+        assertMatches(PropertyNames.COLLECTION, node);
+    }
 
-	/**
-	 * Checks if the CardDAV server responds with status 404 when requesting the current user principal at an unknown location.
-	 * @throws Exception
-	 */
-	@Test
-	public void testDiscoverCurrentUserPrincipalAtUnknown() throws Exception {
-		final DavPropertyNameSet props = new DavPropertyNameSet();
+    /**
+     * Checks if the CardDAV server responds with status 404 when requesting the current user principal at an unknown location.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testDiscoverCurrentUserPrincipalAtUnknown() throws Exception {
+        final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/gibt/es/nicht",
-        		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/gibt/es/nicht", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         super.getWebDAVClient().doPropFind(propFind, StatusCodes.SC_NOT_FOUND);
-	}
+    }
 }

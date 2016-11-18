@@ -50,12 +50,12 @@
 package com.openexchange.ajax.mobilenotifier;
 
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mobilenotifier.actions.MobileNotifierSubscribeRequest;
 import com.openexchange.ajax.mobilenotifier.actions.MobileNotifierUnsubscribeRequest;
 import com.openexchange.ajax.mobilenotifier.actions.MobileNotifierUpdateTokenRequest;
-
 
 /**
  * {@link MobileNotifierLifecycleTest}
@@ -66,12 +66,14 @@ public class MobileNotifierLifecycleTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link MobileNotifierLifecycleTest}.
+     * 
      * @param name
      */
     public MobileNotifierLifecycleTest() {
         super();
     }
 
+    @Test
     public void testSubscriptionLifecycle() throws Exception {
         String startToken = "ADE9219010FD3DEAD9211384129";
         String serviceId = "gcm";
@@ -98,7 +100,7 @@ public class MobileNotifierLifecycleTest extends AbstractAJAXSession {
     }
 
     private void assertEmptyJson(AbstractAJAXResponse resp) {
-        if(resp.getData() instanceof JSONObject) {
+        if (resp.getData() instanceof JSONObject) {
             JSONObject jObj = (JSONObject) resp.getData();
             assertTrue("Returning JSON data is not empty: " + jObj.toString(), jObj.isEmpty());
         } else {

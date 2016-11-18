@@ -80,6 +80,7 @@ import junit.framework.TestCase;
 
 /**
  * This class implements inheritable methods for AJAX tests.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @deprecated use {@link AbstractAJAXSession}.
  */
@@ -118,7 +119,6 @@ public abstract class AbstractAJAXTest extends TestCase {
     private Properties ajaxProps = null;
 
     protected static final int APPEND_MODIFIED = 1000000;
-
 
     @Before
     public void setUp() throws Exception {
@@ -182,6 +182,7 @@ public abstract class AbstractAJAXTest extends TestCase {
     /**
      * Setup the web conversation here so tests are able to create additional if
      * several users are needed for tests.
+     * 
      * @return a new web conversation.
      */
     protected WebConversation newWebConversation() {
@@ -202,37 +203,34 @@ public abstract class AbstractAJAXTest extends TestCase {
      */
     protected String getSessionId() throws IOException, JSONException, OXException {
         if (null == sessionId) {
-            sessionId = LoginTest.getSessionId(getWebConversation(),
-                    getHostName(), getLogin(), getPassword());
+            sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(), getLogin(), getPassword());
             assertNotNull("Can't get session id.", sessionId);
         }
         return sessionId;
     }
 
     protected String getSecondSessionId() throws IOException, JSONException, OXException {
-        if(null == sessionId2) {
-            sessionId2 = LoginTest.getSessionId(getSecondWebConversation(),
-                    getHostName(), getSeconduser(), getPassword());
-            assertNotNull("Can't get session id for second user.",sessionId2);
+        if (null == sessionId2) {
+            sessionId2 = LoginTest.getSessionId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
+            assertNotNull("Can't get session id for second user.", sessionId2);
         }
         return sessionId2;
     }
 
     /**
      * Terminates the session on the server.
+     * 
      * @throws Exception if an error occurs.
      */
     protected void logout() throws Exception {
         if (null != sessionId) {
-            LoginTest.logout(getWebConversation(), getHostName(),
-                    getSessionId());
+            LoginTest.logout(getWebConversation(), getHostName(), getSessionId());
             sessionId = null;
             webConversation = null;
         }
         webConversation = null;
         if (null != sessionId2) {
-            LoginTest.logout(getSecondWebConversation(), getHostName(),
-                    getSecondSessionId());
+            LoginTest.logout(getSecondWebConversation(), getHostName(), getSecondSessionId());
             sessionId2 = null;
         }
         webConversation2 = null;
@@ -242,7 +240,7 @@ public abstract class AbstractAJAXTest extends TestCase {
         if (null == login) {
             login = getAJAXProperty("login");
         }
-        if(! login.contains("@")){
+        if (!login.contains("@")) {
             login += "@" + getAJAXProperty("contextName");
         }
         return login;
@@ -259,8 +257,8 @@ public abstract class AbstractAJAXTest extends TestCase {
         if (null == seconduser) {
             seconduser = getAJAXProperty("seconduser");
         }
-        if(! seconduser.contains("@")){
-        	seconduser += "@" + getAJAXProperty("contextName");
+        if (!seconduser.contains("@")) {
+            seconduser += "@" + getAJAXProperty("contextName");
         }
         return seconduser;
     }
@@ -275,16 +273,16 @@ public abstract class AbstractAJAXTest extends TestCase {
     }
 
     protected JSONObject put(final WebConversation webConv, final String url, final String body) throws MalformedURLException, JSONException, IOException, SAXException {
-        final JSONObject o = new JSONObject(putS(webConv,url, body));
+        final JSONObject o = new JSONObject(putS(webConv, url, body));
         return o;
     }
 
-    protected void putN(final WebConversation webConv, final String url, final String body) throws MalformedURLException, IOException, SAXException  {
-        putS(webConv,url, body);
+    protected void putN(final WebConversation webConv, final String url, final String body) throws MalformedURLException, IOException, SAXException {
+        putS(webConv, url, body);
     }
 
-    protected JSONArray putA(final WebConversation webConv, final String url, final String body) throws MalformedURLException, JSONException, IOException, SAXException  {
-        final JSONArray a = new JSONArray(putS(webConv,url, body));
+    protected JSONArray putA(final WebConversation webConv, final String url, final String body) throws MalformedURLException, JSONException, IOException, SAXException {
+        final JSONArray a = new JSONArray(putS(webConv, url, body));
         return a;
     }
 
@@ -304,46 +302,46 @@ public abstract class AbstractAJAXTest extends TestCase {
         return a;
     }
 
-    protected String pS(final WebConversation webConv, final String url, final Map<String,String> data) throws MalformedURLException, IOException, SAXException {
+    protected String pS(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, IOException, SAXException {
         final PostMethodWebRequest m = new PostMethodWebRequest(url);
 
-        for(final String key : data.keySet()) {
-            m.setParameter(key,data.get(key));
+        for (final String key : data.keySet()) {
+            m.setParameter(key, data.get(key));
         }
         final WebResponse resp = webConv.getResponse(m);
         return resp.getText();
     }
 
-    protected JSONObject p(final WebConversation webConv, final String url, final Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-        final JSONObject o = new JSONObject(pS(webConv,url, data));
+    protected JSONObject p(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+        final JSONObject o = new JSONObject(pS(webConv, url, data));
         return o;
     }
 
-    protected JSONArray pA(final WebConversation webConv, final String url, final Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-        return new JSONArray(pS(webConv,url, data));
+    protected JSONArray pA(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+        return new JSONArray(pS(webConv, url, data));
     }
 
     protected Response gT(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
         final String res = gS(webConv, url);
-        if("".equals(res.trim())) {
+        if ("".equals(res.trim())) {
             return null;
         }
         return Response.parse(res);
 
     }
 
-    protected Response pT(final WebConversation webConv, final String url, final Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-        final String res = pS(webConv,url, data);
-        if("".equals(res.trim())) {
+    protected Response pT(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+        final String res = pS(webConv, url, data);
+        if ("".equals(res.trim())) {
             return null;
         }
         return Response.parse(res);
 
     }
 
-    protected Response putT(final WebConversation webConv, final String url, final String data) throws MalformedURLException, JSONException, IOException, SAXException  {
-        final String res = putS(webConv,url, data);
-        if("".equals(res.trim())) {
+    protected Response putT(final WebConversation webConv, final String url, final String data) throws MalformedURLException, JSONException, IOException, SAXException {
+        final String res = putS(webConv, url, data);
+        if ("".equals(res.trim())) {
             return null;
         }
         return Response.parse(res);
@@ -358,14 +356,14 @@ public abstract class AbstractAJAXTest extends TestCase {
     }
 
     // A poor mans hash literal
-    protected Map<String,String> m(final String ...pairs){
-        if(pairs.length % 2 != 0) {
+    protected Map<String, String> m(final String... pairs) {
+        if (pairs.length % 2 != 0) {
             throw new IllegalArgumentException("Must contain matching pairs");
         }
 
-        final Map<String,String> m = new HashMap<String,String>();
+        final Map<String, String> m = new HashMap<String, String>();
 
-        for(int i = 0; i < pairs.length; i++) {
+        for (int i = 0; i < pairs.length; i++) {
             m.put(pairs[i], pairs[++i]);
         }
 

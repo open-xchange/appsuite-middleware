@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -74,36 +76,36 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug22395Test extends CalDAVTest {
 
-	@Test
-	public void testDateOfChangeExceptions() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create appointment series on server
-		 */
-		List<Appointment> appointments = new ArrayList<Appointment>();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(TimeTools.D("Tomorrow at midnight", TimeZone.getTimeZone("Europe/Berlin")));
-		for (int i = 0; i < 24; i++) {
-		    Appointment appointment = new Appointment();
-		    appointment.setUid(randomUID());
-		    appointment.setTitle("Series " + i);
-		    appointment.setIgnoreConflicts(true);
-		    appointment.setStartDate(calendar.getTime());
-		    calendar.add(Calendar.HOUR_OF_DAY, 1);
+    @Test
+    public void testDateOfChangeExceptions() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create appointment series on server
+         */
+        List<Appointment> appointments = new ArrayList<Appointment>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("Tomorrow at midnight", TimeZone.getTimeZone("Europe/Berlin")));
+        for (int i = 0; i < 24; i++) {
+            Appointment appointment = new Appointment();
+            appointment.setUid(randomUID());
+            appointment.setTitle("Series " + i);
+            appointment.setIgnoreConflicts(true);
+            appointment.setStartDate(calendar.getTime());
+            calendar.add(Calendar.HOUR_OF_DAY, 1);
             appointment.setEndDate(calendar.getTime());
-		    appointment.setRecurrenceType(Appointment.DAILY);
-		    appointment.setInterval(1);
-	        super.create(appointment);
+            appointment.setRecurrenceType(Appointment.DAILY);
+            appointment.setInterval(1);
+            super.create(appointment);
             appointments.add(appointment);
-		}
-		Date clientLastModified = getManager().getLastModification();
+        }
+        Date clientLastModified = getManager().getLastModification();
         /*
          * verify appointment series on client
          */
-		Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<ICalResource> calendarData = super.calendarMultiget(eTags.keySet());
         for (Appointment appointment : appointments) {
@@ -198,6 +200,6 @@ public class Bug22395Test extends CalDAVTest {
             }
 
         }
-	}
+    }
 
 }

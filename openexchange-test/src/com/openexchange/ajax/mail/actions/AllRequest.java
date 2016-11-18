@@ -99,7 +99,6 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         super(AbstractMailRequest.MAIL_URL, folderPath, alias, sort, order, failOnError);
     }
 
-
     @Override
     public Parameter[] getParameters() {
         if (!threadSort) {

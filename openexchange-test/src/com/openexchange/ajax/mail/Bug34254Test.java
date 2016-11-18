@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail;
 
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.mail.actions.AutosaveRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetRequest.View;
@@ -58,7 +59,6 @@ import com.openexchange.ajax.mail.actions.MailReferenceResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequestWithUploads;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
-
 
 /**
  * {@link Bug34254Test}
@@ -71,6 +71,7 @@ public class Bug34254Test extends AbstractMailTest {
         super();
     }
 
+    @Test
     public void testDeleteNormalDraft() throws Exception {
         String subject = "Bug34254Test_testDeleteNormalDraft_" + System.currentTimeMillis();
         JSONObject composedMail = createEMail(getSendAddress(), subject, "text/html", MAIL_TEXT_BODY);
@@ -100,6 +101,7 @@ public class Bug34254Test extends AbstractMailTest {
         assertNull("Draft was not deleted", getResponse.getData());
     }
 
+    @Test
     public void testDeleteAutoDraft() throws Exception {
         String subject = "Bug34254Test_testDeleteAutoDraft_" + System.currentTimeMillis();
         JSONObject composedMail = createEMail(getSendAddress(), subject, "text/html", MAIL_TEXT_BODY);

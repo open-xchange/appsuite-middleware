@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -88,14 +89,11 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss", Locale.GERMAN);
 
+    @Test
     public void testSMTPAbsence() {
         try {
             final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * No error should occur while login

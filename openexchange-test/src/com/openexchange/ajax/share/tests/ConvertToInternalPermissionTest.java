@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -78,6 +79,7 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testConvertToInternalPermissionRandomly() throws Exception {
         testConvertToInternalPermission(randomFolderAPI(), randomModule(), AJAXClient.User.User3);
     }
@@ -90,6 +92,7 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testConvertToInternalObjectPermissionRandomly() throws Exception {
         testConvertToInternalObjectPermission(randomFolderAPI(), AJAXClient.User.User3);
     }

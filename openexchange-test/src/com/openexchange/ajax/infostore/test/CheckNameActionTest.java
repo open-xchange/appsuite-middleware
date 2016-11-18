@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.CheckNameRequest;
 import com.openexchange.ajax.infostore.actions.CheckNameResponse;
 import com.openexchange.exception.OXException;
@@ -64,6 +65,7 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
 
     /**
      * Initializes a new {@link CheckNameActionTest}.
+     * 
      * @param name
      */
     public CheckNameActionTest() {
@@ -80,12 +82,14 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         super.tearDown();
     }
 
+    @Test
     public void testValidFilename() throws Exception {
         CheckNameRequest req = new CheckNameRequest("thisShouldNotFail", false);
         CheckNameResponse resp = client.execute(req);
         assertFalse(resp.hasError());
     }
 
+    @Test
     public void testInvalidCharacter() throws Exception {
         CheckNameRequest req = new CheckNameRequest("withInvalidCharacters<>:/?*\"\\|", false);
         CheckNameResponse resp = client.execute(req);
@@ -103,9 +107,9 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("|"));
     }
 
+    @Test
     public void testReservedNames() throws Exception {
-        String[] RESERVED_NAMES = new String[] {"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "NUL",
-                                                "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "AUX", "PRN" };
+        String[] RESERVED_NAMES = new String[] { "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "NUL", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "AUX", "PRN" };
         for (String name : RESERVED_NAMES) {
             CheckNameRequest req = new CheckNameRequest(name, false);
             CheckNameResponse resp = client.execute(req);
@@ -115,8 +119,9 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         }
     }
 
+    @Test
     public void testMatchOnlyExactReservedNames() throws Exception {
-        String[] RESERVED_NAMES = new String[] {"COM", "CON1", "NULL", "LPT12", "AUXQWERT", "PRN2" };
+        String[] RESERVED_NAMES = new String[] { "COM", "CON1", "NULL", "LPT12", "AUXQWERT", "PRN2" };
         for (String name : RESERVED_NAMES) {
             CheckNameRequest req = new CheckNameRequest(name, false);
             CheckNameResponse resp = client.execute(req);
@@ -124,6 +129,7 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         }
     }
 
+    @Test
     public void testOnlyDotsInName() throws Exception {
         CheckNameRequest req = new CheckNameRequest("..", false);
         CheckNameResponse resp = client.execute(req);
@@ -132,6 +138,7 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         assertTrue(resp.getErrorMessage().contains(".."));
     }
 
+    @Test
     public void testEndsWithWithespace() throws Exception {
         CheckNameRequest req = new CheckNameRequest("willFailToo ", false);
         CheckNameResponse resp = client.execute(req);
@@ -140,6 +147,7 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         assertTrue(resp.getErrorMessage().contains("whitespace"));
     }
 
+    @Test
     public void testEndsWithDot() throws Exception {
         CheckNameRequest req = new CheckNameRequest("willFailToo.", false);
         CheckNameResponse resp = client.execute(req);

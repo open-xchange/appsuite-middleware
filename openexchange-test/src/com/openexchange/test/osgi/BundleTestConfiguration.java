@@ -50,6 +50,7 @@
 package com.openexchange.test.osgi;
 
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.LoginTest;
 
 /**
@@ -68,14 +69,11 @@ public final class BundleTestConfiguration extends AbstractBundleTest {
         super();
     }
 
+    @Test
     public void testConfigurationAbsence() {
         try {
             final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * Everything should work although configuration is missing

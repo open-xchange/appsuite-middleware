@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -75,6 +76,7 @@ public class GuestPasswordTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testUpdatePasswordForNamedGuest() throws Exception {
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
@@ -110,8 +112,7 @@ public class GuestPasswordTest extends ShareTest {
          * update password
          */
         String newPassword = "secret2";
-        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(
-            newPassword, ((GuestRecipient) guestPermission.getRecipient()).getPassword(), true);
+        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(newPassword, ((GuestRecipient) guestPermission.getRecipient()).getPassword(), true);
         guestClient.execute(updateRequest);
         /*
          * check if share link still accessible with old password

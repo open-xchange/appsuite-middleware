@@ -77,7 +77,7 @@ public class CopyInfostoreRequest extends AbstractInfostoreRequest<CopyInfostore
     public CopyInfostoreRequest(String id, String folderId, File file) {
         this(id, folderId, file, null);
     }
-    
+
     public CopyInfostoreRequest(String id, String folderId, File file, String version) {
         super();
         this.id = id;

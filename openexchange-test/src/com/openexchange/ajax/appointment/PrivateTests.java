@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -102,39 +103,12 @@ public class PrivateTests extends AbstractAJAXSession {
         client3 = new AJAXClient(User.User3);
         client4 = new AJAXClient(User.User4);
 
-        folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "Private Test Folder" + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(
-                client1.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                client2.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                client3.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Private Test Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(client1.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(client2.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(client3.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         CommonInsertResponse response = client1.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
         response.fillObject(folder);
     }
 
+    @Test
     public void testBasicPrivate() throws Exception {
         app = new Appointment();
         app.setIgnoreConflicts(true);
@@ -164,6 +138,7 @@ public class PrivateTests extends AbstractAJAXSession {
         assertTrue("Expected error.", getResponse.hasError());
     }
 
+    @Test
     public void testPrivateWithParticipant() throws Exception {
         app = new Appointment();
         app.setIgnoreConflicts(true);
@@ -173,12 +148,8 @@ public class PrivateTests extends AbstractAJAXSession {
         app.setLocation("Hier und da");
         app.setPrivateFlag(true);
         app.setParentFolderID(folder.getObjectID());
-        app.setUsers(new UserParticipant[] {
-            new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()),
-            new UserParticipant(client4.getValues().getUserId()) });
-        app.setParticipants(new Participant[] {
-            new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()),
-            new UserParticipant(client4.getValues().getUserId()) });
+        app.setUsers(new UserParticipant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()), new UserParticipant(client4.getValues().getUserId()) });
+        app.setParticipants(new Participant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()), new UserParticipant(client4.getValues().getUserId()) });
 
         InsertRequest insertRequest = new InsertRequest(app, client1.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = client1.execute(insertRequest);
@@ -204,6 +175,7 @@ public class PrivateTests extends AbstractAJAXSession {
         assertEquals("Missing data.", app.getLocation(), loaded.getLocation());
     }
 
+    @Test
     public void testEditByParticipant() throws Exception {
         app = new Appointment();
         app.setIgnoreConflicts(true);
@@ -213,12 +185,8 @@ public class PrivateTests extends AbstractAJAXSession {
         app.setLocation("Hier und da");
         app.setPrivateFlag(true);
         app.setParentFolderID(folder.getObjectID());
-        app.setUsers(new UserParticipant[] {
-            new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()),
-            new UserParticipant(client4.getValues().getUserId()) });
-        app.setParticipants(new Participant[] {
-            new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()),
-            new UserParticipant(client4.getValues().getUserId()) });
+        app.setUsers(new UserParticipant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()), new UserParticipant(client4.getValues().getUserId()) });
+        app.setParticipants(new Participant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()), new UserParticipant(client4.getValues().getUserId()) });
 
         InsertRequest insertRequest = new InsertRequest(app, client1.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = client1.execute(insertRequest);

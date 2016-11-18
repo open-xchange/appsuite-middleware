@@ -60,23 +60,23 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class UserWordResponse extends AbstractAJAXResponse {
 
-	private Object nullObject;
+    private Object nullObject;
 
-	/**
-	 * Initializes a new {@link UserWordResponse}
-	 *
-	 * @param response
-	 */
-	public UserWordResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link UserWordResponse}
+     *
+     * @param response
+     */
+    public UserWordResponse(final Response response) {
+        super(response);
+    }
 
-	public Object getNullObject() {
-		return nullObject;
-	}
+    public Object getNullObject() {
+        return nullObject;
+    }
 
-	void setNullObject(final Object nullObject) {
-		this.nullObject = nullObject;
-	}
+    void setNullObject(final Object nullObject) {
+        this.nullObject = nullObject;
+    }
 
 }

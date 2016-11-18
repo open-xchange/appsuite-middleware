@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
+import org.junit.Test;
 import com.openexchange.ajax.publish.tests.PublicationTestManager;
 import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -57,7 +58,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.subscribe.Subscription;
-
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -68,6 +68,7 @@ public class DoNotLoseContactsWhenPublishingAndSubscribing extends OXMFContactLi
         super();
     }
 
+    @Test
     public void testShouldNotLoseContactsWhileRoundtripping() throws Exception {
         createContact("Herbert", "Meier");
 

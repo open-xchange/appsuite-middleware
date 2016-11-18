@@ -104,7 +104,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.FolderTestManager;
 
-
 /**
  * {@link ReadFoldersTest}
  *
@@ -225,16 +224,12 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         adminPermission.setEntity(ajaxClient2.getValues().getUserId());
         adminPermission.setGroupPermission(false);
         adminPermission.setFolderAdmin(true);
-        adminPermission.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        adminPermission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         FolderObject client2PrivateFolder = ftm2.getFolderFromServer(privateFolderId(ajaxClient2));
         client2PrivateFolder.setPermissionsAsArray(new OCLPermission[] { adminPermission });
         client2PrivateFolder.setLastModified(new Date());
         ftm2.updateFolderOnServer(client2PrivateFolder);
-        sharedSubfolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared " + contentType.toString() + " "  + System.currentTimeMillis(), moduleId(), privateFolderId(ajaxClient2), ajaxClient2.getValues().getUserId(), userId);
+        sharedSubfolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared " + contentType.toString() + " " + System.currentTimeMillis(), moduleId(), privateFolderId(ajaxClient2), ajaxClient2.getValues().getUserId(), userId);
         ftm2.insertFoldersOnServer(new FolderObject[] { sharedSubfolder });
 
         client.logout();
@@ -434,7 +429,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         OXException e = response.getException();
         Assert.assertTrue(e instanceof OAuthInsufficientScopeException || FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e));
         if (e instanceof OAuthInsufficientScopeException) {
-            Assert.assertEquals(requiredScope.toString(), ((OAuthInsufficientScopeException)e).getScope());
+            Assert.assertEquals(requiredScope.toString(), ((OAuthInsufficientScopeException) e).getScope());
         }
     }
 

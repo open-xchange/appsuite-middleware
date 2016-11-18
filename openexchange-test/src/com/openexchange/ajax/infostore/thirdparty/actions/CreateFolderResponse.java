@@ -52,15 +52,16 @@ package com.openexchange.ajax.infostore.thirdparty.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link CreateFolderResponse}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class CreateFolderResponse extends AbstractAJAXResponse {
+
     /**
      * Initializes a new {@link CreateFolderResponse}.
+     * 
      * @param response
      */
     protected CreateFolderResponse(Response response) {

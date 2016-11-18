@@ -50,6 +50,9 @@
 package com.openexchange.ajax.folder.api2;
 
 import java.util.Locale;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -74,20 +77,21 @@ public class Bug15995Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         locale = client.getValues().getLocale();
         client.execute(new SetRequest(Tree.Language, Locale.US));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new SetRequest(Tree.Language, locale));
         super.tearDown();
     }
 
+    @Test
     public void testGlobalAddressbookName() throws Throwable {
         GetRequest request = new GetRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_LDAP_FOLDER_ID);
         GetResponse response = client.execute(request);

@@ -51,6 +51,7 @@ package com.openexchange.ajax.find.mail;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
@@ -78,6 +79,7 @@ public class Bug42970Test extends AbstractMailFindTest {
      * 
      * @throws Exception
      */
+    @Test
     public void testBccFieldIsIncludedInContacts() throws Exception {
         List<String> folders = new ArrayList<String>(4);
         folders.add(client.getValues().getInboxFolder());

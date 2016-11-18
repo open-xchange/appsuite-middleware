@@ -53,7 +53,6 @@ import org.apache.commons.httpclient.Cookie;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 
-
 /**
  * {@link AbstractLoginTest}
  *
@@ -73,6 +72,5 @@ public class AbstractLoginTest extends AbstractSimpleClientTest {
             }
         }
     }
-
 
 }

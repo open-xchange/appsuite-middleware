@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -60,6 +61,7 @@ import com.openexchange.groupware.container.Contact;
 
 public class GetTest extends ContactTest {
 
+    @Test
     public void testGet() throws Exception {
         final Contact contactObj = createContactObject("testGet");
         final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
@@ -67,6 +69,7 @@ public class GetTest extends ContactTest {
         loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL, getHostName(), getSessionId());
     }
 
+    @Test
     public void testGetWithAllFields() throws Exception {
         final Contact contactObject = createCompleteContactObject();
 
@@ -78,6 +81,7 @@ public class GetTest extends ContactTest {
         compareObject(contactObject, loadContact);
     }
 
+    @Test
     public void testGetWithAllFieldsOnUpdate() throws Exception {
         Contact contactObject = new Contact();
         contactObject.setSurName("testGetWithAllFieldsOnUpdate");
@@ -95,22 +99,21 @@ public class GetTest extends ContactTest {
         compareObject(contactObject, loadContact);
     }
 
+    @Test
     public void testGetUser() throws Exception {
         Contact loadContact = loadUser(getWebConversation(), userId, getHostName(), getSessionId());
         assertNotNull("contact object is null", loadContact);
         assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
         assertTrue("object id not set", loadContact.getObjectID() > 0);
         AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
-        com.openexchange.ajax.user.actions.GetResponse response = client.execute(new com.openexchange.ajax.user.actions.GetRequest(
-            userId,
-            client.getValues().getTimeZone()));
+        com.openexchange.ajax.user.actions.GetResponse response = client.execute(new com.openexchange.ajax.user.actions.GetRequest(userId, client.getValues().getTimeZone()));
         loadContact = response.getContact();
         assertNotNull("contact object is null", loadContact);
         assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
         assertTrue("object id not set", loadContact.getObjectID() > 0);
     }
 
-    // Node 2652
+    // Node 2652    @Test
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
 

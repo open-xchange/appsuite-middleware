@@ -63,31 +63,31 @@ import com.openexchange.ajax.spellcheck.actions.list.ListResponse;
  */
 public final class ListTest extends AbstractSpellCheckTest {
 
-	/**
-	 * Initializes a new {@link ListTest}
-	 *
-	 * @param name
-	 */
-	public ListTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ListTest}
+     *
+     * @param name
+     */
+    public ListTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=list</code> request
-	 *
-	 * @throws Throwable
-	 */
-	public void testList() throws Throwable {
+    /**
+     * Tests the <code>action=list</code> request
+     *
+     * @throws Throwable
+     */
+    public void testList() throws Throwable {
 
-		final String userWord = "clazz";
-		Executor.execute(getSession(), new UserWordRequest(userWord, true, true));
+        final String userWord = "clazz";
+        Executor.execute(getSession(), new UserWordRequest(userWord, true, true));
 
-		final ListResponse listResponse = (ListResponse) Executor.execute(getSession(), new ListRequest(true));
-		final String[] uw = listResponse.getUserWords();
-		assertTrue("No user words: " + Arrays.toString(uw), uw.length > 0);
+        final ListResponse listResponse = (ListResponse) Executor.execute(getSession(), new ListRequest(true));
+        final String[] uw = listResponse.getUserWords();
+        assertTrue("No user words: " + Arrays.toString(uw), uw.length > 0);
 
-		Executor.execute(getSession(), new UserWordRequest(userWord, false, true));
+        Executor.execute(getSession(), new UserWordRequest(userWord, false, true));
 
-	}
+    }
 
 }

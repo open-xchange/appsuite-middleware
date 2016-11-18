@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -152,6 +153,7 @@ public class Bug35355Test extends AbstractAJAXSession {
         blockingApp.setParentFolderID(client3.getValues().getPrivateAppointmentFolder());
     }
 
+    @Test
     public void testBug35355() throws Exception {
         ctm3.insert(blockingApp);
         assertFalse(ctm3.getLastResponse().hasConflicts());

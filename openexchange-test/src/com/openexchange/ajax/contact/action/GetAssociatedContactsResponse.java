@@ -58,7 +58,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -71,14 +70,13 @@ public class GetAssociatedContactsResponse extends AbstractAJAXResponse {
         timeZone = tz;
     }
 
-
     public List<UUID> getUUIDs() throws JSONException {
         List<UUID> results = new LinkedList<UUID>();
         JSONArray arr = (JSONArray) getData();
 
-        for(int i = 0, len = arr.length(); i < len; i++){
+        for (int i = 0, len = arr.length(); i < len; i++) {
             UUID temp = UUID.fromString(arr.getString(i));
-            results.add( temp);
+            results.add(temp);
         }
         return results;
     }

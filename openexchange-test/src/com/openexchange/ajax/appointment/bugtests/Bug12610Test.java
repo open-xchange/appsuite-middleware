@@ -1,7 +1,9 @@
+
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
@@ -18,7 +20,8 @@ public class Bug12610Test extends AbstractAJAXSession {
         super();
     }
 
-    public void testBugAsWritten() throws Throwable{
+    @Test
+    public void testBugAsWritten() throws Throwable {
         AJAXClient client = null;
         Appointment appointment = new Appointment();
 

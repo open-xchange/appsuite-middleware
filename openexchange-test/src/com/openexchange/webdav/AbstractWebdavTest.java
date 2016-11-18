@@ -51,7 +51,6 @@ package com.openexchange.webdav;
 
 import java.util.Properties;
 import javax.xml.parsers.SAXParserFactory;
-import junit.framework.TestCase;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
@@ -63,6 +62,7 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.framework.Constants;
+import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
@@ -85,7 +85,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 
     protected String secondlogin = null;
 
-	protected String context;
+    protected String context;
 
     protected int userId = -1;
 
@@ -100,7 +100,6 @@ public abstract class AbstractWebdavTest extends TestCase {
     protected WebConversation webCon = null;
 
     protected WebConversation secondWebCon = null;
-
 
     protected static final int dayInMillis = 86400000;
 
@@ -149,9 +148,9 @@ public abstract class AbstractWebdavTest extends TestCase {
             password = "";
         }
         if (context != null && context.length() > 0) {
-        	login = login+"@"+context;
+            login = login + "@" + context;
         }
-        return new String(Base64.encode(login+":"+ password));
+        return new String(Base64.encode(login + ":" + password));
     }
 
     protected WebConversation getWebConversation() {

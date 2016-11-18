@@ -52,6 +52,7 @@ package com.openexchange.test.osgi;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -80,14 +81,11 @@ public final class BundleTestIMAP extends AbstractBundleTest {
         super();
     }
 
+    @Test
     public void testIMAPAbsence() {
         try {
             final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * No error should occur while login

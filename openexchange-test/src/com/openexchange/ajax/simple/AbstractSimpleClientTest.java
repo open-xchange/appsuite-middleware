@@ -62,7 +62,6 @@ import org.json.JSONObject;
 import com.openexchange.test.json.JSONAssertion;
 import junit.framework.TestCase;
 
-
 /**
  * Yet another OX testing framework. This one is for simple cases, when the full blown framework would be too much.
  *
@@ -81,7 +80,6 @@ public class AbstractSimpleClientTest extends TestCase {
     protected SimpleOXModule currentModule;
     protected SimpleResponse lastResponse;
 
-
     private final Map<String, SimpleOXClient> authenticatedClients = new HashMap<String, SimpleOXClient>();
     protected JSONObject rawResponse;
 
@@ -89,7 +87,7 @@ public class AbstractSimpleClientTest extends TestCase {
         super();
     }
 
-    public SimpleOXClient createClient() throws Exception{
+    public SimpleOXClient createClient() throws Exception {
         Properties properties = getAJAXProperties();
         String host = properties.getProperty("hostname");
         boolean secure = "https".equalsIgnoreCase(properties.getProperty("protocol"));
@@ -97,7 +95,7 @@ public class AbstractSimpleClientTest extends TestCase {
     }
 
     public SimpleOXClient as(String user) throws Exception {
-        if(authenticatedClients.containsKey(user)) {
+        if (authenticatedClients.containsKey(user)) {
             currentClient = authenticatedClients.get(user);
         } else {
             createClient();
@@ -108,27 +106,27 @@ public class AbstractSimpleClientTest extends TestCase {
         return currentClient;
     }
 
-    public SimpleOXClient asUser(String user) throws Exception{
+    public SimpleOXClient asUser(String user) throws Exception {
         return as(user);
     }
 
-    public JSONObject raw(String action, Object...parameters) throws Exception {
+    public JSONObject raw(String action, Object... parameters) throws Exception {
         return rawResponse = currentModule.raw(action, parameters);
     }
 
-    public JSONObject rawGeneral(String module, String action, Object...parameters) throws Exception {
+    public JSONObject rawGeneral(String module, String action, Object... parameters) throws Exception {
         return rawResponse = currentClient.raw(module, action, parameters);
     }
 
-    public HttpMethod rawMethod(String module, String action, Object...parameters) throws Exception {
+    public HttpMethod rawMethod(String module, String action, Object... parameters) throws Exception {
         return currentClient.rawMethod(module, action, parameters);
     }
 
-    public SimpleResponse call(String action, Object...parameters) throws Exception {
+    public SimpleResponse call(String action, Object... parameters) throws Exception {
         return lastResponse = currentModule.call(action, parameters);
     }
 
-    public SimpleResponse callGeneral(String module, String action, Object...parameters) throws Exception {
+    public SimpleResponse callGeneral(String module, String action, Object... parameters) throws Exception {
         return lastResponse = currentClient.call(module, action, parameters);
     }
 
@@ -170,14 +168,12 @@ public class AbstractSimpleClientTest extends TestCase {
 
     public String[] credentials(String user) throws Exception {
         Properties properties = getAJAXProperties();
-        return new String[] {
-            properties.getProperty(user) + "@" + properties.getProperty("contextName"),
-            properties.getProperty("password")
+        return new String[] { properties.getProperty(user) + "@" + properties.getProperty("contextName"), properties.getProperty("password")
         };
     }
 
     protected Properties getAJAXProperties() throws Exception {
-        if(ajaxProperties != null) {
+        if (ajaxProperties != null) {
             return ajaxProperties;
         }
         String testPropFile = System.getProperty("test.propfile", "conf/test.properties");

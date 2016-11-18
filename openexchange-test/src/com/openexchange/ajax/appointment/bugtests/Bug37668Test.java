@@ -53,6 +53,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -89,7 +90,7 @@ public class Bug37668Test extends AbstractAJAXSession {
 
         ctm = new CalendarTestManager(client);
         timeZone = getClient().getValues().getTimeZone();
-        
+
         appSimple = new Appointment();
         appSimple.setStartDate(D("14.01.2015 16:00", timeZone));
         appSimple.setEndDate(D("14.01.2015 17:00", timeZone));
@@ -99,8 +100,7 @@ public class Bug37668Test extends AbstractAJAXSession {
         appSimple.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         appSimple.setIgnoreConflicts(true);
         appSimple.setTimezone(timeZone.getID());
-        
-        
+
         app23h = new Appointment();
         app23h.setStartDate(D("14.01.2015 16:00", timeZone));
         app23h.setEndDate(D("15.01.2015 15:00", timeZone));
@@ -110,8 +110,7 @@ public class Bug37668Test extends AbstractAJAXSession {
         app23h.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         app23h.setIgnoreConflicts(true);
         app23h.setTimezone(timeZone.getID());
-        
-        
+
         app25h = new Appointment();
         app25h.setStartDate(D("14.01.2015 16:00", timeZone));
         app25h.setEndDate(D("15.01.2015 17:00", timeZone));
@@ -145,50 +144,62 @@ public class Bug37668Test extends AbstractAJAXSession {
         fulltime2days.setFullTime(true);
     }
 
+    @Test
     public void testBug37668_JAN() throws Exception {
         doTest(Calendar.JANUARY);
     }
 
+    @Test
     public void testBug37668_FEB() throws Exception {
         doTest(Calendar.FEBRUARY);
     }
 
+    @Test
     public void testBug37668_MAR() throws Exception {
         doTest(Calendar.MARCH);
     }
 
+    @Test
     public void testBug37668_APR() throws Exception {
         doTest(Calendar.APRIL);
     }
 
+    @Test
     public void testBug37668_MAY() throws Exception {
         doTest(Calendar.MAY);
     }
 
+    @Test
     public void testBug37668_JUN() throws Exception {
         doTest(Calendar.JUNE);
     }
 
+    @Test
     public void testBug37668_JUL() throws Exception {
         doTest(Calendar.JULY);
     }
 
+    @Test
     public void testBug37668_AUG() throws Exception {
         doTest(Calendar.AUGUST);
     }
 
+    @Test
     public void testBug37668_SEP() throws Exception {
         doTest(Calendar.SEPTEMBER);
     }
 
+    @Test
     public void testBug37668_OCT() throws Exception {
         doTest(Calendar.OCTOBER);
     }
 
+    @Test
     public void testBug37668_NOV() throws Exception {
         doTest(Calendar.NOVEMBER);
     }
 
+    @Test
     public void testBug37668_DEC() throws Exception {
         doTest(Calendar.DECEMBER);
     }
@@ -202,10 +213,10 @@ public class Bug37668Test extends AbstractAJAXSession {
 
         app25h.setMonth(month);
         app25h.setTitle("Bug 37668 Test (" + (month + 1) + ") 25h.");
-        
+
         fulltime.setMonth(month);
         fulltime.setTitle("Bug 37668 Test (" + (month + 1) + ") fulltime.");
-        
+
         fulltime2days.setMonth(month);
         fulltime2days.setTitle("Bug 37668 Test (" + (month + 1) + ") fulltime 2 days.");
 
@@ -214,26 +225,26 @@ public class Bug37668Test extends AbstractAJAXSession {
         ctm.insert(app25h);
         ctm.insert(fulltime);
         ctm.insert(fulltime2days);
-        
+
         Appointment delete = new Appointment();
         delete.setObjectID(appSimple.getObjectID());
         delete.setParentFolderID(appSimple.getParentFolderID());
         delete.setRecurrencePosition(1);
         delete.setLastModified(new Date(Long.MAX_VALUE));
         ctm.delete(delete);
-        
+
         delete.setObjectID(app25h.getObjectID());
         delete.setParentFolderID(app25h.getParentFolderID());
         ctm.delete(delete);
-        
+
         delete.setObjectID(app23h.getObjectID());
         delete.setParentFolderID(app23h.getParentFolderID());
         ctm.delete(delete);
-        
+
         delete.setObjectID(fulltime.getObjectID());
         delete.setParentFolderID(fulltime.getParentFolderID());
         ctm.delete(delete);
-        
+
         delete.setObjectID(fulltime2days.getObjectID());
         delete.setParentFolderID(fulltime2days.getParentFolderID());
         ctm.delete(delete);

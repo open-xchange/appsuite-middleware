@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment;
 
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
@@ -66,6 +67,7 @@ public class SearchTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchTest.class);
 
+    @Test
     public void testSimpleSearch() throws Exception {
         final Appointment appointmentObj = new Appointment();
         final String date = String.valueOf(System.currentTimeMillis());
@@ -77,22 +79,13 @@ public class SearchTest extends AppointmentTest {
 
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        final Appointment[] appointmentArray = searchAppointment(
-            getWebConversation(),
-            "testSimpleSearch" + date,
-            appointmentFolderId,
-            new Date(),
-            new Date(),
-            APPOINTMENT_FIELDS,
-            timeZone,
-            PROTOCOL + getHostName(),
-            getSessionId());
+        final Appointment[] appointmentArray = searchAppointment(getWebConversation(), "testSimpleSearch" + date, appointmentFolderId, new Date(), new Date(), APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
         assertTrue("appointment array size is 0", appointmentArray.length > 0);
 
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
-    // Node 2652
+    // Node 2652    @Test
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC };

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.HashMap;
@@ -57,19 +58,21 @@ import com.openexchange.resource.Resource;
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class ResourceFixtureFactory implements FixtureFactory<Resource> {
+
     private final FixtureLoader fixtureLoader;
 
-	public ResourceFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
+    public ResourceFixtureFactory(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
+    }
 
-	@Override
+    @Override
     public Fixtures<Resource> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new ResourceFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class ResourceFixtures extends DefaultFixtures<Resource> implements Fixtures<Resource> {
+
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Resource>> resourceMap = new HashMap<String, Fixture<Resource>>();
 

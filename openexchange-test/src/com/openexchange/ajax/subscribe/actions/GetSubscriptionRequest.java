@@ -90,9 +90,7 @@ public class GetSubscriptionRequest extends AbstractSubscriptionRequest<GetSubsc
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-            new Parameter(AJAXServlet.PARAMETER_ID, getId())
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET), new Parameter(AJAXServlet.PARAMETER_ID, getId())
         };
     }
 

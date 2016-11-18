@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -80,6 +81,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Bug15776Test extends AbstractAJAXSession {
+
     AJAXClient client;
     Appointment appointment;
     Appointment pastAppointment;
@@ -100,6 +102,7 @@ public class Bug15776Test extends AbstractAJAXSession {
         pastAppointment = createSeriesInThePast();
     }
 
+    @Test
     public void testReminder() throws Exception {
         // Set the reminder
         Appointment toUpdate = appointment.clone();
@@ -133,6 +136,7 @@ public class Bug15776Test extends AbstractAJAXSession {
         assertNotNull("No reminder was found.", reminder);
     }
 
+    @Test
     public void testAlarmForReminderInThePast() throws Exception {
         // Set the reminder
         pastAppointment.setAlarm(15);
@@ -231,7 +235,5 @@ public class Bug15776Test extends AbstractAJAXSession {
 
         return appointment;
     }
-
-
 
 }

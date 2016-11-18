@@ -96,23 +96,7 @@ public class Bug32385Test extends AbstractAJAXSession {
         FolderObject sharedFolder = new FolderObject();
         sharedFolder.setObjectID(client2.getValues().getPrivateAppointmentFolder());
         sharedFolder.setLastModified(new Date(Long.MAX_VALUE));
-        sharedFolder.setPermissionsAsArray(new OCLPermission[] {
-            ocl(
-                client1.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                client2.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION) });
+        sharedFolder.setPermissionsAsArray(new OCLPermission[] { ocl(client1.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
         CommonInsertResponse response = client2.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder));
         response.fillObject(sharedFolder);
@@ -133,11 +117,7 @@ public class Bug32385Test extends AbstractAJAXSession {
 
     @Test
     public void testBug32385() throws Exception {
-        List<Appointment> newappointments = ctm.newappointments(
-            D("01.05.2014 00:00", TimeZone.getTimeZone("UTC")),
-            D("02.05.2014 00:00", TimeZone.getTimeZone("UTC")),
-            999,
-            new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID });
+        List<Appointment> newappointments = ctm.newappointments(D("01.05.2014 00:00", TimeZone.getTimeZone("UTC")), D("02.05.2014 00:00", TimeZone.getTimeZone("UTC")), 999, new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID });
 
         int count = 0;
         String inFolder = "";

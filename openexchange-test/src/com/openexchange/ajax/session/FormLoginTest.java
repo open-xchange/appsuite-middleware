@@ -50,6 +50,9 @@
 package com.openexchange.ajax.session;
 
 import static com.openexchange.java.Autoboxing.I;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -73,20 +76,21 @@ public class FormLoginTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         AJAXConfig.init();
         login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password = AJAXConfig.getProperty(Property.PASSWORD);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         login = null;
         password = null;
         super.tearDown();
     }
 
+    @Test
     public void testFormLogin() throws Exception {
         final AJAXSession session = new AJAXSession();
         final AJAXClient myClient = new AJAXClient(session, false);

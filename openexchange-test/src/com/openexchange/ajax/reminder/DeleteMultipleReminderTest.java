@@ -64,14 +64,13 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.Task;
 
-
 /**
  * {@link DeleteMultipleReminderTest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DeleteMultipleReminderTest extends ReminderTest {
-    
+
     private AJAXClient client;
     private Appointment appointment;
     private Task task;
@@ -80,12 +79,13 @@ public class DeleteMultipleReminderTest extends ReminderTest {
 
     /**
      * Initializes a new {@link DeleteMultipleReminderTest}.
+     * 
      * @param name
      */
     public DeleteMultipleReminderTest() {
         super();
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -95,7 +95,7 @@ public class DeleteMultipleReminderTest extends ReminderTest {
         task = new Task();
         task.setTitle("Test Reminder");
         task.setStartDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60));
-        task.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 *2));
+        task.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2));
         task.setAlarm(new Date(System.currentTimeMillis() + 1000 * 60 * 30));
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         InsertRequest taskInsert = new InsertRequest(task, timeZone);
@@ -112,18 +112,18 @@ public class DeleteMultipleReminderTest extends ReminderTest {
         com.openexchange.ajax.appointment.action.InsertRequest appointmentInsert = new com.openexchange.ajax.appointment.action.InsertRequest(appointment, timeZone);
         AppointmentInsertResponse appointmentResponse = client.execute(appointmentInsert);
         appointmentResponse.fillAppointment(appointment);
-        
+
         RangeRequest rngReq = new RangeRequest(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 4));
         RangeResponse rngRes = client.execute(rngReq);
         reminders = rngRes.getReminder(timeZone);
     }
-    
+
     @Test
     public void testDeleteMultipleReminders() throws Exception {
         DeleteRequest delReq = new DeleteRequest(reminders, true);
         client.execute(delReq);
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         appointment.setLastModified(new Date(Long.MAX_VALUE));
@@ -131,7 +131,7 @@ public class DeleteMultipleReminderTest extends ReminderTest {
         client.execute(aDelReq);
 
         com.openexchange.ajax.task.actions.DeleteRequest tDelReq = new com.openexchange.ajax.task.actions.DeleteRequest(task);
-//        client.execute(tDelReq);
+        //        client.execute(tDelReq);
 
         super.tearDown();
     }

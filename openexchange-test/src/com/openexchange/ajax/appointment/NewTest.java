@@ -55,6 +55,7 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
@@ -108,6 +109,7 @@ public class NewTest extends AppointmentTest {
         super.tearDown();
     }
 
+    @Test
     public void testSimple() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSimple");
@@ -124,6 +126,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testFullTime() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -155,7 +158,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, start.getTime(), end.getTime());
     }
 
-
+    @Test
     public void testFullTimeOverTwoDays() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -187,7 +190,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, start.getTime(), end.getTime());
     }
 
-
+    @Test
     public void testServerShouldRoundDownFullTimeAppointments() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -235,6 +238,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, expectedStart.getTime(), expectedEnd.getTime());
     }
 
+    @Test
     public void testShouldRoundFullTimeSeriesAsWell() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -308,6 +312,7 @@ public class NewTest extends AppointmentTest {
         assertEquals(0, check.get(Calendar.MILLISECOND));
     }
 
+    @Test
     public void testUserParticipant() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testUserParticipant");
@@ -332,6 +337,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testGroupParticipant() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testGroupParticipant");
@@ -357,6 +363,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testResourceParticipant() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testResourceParticipant");
@@ -381,6 +388,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testAllParticipants() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testAllParticipants");
@@ -408,6 +416,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testSpecialCharacters() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSpecialCharacters - \u00F6\u00E4\u00FC-:,;.#?!\u00A7$%&/()=\"<>");
@@ -424,6 +433,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testPrivateFolder() throws Exception {
         final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testPrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
         targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
@@ -444,6 +454,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testPublicFolder() throws Exception {
         final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testPublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, true);
         targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
@@ -464,14 +475,13 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testSharedFolder() throws Exception {
         final FolderObject sharedFolderObject = FolderTest.getStandardCalendarFolder(getSecondWebConversation(), getHostName(), getSecondSessionId());
         final int secondUserId = sharedFolderObject.getCreatedBy();
 
         final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testSharedFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-        final OCLPermission[] permission = new OCLPermission[] {
-            com.openexchange.webdav.xml.FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-            com.openexchange.webdav.xml.FolderTest.createPermission( secondUserId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false)
+        final OCLPermission[] permission = new OCLPermission[] { com.openexchange.webdav.xml.FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), com.openexchange.webdav.xml.FolderTest.createPermission(secondUserId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false)
         };
 
         folderObj.setPermissionsAsArray(permission);
@@ -494,6 +504,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testDailyRecurrence() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -502,7 +513,7 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (15 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testDailyRecurrence");
@@ -523,6 +534,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testWeeklyRecurrence() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -531,7 +543,7 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (10*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (10 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testWeeklyRecurrence");
@@ -552,6 +564,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testMonthlyRecurrenceDayInMonth() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -560,7 +573,7 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (60*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (60 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testMonthlyRecurrenceDayInMonth");
@@ -581,6 +594,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
     }
 
+    @Test
     public void testMonthlyRecurrenceDays() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -589,7 +603,7 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (90*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (90 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testMonthlyRecurrenceDays");
@@ -611,6 +625,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
     }
 
+    @Test
     public void testYearlyRecurrenceDayInMonth() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -619,7 +634,7 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (800*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (800 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testYearlyRecurrenceDayInMonth");
@@ -641,6 +656,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
     }
 
+    @Test
     public void testYearlyRecurrenceDays() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -649,7 +665,7 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (800*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (800 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testYearlyRecurrenceDays");
@@ -672,6 +688,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
     }
 
+    @Test
     public void testConflict() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testConflict");
@@ -689,7 +706,8 @@ public class NewTest extends AppointmentTest {
             folderId2 = appointmentFolderId;
             deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
             objectId2 = 0;
-            folderId2 = 0;;
+            folderId2 = 0;
+            ;
             fail("conflict exception expected here!");
         } catch (final OXException exc) {
             assertTrue(true);
@@ -700,6 +718,7 @@ public class NewTest extends AppointmentTest {
         folderId2 = appointmentFolderId;
     }
 
+    @Test
     public void testConflictWithResource() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testConflictWithResource");

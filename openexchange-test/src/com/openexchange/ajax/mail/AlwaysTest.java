@@ -59,6 +59,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.MailTest;
@@ -102,11 +103,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     /**
      * This attributes of mails are requested when a mail folder is listed.
      */
-    private static final int[] listAttributes = new int[] {
-        MailListField.ID.getField(), MailListField.FOLDER_ID.getField(), MailListField.THREAD_LEVEL.getField(),
-        MailListField.ATTACHMENT.getField(), MailListField.FROM.getField(), MailListField.SUBJECT.getField(),
-        MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(), MailListField.FLAGS.getField(),
-        MailListField.PRIORITY.getField(), CommonObject.COLOR_LABEL };
+    private static final int[] listAttributes = new int[] { MailListField.ID.getField(), MailListField.FOLDER_ID.getField(), MailListField.THREAD_LEVEL.getField(), MailListField.ATTACHMENT.getField(), MailListField.FROM.getField(), MailListField.SUBJECT.getField(), MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(), MailListField.FLAGS.getField(), MailListField.PRIORITY.getField(), CommonObject.COLOR_LABEL };
 
     private AJAXClient client;
 
@@ -120,6 +117,7 @@ public class AlwaysTest extends AbstractAJAXTest {
         client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
     }
 
+    @Test
     public void testFolderListing() throws Throwable {
         final FolderObject imapRoot = getIMAPRootFolder();
         recListFolder(imapRoot.getFullName(), "");
@@ -160,8 +158,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     }
 
     public static Map<String, String> getIMAPRights(final AJAXClient client, final String parent) throws IOException, SAXException, JSONException, OXException {
-        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD, parent, new int[] {
-            FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS }, false));
+        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD, parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS }, false));
         final Map<String, String> retval = new HashMap<String, String>();
         for (final Object[] row : listR) {
             retval.put(row[0].toString(), row[1].toString());

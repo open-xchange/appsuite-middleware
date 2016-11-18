@@ -61,7 +61,6 @@ import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 
-
 /**
  * {@link EMClientURLTest}
  *
@@ -70,8 +69,7 @@ import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
  */
 public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
 
-    public EMClientURLTest() {
-    }
+    public EMClientURLTest() {}
 
     private static Map<String, String> confs;
 

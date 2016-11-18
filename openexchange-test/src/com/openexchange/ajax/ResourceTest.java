@@ -7,6 +7,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -26,15 +27,13 @@ public class ResourceTest extends AbstractAJAXTest {
 
     private static final String RESOURCE_URL = "/ajax/resource";
 
+    @Test
     public void testSearch() throws Exception {
-        final com.openexchange.resource.Resource resources[] = searchResource(
-            getWebConversation(),
-            "*",
-            PROTOCOL + getHostName(),
-            getSessionId());
+        final com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
         assertTrue("resource array size is not > 0", resources.length > 0);
     }
 
+    @Test
     public void testList() throws Exception {
         com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
         assertTrue("resource array size is not > 0", resources.length > 0);
@@ -48,18 +47,11 @@ public class ResourceTest extends AbstractAJAXTest {
         assertTrue("resource array size is not > 0", resources.length > 0);
     }
 
+    @Test
     public void testGet() throws Exception {
-        final com.openexchange.resource.Resource resources[] = searchResource(
-            getWebConversation(),
-            "*",
-            PROTOCOL + getHostName(),
-            getSessionId());
+        final com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
         assertTrue("resource array size is not > 0", resources.length > 0);
-        loadResource(
-            getWebConversation(),
-            resources[0].getIdentifier(),
-            PROTOCOL + getHostName(),
-            getSessionId());
+        loadResource(getWebConversation(), resources[0].getIdentifier(), PROTOCOL + getHostName(), getSessionId());
     }
 
     public static com.openexchange.resource.Resource[] searchResource(final WebConversation webCon, final String searchpattern, String host, final String session) throws Exception {

@@ -53,6 +53,9 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -81,8 +84,8 @@ public final class Bug21264Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -100,14 +103,15 @@ public final class Bug21264Test extends AbstractAJAXSession {
         response.fillAppointment(app);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != app) {
             client.execute(new DeleteRequest(app));
         }
         super.tearDown();
     }
 
+    @Test
     public void testDeleteAppointment() throws IOException, JSONException, OXException {
         final CommonDeleteResponse response = client.execute(new DeleteRequest(app, false));
         assertFalse("Deleting appointment failed.", response.hasError());

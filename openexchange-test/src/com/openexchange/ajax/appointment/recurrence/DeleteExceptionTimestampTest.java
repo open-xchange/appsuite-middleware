@@ -53,6 +53,9 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -76,8 +79,8 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         // Create series
         manager = new CalendarTestManager(getClient());
@@ -92,12 +95,13 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         manager.insert(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         manager.cleanUp();
         super.tearDown();
     }
 
+    @Test
     public void testTimestampShouldBeDifferentAfterCreatingDeleteException() throws OXException, IOException, SAXException, JSONException {
         Date oldTimestamp = appointment.getLastModified();
 

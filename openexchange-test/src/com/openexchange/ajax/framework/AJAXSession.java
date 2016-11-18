@@ -131,9 +131,9 @@ public class AJAXSession {
         HttpConnectionParams.setSoTimeout(params, minute);
 
         retval.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY); // OX cookies work with all
-                                                                                                         // browsers, meaning they are a mix
-                                                                                                         // of the Netscape draft and the
-                                                                                                         // RFC
+                                                                                                        // browsers, meaning they are a mix
+                                                                                                        // of the Netscape draft and the
+                                                                                                        // RFC
         retval.getParams().setParameter("User-Agent", USER_AGENT); // needs to be consistent
         retval.getParams().setParameter("http.useragent", USER_AGENT); // needs to be consistent
         return retval;

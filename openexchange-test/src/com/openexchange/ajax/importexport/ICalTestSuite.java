@@ -57,42 +57,42 @@ import junit.framework.TestSuite;
  */
 public final class ICalTestSuite {
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalTaskExportTest.class);
-		tests.addTestSuite(ICalAppointmentExportTest.class);
-		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		tests.addTestSuite(Bug12414Test.class);
-		tests.addTestSuite(Bug12470Test.class);
-		tests.addTestSuite(Bug17393Test.class);
-		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
-		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
-		tests.addTestSuite(Bug19089Test.class);
-		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
-		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
-		tests.addTestSuite(Bug19915Test.class);
-		tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
-		tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
-		tests.addTestSuite(Bug20413Test_CompletelyWrongDTStart.class);
-		tests.addTestSuite(Bug20453Test_emptyDTEND.class);
-		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
-		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
-		tests.addTestSuite(Bug20718Test_JumpDuringDstCrossing.class);
-		tests.addTestSuite(Bug20896Test_AlarmsChange.class);
-		tests.addTestSuite(Bug20945Test_UnexpectedError26.class);
-		tests.addTestSuite(Bug22059Test.class);
+    /**
+     * @return the suite.
+     */
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(ICalImportTest.class);
+        tests.addTestSuite(ICalTaskExportTest.class);
+        tests.addTestSuite(ICalAppointmentExportTest.class);
+        tests.addTestSuite(ICalSeriesTests.class);
+        tests.addTestSuite(Bug9840Test.class);
+        tests.addTestSuite(Bug11724Test.class);
+        tests.addTestSuite(Bug11868Test.class);
+        tests.addTestSuite(Bug11871Test.class);
+        tests.addTestSuite(Bug11920Test.class);
+        tests.addTestSuite(Bug11996Test.class);
+        tests.addTestSuite(Bug12414Test.class);
+        tests.addTestSuite(Bug12470Test.class);
+        tests.addTestSuite(Bug17393Test.class);
+        tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
+        tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
+        tests.addTestSuite(Bug19089Test.class);
+        tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
+        tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
+        tests.addTestSuite(Bug19915Test.class);
+        tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
+        tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
+        tests.addTestSuite(Bug20413Test_CompletelyWrongDTStart.class);
+        tests.addTestSuite(Bug20453Test_emptyDTEND.class);
+        tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
+        tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
+        tests.addTestSuite(Bug20718Test_JumpDuringDstCrossing.class);
+        tests.addTestSuite(Bug20896Test_AlarmsChange.class);
+        tests.addTestSuite(Bug20945Test_UnexpectedError26.class);
+        tests.addTestSuite(Bug22059Test.class);
         tests.addTestSuite(Bug27474Test.class);
         tests.addTestSuite(Bug28071Test.class);
-		return tests;
-	}
+        return tests;
+    }
 }

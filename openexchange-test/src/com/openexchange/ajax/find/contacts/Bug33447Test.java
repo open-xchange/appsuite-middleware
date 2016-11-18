@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
@@ -81,6 +82,7 @@ public class Bug33447Test extends ContactsFindTest {
         super();
     }
 
+    @Test
     public void testSearchContactFromPersonalContactsFolder() throws Exception {
         Map<String, String> options = new HashMap<String, String>();
         options.put("admin", Boolean.FALSE.toString());

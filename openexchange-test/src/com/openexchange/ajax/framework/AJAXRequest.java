@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONException;
 
 /**
@@ -77,33 +76,43 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
     String getServletPath();
 
     public class Parameter {
+
         private final String name;
         private final String value;
+
         public Parameter(final String name, final String value) {
             this.name = name;
             this.value = value;
         }
+
         public Parameter(final String name, final String[] values) {
             this(name, convert(values));
         }
+
         public Parameter(final String name, final int[] values) {
             this(name, convert(values));
         }
+
         public Parameter(final String name, final int identifier) {
             this(name, String.valueOf(identifier));
         }
+
         public Parameter(final String name, final long time) {
             this(name, String.valueOf(time));
         }
+
         public Parameter(final String name, final Date time) {
             this(name, time.getTime());
         }
+
         public Parameter(final String name, final Date time, final TimeZone tz) {
             this(name, time.getTime() + tz.getOffset(time.getTime()));
         }
+
         public Parameter(final String name, final boolean schalter) {
             this(name, String.valueOf(schalter));
         }
+
         public static String convert(final int[] values) {
             final StringBuilder columnSB = new StringBuilder();
             for (final int i : values) {
@@ -113,6 +122,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
             columnSB.delete(columnSB.length() - 1, columnSB.length());
             return columnSB.toString();
         }
+
         public static String convert(final String[] values) {
             final StringBuilder columnSB = new StringBuilder();
             for (final String i : values) {
@@ -122,18 +132,21 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
             columnSB.delete(columnSB.length() - 1, columnSB.length());
             return columnSB.toString();
         }
+
         /**
          * @return the name
          */
         public String getName() {
             return name;
         }
+
         /**
          * @return the value
          */
         public String getValue() {
             return value;
         }
+
         @Override
         public String toString() {
             return name + "=" + value;
@@ -141,47 +154,56 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
     }
 
     class URLParameter extends Parameter {
+
         public URLParameter(final String name, final String value) {
             super(name, value);
         }
+
         public URLParameter(final String name, final int value) {
             this(name, Integer.toString(value));
         }
+
         public URLParameter(String name, int[] values) {
             this(name, convert(values));
         }
+
         public URLParameter(String name, boolean value) {
             this(name, Boolean.toString(value));
         }
     }
 
     class FileParameter extends Parameter {
+
         private final InputStream inputStream;
         private final String mimeType;
-        public FileParameter(final String name, final String fileName,
-            final InputStream inputStream, final String mimeType) {
+
+        public FileParameter(final String name, final String fileName, final InputStream inputStream, final String mimeType) {
             super(name, fileName);
             this.inputStream = inputStream;
             this.mimeType = mimeType;
         }
+
         /**
          * @return the fileName
          */
         public String getFileName() {
             return super.getValue();
         }
+
         /**
          * @return the inputStream
          */
         public InputStream getInputStream() {
             return inputStream;
         }
+
         /**
          * @return the mimeType
          */
         public String getMimeType() {
             return mimeType;
         }
+
         @Override
         public String toString() {
             return super.toString() + ',' + mimeType;
@@ -189,14 +211,17 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
     }
 
     class FieldParameter extends Parameter {
+
         /**
          * Initializes a new {@link FieldParameter}
+         * 
          * @param fieldName
          * @param fieldContent
          */
         public FieldParameter(final String fieldName, final String fieldContent) {
             super(fieldName, fieldContent);
         }
+
         /**
          * Gets the fieldName
          *
@@ -205,6 +230,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
         public String getFieldName() {
             return super.getName();
         }
+
         /**
          * Gets the fieldContent
          *
@@ -218,6 +244,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
     /**
      * This method has to return all parameters that are necessary for the
      * request. The session request parameter is added by the {@link Executor}.
+     * 
      * @return all request parameters except the session identifier.
      */
     Parameter[] getParameters() throws IOException, JSONException;

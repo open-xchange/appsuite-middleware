@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -68,34 +70,24 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug23046Test extends CardDAVTest {
 
-	public Bug23046Test() {
-		super();
-	}
+    public Bug23046Test() {
+        super();
+    }
 
-	@Test
-	public void testCreateWithURLWithoutAuthority() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		String syncToken = super.fetchSyncToken();
-		/*
-		 * create contact
-		 */
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "jupp";
-    	String url = "http://";
-        String vCard =
-    		"BEGIN:VCARD" + "\r\n" +
-			"VERSION:3.0" + "\r\n" +
-			"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-			"FN:" + firstName + " " + lastName + "\r\n" +
-			"URL:" + url + "\r\n" +
-			"UID:" + uid + "\r\n" +
-			"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-			"PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" +
-			"END:VCARD" + "\r\n"
-		;
+    @Test
+    public void testCreateWithURLWithoutAuthority() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        String syncToken = super.fetchSyncToken();
+        /*
+         * create contact
+         */
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "jupp";
+        String url = "http://";
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "URL:" + url + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
         /*
          * verify contact on server
@@ -115,6 +107,6 @@ public class Bug23046Test extends CardDAVTest {
         assertEquals("N wrong", lastName, card.getFamilyName());
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         assertNotNull("URL wrong", card.getVCard().getUrls().get(0));
-	}
+    }
 
 }

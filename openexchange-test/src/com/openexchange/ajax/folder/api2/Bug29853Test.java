@@ -51,6 +51,9 @@ package com.openexchange.ajax.folder.api2;
 
 import java.util.Iterator;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -72,12 +75,8 @@ public class Bug29853Test extends AbstractFolderTest {
 
     private FolderObject folder;
 
-    public Bug29853Test() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         folder = createSingle(FolderObject.INFOSTORE, UUID.randomUUID().toString());
         folder.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
@@ -86,14 +85,15 @@ public class Bug29853Test extends AbstractFolderTest {
         insertResponse.fillObject(folder);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != folder) {
-            super.deleteFolders(true,folder);
+            super.deleteFolders(true, folder);
         }
         super.tearDown();
     }
 
+    @Test
     public void testCreateWithSameName() throws Throwable {
         String folderName = "a";
         FolderObject subfolder = createSingle(FolderObject.INFOSTORE, folderName);
@@ -124,6 +124,7 @@ public class Bug29853Test extends AbstractFolderTest {
         assertFalse("Folder was created " + listResponse.getArray().length + " times: " + listResponse.getResponse(), iterator.hasNext());
     }
 
+    @Test
     public void testRenameToSameName() throws Throwable {
         FolderObject[] subfolders = new FolderObject[THREAD_COUNT];
         for (int i = 0; i < THREAD_COUNT; i++) {

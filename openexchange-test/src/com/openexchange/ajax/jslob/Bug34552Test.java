@@ -51,10 +51,10 @@ package com.openexchange.ajax.jslob;
 
 import java.util.List;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.jslob.actions.ListRequest;
 import com.openexchange.ajax.jslob.actions.SetRequest;
 import com.openexchange.jslob.JSlob;
-
 
 /**
  * {@link Bug34552Test}
@@ -67,12 +67,14 @@ public class Bug34552Test extends AbstractJSlobTest {
 
     /**
      * Initializes a new {@link Bug34552Test}.
+     * 
      * @param name
      */
     public Bug34552Test() {
         super();
     }
 
+    @Test
     public void testUpdateIsVisibleImmediately() throws Exception {
         client.execute(new SetRequest("io.ox/portal", WIDGETS));
 

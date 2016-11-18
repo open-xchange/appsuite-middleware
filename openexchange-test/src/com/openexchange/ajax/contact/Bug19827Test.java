@@ -50,7 +50,9 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
@@ -75,8 +77,8 @@ public class Bug19827Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         contact = new Contact();
@@ -105,49 +107,52 @@ public class Bug19827Test extends AbstractAJAXSession {
         response.fillObject(contact);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-    	if (null != contact) {
-    		contact.setLastModified(new Date(Long.MAX_VALUE));
+    @After
+    public void tearDown() throws Exception {
+        if (null != contact) {
+            contact.setLastModified(new Date(Long.MAX_VALUE));
             client.execute(new DeleteRequest(contact));
-    	}
+        }
         super.tearDown();
     }
 
+    @Test
     public void testInvalidateBusinessAddress() throws Throwable {
-    	GetResponse getResponse = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
-    	Contact contact = getResponse.getContact();
-    	contact.removeCreationDate();
-    	contact.setLastModified(getResponse.getTimestamp());
-    	contact.setPostalCodeBusiness("99999");
-    	client.execute(new UpdateRequest(contact));
-    	GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
-    	contact = response.getContact();
-    	assertNull("Business address not invalidated", contact.getAddressBusiness());
-    }
-    
-    public void testInvalidateHomeAddress() throws Throwable {
-    	GetResponse getResponse = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
-    	Contact contact = getResponse.getContact();
-    	contact.removeCreationDate();
-    	contact.setLastModified(getResponse.getTimestamp());
-    	contact.setStreetHome("Changed Street 88");
-    	client.execute(new UpdateRequest(contact));
-    	GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
-    	contact = response.getContact();
-    	assertNull("Home address not invalidated", contact.getAddressHome());
+        GetResponse getResponse = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
+        Contact contact = getResponse.getContact();
+        contact.removeCreationDate();
+        contact.setLastModified(getResponse.getTimestamp());
+        contact.setPostalCodeBusiness("99999");
+        client.execute(new UpdateRequest(contact));
+        GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
+        contact = response.getContact();
+        assertNull("Business address not invalidated", contact.getAddressBusiness());
     }
 
+    @Test
+    public void testInvalidateHomeAddress() throws Throwable {
+        GetResponse getResponse = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
+        Contact contact = getResponse.getContact();
+        contact.removeCreationDate();
+        contact.setLastModified(getResponse.getTimestamp());
+        contact.setStreetHome("Changed Street 88");
+        client.execute(new UpdateRequest(contact));
+        GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
+        contact = response.getContact();
+        assertNull("Home address not invalidated", contact.getAddressHome());
+    }
+
+    @Test
     public void testInvalidateOtherAddress() throws Throwable {
-    	GetResponse getResponse = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
-    	Contact contact = getResponse.getContact();
-    	contact.removeCreationDate();
-    	contact.setLastModified(getResponse.getTimestamp());
-    	contact.setCountryOther("Another updated country");
-    	client.execute(new UpdateRequest(contact));
-    	GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
-    	contact = response.getContact();
-    	assertNull("Other address not invalidated", contact.getAddressOther());
+        GetResponse getResponse = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
+        Contact contact = getResponse.getContact();
+        contact.removeCreationDate();
+        contact.setLastModified(getResponse.getTimestamp());
+        contact.setCountryOther("Another updated country");
+        client.execute(new UpdateRequest(contact));
+        GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
+        contact = response.getContact();
+        assertNull("Other address not invalidated", contact.getAddressOther());
     }
 
 }

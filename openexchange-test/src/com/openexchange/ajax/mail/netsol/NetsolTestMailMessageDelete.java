@@ -67,70 +67,65 @@ import com.openexchange.mail.MailJSONField;
  */
 public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 
-	/**
-	 * Initializes a new {@link NetsolTestMailMessageDelete}
-	 *
-	 * @param name
-	 */
-	public NetsolTestMailMessageDelete() {
-		super();
-	}
+    /**
+     * Initializes a new {@link NetsolTestMailMessageDelete}
+     *
+     * @param name
+     */
+    public NetsolTestMailMessageDelete() {
+        super();
+    }
 
-	public void testMailDelete() throws Throwable {
-		netsolClearFolder(getInboxFolder());
-		netsolClearFolder(getSentFolder());
-		netsolClearFolder(getTrashFolder());
-		/*
-		 * Create JSON mail object
-		 */
-		final JSONObject mailObject_25kb = new JSONObject();
-		{
-			mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
-			mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
-			mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
-			mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
-			mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
-			mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
+    public void testMailDelete() throws Throwable {
+        netsolClearFolder(getInboxFolder());
+        netsolClearFolder(getSentFolder());
+        netsolClearFolder(getTrashFolder());
+        /*
+         * Create JSON mail object
+         */
+        final JSONObject mailObject_25kb = new JSONObject();
+        {
+            mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
+            mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
+            mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
+            mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
+            mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
+            mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
 
-			final JSONObject bodyObject = new JSONObject();
-			bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
-			bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />");
+            final JSONObject bodyObject = new JSONObject();
+            bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
+            bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />");
 
-			final JSONArray attachments = new JSONArray();
-			attachments.put(bodyObject);
+            final JSONArray attachments = new JSONArray();
+            attachments.put(bodyObject);
 
-			mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-		}
+            mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
+        }
 
-		final int runs = NetsolTestConstants.RUNS;
-		final DurationTracker requestTracker = new DurationTracker(runs);
-		final DurationTracker parseTracker = new DurationTracker(runs);
-		for (int i = 0; i < runs; i++) {
-			/*
-			 * "Put" into "Sent" folder through a send request
-			 */
-			final NetsolSendResponse response = Executor.execute(getSession(),
-					new NetsolSendRequest(mailObject_25kb.toString()));
-			final FolderAndID mailPath = new FolderAndID(response.getFolderAndID()[0], response.getFolderAndID()[1]);
-			/*
-			 * Delete previously added mail
-			 */
-			final NetsolDeleteRequest.NetsolDeleteResponse delResponse = Executor.execute(
-					getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, false));
-			assertTrue("Delete failed", delResponse.getFailed().length() == 0);
-			assertTrue("Duration corrupt", delResponse.getRequestDuration() > 0);
-			requestTracker.addDuration(delResponse.getRequestDuration());
-			parseTracker.addDuration(delResponse.getParseDuration());
-		}
-		/*
-		 * Clean everything
-		 */
-		netsolClearFolder(getInboxFolder());
-		netsolClearFolder(getSentFolder());
-		netsolClearFolder(getTrashFolder());
-	}
+        final int runs = NetsolTestConstants.RUNS;
+        final DurationTracker requestTracker = new DurationTracker(runs);
+        final DurationTracker parseTracker = new DurationTracker(runs);
+        for (int i = 0; i < runs; i++) {
+            /*
+             * "Put" into "Sent" folder through a send request
+             */
+            final NetsolSendResponse response = Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString()));
+            final FolderAndID mailPath = new FolderAndID(response.getFolderAndID()[0], response.getFolderAndID()[1]);
+            /*
+             * Delete previously added mail
+             */
+            final NetsolDeleteRequest.NetsolDeleteResponse delResponse = Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, false));
+            assertTrue("Delete failed", delResponse.getFailed().length() == 0);
+            assertTrue("Duration corrupt", delResponse.getRequestDuration() > 0);
+            requestTracker.addDuration(delResponse.getRequestDuration());
+            parseTracker.addDuration(delResponse.getParseDuration());
+        }
+        /*
+         * Clean everything
+         */
+        netsolClearFolder(getInboxFolder());
+        netsolClearFolder(getSentFolder());
+        netsolClearFolder(getTrashFolder());
+    }
 
 }

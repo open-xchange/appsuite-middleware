@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
@@ -75,18 +76,13 @@ import com.openexchange.groupware.container.UserParticipant;
 @RunWith(ConcurrentTestRunner.class)
 public class GetTest extends AppointmentTest {
 
+    @Test
     public void testGet() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGet");
         appointmentObj.setOrganizer(User.User1.name());
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        final Appointment loadAppointment = loadAppointment(
-            getWebConversation(),
-            objectId,
-            appointmentFolderId,
-            timeZone,
-            PROTOCOL + getHostName(),
-            getSessionId());
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 
         appointmentObj.setObjectID(objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
@@ -94,6 +90,7 @@ public class GetTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testGetWithParticipants() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGetWithParticipants");
         int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
@@ -110,19 +107,14 @@ public class GetTest extends AppointmentTest {
 
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        final Appointment loadAppointment = loadAppointment(
-            getWebConversation(),
-            objectId,
-            appointmentFolderId,
-            timeZone,
-            PROTOCOL + getHostName(),
-            getSessionId());
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         appointmentObj.setObjectID(objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testGetWithAllFields() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testGetWithAllFields");
@@ -137,24 +129,9 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
-        final int userParticipantId = ContactTest.searchContact(
-            getWebConversation(),
-            userParticipant3,
-            FolderObject.SYSTEM_LDAP_FOLDER_ID,
-            new int[] { Contact.INTERNAL_USERID },
-            PROTOCOL + getHostName(),
-            getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(
-            getWebConversation(),
-            groupParticipant,
-            PROTOCOL,
-            getHostName(),
-            getSessionId())[0].getIdentifier();
-        final int resourceParticipantId = ResourceTest.searchResource(
-            getWebConversation(),
-            resourceParticipant,
-            PROTOCOL + getHostName(),
-            getSessionId())[0].getIdentifier();
+        final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
+        final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);
@@ -166,13 +143,7 @@ public class GetTest extends AppointmentTest {
 
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        final Appointment loadAppointment = loadAppointment(
-            getWebConversation(),
-            objectId,
-            appointmentFolderId,
-            timeZone,
-            PROTOCOL + getHostName(),
-            getSessionId());
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -190,6 +161,7 @@ public class GetTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testGetWithAllFieldsOnUpdate() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testGetWithAllFieldsOnUpdate");
@@ -208,24 +180,9 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
-        final int userParticipantId = ContactTest.searchContact(
-            getWebConversation(),
-            userParticipant3,
-            FolderObject.SYSTEM_LDAP_FOLDER_ID,
-            new int[] { Contact.INTERNAL_USERID },
-            PROTOCOL + getHostName(),
-            getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(
-            getWebConversation(),
-            groupParticipant,
-            PROTOCOL,
-            getHostName(),
-            getSessionId())[0].getIdentifier();
-        final int resourceParticipantId = ResourceTest.searchResource(
-            getWebConversation(),
-            resourceParticipant,
-            PROTOCOL + getHostName(),
-            getSessionId())[0].getIdentifier();
+        final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
+        final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);
@@ -237,22 +194,9 @@ public class GetTest extends AppointmentTest {
 
         appointmentObj.removeParentFolderID();
 
-        updateAppointment(
-            getWebConversation(),
-            appointmentObj,
-            objectId,
-            appointmentFolderId,
-            timeZone,
-            PROTOCOL + getHostName(),
-            getSessionId());
+        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        final Appointment loadAppointment = loadAppointment(
-            getWebConversation(),
-            objectId,
-            appointmentFolderId,
-            timeZone,
-            PROTOCOL + getHostName(),
-            getSessionId());
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -271,7 +215,7 @@ public class GetTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
-    // Node 2652
+    // Node 2652    @Test
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
 

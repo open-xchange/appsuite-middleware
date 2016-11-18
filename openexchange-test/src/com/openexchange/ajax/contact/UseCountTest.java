@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -63,7 +64,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
-
 
 /**
  * {@link UseCountTest}
@@ -82,6 +82,7 @@ public class UseCountTest extends ContactTest {
 
     /**
      * Initializes a new {@link UseCountTest}.
+     * 
      * @param name
      */
     public UseCountTest() {
@@ -121,6 +122,7 @@ public class UseCountTest extends ContactTest {
         super.tearDown();
     }
 
+    @Test
     public void testUseCount() throws Exception {
         AJAXClient client = new AJAXClient(User.User1);
         AutocompleteRequest req = new AutocompleteRequest("UseCount", false, String.valueOf(folderId), CONTACT_FIELDS, false);

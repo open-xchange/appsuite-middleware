@@ -50,6 +50,7 @@
 package com.openexchange.ajax.tokenloginV2;
 
 import static com.openexchange.ajax.session.LoginTools.generateAuthId;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -82,6 +83,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         super.setUp();
     }
 
+    @Test
     public void testAcquire() throws Exception {
         AcquireTokenRequest request = new AcquireTokenRequest();
         AcquireTokenResponse response = getClient().execute(request);
@@ -92,6 +94,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         assertEquals("Different token.", token, getClient().execute(request).getToken());
     }
 
+    @Test
     public void testLoginWithPassword() throws Exception {
         AcquireTokenRequest request = new AcquireTokenRequest();
         AcquireTokenResponse response = getClient().execute(request);
@@ -111,9 +114,10 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
 
         int expectedErrorCode = TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber();
         int actualErrorCode = loginResponse.getException().getCode();
-        assertEquals("Wrong error. Expected \"" + expectedErrorCode + "\", but was \""+ actualErrorCode+"\".", expectedErrorCode, actualErrorCode);
+        assertEquals("Wrong error. Expected \"" + expectedErrorCode + "\", but was \"" + actualErrorCode + "\".", expectedErrorCode, actualErrorCode);
     }
 
+    @Test
     public void testLoginWithoutPassword() throws Exception {
         AcquireTokenRequest request = new AcquireTokenRequest();
         AcquireTokenResponse response = getClient().execute(request);
@@ -131,6 +135,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         assertEquals("Wrong error.", TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber(), loginResponse.getException().getCode());
     }
 
+    @Test
     public void testBadSecret() throws Exception {
         AcquireTokenRequest request = new AcquireTokenRequest();
         AcquireTokenResponse response = getClient().execute(request);
@@ -144,6 +149,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         assertEquals("Wrong error.", TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.getNumber(), loginResponse.getException().getCode());
     }
 
+    @Test
     public void testInvalidate() throws Exception {
         AcquireTokenRequest request = new AcquireTokenRequest();
         AcquireTokenResponse response = getClient().execute(request);
@@ -159,6 +165,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         assertTrue("Wrong error.", loginResponse.getException().getCode() == TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber() || loginResponse.getException().getCode() == TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN.getNumber());
     }
 
+    @Test
     public void testBadToken() throws Exception {
         LoginRequest login = new LoginRequest(new TokenLoginParameters("phantasyToken", SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
         AJAXClient client = new AJAXClient();
@@ -167,6 +174,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         assertTrue("Error expected.", loginResponse.hasError());
     }
 
+    @Test
     public void testRedirect() throws Exception {
         final String REDIRECT = client.getHostname() + "/tokenRedirectTest";
         AcquireTokenRequest request = new AcquireTokenRequest();
@@ -181,6 +189,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         assertTrue("Redirect urls does not match.", loginResponse.getRedirectUrl().startsWith(REDIRECT));
     }
 
+    @Test
     public void testLoginWithPasswordInURI_doNotAccept() throws Exception {
         AcquireTokenRequest request = new AcquireTokenRequest();
         AcquireTokenResponse response = getClient().execute(request);

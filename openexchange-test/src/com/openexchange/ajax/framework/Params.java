@@ -127,7 +127,7 @@ public class Params {
     @Override
     public String toString() {
         StringBuffer buffy = new StringBuffer();
-        for(Parameter p: parameters) {
+        for (Parameter p : parameters) {
             buffy.append('&').append(p.toString());
         }
 

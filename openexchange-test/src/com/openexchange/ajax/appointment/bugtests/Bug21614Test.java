@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -109,19 +110,20 @@ public class Bug21614Test extends AbstractAJAXSession {
         appointment.setInterval(1);
         appointment.setParticipants(participants);
     }
-    
+
+    @Test
     public void testBug21614() throws Exception {
         InsertRequest insertRequest = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientA.execute(insertRequest);
         insertResponse.fillObject(appointment);
-        
+
         DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), clientA.getValues().getPrivateAppointmentFolder(), 5, appointment.getLastModified());
         CommonDeleteResponse deleteResponse = clientA.execute(deleteRequest);
         appointment.setLastModified(deleteResponse.getTimestamp());
-        
+
         assertNotFind(clientA);
         assertNotFind(clientB);
-        
+
         deleteRequest = new DeleteRequest(appointment.getObjectID(), clientB.getValues().getPrivateAppointmentFolder(), 2, appointment.getLastModified());
         try {
             deleteResponse = clientB.execute(deleteRequest);
@@ -135,13 +137,13 @@ public class Bug21614Test extends AbstractAJAXSession {
     }
 
     private void assertNotFind(AJAXClient c) throws IOException, JSONException, OXException {
-        AllRequest allRequest = new AllRequest(c.getValues().getPrivateAppointmentFolder(), new int[] {Appointment.OBJECT_ID}, new Date(1334880000000L), new Date(1334966400000L), TimeZone.getTimeZone("UTC"), false);
+        AllRequest allRequest = new AllRequest(c.getValues().getPrivateAppointmentFolder(), new int[] { Appointment.OBJECT_ID }, new Date(1334880000000L), new Date(1334966400000L), TimeZone.getTimeZone("UTC"), false);
         CommonAllResponse allResponse = c.execute(allRequest);
-        
+
         boolean found = false;
         Object[][] objects = allResponse.getArray();
         for (Object[] object : objects) {
-            if ((Integer)object[0] == appointment.getObjectID()) {
+            if ((Integer) object[0] == appointment.getObjectID()) {
                 found = true;
             }
         }

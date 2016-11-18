@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.infostore;
 
 import java.io.IOException;
@@ -5,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
@@ -15,50 +17,50 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class DeleteTest extends InfostoreAJAXTest {
 
-	public DeleteTest() {
-		super();
-	}
+    public DeleteTest() {
+        super();
+    }
 
-	public void testBasic() throws Exception{
+    public void testBasic() throws Exception {
         super.removeAll();
 
-        final Response res = this.all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID});
+        final Response res = this.all(getWebConversation(), getHostName(), sessionId, folderId, new int[] { Metadata.ID });
 
-		assertNoError(res);
+        assertNoError(res);
 
-		final JSONArray a = (JSONArray) res.getData();
+        final JSONArray a = (JSONArray) res.getData();
 
-		assertEquals(0, a.length());
+        assertEquals(0, a.length());
 
-		clean.clear();
-	}
+        clean.clear();
+    }
 
-	public void testConflict() throws Exception{
+    public void testConflict() throws Exception {
 
-		final String[][] toDelete = new String[clean.size()][2];
+        final String[][] toDelete = new String[clean.size()][2];
 
-		for(int i = 0; i < toDelete.length; i++) {
-			toDelete[i][0] = String.valueOf(folderId);
-			toDelete[i][1] = clean.get(i);
-		}
+        for (int i = 0; i < toDelete.length; i++) {
+            toDelete[i][0] = String.valueOf(folderId);
+            toDelete[i][1] = clean.get(i);
+        }
 
-		String[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, 0, toDelete);
-		assertEquals(toDelete.length,notDeleted.length);
+        String[] notDeleted = delete(getWebConversation(), getHostName(), sessionId, 0, toDelete);
+        assertEquals(toDelete.length, notDeleted.length);
 
-		Set<String> notDeletedExpect = new HashSet<String>(clean);
+        Set<String> notDeletedExpect = new HashSet<String>(clean);
 
-		for(final String i : notDeleted) {
-			assertTrue(notDeletedExpect.remove(i));
-		}
-		assertTrue(notDeletedExpect.isEmpty());
+        for (final String i : notDeleted) {
+            assertTrue(notDeletedExpect.remove(i));
+        }
+        assertTrue(notDeletedExpect.isEmpty());
 
-		removeDocumentsAndFolders();
-		clean.clear();
+        removeDocumentsAndFolders();
+        clean.clear();
 
-		final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), sessionId), false);
-		String infostoreTrashFolder = String.valueOf(client.getValues().getInfostoreTrashFolder());
-		notDeletedExpect = new HashSet<String>();
-		for(int i = 0; i < toDelete.length; i++) {
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), sessionId), false);
+        String infostoreTrashFolder = String.valueOf(client.getValues().getInfostoreTrashFolder());
+        notDeletedExpect = new HashSet<String>();
+        for (int i = 0; i < toDelete.length; i++) {
             FileID fileID = new FileID(toDelete[i][1]);
             fileID.setFolderId(infostoreTrashFolder);
             String uniqueID = fileID.toUniqueID();
@@ -67,19 +69,19 @@ public class DeleteTest extends InfostoreAJAXTest {
             toDelete[i][1] = uniqueID;
             notDeletedExpect.add(uniqueID);
         }
-		notDeleted = delete(getWebConversation(),getHostName(),sessionId, 0, toDelete);
-		assertEquals(toDelete.length,notDeleted.length);
+        notDeleted = delete(getWebConversation(), getHostName(), sessionId, 0, toDelete);
+        assertEquals(toDelete.length, notDeleted.length);
 
-		for(final String i : notDeleted) {
-			assertTrue(notDeletedExpect.remove(i));
-		}
-		assertTrue(notDeletedExpect.isEmpty());
+        for (final String i : notDeleted) {
+            assertTrue(notDeletedExpect.remove(i));
+        }
+        assertTrue(notDeletedExpect.isEmpty());
 
-	}
+    }
 
-
+    @Test
     public void testDeleteSingle() throws JSONException, IOException, SAXException {
-        final String[] notDeleted = deleteSingle(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, folderId, clean.get(clean.size()-1));
+        final String[] notDeleted = deleteSingle(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, folderId, clean.get(clean.size() - 1));
         assertEquals(0, notDeleted.length);
 
     }

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -70,6 +71,7 @@ public class ReplyTest extends AbstractReplyTest {
         super();
     }
 
+    @Test
     public void testShouldReplyToSenderOnly() throws OXException, IOException, SAXException, JSONException, OXException {
         AJAXClient client2 = null;
         try {

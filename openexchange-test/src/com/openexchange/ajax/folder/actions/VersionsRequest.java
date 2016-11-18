@@ -74,7 +74,7 @@ public class VersionsRequest extends AbstractFileRequest<VersionsResponse> {
     public VersionsRequest(String folderId, Field[] fields) {
         super(true);
         this.folderId = folderId;
-        
+
         List<Integer> columnNumbers = new ArrayList<Integer>(fields.length);
         for (Field field : fields) {
             columnNumbers.add(field.getNumber());

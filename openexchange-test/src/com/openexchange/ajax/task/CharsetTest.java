@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -59,6 +60,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Verifies that the charset handling is correct.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CharsetTest extends AbstractTaskTest {
@@ -69,8 +71,10 @@ public class CharsetTest extends AbstractTaskTest {
 
     /**
      * Tests if the charset handling is correct.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testCharset() throws Throwable {
         AJAXClient client = getClient();
         Task task = new Task();

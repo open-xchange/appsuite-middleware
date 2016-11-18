@@ -51,6 +51,9 @@ package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -84,8 +87,8 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
         clientB = new AJAXClient(User.User2);
@@ -119,11 +122,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
             createdSharedFolder.setModule(FolderObject.CALENDAR);
             createdSharedFolder.setParentFolderID(clientB.getValues().getPrivateAppointmentFolder());
             createdSharedFolder.setType(FolderObject.PRIVATE);
-            createdSharedFolder.setPermissions(PermissionTools.P(
-                I(clientB.getValues().getUserId()),
-                PermissionTools.ADMIN,
-                I(clientA.getValues().getUserId()),
-                "arawada"));
+            createdSharedFolder.setPermissions(PermissionTools.P(I(clientB.getValues().getUserId()), PermissionTools.ADMIN, I(clientA.getValues().getUserId()), "arawada"));
             createdSharedFolder.setFolderName("testSharedCalendarFolder" + System.currentTimeMillis());
             final InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdSharedFolder);
             final InsertResponse iResp = clientB.execute(iReq);
@@ -132,14 +131,15 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
 
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdPrivateFolder));
         clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdPublicFolder));
         clientB.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdSharedFolder));
         super.tearDown();
     }
 
+    @Test
     public void testForVisibleFolders() throws Throwable {
         final VisibleFoldersRequest req = new VisibleFoldersRequest(EnumAPI.OUTLOOK, "calendar");
         final VisibleFoldersResponse resp = client.execute(req);
@@ -190,6 +190,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testFindingGlobalAddressbook() throws Exception {
         final VisibleFoldersRequest req = new VisibleFoldersRequest(EnumAPI.OUTLOOK, "contacts");
         final VisibleFoldersResponse resp = client.execute(req);

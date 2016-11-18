@@ -54,6 +54,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -100,6 +101,7 @@ public class Bug14111Test extends AbstractAJAXSession {
         exception = createException();
     }
 
+    @Test
     public void testReminders() throws Exception {
         // Get one reminder after another and delete it to calculate the next one
         final Calendar cal = (Calendar) calendar.clone();
@@ -138,18 +140,14 @@ public class Bug14111Test extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         // Delete the exception.
-        final com.openexchange.ajax.appointment.action.DeleteRequest delReq1 = new com.openexchange.ajax.appointment.action.DeleteRequest(
-            exception,
-            false);
+        final com.openexchange.ajax.appointment.action.DeleteRequest delReq1 = new com.openexchange.ajax.appointment.action.DeleteRequest(exception, false);
         client.execute(delReq1);
 
         // Delete the series.
         final GetRequest getApp = new GetRequest(appointment, false);
         final GetResponse getAppResp = client.execute(getApp);
         final Appointment toDelete = getAppResp.getAppointment(tz);
-        final com.openexchange.ajax.appointment.action.DeleteRequest delReq2 = new com.openexchange.ajax.appointment.action.DeleteRequest(
-            toDelete,
-            false);
+        final com.openexchange.ajax.appointment.action.DeleteRequest delReq2 = new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete, false);
         client.execute(delReq2);
         super.tearDown();
     }

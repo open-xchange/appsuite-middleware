@@ -51,6 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -87,12 +89,13 @@ public class ClearTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testClearPrivate() throws Throwable {
         // Get root folder
         String newId = null;
@@ -106,11 +109,7 @@ public class ClearTest extends AbstractAJAXSession {
             oclP.setEntity(client.getValues().getUserId());
             oclP.setGroupPermission(false);
             oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
             final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
@@ -124,8 +123,7 @@ public class ClearTest extends AbstractAJAXSession {
             if (!protocol.endsWith("://")) {
                 protocol = protocol + "://";
             }
-            final String hostname =
-                null == client.getHostname() ? AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME) : client.getHostname();
+            final String hostname = null == client.getHostname() ? AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME) : client.getHostname();
 
             final AJAXSession session = client.getSession();
             final UserValues values = client.getValues();
@@ -139,12 +137,7 @@ public class ClearTest extends AbstractAJAXSession {
                 appointmentObj.setParentFolderID(Integer.parseInt(newId));
                 appointmentObj.setIgnoreConflicts(true);
 
-                AppointmentTest.insertAppointment(
-                    session.getConversation(),
-                    appointmentObj,
-                    values.getTimeZone(),
-                    protocol + hostname,
-                    session.getId());
+                AppointmentTest.insertAppointment(session.getConversation(), appointmentObj, values.getTimeZone(), protocol + hostname, session.getId());
             }
             {
                 final Appointment appointmentObj = new Appointment();
@@ -155,17 +148,11 @@ public class ClearTest extends AbstractAJAXSession {
                 appointmentObj.setParentFolderID(Integer.parseInt(newId));
                 appointmentObj.setIgnoreConflicts(true);
 
-                AppointmentTest.insertAppointment(
-                    session.getConversation(),
-                    appointmentObj,
-                    values.getTimeZone(),
-                    protocol + hostname,
-                    session.getId());
+                AppointmentTest.insertAppointment(session.getConversation(), appointmentObj, values.getTimeZone(), protocol + hostname, session.getId());
             }
 
             final CalendarTestManager calendarTestManager = new CalendarTestManager(client);
-            final Appointment[] appointments =
-                calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
+            final Appointment[] appointments = calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
 
             assertTrue("Appointments were not created.", null != appointments && appointments.length == 2);
 
@@ -176,8 +163,7 @@ public class ClearTest extends AbstractAJAXSession {
 
             assertEquals("Folder could not be cleared.", 0, nonClearedIDs.length());
 
-            final Appointment[] emptyAppointments =
-                calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
+            final Appointment[] emptyAppointments = calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
 
             assertTrue("Appointments were not cleared.", null == emptyAppointments || emptyAppointments.length == 0);
 

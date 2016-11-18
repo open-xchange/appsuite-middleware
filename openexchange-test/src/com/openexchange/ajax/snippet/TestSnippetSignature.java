@@ -57,6 +57,7 @@ import java.io.InputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.managedfile.actions.GetPictureManagedFileRequest;
 import com.openexchange.ajax.managedfile.actions.GetPictureManagedFileResponse;
@@ -85,6 +86,7 @@ public class TestSnippetSignature extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testCreateSignatureWithImageWorkflow() throws Exception {
         String mfID1 = uploadFile("contact_image.png");
         String mfID2 = uploadFile("ox_logo_sml.jpg");

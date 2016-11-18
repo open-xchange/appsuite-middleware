@@ -138,7 +138,7 @@ public abstract class AbstractAJAXResponse extends Assert {
         return conflicts;
     }
 
-    public void setConflicts(final List <ConflictObject> conflicts) {
+    public void setConflicts(final List<ConflictObject> conflicts) {
         this.conflicts = conflicts;
     }
 

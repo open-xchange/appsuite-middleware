@@ -53,6 +53,9 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -66,6 +69,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * Verifies the until date of a full time daily series appointment.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12496Test extends AbstractAJAXSession {
@@ -78,6 +82,7 @@ public final class Bug12496Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name.
      */
     public Bug12496Test() {
@@ -87,8 +92,8 @@ public final class Bug12496Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         final AJAXClient client = getClient();
         tz = client.getValues().getTimeZone();
@@ -102,13 +107,14 @@ public final class Bug12496Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         final DeleteRequest request = new DeleteRequest(appointment);
         getClient().execute(request);
         super.tearDown();
     }
 
+    @Test
     public void testDailyFullTimeUntil() throws Throwable {
         final AJAXClient client = getClient();
         final Appointment changed = changeAppointment();
@@ -118,8 +124,7 @@ public final class Bug12496Test extends AbstractAJAXSession {
     }
 
     private Appointment createAppointment() {
-        final Calendar calendar = TimeTools.createCalendar(TimeZone
-            .getTimeZone("UTC"));
+        final Calendar calendar = TimeTools.createCalendar(TimeZone.getTimeZone("UTC"));
         final Appointment appointment = new Appointment();
         appointment.setTitle("test for bug 12496");
         appointment.setParentFolderID(folderId);
@@ -151,10 +156,11 @@ public final class Bug12496Test extends AbstractAJAXSession {
     }
 
     private static final class SpecialUpdateRequest extends UpdateRequest {
-        public SpecialUpdateRequest(final Appointment appointment,
-            final TimeZone tz) {
+
+        public SpecialUpdateRequest(final Appointment appointment, final TimeZone tz) {
             super(appointment, tz);
         }
+
         @Override
         public JSONObject getBody() throws JSONException {
             final JSONObject retval = super.getBody();

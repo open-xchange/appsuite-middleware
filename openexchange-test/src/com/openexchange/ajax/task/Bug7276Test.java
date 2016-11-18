@@ -50,6 +50,9 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.I;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -67,12 +70,13 @@ import com.openexchange.groupware.tasks.TaskExceptionCode;
 
 /**
  * Tests problem described in bug #7276.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug7276Test extends AbstractTaskTest {
 
     private AJAXClient client2;
-	private Generic expected;
+    private Generic expected;
 
     /**
      * @param name
@@ -84,8 +88,8 @@ public class Bug7276Test extends AbstractTaskTest {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(AJAXClient.User.User2);
     }
@@ -93,16 +97,18 @@ public class Bug7276Test extends AbstractTaskTest {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client2.logout();
         super.tearDown();
     }
 
     /**
      * Tests if bug #7276 appears again.
+     * 
      * @throws Throwable if this test fails.
      */
+    @Test
     public void testBug() throws Throwable {
         final AJAXClient client1 = getClient();
         final int folder2 = client2.getValues().getPrivateTaskFolder();
@@ -110,8 +116,7 @@ public class Bug7276Test extends AbstractTaskTest {
         Task task = Create.createWithDefaults();
         task.setTitle("Test bug #7276");
         task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
-        task.setParticipants(ParticipantTools.createParticipants(client1
-            .getValues().getUserId(), client2.getValues().getUserId()));
+        task.setParticipants(ParticipantTools.createParticipants(client1.getValues().getUserId(), client2.getValues().getUserId()));
         {
             final InsertResponse response = client1.execute(new InsertRequest(task, client1.getValues().getTimeZone()));
             response.fillTask(task);
@@ -120,25 +125,20 @@ public class Bug7276Test extends AbstractTaskTest {
         TaskTools.get(client2, new GetRequest(folder2, task.getObjectID()));
         // User 1 modifies the task and removes participant User 2
         {
-            final GetResponse response = TaskTools.get(client1, new GetRequest(
-                task.getParentFolderID(), task.getObjectID()));
+            final GetResponse response = TaskTools.get(client1, new GetRequest(task.getParentFolderID(), task.getObjectID()));
             task = response.getTask(client1.getValues().getTimeZone());
         }
-        task.setParticipants(ParticipantTools.createParticipants(client1
-            .getValues().getUserId()));
+        task.setParticipants(ParticipantTools.createParticipants(client1.getValues().getUserId()));
         {
-            final UpdateResponse response = TaskTools.update(client1,
-                new UpdateRequest(task, client1.getValues().getTimeZone()));
+            final UpdateResponse response = TaskTools.update(client1, new UpdateRequest(task, client1.getValues().getTimeZone()));
             task.setLastModified(response.getTimestamp());
         }
         // Now User 2 tries to load the task again.
         {
-            final GetResponse response = TaskTools.get(client2, new GetRequest(
-                folder2, task.getObjectID(), false));
-            assertTrue("Server does not give exception although it has to.",
-                response.hasError());
+            final GetResponse response = TaskTools.get(client2, new GetRequest(folder2, task.getObjectID(), false));
+            assertTrue("Server does not give exception although it has to.", response.hasError());
             OXException expectedErr = TaskExceptionCode.NO_PERMISSION.create(I(0), "", I(0));
-            OXException actual= response.getException();
+            OXException actual = response.getException();
             assertTrue("Wrong exception", actual.similarTo(expectedErr));
         }
         // Clean up

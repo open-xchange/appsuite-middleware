@@ -63,7 +63,6 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.tasks.Task;
 
-
 /**
  * {@link DeleteMultipleTaskTest}
  *
@@ -77,6 +76,7 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link DeleteMultipleTaskTest}.
+     * 
      * @param name
      */
     public DeleteMultipleTaskTest() {
@@ -92,22 +92,22 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
         task1 = new Task();
         task1.setTitle("Test 1");
         task1.setStartDate(new Date());
-        task1.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 *2));
+        task1.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2));
         task1.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertRequest insReq1 = new InsertRequest(task1, timeZone);
         final InsertResponse insRes1 = client.execute(insReq1);
         insRes1.fillTask(task1);
-        
+
         task2 = new Task();
         task2.setTitle("Test 2");
         task2.setStartDate(new Date());
-        task2.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 *2));
+        task2.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2));
         task2.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertRequest insReq2 = new InsertRequest(task2, timeZone);
         final InsertResponse insRes2 = client.execute(insReq2);
         insRes2.fillTask(task2);
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         final GetRequest getReq1 = new GetRequest(task1.getParentFolderID(), task1.getObjectID(), false);
@@ -126,10 +126,10 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
 
         super.tearDown();
     }
-    
+
     @Test
     public void testDeleteMultiple() throws Exception {
-        final int[] ids = new int[] {task1.getObjectID(), task2.getObjectID()};
+        final int[] ids = new int[] { task1.getObjectID(), task2.getObjectID() };
         final DeleteRequest delReq = new DeleteRequest(client.getValues().getPrivateTaskFolder(), ids, new Date(System.currentTimeMillis() + 300000), true);
         final CommonDeleteResponse delRes = client.execute(delReq);
         assertFalse("Multiple delete failed: " + delRes.getErrorMessage(), delRes.hasError());

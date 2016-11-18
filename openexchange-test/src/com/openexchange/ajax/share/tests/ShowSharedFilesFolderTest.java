@@ -51,6 +51,7 @@ package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
 import java.util.Iterator;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
@@ -61,7 +62,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
-
 
 /**
  * {@link ShowSharedFilesFolderTest}
@@ -105,6 +105,7 @@ public class ShowSharedFilesFolderTest extends ShareTest {
         super.tearDown();
     }
 
+    @Test
     public void testShowSharedFilesFolder() throws Exception {
         GuestClient guestClient = resolveShare(guest, perm.getRecipient());
 

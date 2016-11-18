@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -68,11 +69,12 @@ public class Bug28185Test extends AbstractManagedContactTest {
         super();
     }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
+    @Test
     public void testWrongMemberReference() throws OXException {
         /*
          * try and create a distribution list, using a wrong entry id reference and no e-mail address
@@ -93,6 +95,7 @@ public class Bug28185Test extends AbstractManagedContactTest {
         assertEquals("unexpected error code in exception", "CON-0177", lastException.getErrorCode());
     }
 
+    @Test
     public void testEmptyEmailAddress() throws OXException {
         /*
          * try and create a distribution list, using an empty e-mail address
@@ -113,6 +116,7 @@ public class Bug28185Test extends AbstractManagedContactTest {
         assertEquals("unexpected error code in exception", "CON-0177", lastException.getErrorCode());
     }
 
+    @Test
     public void testNoObjectIDReference() throws OXException {
         /*
          * try and create a distribution list, using a specific mail-field, but no entry id

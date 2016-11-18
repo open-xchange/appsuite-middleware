@@ -53,6 +53,9 @@ import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.SendRequest;
@@ -92,8 +95,8 @@ public class MSISDNAddressTest extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         userValues = client.getValues();
@@ -104,8 +107,8 @@ public class MSISDNAddressTest extends AbstractMailTest {
         setCellularNumberOfContact(validTestCellPhoneNumber);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         // reset to original Number if tests expect this
         setCellularNumberOfContact(originalCellPhoneNumber);
         super.tearDown();
@@ -127,25 +130,19 @@ public class MSISDNAddressTest extends AbstractMailTest {
     /*
      * Send an e-mail with the msisdn we just set in the contact
      */
+    @Test
     public void testValidFromAddress() throws OXException, IOException, JSONException, SAXException {
-        JSONObject createEMail = createEMail(
-            getSendAddress(client),
-            "MSISDNSubject",
-            MailContentType.PLAIN.name(),
-            "Testing MSISDN as sender address");
+        JSONObject createEMail = createEMail(getSendAddress(client), "MSISDNSubject", MailContentType.PLAIN.name(), "Testing MSISDN as sender address");
         createEMail.put(MailJSONField.FROM.getKey(), validTestCellPhoneNumber);
         SendRequest request = new SendRequest(createEMail.toString());
         SendResponse response = client.execute(request);
         assertTrue("Send request failed", response.getFolderAndID() != null && response.getFolderAndID().length > 0);
     }
 
+    @Test
     public void testInvalidFromAddress() throws OXException, IOException, JSONException, SAXException {
         System.out.println("Testing invalid");
-        JSONObject createEMail = createEMail(
-            getSendAddress(getClient()),
-            "MSISDNSubject",
-            MailContentType.PLAIN.name(),
-            "Testing MSISDN as sender address");
+        JSONObject createEMail = createEMail(getSendAddress(getClient()), "MSISDNSubject", MailContentType.PLAIN.name(), "Testing MSISDN as sender address");
         createEMail.put(MailJSONField.FROM.getKey(), invalidTestCellPhoneNumber);
         SendRequest request = new SendRequest(createEMail.toString(), false);
         SendResponse response = client.execute(request);

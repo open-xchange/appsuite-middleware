@@ -60,7 +60,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
-import junit.framework.TestCase;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -84,6 +84,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.image.WrappingImageTransformationService;
 import com.openexchange.tools.session.SimServerSession;
+import junit.framework.TestCase;
 
 /**
  * {@link ImageComparingTest}
@@ -92,8 +93,7 @@ import com.openexchange.tools.session.SimServerSession;
  * @since v7.6.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    com.openexchange.imagetransformation.java.osgi.Services.class })
+@PrepareForTest({ com.openexchange.imagetransformation.java.osgi.Services.class })
 @PowerMockIgnore({ "javax.imageio.*" })
 public class ImageComparingTest extends TestCase {
 
@@ -130,6 +130,7 @@ public class ImageComparingTest extends TestCase {
         super.tearDown();
     }
 
+    @Test
     public void testRotationSuccess_Bug26630() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "Rotate_90CW.jpg");
@@ -193,6 +194,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
+    @Test
     public void testAlphaChannelShouldNotGetTransformed_Bug28163() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "28163.jpg");
@@ -239,6 +241,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
+    @Test
     public void testGIFPictureIsAnimated_Bug29072() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "29072.gif");
@@ -277,6 +280,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadImageWithCMYKProfile_Bug28082() throws IOException {
         final File file = new File(TEST_DATA_DIR, "28082.jpg");
         final FileHolder fileHolder = new FileHolder(file);

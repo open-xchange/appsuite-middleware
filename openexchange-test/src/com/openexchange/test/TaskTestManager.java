@@ -90,7 +90,7 @@ import com.openexchange.groupware.tasks.TestTask;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TaskTestManager implements TestManager{
+public class TaskTestManager implements TestManager {
 
     protected List<Task> createdEntities;
 
@@ -268,7 +268,7 @@ public class TaskTestManager implements TestManager{
         } catch (Exception e) {
             doHandleExeption(e, "ListRequest");
         }
-        return (tasks == null) ? null : tasks.toArray(new Task[]{});
+        return (tasks == null) ? null : tasks.toArray(new Task[] {});
     }
 
     public Task searchForTasksOnServer() {
@@ -285,45 +285,46 @@ public class TaskTestManager implements TestManager{
     protected static Object transformColumn(final int column, final Object value) {
         final Object retval;
         switch (column) {
-        case Task.CREATION_DATE:
-        case Appointment.LAST_MODIFIED:
-        case Task.START_DATE:
-        case Task.END_DATE:
-        case Task.RECURRENCE_DATE_POSITION:
-        case Task.UNTIL:
-        case Task.DATE_COMPLETED:
-            retval = new Date(((Long) value).longValue());
-            break;
-        case Task.ACTUAL_DURATION:
-        case Task.TARGET_DURATION:
-            retval = Long.valueOf((String) value);
-            break;
-        case Task.ACTUAL_COSTS:
-        case Task.TARGET_COSTS:
-            retval = new BigDecimal(value.toString());
-            break;
-//        case Task.PERCENT_COMPLETED:
-//            retval = Integer.valueOf(((Long) value).intValue());
-//            break;
-        case Task.BILLING_INFORMATION:
-            retval = value;
-            break;
-        case Task.PRIORITY:
-            retval = Integer.valueOf(String.valueOf(value));
-            break;
-        default:
-            retval = value;
+            case Task.CREATION_DATE:
+            case Appointment.LAST_MODIFIED:
+            case Task.START_DATE:
+            case Task.END_DATE:
+            case Task.RECURRENCE_DATE_POSITION:
+            case Task.UNTIL:
+            case Task.DATE_COMPLETED:
+                retval = new Date(((Long) value).longValue());
+                break;
+            case Task.ACTUAL_DURATION:
+            case Task.TARGET_DURATION:
+                retval = Long.valueOf((String) value);
+                break;
+            case Task.ACTUAL_COSTS:
+            case Task.TARGET_COSTS:
+                retval = new BigDecimal(value.toString());
+                break;
+            //        case Task.PERCENT_COMPLETED:
+            //            retval = Integer.valueOf(((Long) value).intValue());
+            //            break;
+            case Task.BILLING_INFORMATION:
+                retval = value;
+                break;
+            case Task.PRIORITY:
+                retval = Integer.valueOf(String.valueOf(value));
+                break;
+            default:
+                retval = value;
         }
         return retval;
     }
 
-    protected List<Task> transformArrayToTasks(JSONArray tasks, int[] columns) throws JSONException{
+    protected List<Task> transformArrayToTasks(JSONArray tasks, int[] columns) throws JSONException {
         LinkedList<Task> results = new LinkedList<Task>();
-        for(int i = 0, length = tasks.length(); i < length; i++){
-            results.add(transformArrayToTask( tasks.getJSONArray(i), columns));
+        for (int i = 0, length = tasks.length(); i < length; i++) {
+            results.add(transformArrayToTask(tasks.getJSONArray(i), columns));
         }
         return results;
     }
+
     /**
      * An AllRequest answers with a JSONArray of JSONArrays, each of which contains a field belonging to a task. This method assembles a
      * task from this array.

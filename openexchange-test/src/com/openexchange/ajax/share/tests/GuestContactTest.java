@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -78,12 +79,14 @@ public class GuestContactTest extends ShareTest {
 
     /**
      * Initializes a new {@link GuestContactTest}.
+     * 
      * @param name
      */
     public GuestContactTest() {
         super();
     }
 
+    @Test
     public void testCreateGuestContact() throws Exception {
         /*
          * create folder and a shared file inside
@@ -125,6 +128,7 @@ public class GuestContactTest extends ShareTest {
         assertTrue("Contact id is 0.", contact.getObjectID() != 0);
     }
 
+    @Test
     public void testUpdateGuestContact() throws Exception {
         /*
          * create folder and a shared file inside
@@ -181,6 +185,7 @@ public class GuestContactTest extends ShareTest {
         assertEquals(ContactExceptionCodes.NO_CHANGE_PERMISSION.getNumber(), updateResponse2.getException().getCode());
     }
 
+    @Test
     public void testOtherUser() throws Exception {
         /*
          * create folder and a shared file inside

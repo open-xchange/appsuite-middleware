@@ -60,14 +60,14 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link AbstractStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public abstract class AbstractStep implements Step{
+public abstract class AbstractStep implements Step {
+
     protected String name;
     protected String expectedError;
     protected AJAXClient client;
@@ -78,18 +78,18 @@ public abstract class AbstractStep implements Step{
     }
 
     protected void checkError(AbstractAJAXResponse response) {
-        if(response.hasError()) {
+        if (response.hasError()) {
             String message = response.getResponse().getErrorMessage();
-            if(expectedError != null) {
-                Assert.assertTrue(name+" expected error: "+expectedError+" but got: "+message, message.contains(expectedError));
+            if (expectedError != null) {
+                Assert.assertTrue(name + " expected error: " + expectedError + " but got: " + message, message.contains(expectedError));
             } else {
-                fail(name+" did not expect error, but failed with: "+message);
+                fail(name + " did not expect error, but failed with: " + message);
             }
 
         } else {
 
-            if(expectedError != null) {
-                Assert.fail(name+" expected error "+expectedError+" but didn't get any errors");
+            if (expectedError != null) {
+                Assert.fail(name + " expected error " + expectedError + " but didn't get any errors");
             }
         }
     }

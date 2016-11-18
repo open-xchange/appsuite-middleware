@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -90,6 +91,7 @@ public class UpdatesTest extends AbstractTaskTest {
         super();
     }
 
+    @Test
     public void testUpdates() throws Throwable {
         final int total = UPDATES + UNTOUCHED + DELETES;
         final AJAXClient client = getClient();
@@ -108,13 +110,10 @@ public class UpdatesTest extends AbstractTaskTest {
             task.setParticipants(new Participant[] { new UserParticipant(userId) });
             inserts[i] = new InsertRequest(task, timeZone);
         }
-        final MultipleResponse<InsertResponse> mInsert = client.execute(
-            MultipleRequest.create(inserts));
+        final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
         int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
-        final CommonAllResponse allR = TaskTools.all(client, new AllRequest(
-            folderId, columns, Task.TITLE, Order.ASCENDING));
-        assertTrue("Can't find " + total + " inserted tasks.",
-            allR.getArray().length >= total);
+        final CommonAllResponse allR = TaskTools.all(client, new AllRequest(folderId, columns, Task.TITLE, Order.ASCENDING));
+        assertTrue("Can't find " + total + " inserted tasks.", allR.getArray().length >= total);
 
         // Now update 5
         final UpdateRequest[] updates = new UpdateRequest[UPDATES];
@@ -128,27 +127,21 @@ public class UpdatesTest extends AbstractTaskTest {
             task.setLastModified(insertR.getTimestamp());
             updates[i] = new UpdateRequest(task, timeZone);
         }
-        final MultipleResponse<UpdateResponse> mUpdate = client.execute(
-            MultipleRequest.create(updates));
+        final MultipleResponse<UpdateResponse> mUpdate = client.execute(MultipleRequest.create(updates));
 
         // And delete 2
         final DeleteRequest[] deletes = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes.length; i++) {
             final InsertResponse insertR = mInsert.getResponse(total - (i + 1));
-            deletes[i] = new DeleteRequest(folderId, insertR.getId(), insertR
-                .getTimestamp());
+            deletes[i] = new DeleteRequest(folderId, insertR.getId(), insertR.getTimestamp());
             expectedDeletedTaskIds.add(insertR.getId());
         }
         client.execute(MultipleRequest.create(deletes));
 
         // Now request updates for the list
-        columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
-            Task.START_DATE, Task.END_DATE, Task.NOTE, Task.ALARM, Task.PERCENT_COMPLETED,
-            Task.PRIORITY, Task.PARTICIPANTS, Task.STATUS };
+        columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE, Task.START_DATE, Task.END_DATE, Task.NOTE, Task.ALARM, Task.PERCENT_COMPLETED, Task.PRIORITY, Task.PARTICIPANTS, Task.STATUS };
         final TaskUpdatesResponse updatesR = client.execute(new UpdatesRequest(folderId, columns, 0, null, allR.getTimestamp(), Ignore.NONE));
-        assertTrue("Only found " + updatesR.size()
-            + " updated tasks but should be more than "
-            + (UPDATES + DELETES) + '.', updatesR.size() >= UPDATES + DELETES);
+        assertTrue("Only found " + updatesR.size() + " updated tasks but should be more than " + (UPDATES + DELETES) + '.', updatesR.size() >= UPDATES + DELETES);
 
         //Check exactly if above done updates and deletes are found.
         Set<Integer> newOrModifiedIds = updatesR.getNewOrModifiedIds();
@@ -159,19 +152,16 @@ public class UpdatesTest extends AbstractTaskTest {
         // Clean up
         final DeleteRequest[] deletes2 = new DeleteRequest[UPDATES + UNTOUCHED];
         for (int i = 0; i < deletes2.length; i++) {
-            final InsertResponse insertR = mInsert
-                .getResponse(i);
+            final InsertResponse insertR = mInsert.getResponse(i);
             final Date lastModified;
             if (i < UPDATES) {
                 lastModified = mUpdate.getResponse(i).getTimestamp();
             } else {
                 lastModified = insertR.getTimestamp();
             }
-            deletes2[i] = new DeleteRequest(folderId, insertR.getId(),
-                lastModified);
+            deletes2[i] = new DeleteRequest(folderId, insertR.getId(), lastModified);
         }
         client.execute(MultipleRequest.create(deletes2));
     }
-
 
 }

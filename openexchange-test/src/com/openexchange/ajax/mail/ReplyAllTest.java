@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -64,7 +65,6 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
-
 
 /**
  * {@link ReplyAllTest}
@@ -77,7 +77,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         super();
     }
 
-    public List<Contact> extract(final int amount, final Contact[] source, final List<String> excludedEmail){
+    public List<Contact> extract(final int amount, final Contact[] source, final List<String> excludedEmail) {
         final List<Contact> returnees = new LinkedList<Contact>();
         int used = 0;
         for (final Contact elem : source) {
@@ -89,6 +89,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         return returnees;
     }
 
+    @Test
     public void testDummy() throws Exception {
         // Disabled test below because sending mails do not cover an estimateable time frame
         final String mail1 = new AJAXClient(User.User1).getValues().getSendAddress();
@@ -105,24 +106,23 @@ public class ReplyAllTest extends AbstractReplyTest {
             Executor.execute(client2.getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
         }
 
-
         final String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
         final String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
 
         List<Contact> otherContacts;
         {
             ContactSearchObject searchObject = new ContactSearchObject();
-            searchObject.setEmail1("*" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME)+"*");
+            searchObject.setEmail1("*" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME) + "*");
             searchObject.addFolder(6);
-            otherContacts = extract(2, contactManager.searchAction(searchObject), Arrays.asList(mail1,mail2));
+            otherContacts = extract(2, contactManager.searchAction(searchObject), Arrays.asList(mail1, mail2));
             if (otherContacts.isEmpty()) {
                 searchObject = new ContactSearchObject();
                 searchObject.setEmail1("*");
                 searchObject.addFolder(6);
-                otherContacts = extract(2, contactManager.searchAction(searchObject), Arrays.asList(mail1,mail2));
+                otherContacts = extract(2, contactManager.searchAction(searchObject), Arrays.asList(mail1, mail2));
             }
         }
-        assertTrue("Precondition: This test needs at least two other contacts in the global address book to work, but has "+otherContacts.size(), otherContacts.size() > 1);
+        assertTrue("Precondition: This test needs at least two other contacts in the global address book to work, but has " + otherContacts.size(), otherContacts.size() > 1);
 
         this.client = client2;
         final String anotherMail = otherContacts.get(0).getEmail1();
@@ -141,15 +141,14 @@ public class ReplyAllTest extends AbstractReplyTest {
         toAndCC.addAll(myReplyMail.getCc()); //need to do both because depending on user settings, it might be one of these
 
         assertTrue("Sender of original message should become recipient in reply", contains(toAndCC, mail2));
-        assertTrue("1st recipient ("+anotherMail+") of original message should still be recipient in reply, but TO/CC field only has these: " + toAndCC, contains(toAndCC, anotherMail));
-        assertTrue("2nd recipient ("+yetAnotherMail+") of original message should still be recipient in reply, but TO/CC field only has these: " + toAndCC, contains(toAndCC, yetAnotherMail));
+        assertTrue("1st recipient (" + anotherMail + ") of original message should still be recipient in reply, but TO/CC field only has these: " + toAndCC, contains(toAndCC, anotherMail));
+        assertTrue("2nd recipient (" + yetAnotherMail + ") of original message should still be recipient in reply, but TO/CC field only has these: " + toAndCC, contains(toAndCC, yetAnotherMail));
     }
 
-
-    protected String adresses(final String... mails){
+    protected String adresses(final String... mails) {
         final StringBuilder builder = new StringBuilder();
         builder.append('[');
-        for(final String mail: mails){
+        for (final String mail : mails) {
             builder.append("[null,");
             builder.append(mail);
             builder.append("],");

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -81,11 +82,7 @@ public class Bug30142Test extends AbstractAJAXSession {
 
         ctm = new CalendarTestManager(client);
         ftm = new FolderTestManager(client);
-        folder = ftm.generatePrivateFolder(
-            "Bug 30142 " + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            client.getValues().getPrivateAppointmentFolder(),
-            client.getValues().getUserId());
+        folder = ftm.generatePrivateFolder("Bug 30142 " + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId());
         ftm.insertFolderOnServer(folder);
 
         appointment = new Appointment();
@@ -95,14 +92,15 @@ public class Bug30142Test extends AbstractAJAXSession {
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setIgnoreConflicts(true);
         ctm.insert(appointment);
-        
+
     }
-    
+
+    @Test
     public void testBug30142() throws Exception {
         Appointment update = ctm.createIdentifyingCopy(appointment);
         update.setCategories("Test");
         ctm.update(update);
-        
+
         Appointment loaded = ctm.get(folder.getObjectID(), appointment.getObjectID());
         assertEquals("Missing category.", "Test", loaded.getCategories());
         assertEquals("Bad folder id.", loaded.getParentFolderID(), folder.getObjectID());

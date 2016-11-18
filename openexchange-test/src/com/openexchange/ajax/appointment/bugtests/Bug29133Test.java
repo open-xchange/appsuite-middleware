@@ -52,10 +52,8 @@ public class Bug29133Test extends AbstractAJAXSession {
         appointmentA.setInterval(1);
         appointmentA.setIgnoreConflicts(true);
         appointmentA.setParentFolderID(clientA.getValues().getPrivateAppointmentFolder());
-        appointmentA.setUsers(new UserParticipant[] {
-            new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
-        appointmentA.setParticipants(new Participant[] {
-            new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
+        appointmentA.setUsers(new UserParticipant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
+        appointmentA.setParticipants(new Participant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
 
         ctmA.insert(appointmentA);
         appointmentB = ctmA.createIdentifyingCopy(appointmentA);

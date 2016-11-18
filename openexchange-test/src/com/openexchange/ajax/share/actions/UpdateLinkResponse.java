@@ -52,7 +52,6 @@ package com.openexchange.ajax.share.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link UpdateLinkResponse}
  *
@@ -63,6 +62,7 @@ public class UpdateLinkResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link UpdateLinkResponse}.
+     * 
      * @param response
      */
     protected UpdateLinkResponse(Response response) {

@@ -54,7 +54,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.mailaccount.MailAccountDescription;
 
-
 /**
  * {@link MailAccountListResponse}
  *

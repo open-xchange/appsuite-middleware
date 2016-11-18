@@ -52,8 +52,6 @@ package com.openexchange.ajax.jslob;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.jslob.actions.ListRequest;
@@ -68,27 +66,6 @@ import com.openexchange.jslob.JSlob;
 public final class Bug28821Test extends AbstractJSlobTest {
 
     private static final int NUM_THREADS = 4;
-
-    /**
-     * Initializes a new {@link Bug28821Test}.
-     *
-     * @param name
-     */
-    public Bug28821Test() {
-        super();
-    }
-
-    @BeforeClass
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @AfterClass
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     @Test
     public void testBug28821() {

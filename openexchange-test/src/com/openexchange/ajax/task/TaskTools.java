@@ -154,10 +154,7 @@ public final class TaskTools extends Assert {
         parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId));
         parameter.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId));
         parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(lastModified.getTime()));
-        final WebRequest req = new PutMethodWebRequest(
-            AbstractAJAXTest.PROTOCOL + hostName + TASKS_URL + parameter.getURLParameters(),
-            bais,
-            AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL + hostName + TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();
@@ -277,10 +274,7 @@ public final class TaskTools extends Assert {
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIRM);
-        final WebRequest req = new PutMethodWebRequest(
-            AbstractAJAXTest.PROTOCOL + hostName + TASKS_URL + parameter.getURLParameters(),
-            bais,
-            AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL + hostName + TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();

@@ -49,11 +49,11 @@
 
 package com.openexchange.ajax.find.common;
 
+import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link Bug32060Test}
@@ -73,6 +73,7 @@ public class Bug32060Test extends AbstractFindTest {
         super();
     }
 
+    @Test
     public void testUnknownModule() throws Exception {
         AutocompleteResponse response = client.execute(new AutocompleteRequest("", "ox-messenger", null, null, false));
         OXException expectedException = response.getException();

@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.drive.action.DeleteLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkResponse;
@@ -115,6 +116,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
         itm.newAction(file, new File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
+    @Test
     public void testGetFileLink() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
         target.setDrivePath("/" + folder2.getFolderName());
@@ -123,6 +125,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
         performTest(target);
     }
 
+    @Test
     public void testGetFolderLink() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
         target.setDrivePath("/" + folder.getFolderName());
@@ -130,6 +133,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
         performTest(target);
     }
 
+    @Test
     public void testBadFileChecksum() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
         target.setDrivePath("/" + folder2.getFolderName());
@@ -142,6 +146,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
         assertTrue("Wrong exception", DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(getLinkResponse.getException()));
     }
 
+    @Test
     public void testBadDirectoryChecksum() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
         target.setDrivePath("/" + folder.getFolderName());

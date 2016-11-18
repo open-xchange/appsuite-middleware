@@ -51,22 +51,23 @@ package com.openexchange.ajax.session;
 
 import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
+import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 import com.openexchange.groupware.calendar.TimeTools;
-
 
 /**
  * {@link StoreTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StoreTest extends AbstractSimpleClientTest{
+public class StoreTest extends AbstractSimpleClientTest {
 
     public StoreTest() {
         super();
     }
 
+    @Test
     public void testStoreStoresSessionInCookie() throws Exception {
         as(USER1);
         inModule("login");
@@ -78,11 +79,12 @@ public class StoreTest extends AbstractSimpleClientTest{
 
         boolean found = false;
         for (Cookie cookie : cookies) {
-            found = found || ( cookie.getName().startsWith(LoginServlet.SESSION_PREFIX) && cookie.getValue().equals(sessionID) );
+            found = found || (cookie.getName().startsWith(LoginServlet.SESSION_PREFIX) && cookie.getValue().equals(sessionID));
         }
         assertTrue(found);
     }
 
+    @Test
     public void testCookieLifetimeIsLongerThanADay() throws Exception {
         as(USER1);
         inModule("login");
@@ -94,7 +96,7 @@ public class StoreTest extends AbstractSimpleClientTest{
 
         Cookie sessionCookie = null;
         for (Cookie cookie : cookies) {
-            if ( cookie.getName().startsWith(LoginServlet.SESSION_PREFIX) && cookie.getValue().equals(sessionID) ) {
+            if (cookie.getName().startsWith(LoginServlet.SESSION_PREFIX) && cookie.getValue().equals(sessionID)) {
                 sessionCookie = cookie;
                 break;
             }
@@ -108,7 +110,7 @@ public class StoreTest extends AbstractSimpleClientTest{
     }
 
     // Error Cases
-
+    @Test
     public void testNonExistingSessionID() throws Exception {
         as(USER1);
         inModule("login");
@@ -117,6 +119,7 @@ public class StoreTest extends AbstractSimpleClientTest{
         assertError();
     }
 
+    @Test
     public void testExistingButDifferentSessionID() throws Exception {
         as(USER1);
         String sessionID = currentClient.getSessionID();
@@ -127,6 +130,5 @@ public class StoreTest extends AbstractSimpleClientTest{
 
         assertError();
     }
-
 
 }

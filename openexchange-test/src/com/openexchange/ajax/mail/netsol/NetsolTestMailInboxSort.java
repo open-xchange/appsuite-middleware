@@ -68,72 +68,67 @@ import com.openexchange.mail.MailListField;
  */
 public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 
-	/**
-	 * Initializes a new {@link NetsolTestMailInboxSort}
-	 *
-	 * @param name
-	 */
-	public NetsolTestMailInboxSort() {
-		super();
-	}
+    /**
+     * Initializes a new {@link NetsolTestMailInboxSort}
+     *
+     * @param name
+     */
+    public NetsolTestMailInboxSort() {
+        super();
+    }
 
-	protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(),
-			MailListField.ID.getField() };
+    protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
 
-	public void testMailInboxSort() throws Throwable {
-		netsolClearFolder(getInboxFolder());
-		netsolClearFolder(getSentFolder());
-		netsolClearFolder(getTrashFolder());
-		/*
-		 * Create JSON mail object
-		 */
-		final JSONObject mailObject_25kb = new JSONObject();
-		{
-			mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
-			mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
-			mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
-			mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
-			mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
-			mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
+    public void testMailInboxSort() throws Throwable {
+        netsolClearFolder(getInboxFolder());
+        netsolClearFolder(getSentFolder());
+        netsolClearFolder(getTrashFolder());
+        /*
+         * Create JSON mail object
+         */
+        final JSONObject mailObject_25kb = new JSONObject();
+        {
+            mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
+            mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
+            mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
+            mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
+            mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
+            mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
 
-			final JSONObject bodyObject = new JSONObject();
-			bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
-			bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />");
+            final JSONObject bodyObject = new JSONObject();
+            bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
+            bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />");
 
-			final JSONArray attachments = new JSONArray();
-			attachments.put(bodyObject);
+            final JSONArray attachments = new JSONArray();
+            attachments.put(bodyObject);
 
-			mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-		}
-		/*
-		 * Put 10 mails into INBOX through send
-		 */
-		final int inboxSize = 10;
-		for (int i = 0; i < inboxSize; i++) {
-			mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), Math.random() + "-> The mail subject");
-			Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString()));
-		}
+            mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
+        }
+        /*
+         * Put 10 mails into INBOX through send
+         */
+        final int inboxSize = 10;
+        for (int i = 0; i < inboxSize; i++) {
+            mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), Math.random() + "-> The mail subject");
+            Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString()));
+        }
 
-		final int runs = NetsolTestConstants.RUNS;
-		final DurationTracker requestTracker = new DurationTracker(runs);
-		final DurationTracker parseTracker = new DurationTracker(runs);
-		for (int i = 0; i < runs; i++) {
-			final CommonAllResponse response = Executor.execute(getSession(), new NetsolAllRequest(
-					getInboxFolder(), COLUMNS_FOLDER_ID, MailListField.SUBJECT.getField(), Order.ASCENDING));
-			assertTrue("Sort failed", response.getArray() != null && response.getArray().length > 0);
-			assertTrue("Duration corrupt", response.getRequestDuration() > 0);
-			requestTracker.addDuration(response.getRequestDuration());
-			parseTracker.addDuration(response.getParseDuration());
-		}
-		/*
-		 * Clean everything
-		 */
-		netsolClearFolder(getInboxFolder());
-		netsolClearFolder(getSentFolder());
-		netsolClearFolder(getTrashFolder());
-	}
+        final int runs = NetsolTestConstants.RUNS;
+        final DurationTracker requestTracker = new DurationTracker(runs);
+        final DurationTracker parseTracker = new DurationTracker(runs);
+        for (int i = 0; i < runs; i++) {
+            final CommonAllResponse response = Executor.execute(getSession(), new NetsolAllRequest(getInboxFolder(), COLUMNS_FOLDER_ID, MailListField.SUBJECT.getField(), Order.ASCENDING));
+            assertTrue("Sort failed", response.getArray() != null && response.getArray().length > 0);
+            assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+            requestTracker.addDuration(response.getRequestDuration());
+            parseTracker.addDuration(response.getParseDuration());
+        }
+        /*
+         * Clean everything
+         */
+        netsolClearFolder(getInboxFolder());
+        netsolClearFolder(getSentFolder());
+        netsolClearFolder(getTrashFolder());
+    }
 
 }

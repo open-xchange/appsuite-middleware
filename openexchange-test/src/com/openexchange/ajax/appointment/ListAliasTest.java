@@ -53,6 +53,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -98,6 +99,7 @@ public class ListAliasTest extends AppointmentTest {
         super.tearDown();
     }
 
+    @Test
     public void testAll() throws Throwable {
         appointment = new Appointment();
         appointment.setStartDate(new Date());
@@ -109,12 +111,7 @@ public class ListAliasTest extends AppointmentTest {
         final AppointmentInsertResponse insertResponse = client.execute(insertRequest);
         insertResponse.fillObject(appointment);
 
-        final AllRequest allRequest = new AllRequest(
-            client.getValues().getPrivateAppointmentFolder(),
-            new int[] { 20, 1 },
-            new Date(0),
-            new Date(Long.MAX_VALUE),
-            client.getValues().getTimeZone());
+        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), new int[] { 20, 1 }, new Date(0), new Date(Long.MAX_VALUE), client.getValues().getTimeZone());
         final CommonAllResponse allResponse = client.execute(allRequest);
         final ListIDs ids = allResponse.getListIDs();
 
@@ -122,8 +119,7 @@ public class ListAliasTest extends AppointmentTest {
         final CommonListResponse aliasResponse = client.execute(aliasRequest);
         final Object[][] aliasAppointments = aliasResponse.getArray();
 
-        final ListRequest request = new ListRequest(ids, new int[] {
-            1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100 });
+        final ListRequest request = new ListRequest(ids, new int[] { 1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100 });
         final CommonListResponse response = client.execute(request);
         final Object[][] appointments = response.getArray();
 

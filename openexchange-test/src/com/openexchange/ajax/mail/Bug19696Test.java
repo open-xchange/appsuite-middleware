@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -75,8 +78,8 @@ public final class Bug19696Test extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folder = client.getValues().getInboxFolder();
@@ -87,8 +90,9 @@ public final class Bug19696Test extends AbstractMailTest {
         ids = response.getIds()[0];
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(ids, true));
         super.tearDown();
     }
@@ -98,6 +102,7 @@ public final class Bug19696Test extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testGet() throws Throwable {
         {
             final GetRequest request = new GetRequest(folder, ids[1]);

@@ -59,7 +59,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.search.Order;
 
-
 /**
  * {@link AllRequest}
  *

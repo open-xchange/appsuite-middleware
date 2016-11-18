@@ -74,7 +74,7 @@ public class Bug15903Test extends CalendarTestManagerTest {
         super();
     }
 
-    // Tests Bug 15903
+    // Tests Bug 15903    @Test
     public void testUpdatedParticipants() throws Exception {
 
         // create appointment with 2 participants

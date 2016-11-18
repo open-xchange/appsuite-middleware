@@ -54,6 +54,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
@@ -75,32 +76,10 @@ import com.openexchange.groupware.container.UserParticipant;
 @RunWith(ConcurrentTestRunner.class)
 public class UpdateTest extends AppointmentTest {
 
-    private final static int[] _appointmentFields = {
-        DataObject.OBJECT_ID,
-        DataObject.CREATED_BY,
-        DataObject.CREATION_DATE,
-        DataObject.LAST_MODIFIED,
-        DataObject.MODIFIED_BY,
-        FolderChildObject.FOLDER_ID,
-        CommonObject.PRIVATE_FLAG,
-        CommonObject.CATEGORIES,
-        CalendarObject.TITLE,
-        Appointment.LOCATION,
-        CalendarObject.START_DATE,
-        CalendarObject.END_DATE,
-        CalendarObject.NOTE,
-        CalendarObject.RECURRENCE_TYPE,
-        CalendarObject.INTERVAL,
-        CalendarObject.RECURRENCE_COUNT,
-        CalendarObject.PARTICIPANTS,
-        CalendarObject.USERS,
-        Appointment.SHOWN_AS,
-        Appointment.FULL_TIME,
-        Appointment.COLOR_LABEL,
-        Appointment.TIMEZONE,
-        Appointment.RECURRENCE_START
+    private final static int[] _appointmentFields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.INTERVAL, CalendarObject.RECURRENCE_COUNT, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.RECURRENCE_START
     };
 
+    @Test
     public void testSimple() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testSimple");
         appointmentObj.setIgnoreConflicts(true);
@@ -116,6 +95,7 @@ public class UpdateTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testUpdateAppointmentWithParticipant() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
         appointmentObj.setIgnoreConflicts(true);
@@ -144,6 +124,7 @@ public class UpdateTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testUpdateRecurrenceWithPosition() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -152,7 +133,7 @@ public class UpdateTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (15 * dayInMillis));
 
         final int changeExceptionPosition = 3;
 
@@ -172,8 +153,8 @@ public class UpdateTest extends AppointmentTest {
         Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
 
-        final long newStartTime = startTime + 60*60*1000;
-        final long newEndTime = endTime + 60*60*1000;
+        final long newStartTime = startTime + 60 * 60 * 1000;
+        final long newEndTime = endTime + 60 * 60 * 1000;
 
         appointmentObj = new Appointment();
         appointmentObj.setTitle("testUpdateRecurrence - exception");
@@ -198,7 +179,7 @@ public class UpdateTest extends AppointmentTest {
     }
 
     // Node 356
-
+    @Test
     public void testShiftRecurrenceAppointment() throws Exception {
         final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
         final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
@@ -264,7 +245,7 @@ public class UpdateTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
-    // Bug 12700    FIXME
+    // Bug 12700    FIXME    @Test
     public void testMakeFullTime() throws Exception {
         final TimeZone utc = TimeZone.getTimeZone("urc");
 

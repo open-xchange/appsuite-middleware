@@ -55,6 +55,7 @@ import junit.framework.TestSuite;
 
 /**
  * Test suite collecting the tests for the login servlet.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class SessionTestSuite {

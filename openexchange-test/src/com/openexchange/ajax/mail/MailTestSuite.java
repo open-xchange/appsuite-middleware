@@ -94,7 +94,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(AllSeenMailTest.class);
         mailSuite.addTestSuite(com.openexchange.ajax.mail.MultipleGetTest.class);
 
-        /*mailSuite.addTestSuite(AlwaysTest.class);*/
+        /* mailSuite.addTestSuite(AlwaysTest.class); */
 
         mailSuite.addTestSuite(Bug12409Test.class);
         mailSuite.addTestSuite(Bug14234Test.class);

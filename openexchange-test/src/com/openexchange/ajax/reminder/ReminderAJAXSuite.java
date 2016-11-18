@@ -52,9 +52,9 @@ package com.openexchange.ajax.reminder;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class ReminderAJAXSuite extends TestSuite{
+public class ReminderAJAXSuite extends TestSuite {
 
-    public static Test suite(){
+    public static Test suite() {
         final TestSuite tests = new TestSuite("com.openexchange.ajax.reminder.ReminderAJAXSuite");
         tests.addTestSuite(RangeTest.class);
         tests.addTestSuite(UpdatesTest.class);

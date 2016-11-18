@@ -51,6 +51,7 @@ package com.openexchange.ajax.subscribe.test;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.DeleteSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.DeleteSubscriptionResponse;
@@ -64,7 +65,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.subscribe.Subscription;
 
-
 /**
  * {@link DeleteSubscriptionTest}
  *
@@ -76,29 +76,30 @@ public class DeleteSubscriptionTest extends AbstractSubscriptionTest {
         super();
     }
 
-    public void testDeleteOMXFSubscriptionShouldAlwaysWork() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testDeleteOMXFSubscriptionShouldAlwaysWork() throws OXException, IOException, SAXException, JSONException {
         //setup
         FolderObject folder = getFolderManager().generatePublicFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);
 
         DynamicFormDescription form = generateFormDescription();
         Subscription expected = generateOXMFSubscription(form);
-        expected.setFolderId( String.valueOf( folder.getObjectID() ) );
+        expected.setFolderId(String.valueOf(folder.getObjectID()));
 
-       //new request
+        //new request
         NewSubscriptionRequest newReq = new NewSubscriptionRequest(expected, form);
         NewSubscriptionResponse newResp = getClient().execute(newReq);
 
         assertFalse("Should succeed creating the subscription", newResp.hasError());
-        expected.setId( newResp.getId() );
+        expected.setId(newResp.getId());
 
         //delete subcription
-        DeleteSubscriptionRequest delReq = new DeleteSubscriptionRequest( expected.getId());
+        DeleteSubscriptionRequest delReq = new DeleteSubscriptionRequest(expected.getId());
         DeleteSubscriptionResponse delResp = getClient().execute(delReq);
         assertFalse("Should succeed deleting the subscription", delResp.hasError());
 
         //verify absense via get request
-        GetSubscriptionRequest getReq = new GetSubscriptionRequest( newResp.getId() );
+        GetSubscriptionRequest getReq = new GetSubscriptionRequest(newResp.getId());
         GetSubscriptionResponse getResp = getClient().execute(getReq);
 
         assertTrue("Should fail trying to get subcription afte deletion", getResp.hasError());

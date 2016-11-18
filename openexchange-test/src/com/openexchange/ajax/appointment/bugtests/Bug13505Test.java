@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -112,6 +113,7 @@ public class Bug13505Test extends AbstractAJAXSession {
         updateAppointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug13505() throws Exception {
         SpecialUpdateRequest updateRequest = new SpecialUpdateRequest(updateAppointment, tz);
         try {

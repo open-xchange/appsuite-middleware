@@ -79,45 +79,45 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class Bug12409Test extends AbstractMailTest {
 
-	private String[] folderAndID;
+    private String[] folderAndID;
 
-	@Override
+    @Override
     public void setUp() throws Exception {
-		super.setUp();
-		final AJAXClient client = getClient();
-		// clean the drafts folder
-		clearFolder(getDraftsFolder());
-		// create an email
-		JSONObject mailObject = createSelfAddressed25KBMailObject();
-		// set the delivery-receipt / disposition-notification option
-		mailObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), "testmail@example.invalid");
-		// mark it as a draft
-		mailObject.put(MailJSONField.FLAGS.getKey(), Integer.toString(MailMessage.FLAG_DRAFT));
-		// convert it to a string for the SaveRequest
-		final String mailObject_string = mailObject.toString();
+        super.setUp();
+        final AJAXClient client = getClient();
+        // clean the drafts folder
+        clearFolder(getDraftsFolder());
+        // create an email
+        JSONObject mailObject = createSelfAddressed25KBMailObject();
+        // set the delivery-receipt / disposition-notification option
+        mailObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), "testmail@example.invalid");
+        // mark it as a draft
+        mailObject.put(MailJSONField.FLAGS.getKey(), Integer.toString(MailMessage.FLAG_DRAFT));
+        // convert it to a string for the SaveRequest
+        final String mailObject_string = mailObject.toString();
 
-		folderAndID = client.execute(new SendRequest(mailObject_string)).getFolderAndID();
+        folderAndID = client.execute(new SendRequest(mailObject_string)).getFolderAndID();
 
+    }
 
-	}
+    @Override
+    public void tearDown() throws Exception {
+        // clean the drafts folder
+        clearFolder(getDraftsFolder());
+        super.tearDown();
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		// clean the drafts folder
-		clearFolder(getDraftsFolder());
-		super.tearDown();
-	}
-	public Bug12409Test() {
-		super();
-	}
+    public Bug12409Test() {
+        super();
+    }
 
-	public void testSavedDispositionNotificationReturnedWhenEditing() throws IOException, SAXException, JSONException, OXException {
-		final AJAXClient client = getClient();
-		// load the email to edit it again
-		GetResponse response;
-		response = client.execute(new GetRequest(folderAndID[0], folderAndID[1]));
-		// verify that the delivery receipt option is still set
-		assertTrue("Disposition notification was not saved.", response.getMail(getTimeZone()).getDispositionNotification().toString().equals("testmail@example.invalid"));
-	}
+    public void testSavedDispositionNotificationReturnedWhenEditing() throws IOException, SAXException, JSONException, OXException {
+        final AJAXClient client = getClient();
+        // load the email to edit it again
+        GetResponse response;
+        response = client.execute(new GetRequest(folderAndID[0], folderAndID[1]));
+        // verify that the delivery receipt option is still set
+        assertTrue("Disposition notification was not saved.", response.getMail(getTimeZone()).getDispositionNotification().toString().equals("testmail@example.invalid"));
+    }
 
 }

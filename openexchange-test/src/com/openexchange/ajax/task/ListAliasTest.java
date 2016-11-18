@@ -50,6 +50,9 @@
 package com.openexchange.ajax.task;
 
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -82,19 +85,20 @@ public class ListAliasTest extends AbstractTaskTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         final DeleteRequest delete = new DeleteRequest(task);
         client.execute(delete);
         super.tearDown();
     }
 
+    @Test
     public void testAll() throws Throwable {
         task = new Task();
         task.setTitle("Task TestListAlias");

@@ -85,8 +85,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         timeZone = client1.getValues().getTimeZone();
@@ -97,8 +96,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         client1.execute(new DeleteRequest(task));
         super.tearDown();
     }
@@ -106,7 +104,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
     @Test
     public void testForVerifiedPriority() throws OXException, IOException, JSONException {
         Task test = TaskTools.valuesForUpdate(task);
-        for (int priority : new int[] { Task.LOW, Task.NORMAL, Task.HIGH } ) {
+        for (int priority : new int[] { Task.LOW, Task.NORMAL, Task.HIGH }) {
             test.setPriority(I(priority));
             UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone, false));
             if (!response.hasError()) {
@@ -119,7 +117,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
             assertTrue("Task should contain a priority.", test.containsPriority());
             assertEquals("Written priority should be equal to read one.", I(priority), test.getPriority());
         }
-        for (int priority : new int[] { Task.LOW-1, Task.HIGH+1 }) {
+        for (int priority : new int[] { Task.LOW - 1, Task.HIGH + 1 }) {
             test.setPriority(I(priority));
             UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone, false));
             if (!response.hasError()) {
@@ -132,6 +130,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
         {
             test.removePriority();
             UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone) {
+
                 @Override
                 public JSONObject getBody() throws JSONException {
                     JSONObject json = super.getBody();

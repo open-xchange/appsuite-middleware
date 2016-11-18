@@ -67,29 +67,29 @@ import com.openexchange.exception.OXException;
  */
 public final class PasswordChangeUpdateAJAXTest extends AbstractPasswordChangeAJAXTest {
 
-	/**
-	 * Initializes a new {@link PasswordChangeUpdateAJAXTest}
-	 *
-	 * @param name
-	 *            The test name
-	 */
-	public PasswordChangeUpdateAJAXTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link PasswordChangeUpdateAJAXTest}
+     *
+     * @param name
+     *            The test name
+     */
+    public PasswordChangeUpdateAJAXTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=update</code> request
-	 * @throws JSONException
-	 * @throws SAXException
-	 * @throws IOException
-	 * @throws OXException
-	 */
-	public void testUpdate() throws OXException, IOException, SAXException, JSONException {
-		/*
-		 * Perform update request
-		 */
-		final String oldPassword = AJAXConfig.getProperty(Property.PASSWORD);
-		Executor.execute(
-				getSession(), new PasswordChangeUpdateRequest(oldPassword, oldPassword, true));
-	}
+    /**
+     * Tests the <code>action=update</code> request
+     * 
+     * @throws JSONException
+     * @throws SAXException
+     * @throws IOException
+     * @throws OXException
+     */
+    public void testUpdate() throws OXException, IOException, SAXException, JSONException {
+        /*
+         * Perform update request
+         */
+        final String oldPassword = AJAXConfig.getProperty(Property.PASSWORD);
+        Executor.execute(getSession(), new PasswordChangeUpdateRequest(oldPassword, oldPassword, true));
+    }
 }

@@ -76,7 +76,7 @@ public class ReorderRequest extends AbstractMailFilterRequest<ReorderResponse> {
         super();
         this.ids = ids;
     }
-    
+
     /*
      * (non-Javadoc)
      * 

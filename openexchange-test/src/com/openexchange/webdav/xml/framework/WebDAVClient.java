@@ -64,6 +64,7 @@ import com.openexchange.webdav.xml.user.GroupUserTools;
  * This class implements the temporary memory of a WebDAV client and provides
  * some convenience methods to determine user specific values for running some
  * tests more easily.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class WebDAVClient {
@@ -145,7 +146,7 @@ public class WebDAVClient {
     }
 
     public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, OXException {
-         return Executor.execute(this, request);
+        return Executor.execute(this, request);
     }
 
     public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, OXException {
@@ -153,7 +154,7 @@ public class WebDAVClient {
             return execute(request);
         }
         return Executor.execute(this, host, request);
-   }
+    }
 
     public FolderTools getFolderTools() {
         if (null == folderTools) {

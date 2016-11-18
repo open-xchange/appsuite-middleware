@@ -101,8 +101,7 @@ public class Bug44167Test extends CalDAVTest {
     public void setUp() throws Exception {
         manager2 = new CalendarTestManager(new AJAXClient(User.User2));
         manager2.setFailOnError(true);
-        FolderObject calendarFolder = manager2.getClient().execute(
-            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
+        FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
         folder.setFolderName(subFolderName);
@@ -179,15 +178,7 @@ public class Bug44167Test extends CalDAVTest {
         calendar.add(Calendar.SECOND, 17);
         Date acknowledgedDate = calendar.getTime();
         iCalResource.getVEvent().getComponents().clear();
-        String iCal =
-            "BEGIN:VALARM\r\n" +
-            "ACKNOWLEDGED:" + formatAsUTC(acknowledgedDate) + "\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "TRIGGER:-PT15M\r\n" +
-            "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
-            "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
-            "END:VALARM\r\n";
+        String iCal = "BEGIN:VALARM\r\n" + "ACKNOWLEDGED:" + formatAsUTC(acknowledgedDate) + "\r\n" + "ACTION:DISPLAY\r\n" + "DESCRIPTION:Alarm\r\n" + "TRIGGER:-PT15M\r\n" + "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "END:VALARM\r\n";
         ;
         Component vAlarm = SimpleICal.parse(iCal, "VALARM");
         iCalResource.getVEvent().getComponents().add(vAlarm);

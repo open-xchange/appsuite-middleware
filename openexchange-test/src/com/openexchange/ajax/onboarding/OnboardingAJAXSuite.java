@@ -61,7 +61,6 @@ import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-
 /**
  * {@link OnboardingAJAXSuite}
  *

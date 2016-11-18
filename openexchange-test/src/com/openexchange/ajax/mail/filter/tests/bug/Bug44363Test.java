@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter.tests.bug;
 
 import java.util.Collections;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Discard;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
@@ -86,6 +87,7 @@ public class Bug44363Test extends AbstractMailFilterTest {
      * 
      * @throws Exception if an error is occurred
      */
+    @Test
     public void testBug44363() throws Exception {
         // Create a vacation rule with a single lined dot '.' character
         Rule vacationRule;

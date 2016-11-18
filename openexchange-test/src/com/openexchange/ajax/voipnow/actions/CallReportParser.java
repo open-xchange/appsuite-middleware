@@ -57,6 +57,7 @@ public class CallReportParser extends AbstractAJAXParser<CallReportResponse> {
 
     /**
      * Default constructor.
+     * 
      * @param userId
      */
     public CallReportParser(final boolean failOnError) {

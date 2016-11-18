@@ -90,7 +90,6 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     private String groupParticipant;
 
-
     private Appointment exception;
 
     public Bug33242Test() {
@@ -228,7 +227,7 @@ public class Bug33242Test extends AbstractAJAXSession {
         assertNull(creatorAppointment.getDeleteException());
         assertNull(groupMemberAppointment.getDeleteException());
 
-        List<Appointment> checkAppointment =  ctm.getChangeExceptions(client1.getValues().getPrivateAppointmentFolder(), series.getObjectID(), Appointment.ALL_COLUMNS);
+        List<Appointment> checkAppointment = ctm.getChangeExceptions(client1.getValues().getPrivateAppointmentFolder(), series.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull(checkAppointment);
         assertSame(checkAppointment.size(), 1);
         boolean found = false;
@@ -237,9 +236,8 @@ public class Bug33242Test extends AbstractAJAXSession {
                 found = true;
             }
         }
-        assertTrue("The creator is missing in the Participant list, but should be present",found);
+        assertTrue("The creator is missing in the Participant list, but should be present", found);
     }
-
 
     @Test
     public void testDeleteByCreaterWithUpdate() throws Exception {
@@ -284,7 +282,7 @@ public class Bug33242Test extends AbstractAJAXSession {
 
         Appointment copy = ctm.createIdentifyingCopy(series);
         copy.setRecurrencePosition(2);
-        Appointment checkAppointment =  ctm.get(copy);
+        Appointment checkAppointment = ctm.get(copy);
         assertNotNull(checkAppointment);
 
         boolean found = false;

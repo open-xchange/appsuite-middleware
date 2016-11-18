@@ -55,6 +55,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -75,6 +76,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * Checks if a changed appointment in a shared folder looses all its participants.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug10154Test extends AbstractAJAXSession {
@@ -90,35 +92,20 @@ public final class Bug10154Test extends AbstractAJAXSession {
      * A creates a shared folder and an appointment with participants. B changes
      * the participant in the folder and A verifies if its participants get lost.
      */
+    @Test
     public void testParticipantsLost() throws Throwable {
         final AJAXClient clientA = getClient();
         final int userIdA = clientA.getValues().getUserId();
         final AJAXClient clientB = new AJAXClient(User.User2);
-        final FolderObject folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "Folder to test bug 10154",
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(userIdA, false, true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(clientB.getValues().getUserId(), false, false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        final FolderObject folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 10154", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(userIdA, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         {
-            final CommonInsertResponse response = clientA.execute(
-                new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
+            final CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
             response.fillObject(folder);
         }
         try {
             final TimeZone tzA = clientA.getValues().getTimeZone();
             final Appointment appointment = new Appointment();
-            final List<Participant> onInsert = ParticipantTools.createParticipants(
-                userIdA, clientB.getValues().getUserId());
+            final List<Participant> onInsert = ParticipantTools.createParticipants(userIdA, clientB.getValues().getUserId());
             final Participant[] expected = onInsert.toArray(new Participant[onInsert.size()]);
             {
                 appointment.setTitle("Test for bug 10154");
@@ -152,10 +139,12 @@ public final class Bug10154Test extends AbstractAJAXSession {
                 final Participant[] participants = reload.getParticipants();
                 assertEquals("Participants should not be changed.", expected.length, participants.length);
                 final Comparator<Participant> comparator = new Comparator<Participant>() {
+
                     @Override
                     public int compare(final Participant o1, final Participant o2) {
                         return o1.getIdentifier() - o2.getIdentifier();
-                    }};
+                    }
+                };
                 Arrays.sort(expected, comparator);
                 Arrays.sort(participants, comparator);
                 for (int i = 0; i < expected.length; i++) {
@@ -163,8 +152,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
                 }
             }
         } finally {
-            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD,
-                    folder.getObjectID(), folder.getLastModified()));
+            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
         }
     }
 }

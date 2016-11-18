@@ -135,10 +135,13 @@ public abstract class AbstractUpdatesRequest<T extends AbstractColumnsResponse> 
     public enum Ignore {
         DELETED("deleted"),
         NONE("none");
+
         private final String value;
+
         private Ignore(final String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }

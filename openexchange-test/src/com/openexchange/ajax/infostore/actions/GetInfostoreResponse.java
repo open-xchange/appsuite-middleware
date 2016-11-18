@@ -56,7 +56,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -65,7 +64,6 @@ public class GetInfostoreResponse extends AbstractAJAXResponse {
     protected GetInfostoreResponse(Response response) {
         super(response);
     }
-
 
     public File getDocumentMetadata() throws OXException, JSONException {
         return com.openexchange.file.storage.json.FileMetadataParser.getInstance().parse((JSONObject) getData());

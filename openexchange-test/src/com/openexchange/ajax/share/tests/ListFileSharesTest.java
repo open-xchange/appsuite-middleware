@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -81,18 +82,22 @@ public class ListFileSharesTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testListSharedFilesToAnonymous() throws Exception {
         testListSharedFiles(randomGuestObjectPermission(RecipientType.ANONYMOUS));
     }
 
+    @Test
     public void testListSharedFilesToGuest() throws Exception {
         testListSharedFiles(randomGuestObjectPermission(RecipientType.GUEST));
     }
 
+    @Test
     public void testListSharedFilesToGroup() throws Exception {
         testListSharedFiles(new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ));
     }
 
+    @Test
     public void testListSharedFilesToUser() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         int userId = client2.getValues().getUserId();
@@ -126,6 +131,7 @@ public class ListFileSharesTest extends ShareTest {
         checkGuestPermission(permission, guest);
     }
 
+    @Test
     public void testDontListPublicFiles() throws Exception {
         /*
          * create folder and a shared file inside
@@ -160,6 +166,7 @@ public class ListFileSharesTest extends ShareTest {
         assertNull("Share in public folder listed", matchingShare);
     }
 
+    @Test
     public void testDontListPublicFilesInSubfolder() throws Exception {
         /*
          * create folder and a shared file inside

@@ -1,9 +1,12 @@
+
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.junit.Test;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -11,7 +14,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -20,6 +22,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * Checks, if a change of the time of a sequence forces deletion of all exceptions.
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
  */
@@ -29,6 +32,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testBugAsWritte() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
@@ -63,7 +67,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
 
             //Step 2
             //Load occurrence for changing
-            GetRequest getRequest= new GetRequest(folderId, sequence.getObjectID(), 3);
+            GetRequest getRequest = new GetRequest(folderId, sequence.getObjectID(), 3);
             GetResponse getResponse = client.execute(getRequest);
             Appointment occurrence = getResponse.getAppointment(tz);
 
@@ -109,7 +113,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
             lastModified = changeSequence.getLastModified();
 
             //Load occurrence again
-            getRequest= new GetRequest(folderId, sequence.getObjectID(), 3);
+            getRequest = new GetRequest(folderId, sequence.getObjectID(), 3);
             getResponse = client.execute(getRequest);
             occurrence = getResponse.getAppointment(tz);
 
@@ -126,24 +130,20 @@ public final class Bug12463Test extends AbstractAJAXSession {
             assertEquals("End time does not match sequence end time", sequenceEndTime, occurrenceEndTime);
 
             //Check if sequence still has any exceptions
-            int[] columns = new int[]{
-                Appointment.START_DATE,
-                Appointment.END_DATE,
-                Appointment.OBJECT_ID,
-                Appointment.RECURRENCE_ID
+            int[] columns = new int[] { Appointment.START_DATE, Appointment.END_DATE, Appointment.OBJECT_ID, Appointment.RECURRENCE_ID
             };
             UpdatesRequest updatesRequest = new UpdatesRequest(folderId, columns, lastModifiedOfOccurenceUpdate, true);
             AppointmentUpdatesResponse updatesResponse = client.execute(updatesRequest);
             List<Appointment> appointments = updatesResponse.getAppointments(tz);
-            for(Appointment current: appointments) {
-                if(current.getObjectID() != sequence.getObjectID() && current.getRecurrenceID() == sequence.getObjectID()) {
+            for (Appointment current : appointments) {
+                if (current.getObjectID() != sequence.getObjectID() && current.getRecurrenceID() == sequence.getObjectID()) {
                     fail("Found exception of sequence.");
                 }
             }
 
         } finally {
 
-            if(objectId != 0 && lastModified != null) {
+            if (objectId != 0 && lastModified != null) {
                 final DeleteRequest deleteRequest = new DeleteRequest(objectId, folderId, lastModified);
                 client.execute(deleteRequest);
             }

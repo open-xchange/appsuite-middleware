@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
@@ -11,45 +12,45 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug10733Test extends AppointmentTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug10733Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug10733Test.class);
 
-	public Bug10733Test() {
-		super();
-	}
+    public Bug10733Test() {
+        super();
+    }
 
-	public void testDummy() {
+    public void testDummy() {
 
-	}
+    }
 
-	public void testBug10733() throws Exception {
-		final StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append("testBug10733");
-		stringBuffer.append(" - ");
-		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
-		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
-		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
-		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
-		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
+    public void testBug10733() throws Exception {
+        final StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("testBug10733");
+        stringBuffer.append(" - ");
+        stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
+        stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
+        stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
+        stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
+        stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle(stringBuffer.toString());
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(Appointment.ABSENT);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle(stringBuffer.toString());
+        appointmentObj.setStartDate(new Date(startTime));
+        appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setShownAs(Appointment.ABSENT);
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
 
-		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
-		final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, false);
+        final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
+        final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, false);
 
-		final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);
-		final boolean hasError = insertResponse.hasError();
-		assertTrue("error message expected", hasError);
+        final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);
+        final boolean hasError = insertResponse.hasError();
+        assertTrue("error message expected", hasError);
 
-		final JSONObject jsonObj = insertResponse.getResponse().getJSON();
+        final JSONObject jsonObj = insertResponse.getResponse().getJSON();
 
-		final String errorCode = jsonObj.getString("code");
+        final String errorCode = jsonObj.getString("code");
 
-		assertEquals("unexpected error message", "APP-0072", errorCode);
-	}
+        assertEquals("unexpected error message", "APP-0072", errorCode);
+    }
 }

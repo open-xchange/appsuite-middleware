@@ -53,7 +53,6 @@ import java.util.Map;
 import com.openexchange.find.Document;
 import com.openexchange.find.DocumentVisitor;
 
-
 /**
  * {@link PropDocument}
  *

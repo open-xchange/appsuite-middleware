@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -77,6 +78,7 @@ public class Bug40993Test extends ShareTest {
         super();
     }
 
+    @Test
     public void testAccessSubfolderRandomly() throws Exception {
         int module = randomModule();
         testAccessSubfolder(randomFolderAPI(), module, randomGuestPermission(RecipientType.GUEST, module));

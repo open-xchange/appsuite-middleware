@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
 import java.util.Iterator;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -94,7 +95,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         ctm3 = new CalendarTestManager(client3);
         ftm1 = new FolderTestManager(client);
         ftm2 = new FolderTestManager(client2);
-        
+
         // Remove all permissions
         FolderObject privateFolder1 = ftm1.getFolderFromServer(client.getValues().getPrivateAppointmentFolder());
         Iterator<OCLPermission> i = privateFolder1.getPermissions().iterator();
@@ -117,11 +118,11 @@ public class Bug48149Test extends AbstractAJAXSession {
         }
         privateFolder2.setLastModified(new Date(Long.MAX_VALUE));
         ftm2.updateFolderOnServer(privateFolder2);
-        
+
         // Add new shared folder.
-        sharedFolder1 = ftm1.generateSharedFolder("Shared Folder"+System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), client3.getValues().getUserId());
+        sharedFolder1 = ftm1.generateSharedFolder("Shared Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), client3.getValues().getUserId());
         ftm1.insertFolderOnServer(sharedFolder1);
-        
+
         // Appointments not visible for user 3.
         app1 = new Appointment();
         app1.setTitle("app1");
@@ -130,7 +131,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         app1.setIgnoreConflicts(true);
         app1.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         ctm.insert(app1);
-        
+
         app2 = new Appointment();
         app2.setTitle("app1");
         app2.setStartDate(TimeTools.D("07.08.2016 08:00"));
@@ -140,6 +141,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         ctm2.insert(app2);
     }
 
+    @Test
     public void testLoadAppointmentFromUserWithShared() throws Exception {
         try {
             ctm3.get(sharedFolder1.getObjectID(), app1.getObjectID());
@@ -147,9 +149,10 @@ public class Bug48149Test extends AbstractAJAXSession {
             // ignore
         }
         assertTrue("Expected error.", ctm3.getLastResponse().hasError());
-        assertTrue("Excpected something with permissions. ("+ctm3.getLastResponse().getErrorMessage()+")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
+        assertTrue("Excpected something with permissions. (" + ctm3.getLastResponse().getErrorMessage() + ")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
     }
 
+    @Test
     public void testLoadAppointmentFromUserWithoutAnyShares() throws Exception {
         try {
             ctm3.get(sharedFolder1.getObjectID(), app2.getObjectID());
@@ -157,7 +160,7 @@ public class Bug48149Test extends AbstractAJAXSession {
             // ignore
         }
         assertTrue("Expected error.", ctm3.getLastResponse().hasError());
-        assertTrue("Excpected something with permissions. ("+ctm3.getLastResponse().getErrorMessage()+")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
+        assertTrue("Excpected something with permissions. (" + ctm3.getLastResponse().getErrorMessage() + ")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
     }
 
     @Override

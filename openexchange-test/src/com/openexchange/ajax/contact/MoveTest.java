@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.contact;
 
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -62,22 +64,14 @@ public class MoveTest extends AbstractContactTest {
     private int targetFolder;
     private int objectId;
 
-    public MoveTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testMove2PrivateFolder() throws Exception {
         final Contact contactObj = new Contact();
         contactObj.setSurName("testMove2PrivateFolder");
         contactObj.setParentFolderID(contactFolderId);
         objectId = insertContact(contactObj);
 
-        folder = Create.createPrivateFolder("testCopy"+System.currentTimeMillis(), FolderObject.CONTACT, userId);
+        folder = Create.createPrivateFolder("testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, userId);
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
         final InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
@@ -91,13 +85,14 @@ public class MoveTest extends AbstractContactTest {
         compareObject(contactObj, loadContact);
     }
 
+    @Test
     public void testMove2PublicFolder() throws Exception {
         final Contact contactObj = new Contact();
         contactObj.setSurName("testMove2PublicFolder");
         contactObj.setParentFolderID(contactFolderId);
         objectId = insertContact(contactObj);
 
-        folder = Create.createPrivateFolder("testCopy"+System.currentTimeMillis(), FolderObject.CONTACT, userId);
+        folder = Create.createPrivateFolder("testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, userId);
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
         final InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
@@ -111,8 +106,8 @@ public class MoveTest extends AbstractContactTest {
         compareObject(contactObj, loadContact);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         deleteContact(objectId, targetFolder, true);
         client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
 

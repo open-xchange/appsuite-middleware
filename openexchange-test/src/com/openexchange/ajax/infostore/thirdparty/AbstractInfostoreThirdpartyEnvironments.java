@@ -60,9 +60,9 @@ import com.openexchange.ajax.infostore.fileaccount.actions.DeleteFileaccountRequ
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountRequest;
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountResponse;
 import com.openexchange.ajax.oauth.actions.DeleteOAuthAccountRequest;
-import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.ajax.oauth.client.actions.InitOAuthAccountRequest;
 import com.openexchange.ajax.oauth.client.actions.InitOAuthAccountResponse;
+import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
 
@@ -72,6 +72,7 @@ import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public abstract class AbstractInfostoreThirdpartyEnvironments {
+
     protected AJAXClient ajaxClient;
 
     private final List<OAuthService> authProviders;
@@ -90,7 +91,7 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
         OAuthService[] auth = OAuthService.values();
         this.authProviders = new ArrayList<OAuthService>(auth.length);
 
-        for(OAuthService authProvider : auth) {
+        for (OAuthService authProvider : auth) {
             this.authProviders.add(authProvider);
         }
 
@@ -102,12 +103,11 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
      * @param authProviders The authentication provider
      */
     protected AbstractInfostoreThirdpartyEnvironments(List<OAuthService> authProvider) {
-        if(authProvider == null || authProvider.isEmpty()) {
+        if (authProvider == null || authProvider.isEmpty()) {
             throw new IllegalArgumentException("No thirdparty authentication provider found to initialize a filestorage");
         }
         this.authProviders = authProvider;
     }
-
 
     /**
      * Initialize the test environment
@@ -122,20 +122,21 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
             e.printStackTrace();
         }
     }
+
     /**
      * Clean up
      *
      * @throws Exception
      */
     public void cleanup() throws Exception {
-        if(authProviders != null && false == authProviders.isEmpty()) {
-            for(OAuthService auth : authProviders) {
+        if (authProviders != null && false == authProviders.isEmpty()) {
+            for (OAuthService auth : authProviders) {
                 deleteFilestorageFor(auth);
             }
         }
 
-        if(accountIds != null && false == accountIds.isEmpty()) {
-            for(int accountId : accountIds) {
+        if (accountIds != null && false == accountIds.isEmpty()) {
+            for (int accountId : accountIds) {
                 deleteOAuthAccount(accountId);
             }
         }
@@ -162,7 +163,7 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
     private void initEnvironments(List<OAuthService> authProviders) throws Exception {
         this.accountIds = new ArrayList<Integer>(authProviders.size());
 
-        for(OAuthService authProvider : authProviders) {
+        for (OAuthService authProvider : authProviders) {
             int currentOAuthAccount = initOAuthAccountFor(authProvider);
             createFilestorageFor(authProvider, currentOAuthAccount);
             accountIds.add(currentOAuthAccount);
@@ -185,8 +186,6 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
         String filestoreId = (String) nfResp.getData();
         this.filestoreId = filestoreId;
     }
-
-
 
     /**
      * Logout the client

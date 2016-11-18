@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -65,7 +66,6 @@ import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-
 
 /**
  * {@link Bug13090Test}
@@ -81,6 +81,7 @@ public class Bug13090Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug13090Test}.
+     * 
      * @param name
      */
     public Bug13090Test() {
@@ -91,19 +92,7 @@ public class Bug13090Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "Bug 13090 Folder " + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(
-                getClient().getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Bug 13090 Folder " + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
         CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
@@ -142,6 +131,7 @@ public class Bug13090Test extends AbstractAJAXSession {
         updateAppointment.setLastModified(new Date(Long.MAX_VALUE));
     }
 
+    @Test
     public void testErrorMessag() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(getClient().getValues().getPrivateAppointmentFolder(), updateAppointment, getClient().getValues().getTimeZone(), false);
         UpdateResponse updateResponse = getClient().execute(updateRequest);

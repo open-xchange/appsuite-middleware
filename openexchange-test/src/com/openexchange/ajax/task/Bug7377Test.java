@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -91,8 +92,7 @@ public class Bug7377Test extends AbstractTaskTest {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         client2 = new AJAXClient(AJAXClient.User.User2);
@@ -103,8 +103,7 @@ public class Bug7377Test extends AbstractTaskTest {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         if (null != client2) {
             client2.logout();
         }
@@ -113,8 +112,10 @@ public class Bug7377Test extends AbstractTaskTest {
 
     /**
      * Tests if on updating tasks the folder for the reminder gets lost.
+     * 
      * @throws Throwable if this test fails.
      */
+    @Test
     public void testLostFolderInfo() throws Throwable {
         // Create a task.
         final Task task = new Task();
@@ -134,20 +135,19 @@ public class Bug7377Test extends AbstractTaskTest {
             task.setLastModified(uResponse.getTimestamp());
             // Check reminder
             final RangeResponse rResponse = client1.execute(new RangeRequest(remindDate));
-            
+
             if (rResponse.hasConflicts()) {
                 System.out.println("Response has got " + rResponse.getConflicts().size() + " conflicts");
             }
             if (rResponse.getResponse() != null) {
-            	System.out.println("There is a response!");
-            	System.out.println("Response is " + rResponse.getResponse().getJSON());
+                System.out.println("There is a response!");
+                System.out.println("Response is " + rResponse.getResponse().getJSON());
                 if (rResponse.hasError()) {
                     System.out.println("Response has got " + rResponse.getProblematics().length + " problematics");
                 }
-            	System.out.println("Response has got " + rResponse.getException() + " exceptions");
+                System.out.println("Response has got " + rResponse.getException() + " exceptions");
             }
-            	
-            
+
             ReminderObject[] reminder2 = rResponse.getReminder(tz1);
             assertTrue("Found no reminders for given timezone", 0 < reminder2.length);
 
@@ -159,6 +159,7 @@ public class Bug7377Test extends AbstractTaskTest {
         }
     }
 
+    @Test
     public void testPublicFolderMove() throws Throwable {
         // Create task with 2 participants and reminder
         final Task task = new Task();
@@ -166,9 +167,7 @@ public class Bug7377Test extends AbstractTaskTest {
         task.setTitle("Test bug #7377");
         final Date remindDate = new Date();
         task.setAlarm(remindDate);
-        final Participant[] parts = new Participant[] {
-            new UserParticipant(client1.getValues().getUserId()),
-            new UserParticipant(client2.getValues().getUserId())
+        final Participant[] parts = new Participant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId())
         };
         task.setParticipants(parts);
         {

@@ -53,6 +53,9 @@ import static com.openexchange.mail.MailListField.FLAGS;
 import static com.openexchange.mail.MailListField.ID;
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -83,8 +86,8 @@ public class Bug15608Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -100,12 +103,14 @@ public class Bug15608Test extends AbstractAJAXSession {
         ids = response.getIds();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(ids, true));
         super.tearDown();
     }
 
+    @Test
     public void testFlags() throws Throwable {
         {
             final ListRequest request = new ListRequest(ids, ATTRIBUTES);

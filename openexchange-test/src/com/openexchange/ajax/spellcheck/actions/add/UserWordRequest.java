@@ -63,62 +63,62 @@ import com.openexchange.ajax.spellcheck.actions.AbstractSpellCheckRequest;
  */
 public final class UserWordRequest extends AbstractSpellCheckRequest {
 
-	private final String userWord;
+    private final String userWord;
 
-	private final boolean add;
+    private final boolean add;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link UserWordRequest}
-	 */
-	public UserWordRequest(final String userWord, final boolean add, final boolean failOnError) {
-		super();
-		this.userWord = userWord;
-		this.add = add;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link UserWordRequest}
+     */
+    public UserWordRequest(final String userWord, final boolean add, final boolean failOnError) {
+        super();
+        this.userWord = userWord;
+        this.add = add;
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return userWord;
-	}
+        return userWord;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, add ? "add" : "remove"));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, add ? "add" : "remove"));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public UserWordParser getParser() {
-		return new UserWordParser(failOnError);
-	}
+        return new UserWordParser(failOnError);
+    }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.session;
 
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -61,7 +62,6 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-
 
 /**
  * {@link Bug40821Test}
@@ -100,6 +100,7 @@ public class Bug40821Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testLoginWithStoreLanguage() throws Exception {
         String languageToSet = "de_DE".equalsIgnoreCase(language) ? "en_US" : "de_DE";
         LoginRequest req = new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, languageToSet, true, false);
@@ -110,6 +111,7 @@ public class Bug40821Test extends AbstractAJAXSession {
         assertEquals("Language was not stored.", languageToSet, locale);
     }
 
+    @Test
     public void testLoginWithoutStoreLanguage() throws Exception {
         String languageToSet = "de_DE".equalsIgnoreCase(language) ? "en_US" : "de_DE";
         LoginRequest req = new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, languageToSet, false, false);

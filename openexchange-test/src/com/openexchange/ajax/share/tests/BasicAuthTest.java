@@ -62,7 +62,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -103,8 +105,8 @@ public class BasicAuthTest extends ShareTest {
         calendarManager = new CalendarTestManager(client);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         CalendarTestManager calendarManager = this.calendarManager;
         if (null != calendarManager) {
             calendarManager.cleanUp();
@@ -119,6 +121,7 @@ public class BasicAuthTest extends ShareTest {
         super.tearDown();
     }
 
+    @Test
     public void testBasicAuth() throws Exception {
         EnumAPI api = EnumAPI.OUTLOOK;
         int module = FolderObject.CALENDAR;
@@ -227,7 +230,7 @@ public class BasicAuthTest extends ShareTest {
 
         // Check access to share (via guest client)
         String shareURL = discoverShareURL(guest);
-        GuestClient guestClient =  resolveShare(shareURL, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
 

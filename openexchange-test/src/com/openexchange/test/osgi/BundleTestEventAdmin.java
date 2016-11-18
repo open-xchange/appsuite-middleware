@@ -58,6 +58,7 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -90,14 +91,11 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
         super();
     }
 
+    @Test
     public void testEventAdminAbsence() {
         try {
             final LoginTest loginTest = new LoginTest();
-            final JSONObject loginObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject loginObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * Login should work without problems
@@ -113,17 +111,8 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
             /*
              * Check behavior if inserting a new appointment
              */
-            final Appointment newApp = createAppointmentObject(
-                "TestAppointment",
-                System.currentTimeMillis(),
-                System.currentTimeMillis() + 3600L,
-                getStandardCalendarFolder(getWebConversation(), loginTest.getHostName(), sessionId));
-            final JSONObject appointmentObject = insertAppointment(
-                getWebConversation(),
-                newApp,
-                TimeZone.getTimeZone("UTC"),
-                loginTest.getHostName(),
-                sessionId);
+            final Appointment newApp = createAppointmentObject("TestAppointment", System.currentTimeMillis(), System.currentTimeMillis() + 3600L, getStandardCalendarFolder(getWebConversation(), loginTest.getHostName(), sessionId));
+            final JSONObject appointmentObject = insertAppointment(getWebConversation(), newApp, TimeZone.getTimeZone("UTC"), loginTest.getHostName(), sessionId);
 
             /*
              * Check for error
@@ -151,10 +140,7 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 
         final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-        final WebRequest req = new PutMethodWebRequest(
-            PROTOCOL + host + APPOINTMENT_URL + parameter.getURLParameters(),
-            bais,
-            "text/javascript");
+        final WebRequest req = new PutMethodWebRequest(PROTOCOL + host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();

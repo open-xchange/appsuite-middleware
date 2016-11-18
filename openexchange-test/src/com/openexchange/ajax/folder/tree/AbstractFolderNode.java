@@ -54,7 +54,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
 
-
 /**
  * {@link AbstractFolderNode}
  *
@@ -90,13 +89,13 @@ public abstract class AbstractFolderNode implements FolderNode {
     }
 
     protected FolderNode resolveRecursively(int i, String[] path) {
-        if(i == path.length) {
+        if (i == path.length) {
             return this;
         }
         String childName = path[i];
-        for(FolderNode node : getChildren()) {
-            if(node.getFolder().getFolderName().equals(childName)) {
-                return ((AbstractFolderNode) node).resolveRecursively(i+1, path);
+        for (FolderNode node : getChildren()) {
+            if (node.getFolder().getFolderName().equals(childName)) {
+                return ((AbstractFolderNode) node).resolveRecursively(i + 1, path);
             }
         }
 
@@ -110,7 +109,7 @@ public abstract class AbstractFolderNode implements FolderNode {
 
     @Override
     public FolderNode getParent() {
-        if(parent != null) {
+        if (parent != null) {
             return parent;
         }
         return parent = load(getFolder().getParentFolderID());
@@ -118,7 +117,7 @@ public abstract class AbstractFolderNode implements FolderNode {
 
     protected FolderNode load(FolderObject folder) {
         FolderObject folderObject = manager.getFolderFromServer(folder, false);
-        if(folderObject == null) {
+        if (folderObject == null) {
             // Best effort
             return node(folder, client);
         }
@@ -134,11 +133,9 @@ public abstract class AbstractFolderNode implements FolderNode {
         return manager;
     }
 
-
     protected AJAXClient getClient() {
         return client;
     }
-
 
     protected void setFolder(FolderObject folder) {
         this.folder = folder;
@@ -152,9 +149,9 @@ public abstract class AbstractFolderNode implements FolderNode {
     }
 
     protected void recurse(int i, FolderNodeVisitor visitor) {
-        visitor.visit(i,this);
-        for(FolderNode child : getChildren()) {
-            ((AbstractFolderNode)child).recurse(i+1, visitor);
+        visitor.visit(i, this);
+        for (FolderNode child : getChildren()) {
+            ((AbstractFolderNode) child).recurse(i + 1, visitor);
         }
     }
 }

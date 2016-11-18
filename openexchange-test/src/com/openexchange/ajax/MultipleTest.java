@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -72,6 +73,7 @@ public class MultipleTest extends AbstractAJAXTest {
 
     private static final String MULTIPLE_URL = "/ajax/multiple";
 
+    @Test
     public void testMultiple() throws Exception {
         final int folderId = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId()).getObjectID();
 

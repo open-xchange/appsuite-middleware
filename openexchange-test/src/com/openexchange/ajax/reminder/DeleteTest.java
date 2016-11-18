@@ -51,6 +51,7 @@ package com.openexchange.ajax.reminder;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
@@ -65,6 +66,7 @@ public class DeleteTest extends ReminderTest {
         super();
     }
 
+    @Test
     public void testDelete() throws Exception {
         final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 
@@ -98,6 +100,7 @@ public class DeleteTest extends ReminderTest {
         AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testDeleteWithNonExisting() throws Exception {
         final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 
@@ -127,9 +130,9 @@ public class DeleteTest extends ReminderTest {
             }
         }
         assertNotSame("Reminder not found.", -1, pos);
-        final int[] failedObjects = deleteReminder(getWebConversation(), reminderObj[pos].getObjectId()+1000, getHostName(), getSessionId());
+        final int[] failedObjects = deleteReminder(getWebConversation(), reminderObj[pos].getObjectId() + 1000, getHostName(), getSessionId());
         assertTrue("failed object size is not > 0", failedObjects.length > 0);
-        assertEquals("fail object id not equals expected", reminderObj[pos].getObjectId()+1000, failedObjects[0]);
+        assertEquals("fail object id not equals expected", reminderObj[pos].getObjectId() + 1000, failedObjects[0]);
 
         AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId(), false);
     }

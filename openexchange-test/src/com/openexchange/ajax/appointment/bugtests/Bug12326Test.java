@@ -69,38 +69,35 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * Checks if the data of recurring appointment exceptions is correctly stored
  * and given to the GUI.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12326Test extends AbstractAJAXSession {
 
-    private static final int[] columns = new int[] {
-        Appointment.OBJECT_ID,
-        Appointment.FOLDER_ID,
-        Appointment.RECURRENCE_TYPE,
-        Appointment.RECURRENCE_POSITION,
-        Appointment.RECURRENCE_ID
+    private static final int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_ID
     };
 
-	/**
-	 * Default constructor.
-	 * @param name test name.
-	 */
-	public Bug12326Test() {
-		super();
-	}
+    /**
+     * Default constructor.
+     * 
+     * @param name test name.
+     */
+    public Bug12326Test() {
+        super();
+    }
 
-	/**
-	 * Creates an appointment series and modifies one appointment of the series
-	 * to be an exception.
-	 */
-	public void testAppointmentException() throws Throwable {
+    /**
+     * Creates an appointment series and modifies one appointment of the series
+     * to be an exception.
+     */
+    public void testAppointmentException() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
-		final Appointment series = new Appointment();
+        final Appointment series = new Appointment();
         final Calendar calendar = TimeTools.createCalendar(tz);
-		{
-			series.setTitle("Test for bug 12326");
+        {
+            series.setTitle("Test for bug 12326");
             series.setParentFolderID(folderId);
             series.setIgnoreConflicts(true);
             // Start and end date.
@@ -112,67 +109,66 @@ public final class Bug12326Test extends AbstractAJAXSession {
             series.setRecurrenceType(Appointment.DAILY);
             series.setInterval(1);
             series.setOccurrence(5);
-		}
-		{
+        }
+        {
             final InsertRequest request = new InsertRequest(series, tz);
             final CommonInsertResponse response = client.execute(request);
             series.setObjectID(response.getId());
             series.setLastModified(response.getTimestamp());
-		}
-		try {
-		    final int recurrence_position = 3;
-			// Load third occurence
-		    final Appointment occurence;
-			{
-				final GetRequest request= new GetRequest(folderId, series.getObjectID(), recurrence_position);
-				final GetResponse response = client.execute(request);
-				occurence = response.getAppointment(tz);
-				assertEquals("Occurence must have a recurrence position.", recurrence_position, occurence.getRecurrencePosition());
-			}
-			// Create exception
-			final int exceptionId;
-			{
-				final Appointment exception = new Appointment();
+        }
+        try {
+            final int recurrence_position = 3;
+            // Load third occurence
+            final Appointment occurence;
+            {
+                final GetRequest request = new GetRequest(folderId, series.getObjectID(), recurrence_position);
+                final GetResponse response = client.execute(request);
+                occurence = response.getAppointment(tz);
+                assertEquals("Occurence must have a recurrence position.", recurrence_position, occurence.getRecurrencePosition());
+            }
+            // Create exception
+            final int exceptionId;
+            {
+                final Appointment exception = new Appointment();
                 exception.setObjectID(occurence.getObjectID());
                 exception.setParentFolderID(folderId);
                 exception.setLastModified(occurence.getLastModified());
                 exception.setRecurrencePosition(occurence.getRecurrencePosition());
-				exception.setTitle(occurence.getTitle() + "-changed");
-	            exception.setIgnoreConflicts(true);
-				calendar.setTime(occurence.getEndDate());
-				exception.setStartDate(calendar.getTime());
-				calendar.add(Calendar.HOUR, 1);
-				exception.setEndDate(calendar.getTime());
-				final UpdateRequest request = new UpdateRequest(exception, tz);
-				final UpdateResponse response = client.execute(request);
-				exceptionId = response.getId();
-				series.setLastModified(response.getTimestamp());
-			}
-			// Check exception in get response
-			{
-			    final GetRequest request = new GetRequest(folderId, exceptionId);
-			    final GetResponse response = client.execute(request);
-	            final Appointment exception = response.getAppointment(tz);
-	            series.setLastModified(exception.getLastModified());
-	            // Check exception
-	            assertEquals("Exception is still a series.", Appointment.NO_RECURRENCE, exception.getRecurrenceType());
-	            assertEquals("Exception must have a recurrence position.", occurence.getRecurrencePosition(), exception.getRecurrencePosition());
-	            assertEquals("Exception is missing reference to series.", series.getObjectID(), exception.getRecurrenceID());
-			}
-			// Check exception in list response
-			{
-			    final ListIDs ids = ListIDs.l(new int[] {folderId, exceptionId});
-			    final ListRequest request = new ListRequest(ids, columns);
-			    final CommonListResponse response = client.execute(request);
-			    final Object[] data = response.getArray()[0];
-	            assertEquals("Exception is still a series.", Integer.valueOf(Appointment.NO_RECURRENCE), data[2]);
-	            assertEquals("Exception must have a recurrence position.", Integer.valueOf(occurence.getRecurrencePosition()), data[3]);
-	            assertEquals("Exception is missing reference to series.", Integer.valueOf(series.getObjectID()), data[4]);
-	            series.setLastModified(response.getTimestamp());
-			}
-		} finally {
-            client.execute(new DeleteRequest(series.getObjectID(), folderId,
-                series.getLastModified()));
-		}
-	}
+                exception.setTitle(occurence.getTitle() + "-changed");
+                exception.setIgnoreConflicts(true);
+                calendar.setTime(occurence.getEndDate());
+                exception.setStartDate(calendar.getTime());
+                calendar.add(Calendar.HOUR, 1);
+                exception.setEndDate(calendar.getTime());
+                final UpdateRequest request = new UpdateRequest(exception, tz);
+                final UpdateResponse response = client.execute(request);
+                exceptionId = response.getId();
+                series.setLastModified(response.getTimestamp());
+            }
+            // Check exception in get response
+            {
+                final GetRequest request = new GetRequest(folderId, exceptionId);
+                final GetResponse response = client.execute(request);
+                final Appointment exception = response.getAppointment(tz);
+                series.setLastModified(exception.getLastModified());
+                // Check exception
+                assertEquals("Exception is still a series.", Appointment.NO_RECURRENCE, exception.getRecurrenceType());
+                assertEquals("Exception must have a recurrence position.", occurence.getRecurrencePosition(), exception.getRecurrencePosition());
+                assertEquals("Exception is missing reference to series.", series.getObjectID(), exception.getRecurrenceID());
+            }
+            // Check exception in list response
+            {
+                final ListIDs ids = ListIDs.l(new int[] { folderId, exceptionId });
+                final ListRequest request = new ListRequest(ids, columns);
+                final CommonListResponse response = client.execute(request);
+                final Object[] data = response.getArray()[0];
+                assertEquals("Exception is still a series.", Integer.valueOf(Appointment.NO_RECURRENCE), data[2]);
+                assertEquals("Exception must have a recurrence position.", Integer.valueOf(occurence.getRecurrencePosition()), data[3]);
+                assertEquals("Exception is missing reference to series.", Integer.valueOf(series.getObjectID()), data[4]);
+                series.setLastModified(response.getTimestamp());
+            }
+        } finally {
+            client.execute(new DeleteRequest(series.getObjectID(), folderId, series.getLastModified()));
+        }
+    }
 }

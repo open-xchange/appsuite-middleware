@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.Assume;
+import org.junit.Test;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -133,6 +134,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         }
     }
 
+    @Test
     public void testUserHasAccessToOtherUsersRules() throws Exception {
         userClient = getClient();
 
@@ -155,7 +157,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         final String userImapLogin = description.getLogin();
 
         MailFilterAPI adminFilterAPI = new MailFilterAPI(adminClient);
-        try{
+        try {
             List<Rule> adminRules = adminFilterAPI.listRules(userImapLogin, false);
             for (final Rule ur : rules) {
                 boolean foundRule = false;
@@ -167,10 +169,10 @@ public class AdminListTest extends AbstractMailFilterTest {
                 }
                 assertTrue("Did not find rule.", foundRule);
             }
-        }catch(OXException e){
-            if(e.getPrefix().equals("MAIL_FILTER") && e.getCode()==2){
+        } catch (OXException e) {
+            if (e.getPrefix().equals("MAIL_FILTER") && e.getCode() == 2) {
                 Assume.assumeTrue("The context admin is unable to login to the sieve server. This is probably a configuration problem (e.g. imaplogin==null).", false);
-            }else {
+            } else {
                 throw e;
             }
         }

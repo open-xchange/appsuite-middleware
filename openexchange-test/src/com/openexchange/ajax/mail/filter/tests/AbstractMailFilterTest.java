@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter.tests;
 
 import static org.junit.Assert.assertArrayEquals;
 import java.util.List;
+import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.ActionParserFactory;
@@ -138,8 +139,8 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         mailFilterAPI = new MailFilterAPI(client);

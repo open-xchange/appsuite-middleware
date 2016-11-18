@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -86,7 +87,6 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
-
 /**
  * {@link QueryTest}
  *
@@ -103,6 +103,7 @@ public class QueryTest extends ContactsFindTest {
         super();
     }
 
+    @Test
     public void testFilterChaining() throws Exception {
         Contact contact = randomContact();
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
@@ -117,44 +118,47 @@ public class QueryTest extends ContactsFindTest {
         assertFoundDocumentInSearch(facets, contact.getEmail1());
     }
 
+    @Test
     public void testFilterPhone() throws Exception {
         testStringFilter(PHONE, "phone", PHONE_COLUMNS);
     }
 
+    @Test
     public void testFilterName() throws Exception {
         testStringFilter(NAME, "name", NAME_COLUMNS);
     }
 
+    @Test
     public void testFilterAddressbook() throws Exception {
         testStringFilter(GLOBAL, "address_book", ADDRESS_COLUMNS);
     }
 
+    @Test
     public void testFilterAddress() throws Exception {
         testStringFilter(ADDRESS, "address", ADDRESS_COLUMNS);
     }
 
+    @Test
     public void testFilterEmail() throws Exception {
         testStringFilter(EMAIL, "email", randomUID() + "@example.com", EMAIL_COLUMNS);
     }
 
+    @Test
     public void testSearchEmailInDistributionList() throws Exception {
         // Test case for bug 38260
         Contact distributionList = randomContact();
-        distributionList.setDistributionList(new DistributionListEntryObject[] {
-            new DistributionListEntryObject(randomUID(), randomUID() + "someuniquestring@example.com", DistributionListEntryObject.INDEPENDENT)
+        distributionList.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject(randomUID(), randomUID() + "someuniquestring@example.com", DistributionListEntryObject.INDEPENDENT)
         });
         manager.newAction(distributionList);
         List<PropDocument> response = query(Collections.singletonList(createQuery("someuniquestring")));
         assertTrue("Distribution list not found", 0 < response.size());
     }
 
+    @Test
     public void testFilterContactType() throws Exception {
         Contact contact = randomContact();
         Contact distributionList = randomContact();
-        distributionList.setDistributionList(new DistributionListEntryObject[] {
-            new DistributionListEntryObject(randomUID(), randomUID() + "@example.com", DistributionListEntryObject.INDEPENDENT),
-            new DistributionListEntryObject(randomUID(), randomUID() + "@example.com", DistributionListEntryObject.INDEPENDENT),
-            new DistributionListEntryObject(randomUID(), randomUID() + "@example.com", DistributionListEntryObject.INDEPENDENT),
+        distributionList.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject(randomUID(), randomUID() + "@example.com", DistributionListEntryObject.INDEPENDENT), new DistributionListEntryObject(randomUID(), randomUID() + "@example.com", DistributionListEntryObject.INDEPENDENT), new DistributionListEntryObject(randomUID(), randomUID() + "@example.com", DistributionListEntryObject.INDEPENDENT),
         });
         manager.newAction(contact, distributionList);
 
@@ -169,6 +173,7 @@ public class QueryTest extends ContactsFindTest {
         assertNotNull("distribution list not found", findByProperty(distListDocuments, "display_name", distributionList.getDisplayName()));
     }
 
+    @Test
     public void testFilterFolderType() throws Exception {
         Contact contact = manager.newAction(randomContact());
         List<PropDocument> privateFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderType.PRIVATE)));
@@ -181,6 +186,7 @@ public class QueryTest extends ContactsFindTest {
         assertNotNull("user contact not found", findByProperty(publicFolderDocuments, "email1", client.getValues().getDefaultAddress()));
     }
 
+    @Test
     public void testTokenizedQuery() throws Exception {
         Contact contact = randomContact();
         String t1 = randomUID();
@@ -253,28 +259,16 @@ public class QueryTest extends ContactsFindTest {
         assertEquals("Documents were found", 0, documents.size());
     }
 
+    @Test
     public void testFolderTypeFacet() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         try {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
             AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
             FolderObject[] folders = new FolderObject[3];
-            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
-                randomUID(),
-                FolderObject.CONTACT,
-                client.getValues().getPrivateContactFolder(),
-                client.getValues().getUserId()));
-            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(
-                randomUID(),
-                FolderObject.CONTACT,
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                client.getValues().getUserId()));
-            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(
-                randomUID(),
-                FolderObject.CONTACT,
-                client.getValues().getPrivateContactFolder(),
-                client.getValues().getUserId(),
-                client2.getValues().getUserId()));
+            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.CONTACT, client.getValues().getPrivateContactFolder(), client.getValues().getUserId()));
+            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.CONTACT, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, client.getValues().getUserId()));
+            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.CONTACT, client.getValues().getPrivateContactFolder(), client.getValues().getUserId(), client2.getValues().getUserId()));
 
             Contact[] contacts = new Contact[3];
             contacts[0] = manager.newAction(randomContact(folders[0].getObjectID()));
@@ -327,6 +321,7 @@ public class QueryTest extends ContactsFindTest {
         }
     }
 
+    @Test
     public void testPaging() throws Exception {
         int numberOfContacts = client.execute(new AllRequest(6, AllRequest.GUI_COLUMNS)).getArray().length - 1;
         Set<Integer> names = new HashSet<Integer>();

@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -112,6 +113,7 @@ public class Bug18336Test extends AbstractAJAXSession {
         updateAppointment.setLastModified(new Date(Long.MAX_VALUE));
     }
 
+    @Test
     public void testBug18336() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(updateAppointment, getClient().getValues().getTimeZone());
         UpdateResponse updateResponse = getClient().execute(updateRequest);

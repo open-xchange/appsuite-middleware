@@ -53,6 +53,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -100,14 +101,11 @@ public class Bug26350Test extends AbstractAJAXSession {
         ctm1 = new CalendarTestManager(client1);
         ctm1.setFailOnError(true);
         ftm = new FolderTestManager(client1);
-        folder = ftm.generatePrivateFolder(
-            "Bug26350 Folder" + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            client1.getValues().getPrivateAppointmentFolder(),
-            client1.getValues().getUserId());
+        folder = ftm.generatePrivateFolder("Bug26350 Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client1.getValues().getPrivateAppointmentFolder(), client1.getValues().getUserId());
         ftm.insertFolderOnServer(folder);
     }
 
+    @Test
     public void testBug26350() throws Exception {
         for (int i = 0; i < cycles; i++) {
             List<Integer> chunkIds = new ArrayList<Integer>();

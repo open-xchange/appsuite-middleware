@@ -52,6 +52,9 @@ package com.openexchange.ajax.task;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -82,8 +85,8 @@ public class Bug16006Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         origTimeZone = client.getValues().getTimeZone();
@@ -99,13 +102,14 @@ public class Bug16006Test extends AbstractAJAXSession {
         response.fillTask(task);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(task));
         client.execute(new SetRequest(Tree.TimeZone, origTimeZone.getID()));
         super.tearDown();
     }
 
+    @Test
     public void testAlarm() throws Throwable {
         GetRequest[] requests = new GetRequest[1];
         requests[0] = new GetRequest(task, TimeZones.UTC);

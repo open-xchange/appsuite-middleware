@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -97,6 +98,7 @@ public class CreatedByTest extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testInjectedCreatedBy() throws Exception {
         InsertRequest request = new InsertRequest(appointment, client.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = client.execute(request);

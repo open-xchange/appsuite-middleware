@@ -52,6 +52,9 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -85,22 +88,14 @@ public class Bug16151Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         client2 = new AJAXClient(User.User2);
         timeZone2 = client2.getValues().getTimeZone();
         // client2 shares folder
-        FolderTools.shareFolder(
-            client2,
-            EnumAPI.OX_NEW,
-            client2.getValues().getPrivateAppointmentFolder(),
-            client.getValues().getUserId(),
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        FolderTools.shareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         // client creates appointment
         appointment = new Appointment();
         appointment.setTitle("Appointment for bug 16151");
@@ -115,8 +110,8 @@ public class Bug16151Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         // client deletes appointment
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         client.execute(new DeleteRequest(appointment));
@@ -125,6 +120,7 @@ public class Bug16151Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testMoveFromShared2Private() throws Throwable {
         // client moves from shared folder to private folder
         Appointment moveMe = new Appointment();

@@ -52,6 +52,7 @@ package com.openexchange.ajax.reminder;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -112,22 +113,12 @@ public class SharedFolderTest extends AbstractAJAXSession {
         // Create shared folder
         sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
         sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        final InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(
-            EnumAPI.OUTLOOK,
-            sharedFolder,
-            true));
+        final InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
         folderInsertResponse.fillObject(sharedFolder);
-        FolderTools.shareFolder(
-            client,
-            EnumAPI.OUTLOOK,
-            sharedFolder.getObjectID(),
-            client2.getValues().getUserId(),
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        FolderTools.shareFolder(client, EnumAPI.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
     }
 
+    @Test
     public void testAppointmentCreatorCanChangeReminder() throws Exception {
         // Create appointment
         firstAppointment = createAppointment();
@@ -176,6 +167,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         client.execute(new DeleteRequest(firstAppointment));
     }
 
+    @Test
     public void testSecretaryCanChangeReminder() throws Exception {
         // Create appointment
         secondAppointment = createAppointment();

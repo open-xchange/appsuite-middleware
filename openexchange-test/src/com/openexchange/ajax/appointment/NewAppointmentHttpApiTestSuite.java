@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongMonthlyRecurrences;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongYearlyRecurrences;
 import com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions;
@@ -59,7 +57,8 @@ import com.openexchange.ajax.appointment.recurrence.TestsForDifferentWaysOfEndin
 import com.openexchange.ajax.appointment.recurrence.TestsForModifyingChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsForUsingRecurrencePositionToGetChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries;
-
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Suite for systematic tests to check the expected behaviour
@@ -67,13 +66,13 @@ import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointm
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class NewAppointmentHttpApiTestSuite extends TestSuite{
+public class NewAppointmentHttpApiTestSuite extends TestSuite {
 
     private NewAppointmentHttpApiTestSuite() {
         super();
     }
 
-    public static Test suite(){
+    public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(TestsToCreateMinimalAppointmentSeries.class);
         tests.addTestSuite(TestsForChangingAmongMonthlyRecurrences.class);

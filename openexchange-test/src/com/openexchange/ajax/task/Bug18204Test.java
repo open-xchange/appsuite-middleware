@@ -51,6 +51,7 @@ package com.openexchange.ajax.task;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -91,6 +92,7 @@ public class Bug18204Test extends AbstractAJAXSession {
         task = createTask();
     }
 
+    @Test
     public void testBug18204() throws Exception {
         // Insert new recurring task with end of series set to _after_
         InsertResponse insertResponse = client.execute(new InsertRequest(task, tz, true));

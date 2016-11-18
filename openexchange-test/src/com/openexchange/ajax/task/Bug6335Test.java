@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
@@ -59,6 +60,7 @@ import com.openexchange.groupware.tasks.TaskExceptionCode;
 
 /**
  * Tests if bug 6335 appears again in tasks.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug6335Test extends AbstractTaskTest {
@@ -72,8 +74,10 @@ public class Bug6335Test extends AbstractTaskTest {
 
     /**
      * Tests if invalid characters are detected.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testCharacter() throws Throwable {
         final AJAXClient client = getClient();
         final Task task = Create.createWithDefaults();

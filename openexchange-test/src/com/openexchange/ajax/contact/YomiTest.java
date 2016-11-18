@@ -50,6 +50,9 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
@@ -70,12 +73,8 @@ public class YomiTest extends AbstractAJAXSession {
 
     private Contact updateContact;
 
-    public YomiTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         contact = new Contact();
@@ -103,6 +102,7 @@ public class YomiTest extends AbstractAJAXSession {
         updateContact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
     }
 
+    @Test
     public void testYomiFields() throws Exception {
         GetRequest getRequest = new GetRequest(contact, getClient().getValues().getTimeZone());
         GetResponse getResponse = getClient().execute(getRequest);
@@ -127,8 +127,8 @@ public class YomiTest extends AbstractAJAXSession {
         assertEquals("Wrong Yomi Last name", "\u3059\u305a\u304d", loadedUpdatedContact.getYomiLastName());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(contact));
         super.tearDown();
     }

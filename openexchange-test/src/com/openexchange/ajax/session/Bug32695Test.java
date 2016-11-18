@@ -52,6 +52,9 @@ package com.openexchange.ajax.session;
 import java.util.List;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -83,22 +86,23 @@ public class Bug32695Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         AJAXConfig.init();
         login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password = AJAXConfig.getProperty(Property.PASSWORD);
         client = new AJAXClient(new AJAXSession(), true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != client && false == Strings.isEmpty(client.getSession().getId())) {
             client.logout();
         }
         super.tearDown();
     }
 
+    @Test
     public void testAutoFormLogin() throws Exception {
         /*
          * perform initial form login & store session cookie
@@ -115,6 +119,7 @@ public class Bug32695Test extends AbstractAJAXSession {
         assertEquals("Different session IDs", firstSessionID, secondSessionID);
     }
 
+    @Test
     public void testAutoFormLoginWithOtherUser() throws Exception {
         /*
          * perform initial form login & store session cookie
@@ -133,6 +138,7 @@ public class Bug32695Test extends AbstractAJAXSession {
         client.getSession().setId(secondSessionID);
     }
 
+    @Test
     public void testAutoFormLoginWithWrongCredentials() throws Exception {
         /*
          * perform initial form login & store session cookie
@@ -152,6 +158,7 @@ public class Bug32695Test extends AbstractAJAXSession {
         assertNotNull("No errors performing second login with wrong password", expectedError);
     }
 
+    @Test
     public void testAutoFormLoginWithWrongSecretCookie() throws Exception {
         /*
          * perform initial form login & store session cookie
@@ -169,6 +176,7 @@ public class Bug32695Test extends AbstractAJAXSession {
         client.getSession().setId(secondSessionID);
     }
 
+    @Test
     public void testAutoFormLoginWithWrongSessionCookie() throws Exception {
         /*
          * perform initial form login & store session cookie
@@ -186,6 +194,7 @@ public class Bug32695Test extends AbstractAJAXSession {
         client.getSession().setId(secondSessionID);
     }
 
+    @Test
     public void testAutoFormLoginWithoutStore() throws Exception {
         /*
          * perform initial form login, don't store session cookie

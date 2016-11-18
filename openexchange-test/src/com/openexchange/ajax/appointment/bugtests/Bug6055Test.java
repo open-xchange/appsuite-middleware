@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -58,6 +59,7 @@ public class Bug6055Test extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6055Test.class);
 
+    @Test
     public void testBug6055() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testBug6055");
         appointmentObj.setParentFolderID(appointmentFolderId);

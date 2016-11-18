@@ -59,25 +59,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-    CurrentUserPrincipalTest.class,
-    OptionsTest.class,
-    CollectionsTest.class,
-    PrincipalPropertiesTest.class,
-    AddressbookPropertiesTest.class,
-    NewTest.class,
-    UpdateTest.class,
-    DeleteTest.class,
-    MoveTest.class,
-    UpgradeTest.class,
-    ImageTest.class,
-    CookieTest.class,
-    BasicTest.class,
-    BulkImportTest.class,
-    AddressbookQueryTest.class,
-    AddressbookQueryPartialRetrievalTest.class,
-    AddressbookMultigetPartialRetrievalTest.class,
-    ImageURITest.class
+@SuiteClasses({ CurrentUserPrincipalTest.class, OptionsTest.class, CollectionsTest.class, PrincipalPropertiesTest.class, AddressbookPropertiesTest.class, NewTest.class, UpdateTest.class, DeleteTest.class, MoveTest.class, UpgradeTest.class, ImageTest.class, CookieTest.class, BasicTest.class, BulkImportTest.class, AddressbookQueryTest.class, AddressbookQueryPartialRetrievalTest.class, AddressbookMultigetPartialRetrievalTest.class, ImageURITest.class
 })
 public final class CardDAVTestSuite {
 

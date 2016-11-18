@@ -1,8 +1,10 @@
+
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -22,9 +24,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class AllRequestAndResponseTest extends AbstractMailTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
-	protected String folder;
-	String mailObject_25kb;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
+    protected String folder;
+    String mailObject_25kb;
 
     public AllRequestAndResponseTest() throws OXException, IOException, SAXException, JSONException {
         super();
@@ -36,9 +38,9 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
         super.setUp();
         folder = getSentFolder();
         /*
-		 * Create JSON mail object
-		 */
-		mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+         * Create JSON mail object
+         */
+        mailObject_25kb = createSelfAddressed25KBMailObject().toString();
         clearFolder(folder);
     }
 
@@ -48,27 +50,27 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
         super.tearDown();
     }
 
+    @Test
     public void testAllResponseGetMailObjects() throws Exception {
 
-    	/*
-		 * Insert <numOfMails> mails through a send request
-		 */
-		final int numOfMails = 1;
-		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
-		for (int i = 0; i < numOfMails; i++) {
-		    getClient().execute(new SendRequest(mailObject_25kb));
-			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
-		}
+        /*
+         * Insert <numOfMails> mails through a send request
+         */
+        final int numOfMails = 1;
+        LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        for (int i = 0; i < numOfMails; i++) {
+            getClient().execute(new SendRequest(mailObject_25kb));
+            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+        }
 
-    	AllResponse allR = Executor.execute(getSession(), new AllRequest(
-				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
+        AllResponse allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }
         MailMessage[] mailMessages = allR.getMailMessages(COLUMNS_DEFAULT_LIST);
-        for (MailMessage mailMessage : mailMessages){
-        	assertEquals("From is not equal", new InternetAddress(getSendAddress()) ,mailMessage.getFrom()[0]);
-        	assertEquals("Subject is not equal", MAIL_SUBJECT ,mailMessage.getSubject());
+        for (MailMessage mailMessage : mailMessages) {
+            assertEquals("From is not equal", new InternetAddress(getSendAddress()), mailMessage.getFrom()[0]);
+            assertEquals("Subject is not equal", MAIL_SUBJECT, mailMessage.getSubject());
         }
     }
 

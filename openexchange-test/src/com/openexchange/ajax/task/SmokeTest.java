@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.L;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -69,6 +70,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Implements test case 1803 partly.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 @RunWith(ConcurrentTestRunner.class)
@@ -84,8 +86,10 @@ public class SmokeTest extends AbstractTaskTest {
     /**
      * Tests inserting a private task.
      * http://testlink6.open-xchange.com/testlink/lib/execute/execSetResults.php?level=testcase&id=1803
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testCase1803() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateTaskFolder();
@@ -93,8 +97,7 @@ public class SmokeTest extends AbstractTaskTest {
         task.setParentFolderID(folderId);
         task.setTitle("Buy a birthday gift for Mr. K\u00e4rner");
         final TimeZone timeZone = client.getValues().getTimeZone();
-        final DateFormat dateF = new SimpleDateFormat("dd.MM.yyyy", client
-            .getValues().getLocale());
+        final DateFormat dateF = new SimpleDateFormat("dd.MM.yyyy", client.getValues().getLocale());
         dateF.setTimeZone(timeZone);
         task.setStartDate(dateF.parse("26.02.2007"));
         task.setEndDate(dateF.parse("27.02.2007"));
@@ -107,17 +110,14 @@ public class SmokeTest extends AbstractTaskTest {
         final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
-        final CommonAllResponse allR = TaskTools.all(client, new AllRequest(
-            folderId, AbstractTaskRequest.GUI_COLUMNS, AllRequest.GUI_SORT,
-            AllRequest.GUI_ORDER));
+        final CommonAllResponse allR = TaskTools.all(client, new AllRequest(folderId, AbstractTaskRequest.GUI_COLUMNS, AllRequest.GUI_SORT, AllRequest.GUI_ORDER));
         boolean foundObject = false;
         for (final Object[] rowValues : allR) {
             if (rowValues[0].equals(Integer.valueOf(insertR.getId()))) {
                 foundObject = true;
             }
         }
-        assertTrue("All request on folder did not found created object.",
-            foundObject);
+        assertTrue("All request on folder did not found created object.", foundObject);
         // TODO Use list an check if list contains the entered attributes.
         client.execute(new DeleteRequest(reload));
     }

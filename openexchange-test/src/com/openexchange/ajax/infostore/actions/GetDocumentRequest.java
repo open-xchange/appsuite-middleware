@@ -83,7 +83,7 @@ public class GetDocumentRequest extends AbstractInfostoreRequest<GetDocumentResp
         this(folder, id, null);
     }
 
-    public void setAdditionalParameters(Parameter...additionalParameters) {
+    public void setAdditionalParameters(Parameter... additionalParameters) {
         this.additionalParameters = additionalParameters;
     }
 
@@ -99,11 +99,7 @@ public class GetDocumentRequest extends AbstractInfostoreRequest<GetDocumentResp
 
     @Override
     public Parameter[] getParameters() {
-        Params params = new Params(
-            AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DOCUMENT,
-            AJAXServlet.PARAMETER_ID, id,
-            AJAXServlet.PARAMETER_FOLDERID, folder
-        );
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DOCUMENT, AJAXServlet.PARAMETER_ID, id, AJAXServlet.PARAMETER_FOLDERID, folder);
         if (null != version) {
             params.add(AJAXServlet.PARAMETER_VERSION, version);
         }

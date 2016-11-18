@@ -61,7 +61,6 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.share.ShareTarget;
 
-
 /**
  * {@link SendLinkRequest}
  *
@@ -111,9 +110,7 @@ public class SendLinkRequest implements AJAXRequest<SendLinkResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "sendLink"
-        ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "sendLink").toArray();
     }
 
     @Override

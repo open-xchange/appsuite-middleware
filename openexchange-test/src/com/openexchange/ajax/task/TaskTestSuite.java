@@ -55,6 +55,7 @@ import junit.framework.TestSuite;
 
 /**
  * Suite for all task tests.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class TaskTestSuite {
@@ -68,6 +69,7 @@ public final class TaskTestSuite {
 
     /**
      * Generates the task test suite.
+     * 
      * @return the task tests suite.
      */
     public static Test suite() {

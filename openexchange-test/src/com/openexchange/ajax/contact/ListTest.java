@@ -2,11 +2,11 @@
 package com.openexchange.ajax.contact;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.ListRequest;
@@ -18,15 +18,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 
 public class ListTest extends AbstractContactTest {
 
-    public ListTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testList() throws Exception {
         final Contact contactObj = createContactObject("testList");
         final int id1 = insertContact(contactObj);
@@ -51,6 +43,7 @@ public class ListTest extends AbstractContactTest {
         }
     }
 
+    @Test
     public void testSortDuration() throws Exception {
         final int size = 10000;
         final List<Contact> contacts = new ArrayList<Contact>();
@@ -85,6 +78,7 @@ public class ListTest extends AbstractContactTest {
         // System.out.println("Duration: " + diff);
     }
 
+    @Test
     public void testListWithAllFields() throws Exception {
         final Contact contactObject = createCompleteContactObject();
 
@@ -102,6 +96,7 @@ public class ListTest extends AbstractContactTest {
         compareObject(contactObject, loadContact);
     }
 
+    @Test
     public void testListWithNotExistingEntries() throws Exception {
         final Contact contactObject = createCompleteContactObject();
         final int objectId = insertContact(contactObject);
@@ -127,7 +122,7 @@ public class ListTest extends AbstractContactTest {
         deleteContact(objectId, contactFolderId, true);
     }
 
-    // Node 2652
+    // Node 2652    @Test
     public void testLastModifiedUTC() throws Exception {
         final int cols[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
 
@@ -168,6 +163,7 @@ public class ListTest extends AbstractContactTest {
         return contactObj;
     }
 
+    @Test
     public void testBug42726_emptyList_markedAsDistList() throws Exception {
         // SETUP
         Contact contactEntry = createContactObject("internal contact");

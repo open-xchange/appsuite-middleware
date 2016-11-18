@@ -78,12 +78,7 @@ public class Importer {
             // System.out.println(i);
             AJAXSession session = new AJAXSession();
             AJAXClient client = new AJAXClient(session, false); // normally true, but there is an explicit call at the end of the method
-            LoginResponse loginResponse = client.execute(new LoginRequest(
-                "oxuser" + i + "@performance",
-                "secret",
-                LoginTools.generateAuthId(),
-                AJAXClient.class.getName(),
-                "6.20.0"));
+            LoginResponse loginResponse = client.execute(new LoginRequest("oxuser" + i + "@performance", "secret", LoginTools.generateAuthId(), AJAXClient.class.getName(), "6.20.0"));
             session.setId(loginResponse.getSessionId());
             int folderId = client.getValues().getPrivateContactFolder();
             client.execute(new VCardImportRequest(folderId, new FileInputStream(args[0])));

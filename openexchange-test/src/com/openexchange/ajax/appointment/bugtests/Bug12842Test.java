@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -75,6 +76,7 @@ public class Bug12842Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testConflictBetween() throws Throwable {
         /*-
          * Occurrence:     [--------]
@@ -91,6 +93,7 @@ public class Bug12842Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testConflictOverlappingStartDate() throws Throwable {
         /*-
          * Occurrence:     [--------]
@@ -107,6 +110,7 @@ public class Bug12842Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testConflictOverlappingEndDate() throws Throwable {
         /*-
          * Occurrence:     [--------]
@@ -123,6 +127,7 @@ public class Bug12842Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testConflictOverlapping() throws Throwable {
         /*-
          * Occurrence:     [--------]
@@ -139,6 +144,7 @@ public class Bug12842Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testBoundaryStart() throws Throwable {
         /*-
          * Occurrence:     [--------]
@@ -155,6 +161,7 @@ public class Bug12842Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testBoundaryEnd() throws Throwable {
         /*-
          * Occurrence:     [--------]
@@ -171,6 +178,7 @@ public class Bug12842Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testBeforeStart() throws Throwable {
         /*-
          * Occurrence:      [--------]
@@ -187,6 +195,7 @@ public class Bug12842Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testAfterEnd() throws Throwable {
         /*-
          * Occurrence:     [--------]
@@ -235,19 +244,19 @@ public class Bug12842Test extends AbstractAJAXSession {
             appointment.setInterval(1);
 
             switch (type) {
-            case CalendarObject.YEARLY:
-                appointment.setMonth(calendar.get(Calendar.MONTH));
-            case CalendarObject.MONTHLY:
-                appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
-                break;
-            case CalendarObject.WEEKLY:
-                appointment.setDays((int) Math.pow(2, (calendar.get(Calendar.DAY_OF_WEEK) - 1))); // Transforming
-                // java.util.Calendar.DAY_OF_WEEK to
-                // com.openexchange.groupware.container.CalendarObject.days
-            case CalendarObject.DAILY:
-                break;
-            default:
-                break;
+                case CalendarObject.YEARLY:
+                    appointment.setMonth(calendar.get(Calendar.MONTH));
+                case CalendarObject.MONTHLY:
+                    appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
+                    break;
+                case CalendarObject.WEEKLY:
+                    appointment.setDays((int) Math.pow(2, (calendar.get(Calendar.DAY_OF_WEEK) - 1))); // Transforming
+                    // java.util.Calendar.DAY_OF_WEEK to
+                    // com.openexchange.groupware.container.CalendarObject.days
+                case CalendarObject.DAILY:
+                    break;
+                default:
+                    break;
             }
 
             InsertRequest request = new InsertRequest(appointment, tz);
@@ -262,22 +271,22 @@ public class Bug12842Test extends AbstractAJAXSession {
             calendar.set(Calendar.DAY_OF_MONTH, 28);
 
             switch (type) {
-            case CalendarObject.YEARLY:
-                calendar.add(Calendar.YEAR, 1);
-                break;
-            case CalendarObject.MONTHLY:
-                calendar.add(Calendar.MONTH, 1);
-                break;
-            case CalendarObject.WEEKLY:
-                // Adding 2 weeks to get into the future. Appointments in the past do not conflict.
-                calendar.add(Calendar.WEEK_OF_YEAR, 2);
-                break;
-            case CalendarObject.DAILY:
-                // Adding 8 days to get into the future. Appointments in the past do not conflict.
-                calendar.add(Calendar.DAY_OF_MONTH, 8);
-                break;
-            default:
-                break;
+                case CalendarObject.YEARLY:
+                    calendar.add(Calendar.YEAR, 1);
+                    break;
+                case CalendarObject.MONTHLY:
+                    calendar.add(Calendar.MONTH, 1);
+                    break;
+                case CalendarObject.WEEKLY:
+                    // Adding 2 weeks to get into the future. Appointments in the past do not conflict.
+                    calendar.add(Calendar.WEEK_OF_YEAR, 2);
+                    break;
+                case CalendarObject.DAILY:
+                    // Adding 8 days to get into the future. Appointments in the past do not conflict.
+                    calendar.add(Calendar.DAY_OF_MONTH, 8);
+                    break;
+                default:
+                    break;
             }
 
             calendar.set(Calendar.HOUR_OF_DAY, conflictStart);
@@ -306,17 +315,11 @@ public class Bug12842Test extends AbstractAJAXSession {
             }
         } finally {
             if (client != null && conflictAppointment.getObjectID() != 0 && conflictAppointment.getLastModified() != null) {
-                final DeleteRequest deleteRequest = new DeleteRequest(
-                    conflictAppointment.getObjectID(),
-                    client.getValues().getPrivateAppointmentFolder(),
-                    conflictAppointment.getLastModified());
+                final DeleteRequest deleteRequest = new DeleteRequest(conflictAppointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), conflictAppointment.getLastModified());
                 client.execute(deleteRequest);
             }
             if (client != null && appointment.getObjectID() != 0 && appointment.getLastModified() != null) {
-                final DeleteRequest deleteRequest = new DeleteRequest(
-                    appointment.getObjectID(),
-                    client.getValues().getPrivateAppointmentFolder(),
-                    appointment.getLastModified());
+                final DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
                 client.execute(deleteRequest);
             }
         }

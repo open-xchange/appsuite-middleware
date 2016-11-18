@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -108,6 +109,7 @@ public class Bug16249Test extends AttachmentTest {
         timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
     }
 
+    @Test
     public void testBug16249() throws Exception {
         Appointment a = new Appointment();
         a.setTitle("Bug 16249 Test");
@@ -120,11 +122,11 @@ public class Bug16249Test extends AttachmentTest {
         Date beforeAttach = loadAppointment(getWebConversation(), appointmentId, folderId, timeZone, getHostName(), getSessionId()).getLastModified();
 
         Response res = attach(getWebConversation(), getSessionId(), folderId, appointmentId, Types.APPOINTMENT, testFile);
-        int attachmentId = ((JSONArray)res.getData()).getInt(0);
+        int attachmentId = ((JSONArray) res.getData()).getInt(0);
 
         Date afterAttach = loadAppointment(getWebConversation(), appointmentId, folderId, timeZone, getHostName(), getSessionId()).getLastModified();
 
-        detach(getWebConversation(), getSessionId(), folderId, appointmentId, Types.APPOINTMENT, new int[]{attachmentId});
+        detach(getWebConversation(), getSessionId(), folderId, appointmentId, Types.APPOINTMENT, new int[] { attachmentId });
 
         Date afterDetach = loadAppointment(getWebConversation(), appointmentId, folderId, timeZone, getHostName(), getSessionId()).getLastModified();
 

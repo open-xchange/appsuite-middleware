@@ -51,8 +51,8 @@ package com.openexchange.dav;
 
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
@@ -63,31 +63,31 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class Config {
-	
-	private Config() {
-		// prevent instantiation
-	}
-	
+
+    private Config() {
+        // prevent instantiation
+    }
+
     public static String getBaseUri() throws OXException {
         return getProtocol() + "://" + getHostname();
     }
-    
+
     public static User getUser() {
-    	return User.User1;
+        return User.User1;
     }
-    
+
     public static String getLogin() throws OXException {
-    	return getLogin(getUser());
+        return getLogin(getUser());
     }
-    
+
     public static String getUsername() throws OXException {
-    	return getUsername(getUser());
+        return getUsername(getUser());
     }
-    
+
     public static String getPassword() throws OXException {
-    	return getPassword(getUser());
+        return getPassword(getUser());
     }
-    
+
     public static String getHostname() throws OXException {
         final String hostname = AJAXConfig.getProperty(Property.HOSTNAME);
         if (null == hostname) {
@@ -95,7 +95,7 @@ public final class Config {
         }
         return hostname;
     }
-    
+
     public static String getProtocol() throws OXException {
         final String hostname = AJAXConfig.getProperty(Property.PROTOCOL);
         if (null == hostname) {
@@ -103,13 +103,13 @@ public final class Config {
         }
         return hostname;
     }
-    
+
     public static String getLogin(final User user) throws OXException {
         final String login = AJAXConfig.getProperty(user.getLogin());
         if (null == login) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getLogin().getPropertyName());
         } else if (login.contains("@")) {
-        	return login;
+            return login;
         } else {
             final String context = AJAXConfig.getProperty(Property.CONTEXTNAME);
             if (null == context) {
@@ -118,16 +118,16 @@ public final class Config {
             return login + "@" + context;
         }
     }
-    
+
     public static String getUsername(final User user) throws OXException {
         final String username = AJAXConfig.getProperty(user.getLogin());
         if (null == username) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getLogin().getPropertyName());
         } else {
-        	return username.contains("@") ? username.substring(0, username.indexOf("@")) : username;
+            return username.contains("@") ? username.substring(0, username.indexOf("@")) : username;
         }
     }
-    
+
     public static String getPassword(final User user) throws OXException {
         final String password = AJAXConfig.getProperty(user.getPassword());
         if (null == password) {

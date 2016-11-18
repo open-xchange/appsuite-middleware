@@ -50,6 +50,9 @@
 package com.openexchange.ajax.task;
 
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
@@ -79,19 +82,20 @@ public class AllAliasTest extends AbstractTaskTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         final DeleteRequest delete = new DeleteRequest(task);
         client.execute(delete);
         super.tearDown();
     }
 
+    @Test
     public void testAll() throws Throwable {
         task = new Task();
         task.setTitle("Task TestAllAlias");
@@ -104,11 +108,7 @@ public class AllAliasTest extends AbstractTaskTest {
         final CommonAllResponse aliasResponse = client.execute(aliasRequest);
         final Object[][] tasksAlias = aliasResponse.getArray();
 
-        final AllRequest request = new AllRequest(
-            client.getValues().getPrivateTaskFolder(),
-            new int[] { 20, 1, 2, 5, 4 },
-            0,
-            Order.NO_ORDER);
+        final AllRequest request = new AllRequest(client.getValues().getPrivateTaskFolder(), new int[] { 20, 1, 2, 5, 4 }, 0, Order.NO_ORDER);
         final CommonAllResponse response = client.execute(request);
         final Object[][] tasks = response.getArray();
 

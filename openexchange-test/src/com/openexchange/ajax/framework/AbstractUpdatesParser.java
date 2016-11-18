@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-
 /**
  * {@link AbstractUpdatesParser}
  *

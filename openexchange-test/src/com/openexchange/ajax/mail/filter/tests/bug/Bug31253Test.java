@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter.tests.bug;
 
 import java.util.Collections;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -93,6 +94,7 @@ public class Bug31253Test extends AbstractMailFilterTest {
         super.tearDown();
     }
 
+    @Test
     public void testBug31253() throws Exception {
         client = getClient();
         folder = Create.createPrivateFolder("Test for Bug31253", FolderObject.MAIL, client.getValues().getUserId());

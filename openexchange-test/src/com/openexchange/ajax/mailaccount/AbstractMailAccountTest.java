@@ -60,7 +60,6 @@ import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
 
-
 /**
  * {@link AbstractMailAccountTest}
  *
@@ -68,6 +67,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
  *
  */
 public class AbstractMailAccountTest extends AbstractAJAXSession {
+
     protected AbstractMailAccountTest() {
         super();
     }
@@ -84,7 +84,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         mailAccountDescription.parseMailServerURL("imap://mail.test.invalid");
         mailAccountDescription.setName("Test Mail Account");
         mailAccountDescription.setPassword("Password");
-        mailAccountDescription.setPrimaryAddress("bob"+System.currentTimeMillis()+"@test.invalid");
+        mailAccountDescription.setPrimaryAddress("bob" + System.currentTimeMillis() + "@test.invalid");
         mailAccountDescription.setSent("sent");
         mailAccountDescription.setSpam("Spam");
         mailAccountDescription.setSpamHandler("spamHandler");

@@ -53,7 +53,7 @@ import static com.openexchange.java.Autoboxing.L;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.TimeZone;
-import junit.framework.AssertionFailedError;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -64,6 +64,7 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
+import junit.framework.AssertionFailedError;
 
 /**
  * {@link TaskDurationAndCostsTest}
@@ -109,6 +110,7 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         client.execute(req);
     }
 
+    @Test
     public void testDurationAndCosts() throws Exception {
         task.setTargetCosts(new BigDecimal("11.5"));
         task.setActualCosts(new BigDecimal("4.728"));

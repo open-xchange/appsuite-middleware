@@ -50,6 +50,8 @@
 package com.openexchange.ajax.infostore.thirdparty.test;
 
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.infostore.thirdparty.AbstractInfostoreThirdpartyTest;
 import com.openexchange.ajax.infostore.thirdparty.ProviderIdMapper;
 import com.openexchange.ajax.infostore.thirdparty.actions.CreateFolderRequest;
@@ -80,23 +82,18 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         filestorages = getConnectedInfostoreId();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        //TODO delete files here...
-        super.tearDown();
-    }
-
+    @Test
     public void testLifecycle() throws Exception {
         String folderName = "unittest";
         byte[] file = randomBytes(5);
 
-        for(ProviderIdMapper pid : filestorages) {
+        for (ProviderIdMapper pid : filestorages) {
             String folderId = createFolder(pid, folderName);
             String fileId = uploadFile(folderId, file);
             deleteFile(folderId, fileId);
@@ -111,7 +108,6 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
         String folderId = (String) cfResp.getData();
         return folderId;
     }
-
 
     public String uploadFile(String folderId, byte[] bytesToUpload) throws Exception {
         NewFileRequest nfReq = new NewFileRequest(bytesToUpload, setFolderId(folderId), "application/octet-stream");

@@ -51,6 +51,7 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Random;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
@@ -61,6 +62,7 @@ import com.openexchange.tools.RandomString;
 
 /**
  * Tests resulting from bug reports.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class BugTests extends AbstractAJAXSession {
@@ -71,6 +73,7 @@ public class BugTests extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name Name of the test.
      */
     public BugTests(final String name) {
@@ -87,6 +90,7 @@ public class BugTests extends AbstractAJAXSession {
     /**
      * Tests if the mail folder are sent correctly to the GUI.
      */
+    @Test
     public void testBug5607() throws Throwable {
         final String drafts = client.execute(new GetRequest(Tree.DraftsFolder)).getString();
         assertNotNull("Can't get drafts folder.", drafts);
@@ -101,8 +105,10 @@ public class BugTests extends AbstractAJAXSession {
     /**
      * Tests if calendar and task notifications can be properly turned on and
      * off.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testBug6462() throws Throwable {
         for (Tree tree : new Tree[] { Tree.CalendarNotification, Tree.TaskNotification }) {
             boolean origValue = client.execute(new GetRequest(tree)).getBoolean();
@@ -119,8 +125,10 @@ public class BugTests extends AbstractAJAXSession {
 
     /**
      * Tests if any desired senderAddress can be written to the config tree.
+     * 
      * @throws Throwable
      */
+    @Test
     public void testWriteSenderAddress() throws Throwable {
         // Get original value.
         final String origAddress = client.execute(new GetRequest(Tree.SendAddress)).getString();

@@ -64,31 +64,31 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractPasswordChangeAJAXTest extends AbstractAJAXSession {
 
-	/**
-	 * Default constructor.
-	 *
-	 * @param name
-	 *            name of the test.
-	 */
-	protected AbstractPasswordChangeAJAXTest() {
-		super();
-	}
+    /**
+     * Default constructor.
+     *
+     * @param name
+     *            name of the test.
+     */
+    protected AbstractPasswordChangeAJAXTest() {
+        super();
+    }
 
-	/**
-	 * Gets the client time zone
-	 *
-	 * @return The client time zone
-	 * @throws OXException
-	 *             If an AJAX error occurs
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 * @throws SAXException
-	 *             If a SAX error occurs
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
-		return getClient().getValues().getTimeZone();
-	}
+    /**
+     * Gets the client time zone
+     *
+     * @return The client time zone
+     * @throws OXException
+     *             If an AJAX error occurs
+     * @throws IOException
+     *             If an I/O error occurs
+     * @throws SAXException
+     *             If a SAX error occurs
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getTimeZone();
+    }
 
 }

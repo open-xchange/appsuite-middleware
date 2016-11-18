@@ -2,6 +2,7 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -16,6 +17,7 @@ import com.openexchange.groupware.container.Contact;
 
 public class MultipleTest extends ContactTest {
 
+    @Test
     public void testMultipleInsert() throws Exception {
         final Contact contactObj = new Contact();
         contactObj.setSurName("testMultipleInsert");
@@ -26,8 +28,7 @@ public class MultipleTest extends ContactTest {
         final InsertRequest insertRequest2 = new InsertRequest(contactObj, true);
         final InsertRequest insertRequest3 = new InsertRequest(contactObj, true);
 
-        final MultipleRequest<InsertResponse> multipleInsertRequest = MultipleRequest.create(new InsertRequest[] {
-            insertRequest1, insertRequest2, insertRequest3 });
+        final MultipleRequest<InsertResponse> multipleInsertRequest = MultipleRequest.create(new InsertRequest[] { insertRequest1, insertRequest2, insertRequest3 });
         final MultipleResponse multipleInsertResponse = Executor.execute(new AJAXClient(ajaxSession, false), multipleInsertRequest);
 
         assertFalse("first insert request has errors: ", multipleInsertResponse.getResponse(0).hasError());

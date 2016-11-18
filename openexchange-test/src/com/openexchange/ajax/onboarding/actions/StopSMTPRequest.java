@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link StopSMTPRequest}
  *
@@ -96,15 +95,13 @@ public class StopSMTPRequest implements AJAXRequest<OnboardingTestResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "stopSMTP",
-            "restoreTransports", Boolean.toString(restoreTransports)
-            ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "stopSMTP", "restoreTransports", Boolean.toString(restoreTransports)).toArray();
     }
 
     @Override
     public AbstractAJAXParser<? extends OnboardingTestResponse> getParser() {
         return new AbstractAJAXParser<OnboardingTestResponse>(failOnError) {
+
             @Override
             protected OnboardingTestResponse createResponse(Response response) throws JSONException {
                 return new OnboardingTestResponse(response);

@@ -52,6 +52,7 @@ package com.openexchange.ajax.infostore.fileaccount.test;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.infostore.fileaccount.actions.AllFileaccountRequest;
@@ -68,8 +69,7 @@ import com.openexchange.file.storage.FileStorageCapability;
  */
 public final class FilestorageAccountTest extends AbstractAJAXSession {
 
-    private static final String[] POSSIBLE_CAPABILITIES = new String[] { FileStorageCapability.FILE_VERSIONS.name(), FileStorageCapability.EXTENDED_METADATA.name(), FileStorageCapability.RANDOM_FILE_ACCESS.name(),
-        FileStorageCapability.LOCKS.name(), FileStorageCapability.AUTO_NEW_VERSION.name(), FileStorageCapability.ZIPPABLE_FOLDER.name() };
+    private static final String[] POSSIBLE_CAPABILITIES = new String[] { FileStorageCapability.FILE_VERSIONS.name(), FileStorageCapability.EXTENDED_METADATA.name(), FileStorageCapability.RANDOM_FILE_ACCESS.name(), FileStorageCapability.LOCKS.name(), FileStorageCapability.AUTO_NEW_VERSION.name(), FileStorageCapability.ZIPPABLE_FOLDER.name() };
 
     /**
      * Initializes a new {@link FilestorageAccountTest}.
@@ -80,7 +80,7 @@ public final class FilestorageAccountTest extends AbstractAJAXSession {
         super();
     }
 
-    
+    @Test
     public void testGetFilestorageAccountCapabilities() throws Throwable {
 
         AJAXClient client = getClient();
@@ -105,7 +105,8 @@ public final class FilestorageAccountTest extends AbstractAJAXSession {
             assertTrue("Returns unknown capability " + str, contains);
         }
     }
-    
+
+    @Test
     public void testGetAllFilestorageAccountCapabilities() throws Throwable {
 
         AJAXClient client = getClient();

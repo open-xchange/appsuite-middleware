@@ -56,9 +56,11 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 /**
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class DeleteFileaccountParser extends AbstractAJAXParser<DeleteFileaccountResponse>  {
+public class DeleteFileaccountParser extends AbstractAJAXParser<DeleteFileaccountResponse> {
+
     /**
      * Initializes a new {@link DeleteFileaccountParser}.
+     * 
      * @param failOnError
      */
     protected DeleteFileaccountParser(boolean failOnError) {

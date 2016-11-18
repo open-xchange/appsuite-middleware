@@ -287,8 +287,7 @@ public class ConfirmationTest extends CalDAVTest {
         calendar.setTime(appointment.getEndDate());
         calendar.add(Calendar.DAY_OF_YEAR, 5);
         Date exceptionEndDate = calendar.getTime();
-        exception.getProperties().add(new Property(
-            "RECURRENCE-ID;TZID=" + appointment.getTimezone() + ":" + format(exceptionStartDate, appointment.getTimezone())));
+        exception.getProperties().add(new Property("RECURRENCE-ID;TZID=" + appointment.getTimezone() + ":" + format(exceptionStartDate, appointment.getTimezone())));
         iCalResource.addComponent(exception);
         exception.setDTStart(exceptionStartDate);
         exception.setDTEnd(exceptionEndDate);
@@ -310,8 +309,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertEquals("Confirm status of series wrong", Appointment.NONE, user.getConfirm());
         assertNotNull("No change exceptions found", appointment.getChangeException());
         assertEquals("Invalid number of change exceptions found", 1, appointment.getChangeException().length);
-        List<Appointment> changeExceptions = getManager().getChangeExceptions(
-            appointment.getParentFolderID(), appointment.getObjectID(), Appointment.ALL_COLUMNS);
+        List<Appointment> changeExceptions = getManager().getChangeExceptions(appointment.getParentFolderID(), appointment.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull("no change exceptions found", changeExceptions);
         assertEquals("Invalid number of change exceptions found", 1, changeExceptions.size());
         Appointment changeException = getManager().get(appointment.getParentFolderID(), changeExceptions.get(0).getObjectID());
@@ -414,8 +412,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertEquals("Confirm status of series wrong", Appointment.NONE, user.getConfirm());
         assertNotNull("No change exceptions found", appointment.getChangeException());
         assertEquals("Invalid number of change exceptions found", 1, appointment.getChangeException().length);
-        List<Appointment> changeExceptions = getManager().getChangeExceptions(
-            appointment.getParentFolderID(), appointment.getObjectID(), Appointment.ALL_COLUMNS);
+        List<Appointment> changeExceptions = getManager().getChangeExceptions(appointment.getParentFolderID(), appointment.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull("no change exceptions found", changeExceptions);
         assertEquals("Invalid number of change exceptions found", 1, changeExceptions.size());
         Appointment changeException = getManager().get(appointment.getParentFolderID(), changeExceptions.get(0).getObjectID());

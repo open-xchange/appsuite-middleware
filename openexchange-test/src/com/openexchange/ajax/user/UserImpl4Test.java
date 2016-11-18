@@ -20,184 +20,183 @@ import com.openexchange.groupware.ldap.User;
  */
 public class UserImpl4Test implements User {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 5888772849310386010L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5888772849310386010L;
 
-	private int id = 0;
+    private int id = 0;
 
-	private String userPassword;
+    private String userPassword;
 
-	private final String passwordMech = null;
+    private final String passwordMech = null;
 
-	private final boolean mailEnabled = false;
+    private final boolean mailEnabled = false;
 
-	private final int shadowLastChange = -1;
+    private final int shadowLastChange = -1;
 
-	private final String imapServer = null;
+    private final String imapServer = null;
 
-	private final String imapLogin = null;
+    private final String imapLogin = null;
 
-	private final String smtpServer = null;
+    private final String smtpServer = null;
 
-	private final String mailDomain = null;
+    private final String mailDomain = null;
 
-	private String givenName = null;
+    private String givenName = null;
 
-	private String surName = null;
+    private String surName = null;
 
-	private String mail = null;
+    private String mail = null;
 
-	private String displayName = null;
+    private String displayName = null;
 
-	private final String timezone = null;
+    private final String timezone = null;
 
-	private final String preferedLanguage = null;
+    private final String preferedLanguage = null;
 
-	private String loginInfo = null;
+    private String loginInfo = null;
 
-	private Locale locale;
+    private Locale locale;
 
     private int[] groups;
 
     private int guestCreatedBy = 0;
 
-	public UserImpl4Test() {
+    public UserImpl4Test() {
 
-	}
+    }
 
-	@Override
+    @Override
     public int getId() {
-		return id;
-	}
+        return id;
+    }
 
-	public void setId(final int id) {
-		this.id = id;
-	}
+    public void setId(final int id) {
+        this.id = id;
+    }
 
-	public void setMail(final String mail) {
-		this.mail = mail;
-	}
+    public void setMail(final String mail) {
+        this.mail = mail;
+    }
 
-	@Override
+    @Override
     public String getUserPassword() {
-		return userPassword;
-	}
+        return userPassword;
+    }
 
-	@Override
+    @Override
     public String getPasswordMech() {
-		return passwordMech;
-	}
+        return passwordMech;
+    }
 
-	@Override
+    @Override
     public boolean isMailEnabled() {
-		return mailEnabled;
-	}
+        return mailEnabled;
+    }
 
-	@Override
+    @Override
     public int getShadowLastChange() {
-		return shadowLastChange;
-	}
+        return shadowLastChange;
+    }
 
-	@Override
+    @Override
     public String getImapServer() {
-		return imapServer;
-	}
+        return imapServer;
+    }
 
-	@Override
+    @Override
     public String getImapLogin() {
-		return imapLogin;
-	}
+        return imapLogin;
+    }
 
-	@Override
+    @Override
     public String getSmtpServer() {
-		return smtpServer;
-	}
+        return smtpServer;
+    }
 
-	@Override
+    @Override
     public String getMailDomain() {
-		return mailDomain;
-	}
+        return mailDomain;
+    }
 
-	@Override
+    @Override
     public String getGivenName() {
-		return givenName;
-	}
+        return givenName;
+    }
 
-	@Override
+    @Override
     public String getSurname() {
-		return surName;
-	}
+        return surName;
+    }
 
-	@Override
+    @Override
     public String getMail() {
-		return mail;
-	}
+        return mail;
+    }
 
-	@Override
+    @Override
     public String[] getAliases() {
-		return null;
-	}
+        return null;
+    }
 
 	@Override
     public Map<String, String> getAttributes() {
 		return Collections.emptyMap();
 	}
 
-	@Override
+    @Override
     public String getDisplayName() {
-		return displayName;
-	}
+        return displayName;
+    }
 
-	@Override
+    @Override
     public String getTimeZone() {
-		return timezone;
-	}
+        return timezone;
+    }
 
-	@Override
+    @Override
     public String getPreferredLanguage() {
-		return preferedLanguage;
-	}
+        return preferedLanguage;
+    }
 
-	@Override
+    @Override
     public int[] getGroups() {
-		return groups;
-	}
-
+        return groups;
+    }
 
     public void setGroups(int[] groups) {
         this.groups = groups;
     }
 
-	@Override
+    @Override
     public int getContactId() {
-		return -1;
-	}
+        return -1;
+    }
 
-	@Override
+    @Override
     public String getLoginInfo() {
-		return loginInfo;
-	}
+        return loginInfo;
+    }
 
-	public void setLoginInfo(final String loginInfo) {
-		this.loginInfo = loginInfo;
-	}
+    public void setLoginInfo(final String loginInfo) {
+        this.loginInfo = loginInfo;
+    }
 
-	@Override
+    @Override
     public Locale getLocale() {
-		return locale;
-	}
+        return locale;
+    }
 
-	public void setLocale(final Locale locale) {
-		this.locale = locale;
-	}
+    public void setLocale(final Locale locale) {
+        this.locale = locale;
+    }
 
     /**
      * @param string
      */
     public void setDisplayName(String displayName) {
-       this.displayName = displayName;
+        this.displayName = displayName;
     }
 
     /**

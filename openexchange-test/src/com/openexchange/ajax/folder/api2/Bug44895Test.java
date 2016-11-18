@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -68,6 +69,7 @@ public class Bug44895Test extends AbstractFolderTest {
 
     /**
      * Initializes a new {@link Bug44895Test}.
+     * 
      * @param name
      */
     public Bug44895Test() {
@@ -95,6 +97,7 @@ public class Bug44895Test extends AbstractFolderTest {
         super.tearDown();
     }
 
+    @Test
     public void testBug44895() throws Exception {
         calendarFolder.setFolderName("shouldNotFailInCalendarModule<>");
         UpdateRequest req = new UpdateRequest(EnumAPI.OX_NEW, calendarFolder, false);

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Iterator;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -86,6 +87,7 @@ public class NewListTest extends AbstractAJAXSession {
      * This method tests the new handling of not more available objects for LIST
      * requests.
      */
+    @Test
     public void testRemovedObjectHandling() throws Throwable {
         final AJAXClient clientA = getClient();
         final int folderA = clientA.getValues().getPrivateContactFolder();
@@ -94,7 +96,7 @@ public class NewListTest extends AbstractAJAXSession {
         for (int i = 0; i < inserts.length; i++) {
 
             final Contact contactObj = new Contact();
-            contactObj.setSurName("NewTestList"+i);
+            contactObj.setSurName("NewTestList" + i);
             contactObj.setParentFolderID(folderA);
 
             inserts[i] = new InsertRequest(contactObj, true);
@@ -106,33 +108,28 @@ public class NewListTest extends AbstractAJAXSession {
         // A now gets all of the folder.
         final int[] columns = new int[] { Contact.SUR_NAME, Contact.OBJECT_ID, Contact.FOLDER_ID };
 
-
         final CommonAllResponse allR = Executor.execute(clientA, new AllRequest(folderA, columns));
 
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
-            final InsertResponse insertR = mInsert
-                .getResponse( (DELETES + i) );
-            deletes1[i] = new DeleteRequest(folderA, insertR.getId(), allR
-                .getTimestamp());
+            final InsertResponse insertR = mInsert.getResponse((DELETES + i));
+            deletes1[i] = new DeleteRequest(folderA, insertR.getId(), allR.getTimestamp());
         }
         Executor.execute(clientA, MultipleRequest.create(deletes1));
 
         // List request of A must now not contain the deleted objects and give
         // no error.
-        final CommonListResponse listR = Executor.execute(
-            clientA, new ListRequest(allR.getListIDs(), columns, true));
+        final CommonListResponse listR = Executor.execute(clientA, new ListRequest(allR.getListIDs(), columns, true));
 
         final Iterator<Object[]> it = listR.iterator();
         while (it.hasNext()) {
             final Object[] ar = it.next();
 
-
             final InsertResponse irr = mInsert.getResponse(DELETES);
-            final InsertResponse irr2 = mInsert.getResponse(DELETES+1);
+            final InsertResponse irr2 = mInsert.getResponse(DELETES + 1);
 
-            if ( ((Integer)ar[1]).intValue() == irr.getId() || ((Integer)ar[1]).intValue() == irr2.getId()){
+            if (((Integer) ar[1]).intValue() == irr.getId() || ((Integer) ar[1]).intValue() == irr2.getId()) {
                 assertFalse("Error: Object was found in list", true);
             }
 
@@ -142,9 +139,9 @@ public class NewListTest extends AbstractAJAXSession {
 
         int cnt = 0;
         for (int i = 0; i < NUMBER; i++) {
-            if ( (i != DELETES) && (i != (DELETES +1)) ){
+            if ((i != DELETES) && (i != (DELETES + 1))) {
                 final InsertResponse insertR = mInsert.getResponse(i);
-                deletes2[cnt] = new DeleteRequest(folderA, insertR.getId(),listR.getTimestamp());
+                deletes2[cnt] = new DeleteRequest(folderA, insertR.getId(), listR.getTimestamp());
                 cnt++;
             }
         }

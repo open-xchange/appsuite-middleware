@@ -53,6 +53,8 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
@@ -84,17 +86,13 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
 
     private FolderObject folder;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         fMgr = getFolderManager();
 
         // create contact folder
-        folder = fMgr.generatePublicFolder(
-            "publishedContacts",
-            FolderObject.CONTACT,
-            getClient().getValues().getPrivateContactFolder(),
-            getClient().getValues().getUserId());
+        folder = fMgr.generatePublicFolder("publishedContacts", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer(folder);
 
         // fill contact folder
@@ -117,17 +115,14 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
         expected.setId(newResp.getId());
     }
 
+    @Test
     public void testShouldSetTheIconViaGet() throws Exception {
         // check negative
         fMgr.getFolderFromServer(folder.getObjectID(), false, new int[] { FLAG_SUBSCRIBED });
         GetResponse response = (GetResponse) fMgr.getLastResponse();
         JSONObject data = (JSONObject) response.getData();
-        assertTrue(
-            "Should contain the key '"+KEY_SUBSCRIBED+"' even before publication",
-            data.has(KEY_SUBSCRIBED));
-        assertFalse(
-            "Key '"+KEY_SUBSCRIBED+"' should have 'false' value before publication",
-            data.getBoolean(KEY_SUBSCRIBED));
+        assertTrue("Should contain the key '" + KEY_SUBSCRIBED + "' even before publication", data.has(KEY_SUBSCRIBED));
+        assertFalse("Key '" + KEY_SUBSCRIBED + "' should have 'false' value before publication", data.getBoolean(KEY_SUBSCRIBED));
 
         // subscribe
         subscribe();
@@ -136,14 +131,11 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
         fMgr.getFolderFromServer(folder.getObjectID(), false, new int[] { FLAG_SUBSCRIBED });
         response = (GetResponse) fMgr.getLastResponse();
         data = (JSONObject) response.getData();
-        assertTrue(
-            "Should contain the key '"+KEY_SUBSCRIBED+"'",
-            data.has(KEY_SUBSCRIBED));
-        assertTrue(
-            "Key '"+KEY_SUBSCRIBED+"' should have 'true' value after publication",
-            data.getBoolean(KEY_SUBSCRIBED));
+        assertTrue("Should contain the key '" + KEY_SUBSCRIBED + "'", data.has(KEY_SUBSCRIBED));
+        assertTrue("Key '" + KEY_SUBSCRIBED + "' should have 'true' value after publication", data.getBoolean(KEY_SUBSCRIBED));
     }
 
+    @Test
     public void testShouldSetTheIconViaList() throws Exception {
         // check negative
         fMgr.listFoldersOnServer(folder.getParentFolderID(), new int[] { FLAG_SUBSCRIBED });
@@ -154,7 +146,7 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
         for (int i = 0; i < folders.length(); i++) {
             JSONArray subfolder = folders.getJSONArray(i);
             int id = subfolder.getInt(response.getColumnPos(FolderObject.OBJECT_ID)); // note: this work only as long as we have this stupid "oh, I'll add the folder id anyways"
-                                          // feature in that request
+            // feature in that request
             boolean published = subfolder.getBoolean(response.getColumnPos(FLAG_SUBSCRIBED));
             if (id == folder.getObjectID()) {
                 found = true;
@@ -175,7 +167,7 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
         for (int i = 0; i < folders.length(); i++) {
             JSONArray subfolder = folders.getJSONArray(i);
             int id = subfolder.getInt(response.getColumnPos(FolderObject.OBJECT_ID)); // note: this work only as long as we have this stupid "oh, I'll add the folder id anyways"
-                                          // feature in that request
+            // feature in that request
             boolean published = subfolder.getBoolean(response.getColumnPos(FLAG_SUBSCRIBED));
             if (id == folder.getObjectID()) {
                 found = true;
@@ -186,6 +178,7 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
 
     }
 
+    @Test
     public void testShouldSetTheIconViaUpdates() throws Exception {
         // check negative
         Date lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);

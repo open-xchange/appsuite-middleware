@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -72,6 +73,7 @@ public final class Bug12372Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testDeleteOfStrangeApp() throws Throwable {
         final AJAXClient client = getClient();
         final TimeZone tz = client.getValues().getTimeZone();

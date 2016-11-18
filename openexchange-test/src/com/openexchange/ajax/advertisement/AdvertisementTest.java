@@ -169,13 +169,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
     @Test
     public void configByUserIdTest() throws OXException, IOException, JSONException {
         String data = "{\"data\":\"Preview\"}";
-        try{
-            SetConfigRequest set = SetConfigRequest.createPreview(  null, 
-                                                                    String.valueOf(client.getValues().getUserId()), 
-                                                                    String.valueOf(client.getValues().getContextId()), 
-                                                                    data, 
-                                                                    BASIC_AUTH_LOGIN, 
-                                                                    BASIC_AUTH_PASSWORD);
+        try {
+            SetConfigRequest set = SetConfigRequest.createPreview(null, String.valueOf(client.getValues().getUserId()), String.valueOf(client.getValues().getContextId()), data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
             SetConfigResponse setResponse = client.execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
             GetConfigRequest req = new GetConfigRequest();
@@ -187,16 +182,11 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             GetConfigResponse response2 = client2.execute(req);
             assertTrue("Expecting a response with an error.", response2.hasError());
         } finally {
-            SetConfigRequest set = SetConfigRequest.createPreview(  null, 
-                String.valueOf(client.getValues().getUserId()), 
-                String.valueOf(client.getValues().getContextId()), 
-                null, 
-                BASIC_AUTH_LOGIN, 
-                BASIC_AUTH_PASSWORD);
+            SetConfigRequest set = SetConfigRequest.createPreview(null, String.valueOf(client.getValues().getUserId()), String.valueOf(client.getValues().getContextId()), null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
             client.execute(set);
         }
     }
-    
+
     @Test
     public void configByResellerAndPackageTest() throws OXException, IOException, JSONException {
         String data = "{\"data\":\"Package\"}";
@@ -210,7 +200,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 pack = "groupware_premium";
                 break;
         }
-        try{
+        try {
             SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
             SetConfigResponse setResponse = client.execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());

@@ -51,6 +51,9 @@ package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -77,8 +80,8 @@ public class Bug15980Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         testFolder = new FolderObject();
@@ -93,12 +96,13 @@ public class Bug15980Test extends AbstractAJAXSession {
         testFolder.setLastModified(new Date());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(EnumAPI.OUTLOOK, testFolder));
         super.tearDown();
     }
 
+    @Test
     public void testPath() throws Throwable {
         PathRequest request = new PathRequest(EnumAPI.OUTLOOK, testFolder.getObjectID(), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME });
         PathResponse response = client.execute(request);

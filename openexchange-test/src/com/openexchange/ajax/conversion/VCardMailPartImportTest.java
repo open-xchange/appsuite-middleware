@@ -75,141 +75,125 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class VCardMailPartImportTest extends AbstractConversionTest {
 
-	private static final byte[] VCARD_BYTES = String.valueOf(
-			"" + "BEGIN:VCARD\n" + "VERSION:2.1\n" + "FN:Mustermann, Thomas\n"
-					+ "N:Mustermann;Thomas;;Dipl.,Informatiker;\n" + "BDAY:19851213\n"
-					+ "ADR;TYPE=work:;;Martinstr. 41;Olpe;NRW;57462;DE\n"
-					+ "ADR;TYPE=home:;;Musterstr. 10;Olpe;NRW;57666;Deutschland\n"
-					+ "TEL;TYPE=work;TYPE=voice:+49 (2761) 8385-16\n" + "TEL;TYPE=work;TYPE=fax:+49 (2761) 8385-30\n"
-					+ "TEL;TYPE=home;TYPE=voice:+49 2761 / 843 157\n" + "TEL;TYPE=cell;TYPE=voice:0171 / 835 72 89\n"
-					+ "EMAIL:thomas.mustermann@open-xchange.com\n" + "ORG:OX Software GmbH;Development\n"
-					+ "REV:20080818T064153.771Z\n" + "UID:5@ox6-unstable.netline.de\n" + "END:VCARD").getBytes();
+    private static final byte[] VCARD_BYTES = String.valueOf("" + "BEGIN:VCARD\n" + "VERSION:2.1\n" + "FN:Mustermann, Thomas\n" + "N:Mustermann;Thomas;;Dipl.,Informatiker;\n" + "BDAY:19851213\n" + "ADR;TYPE=work:;;Martinstr. 41;Olpe;NRW;57462;DE\n" + "ADR;TYPE=home:;;Musterstr. 10;Olpe;NRW;57666;Deutschland\n" + "TEL;TYPE=work;TYPE=voice:+49 (2761) 8385-16\n" + "TEL;TYPE=work;TYPE=fax:+49 (2761) 8385-30\n" + "TEL;TYPE=home;TYPE=voice:+49 2761 / 843 157\n" + "TEL;TYPE=cell;TYPE=voice:0171 / 835 72 89\n" + "EMAIL:thomas.mustermann@open-xchange.com\n" + "ORG:OX Software GmbH;Development\n" + "REV:20080818T064153.771Z\n" + "UID:5@ox6-unstable.netline.de\n" + "END:VCARD").getBytes();
 
-	/**
-	 * Initializes a new {@link VCardMailPartImportTest}
-	 *
-	 * @param name
-	 *            The name
-	 */
-	public VCardMailPartImportTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link VCardMailPartImportTest}
+     *
+     * @param name
+     *            The name
+     */
+    public VCardMailPartImportTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=convert</code> request
-	 *
-	 * @throws Throwable
-	 */
-	public void testVCardImport() throws Throwable {
-		final String[] mailFolderAndMailID;
-		try {
-			/*
-			 * Create a mail with VCard attachment
-			 */
-			final JSONObject mailObject_25kb = new JSONObject();
-			{
-				mailObject_25kb.put(MailJSONField.FROM.getKey(), getClient().getValues().getSendAddress());
-				mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getClient().getValues().getSendAddress());
-				mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
-				mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
-				mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
-				mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
+    /**
+     * Tests the <code>action=convert</code> request
+     *
+     * @throws Throwable
+     */
+    public void testVCardImport() throws Throwable {
+        final String[] mailFolderAndMailID;
+        try {
+            /*
+             * Create a mail with VCard attachment
+             */
+            final JSONObject mailObject_25kb = new JSONObject();
+            {
+                mailObject_25kb.put(MailJSONField.FROM.getKey(), getClient().getValues().getSendAddress());
+                mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getClient().getValues().getSendAddress());
+                mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
+                mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
+                mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
+                mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
 
-				final JSONObject bodyObject = new JSONObject();
-				bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
-				bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY);
+                final JSONObject bodyObject = new JSONObject();
+                bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
+                bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY);
 
-				final JSONArray attachments = new JSONArray();
-				attachments.put(bodyObject);
+                final JSONArray attachments = new JSONArray();
+                attachments.put(bodyObject);
 
-				mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-			}
+                mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
+            }
 
-			InputStream in = null;
-			try {
-				in = new UnsynchronizedByteArrayInputStream(VCARD_BYTES);
-				/*
-				 * Perform send
-				 */
-				final NetsolSendResponse response = Executor.execute(getSession(),
-						new NetsolSendRequest(mailObject_25kb.toString(), in, "text/x-vcard; charset=US-ASCII",
-								"vcard.vcf"));
-				assertTrue("Send failed", response.getFolderAndID() != null);
-				assertTrue("Duration corrupt", response.getRequestDuration() > 0);
-				mailFolderAndMailID = response.getFolderAndID();
-			} finally {
-				if (null != in) {
-					in.close();
-				}
-			}
+            InputStream in = null;
+            try {
+                in = new UnsynchronizedByteArrayInputStream(VCARD_BYTES);
+                /*
+                 * Perform send
+                 */
+                final NetsolSendResponse response = Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString(), in, "text/x-vcard; charset=US-ASCII", "vcard.vcf"));
+                assertTrue("Send failed", response.getFolderAndID() != null);
+                assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+                mailFolderAndMailID = response.getFolderAndID();
+            } finally {
+                if (null != in) {
+                    in.close();
+                }
+            }
 
-			try {
-				Long.parseLong(mailFolderAndMailID[1]);
-			} catch (final NumberFormatException e) {
-				int pos = mailFolderAndMailID[1].lastIndexOf('/');
-				if (pos == -1) {
-					pos = mailFolderAndMailID[1].lastIndexOf('.');
-					if (pos == -1) {
-						fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
-					}
-				}
-				final String substr = mailFolderAndMailID[1].substring(pos + 1);
-				try {
-					Long.parseLong(substr);
-				} catch (final NumberFormatException e1) {
-					fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
-				}
-				mailFolderAndMailID[1] = substr;
-			}
+            try {
+                Long.parseLong(mailFolderAndMailID[1]);
+            } catch (final NumberFormatException e) {
+                int pos = mailFolderAndMailID[1].lastIndexOf('/');
+                if (pos == -1) {
+                    pos = mailFolderAndMailID[1].lastIndexOf('.');
+                    if (pos == -1) {
+                        fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
+                    }
+                }
+                final String substr = mailFolderAndMailID[1].substring(pos + 1);
+                try {
+                    Long.parseLong(substr);
+                } catch (final NumberFormatException e1) {
+                    fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
+                }
+                mailFolderAndMailID[1] = substr;
+            }
 
-			try {
-				/*
-				 * Get previously sent mail
-				 */
-				final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-				final NetsolGetResponse resp = Executor.execute(getSession(),
-						new NetsolGetRequest(mailPath, true));
-				final JSONObject mailObject = (JSONObject) resp.getData();
-				final JSONArray attachments = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-				final int len = attachments.length();
-				String sequenceId = null;
-				for (int i = 0; i < len && sequenceId == null; i++) {
-					final JSONObject attachObj = attachments.getJSONObject(i);
-					if (attachObj.getString(MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/x-vcard")) {
-						sequenceId = attachObj.getString(MailListField.ID.getKey());
-					}
-				}
-				/*
-				 * Trigger conversion
-				 */
-				final JSONObject jsonBody = new JSONObject();
-				final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.vcard");
-				jsonSource.put("args", new JSONArray().put(
-						new JSONObject().put("com.openexchange.mail.conversion.fullname", mailFolderAndMailID[0])).put(
-						new JSONObject().put("com.openexchange.mail.conversion.mailid", mailFolderAndMailID[1])).put(
-						new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
-				jsonBody.put("datasource", jsonSource);
-				final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.contact");
-				jsonHandler.put("args", new JSONArray().put(new JSONObject().put(
-						"com.openexchange.groupware.contact.folder", getPrivateContactFolder())));
-				jsonBody.put("datahandler", jsonHandler);
-				final ConvertResponse convertResponse = (ConvertResponse) Executor.execute(getSession(),
-						new ConvertRequest(jsonBody, true));
-				final String[][] sa = convertResponse.getFoldersAndIDs();
+            try {
+                /*
+                 * Get previously sent mail
+                 */
+                final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
+                final NetsolGetResponse resp = Executor.execute(getSession(), new NetsolGetRequest(mailPath, true));
+                final JSONObject mailObject = (JSONObject) resp.getData();
+                final JSONArray attachments = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+                final int len = attachments.length();
+                String sequenceId = null;
+                for (int i = 0; i < len && sequenceId == null; i++) {
+                    final JSONObject attachObj = attachments.getJSONObject(i);
+                    if (attachObj.getString(MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/x-vcard")) {
+                        sequenceId = attachObj.getString(MailListField.ID.getKey());
+                    }
+                }
+                /*
+                 * Trigger conversion
+                 */
+                final JSONObject jsonBody = new JSONObject();
+                final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.vcard");
+                jsonSource.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.mail.conversion.fullname", mailFolderAndMailID[0])).put(new JSONObject().put("com.openexchange.mail.conversion.mailid", mailFolderAndMailID[1])).put(new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
+                jsonBody.put("datasource", jsonSource);
+                final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.contact");
+                jsonHandler.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.groupware.contact.folder", getPrivateContactFolder())));
+                jsonBody.put("datahandler", jsonHandler);
+                final ConvertResponse convertResponse = (ConvertResponse) Executor.execute(getSession(), new ConvertRequest(jsonBody, true));
+                final String[][] sa = convertResponse.getFoldersAndIDs();
 
-				assertFalse("Missing response on action=convert", sa == null);
-				assertTrue("Unexpected response length", sa.length == 1);
-			} finally {
-				if (mailFolderAndMailID != null) {
-					final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-					Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
-				}
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+                assertFalse("Missing response on action=convert", sa == null);
+                assertTrue("Unexpected response length", sa.length == 1);
+            } finally {
+                if (mailFolderAndMailID != null) {
+                    final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
+                    Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
+                }
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
-	}
+    }
 
 }

@@ -55,6 +55,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -99,6 +100,7 @@ public class Bug14357Test extends AbstractAJAXSession {
         appointmentInsertResponse.fillAppointment(appointment);
     }
 
+    @Test
     public void testBug14357() throws Exception {
         checkYear(1, 2010, 2);
         checkYear(2, 2011, 2);
@@ -125,14 +127,7 @@ public class Bug14357Test extends AbstractAJAXSession {
 
         ListIDs list = new ListIDs();
         list.add(new ListIDInt(getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId()));
-        MyListRequest listRequest = new MyListRequest(
-            list,
-            new int[] { Appointment.OBJECT_ID, Appointment.START_DATE },
-            true,
-            getClient().getValues().getPrivateAppointmentFolder(),
-            position,
-            appointment.getObjectID(),
-            getClient().getValues().getUserId());
+        MyListRequest listRequest = new MyListRequest(list, new int[] { Appointment.OBJECT_ID, Appointment.START_DATE }, true, getClient().getValues().getPrivateAppointmentFolder(), position, appointment.getObjectID(), getClient().getValues().getUserId());
 
         CommonListResponse listResponse = getClient().execute(listRequest);
 

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.appointment.bugtests;
 
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -57,33 +58,31 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 
-public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends
-		ManagedAppointmentTest {
+public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends ManagedAppointmentTest {
 
-	public Bug7883Test_ReminderIsSyncedAndCrashesOutlook() {
-		super();
-	}
+    public Bug7883Test_ReminderIsSyncedAndCrashesOutlook() {
+        super();
+    }
 
-	public void testIt() throws Exception{
-		AJAXClient client2 = new AJAXClient(User.User2);
-		
-		UserParticipant other = new UserParticipant(client2.getValues().getUserId());
-		assertTrue(other.getIdentifier() > 0);
-		int fid1 = folder.getObjectID();
-		
-		Appointment app = AbstractAssertion.generateDefaultAppointment(fid1);
-		app.addParticipant(other);
-		app.setAlarm(24*60*60); //a day.
-		
-		calendarManager.insert(app);
-		
-		int appId = app.getObjectID();
-		int fid2 = client2.getValues().getPrivateAppointmentFolder();
-		
-		GetResponse getResponse = client2.execute(new GetRequest(fid2,appId));
-		Appointment actual = getResponse.getAppointment(userTimeZone);
-		
-		assertFalse(actual.containsAlarm());
-	}
+    public void testIt() throws Exception {
+        AJAXClient client2 = new AJAXClient(User.User2);
+
+        UserParticipant other = new UserParticipant(client2.getValues().getUserId());
+        assertTrue(other.getIdentifier() > 0);
+        int fid1 = folder.getObjectID();
+
+        Appointment app = AbstractAssertion.generateDefaultAppointment(fid1);
+        app.addParticipant(other);
+        app.setAlarm(24 * 60 * 60); //a day.
+
+        calendarManager.insert(app);
+
+        int appId = app.getObjectID();
+        int fid2 = client2.getValues().getPrivateAppointmentFolder();
+
+        GetResponse getResponse = client2.execute(new GetRequest(fid2, appId));
+        Appointment actual = getResponse.getAppointment(userTimeZone);
+
+        assertFalse(actual.containsAlarm());
+    }
 }
-

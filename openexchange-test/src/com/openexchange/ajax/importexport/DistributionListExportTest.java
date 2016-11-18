@@ -46,11 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.importexport;
 
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.CSVExportRequest;
 import com.openexchange.ajax.importexport.actions.CSVExportResponse;
@@ -63,28 +65,26 @@ import com.openexchange.groupware.importexport.csv.CSVParser;
 
 public class DistributionListExportTest extends AbstractManagedContactTest {
 
-	public DistributionListExportTest() {
-		super();
-	}
+    public DistributionListExportTest() {
+        super();
+    }
 
-	public void testCsvDistributionListsAreExported () throws OXException, IOException, JSONException {
-		Contact list = generateContact("Distribution list");
-		list.setDistributionList( new DistributionListEntryObject[]{
-				new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
-		});
-		manager.newAction(list);
-		CSVExportResponse csvExportResponse = client.execute(new CSVExportRequest(folderID, true));
-		String csvStr = (String) csvExportResponse.getData();
-
-		CSVParser csvParser = new CSVParser(csvStr);
-		List<List<String>> csv = csvParser.parse();
-		assertEquals("Should only contain the header line but no content", 2, csv.size() );
-	}
-
-	public void testCsvDistributionListsAreNotExported () throws OXException, IOException, JSONException {
+    public void testCsvDistributionListsAreExported() throws OXException, IOException, JSONException {
         Contact list = generateContact("Distribution list");
-        list.setDistributionList( new DistributionListEntryObject[]{
-                new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
+        list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
+        });
+        manager.newAction(list);
+        CSVExportResponse csvExportResponse = client.execute(new CSVExportRequest(folderID, true));
+        String csvStr = (String) csvExportResponse.getData();
+
+        CSVParser csvParser = new CSVParser(csvStr);
+        List<List<String>> csv = csvParser.parse();
+        assertEquals("Should only contain the header line but no content", 2, csv.size());
+    }
+
+    public void testCsvDistributionListsAreNotExported() throws OXException, IOException, JSONException {
+        Contact list = generateContact("Distribution list");
+        list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
         CSVExportResponse csvExportResponse = client.execute(new CSVExportRequest(folderID, false));
@@ -92,13 +92,13 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
 
         CSVParser csvParser = new CSVParser(csvStr);
         List<List<String>> csv = csvParser.parse();
-        assertEquals("Should only contain the header line but no content", 1, csv.size() );
+        assertEquals("Should only contain the header line but no content", 1, csv.size());
     }
 
+    @Test
     public void testVCardDistributionListsAreNotExportedByDefault() throws OXException, IOException, JSONException {
         Contact list = generateContact("Distribution list is not present");
-        list.setDistributionList( new DistributionListEntryObject[]{
-                new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
+        list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
         VCardExportResponse vcardExportResponse = client.execute(new VCardExportRequest(folderID, false));
@@ -110,10 +110,10 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
 
     }
 
+    @Test
     public void testVCardDistributionListsAreNotExported() throws OXException, IOException, JSONException {
         Contact list = generateContact("Distribution list is not present");
-        list.setDistributionList( new DistributionListEntryObject[]{
-                new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
+        list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
         VCardExportResponse vcardExportResponse = client.execute(new VCardExportRequest(folderID, Boolean.FALSE, false));
@@ -125,10 +125,10 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
 
     }
 
-    public void testVCardDistributionListsAreExported () throws OXException, IOException, JSONException {
+    @Test
+    public void testVCardDistributionListsAreExported() throws OXException, IOException, JSONException {
         Contact list = generateContact("Distribution list");
-        list.setDistributionList( new DistributionListEntryObject[]{
-                new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
+        list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
         VCardExportResponse vcardExportResponse = client.execute(new VCardExportRequest(folderID, Boolean.TRUE, true));

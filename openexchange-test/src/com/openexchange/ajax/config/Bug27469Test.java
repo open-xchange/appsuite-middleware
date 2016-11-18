@@ -50,13 +50,13 @@
 package com.openexchange.ajax.config;
 
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-
 
 /**
  * {@link Bug27469Test} Test setting of the default sender address to one of the available aliases
@@ -67,19 +67,21 @@ public class Bug27469Test extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link Bug27469Test}.
+     * 
      * @param name
      */
     public Bug27469Test() {
         super();
     }
-    
+
+    @Test
     public void testSetAliases() throws Exception {
         GetRequest request = new GetRequest(Tree.MailAddresses);
         GetResponse response = client.execute(request);
         JSONArray allAddresses = (JSONArray) response.getData();
         int numberOfAddresses = allAddresses.length();
         assertTrue(numberOfAddresses > 1);
-        for(int i = 0; i < numberOfAddresses; i++) {
+        for (int i = 0; i < numberOfAddresses; i++) {
             String newAddress = allAddresses.getString(i);
             setSendAddress(newAddress);
             String sendAddress = getSendAddress();

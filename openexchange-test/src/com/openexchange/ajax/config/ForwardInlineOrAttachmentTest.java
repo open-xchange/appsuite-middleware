@@ -51,11 +51,13 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.ajax.config.ConfigTools.readSetting;
 import static com.openexchange.ajax.config.ConfigTools.storeSetting;
+import org.junit.Test;
 import com.openexchange.ajax.AbstractAJAXTest;
 
 /**
  * Tests if forwarding configuration parameter correctly stores the values
  * "Inline" or "Attachment".
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
@@ -77,6 +79,7 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
 
     /**
      * Default constructor.
+     * 
      * @param name Name of the test.
      */
     public ForwardInlineOrAttachmentTest() {
@@ -86,15 +89,12 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
     /**
      * Tests if the forward configuration parameter is stored correctly.
      */
+    @Test
     public void testForwardParameter() throws Throwable {
-        final String forward = readSetting(getWebConversation(), getHostName(),
-            getSessionId(), PATH);
+        final String forward = readSetting(getWebConversation(), getHostName(), getSessionId(), PATH);
         for (final String testString : new String[] { INLINE, ATTACHMENT, forward }) {
-            storeSetting(getWebConversation(), getHostName(), getSessionId(),
-                PATH, testString);
-            assertEquals("Written setting isn't returned from server.",
-                testString, readSetting(getWebConversation(), getHostName(),
-                    getSessionId(), PATH));
+            storeSetting(getWebConversation(), getHostName(), getSessionId(), PATH, testString);
+            assertEquals("Written setting isn't returned from server.", testString, readSetting(getWebConversation(), getHostName(), getSessionId(), PATH));
         }
     }
 }

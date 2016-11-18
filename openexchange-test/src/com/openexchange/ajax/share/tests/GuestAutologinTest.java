@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -85,6 +86,7 @@ public class GuestAutologinTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testGuestAutologin() throws Exception {
         /*
          * create folder shared to guest user
@@ -132,6 +134,8 @@ public class GuestAutologinTest extends ShareTest {
             sharedSession.setId(oldSessionID);
         }
     }
+
+    @Test
     public void testGuestAutologinWithoutStore() throws Exception {
         /*
          * create folder shared to guest user

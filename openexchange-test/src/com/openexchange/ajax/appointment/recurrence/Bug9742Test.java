@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
@@ -21,106 +22,83 @@ import com.openexchange.groupware.container.FolderChildObject;
 
 public class Bug9742Test extends AbstractAJAXSession {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9742Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9742Test.class);
 
-	public static final int[] APPOINTMENT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY,
-			DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
-			FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES,
-			CalendarObject.TITLE, CalendarObject.START_DATE, CalendarObject.END_DATE,
-			Appointment.LOCATION, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
-			CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS,
-			Appointment.FULL_TIME, Appointment.COLOR_LABEL };
+    public static final int[] APPOINTMENT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, CalendarObject.START_DATE, CalendarObject.END_DATE, Appointment.LOCATION, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL };
 
-	public Bug9742Test() {
-		super();
-	}
+    public void testBug9742() throws Exception {
+        final AJAXSession ajaxSession = getSession();
+        final AJAXClient ajaxClient = getClient();
+        TimeZone timeZone = ajaxClient.getValues().getTimeZone();
+        if (!timeZone.getID().equals("Europe/Berlin")) {
+            ajaxClient.getValues().setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        }
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+        timeZone = ajaxClient.getValues().getTimeZone();
 
-	public void testDummy() {
+        final Calendar calendar = Calendar.getInstance(timeZone);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 10);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
 
-	}
+        final Date startDate = calendar.getTime();
 
-	public void testBug9742() throws Exception {
-		final AJAXSession ajaxSession = getSession();
-		final AJAXClient ajaxClient = getClient();
-		TimeZone timeZone = ajaxClient.getValues().getTimeZone();
-		if (!timeZone.getID().equals("Europe/Berlin")) {
-			ajaxClient.getValues().setTimeZone(TimeZone.getTimeZone("America/New_York"));
-		}
+        calendar.add(Calendar.HOUR_OF_DAY, 2);
 
-		timeZone = ajaxClient.getValues().getTimeZone();
+        final Date endDate = calendar.getTime();
 
-		final Calendar calendar = Calendar.getInstance(timeZone);
-		calendar.add(Calendar.DAY_OF_MONTH, 1);
-		calendar.set(Calendar.HOUR_OF_DAY, 10);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
+        final int appointmentFolderId = ajaxClient.getValues().getPrivateAppointmentFolder();
 
-		final Date startDate = calendar.getTime();
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle("testBug9742");
+        appointmentObj.setStartDate(startDate);
+        appointmentObj.setEndDate(endDate);
+        appointmentObj.setShownAs(Appointment.ABSENT);
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setRecurrenceType(Appointment.DAILY);
+        appointmentObj.setInterval(1);
+        appointmentObj.setRecurrenceCount(5);
+        appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setTimezone("Europe/Berlin");
 
-		calendar.add(Calendar.HOUR_OF_DAY, 2);
+        final Calendar calendarRange = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendarRange.add(Calendar.MILLISECOND, timeZone.getOffset(calendarRange.getTimeInMillis()));
+        calendarRange.set(Calendar.HOUR_OF_DAY, 0);
+        calendarRange.set(Calendar.MINUTE, 0);
+        calendarRange.set(Calendar.SECOND, 0);
+        calendarRange.set(Calendar.MILLISECOND, 0);
 
-		final Date endDate = calendar.getTime();
+        final Date start = calendarRange.getTime();
 
-		final int appointmentFolderId = ajaxClient.getValues().getPrivateAppointmentFolder();
+        calendarRange.add(Calendar.DAY_OF_MONTH, 5);
 
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle("testBug9742");
-		appointmentObj.setStartDate(startDate);
-		appointmentObj.setEndDate(endDate);
-		appointmentObj.setShownAs(Appointment.ABSENT);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(Appointment.DAILY);
-		appointmentObj.setInterval(1);
-		appointmentObj.setRecurrenceCount(5);
-		appointmentObj.setIgnoreConflicts(true);
-		appointmentObj.setTimezone("Europe/Berlin");
+        final Date end = calendarRange.getTime();
 
-		final Calendar calendarRange = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		calendarRange.add(Calendar.MILLISECOND, timeZone.getOffset(calendarRange.getTimeInMillis()));
-		calendarRange.set(Calendar.HOUR_OF_DAY, 0);
-		calendarRange.set(Calendar.MINUTE, 0);
-		calendarRange.set(Calendar.SECOND, 0);
-		calendarRange.set(Calendar.MILLISECOND, 0);
+        final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, true);
 
-		final Date start = calendarRange.getTime();
+        final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);
+        final int objectId = insertResponse.getId();
 
-		calendarRange.add(Calendar.DAY_OF_MONTH, 5);
+        final String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        final WebConversation webCon = ajaxSession.getConversation();
 
-		final Date end = calendarRange.getTime();
+        final Appointment loadAppointment = AppointmentTest.loadAppointment(webCon, objectId, appointmentFolderId, timeZone, hostname, ajaxSession.getId());
+        final Date modified = loadAppointment.getLastModified();
 
-		final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, true);
+        final Appointment[] appointmentArray = AppointmentTest.listAppointment(webCon, appointmentFolderId, APPOINTMENT_FIELDS, start, end, timeZone, false, hostname, ajaxSession.getId());
 
-		final CommonInsertResponse insertResponse = Executor.execute(ajaxSession,
-				insertRequest);
-		final int objectId = insertResponse.getId();
+        int appointmentCounter = 0;
+        for (int a = 0; a < appointmentArray.length; a++) {
+            if (appointmentArray[a].getObjectID() == objectId) {
+                appointmentCounter++;
+            }
+        }
 
-		final String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-		final WebConversation webCon = ajaxSession.getConversation();
+        assertEquals("unexpected appointments size", 4, appointmentCounter);
 
-		final Appointment loadAppointment = AppointmentTest.loadAppointment(webCon, objectId, appointmentFolderId, timeZone, hostname, ajaxSession.getId());
-		final Date modified = loadAppointment.getLastModified();
-
-
-		final Appointment[] appointmentArray = AppointmentTest.listAppointment(webCon,
-				appointmentFolderId, APPOINTMENT_FIELDS, start, end, timeZone, false, hostname, ajaxSession
-						.getId());
-
-		int appointmentCounter = 0;
-		for (int a = 0; a < appointmentArray.length; a++) {
-			if (appointmentArray[a].getObjectID() == objectId) {
-				appointmentCounter++;
-			}
-		}
-
-		assertEquals("unexpected appointments size", 4, appointmentCounter);
-
-		final DeleteRequest deleteRequest = new DeleteRequest(objectId, appointmentFolderId, modified);
-		Executor.execute(ajaxSession, deleteRequest);
-	}
+        final DeleteRequest deleteRequest = new DeleteRequest(objectId, appointmentFolderId, modified);
+        Executor.execute(ajaxSession, deleteRequest);
+    }
 }

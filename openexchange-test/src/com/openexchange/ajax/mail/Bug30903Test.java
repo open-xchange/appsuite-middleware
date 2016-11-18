@@ -53,6 +53,8 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
@@ -74,16 +76,7 @@ import com.openexchange.mail.MailJSONField;
  */
 public class Bug30903Test extends AbstractMailTest {
 
-    private static String mail = "Message-Id: <blah@non-existent.com>\n" +
-                                        "X-Mailer: AppSuite 7.6.0 \n" +
-                                        "Date: Tue, 08 Apr 2014 13:37:00 +0100\n" +
-                                        "From: #ADDR#\n" +
-                                        "To: #ADDR#\n" +
-                                        "Subject: Bug30903\n" +
-                                        "Mime-Version: 1.0\n" +
-                                        "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-                                        "\n" +
-                                        "Testing";
+    private static String mail = "Message-Id: <blah@non-existent.com>\n" + "X-Mailer: AppSuite 7.6.0 \n" + "Date: Tue, 08 Apr 2014 13:37:00 +0100\n" + "From: #ADDR#\n" + "To: #ADDR#\n" + "Subject: Bug30903\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "\n" + "Testing";
 
     private final String fmids[][] = new String[2][2];
 
@@ -96,8 +89,8 @@ public class Bug30903Test extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
     }
 
@@ -115,12 +108,11 @@ public class Bug30903Test extends AbstractMailTest {
      * @throws IOException
      * @throws JSONException
      */
+    @Test
     public void testDeleteDraft() throws OXException, IOException, JSONException {
         UserValues values = client.getValues();
         //Save draft
-        NewMailRequest newMailReq = new NewMailRequest(values.getDraftsFolder(),
-                                mail.replaceAll("#ADDR#", values.getSendAddress()),
-                                MailFlag.DRAFT.getValue());
+        NewMailRequest newMailReq = new NewMailRequest(values.getDraftsFolder(), mail.replaceAll("#ADDR#", values.getSendAddress()), MailFlag.DRAFT.getValue());
         NewMailResponse newMailResp = client.execute(newMailReq);
         assertNotNull(newMailResp);
         String draftID = newMailResp.getId();
@@ -162,8 +154,8 @@ public class Bug30903Test extends AbstractMailTest {
         AllRequest allReq = new AllRequest(values.getDraftsFolder(), COLUMNS_FOLDER_ID, 0, Order.ASCENDING, true);
         AllResponse allResp = client.execute(allReq);
         assertNotNull(allResp);
-        Object[][] objArray =  allResp.getArray();
-        for(Object o[] : objArray) {
+        Object[][] objArray = allResp.getArray();
+        for (Object o[] : objArray) {
             String s = (String) o[1];
             if (Integer.parseInt(s) == Integer.parseInt(draftID)) {
                 fail("Draft mail still in 'Drafts' folder");

@@ -100,9 +100,7 @@ public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainRespo
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "remindAgain"),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(reminder.getObjectId())),
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "remindAgain"), new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(reminder.getObjectId())),
         };
     }
 

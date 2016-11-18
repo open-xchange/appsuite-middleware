@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.bugs;
 
 import java.util.Collections;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
@@ -81,6 +82,7 @@ public class Bug40596Test extends ShareTest {
         super();
     }
 
+    @Test
     public void testBug40596() throws Exception {
         File file = insertFile(client.getValues().getPrivateInfostoreFolder());
         remember(file);

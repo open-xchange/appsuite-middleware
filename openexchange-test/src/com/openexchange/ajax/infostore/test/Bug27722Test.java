@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
@@ -71,8 +72,8 @@ import com.openexchange.java.util.UUIDs;
  */
 public final class Bug27722Test extends AbstractInfostoreTest {
 
-    private static final int TOTAL_ITEMS = 100/*00*/;  // don't test that much files in continuous build
-    private static final int DELETED_ITEMS = 50/*00*/; // don't test that much files in continuous build
+    private static final int TOTAL_ITEMS = 100/* 00 */;  // don't test that much files in continuous build
+    private static final int DELETED_ITEMS = 50/* 00 */; // don't test that much files in continuous build
 
     private FolderObject testFolder;
     private List<File> items;
@@ -86,11 +87,10 @@ public final class Bug27722Test extends AbstractInfostoreTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE,
-            client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
+        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
         testFolder = fMgr.insertFolderOnServer(testFolder);
         items = new ArrayList<File>(TOTAL_ITEMS);
         for (int i = 0; i < TOTAL_ITEMS; i++) {
@@ -122,11 +122,6 @@ public final class Bug27722Test extends AbstractInfostoreTest {
                 }
             }
         }
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Random;
 import java.util.TimeZone;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -87,6 +88,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     /**
      * Tests if the settings can be read from the server.
      */
+    @Test
     public void testReadSettings() throws Throwable {
         final GetRequest request = new GetRequest(Tree.ALL);
         final GetResponse response = getClient().execute(request);
@@ -98,6 +100,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     /**
      * Tests if the spam-button setting can be read from the server.
      */
+    @Test
     public void testHasSpam() throws Throwable {
         final GetRequest request = new GetRequest(Tree.SpamButton);
         final GetResponse response = getClient().execute(request);
@@ -109,6 +112,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     /**
      * Tests if the time zone of a user can be changed.
      */
+    @Test
     public void testTimeZone() throws Throwable {
         final GetRequest getRequest = new GetRequest(Tree.TimeZone);
         GetResponse getResponse = getClient().execute(getRequest);
@@ -129,6 +133,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     /**
      * Tests if the beta feature support of a user can be changed.
      */
+    @Test
     public void testBeta() throws Throwable {
         final GetRequest getRequest = new GetRequest(Tree.Beta);
         GetResponse getResponse = getClient().execute(getRequest);
@@ -148,6 +153,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     /**
      * Tests if the unique identifier of the user can be loaded.
      */
+    @Test
     public void testIdentifier() throws Throwable {
         final GetRequest request = new GetRequest(Tree.Identifier);
         final GetResponse response = getClient().execute(request);

@@ -72,7 +72,7 @@ public class AppointmentUpdatesResponse extends CommonUpdatesResponse {
 
     public List<Appointment> getAppointments(final TimeZone timeZone) throws OXException, JSONException {
         //TODO extract functionality from test...
-        Appointment[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray)getData(), getColumns(), timeZone);
+        Appointment[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray) getData(), getColumns(), timeZone);
         return Arrays.asList(objects);
     }
 }

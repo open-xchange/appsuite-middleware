@@ -53,7 +53,6 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
-
 /**
  * {@link FolderModuleTransformator}
  *
@@ -62,27 +61,29 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class FolderModuleTransformator implements Transformator {
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.test.fixtures.transformators.Transformator#transform(java.lang.String)
      */
     @Override
     public Object transform(String value) throws OXException {
-        if( value.equalsIgnoreCase(Folder.MODULE_CALENDAR)) {
+        if (value.equalsIgnoreCase(Folder.MODULE_CALENDAR)) {
             return FolderObject.CALENDAR;
         }
-        if( value.equalsIgnoreCase(Folder.MODULE_CONTACT)) {
+        if (value.equalsIgnoreCase(Folder.MODULE_CONTACT)) {
             return FolderObject.CONTACT;
         }
-        if( value.equalsIgnoreCase(Folder.MODULE_INFOSTORE)) {
+        if (value.equalsIgnoreCase(Folder.MODULE_INFOSTORE)) {
             return FolderObject.INFOSTORE;
         }
-        if( value.equalsIgnoreCase(Folder.MODULE_MAIL)) {
+        if (value.equalsIgnoreCase(Folder.MODULE_MAIL)) {
             return FolderObject.MAIL;
         }
-        if( value.equalsIgnoreCase(Folder.MODULE_TASK)) {
+        if (value.equalsIgnoreCase(Folder.MODULE_TASK)) {
             return FolderObject.TASK;
         }
-        if( value.equalsIgnoreCase(Folder.MODULE_SYSTEM)) {
+        if (value.equalsIgnoreCase(Folder.MODULE_SYSTEM)) {
             return FolderObject.SYSTEM_TYPE;
         }
         return Integer.valueOf(value);

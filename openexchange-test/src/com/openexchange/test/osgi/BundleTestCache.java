@@ -55,6 +55,7 @@ import java.net.MalformedURLException;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -87,14 +88,11 @@ public final class BundleTestCache extends AbstractBundleTest {
         super();
     }
 
+    @Test
     public void testCacheAbsence() {
         try {
             final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * Login should succeed
@@ -128,12 +126,7 @@ public final class BundleTestCache extends AbstractBundleTest {
             /*
              * Access to infostore should further work
              */
-            final JSONObject infostoreObject = allInfostoreItems(
-                getWebConversation(),
-                loginTest.getHostName(),
-                sessionId,
-                getStandardInfostoreFolder(getWebConversation(), loginTest.getHostName(), sessionId),
-                new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID });
+            final JSONObject infostoreObject = allInfostoreItems(getWebConversation(), loginTest.getHostName(), sessionId, getStandardInfostoreFolder(getWebConversation(), loginTest.getHostName(), sessionId), new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID });
             /*
              * Should succeed
              */

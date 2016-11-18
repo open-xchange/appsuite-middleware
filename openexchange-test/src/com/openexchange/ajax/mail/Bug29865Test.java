@@ -55,6 +55,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
@@ -63,58 +66,59 @@ import com.openexchange.ajax.mail.actions.NewMailResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link Bug29865Test}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Bug29865Test extends AbstractMailTest {
-    
+
     private static String attachment = readFile("attachment.base64");
-    
+
     private static String eml = readFile("bug29865.eml");
-    
+
     private UserValues values;
 
     /**
      * Initializes a new {@link Bug29865Test}.
+     * 
      * @param name
      */
     public Bug29865Test() {
         super();
     }
-    
-    @Override
-    protected void setUp() throws Exception {
+
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         super.tearDown();
     }
-    
-    public void testGetStructure() throws OXException, IOException, JSONException{
+
+    @Test
+    public void testGetStructure() throws OXException, IOException, JSONException {
 
         final NewMailRequest newMailRequest = new NewMailRequest(null, eml.replaceAll("#ADDR#", values.getSendAddress()), -1, true);
         final NewMailResponse newMailResponse = getClient().execute(newMailRequest);
 
         assertNotNull("Missing folder in response.", newMailResponse.getFolder());
         assertNotNull("Missing ID in response.", newMailResponse.getId());
-        
+
         final GetRequest newGetRequest = new GetRequest(newMailResponse.getFolder(), newMailResponse.getId(), true, true);
         final GetResponse newGetResponse = getClient().execute(newGetRequest);
-        
-        String actualAttachment = ((JSONObject)newGetResponse.getData()).getJSONArray("body").getJSONObject(1).getJSONObject("body").getString("data");
+
+        String actualAttachment = ((JSONObject) newGetResponse.getData()).getJSONArray("body").getJSONObject(1).getJSONObject("body").getString("data");
         assertEquals("Attachment has been modified", attachment.replaceAll("(\\r|\\n)", ""), actualAttachment);
     }
-    
-    private static String readFile(String fileName){
+
+    private static String readFile(String fileName) {
         try {
-            @SuppressWarnings("resource")
-            BufferedReader br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
+            @SuppressWarnings("resource") BufferedReader br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 

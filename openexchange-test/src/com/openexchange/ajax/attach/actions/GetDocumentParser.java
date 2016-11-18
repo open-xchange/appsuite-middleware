@@ -65,9 +65,9 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
-    
-    private int contentLength; 
-    
+
+    private int contentLength;
+
     /**
      * Initializes a new {@link GetDocumentParser}.
      */
@@ -77,6 +77,7 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
      */
     @Override
@@ -93,6 +94,7 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse, org.apache.http.HttpRequest)
      */
     @Override
@@ -109,6 +111,7 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override

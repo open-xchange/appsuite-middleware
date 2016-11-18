@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -79,18 +80,21 @@ public class NotifyFolderSharesTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testNotifyGuest() throws Exception {
         int module = randomModule();
         testNotifyGuest(module, getDefaultFolder(module));
         testNotifyGuest(module, getPublicRoot(module));
     }
 
+    @Test
     public void testNotifyGroup() throws Exception {
         int module = randomModule();
         testNotifyGroup(module, getDefaultFolder(module));
         testNotifyGroup(module, getPublicRoot(module));
     }
 
+    @Test
     public void testNotifyUser() throws Exception {
         int module = randomModule();
         testNotifyUser(module, getDefaultFolder(module));
@@ -105,8 +109,7 @@ public class NotifyFolderSharesTest extends ShareTest {
 
     private void testNotifyGroup(int module, int parent) throws Exception {
         OCLPermission permission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, 0);
-        permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         permission.setGroupPermission(true);
         AJAXClient client2 = new AJAXClient(User.User2);
         String emailAddress = client2.getValues().getDefaultAddress();
@@ -120,8 +123,7 @@ public class NotifyFolderSharesTest extends ShareTest {
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         OCLPermission permission = new OCLPermission(userId, 0);
-        permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         testNotify(module, parent, permission, emailAddress);
     }
 

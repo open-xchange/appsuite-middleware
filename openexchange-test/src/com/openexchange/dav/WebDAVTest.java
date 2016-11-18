@@ -49,7 +49,10 @@
 
 package com.openexchange.dav;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -129,7 +132,6 @@ public abstract class WebDAVTest {
         AJAXConfig.init();
     }
 
-
     // --- BEGIN: Optional OAuth Configuration ------------------------------------------------------------------------------
 
     protected static final String AUTH_METHOD_BASIC = "Basic Auth";
@@ -185,13 +187,7 @@ public abstract class WebDAVTest {
             oAuthClientApp = AbstractOAuthTest.registerTestClient();
             DefaultHttpClient client = OAuthSession.newOAuthHttpClient();
             String state = UUIDs.getUnformattedStringFromRandom();
-            OAuthParams params = new OAuthParams()
-                .setHostname(Config.getHostname())
-                .setClientId(oAuthClientApp.getId())
-                .setClientSecret(oAuthClientApp.getSecret())
-                .setRedirectURI(oAuthClientApp.getRedirectURIs().get(0))
-                .setScope("carddav caldav")
-                .setState(state);
+            OAuthParams params = new OAuthParams().setHostname(Config.getHostname()).setClientId(oAuthClientApp.getId()).setClientSecret(oAuthClientApp.getSecret()).setRedirectURI(oAuthClientApp.getRedirectURIs().get(0)).setScope("carddav caldav").setState(state);
             oAuthGrant = Protocol.obtainAccess(client, params, Config.getLogin(), Config.getPassword());
         }
     }
@@ -287,8 +283,7 @@ public abstract class WebDAVTest {
      * @throws JSONException
      */
     protected FolderObject getFolder(String folderName) throws OXException, IOException, JSONException {
-        VisibleFoldersResponse response = client.execute(
-            new VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
+        VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
         FolderObject folder = findByName(response.getPrivateFolders(), folderName);
         if (null == folder) {
             folder = findByName(response.getPublicFolders(), folderName);
@@ -312,8 +307,7 @@ public abstract class WebDAVTest {
      * @throws JSONException
      */
     protected FolderObject getCalendarFolder(String folderName) throws OXException, IOException, JSONException {
-        VisibleFoldersResponse response =
-            client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, "calendar", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
+        VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, "calendar", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
         FolderObject folder = findByName(response.getPrivateFolders(), folderName);
         if (null == folder) {
             folder = findByName(response.getPublicFolders(), folderName);

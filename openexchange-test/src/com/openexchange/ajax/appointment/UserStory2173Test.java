@@ -53,6 +53,7 @@ import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -100,33 +101,11 @@ public class UserStory2173Test extends AbstractAJAXSession {
         setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, I(Appointment.ACCEPT));
         clientB.execute(setRequest);
 
-        publicFolder = Create.folder(
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            "US2173TestFolder",
-            FolderObject.CALENDAR,
-            FolderObject.PUBLIC,
-            ocl(
-                clientA.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                clientB.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        publicFolder = Create.folder(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "US2173TestFolder", FolderObject.CALENDAR, FolderObject.PUBLIC, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         CommonInsertResponse folderResponse = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, publicFolder));
         folderResponse.fillObject(publicFolder);
 
-        List<Participant> participants = ParticipantTools.createParticipants(
-            clientA.getValues().getUserId(),
-            clientB.getValues().getUserId());
+        List<Participant> participants = ParticipantTools.createParticipants(clientA.getValues().getUserId(), clientB.getValues().getUserId());
         appointmentPrivate = new Appointment();
         appointmentPrivate.setParentFolderID(clientA.getValues().getPrivateAppointmentFolder());
         appointmentPrivate.setTitle("UserStory2173 Test in private folder");
@@ -166,6 +145,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testPrivate() throws Exception {
         AppointmentInsertResponse insertResponse = clientA.execute(new InsertRequest(appointmentPrivate, clientA.getValues().getTimeZone()));
         insertResponse.fillAppointment(appointmentPrivate);
@@ -180,6 +160,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testPublic() throws Exception {
         AppointmentInsertResponse insertResponse = clientA.execute(new InsertRequest(appointmentPublic, clientA.getValues().getTimeZone()));
         insertResponse.fillAppointment(appointmentPublic);

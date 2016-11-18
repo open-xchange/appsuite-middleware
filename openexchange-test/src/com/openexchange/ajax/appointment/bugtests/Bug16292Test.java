@@ -8,16 +8,17 @@ import java.util.Iterator;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -77,6 +78,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         contact = createContact();
     }
 
+    @Test
     public void testAppointmentAtGet() throws Exception {
         final GetRequest appointmentGetReq = new GetRequest(appointment, false);
         final GetResponse appointmentGetResp = client.execute(appointmentGetReq);
@@ -84,6 +86,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         assertTrue("Appointment: Number of attachments is null after GetRequest.", (appointmentJSON.get("number_of_attachments") != null));
     }
 
+    @Test
     public void testTaskAtGet() throws Exception {
         final com.openexchange.ajax.task.actions.GetRequest taskGetReq = new com.openexchange.ajax.task.actions.GetRequest(task, tz);
         final com.openexchange.ajax.task.actions.GetResponse taskGetResp = client.execute(taskGetReq);
@@ -91,140 +94,94 @@ public class Bug16292Test extends AbstractAJAXSession {
         assertTrue("Task: Number of attachments is null after GetRequest.", (taskJSON.get("number_of_attachments") != null));
     }
 
+    @Test
     public void testContactAtGet() throws Exception {
-        final com.openexchange.ajax.contact.action.GetRequest contactGetReq = new com.openexchange.ajax.contact.action.GetRequest(
-            contact,
-            tz);
+        final com.openexchange.ajax.contact.action.GetRequest contactGetReq = new com.openexchange.ajax.contact.action.GetRequest(contact, tz);
         final com.openexchange.ajax.contact.action.GetResponse contactGetResp = client.execute(contactGetReq);
         final JSONObject contactJSON = (JSONObject) contactGetResp.getData();
         assertTrue("Contact: Number of attachments is null after GetRequest.", (contactJSON.get("number_of_attachments") != null));
     }
 
+    @Test
     public void testAppointmentAtList() throws Exception {
         final int[] appFields = { Appointment.NUMBER_OF_ATTACHMENTS, Appointment.TITLE, Appointment.OBJECT_ID };
-        final ListRequest appointmentListReq = new ListRequest(
-            new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()),
-            appFields,
-            false);
+        final ListRequest appointmentListReq = new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), appFields, false);
         final CommonListResponse appointmentListResp = client.execute(appointmentListReq);
 
-        assertNOANotNull(
-            appointmentListResp,
-            "Appointment",
-            "ListRequest",
-            Appointment.OBJECT_ID,
-            Appointment.NUMBER_OF_ATTACHMENTS,
-            appointment.getObjectID());
+        assertNOANotNull(appointmentListResp, "Appointment", "ListRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS, appointment.getObjectID());
     }
 
+    @Test
     public void testTaskAtList() throws Exception {
         final int[][] ids = { { taskFolder, task.getObjectID() } };
         final int[] taskFields = { Task.OBJECT_ID, Task.TITLE, Task.NUMBER_OF_ATTACHMENTS };
-        final com.openexchange.ajax.task.actions.ListRequest taskListReq = new com.openexchange.ajax.task.actions.ListRequest(
-            ids,
-            taskFields,
-            false);
+        final com.openexchange.ajax.task.actions.ListRequest taskListReq = new com.openexchange.ajax.task.actions.ListRequest(ids, taskFields, false);
         final CommonListResponse taskListResp = client.execute(taskListReq);
 
         assertNOANotNull(taskListResp, "Task", "ListRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS, task.getObjectID());
     }
 
+    @Test
     public void testContactAtList() throws Exception {
         final int[] conFields = { Contact.OBJECT_ID, Contact.TITLE, Contact.NUMBER_OF_ATTACHMENTS };
-        final com.openexchange.ajax.contact.action.ListRequest contactListReq = new com.openexchange.ajax.contact.action.ListRequest(
-            new ListIDs(contactFolder, contact.getObjectID()),
-            conFields);
+        final com.openexchange.ajax.contact.action.ListRequest contactListReq = new com.openexchange.ajax.contact.action.ListRequest(new ListIDs(contactFolder, contact.getObjectID()), conFields);
         final CommonListResponse contactListResp = client.execute(contactListReq);
 
         assertNOANotNull(contactListResp, "Contact", "ListRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS, contact.getObjectID());
     }
 
+    @Test
     public void testAppointmentAtAll() throws Exception {
         final int[] appFields = { Appointment.NUMBER_OF_ATTACHMENTS, Appointment.TITLE, Appointment.OBJECT_ID };
-        final AllRequest appointmentAllReq = new AllRequest(
-            appointmentFolder,
-            appFields,
-            appointment.getStartDate(),
-            appointment.getEndDate(),
-            tz);
+        final AllRequest appointmentAllReq = new AllRequest(appointmentFolder, appFields, appointment.getStartDate(), appointment.getEndDate(), tz);
         final CommonAllResponse appointmentAllResp = client.execute(appointmentAllReq);
 
-        assertNOANotNull(
-            appointmentAllResp,
-            "Appointment",
-            "AllRequest",
-            Appointment.OBJECT_ID,
-            Appointment.NUMBER_OF_ATTACHMENTS,
-            appointment.getObjectID());
+        assertNOANotNull(appointmentAllResp, "Appointment", "AllRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS, appointment.getObjectID());
     }
 
+    @Test
     public void testTaskAtAll() throws Exception {
         final int[] taskFields = { Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS, Task.TITLE };
-        final com.openexchange.ajax.task.actions.AllRequest taskAllReq = new com.openexchange.ajax.task.actions.AllRequest(
-            taskFolder,
-            taskFields,
-            Task.START_DATE,
-            Order.ASCENDING);
+        final com.openexchange.ajax.task.actions.AllRequest taskAllReq = new com.openexchange.ajax.task.actions.AllRequest(taskFolder, taskFields, Task.START_DATE, Order.ASCENDING);
         final CommonAllResponse taskAllResp = client.execute(taskAllReq);
 
         assertNOANotNull(taskAllResp, "Task", "AllRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS, task.getObjectID());
     }
 
+    @Test
     public void testContactAtAll() throws Exception {
         final int[] contactFields = { Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS, Contact.TITLE };
-        final com.openexchange.ajax.contact.action.AllRequest contactAllReq = new com.openexchange.ajax.contact.action.AllRequest(
-            contactFolder,
-            contactFields);
+        final com.openexchange.ajax.contact.action.AllRequest contactAllReq = new com.openexchange.ajax.contact.action.AllRequest(contactFolder, contactFields);
         final CommonAllResponse contactAllResp = client.execute(contactAllReq);
 
         assertNOANotNull(contactAllResp, "Contact", "AllRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS, contact.getObjectID());
     }
 
+    @Test
     public void testAppointmentAtUpdates() throws Exception {
         final int[] appFields = { Appointment.NUMBER_OF_ATTACHMENTS, Appointment.TITLE, Appointment.OBJECT_ID };
-        final UpdatesRequest appointmentUpdatesRequest = new UpdatesRequest(appointmentFolder, appFields, new Date(
-            appointment.getLastModified().getTime() - 1), false);
+        final UpdatesRequest appointmentUpdatesRequest = new UpdatesRequest(appointmentFolder, appFields, new Date(appointment.getLastModified().getTime() - 1), false);
         final AppointmentUpdatesResponse appointmentUpdatesResp = client.execute(appointmentUpdatesRequest);
 
-        assertNOANotNull(
-            appointmentUpdatesResp,
-            "Appointment",
-            "UpdatesRequest",
-            Appointment.OBJECT_ID,
-            Appointment.NUMBER_OF_ATTACHMENTS,
-            appointment.getObjectID());
+        assertNOANotNull(appointmentUpdatesResp, "Appointment", "UpdatesRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS, appointment.getObjectID());
     }
 
+    @Test
     public void testTaskAtUpdates() throws Exception {
         final int[] taskFields = { Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS, Task.TITLE };
-        final com.openexchange.ajax.task.actions.UpdatesRequest taskUpdatesReq = new com.openexchange.ajax.task.actions.UpdatesRequest(
-            taskFolder,
-            taskFields,
-            Task.START_DATE,
-            Order.ASCENDING,
-            new Date(task.getLastModified().getTime() - 1));
+        final com.openexchange.ajax.task.actions.UpdatesRequest taskUpdatesReq = new com.openexchange.ajax.task.actions.UpdatesRequest(taskFolder, taskFields, Task.START_DATE, Order.ASCENDING, new Date(task.getLastModified().getTime() - 1));
         final TaskUpdatesResponse taskUpdatesResp = client.execute(taskUpdatesReq);
 
         assertNOANotNull(taskUpdatesResp, "Task", "UpdatesRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS, task.getObjectID());
     }
 
+    @Test
     public void testContactAtUpdates() throws Exception {
         final int[] contactFields = { Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS, Contact.TITLE };
-        final com.openexchange.ajax.contact.action.UpdatesRequest contactUpdatesReq = new com.openexchange.ajax.contact.action.UpdatesRequest(
-            contactFolder,
-            contactFields,
-            Contact.OBJECT_ID,
-            Order.DESCENDING,
-            new Date(contact.getLastModified().getTime() - 1));
+        final com.openexchange.ajax.contact.action.UpdatesRequest contactUpdatesReq = new com.openexchange.ajax.contact.action.UpdatesRequest(contactFolder, contactFields, Contact.OBJECT_ID, Order.DESCENDING, new Date(contact.getLastModified().getTime() - 1));
         final ContactUpdatesResponse contactUpdatesResp = client.execute(contactUpdatesReq);
 
-        assertNOANotNull(
-            contactUpdatesResp,
-            "Contact",
-            "UpdatesRequest",
-            Contact.OBJECT_ID,
-            Contact.NUMBER_OF_ATTACHMENTS,
-            contact.getObjectID());
+        assertNOANotNull(contactUpdatesResp, "Contact", "UpdatesRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS, contact.getObjectID());
     }
 
     private void assertNOANotNull(final AbstractColumnsResponse resp, final String type, final String reqType, final int objIdColumn, final int noaColumn, final int objId) {
@@ -290,10 +247,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         taskObj.setPercentComplete(75);
         taskObj.setStatus(Task.IN_PROGRESS);
 
-        final com.openexchange.ajax.task.actions.InsertRequest insReq = new com.openexchange.ajax.task.actions.InsertRequest(
-            taskObj,
-            tz,
-            false);
+        final com.openexchange.ajax.task.actions.InsertRequest insReq = new com.openexchange.ajax.task.actions.InsertRequest(taskObj, tz, false);
         final InsertResponse insResp = client.execute(insReq);
         insResp.fillTask(taskObj);
 
@@ -314,9 +268,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         contactObj.setEmail1("hebert.meier@open-xchange.com");
         contactObj.setParentFolderID(contactFolder);
 
-        final com.openexchange.ajax.contact.action.InsertRequest insReq = new com.openexchange.ajax.contact.action.InsertRequest(
-            contactObj,
-            false);
+        final com.openexchange.ajax.contact.action.InsertRequest insReq = new com.openexchange.ajax.contact.action.InsertRequest(contactObj, false);
         final com.openexchange.ajax.contact.action.InsertResponse insResp = client.execute(insReq);
         insResp.fillObject(contactObj);
 

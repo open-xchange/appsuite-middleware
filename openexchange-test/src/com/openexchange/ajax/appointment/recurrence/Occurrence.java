@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Date;

@@ -79,18 +79,18 @@ public final class Executor {
         String urlString = host + request.getServletPath();
         HttpMethodBase method;
         switch (request.getMethod()) {
-        case PROPFIND:
-            final EntityEnclosingMethod propFind = new PropFindMethod(urlString);
-            propFind.setRequestEntity(request.getEntity());
-            method = propFind;
-            break;
-        case PUT:
-            final EntityEnclosingMethod put = new PutMethod(urlString);
-            put.setRequestEntity(request.getEntity());
-            method = put;
-            break;
-        default:
-            throw new TestException("Unknown method.");
+            case PROPFIND:
+                final EntityEnclosingMethod propFind = new PropFindMethod(urlString);
+                propFind.setRequestEntity(request.getEntity());
+                method = propFind;
+                break;
+            case PUT:
+                final EntityEnclosingMethod put = new PutMethod(urlString);
+                put.setRequestEntity(request.getEntity());
+                method = put;
+                break;
+            default:
+                throw new TestException("Unknown method.");
         }
         method.setDoAuthentication(true);
         method.getHostAuthState().setAuthScheme(new BasicScheme());

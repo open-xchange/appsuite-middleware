@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -73,16 +74,15 @@ public final class Bug12364Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testMoveTasks() throws Throwable {
         final AJAXClient myClient = getClient();
         final TimeZone tz = myClient.getValues().getTimeZone();
         final FolderObject folder1;
         final FolderObject folder2;
         {
-            folder1 = Create.createPublicFolder(myClient,
-                "bug 12364 test folder 1", FolderObject.TASK);
-            folder2 = Create.createPublicFolder(myClient,
-                "bug 12364 test folder 2", FolderObject.TASK);
+            folder1 = Create.createPublicFolder(myClient, "bug 12364 test folder 1", FolderObject.TASK);
+            folder2 = Create.createPublicFolder(myClient, "bug 12364 test folder 2", FolderObject.TASK);
         }
         try {
             // Create tasks.
@@ -98,9 +98,7 @@ public final class Bug12364Test extends AbstractAJAXSession {
             task2.setParentFolderID(folder1.getObjectID());
             final UpdateRequest request1 = new UpdateRequest(folder1.getObjectID(), task1, tz);
             final UpdateRequest request2 = new UpdateRequest(folder2.getObjectID(), task2, tz);
-            myClient.execute(MultipleRequest.create(new UpdateRequest[] {
-                request1,
-                request2
+            myClient.execute(MultipleRequest.create(new UpdateRequest[] { request1, request2
             }));
         } finally {
             myClient.execute(new DeleteRequest(EnumAPI.OX_OLD, folder1, folder2));

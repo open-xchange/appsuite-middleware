@@ -129,7 +129,6 @@ public class GetResponse extends AbstractAJAXResponse {
         return null == value ? null : (String) value;
     }
 
-
     /**
      * Checks if obtained value is of the type <code>Long</code>
      *

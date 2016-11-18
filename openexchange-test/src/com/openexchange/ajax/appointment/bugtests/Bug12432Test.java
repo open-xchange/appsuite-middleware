@@ -1,8 +1,10 @@
+
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -20,6 +22,7 @@ public class Bug12432Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testFirstReservedThenFree() throws Throwable {
         AJAXClient client = null;
         Appointment appointmentReserved = null;
@@ -53,6 +56,7 @@ public class Bug12432Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testFirstFreeThenReserved() throws Throwable {
         AJAXClient client = null;
         Appointment appointmentReserved = null;
@@ -86,6 +90,7 @@ public class Bug12432Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testChangeFree() throws Throwable {
         AJAXClient client = null;
         Appointment appointmentReserved = null;
@@ -138,6 +143,7 @@ public class Bug12432Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testChangeReserved() throws Throwable {
         AJAXClient client = null;
         Appointment appointmentReserved = null;
@@ -181,8 +187,8 @@ public class Bug12432Test extends AbstractAJAXSession {
 
             UpdateRequest updateRequest = new UpdateRequest(updateAppointment, tz);
             UpdateResponse updateResponse = client.execute(updateRequest);
-            if (updateResponse.hasConflicts()){
-                for(ConflictObject conflict: updateResponse.getConflicts()){
+            if (updateResponse.hasConflicts()) {
+                for (ConflictObject conflict : updateResponse.getConflicts()) {
                     assertFalse("Update on Appointment should not conflict with free Appointment.", conflict.getId() == appointmentFree.getObjectID());
                 }
             }
@@ -194,6 +200,7 @@ public class Bug12432Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testBugAsWritten() throws Throwable {
         AJAXClient client = null;
         Appointment appointmentA = null;
@@ -269,7 +276,7 @@ public class Bug12432Test extends AbstractAJAXSession {
         return appointment;
     }
 
-    private void deleteAppointment(Appointment appointment, AJAXClient client) throws Throwable{
+    private void deleteAppointment(Appointment appointment, AJAXClient client) throws Throwable {
         if (client != null && appointment.getObjectID() != 0 && appointment.getLastModified() != null) {
             DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
             client.execute(deleteRequest);

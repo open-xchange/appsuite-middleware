@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -77,6 +78,7 @@ public class Bug40722Test extends ShareTest {
         super();
     }
 
+    @Test
     public void testRemoveGuestPassword() throws Exception {
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
@@ -112,8 +114,7 @@ public class Bug40722Test extends ShareTest {
          * update password
          */
         String newPassword = null;
-        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(
-            newPassword, ((GuestRecipient) guestPermission.getRecipient()).getPassword(), true);
+        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(newPassword, ((GuestRecipient) guestPermission.getRecipient()).getPassword(), true);
         guestClient.execute(updateRequest);
         /*
          * check access to share link, now without password

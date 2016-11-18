@@ -51,6 +51,9 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -72,8 +75,8 @@ public class Bug13788Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         appointment = new Appointment();
@@ -97,6 +100,7 @@ public class Bug13788Test extends AbstractAJAXSession {
         update.setEndDate(D("04.10.2009 00:00", TimeZone.getTimeZone("UTC")));
     }
 
+    @Test
     public void testBug13788() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(update, client.getValues().getTimeZone());
         UpdateResponse updateResponse = client.execute(updateRequest);
@@ -109,8 +113,8 @@ public class Bug13788Test extends AbstractAJAXSession {
         assertTrue("Lost fulltime flag.", loadedAppointment.getFullTime());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
         getClient().execute(appointmentDeleteRequest);
 

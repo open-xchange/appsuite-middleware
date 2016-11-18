@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -76,6 +77,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testCreateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testCreateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
@@ -91,6 +93,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testCreateSharedFileRandomly() throws Exception {
         testCreateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }

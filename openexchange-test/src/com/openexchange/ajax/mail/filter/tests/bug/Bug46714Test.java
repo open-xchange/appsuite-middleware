@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.tests.bug;
 
 import java.util.LinkedList;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
@@ -76,6 +77,7 @@ public class Bug46714Test extends AbstractMailFilterTest {
     /**
      * Insert 5 rules and try to reorder with an array of 6
      */
+    @Test
     public void testBug46714() throws Exception {
         // Create 5 rules and insert them
         LinkedList<Rule> expectedRules = new LinkedList<>();

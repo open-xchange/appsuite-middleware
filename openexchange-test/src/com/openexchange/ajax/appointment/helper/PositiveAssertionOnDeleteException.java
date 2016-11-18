@@ -54,7 +54,6 @@ import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
 import com.openexchange.test.CalendarTestManager;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -72,16 +71,14 @@ public class PositiveAssertionOnDeleteException extends AbstractPositiveAssertio
         approachUsedForTest = "Creation, then DeleteException";
 
         create(copy);
-        if(manager.hasLastException()) {
+        if (manager.hasLastException()) {
             fail2("Could not create appointment, error: " + manager.getLastException());
         }
-
 
         manager.createDeleteException(copy, recurrencePosition);
 
         checkViaGet(copy.getParentFolderID(), copy.getObjectID(), expectations);
         checkViaList(copy.getParentFolderID(), copy.getObjectID(), expectations);
     }
-
 
 }

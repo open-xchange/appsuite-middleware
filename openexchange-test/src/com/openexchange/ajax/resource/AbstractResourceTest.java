@@ -71,110 +71,106 @@ import com.openexchange.resource.Resource;
  */
 public abstract class AbstractResourceTest extends AbstractAJAXSession {
 
-	/**
-	 * Default constructor.
-	 *
-	 * @param name
-	 *            name of the test.
-	 */
-	protected AbstractResourceTest() {
-		super();
-	}
+    /**
+     * Default constructor.
+     *
+     * @param name
+     *            name of the test.
+     */
+    protected AbstractResourceTest() {
+        super();
+    }
 
-	/**
-	 * Gets the client time zone
-	 *
-	 * @return The client time zone
-	 * @throws OXException
-	 *             If an AJAX error occurs
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 * @throws SAXException
-	 *             If a SAX error occurs
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
-		return getClient().getValues().getTimeZone();
-	}
+    /**
+     * Gets the client time zone
+     *
+     * @return The client time zone
+     * @throws OXException
+     *             If an AJAX error occurs
+     * @throws IOException
+     *             If an I/O error occurs
+     * @throws SAXException
+     *             If a SAX error occurs
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getTimeZone();
+    }
 
-	/**
-	 * Gets the resource identified through specified <code>resourceId</code>
-	 *
-	 * @param resourceId
-	 *            The resource ID
-	 * @return The resource identified through specified <code>resourceId</code>
-	 *         or <code>null</code> on an invalid <code>resourceId</code>
-	 * @throws OXException
-	 *             If an AJAX error occurs
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 * @throws SAXException
-	 *             If a SAX error occurs
-	 */
-	protected Resource getResource(final int resourceId) throws OXException, JSONException, IOException, SAXException {
-		if (resourceId <= 0) {
-			return null;
-		}
-		return ((ResourceGetResponse) Executor.execute(getSession(), new ResourceGetRequest(resourceId, true)))
-				.getResource();
-	}
+    /**
+     * Gets the resource identified through specified <code>resourceId</code>
+     *
+     * @param resourceId
+     *            The resource ID
+     * @return The resource identified through specified <code>resourceId</code>
+     *         or <code>null</code> on an invalid <code>resourceId</code>
+     * @throws OXException
+     *             If an AJAX error occurs
+     * @throws JSONException
+     *             If a JSON error occurs
+     * @throws IOException
+     *             If an I/O error occurs
+     * @throws SAXException
+     *             If a SAX error occurs
+     */
+    protected Resource getResource(final int resourceId) throws OXException, JSONException, IOException, SAXException {
+        if (resourceId <= 0) {
+            return null;
+        }
+        return ((ResourceGetResponse) Executor.execute(getSession(), new ResourceGetRequest(resourceId, true))).getResource();
+    }
 
-	/**
-	 * Deletes the resource identified through specified <code>resourceId</code>
-	 * .
-	 *
-	 * @param resourceId
-	 *            The resource ID
-	 * @throws OXException
-	 *             If an AJAX error occurs
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 * @throws SAXException
-	 *             If a SAX error occurs
-	 */
-	protected void deleteResource(final int resourceId) throws OXException, JSONException, IOException, SAXException {
-		if (resourceId <= 0) {
-			return;
-		}
-		/*
-		 * Perform GET to hold proper timestamp
-		 */
-		final ResourceGetResponse getResponse = (ResourceGetResponse) Executor.execute(getSession(),
-				new ResourceGetRequest(resourceId, true));
-		final Date timestamp = getResponse.getTimestamp();
-		/*
-		 * Perform delete request
-		 */
-		Executor.execute(getSession(), new ResourceDeleteRequest(getResponse.getResource(), timestamp.getTime(), true));
-	}
+    /**
+     * Deletes the resource identified through specified <code>resourceId</code>
+     * .
+     *
+     * @param resourceId
+     *            The resource ID
+     * @throws OXException
+     *             If an AJAX error occurs
+     * @throws JSONException
+     *             If a JSON error occurs
+     * @throws IOException
+     *             If an I/O error occurs
+     * @throws SAXException
+     *             If a SAX error occurs
+     */
+    protected void deleteResource(final int resourceId) throws OXException, JSONException, IOException, SAXException {
+        if (resourceId <= 0) {
+            return;
+        }
+        /*
+         * Perform GET to hold proper timestamp
+         */
+        final ResourceGetResponse getResponse = (ResourceGetResponse) Executor.execute(getSession(), new ResourceGetRequest(resourceId, true));
+        final Date timestamp = getResponse.getTimestamp();
+        /*
+         * Perform delete request
+         */
+        Executor.execute(getSession(), new ResourceDeleteRequest(getResponse.getResource(), timestamp.getTime(), true));
+    }
 
-	/**
-	 * Creates specified resource
-	 *
-	 * @param toCreate
-	 *            The resource to create
-	 * @return The ID of the newly created resource
-	 * @throws OXException
-	 *             If an AJAX error occurs
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 * @throws SAXException
-	 *             If a SAX error occurs
-	 */
-	protected int createResource(final Resource toCreate) throws OXException, JSONException, IOException,
-			SAXException {
-		/*
-		 * Perform new request
-		 */
-		final int id = (Executor.execute(getSession(), new ResourceNewRequest(toCreate, true)))
-				.getID();
-		return id;
-	}
+    /**
+     * Creates specified resource
+     *
+     * @param toCreate
+     *            The resource to create
+     * @return The ID of the newly created resource
+     * @throws OXException
+     *             If an AJAX error occurs
+     * @throws JSONException
+     *             If a JSON error occurs
+     * @throws IOException
+     *             If an I/O error occurs
+     * @throws SAXException
+     *             If a SAX error occurs
+     */
+    protected int createResource(final Resource toCreate) throws OXException, JSONException, IOException, SAXException {
+        /*
+         * Perform new request
+         */
+        final int id = (Executor.execute(getSession(), new ResourceNewRequest(toCreate, true))).getID();
+        return id;
+    }
 }

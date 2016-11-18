@@ -51,7 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
-import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -114,10 +114,11 @@ public class Bug41995Test extends AbstractAJAXSession {
         appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
         appointment.setParticipants(new Participant[] { new UserParticipant(client.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
-        
+
         ctm1.insert(appointment);
     }
 
+    @Test
     public void testBug41995() throws Exception {
         Appointment update = new Appointment();
         update.setObjectID(appointment.getObjectID());
@@ -125,7 +126,7 @@ public class Bug41995Test extends AbstractAJAXSession {
         update.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
         update.setAlarm(15);
         ctm2.update(update);
-        
+
         Appointment loaded = ctm1.get(client.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         assertEquals("Wrong start date.", appointment.getStartDate(), loaded.getStartDate());
         assertEquals("Wrong end date.", appointment.getEndDate(), loaded.getEndDate());

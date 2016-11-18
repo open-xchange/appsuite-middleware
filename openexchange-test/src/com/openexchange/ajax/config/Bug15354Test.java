@@ -51,6 +51,7 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Arrays;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -112,6 +113,7 @@ public class Bug15354Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testAliases() throws Throwable {
         boolean stop = false;
         for (int i = 0; i < ITERATIONS && !stop; i++) {

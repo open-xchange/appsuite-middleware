@@ -50,7 +50,6 @@
 package com.openexchange.ajax.contact.action;
 
 import java.util.Date;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
@@ -58,34 +57,34 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 
-
 /**
  * This contains some examples of tests created for ContactTestManager
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  */
 public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 
-	private ContactTestManager contactManager;
-	private AJAXClient client;
-	Contact contactObject1;
-	Contact contactObject2;
+    private ContactTestManager contactManager;
+    private AJAXClient client;
+    Contact contactObject1;
+    Contact contactObject2;
     private FolderTestManager folderManager;
     private FolderObject folder;
 
-	public ExemplaryContactTestManagerTest() {
-		super();
-	}
+    public ExemplaryContactTestManagerTest() {
+        super();
+    }
 
-	@Override
+    @Override
     public void setUp() throws Exception {
-		super.setUp();
-		client = getClient();
-		contactManager = new ContactTestManager(client);
-		folderManager = new FolderTestManager(client);
+        super.setUp();
+        client = getClient();
+        contactManager = new ContactTestManager(client);
+        folderManager = new FolderTestManager(client);
 
-		//create a folder for testing
-		folder = folderManager.generatePublicFolder("contacts manager tests ("+new Date().getTime()+")", FolderObject.CONTACT, client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
-		folderManager.insertFolderOnServer(folder);
+        //create a folder for testing
+        folder = folderManager.generatePublicFolder("contacts manager tests (" + new Date().getTime() + ")", FolderObject.CONTACT, client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
+        folderManager.insertFolderOnServer(folder);
 
         //create a contact in the private folder
         contactObject1 = new Contact();
@@ -102,94 +101,94 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         contactObject2.setParentFolderID(folder.getObjectID());
         contactObject2.setNote("created by ExemplaryContactTestManagerTest");
         contactManager.newAction(contactObject2);
-	}
+    }
 
-	@Override
+    @Override
     public void tearDown() throws Exception {
-		contactManager.cleanUp();
-		folderManager.cleanUp();
-	}
+        contactManager.cleanUp();
+        folderManager.cleanUp();
+    }
 
-	public void testCreatedContactsAreReturnedByGetRequest () throws Exception {
-		Contact co = contactManager.getAction(contactObject1.getParentFolderID(), contactObject1.getObjectID());
-		assertEquals("The contact was not returned.", co.getDisplayName(), contactObject1.getDisplayName());
-	}
+    public void testCreatedContactsAreReturnedByGetRequest() throws Exception {
+        Contact co = contactManager.getAction(contactObject1.getParentFolderID(), contactObject1.getObjectID());
+        assertEquals("The contact was not returned.", co.getDisplayName(), contactObject1.getDisplayName());
+    }
 
-	public void testCreatedContactsAppearInAllRequestForSameFolder () throws Exception {
-		boolean found1 = false;
-		boolean found2 = false;
-		Contact [] allContacts = contactManager.allAction(folder.getObjectID());
-		for (int i=0; i<allContacts.length; i++) {
-			Contact co = allContacts[i];
-			if (co.getObjectID() == contactObject1.getObjectID()) {
-                found1=true;
+    public void testCreatedContactsAppearInAllRequestForSameFolder() throws Exception {
+        boolean found1 = false;
+        boolean found2 = false;
+        Contact[] allContacts = contactManager.allAction(folder.getObjectID());
+        for (int i = 0; i < allContacts.length; i++) {
+            Contact co = allContacts[i];
+            if (co.getObjectID() == contactObject1.getObjectID()) {
+                found1 = true;
             }
-			if (co.getObjectID() == contactObject2.getObjectID()) {
-                found2=true;
+            if (co.getObjectID() == contactObject2.getObjectID()) {
+                found2 = true;
             }
-		}
-		assertTrue("First contact was not found.", found1);
-		assertTrue("Second contact was not found.", found2);
-	}
+        }
+        assertTrue("First contact was not found.", found1);
+        assertTrue("Second contact was not found.", found2);
+    }
 
-	public void testCreatedContactsAppearInListRequest () throws Exception {
-		boolean found1 = false;
-		boolean found2 = false;
-		int[] firstContact = new int [] {contactObject1.getParentFolderID(), contactObject1.getObjectID()};
-		int[] secondContact = new int [] {contactObject2.getParentFolderID(), contactObject2.getObjectID()};
-		Contact [] allContacts = contactManager.listAction(firstContact, secondContact);
-		for (int i=0; i<allContacts.length; i++) {
-			Contact co = allContacts[i];
-			if (co.getObjectID() == contactObject1.getObjectID()) {
-                found1=true;
+    public void testCreatedContactsAppearInListRequest() throws Exception {
+        boolean found1 = false;
+        boolean found2 = false;
+        int[] firstContact = new int[] { contactObject1.getParentFolderID(), contactObject1.getObjectID() };
+        int[] secondContact = new int[] { contactObject2.getParentFolderID(), contactObject2.getObjectID() };
+        Contact[] allContacts = contactManager.listAction(firstContact, secondContact);
+        for (int i = 0; i < allContacts.length; i++) {
+            Contact co = allContacts[i];
+            if (co.getObjectID() == contactObject1.getObjectID()) {
+                found1 = true;
             }
-			if (co.getObjectID() == contactObject2.getObjectID()) {
-                found2=true;
+            if (co.getObjectID() == contactObject2.getObjectID()) {
+                found2 = true;
             }
-		}
-		assertTrue("First contact was not found.", found1);
-		assertTrue("Second contact was not found.", found2);
-	}
+        }
+        assertTrue("First contact was not found.", found1);
+        assertTrue("Second contact was not found.", found2);
+    }
 
-	public void testCreatedContactsAppearInSearchRequestOverAllFolders () throws Exception {
-		boolean found1 = false;
-		boolean found2 = false;
-		// folderId "-1" means searching in all folders
-		Contact[] contacts_1 = contactManager.searchAction(contactObject1.getDisplayName(), -1);
-		Contact[] contacts_2 = contactManager.searchAction(contactObject2.getDisplayName(), -1);
+    public void testCreatedContactsAppearInSearchRequestOverAllFolders() throws Exception {
+        boolean found1 = false;
+        boolean found2 = false;
+        // folderId "-1" means searching in all folders
+        Contact[] contacts_1 = contactManager.searchAction(contactObject1.getDisplayName(), -1);
+        Contact[] contacts_2 = contactManager.searchAction(contactObject2.getDisplayName(), -1);
 
-		for (int i = 0; i < contacts_1.length; i++) {
-		    if (contacts_1[i].getObjectID() == contactObject1.getObjectID()) {
-		        found1 = true;
-		    }
-		}
+        for (int i = 0; i < contacts_1.length; i++) {
+            if (contacts_1[i].getObjectID() == contactObject1.getObjectID()) {
+                found1 = true;
+            }
+        }
 
-		for (int i = 0; i < contacts_2.length; i++) {
+        for (int i = 0; i < contacts_2.length; i++) {
             if (contacts_2[i].getObjectID() == contactObject2.getObjectID()) {
                 found2 = true;
             }
         }
 
-		assertTrue("First contact was not found.", found1);
-		assertTrue("Second contact was not found.", found2);
-	}
+        assertTrue("First contact was not found.", found1);
+        assertTrue("Second contact was not found.", found2);
+    }
 
-	public void testCreatedContactsAppearAsUpdatedSinceYesterday () throws Exception {
-		boolean found1 = false;
-		boolean found2 = false;
-		Date date = new Date();
-		date.setDate(date.getDate()-1);
-		Contact [] allContacts = contactManager.updatesAction(folder.getObjectID(), date);
-		for (int i=0; i<allContacts.length; i++) {
-			Contact co = allContacts[i];
-			if (co.getObjectID() == contactObject1.getObjectID()) {
-                found1=true;
+    public void testCreatedContactsAppearAsUpdatedSinceYesterday() throws Exception {
+        boolean found1 = false;
+        boolean found2 = false;
+        Date date = new Date();
+        date.setDate(date.getDate() - 1);
+        Contact[] allContacts = contactManager.updatesAction(folder.getObjectID(), date);
+        for (int i = 0; i < allContacts.length; i++) {
+            Contact co = allContacts[i];
+            if (co.getObjectID() == contactObject1.getObjectID()) {
+                found1 = true;
             }
-			if (co.getObjectID() == contactObject2.getObjectID()) {
-                found2=true;
+            if (co.getObjectID() == contactObject2.getObjectID()) {
+                found2 = true;
             }
-		}
-		assertTrue("First contact was not found.", found1);
-		assertTrue("Second contact was not found.", found2);
-	}
+        }
+        assertTrue("First contact was not found.", found1);
+        assertTrue("Second contact was not found.", found2);
+    }
 }

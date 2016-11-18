@@ -60,13 +60,13 @@ import org.w3c.dom.Document;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CustomPropFindMethod extends PropFindMethod {
-    
+
     private Document responseDocument;
 
     public CustomPropFindMethod(String uri, int propfindType, DavPropertyNameSet propNameSet, int depth) throws IOException {
         super(uri, propfindType, propNameSet, depth);
     }
-    
+
     @Override
     public Document getResponseBodyAsDocument() throws IOException {
         if (null == responseDocument) {
@@ -76,4 +76,3 @@ public class CustomPropFindMethod extends PropFindMethod {
     }
 
 }
-

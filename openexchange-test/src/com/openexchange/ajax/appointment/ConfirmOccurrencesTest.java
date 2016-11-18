@@ -53,6 +53,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -89,9 +90,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     private static int NOT_EXISTENT = -9999;
 
-    private static final int[] COLS = new int[] {
-        Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.TITLE,
-        Appointment.CONFIRMATIONS, Appointment.USERS, Appointment.PARTICIPANTS, Appointment.RECURRENCE_POSITION };
+    private static final int[] COLS = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.TITLE, Appointment.CONFIRMATIONS, Appointment.USERS, Appointment.PARTICIPANTS, Appointment.RECURRENCE_POSITION };
 
     /**
      * Initializes a new {@link ConfirmOccurrencesTest}.
@@ -128,11 +127,13 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.insert(appointment);
     }
 
+    @Test
     public void testConfirmationSetCorrectlyForOccurrence() throws Exception {
         // TODO when possible to get participant info for an occurrence test correct set confirmation status for occurrence
 
     }
 
+    @Test
     public void testConfirmSeries() throws Exception {
         ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
@@ -153,6 +154,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testException() throws Exception {
         ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
@@ -192,6 +194,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         checkConfirmations(loadedAppointment, Appointment.DECLINE, "decline", 2);
     }
 
+    @Test
     public void testOccurrence() throws Exception {
         ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
@@ -223,6 +226,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testOccurrenceOnExistingException() throws Exception {
         ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
@@ -282,6 +286,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept", 2, 0);
     }
 
+    @Test
     public void testConflicts() throws Exception {
         ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.ACCEPT, "accept");

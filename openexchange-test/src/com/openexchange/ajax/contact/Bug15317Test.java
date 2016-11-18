@@ -50,6 +50,8 @@
 package com.openexchange.ajax.contact;
 
 import java.util.TimeZone;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
@@ -76,8 +78,8 @@ public class Bug15317Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = client.getValues().getTimeZone();
@@ -86,6 +88,7 @@ public class Bug15317Test extends AbstractAJAXSession {
         userContact = response.getContact();
     }
 
+    @Test
     public void testDeleteUserContact() throws Throwable {
         CommonDeleteResponse response = client.execute(new DeleteRequest(userContact, false));
         assertTrue("Delete was not denied.", response.hasError());

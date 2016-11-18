@@ -50,10 +50,8 @@
 package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.VCardExportRequest;
 import com.openexchange.ajax.importexport.actions.VCardExportResponse;
@@ -62,42 +60,41 @@ import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
-
 public class Bug27151Test_RoundtripOfYomiFields extends AbstractManagedContactTest {
 
     private Contact contact;
 
-	public Bug27151Test_RoundtripOfYomiFields(String name) {
-		super();
-	}
-	
-	public void testShouldImportXPhoneticAsYomiField() throws Exception, Exception, Exception {
-		contact = ContactTestManager.generateFullContact(folderID);
-		contact.setYomiFirstName("YomiFirstName1");
-		contact.setYomiLastName("YomiLastName1");
-		manager.newAction(contact);
-		
-		// Back...
-		VCardExportResponse exportResponse = getClient().execute(new VCardExportRequest(folderID, true));
-		String vCard = exportResponse.getVCard();
-		
-		assertTrue(vCard.contains("X-PHONETIC-FIRST-NAME"));
-		assertTrue(vCard.contains("X-PHONETIC-LAST-NAME"));
-		assertTrue(vCard.contains("YomiFirstName1"));
-		assertTrue(vCard.contains("YomiLastName1"));
-		
-		// (...clean up...)
-		manager.deleteAction(contact);
+    public Bug27151Test_RoundtripOfYomiFields(String name) {
+        super();
+    }
 
-		//...and forth!
-		VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vCard.getBytes()));
-		VCardImportResponse importResponse = manager.getClient().execute(importRequest);
+    public void testShouldImportXPhoneticAsYomiField() throws Exception, Exception, Exception {
+        contact = ContactTestManager.generateFullContact(folderID);
+        contact.setYomiFirstName("YomiFirstName1");
+        contact.setYomiLastName("YomiLastName1");
+        manager.newAction(contact);
 
-		JSONArray response = (JSONArray) importResponse.getData();
-		assertEquals("Precondition: Should only find one contact in there", 1, response.length());
-		JSONObject jsonObject = response.getJSONObject(0);
-		Contact actual = manager.getAction(folderID, jsonObject.getInt("id"));
-		assertEquals("YomiFirstName1", actual.getYomiFirstName());
-		assertEquals("YomiLastName1", actual.getYomiLastName());
-	}
+        // Back...
+        VCardExportResponse exportResponse = getClient().execute(new VCardExportRequest(folderID, true));
+        String vCard = exportResponse.getVCard();
+
+        assertTrue(vCard.contains("X-PHONETIC-FIRST-NAME"));
+        assertTrue(vCard.contains("X-PHONETIC-LAST-NAME"));
+        assertTrue(vCard.contains("YomiFirstName1"));
+        assertTrue(vCard.contains("YomiLastName1"));
+
+        // (...clean up...)
+        manager.deleteAction(contact);
+
+        //...and forth!
+        VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vCard.getBytes()));
+        VCardImportResponse importResponse = manager.getClient().execute(importRequest);
+
+        JSONArray response = (JSONArray) importResponse.getData();
+        assertEquals("Precondition: Should only find one contact in there", 1, response.length());
+        JSONObject jsonObject = response.getJSONObject(0);
+        Contact actual = manager.getAction(folderID, jsonObject.getInt("id"));
+        assertEquals("YomiFirstName1", actual.getYomiFirstName());
+        assertEquals("YomiLastName1", actual.getYomiLastName());
+    }
 }

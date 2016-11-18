@@ -51,6 +51,7 @@ package com.openexchange.subscribe.mslive;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -100,6 +101,7 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
         return MSLiveSubscribeTestEnvironment.getInstance().getTestFolders().get(id);
     }
 
+    @Test
     public void testSubscribe() throws OXException, IOException, JSONException, Exception {
         Contact[] contacts = contactMgr.allAction(getContactTestFolderID(), Contact.ALL_COLUMNS);
 

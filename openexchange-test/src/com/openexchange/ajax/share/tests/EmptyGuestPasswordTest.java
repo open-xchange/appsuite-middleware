@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -62,7 +63,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
-
 
 /**
  * {@link EmptyGuestPasswordTest}
@@ -89,6 +89,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         super.tearDown();
     }
 
+    @Test
     public void testEmptyPassword() throws Exception {
         long now = System.currentTimeMillis();
         OCLGuestPermission perm = createNamedGuestPermission("testGuestPasswordInit" + now + "@example.org", "Test " + now);

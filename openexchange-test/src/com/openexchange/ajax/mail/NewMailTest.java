@@ -51,6 +51,9 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
@@ -64,19 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public class NewMailTest extends AbstractMailTest {
 
-    private static final String EML_WITHOUT_FROM =
-        "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" +
-        "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" +
-        "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-        "To: #TOADDR#\n" +
-        "Subject: Re: Your order for East Texas Lighthouse\n" +
-        "Mime-Version: 1.0\n" +
-        "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-        "Content-Transfer-Encoding: 8bit\n" +
-        "\n" +
-        "This is a MIME message. If you are reading this text, you may want to \n" +
-        "consider changing to a mail reader or gateway that understands how to \n" +
-        "properly handle MIME multipart messages.";
+    private static final String EML_WITHOUT_FROM = "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" + "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "To: #TOADDR#\n" + "Subject: Re: Your order for East Texas Lighthouse\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
 
     private UserValues values;
 
@@ -84,18 +75,20 @@ public class NewMailTest extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
-    public void testTransportNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testTransportNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException {
         // System.out.println(values.getDraftsFolder());
 
         final NewMailRequest newMailRequest = new NewMailRequest(null, EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()), -1, true);
@@ -105,7 +98,8 @@ public class NewMailTest extends AbstractMailTest {
         assertNotNull("Missing ID in response.", newMailResponse.getId());
     }
 
-    public void testAppendNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testAppendNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException {
         // System.out.println(values.getDraftsFolder());
 
         final NewMailRequest newMailRequest = new NewMailRequest(values.getDraftsFolder(), EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()), -1, true);

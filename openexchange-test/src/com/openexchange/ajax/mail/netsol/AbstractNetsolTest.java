@@ -69,31 +69,28 @@ import com.openexchange.mail.MailListField;
  */
 public abstract class AbstractNetsolTest extends AbstractMailTest {
 
-	/**
-	 * Initializes a new {@link AbstractNetsolTest}
-	 *
-	 * @param name
-	 */
-	protected AbstractNetsolTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link AbstractNetsolTest}
+     *
+     * @param name
+     */
+    protected AbstractNetsolTest() {
+        super();
+    }
 
-	protected static final int[] COLUMNS_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
+    protected static final int[] COLUMNS_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
 
-	protected final void netsolClearFolder(final String folder) throws OXException, IOException, SAXException,
-			JSONException {
-		Executor.execute(getSession(), new NetsolDeleteRequest(getIDs(folder), true));
-	}
+    protected final void netsolClearFolder(final String folder) throws OXException, IOException, SAXException, JSONException {
+        Executor.execute(getSession(), new NetsolDeleteRequest(getIDs(folder), true));
+    }
 
-	protected final FolderAndID[] getIDs(final String folder) throws OXException, IOException, SAXException,
-			JSONException {
-		final CommonAllResponse allR = Executor.execute(getSession(), new NetsolAllRequest(folder,
-				COLUMNS_ID, 0, null));
-		final Object[][] array = allR.getArray();
-		final FolderAndID[] paths = new FolderAndID[array.length];
-		for (int i = 0; i < array.length; i++) {
-			paths[i] = new FolderAndID(array[i][0].toString(), array[i][1].toString());
-		}
-		return paths;
-	}
+    protected final FolderAndID[] getIDs(final String folder) throws OXException, IOException, SAXException, JSONException {
+        final CommonAllResponse allR = Executor.execute(getSession(), new NetsolAllRequest(folder, COLUMNS_ID, 0, null));
+        final Object[][] array = allR.getArray();
+        final FolderAndID[] paths = new FolderAndID[array.length];
+        for (int i = 0; i < array.length; i++) {
+            paths[i] = new FolderAndID(array[i][0].toString(), array[i][1].toString());
+        }
+        return paths;
+    }
 }

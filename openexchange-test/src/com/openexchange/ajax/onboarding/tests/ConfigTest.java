@@ -51,12 +51,12 @@ package com.openexchange.ajax.onboarding.tests;
 
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ConfigRequest;
 import com.openexchange.ajax.onboarding.actions.ConfigResponse;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Platform;
-
 
 /**
  * {@link ConfigTest}
@@ -83,6 +83,7 @@ public class ConfigTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testGetConfig() throws Exception {
         ConfigRequest req = new ConfigRequest(false);
         ConfigResponse resp = client.execute(req);

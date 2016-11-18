@@ -53,6 +53,9 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -68,7 +71,7 @@ import com.openexchange.java.util.TimeZones;
 
 /**
  * This test ensures that bug 23444 does not occur again. The bug describes the problem that the recurrence information can not be removed
- * from a task. Settings recurrence_type to 0 is not working to remove the recurrence 
+ * from a task. Settings recurrence_type to 0 is not working to remove the recurrence
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -82,8 +85,8 @@ public final class Bug23444Test extends AbstractTaskTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = getTimeZone();
@@ -99,12 +102,13 @@ public final class Bug23444Test extends AbstractTaskTest {
         response.fillTask(task);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(task));
         super.tearDown();
     }
 
+    @Test
     public void testForBug() throws OXException, IOException, JSONException {
         Task update = TaskTools.valuesForUpdate(task);
         update.setRecurrenceType(Task.NO_RECURRENCE);

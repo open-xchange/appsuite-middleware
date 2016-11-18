@@ -55,7 +55,6 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
 import com.openexchange.find.tasks.TasksStrings;
 
-
 /**
  * {@link FindTasksAutocompleteTests}
  *

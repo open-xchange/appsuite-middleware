@@ -67,45 +67,44 @@ import com.openexchange.resource.Resource;
  */
 public final class ResourceGetAJAXTest extends AbstractResourceTest {
 
-	/**
-	 * Initializes a new {@link ResourceGetAJAXTest}
-	 *
-	 * @param name
-	 *            The test name
-	 */
-	public ResourceGetAJAXTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceGetAJAXTest}
+     *
+     * @param name
+     *            The test name
+     */
+    public ResourceGetAJAXTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=get</code> request
-	 */
-	public void testUpdate() throws OXException, JSONException, IOException, SAXException {
-		int id = -1;
-		try {
-			/*
-			 * Create resource
-			 */
-			Resource resource = new Resource();
-			resource.setAvailable(true);
-			resource.setMail("my.resource@domain.tld");
-			resource.setSimpleName(ResourceGetAJAXTest.class.getName());
-			resource.setDisplayName(ResourceGetAJAXTest.class.getName());
-			resource.setDescription(ResourceGetAJAXTest.class.getName());
-			id = createResource(resource);
-			/*
-			 * Perform GET
-			 */
-			final ResourceGetResponse response = (ResourceGetResponse) Executor.execute(getSession(),
-					new ResourceGetRequest(id, true));
+    /**
+     * Tests the <code>action=get</code> request
+     */
+    public void testUpdate() throws OXException, JSONException, IOException, SAXException {
+        int id = -1;
+        try {
+            /*
+             * Create resource
+             */
+            Resource resource = new Resource();
+            resource.setAvailable(true);
+            resource.setMail("my.resource@domain.tld");
+            resource.setSimpleName(ResourceGetAJAXTest.class.getName());
+            resource.setDisplayName(ResourceGetAJAXTest.class.getName());
+            resource.setDescription(ResourceGetAJAXTest.class.getName());
+            id = createResource(resource);
+            /*
+             * Perform GET
+             */
+            final ResourceGetResponse response = (ResourceGetResponse) Executor.execute(getSession(), new ResourceGetRequest(id, true));
 
-			resource = response.getResource();
-			assertTrue("GET failed", resource != null && resource.getIdentifier() == id);
+            resource = response.getResource();
+            assertTrue("GET failed", resource != null && resource.getIdentifier() == id);
 
-            assertTrue(((JSONObject)response.getData()).has("last_modified_utc"));
+            assertTrue(((JSONObject) response.getData()).has("last_modified_utc"));
 
-		} finally {
-		    deleteResource(id);
-		}
-	}
+        } finally {
+            deleteResource(id);
+        }
+    }
 }

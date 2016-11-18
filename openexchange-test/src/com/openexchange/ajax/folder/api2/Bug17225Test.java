@@ -50,6 +50,8 @@
 package com.openexchange.ajax.folder.api2;
 
 import java.util.Iterator;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -71,61 +73,48 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public final class Bug17225Test extends AbstractAJAXSession {
 
-	private AJAXClient client;
-	private AJAXClient client2;
-	private FolderObject folder;
-	private int userId1;
+    private AJAXClient client;
+    private AJAXClient client2;
+    private FolderObject folder;
+    private int userId1;
 
-	public Bug17225Test() {
-		super();
-	}
+    public Bug17225Test() {
+        super();
+    }
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		client = getClient();
-		userId1 = client.getValues().getUserId();
-		client2 = new AJAXClient(User.User2);
-		int folderId = client.getValues().getPrivateAppointmentFolder();
-		GetResponse getR = client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
-		FolderObject oldFolder = getR.getFolder();
-		folder = new FolderObject();
-		folder.setObjectID(oldFolder.getObjectID());
-		folder.setLastModified(getR.getTimestamp());
-		folder.setPermissionsAsArray(new OCLPermission[] {
-				Create.ocl(userId1, false, true,
-						OCLPermission.ADMIN_PERMISSION,
-						OCLPermission.ADMIN_PERMISSION,
-						OCLPermission.ADMIN_PERMISSION,
-						OCLPermission.ADMIN_PERMISSION),
-				Create.ocl(client2.getValues().getUserId(), false, false,
-						OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-						OCLPermission.READ_ALL_OBJECTS,
-						OCLPermission.WRITE_ALL_OBJECTS,
-						OCLPermission.DELETE_ALL_OBJECTS) });
-		InsertResponse updateR = client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
-		folder.setLastModified(updateR.getTimestamp());
-//		client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
-	}
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        userId1 = client.getValues().getUserId();
+        client2 = new AJAXClient(User.User2);
+        int folderId = client.getValues().getPrivateAppointmentFolder();
+        GetResponse getR = client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
+        FolderObject oldFolder = getR.getFolder();
+        folder = new FolderObject();
+        folder.setObjectID(oldFolder.getObjectID());
+        folder.setLastModified(getR.getTimestamp());
+        folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(userId1, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS) });
+        InsertResponse updateR = client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
+        folder.setLastModified(updateR.getTimestamp());
+        //		client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
+    }
 
-	@Override
-	protected void tearDown() throws Exception {
-		folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(userId1,
-				false, true, OCLPermission.ADMIN_PERMISSION,
-				OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-				OCLPermission.ADMIN_PERMISSION) });
-		client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
-		super.tearDown();
-	}
+    @After
+    public void tearDown() throws Exception {
+        folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(userId1, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+        client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
+        super.tearDown();
+    }
 
-	public void testSharedType() throws Throwable {
-		ListResponse response = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SHARED_PREFIX + userId1, new int[] { 1, 20, 2, 3, 300, 301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316 }, false));
-		Iterator<FolderObject> iter = response.getFolder();
-		while (iter.hasNext()) {
-			FolderObject testFolder = iter.next();
-			if (testFolder.getObjectID() == folder.getObjectID()) {
-				assertEquals("Shared folder is sent with type private.", FolderObject.SHARED, testFolder.getType());
-			}
-		}
-	}
+    public void testSharedType() throws Throwable {
+        ListResponse response = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SHARED_PREFIX + userId1, new int[] { 1, 20, 2, 3, 300, 301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316 }, false));
+        Iterator<FolderObject> iter = response.getFolder();
+        while (iter.hasNext()) {
+            FolderObject testFolder = iter.next();
+            if (testFolder.getObjectID() == folder.getObjectID()) {
+                assertEquals("Shared folder is sent with type private.", FolderObject.SHARED, testFolder.getType());
+            }
+        }
+    }
 }

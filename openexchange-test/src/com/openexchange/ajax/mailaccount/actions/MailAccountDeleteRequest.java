@@ -65,14 +65,14 @@ public class MailAccountDeleteRequest implements AJAXRequest<MailAccountDeleteRe
     private final JSONArray ids = new JSONArray();
     private final boolean failOnError;
 
-    public MailAccountDeleteRequest(boolean failOnError, int...ids) {
+    public MailAccountDeleteRequest(boolean failOnError, int... ids) {
         this.failOnError = failOnError;
-        for(int id : ids) {
+        for (int id : ids) {
             this.ids.put(id);
         }
     }
 
-    public MailAccountDeleteRequest(int...ids) {
+    public MailAccountDeleteRequest(int... ids) {
         this(true, ids);
     }
 
@@ -93,8 +93,7 @@ public class MailAccountDeleteRequest implements AJAXRequest<MailAccountDeleteRe
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[]{
-            new Parameter("action", "delete")
+        return new Parameter[] { new Parameter("action", "delete")
         };
     }
 
@@ -102,7 +101,6 @@ public class MailAccountDeleteRequest implements AJAXRequest<MailAccountDeleteRe
     public AbstractAJAXParser<MailAccountDeleteResponse> getParser() {
         return new MailAccountDeleteResponseParser(failOnError);
     }
-
 
     @Override
     public String getServletPath() {

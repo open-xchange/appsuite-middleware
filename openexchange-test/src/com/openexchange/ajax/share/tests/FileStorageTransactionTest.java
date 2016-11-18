@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
@@ -74,7 +76,6 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.share.recipient.AnonymousRecipient;
 
-
 /**
  * {@link FileStorageTransactionTest}
  *
@@ -90,6 +91,7 @@ public class FileStorageTransactionTest extends ShareTest {
 
     /**
      * Initializes a new {@link FileStorageTransactionTest}.
+     * 
      * @param name
      */
     public FileStorageTransactionTest() {
@@ -113,14 +115,15 @@ public class FileStorageTransactionTest extends ShareTest {
         }
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (itm != null) {
             itm.cleanUp();
         }
         super.tearDown();
     }
 
+    @Test
     public void testShareItemsInFolder() throws Exception {
         DefaultFileStorageGuestObjectPermission permission = new DefaultFileStorageGuestObjectPermission();
         permission.setPermissions(ObjectPermission.READ);
@@ -129,7 +132,7 @@ public class FileStorageTransactionTest extends ShareTest {
         List<DefaultFile> sharedFiles = new ArrayList<DefaultFile>(files.size());
         for (DefaultFile file : files) {
             if (r.nextBoolean()) {
-                file.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(permission));
+                file.setObjectPermissions(Collections.<FileStorageObjectPermission> singletonList(permission));
                 itm.updateAction(file, new Field[] { Field.OBJECT_PERMISSIONS }, new Date());
                 sharedFiles.add(file);
             }
@@ -156,17 +159,13 @@ public class FileStorageTransactionTest extends ShareTest {
             assertEquals(1, share.getExtendedPermissions().size());
             ExtendedPermissionEntity guest = share.getExtendedPermissions().get(0);
             checkGuestPermission(permission, guest);
-            GuestClient guestClient =  resolveShare(guest, permission.getRecipient());
+            GuestClient guestClient = resolveShare(guest, permission.getRecipient());
             guestClient.checkShareModuleAvailable();
             guestClient.checkShareAccessible(permission);
             /*
              * check file listing in folder 10 contains share target
              */
-            AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(
-                FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
-                Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
-                Metadata.ID,
-                Order.ASCENDING));
+            AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING));
 
             Object[][] docs = allResp.getArray();
             assertEquals(1, docs.length);

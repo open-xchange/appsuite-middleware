@@ -52,6 +52,9 @@ package com.openexchange.ajax.task;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TaskTestManager;
@@ -72,8 +75,8 @@ public class Bug13173Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         folderId = client.getValues().getPrivateTaskFolder();
         timezone = client.getValues().getTimeZone();
@@ -96,13 +99,14 @@ public class Bug13173Test extends AbstractAJAXSession {
 
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         ttm.cleanUp();
         deleteDuplicates(duplicates);
         super.tearDown();
     }
 
+    @Test
     public void testBug13173() throws Exception {
         testTask = ttm.insertTaskOnServer(testTask);
         setTaskComplete(testTask);
@@ -160,7 +164,7 @@ public class Bug13173Test extends AbstractAJAXSession {
                 boolean percentComplete = t.getPercentComplete() == testTask.getPercentComplete();
                 boolean oid = t.getObjectID() == testTask.getObjectID();
 
-//                if (!oid && title && creater) {
+                //                if (!oid && title && creater) {
                 if (!oid && title && creater && startDate && percentComplete) {
                     returnList.add(t);
                 }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import java.util.Comparator;
 import java.util.UUID;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.groupware.container.Contact;
@@ -70,15 +71,16 @@ public class Bug35059Test extends AbstractManagedContactTest {
         super();
     }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
+    @Test
     public void testSortOrder() throws Exception {
-    	/*
-    	 * create distribution list
-    	 */
+        /*
+         * create distribution list
+         */
         DistributionListEntryObject[] distributionList = new DistributionListEntryObject[100];
         for (int i = 0; i < 100; i++) {
             DistributionListEntryObject member = new DistributionListEntryObject();
@@ -91,9 +93,9 @@ public class Bug35059Test extends AbstractManagedContactTest {
         Contact contact = super.generateContact("List");
         contact.setDistributionList(distributionList);
         contact = manager.newAction(contact);
-    	/*
-    	 * get distribution list again
-    	 */
+        /*
+         * get distribution list again
+         */
         GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
         contact = response.getContact();
         DistributionListEntryObject[] list = contact.getDistributionList();

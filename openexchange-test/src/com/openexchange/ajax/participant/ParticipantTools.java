@@ -86,16 +86,11 @@ public final class ParticipantTools {
         super();
     }
 
-    public static List<Participant> getParticipants(
-        final WebConversation conversation, final String hostName,
-        final String sessionId) throws Exception {
-        final Contact[] userContacts = ContactTest.searchContact(
-            conversation, "*", FolderObject.SYSTEM_LDAP_FOLDER_ID, COLUMNS, AbstractAJAXTest.PROTOCOL
-            + hostName, sessionId);
+    public static List<Participant> getParticipants(final WebConversation conversation, final String hostName, final String sessionId) throws Exception {
+        final Contact[] userContacts = ContactTest.searchContact(conversation, "*", FolderObject.SYSTEM_LDAP_FOLDER_ID, COLUMNS, AbstractAJAXTest.PROTOCOL + hostName, sessionId);
         final List<Participant> participants = new ArrayList<Participant>();
         for (final Contact userContact : userContacts) {
-            final UserParticipant user = new UserParticipant(userContact
-                .getInternalUserId());
+            final UserParticipant user = new UserParticipant(userContact.getInternalUserId());
             participants.add(user);
         }
         return participants;
@@ -122,12 +117,8 @@ public final class ParticipantTools {
         return participants;
     }
 
-    public static List<Participant> getParticipants(
-        final WebConversation conversation, final String hostName,
-        final String sessionId, final int count, final boolean noCreator,
-        final int creatorId) throws Exception {
-        List<Participant> participants = getParticipants(conversation, hostName,
-            sessionId);
+    public static List<Participant> getParticipants(final WebConversation conversation, final String hostName, final String sessionId, final int count, final boolean noCreator, final int creatorId) throws Exception {
+        List<Participant> participants = getParticipants(conversation, hostName, sessionId);
         if (noCreator) {
             removeParticipant(participants, creatorId);
         }
@@ -148,8 +139,7 @@ public final class ParticipantTools {
         return participants;
     }
 
-    public static void removeParticipant(final List<Participant> participants,
-        final int creatorId) {
+    public static void removeParticipant(final List<Participant> participants, final int creatorId) {
         final Iterator<Participant> iter = participants.iterator();
         while (iter.hasNext()) {
             if (iter.next().getIdentifier() == creatorId) {

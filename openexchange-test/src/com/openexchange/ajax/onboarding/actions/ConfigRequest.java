@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link ConfigRequest}
  *
@@ -89,9 +88,7 @@ public class ConfigRequest implements AJAXRequest<ConfigResponse> {
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "config"
-        ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "config").toArray();
     }
 
     @Override

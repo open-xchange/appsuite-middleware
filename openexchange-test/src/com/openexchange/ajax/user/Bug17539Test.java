@@ -50,6 +50,8 @@
 package com.openexchange.ajax.user;
 
 import org.json.JSONArray;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.actions.AllRequest;
@@ -68,12 +70,13 @@ public class Bug17539Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testAll() throws Throwable {
         AllRequest request = new AllRequest(null);
         AllResponse response = client.execute(request);

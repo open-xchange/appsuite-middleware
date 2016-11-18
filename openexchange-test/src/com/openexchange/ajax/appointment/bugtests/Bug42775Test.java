@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -117,6 +118,7 @@ public class Bug42775Test extends AbstractAJAXSession {
         ctm1.insert(appointment);
     }
 
+    @Test
     public void testBug41995() throws Exception {
         Appointment update = new Appointment();
         update.setObjectID(appointment.getObjectID());

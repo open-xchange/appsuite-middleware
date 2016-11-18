@@ -66,49 +66,47 @@ import com.openexchange.resource.Resource;
  */
 public final class ResourceUpdateAJAXTest extends AbstractResourceTest {
 
-	/**
-	 * Initializes a new {@link ResourceUpdateAJAXTest}
-	 *
-	 * @param name
-	 *            The test name
-	 */
-	public ResourceUpdateAJAXTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceUpdateAJAXTest}
+     *
+     * @param name
+     *            The test name
+     */
+    public ResourceUpdateAJAXTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=update</code> request
-	 */
-	public void testUpdate() throws OXException, JSONException, IOException, SAXException {
-		int id = -1;
-		try {
-			/*
-			 * Create resource
-			 */
-			final Resource resource = new Resource();
-			resource.setAvailable(true);
-			resource.setMail("my.resource@domain.tdl");
-			resource.setSimpleName(ResourceUpdateAJAXTest.class.getName());
-			resource.setDisplayName(ResourceUpdateAJAXTest.class.getName());
-			resource.setDescription(ResourceUpdateAJAXTest.class.getName());
-			id = createResource(resource);
-			/*
-			 * Obtain timestamp
-			 */
-			final long clientLastModified = Executor.execute(getSession(), new ResourceGetRequest(id, true))
-					.getTimestamp().getTime();
-			/*
-			 * Perform update request
-			 */
-			resource.setIdentifier(id);
-			resource.setMail("my.resource1337@domain.tdl");
-			Executor.execute(getSession(),
-					new ResourceUpdateRequest(resource, clientLastModified, true));
+    /**
+     * Tests the <code>action=update</code> request
+     */
+    public void testUpdate() throws OXException, JSONException, IOException, SAXException {
+        int id = -1;
+        try {
+            /*
+             * Create resource
+             */
+            final Resource resource = new Resource();
+            resource.setAvailable(true);
+            resource.setMail("my.resource@domain.tdl");
+            resource.setSimpleName(ResourceUpdateAJAXTest.class.getName());
+            resource.setDisplayName(ResourceUpdateAJAXTest.class.getName());
+            resource.setDescription(ResourceUpdateAJAXTest.class.getName());
+            id = createResource(resource);
+            /*
+             * Obtain timestamp
+             */
+            final long clientLastModified = Executor.execute(getSession(), new ResourceGetRequest(id, true)).getTimestamp().getTime();
+            /*
+             * Perform update request
+             */
+            resource.setIdentifier(id);
+            resource.setMail("my.resource1337@domain.tdl");
+            Executor.execute(getSession(), new ResourceUpdateRequest(resource, clientLastModified, true));
 
-		} finally {
-		    deleteResource(id);
-		}
+        } finally {
+            deleteResource(id);
+        }
 
-	}
+    }
 
 }

@@ -52,6 +52,7 @@ package com.openexchange.ajax.share.tests;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -78,6 +79,7 @@ public class FolderTransactionTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testDontCreateShareOnFailingFolderCreate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
@@ -86,6 +88,7 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testDontCreateShareOnFailingFolderCreate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         FolderObject folder = insertPrivateFolder(api, module, parent.getObjectID());
@@ -95,12 +98,7 @@ public class FolderTransactionTest extends ShareTest {
          */
         boolean insertionFailed = false;
         try {
-            insertSharedFolder(
-                api,
-                module,
-                parent.getObjectID(),
-                folder.getFolderName(),
-                createAnonymousGuestPermission());
+            insertSharedFolder(api, module, parent.getObjectID(), folder.getFolderName(), createAnonymousGuestPermission());
         } catch (Throwable e) {
             insertionFailed = true;
         }
@@ -110,6 +108,7 @@ public class FolderTransactionTest extends ShareTest {
         assertEquals("The number of shares differs but should not. " + "API: " + api + ", Module: " + module, oldShares.size(), newShares.size());
     }
 
+    @Test
     public void testDontCreateShareOnFailingFolderUpdate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
@@ -118,6 +117,7 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testDontCreateShareOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         FolderObject sharedFolder = insertPrivateFolder(api, module, parent.getObjectID());
@@ -144,6 +144,7 @@ public class FolderTransactionTest extends ShareTest {
         assertEquals("The number of shares differs but should not." + "API: " + api + ", Module: " + module, oldShares.size(), newShares.size());
     }
 
+    @Test
     public void testDontRemoveSharesOnFailingFolderUpdate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
@@ -152,14 +153,11 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testDontRemoveSharesOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
-        FolderObject sharedFolder = insertSharedFolder(
-            api,
-            module,
-            parent.getObjectID(),
-            guestPermission);
+        FolderObject sharedFolder = insertSharedFolder(api, module, parent.getObjectID(), guestPermission);
         /*
          * check permissions
          */

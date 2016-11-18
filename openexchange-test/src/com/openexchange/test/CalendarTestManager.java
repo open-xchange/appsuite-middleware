@@ -310,28 +310,28 @@ public class CalendarTestManager implements TestManager {
     }
 
     public void confirm(Appointment app, int status, String message) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, app.getLastModified(),  getFailOnError());
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, app.getLastModified(), getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
 
     public void confirm(Appointment app, int user, int status, String message) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, user, app.getLastModified(),  getFailOnError());
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, user, app.getLastModified(), getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
 
     public void confirmExternal(Appointment app, String mail, int status, String message, int occurrence) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), occurrence, status, message, mail, app.getLastModified(),  getFailOnError());
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), occurrence, status, message, mail, app.getLastModified(), getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
 
     public void confirmExternal(Appointment app, String mail, int status, String message) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, mail, app.getLastModified(),  getFailOnError());
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, mail, app.getLastModified(), getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
@@ -394,8 +394,8 @@ public class CalendarTestManager implements TestManager {
         return extractAppointments(resp);
     }
 
-	public List<Appointment> extractAppointments(CommonListResponse resp) {
-		List<Appointment> list = new LinkedList<Appointment>();
+    public List<Appointment> extractAppointments(CommonListResponse resp) {
+        List<Appointment> list = new LinkedList<Appointment>();
         int[] cols = resp.getColumns();
         Object[][] arr = resp.getArray();
         for (Object[] values : arr) {
@@ -411,18 +411,18 @@ public class CalendarTestManager implements TestManager {
             fixDates(temp);
         }
         return list;
-	}
+    }
 
     public List<Appointment> newappointments(Date start, Date end, int limit, int[] columns) {
         NewAppointmentSearchRequest req = new NewAppointmentSearchRequest(start, end, limit, timezone, columns);
         NewAppointmentSearchResponse resp = execute(req);
         extractInfo(resp);
         try {
-			return Arrays.asList(resp.getAppointments());
-		} catch (Exception e) {
-			lastException = e;
-			return null;
-		}
+            return Arrays.asList(resp.getAppointments());
+        } catch (Exception e) {
+            lastException = e;
+            return null;
+        }
     }
 
     private void fixDates(Appointment temp) {
@@ -445,12 +445,12 @@ public class CalendarTestManager implements TestManager {
     private Object conv(int i, Object object) {
         Object value = object;
         switch (i) {
-        case Appointment.START_DATE:
-        case Appointment.END_DATE:
-        case Appointment.UNTIL:
-            if (!(object instanceof Date)) {
-                value = new Date((Long) object);
-            }
+            case Appointment.START_DATE:
+            case Appointment.END_DATE:
+            case Appointment.UNTIL:
+                if (!(object instanceof Date)) {
+                    value = new Date((Long) object);
+                }
         }
         return value;
     }
@@ -496,7 +496,7 @@ public class CalendarTestManager implements TestManager {
                                 tryInteger(app, actualColumns[i], (Long) row[i]);
                             }
                         } else if (x.getMessage().equals("java.lang.Long cannot be cast to java.util.Date")) {
-                            app.set(actualColumns[i], new Date((Long)row[i]));
+                            app.set(actualColumns[i], new Date((Long) row[i]));
                         } else if (x.getMessage().equals("java.lang.String cannot be cast to java.lang.Long")) {
                             app.set(actualColumns[i], Long.parseLong((String) row[i]));
                         } else if (x.getMessage().equals("org.json.JSONArray cannot be cast to [Ljava.util.Date;")) {
@@ -556,7 +556,6 @@ public class CalendarTestManager implements TestManager {
         return all(parentFolderID, start, end, columns, true);
     }
 
-
     public Appointment[] all(int parentFolderID, Date start, Date end) {
         AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
         CommonAllResponse response = execute(request);
@@ -593,22 +592,13 @@ public class CalendarTestManager implements TestManager {
             createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
         }
         DeleteRequest deleteRequest;
-        if(appointment.containsRecurrencePosition()){
-            deleteRequest = new DeleteRequest(
-                appointment.getObjectID(),
-                appointment.getParentFolderID(),
-                appointment.getRecurrencePosition(),
-                new Date(Long.MAX_VALUE),
-                failOnErrorOverride);
+        if (appointment.containsRecurrencePosition()) {
+            deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getRecurrencePosition(), new Date(Long.MAX_VALUE), failOnErrorOverride);
         } else {
-            deleteRequest = new DeleteRequest(
-                appointment.getObjectID(),
-                appointment.getParentFolderID(),
-                new Date(Long.MAX_VALUE),
-                failOnErrorOverride);
+            deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), new Date(Long.MAX_VALUE), failOnErrorOverride);
         }
         CommonDeleteResponse response = execute(deleteRequest);
-        if(response != null) {
+        if (response != null) {
             extractInfo(response);
         }
     }
@@ -631,8 +621,8 @@ public class CalendarTestManager implements TestManager {
         master.setLastModified(getLastModification());
     }
 
-    public boolean[] has(Date startInclusive, Date endExclusive){
-        HasResponse response = execute( new HasRequest(startInclusive, endExclusive, getTimezone()));
+    public boolean[] has(Date startInclusive, Date endExclusive) {
+        HasResponse response = execute(new HasRequest(startInclusive, endExclusive, getTimezone()));
         lastResponse = response;
         try {
             return response.getValues();
@@ -643,7 +633,7 @@ public class CalendarTestManager implements TestManager {
     }
 
     public List<Appointment> getCreatedEntities() {
-    	return this.createdEntities;
+        return this.createdEntities;
     }
 
     /*

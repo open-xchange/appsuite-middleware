@@ -67,7 +67,7 @@ public abstract class AbstractMailFilterRequest<T extends AbstractAJAXResponse> 
      * URL of the calendar AJAX interface.
      */
     public static final String URL = "/ajax/mailfilter";
-    
+
     protected boolean failOnError = true;
 
     protected AbstractMailFilterRequest() {
@@ -90,7 +90,7 @@ public abstract class AbstractMailFilterRequest<T extends AbstractAJAXResponse> 
         mailFilterWriter.writeMailFilter(rule, jsonObj);
         return jsonObj;
     }
-    
+
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }

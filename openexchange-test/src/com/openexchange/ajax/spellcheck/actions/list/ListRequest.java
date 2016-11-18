@@ -63,56 +63,56 @@ import com.openexchange.ajax.spellcheck.actions.AbstractSpellCheckRequest;
  */
 public final class ListRequest extends AbstractSpellCheckRequest {
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link ListRequest}
-	 */
-	public ListRequest(final boolean failOnError) {
-		super();
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link ListRequest}
+     */
+    public ListRequest(final boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return null;
-	}
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.GET;
-	}
+        return Method.GET;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "list"));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "list"));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public ListParser getParser() {
-		return new ListParser(failOnError);
-	}
+        return new ListParser(failOnError);
+    }
 
 }

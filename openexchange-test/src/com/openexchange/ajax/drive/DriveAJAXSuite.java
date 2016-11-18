@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.drive;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import com.openexchange.ajax.drive.test.DeleteLinkTest;
 import com.openexchange.ajax.drive.test.GetLinkTest;
 import com.openexchange.ajax.drive.test.UpdateLinkTest;
 import com.openexchange.ajax.drive.updater.UpdaterXMLTest;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * {@link DriveAJAXSuite}

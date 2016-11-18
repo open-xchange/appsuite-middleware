@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.session;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -80,22 +83,23 @@ public class Bug36484Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         AJAXConfig.init();
         login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password = AJAXConfig.getProperty(Property.PASSWORD);
         client = new AJAXClient(new AJAXSession(), true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != client && false == Strings.isEmpty(client.getSession().getId())) {
             client.logout();
         }
         super.tearDown();
     }
 
+    @Test
     public void testAutoFormLoginWithChangedIP() throws Exception {
         /*
          * perform initial form login & store session cookie

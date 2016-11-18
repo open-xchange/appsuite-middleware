@@ -53,6 +53,9 @@ import java.util.Date;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -75,7 +78,6 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
-
 /**
  * {@link IMipImportTest}
  *
@@ -97,8 +99,8 @@ public class IMipImportTest extends AbstractConversionTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         client1 = getClient();
@@ -113,13 +115,14 @@ public class IMipImportTest extends AbstractConversionTest {
         sequenceId2 = getSequenceIdForMail(client2, mailFolderAndMailID2);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(objectId, folder, new Date(Long.MAX_VALUE)));
 
         super.tearDown();
     }
 
+    @Test
     public void testIMIP() throws Exception {
         String[][] folderIdFirst = confirm(client1, mailFolderAndMailID, sequenceId, CalendarObject.ACCEPT, "Positive");
         String[][] folderIdSecond = confirm(client2, mailFolderAndMailID2, sequenceId2, CalendarObject.DECLINE, "Negative");
@@ -158,43 +161,20 @@ public class IMipImportTest extends AbstractConversionTest {
     protected String[][] confirm(AJAXClient c, String[] folderAndId, String seq, int confirm, String message) throws Exception {
         JSONObject jsonBody = new JSONObject();
         JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.ical");
-        jsonSource.put("args", new JSONArray().put(
-                new JSONObject().put("com.openexchange.mail.conversion.fullname", folderAndId[0])).put(
-                new JSONObject().put("com.openexchange.mail.conversion.mailid", folderAndId[1])).put(
-                new JSONObject().put("com.openexchange.mail.conversion.sequenceid", seq)));
+        jsonSource.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.mail.conversion.fullname", folderAndId[0])).put(new JSONObject().put("com.openexchange.mail.conversion.mailid", folderAndId[1])).put(new JSONObject().put("com.openexchange.mail.conversion.sequenceid", seq)));
         jsonBody.put("datasource", jsonSource);
         JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical");
-        jsonHandler.put("args", new JSONArray().put(
-                new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder()))
-                .put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder()))
-                .put(new JSONObject().put("com.openexchange.groupware.calendar.confirmstatus", confirm))
-                .put(new JSONObject().put("com.openexchange.groupware.calendar.confirmmessage", message)));
+        jsonHandler.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder())).put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder())).put(new JSONObject().put("com.openexchange.groupware.calendar.confirmstatus", confirm)).put(new JSONObject().put("com.openexchange.groupware.calendar.confirmmessage", message)));
         jsonBody.put("datahandler", jsonHandler);
-        ConvertResponse convertResponse = (ConvertResponse) Executor.execute(c.getSession(),
-                new ConvertRequest(jsonBody, true));
+        ConvertResponse convertResponse = (ConvertResponse) Executor.execute(c.getSession(), new ConvertRequest(jsonBody, true));
 
         return convertResponse.getFoldersAndIDs();
     }
 
     protected String[] createMail(AJAXClient c) throws Exception {
-        byte[] ICAL_BYTES = new StringBuilder()
-            .append("BEGIN:VCALENDAR\n")
-            .append("VERSION:2.0\n")
-            .append("METHOD:REQUEST\n")
-            .append("BEGIN:VEVENT\n")
-            .append("ORGANIZER:").append(client1.getValues().getSendAddress()).append('\n')
-            .append("ATTENDEE;PARTSTAT=ACCEPTED;CN=Da Organiza:Mailto:").append(client1.getValues().getSendAddress()).append('\n')
+        byte[] ICAL_BYTES = new StringBuilder().append("BEGIN:VCALENDAR\n").append("VERSION:2.0\n").append("METHOD:REQUEST\n").append("BEGIN:VEVENT\n").append("ORGANIZER:").append(client1.getValues().getSendAddress()).append('\n').append("ATTENDEE;PARTSTAT=ACCEPTED;CN=Da Organiza:Mailto:").append(client1.getValues().getSendAddress()).append('\n')
             //.append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=Firs User:Mailto:").append(client1.getValues().getSendAddress()).append("\n")
-            .append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=Second User:Mailto:").append(client2.getValues().getSendAddress()).append('\n')
-            .append("DTSTART;VALUE=DATE:20061221\n")
-            .append("DTEND;VALUE=DATE:20070106\n")
-            .append("SUMMARY:Weihnachtsferien\n")
-            .append("UID:").append(uuid).append('\n')
-            .append("SEQUENCE:8\n")
-            .append("DTSTAMP:20060520T163834Z\n")
-            .append("END:VEVENT\n")
-            .append("END:VCALENDAR")
-            .toString().getBytes();
+            .append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=Second User:Mailto:").append(client2.getValues().getSendAddress()).append('\n').append("DTSTART;VALUE=DATE:20061221\n").append("DTEND;VALUE=DATE:20070106\n").append("SUMMARY:Weihnachtsferien\n").append("UID:").append(uuid).append('\n').append("SEQUENCE:8\n").append("DTSTAMP:20060520T163834Z\n").append("END:VEVENT\n").append("END:VCALENDAR").toString().getBytes();
 
         JSONObject mail = new JSONObject();
         mail.put(MailJSONField.FROM.getKey(), c.getValues().getSendAddress());

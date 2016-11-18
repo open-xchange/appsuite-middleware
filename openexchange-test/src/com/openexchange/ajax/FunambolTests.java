@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import org.junit.Test;
 import com.openexchange.ajax.appointment.CalendarTestManagerTest;
 import com.openexchange.ajax.contact.BasicManagedContactTests;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -66,6 +67,7 @@ public class FunambolTests extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testLoginAndLogout() {
         /*
          * Login Request: http://oxptftest.schlund.de/ajax/login?action=login Logout Request: http://192.168.0.76/ajax/login?
@@ -75,6 +77,7 @@ public class FunambolTests extends AbstractAJAXSession {
         // not implemented: Every single test does log in and out
     }
 
+    @Test
     public void testGetAllContactsWithColumns() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=all&session=3b0b1d04035e8d1cfa19918228ca69b7&folder=38&columns=1%2C4%2C5% 2C20
@@ -91,6 +94,7 @@ public class FunambolTests extends AbstractAJAXSession {
 
     }
 
+    @Test
     public void testGetAllAppointmentsWithStartAndEndDate() throws Exception {
         /*
          * Request: http://oxptftest.schlund.de/ajax/calendar?
@@ -107,6 +111,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testGetAllTasksWithStartAndEndDate() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/tasks? action=all&session=0e7c0ac11129ae69ea4e6335ab7c3f67&folder=39&start=10000000&end=2524
@@ -122,6 +127,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testGetContactUpdates() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=updates&session=e4533629a58e8de2d550ee0a0a78cd33&folder=38&timestamp=12061116
@@ -136,6 +142,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testGetAppointmentUpdates() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/calendar? action=updates&session=f75cd157f27e5b756c663e8121bd6ee7&folder=37&timestamp=12127611
@@ -151,6 +158,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testGetTaskUpdates() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/tasks? action=updates&session=cfbaa1d35d0aab24f0145f60b62c8302&folder=39&timestamp=12127617
@@ -168,6 +176,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testGetSingleContact() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=get&session=092644bdf45610f622b6b631e74c0d17&folder=38&id=3301&columns=1 Note:
@@ -183,6 +192,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testGetSingleAppointment() throws Exception {
         /*
          * Request: http://oxptftest.schlund.de/ajax/calendar? action=get&session=f9d94265fea7c0fc57a4f550269904c3&folder=256&id=1436
@@ -212,6 +222,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testUpdateContact() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/contacts?action=update&session=092644bdf45610f622b6b631e74c0d17&id=3301&folder=38&timestamp=
@@ -228,6 +239,7 @@ public class FunambolTests extends AbstractAJAXSession {
 
     }
 
+    @Test
     public void testUpdateAppointment() throws Exception {
         /*
          * Request: http://oxptftest.schlund.de/ajax/calendar?
@@ -244,6 +256,7 @@ public class FunambolTests extends AbstractAJAXSession {
 
     }
 
+    @Test
     public void testUpdateTask() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/tasks? action=update&session=cfbaa1d35d0aab24f0145f60b62c8302&id=215&folder=39&timestamp=12
@@ -260,6 +273,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testAddContact() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=new&session=092644bdf45610f622b6b631e74c0d17
@@ -274,6 +288,7 @@ public class FunambolTests extends AbstractAJAXSession {
 
     }
 
+    @Test
     public void testAddAppointment() throws Exception {
         /*
          * Request: http://oxptftest.schlund.de/ajax/calendar? action=new&session=f3abe0fc28b004289575a4a01887ef6e
@@ -289,6 +304,7 @@ public class FunambolTests extends AbstractAJAXSession {
 
     }
 
+    @Test
     public void testAddTask() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/tasks?action=new&session=cfbaa1d35d0aab24f0145f60b62c8302 Following is a sample request body
@@ -306,6 +322,7 @@ public class FunambolTests extends AbstractAJAXSession {
 
     }
 
+    @Test
     public void testDeleteContact() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=delete&session=887e15e1497fddf59e67ba0450a346e0&timestamp=1206111782257
@@ -319,6 +336,7 @@ public class FunambolTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testDeleteAppointment() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/calendar? action=delete&session=f75cd157f27e5b756c663e8121bd6ee7&timestamp=1212761477393
@@ -333,6 +351,7 @@ public class FunambolTests extends AbstractAJAXSession {
 
     }
 
+    @Test
     public void testDeleteTask() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/tasks? action=delete&session=cfbaa1d35d0aab24f0145f60b62c8302&timestamp=1212762011919 Following

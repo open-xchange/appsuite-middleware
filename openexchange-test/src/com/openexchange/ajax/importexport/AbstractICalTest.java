@@ -101,7 +101,7 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * @deprecated Use IcalImportRequest/Response or IcalExportRequest/Response
- * and a normal AbstractAjaxTest or a managed one.
+ *             and a normal AbstractAjaxTest or a managed one.
  *
  */
 @Deprecated
@@ -147,12 +147,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 
         LOG.debug(new StringBuilder().append("use timezone: ").append(timeZone).toString());
 
-        final Contact contactObj = ContactTest.loadUser(
-            getWebConversation(),
-            userId,
-            FolderObject.SYSTEM_LDAP_FOLDER_ID,
-            getHostName(),
-            getSessionId());
+        final Contact contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
         emailaddress = contactObj.getEmail1();
 
         final Calendar c = Calendar.getInstance();
@@ -186,12 +181,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
         final ICalEmitter emitter = new ICal4JEmitter();
         final ICalSession icalSession = emitter.createSession();
         for (int a = 0; a < appointments.length; a++) {
-            emitter.writeAppointment(
-                icalSession,
-                appointments[a],
-                null,
-                new LinkedList<ConversionError>(),
-                new LinkedList<ConversionWarning>());
+            emitter.writeAppointment(icalSession, appointments[a], null, new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         }
         emitter.writeSession(icalSession, baos);
         final ByteArrayInputStream input = new ByteArrayInputStream(baos.toByteArray());

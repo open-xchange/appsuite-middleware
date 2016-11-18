@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -68,6 +69,7 @@ import com.openexchange.tools.encoding.Base64;
 
 /**
  * Tests the login. This assumes autologin is allowed and cookie timeout is one week.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
  */
 public class LoginTest extends AbstractLoginTest {
@@ -76,29 +78,25 @@ public class LoginTest extends AbstractLoginTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         createClient();
     }
 
-    @Override
-    protected void tearDown() {
-        // Nothing to do.
-    }
-
     // Success Cases
-
+    @Test
     public void testSuccessfulLoginReturnsSession() throws Exception {
         assertResponseContains("session");
     }
 
     /*
      * Response now lacks the random unless configured otherwise via login.properties:com.openexchange.ajax.login.randomToken=false
-     */
+     */ @Test
     public void testSuccessfulLoginLacksRandom() throws Exception {
         assertResponseLacks("random");
     }
 
+    @Test
     public void testSuccessfulLoginSetsSecretCookie() throws Exception {
         rawLogin(USER1);
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
@@ -110,9 +108,10 @@ public class LoginTest extends AbstractLoginTest {
             found = found || name.startsWith("open-xchange-secret");
         }
 
-        assertTrue("Missing secret cookie: "+cookieNames.toString(), found);
+        assertTrue("Missing secret cookie: " + cookieNames.toString(), found);
     }
 
+    @Test
     public void testSuccessfulLoginDoesNotSetSessionCookie() throws Exception {
         // Note: This will fail a while, until UI uses new store action and we can get rid of the session cookie after login
         rawLogin(USER1);
@@ -125,25 +124,18 @@ public class LoginTest extends AbstractLoginTest {
             found = found || name.startsWith("open-xchange-session");
         }
 
-        assertFalse("Found session cookie, but shouldn't have: "+cookieNames.toString(), found);
+        assertFalse("Found session cookie, but shouldn't have: " + cookieNames.toString(), found);
     }
 
+    @Test
     public void testSecretCookiesDifferPerClientID() throws Exception {
         String[] credentials = credentials(USER1);
 
         inModule("login");
 
-        raw("login",
-                "name", credentials[0],
-                "password", credentials[1],
-                "client" , "testclient1"
-                 );
+        raw("login", "name", credentials[0], "password", credentials[1], "client", "testclient1");
 
-        raw("login",
-            "name", credentials[0],
-            "password", credentials[1],
-            "client" , "testclient2"
-             );
+        raw("login", "name", credentials[0], "password", credentials[1], "client", "testclient2");
 
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
         int counter = 0;
@@ -151,15 +143,16 @@ public class LoginTest extends AbstractLoginTest {
         for (Cookie cookie : cookies) {
             String name = cookie.getName();
             cookieNames.add(name);
-            if(name.startsWith("open-xchange-secret")) {
+            if (name.startsWith("open-xchange-secret")) {
                 counter++;
             }
         }
 
-        assertTrue("Missing secret cookie: "+cookieNames.toString(), counter == 2);
+        assertTrue("Missing secret cookie: " + cookieNames.toString(), counter == 2);
 
     }
 
+    @Test
     public void testSecretCookieLifetimeIsLongerThanADay() throws Exception {
         rawLogin(USER1);
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
@@ -167,29 +160,32 @@ public class LoginTest extends AbstractLoginTest {
         for (Cookie cookie : cookies) {
             String name = cookie.getName();
             cookieNames.add(name);
-            if(name.startsWith("open-xchange-secret")) {
+            if (name.startsWith("open-xchange-secret")) {
                 assertNotNull(cookie.getExpiryDate());
                 Date tomorrow = TimeTools.D("tomorrow");
                 assertTrue(cookie.getExpiryDate().after(tomorrow));
-              }
+            }
         }
     }
 
+    @Test
     public void testSuccessfulLoginAllowsSubsequentRequests() throws Exception {
         as(USER1);
-        inModule("quota"); call("filestore"); // Send some request.
+        inModule("quota");
+        call("filestore"); // Send some request.
 
         assertNoError();
     }
 
+    @Test
     public void testRefreshSecretActionResetsSecretCookieLifetime() throws Exception {
         rawLogin(USER1);
         Date oldCookie = null, newCookie = null;
 
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
 
-        for(int i = 0; i < cookies.length; i++) {
-            if(cookies[i].getName().startsWith("open-xchange-secret")) {
+        for (int i = 0; i < cookies.length; i++) {
+            if (cookies[i].getName().startsWith("open-xchange-secret")) {
                 oldCookie = cookies[i].getExpiryDate();
             }
         }
@@ -198,8 +194,8 @@ public class LoginTest extends AbstractLoginTest {
         raw(AJAXServlet.ACTION_REFRESH_SECRET, AJAXServlet.PARAMETER_SESSION, rawResponse.getString(AJAXServlet.PARAMETER_SESSION));
         cookies = currentClient.getClient().getState().getCookies();
 
-        for(int i = 0; i < cookies.length; i++) {
-            if(cookies[i].getName().startsWith("open-xchange-secret")) {
+        for (int i = 0; i < cookies.length; i++) {
+            if (cookies[i].getName().startsWith("open-xchange-secret")) {
                 newCookie = cookies[i].getExpiryDate();
             }
         }
@@ -211,29 +207,31 @@ public class LoginTest extends AbstractLoginTest {
     }
 
     // Error Cases
-
+    @Test
     public void testWrongCredentials() throws Exception {
         inModule("login");
-        call("login",
-               "name", "foo",
-               "password", "bar");
+        call("login", "name", "foo", "password", "bar");
 
         assertError();
     }
 
+    @Test
     public void testNonExistingSessionIDOnSubsequentRequests() throws Exception {
         as(USER1);
-        inModule("quota"); call("filestore", "session", "1234567"); // Send some request, and override the sessionID.
+        inModule("quota");
+        call("filestore", "session", "1234567"); // Send some request, and override the sessionID.
 
         assertError();
     }
 
+    @Test
     public void testSessionIDAndSecretMismatch() throws Exception {
         as(USER1);
         String sessionID = currentClient.getSessionID();
 
         as(USER2);
-        inModule("quota"); call("filestore", "session", sessionID); // Send some request with user 1 session. Secrets will differ.
+        inModule("quota");
+        call("filestore", "session", sessionID); // Send some request with user 1 session. Secrets will differ.
 
         assertError();
     }
@@ -244,13 +242,14 @@ public class LoginTest extends AbstractLoginTest {
      *
      * @throws Exception
      */
+    @Test
     public void testSessionRandomMissingAndUnusable() throws Exception {
         rawLogin(USER1);
         /*
          * if login.properties:com.openexchange.ajax.login.randomToken=true
          * the response contains the random. only continue when it's absent.
          */
-        if(!rawResponse.has("random")) {
+        if (!rawResponse.has("random")) {
             String sessionID = rawResponse.getString("session");
             //get the otherwise valid random token
             callGeneral("logintest", "randomtoken", "session", sessionID);
@@ -259,18 +258,10 @@ public class LoginTest extends AbstractLoginTest {
             Object randomObject = details.get("random");
             assertNotNull(randomObject);
 
-            HttpMethod redirectMethod = rawMethod("login",
-                "redirect",
-                "session", sessionID,
-                "random", randomObject
-                );
+            HttpMethod redirectMethod = rawMethod("login", "redirect", "session", sessionID, "random", randomObject);
             assertEquals("action=redirect shouldn't work when randomToken is disabled", 400, redirectMethod.getStatusCode());
 
-            HttpMethod redeemMethod = rawMethod("login",
-                "redeem",
-                "session", sessionID,
-                "random", randomObject
-                );
+            HttpMethod redeemMethod = rawMethod("login", "redeem", "session", sessionID, "random", randomObject);
             assertEquals("action=redeem shouldn't work when randomToken is disabled", 400, redeemMethod.getStatusCode());
         }
     }
@@ -301,15 +292,12 @@ public class LoginTest extends AbstractLoginTest {
         assertRaw(new JSONAssertion().isObject().lacksKey(key));
     }
 
-    private void rawLogin(String user) throws Exception{
+    private void rawLogin(String user) throws Exception {
         String[] credentials = credentials(user);
 
         inModule("login");
 
-        raw("login",
-                "name", credentials[0],
-                "password", credentials[1]
-                 );
+        raw("login", "name", credentials[0], "password", credentials[1]);
 
     }
 

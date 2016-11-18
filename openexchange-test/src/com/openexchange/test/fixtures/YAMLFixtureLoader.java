@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.io.File;
@@ -84,7 +85,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
     @Override
     public void load(final String... fixtureNames) throws OXException {
         for (final String fixtureName : fixtureNames) {
-            parse(locateFile(fixtureName), fixtureName );
+            parse(locateFile(fixtureName), fixtureName);
         }
     }
 
@@ -109,10 +110,10 @@ public class YAMLFixtureLoader implements FixtureLoader {
     private File locateFile(final String fixtureName) throws OXException {
         for (final File path : loadPath) {
             File fixtureFile = new File(path, fixtureName).getAbsoluteFile();
-            if( fixtureFile.exists()) {
+            if (fixtureFile.exists()) {
                 return fixtureFile;
             }
-            fixtureFile = new File(path, fixtureName+".yml").getAbsoluteFile();
+            fixtureFile = new File(path, fixtureName + ".yml").getAbsoluteFile();
             if (fixtureFile.exists()) {
                 return fixtureFile;
             }
@@ -127,17 +128,17 @@ public class YAMLFixtureLoader implements FixtureLoader {
         if (sb.length() > 1) {
             sb.setLength(sb.length() - 1);
         }
-        throw new FixtureException("Can't find fixture " + fixtureName + " in path: " +sb.toString());
+        throw new FixtureException("Can't find fixture " + fixtureName + " in path: " + sb.toString());
     }
 
     private void parse(final File file, final String fixtureName) throws OXException {
-    	InputStreamReader reader = null;
+        InputStreamReader reader = null;
         try {
-        	reader = new InputStreamReader(new FileInputStream(file), Charset.forName("UTF8"));
-            fixtureDefinitions.put(fixtureName, (Map<String, Map<String, String>>)YAML.load(reader));
+            reader = new InputStreamReader(new FileInputStream(file), Charset.forName("UTF8"));
+            fixtureDefinitions.put(fixtureName, (Map<String, Map<String, String>>) YAML.load(reader));
         } catch (FileNotFoundException e) {
             throw new FixtureException(e);
-		} finally {
+        } finally {
             if (null != reader) {
                 try {
                     reader.close();
@@ -150,7 +151,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
 
     private <T> FixtureFactory<T> getFixtureFactory(final Class<T> aClass) throws OXException {
         if (!factories.containsKey(aClass)) {
-            throw new FixtureException("Can't load fixtures of type: "+aClass);
+            throw new FixtureException("Can't load fixtures of type: " + aClass);
         }
         return (FixtureFactory<T>) factories.get(aClass);
     }

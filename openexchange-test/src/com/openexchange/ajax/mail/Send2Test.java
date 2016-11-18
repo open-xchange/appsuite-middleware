@@ -51,6 +51,9 @@ package com.openexchange.ajax.mail;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
@@ -75,14 +78,15 @@ public final class Send2Test extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(client, false);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         manager.cleanUp();
         super.tearDown();
     }
@@ -92,6 +96,7 @@ public final class Send2Test extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testSend() throws Throwable {
         // Create JSON mail object
         final JSONObject jMail = new JSONObject(16);
@@ -107,7 +112,7 @@ public final class Send2Test extends AbstractMailTest {
 
         {
             final JSONObject jHeaders = new JSONObject(4);
-            jHeaders.put("X-OxGuard",true).put("X-OxGuard-ID","45fe1029-edd1-4866-8a1a-7889b4a98bca");
+            jHeaders.put("X-OxGuard", true).put("X-OxGuard-ID", "45fe1029-edd1-4866-8a1a-7889b4a98bca");
             jMail.putOpt("headers", jHeaders);
         }
 

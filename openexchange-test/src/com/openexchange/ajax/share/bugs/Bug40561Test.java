@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -86,6 +87,7 @@ public class Bug40561Test extends ShareTest {
         super();
     }
 
+    @Test
     public void testShareFileAndSearchForItAsGuest() throws Exception {
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
@@ -111,6 +113,7 @@ public class Bug40561Test extends ShareTest {
         Assert.assertNotNull(AbstractFindTest.findByProperty(searchResults, "id", sharedFileID));
     }
 
+    @Test
     public void testShareFileInternallyAndSearchForIt() throws Exception {
         AJAXClient shareClient = new AJAXClient(User.User2);
         try {
@@ -132,6 +135,6 @@ public class Bug40561Test extends ShareTest {
         } finally {
             shareClient.logout();
         }
-	}
+    }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
@@ -90,6 +91,7 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
     }
 
+    @Test
     public void testShouldNotAllowTurningAChangeExceptionIntoASeries() {
         Changes secondChange = new Changes();
         secondChange.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
@@ -107,7 +109,8 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         assertEquals("Should have correct exception", 99, ((OXException) calendarManager.getLastException()).getCode());
     }
 
-    public void testDeletingAChangeException(){
+    @Test
+    public void testDeletingAChangeException() {
         Appointment secondUpdate = new Appointment();
         secondUpdate.setParentFolderID(update.getParentFolderID());
         secondUpdate.setObjectID(update.getObjectID());

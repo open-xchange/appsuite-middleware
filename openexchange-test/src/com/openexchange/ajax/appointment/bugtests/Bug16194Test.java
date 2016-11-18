@@ -55,6 +55,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -95,8 +98,8 @@ public class Bug16194Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         userId = client.getValues().getUserId();
@@ -133,12 +136,13 @@ public class Bug16194Test extends AbstractAJAXSession {
         return folder;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(EnumAPI.OX_NEW, publicFolder));
         super.tearDown();
     }
 
+    @Test
     public void testMoveFromPublic2Private() throws Throwable {
         Appointment moveMe = new Appointment();
         moveMe.setObjectID(appointment.getObjectID());

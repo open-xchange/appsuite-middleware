@@ -51,6 +51,9 @@ package com.openexchange.ajax.contact;
 
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -117,27 +120,27 @@ public class Bug16618Test extends AbstractAJAXSession {
         return contact;
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = client.getValues().getTimeZone();
         contact = createContactWithImage();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(contact));
         super.tearDown();
     }
 
+    @Test
     public void testContactImageWithAllRequest() throws Throwable {
         /*
          * Check presence of image URL via action=list
          */
         {
-            final ListRequest listRequest =
-                new ListRequest(new ListIDs(folderId, contact.getObjectID()), new int[] { Contact.OBJECT_ID, Contact.IMAGE1_URL, Contact.LAST_MODIFIED });
+            final ListRequest listRequest = new ListRequest(new ListIDs(folderId, contact.getObjectID()), new int[] { Contact.OBJECT_ID, Contact.IMAGE1_URL, Contact.LAST_MODIFIED });
             final CommonListResponse response = client.execute(listRequest);
             final int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
             final int imageURLPos = response.getColumnPos(Contact.IMAGE1_URL);

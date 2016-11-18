@@ -55,15 +55,18 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -89,8 +92,8 @@ public class Bug13960Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -107,12 +110,13 @@ public class Bug13960Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
+    @Test
     public void testJSONValues() throws Throwable {
         {
             GetRequest request = new GetRequest(appointment);
@@ -139,7 +143,7 @@ public class Bug13960Test extends AbstractAJAXSession {
             assertEquals(JSONObject.NULL, array.get(recurrencePositionPos));
         }
         {
-            ListRequest request = new ListRequest(ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID()}), COLUMNS);
+            ListRequest request = new ListRequest(ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID() }), COLUMNS);
             CommonListResponse response = client.execute(request);
             JSONArray array = ((JSONArray) response.getData()).getJSONArray(0);
             int recurrenceIdPos = response.getColumnPos(Appointment.RECURRENCE_ID);

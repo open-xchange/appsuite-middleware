@@ -119,6 +119,7 @@ public final class Bug24876Test {
     /**
      * Test is disabled. Multiple servlet needs parameter module which conflicts with module parameter of attachment list request.
      */
+    @Test
     public void testMultipleList() throws Exception {
         ListResponse response = client.execute(MultipleRequest.create(new ListRequest(contact, new int[] { attachmentId }, new int[] { AttachmentField.CREATION_DATE }, TimeZones.UTC))).getResponse(0);
         assertEquals("attachment listing did not return the only created attachment", 1, response.getArray().length);

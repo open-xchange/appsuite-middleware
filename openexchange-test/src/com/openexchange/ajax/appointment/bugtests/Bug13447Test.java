@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -94,6 +95,7 @@ public class Bug13447Test extends AbstractAJAXSession {
         insertResponse.fillObject(appointment);
     }
 
+    @Test
     public void testBug13447() throws Exception {
         Appointment updateAppointment = new Appointment();
         updateAppointment.setObjectID(appointment.getObjectID());

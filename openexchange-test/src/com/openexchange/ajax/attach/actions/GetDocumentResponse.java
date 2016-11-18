@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GetDocumentResponse extends AbstractAJAXResponse {
-    
+
     private final int contentLength;
 
     /**

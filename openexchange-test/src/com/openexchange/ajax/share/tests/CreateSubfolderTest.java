@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -78,6 +79,7 @@ public class CreateSubfolderTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testCreateSubfolderWithAdminFlagRandomly() throws Exception {
         testCreateSubfolderWithAdminFlag(randomFolderAPI(), FolderObject.INFOSTORE);
     }

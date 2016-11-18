@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.group.actions.CreateRequest;
@@ -59,7 +60,6 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-
 
 /**
  * {@link AddGuestUserToGroupTest}
@@ -86,6 +86,7 @@ public class AddGuestUserToGroupTest extends ShareTest {
         super.tearDown();
     }
 
+    @Test
     public void testAddGuestToGroup() throws Exception {
         OCLGuestPermission perm = randomGuestPermission(FolderObject.INFOSTORE);
         FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), perm);

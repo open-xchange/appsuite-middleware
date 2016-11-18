@@ -91,8 +91,7 @@ public class Bug15291Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         group.setSimpleName("GroupForTestingBug15291");
@@ -109,8 +108,7 @@ public class Bug15291Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         client1.execute(new DeleteRequest(task));
         client1.execute(new com.openexchange.ajax.group.actions.DeleteRequest(group));
         super.tearDown();

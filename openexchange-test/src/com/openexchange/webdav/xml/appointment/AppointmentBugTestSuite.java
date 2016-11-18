@@ -54,16 +54,16 @@ import junit.framework.TestSuite;
 
 public class AppointmentBugTestSuite {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug4395Test.class);
-		tests.addTestSuite(Bug5933Test.class);
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(Bug4395Test.class);
+        tests.addTestSuite(Bug5933Test.class);
         tests.addTestSuite(Bug6056Test.class);
-		tests.addTestSuite(Bug6535Test.class);
-		tests.addTestSuite(Bug8123Test.class);
-		tests.addTestSuite(Bug8196Test.class);
-		tests.addTestSuite(Bug8453Test.class);
-		tests.addTestSuite(Bug6455Test.class);
+        tests.addTestSuite(Bug6535Test.class);
+        tests.addTestSuite(Bug8123Test.class);
+        tests.addTestSuite(Bug8196Test.class);
+        tests.addTestSuite(Bug8453Test.class);
+        tests.addTestSuite(Bug6455Test.class);
         tests.addTestSuite(Bug12494Test.class);
         tests.addTestSuite(Bug12553Test.class);
         tests.addTestSuite(Bug11835Test.class);
@@ -72,5 +72,5 @@ public class AppointmentBugTestSuite {
         tests.addTestSuite(Bug12050Test.class);
         tests.addTestSuite(Bug15491Test.class);
         return tests;
-	}
+    }
 }

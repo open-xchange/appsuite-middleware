@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.UpdateRequest;
@@ -68,6 +69,7 @@ public class Bug36943Test extends AbstractManagedContactTest {
         super();
     }
 
+    @Test
     public void testCreateWithAstralSymbols() throws Exception {
         Contact contact = generateContact("Pile of \uD83D\uDCA9 poo");
         InsertResponse insertResponse = getClient().execute(new InsertRequest(contact, false));
@@ -75,6 +77,7 @@ public class Bug36943Test extends AbstractManagedContactTest {
         assertEquals("Unexpected error code", "CON-0262", insertResponse.getException().getErrorCode());
     }
 
+    @Test
     public void testUpdateWithAstralSymbols() throws Exception {
         Contact contact = manager.newAction(generateContact());
         contact.setSurName("Pile of \uD83D\uDCA9 poo");

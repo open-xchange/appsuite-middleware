@@ -52,6 +52,7 @@ package com.openexchange.ajax.share.tests;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -63,7 +64,6 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 
-
 /**
  * {@link ResolveLegacyLinkTest}
  *
@@ -74,12 +74,14 @@ public class ResolveLegacyLinkTest extends ShareTest {
 
     /**
      * Initializes a new {@link ResolveLegacyLinkTest}.
+     * 
      * @param name
      */
     public ResolveLegacyLinkTest() {
         super();
     }
 
+    @Test
     public void testOpeningALegacyLinkWorks() throws Exception {
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest");
         int module = randomModule();

@@ -60,51 +60,47 @@ import com.openexchange.test.FolderTestManager;
 
 public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
-	protected ContactTestManager manager;
-	protected FolderTestManager folderManager;
-	protected int folderID;
+    protected ContactTestManager manager;
+    protected FolderTestManager folderManager;
+    protected int folderID;
 
-	public AbstractManagedContactTest() {
-		super();
-	}
+    public AbstractManagedContactTest() {
+        super();
+    }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
 
-	    manager = new ContactTestManager(getClient());
-	    manager.setFailOnError(false);
+        manager = new ContactTestManager(getClient());
+        manager.setFailOnError(false);
 
-	    folderManager = new FolderTestManager(getClient());
-	    folderManager.setFailOnError(false);
+        folderManager = new FolderTestManager(getClient());
+        folderManager.setFailOnError(false);
 
-	    UserValues values = getClient().getValues();
-	    FolderObject folder = folderManager.generatePublicFolder(
-	    		"ManagedContactTest_"+(new Date().getTime()),
-	    		Module.CONTACTS.getFolderConstant(),
-	    		values.getPrivateContactFolder(),
-	    		values.getUserId());
-	    folder = folderManager.insertFolderOnServer(folder);
-	    folderID = folder.getObjectID();
-	}
+        UserValues values = getClient().getValues();
+        FolderObject folder = folderManager.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        folder = folderManager.insertFolderOnServer(folder);
+        folderID = folder.getObjectID();
+    }
 
-	@Override
-	public void tearDown() throws Exception {
+    @Override
+    public void tearDown() throws Exception {
         manager.cleanUp();
-    	folderManager.cleanUp();
-	    super.tearDown();
-	}
+        folderManager.cleanUp();
+        super.tearDown();
+    }
 
-	protected Contact generateContact(String lastname) {
-	    Contact contact = new Contact();
-	    contact.setSurName(lastname);
-	    contact.setGivenName("Given name");
-	    contact.setDisplayName(contact.getSurName() +", "+contact.getGivenName());
-	    contact.setParentFolderID(folderID);
-	    return contact;
-	}
+    protected Contact generateContact(String lastname) {
+        Contact contact = new Contact();
+        contact.setSurName(lastname);
+        contact.setGivenName("Given name");
+        contact.setDisplayName(contact.getSurName() + ", " + contact.getGivenName());
+        contact.setParentFolderID(folderID);
+        return contact;
+    }
 
-	protected Contact generateContact() {
-	    return generateContact("Surname");
-	}
+    protected Contact generateContact() {
+        return generateContact("Surname");
+    }
 }

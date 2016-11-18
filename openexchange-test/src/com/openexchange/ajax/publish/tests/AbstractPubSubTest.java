@@ -54,6 +54,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -112,16 +114,16 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return infostoreMgr;
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         setFolderManager(new FolderTestManager(getClient()));
         setContactManager(new ContactTestManager(getClient()));
         setInfostoreManager(new InfostoreTestManager(getClient()));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         getContactManager().cleanUp();
         getInfostoreManager().cleanUp();
         getFolderManager().cleanUp();
@@ -160,7 +162,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         PublicationTarget target = generateMicroformatTarget(form, type);
 
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put("siteName", "publication-"+System.currentTimeMillis());
+        config.put("siteName", "publication-" + System.currentTimeMillis());
         config.put("protected", Boolean.valueOf(true));
 
         discovery.addTarget(target);
@@ -173,29 +175,28 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return pub;
     }
 
-    
-//      This does not work anymore, since com.openexchange.publish.online.infostore.document will only allow one document at a time and no folders
-//    
-//    protected Publication generateInfostoreFolderPublication(String folder, SimPublicationTargetDiscoveryService discovery) {
-//        DynamicFormDescription form = generateOXMFFormDescription();
-//
-//        PublicationTarget target = new PublicationTarget();
-//        target.setFormDescription(form);
-//        target.setId("com.openexchange.publish.online.infostore.document");
-//
-//        Map<String, Object> config = new HashMap<String, Object>();
-//        config.put("siteName", "publication-"+System.currentTimeMillis());
-//        config.put("protected", Boolean.valueOf(true));
-//
-//        discovery.addTarget(target);
-//
-//        Publication pub = new Publication();
-//        pub.setModule("infostore/object");
-//        pub.setEntityId(folder);
-//        pub.setTarget(target);
-//        pub.setConfiguration(config);
-//        return pub;
-//    }
+    //      This does not work anymore, since com.openexchange.publish.online.infostore.document will only allow one document at a time and no folders
+    //    
+    //    protected Publication generateInfostoreFolderPublication(String folder, SimPublicationTargetDiscoveryService discovery) {
+    //        DynamicFormDescription form = generateOXMFFormDescription();
+    //
+    //        PublicationTarget target = new PublicationTarget();
+    //        target.setFormDescription(form);
+    //        target.setId("com.openexchange.publish.online.infostore.document");
+    //
+    //        Map<String, Object> config = new HashMap<String, Object>();
+    //        config.put("siteName", "publication-"+System.currentTimeMillis());
+    //        config.put("protected", Boolean.valueOf(true));
+    //
+    //        discovery.addTarget(target);
+    //
+    //        Publication pub = new Publication();
+    //        pub.setModule("infostore/object");
+    //        pub.setEntityId(folder);
+    //        pub.setTarget(target);
+    //        pub.setConfiguration(config);
+    //        return pub;
+    //    }
 
     protected Publication generateInfostoreItemPublication(String objId, SimPublicationTargetDiscoveryService discovery) {
         DynamicFormDescription form = generateOXMFFormDescription();
@@ -205,7 +206,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         target.setId("com.openexchange.publish.online.infostore.document");
 
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put("siteName", "publication-"+System.currentTimeMillis());
+        config.put("siteName", "publication-" + System.currentTimeMillis());
         config.put("protected", Boolean.valueOf(true));
 
         discovery.addTarget(target);
@@ -242,11 +243,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     protected FolderObject createDefaultContactFolder() throws OXException, IOException, SAXException, JSONException {
-        FolderObject folder = getFolderManager().generatePublicFolder(
-            "pubsub default contact folder "+System.currentTimeMillis(),
-            FolderObject.CONTACT,
-            getClient().getValues().getPrivateContactFolder(),
-            getClient().getValues().getUserId());
+        FolderObject folder = getFolderManager().generatePublicFolder("pubsub default contact folder " + System.currentTimeMillis(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);
         return folder;
     }
@@ -256,16 +253,12 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     protected FolderObject createDefaultInfostoreFolder(String folderName) throws OXException, IOException, SAXException, JSONException {
-    	if (folderName == null) {
-    		folderName = "pubsub default infostore folder "+getName()+"-"+System.currentTimeMillis();
-    	}
-    	FolderObject folder = getFolderManager().generatePublicFolder(
-                folderName,
-                FolderObject.INFOSTORE,
-                getClient().getValues().getPrivateInfostoreFolder(),
-                getClient().getValues().getUserId());
-            getFolderManager().insertFolderOnServer(folder);
-            return folder;
+        if (folderName == null) {
+            folderName = "pubsub default infostore folder " + getName() + "-" + System.currentTimeMillis();
+        }
+        FolderObject folder = getFolderManager().generatePublicFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
+        getFolderManager().insertFolderOnServer(folder);
+        return folder;
     }
 
     protected Contact createDefaultContactFolderWithOneContact() throws OXException, IOException, SAXException, JSONException {
@@ -290,8 +283,8 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     public String getWebsite(String url) throws IOException {
 
         WebResponse resp = getResponse(url);
-        assertEquals("Should respond with status 200", 200 , resp.getResponseCode());
-        return resp .getText();
+        assertEquals("Should respond with status 200", 200, resp.getResponseCode());
+        return resp.getText();
     }
 
     public InputStream getDownload(String url) throws IOException {

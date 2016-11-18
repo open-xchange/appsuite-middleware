@@ -72,7 +72,6 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
 
-
 /**
  * {@link UpdatesTest}
  *
@@ -80,7 +79,7 @@ import com.openexchange.test.TestInit;
  */
 public class UpdatesTest extends AbstractAJAXSession {
 
-	protected static final int[] virtualFolders = {FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID};
+    protected static final int[] virtualFolders = { FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
     private FolderTestManager ftm;
     private FolderObject testFolder;
@@ -97,11 +96,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         super.setUp();
         itm = new InfostoreTestManager(client);
         ftm = new FolderTestManager(client);
-        testFolder = ftm.generatePrivateFolder(
-            UUIDs.getUnformattedString(UUID.randomUUID()),
-            FolderObject.INFOSTORE,
-            client.getValues().getPrivateInfostoreFolder(),
-            client.getValues().getUserId());
+        testFolder = ftm.generatePrivateFolder(UUIDs.getUnformattedString(UUID.randomUUID()), FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
         ftm.insertFolderOnServer(testFolder);
 
         knowledgeDoc = new DefaultFile();
@@ -125,12 +120,9 @@ public class UpdatesTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testBasic() throws Exception {
-        AllInfostoreRequest allReq = new AllInfostoreRequest(
-            testFolder.getObjectID(),
-            new int[] { Metadata.ID, Metadata.FOLDER_ID },
-            Metadata.ID,
-            Order.ASCENDING);
+        AllInfostoreRequest allReq = new AllInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.FOLDER_ID }, Metadata.ID, Order.ASCENDING);
         AbstractColumnsResponse allResp = client.execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
 
@@ -139,14 +131,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         updateDoc.setTitle("test knowledge updated");
         itm.updateAction(updateDoc, new File.Field[] { File.Field.TITLE }, timestamp);
 
-        UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
-            testFolder.getObjectID(),
-            new int[] { Metadata.ID, Metadata.TITLE },
-            Metadata.ID,
-            Order.ASCENDING,
-            Ignore.NONE,
-            timestamp,
-            true);
+        UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.TITLE }, Metadata.ID, Order.ASCENDING, Ignore.NONE, timestamp, true);
         UpdatesInfostoreResponse resp = client.execute(req);
         JSONArray modifiedValues = resp.getNewAndModified().iterator().next();
         assertEquals("Wrong number of modified documents", 1, resp.getNewAndModified().size());
@@ -158,14 +143,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         itm.deleteAction(knowledgeDoc.getId(), String.valueOf(testFolder.getObjectID()), timestamp);
         itm.deleteAction(urlDoc.getId(), String.valueOf(testFolder.getObjectID()), timestamp);
 
-        req = new UpdatesInfostoreRequest(
-            testFolder.getObjectID(),
-            new int[] { Metadata.ID },
-            Metadata.ID,
-            Order.ASCENDING,
-            Ignore.NONE,
-            timestamp,
-            true);
+        req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID }, Metadata.ID, Order.ASCENDING, Ignore.NONE, timestamp, true);
         resp = client.execute(req);
         assertEquals("Wrong number of modified documents", 0, resp.getNewAndModified().size());
         assertEquals("Wrong number of deleted documents", 2, resp.getDeleted().size());
@@ -178,12 +156,9 @@ public class UpdatesTest extends AbstractAJAXSession {
         assertEquals("Wrong documents have been deleted", 2, found);
     }
 
+    @Test
     public void testRemovedVersionForcesUpdate() throws Exception {
-    	AllInfostoreRequest allReq = new AllInfostoreRequest(
-                testFolder.getObjectID(),
-                new int[] { Metadata.ID, Metadata.FOLDER_ID },
-                Metadata.ID,
-                Order.ASCENDING);
+        AllInfostoreRequest allReq = new AllInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.FOLDER_ID }, Metadata.ID, Order.ASCENDING);
         AbstractColumnsResponse allResp = client.execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
 
@@ -202,90 +177,58 @@ public class UpdatesTest extends AbstractAJAXSession {
         itm.updateAction(updateDoc, upload, new File.Field[] { File.Field.VERSION_COMMENT }, timestamp);
         timestamp = itm.getLastResponse().getTimestamp();
 
-        DetachInfostoreRequest detachReq = new DetachInfostoreRequest(
-        		updateDoc.getId(),
-        		testFolder.getObjectID(),
-        		Collections.singleton("3"),
-        		timestamp);
+        DetachInfostoreRequest detachReq = new DetachInfostoreRequest(updateDoc.getId(), testFolder.getObjectID(), Collections.singleton("3"), timestamp);
         DetachInfostoreResponse detachResp = client.execute(detachReq);
         assertEquals("Version was not deleted", 0, detachResp.getNotDeleted().length);
 
-        UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
-                testFolder.getObjectID(),
-                new int[] { Metadata.TITLE, Metadata.DESCRIPTION },
-                Metadata.ID,
-                Order.ASCENDING,
-                Ignore.NONE,
-                timestamp,
-                true);
+        UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.TITLE, Metadata.DESCRIPTION }, Metadata.ID, Order.ASCENDING, Ignore.NONE, timestamp, true);
         UpdatesInfostoreResponse resp = client.execute(req);
         assertEquals("Wrong number of modified documents", 1, resp.getNewAndModified().size());
     }
 
     //Bug 4269
-  	public void testVirtualFolder() throws Exception {
-          for(int folderId : virtualFolders) {
-              virtualFolderTest(folderId);
-          }
-  	}
+    public void testVirtualFolder() throws Exception {
+        for (int folderId : virtualFolders) {
+            virtualFolderTest(folderId);
+        }
+    }
 
     //Bug 4269
     @Test
-  	public void virtualFolderTest(int folderId) throws Exception {
-  		UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
-  				folderId,
-                new int[] { Metadata.ID },
-                Metadata.ID,
-                Order.ASCENDING,
-                Ignore.NONE,
-                new Date(0L),
-                true);
+    public void virtualFolderTest(int folderId) throws Exception {
+        UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(folderId, new int[] { Metadata.ID }, Metadata.ID, Order.ASCENDING, Ignore.NONE, new Date(0L), true);
         UpdatesInfostoreResponse resp = client.execute(req);
         assertEquals("Wrong number of modified documents", 0, resp.getNewAndModified().size() + resp.getDeleted().size());
-  	}
+    }
 
-    // Node 2652
+    // Node 2652    @Test
     public void testLastModifiedUTC() throws Exception {
-  		UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
-  				testFolder.getObjectID(),
-                new int[] { Metadata.LAST_MODIFIED_UTC },
-                Metadata.LAST_MODIFIED_UTC,
-                Order.ASCENDING,
-                Ignore.NONE,
-                new Date(0L),
-                true);
+        UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.LAST_MODIFIED_UTC }, Metadata.LAST_MODIFIED_UTC, Order.ASCENDING, Ignore.NONE, new Date(0L), true);
         UpdatesInfostoreResponse resp = client.execute(req);
         assertTrue("Wrong number of modified documents", resp.getNewAndModified().size() + resp.getDeleted().size() > 0);
     }
 
     // Bug 12427
-	public void testNumberOfVersions() throws Exception {
-	    java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
-		DefaultFile updateDoc = new DefaultFile();
+    public void testNumberOfVersions() throws Exception {
+        java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        DefaultFile updateDoc = new DefaultFile();
         updateDoc.setId(knowledgeDoc.getId());
         updateDoc.setDescription("New description");
-		itm.updateAction(updateDoc, upload, new File.Field[] { File.Field.DESCRIPTION }, new Date(Long.MAX_VALUE));
+        itm.updateAction(updateDoc, upload, new File.Field[] { File.Field.DESCRIPTION }, new Date(Long.MAX_VALUE));
 
-		UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
-  				testFolder.getObjectID(),
-                new int[] { Metadata.ID, Metadata.NUMBER_OF_VERSIONS },
-                Metadata.ID,
-                Order.ASCENDING,
-                Ignore.NONE,
-                new Date(0L),
-                true);
+        UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.NUMBER_OF_VERSIONS }, Metadata.ID, Order.ASCENDING, Ignore.NONE, new Date(0L), true);
         UpdatesInfostoreResponse resp = client.execute(req);
 
         boolean found = false;
         for (JSONArray modified : resp.getNewAndModified()) {
-        	String id = modified.getString(0);
-        	int numberOfVersions = modified.getInt(1);
-        	if (id.equals(updateDoc.getId())) {
-        		assertEquals(1, numberOfVersions);
-        		found = true;
-        	}
+            String id = modified.getString(0);
+            int numberOfVersions = modified.getInt(1);
+            if (id.equals(updateDoc.getId())) {
+                assertEquals(1, numberOfVersions);
+                found = true;
+            }
         }
         assertTrue(found);
-	}
+    }
 
 }

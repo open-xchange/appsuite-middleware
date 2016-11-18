@@ -53,6 +53,7 @@ import static com.openexchange.ajax.folder.Create.ocl;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
@@ -106,26 +107,10 @@ public class ConfirmOthers extends AbstractAJAXSession {
         folder = new FolderObject();
         folder.setObjectID(clientA.getValues().getPrivateAppointmentFolder());
         folder.setLastModified(new Date(Long.MAX_VALUE));
-//        folder.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-//        folder.setModule(FolderObject.CALENDAR);
-//        folder.setType(FolderObject.PRIVATE);
-        folder.setPermissionsAsArray(new OCLPermission[] {
-            ocl(
-                userIdA,
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                userIdB,
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION) });
+        //        folder.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        //        folder.setModule(FolderObject.CALENDAR);
+        //        folder.setType(FolderObject.PRIVATE);
+        folder.setPermissionsAsArray(new OCLPermission[] { ocl(userIdA, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(userIdB, false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
         Participant external = new ExternalUserParticipant("test@example.invalid");
 
@@ -152,6 +137,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testConfirmOthersAllowed() throws Exception {
         clientB.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, appointment.getLastModified(), true));
         GetResponse getResponse = clientA.execute(new GetRequest(folder.getObjectID(), appointment.getObjectID()));
@@ -165,6 +151,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testConfirmOthersNotAllowed() throws Exception {
         clientC.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, appointment.getLastModified(), false));
         GetResponse getResponse = clientA.execute(new GetRequest(folder.getObjectID(), appointment.getObjectID()));
@@ -178,6 +165,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testConfirmExternal() throws Exception {
         clientC.execute(new ConfirmRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), Appointment.TENTATIVE, "maybe", "test@example.invalid", appointment.getLastModified(), false));
         GetResponse getResponse = clientC.execute(new GetRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID()));

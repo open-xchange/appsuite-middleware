@@ -53,6 +53,7 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceAllRequest;
@@ -83,6 +84,7 @@ public final class ResourceListAJAXTest extends AbstractResourceTest {
     /**
      * Tests the <code>action=list</code>
      */
+    @Test
     public void testList() throws OXException, JSONException, IOException, SAXException {
         int id = -1;
         try {
@@ -99,22 +101,20 @@ public final class ResourceListAJAXTest extends AbstractResourceTest {
             /*
              * Perform all request
              */
-            final ResourceAllResponse allResponse = Executor.execute(getSession(),
-                    new ResourceAllRequest(true));
+            final ResourceAllResponse allResponse = Executor.execute(getSession(), new ResourceAllRequest(true));
             final int[] ids = allResponse.getIDs();
             assertTrue("All request failed", ids != null);
 
             /*
              * Perform list request
              */
-            final ResourceListResponse listResponse = Executor.execute(getSession(),
-                    new ResourceListRequest(ids, true));
+            final ResourceListResponse listResponse = Executor.execute(getSession(), new ResourceListRequest(ids, true));
             final Resource[] resources = listResponse.getResources();
 
             assertTrue("List failed", resources != null && resources.length == ids.length);
 
             JSONArray arr = (JSONArray) listResponse.getData();
-            for(int i = 0, size = arr.length(); i < size; i++) {
+            for (int i = 0, size = arr.length(); i < size; i++) {
                 JSONObject res = arr.optJSONObject(i);
                 assertNotNull(res);
                 assertTrue(res.has("last_modified_utc"));

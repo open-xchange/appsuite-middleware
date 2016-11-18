@@ -71,8 +71,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxS
      *
      * @param name
      */
-    protected AbstractConfigAwareAjaxSession() {
-    }
+    protected AbstractConfigAwareAjaxSession() {}
 
     JSONObject oldData;
 

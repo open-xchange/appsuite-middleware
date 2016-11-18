@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -91,6 +92,7 @@ public class Bug37198Test extends AbstractAJAXSession {
         app.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug37198() throws Exception {
         ctm.setFailOnError(true);
         ctm.insert(app);

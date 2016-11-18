@@ -50,6 +50,9 @@
 package com.openexchange.ajax.config;
 
 import org.apache.http.params.HttpConnectionParams;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -75,8 +78,8 @@ public final class Bug21619Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         origValue = client.execute(new GetRequest(Tree.TaskUIConfiguration)).getString();
@@ -85,12 +88,13 @@ public final class Bug21619Test extends AbstractAJAXSession {
         }
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new SetRequest(Tree.TaskUIConfiguration, origValue));
         super.tearDown();
     }
 
+    @Test
     public void testForBug() throws InterruptedException {
         for (int i = 0; i < writers.length; i++) {
             threads[i] = new Thread(writers[i]);
@@ -111,17 +115,22 @@ public final class Bug21619Test extends AbstractAJAXSession {
     }
 
     private static class ValueWriter implements Runnable {
+
         private boolean run = true;
         private Throwable t;
+
         ValueWriter() {
             super();
         }
+
         public void stop() {
             run = false;
         }
+
         public Throwable getThrowable() {
             return t;
         }
+
         @Override
         public void run() {
             AJAXClient client = null;

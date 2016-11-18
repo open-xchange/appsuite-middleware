@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link StartSMTPRequest}
  *
@@ -102,16 +101,13 @@ public class StartSMTPRequest implements AJAXRequest<OAuthTestResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "startSMTP",
-            "updateAccount", Boolean.toString(updateAccount),
-            "updateNoReplyForContext", Integer.toString(updateNoReplyForContext)
-            ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "startSMTP", "updateAccount", Boolean.toString(updateAccount), "updateNoReplyForContext", Integer.toString(updateNoReplyForContext)).toArray();
     }
 
     @Override
     public AbstractAJAXParser<? extends OAuthTestResponse> getParser() {
         return new AbstractAJAXParser<OAuthTestResponse>(failOnError) {
+
             @Override
             protected OAuthTestResponse createResponse(Response response) throws JSONException {
                 return new OAuthTestResponse(response);

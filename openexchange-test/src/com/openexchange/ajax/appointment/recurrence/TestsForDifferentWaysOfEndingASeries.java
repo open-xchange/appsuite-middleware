@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -67,6 +68,7 @@ public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest
         super();
     }
 
+    @Test
     public void testShouldNotSetUntilIfOccurrencesIsUsed() throws Exception {
         Appointment app = generateDailyAppointment();
         Changes changes = new Changes();
@@ -81,6 +83,7 @@ public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldNotSetOccurrencesIfUntilIsUsed() throws Exception {
         Appointment app = generateDailyAppointment();
         Changes changes = new Changes();
@@ -95,7 +98,7 @@ public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
-
+    @Test
     public void testShouldNotSetOccurrencesIfNothingIsSet() throws Exception {
         Appointment app = generateDailyAppointment();
         Changes changes = new Changes();

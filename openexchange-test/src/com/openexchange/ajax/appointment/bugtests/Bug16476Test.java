@@ -52,6 +52,9 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -89,27 +92,13 @@ public class Bug16476Test extends AbstractAJAXSession {
 
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
         clientB = new AJAXClient(User.User2);
 
-        folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "Folder to test bug 16476",
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(clientA.getValues().getUserId(), false, true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(clientB.getValues().getUserId(), false, false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 16476", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
@@ -123,6 +112,7 @@ public class Bug16476Test extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug16476() throws Exception {
         InsertRequest insert = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientA.execute(insert);
@@ -134,8 +124,8 @@ public class Bug16476Test extends AbstractAJAXSession {
         assertTrue("No results expected", jsonArray.length() == 0);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         clientA.execute(new DeleteRequest(appointment));
         clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
         super.tearDown();

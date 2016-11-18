@@ -52,6 +52,7 @@ package com.openexchange.ajax.task;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInBodyRequest;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInParametersRequest;
@@ -60,7 +61,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.test.TaskTestManager;
-
 
 /**
  * {@link ConfirmTest}
@@ -79,7 +79,7 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
     }
 
     @Override
-    public void setUp() throws Exception{
+    public void setUp() throws Exception {
         super.setUp();
         manager = new TaskTestManager(getClient());
         task = getNewTask(getName());
@@ -88,7 +88,6 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
         task.addParticipant(new UserParticipant(userId));
 
         manager.insertTaskOnServer(task);
-
 
     }
 
@@ -99,6 +98,7 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
         super.tearDown();
     }
 
+    @Test
     public void testConfirmWithTaskInParameters() throws OXException, IOException, SAXException, JSONException {
         ConfirmWithTaskInParametersRequest request = new ConfirmWithTaskInParametersRequest(task, Task.ACCEPT, "Confirmanize!");
         getClient().execute(request);
@@ -106,6 +106,7 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
         checkTaskOnServer(Task.ACCEPT, "Confirmanize!");
     }
 
+    @Test
     public void testConfirmWithTaskInBody() throws OXException, IOException, SAXException, JSONException {
         ConfirmWithTaskInBodyRequest request = new ConfirmWithTaskInBodyRequest(task, Task.ACCEPT, "Confirmanize!");
         getClient().execute(request);
@@ -117,10 +118,10 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
         Task reloaded = manager.getTaskFromServer(task);
 
         boolean found = false;
-        for(UserParticipant user : reloaded.getUsers()) {
-            if(user.getIdentifier() == userId) {
+        for (UserParticipant user : reloaded.getUsers()) {
+            if (user.getIdentifier() == userId) {
                 assertEquals(confirmmation, user.getConfirm());
-                assertEquals(message , user.getConfirmMessage());
+                assertEquals(message, user.getConfirmMessage());
                 found = true;
             }
         }

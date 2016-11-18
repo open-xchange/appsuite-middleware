@@ -51,6 +51,8 @@ package com.openexchange.ajax.framework;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient.User;
 
 /**
@@ -59,6 +61,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
+@RunWith(ConcurrentTestRunner.class)
 public abstract class AbstractJUnit4AjaxSession {
 
     protected AJAXClient client;

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -64,6 +65,7 @@ public class Bug11835Test extends AppointmentTest {
         super();
     }
 
+    @Test
     public void testBug() throws Throwable {
         int objectId = -1;
 

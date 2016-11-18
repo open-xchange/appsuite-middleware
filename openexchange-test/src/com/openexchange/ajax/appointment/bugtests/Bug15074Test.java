@@ -52,6 +52,9 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -80,10 +83,11 @@ public class Bug15074Test extends AbstractAJAXSession {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AbstractAJAXSession#setUp()
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         appointment = new Appointment();
@@ -105,32 +109,29 @@ public class Bug15074Test extends AbstractAJAXSession {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AbstractAJAXSession#tearDown()
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
         getClient().execute(appointmentDeleteRequest);
 
         super.tearDown();
     }
 
+    @Test
     public void testBug() throws Exception {
 
         int[] columns = new int[] { Appointment.OBJECT_ID };
 
-        AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(),
-            columns,
-            D("01.12.2009 00:00", TimeZone.getTimeZone("UTC")),
-            D("01.01.2010 00:00", TimeZone.getTimeZone("UTC")),
-            TimeZone.getTimeZone("UTC"),
-            false);
+        AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), columns, D("01.12.2009 00:00", TimeZone.getTimeZone("UTC")), D("01.01.2010 00:00", TimeZone.getTimeZone("UTC")), TimeZone.getTimeZone("UTC"), false);
 
         CommonAllResponse allResponse = client.execute(allRequest);
         Object[][] objects = allResponse.getArray();
         boolean found = false;
         for (Object[] object : objects) {
-            if ((Integer)object[0] == appointment.getObjectID()) {
+            if ((Integer) object[0] == appointment.getObjectID()) {
                 found = true;
                 break;
             }

@@ -51,7 +51,7 @@ package com.openexchange.ajax.session;
 
 import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static com.openexchange.ajax.framework.AJAXClient.User.User2;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
@@ -60,6 +60,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import junit.framework.TestCase;
 
 /**
  * Checks if the server detects correctly a duplicate used authId.
@@ -114,6 +115,7 @@ public class DuplicateAuthIdTest extends TestCase {
         super.tearDown();
     }
 
+    @Test
     public void testDuplicateAuthId() throws Throwable {
         LoginResponse response = client2.execute(new LoginRequest(login2, password2, sameAuthId, LoginTest.class.getName(), "6.15.0", false));
         if (!response.hasError()) {

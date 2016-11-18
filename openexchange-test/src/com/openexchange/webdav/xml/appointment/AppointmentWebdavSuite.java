@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.webdav.xml.appointment.recurrence.RecurrenceTestSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import com.openexchange.webdav.xml.appointment.recurrence.RecurrenceTestSuite;
 
 public class AppointmentWebdavSuite {
 
@@ -61,7 +61,7 @@ public class AppointmentWebdavSuite {
         tests.addTestSuite(DeleteTest.class);
         tests.addTestSuite(ListTest.class);
         tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(UpdateTest.class );
+        tests.addTestSuite(UpdateTest.class);
         tests.addTest(RecurrenceTestSuite.suite());
         tests.addTest(AppointmentBugTestSuite.suite());
         return tests;

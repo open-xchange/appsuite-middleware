@@ -1,6 +1,10 @@
+
 package com.openexchange.ajax.folder.api2;
 
 import java.util.ArrayList;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -12,7 +16,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 
-
 public class ChangePermissionsTest extends AbstractAJAXSession {
 
     private AJAXClient client2;
@@ -22,12 +25,8 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
     private FolderTestManager ftm2;
     private String folderName;
 
-    public ChangePermissionsTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         folderName = "ChangePermissionsTest Folder" + System.currentTimeMillis();
         client2 = new AJAXClient(User.User2);
@@ -35,7 +34,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
     }
 
     public void notestChangePermissionsSuccess() throws Exception {
-        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), new int[] {client.getValues().getUserId()});
+        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), new int[] { client.getValues().getUserId() });
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
         final InsertResponse insertFolderResp = client.execute(insertFolderReq);
 
@@ -49,11 +48,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
                 permissions.setEntity(client.getValues().getUserId());
                 permissions.setGroupPermission(false);
                 permissions.setFolderAdmin(true);
-                permissions.setAllPermission(
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION);
+                permissions.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 allPermissions.add(permissions);
             }
             {
@@ -61,11 +56,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
                 permissions.setEntity(client2.getValues().getUserId());
                 permissions.setGroupPermission(false);
                 permissions.setFolderAdmin(false);
-                permissions.setAllPermission(
-                    OCLPermission.READ_FOLDER,
-                    OCLPermission.READ_ALL_OBJECTS,
-                    OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS);
+                permissions.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
                 allPermissions.add(permissions);
             }
             folder.setPermissions(allPermissions);
@@ -75,8 +66,9 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
         assertTrue("Unexpected number of permissions", 2 == folder.getNonSystemPermissionsAsArray().length);
     }
 
+    @Test
     public void testChangePermissionsFail() throws Exception {
-        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, client.getValues().getInfostoreTrashFolder(), new int[] {client.getValues().getUserId()});
+        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, client.getValues().getInfostoreTrashFolder(), new int[] { client.getValues().getUserId() });
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
         final InsertResponse insertFolderResp = client.execute(insertFolderReq);
 
@@ -90,11 +82,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
                 permissions.setEntity(client.getValues().getUserId());
                 permissions.setGroupPermission(false);
                 permissions.setFolderAdmin(true);
-                permissions.setAllPermission(
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION);
+                permissions.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 allPermissions.add(permissions);
             }
             {
@@ -102,11 +90,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
                 permissions.setEntity(client2.getValues().getUserId());
                 permissions.setGroupPermission(false);
                 permissions.setFolderAdmin(false);
-                permissions.setAllPermission(
-                    OCLPermission.READ_FOLDER,
-                    OCLPermission.READ_ALL_OBJECTS,
-                    OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS);
+                permissions.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
                 allPermissions.add(permissions);
             }
             folder.setPermissions(allPermissions);
@@ -117,8 +101,8 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
         assertNotNull("Updating trash folder permissions not denied, but should.", lastResponse.getException());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         ftm1.deleteFolderOnServer(folder);
         client2.logout();
 

@@ -169,7 +169,7 @@ public abstract class ReminderTest extends AbstractAJAXTest {
             return failedObjects;
         }
 
-        return new int[] { };
+        return new int[] {};
     }
 
     public static void compareReminder(final ReminderObject reminderObj1, final ReminderObject reminderObj2) throws Exception {

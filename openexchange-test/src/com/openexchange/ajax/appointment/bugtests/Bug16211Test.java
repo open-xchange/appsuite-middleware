@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -113,37 +114,21 @@ public class Bug16211Test extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         calendar = TimeTools.createCalendar(tz);
 
-        sharedAppointmentFolder = Create.createPublicFolder(
-            client2,
-            "Bug16211PublicFolder" + System.currentTimeMillis(),
-            FolderObject.CALENDAR);
-        FolderTools.shareFolder(
-            client2,
-            EnumAPI.OX_NEW,
-            sharedAppointmentFolder.getObjectID(),
-            client.getValues().getUserId(),
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR);
+        FolderTools.shareFolder(client2, EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), client.getValues().getUserId(), OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
         appointment = createAppointment();
 
         // Create and insert the personal folder
-        personalAppointmentFolder = Create.createPrivateFolder(
-            "Bug16211PersonalFolder",
-            FolderObject.CALENDAR,
-            client.getValues().getUserId());
+        personalAppointmentFolder = Create.createPrivateFolder("Bug16211PersonalFolder", FolderObject.CALENDAR, client.getValues().getUserId());
 
         personalAppointmentFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        final com.openexchange.ajax.folder.actions.InsertRequest insertFolderReq = new com.openexchange.ajax.folder.actions.InsertRequest(
-            EnumAPI.OX_NEW,
-            personalAppointmentFolder,
-            false);
+        final com.openexchange.ajax.folder.actions.InsertRequest insertFolderReq = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, personalAppointmentFolder, false);
         final InsertResponse insertFolderResp = client.execute(insertFolderReq);
         insertFolderResp.fillObject(personalAppointmentFolder);
     }
 
+    @Test
     public void testMoveToPersonalFolder() throws Exception {
         // Use this to test if reminder of the moving user also has been updated. See Bug 16358
         // -------------
@@ -187,13 +172,9 @@ public class Bug16211Test extends AbstractAJAXSession {
             if (rem.getTargetId() == appointment.getObjectID()) {
                 final int uid = rem.getUser();
                 if (uid == client2.getValues().getUserId()) {
-                    assertTrue(
-                        "Reminder is incorrect after move for User " + uid + ".",
-                        rem.getFolder() == client2.getValues().getPrivateAppointmentFolder());
+                    assertTrue("Reminder is incorrect after move for User " + uid + ".", rem.getFolder() == client2.getValues().getPrivateAppointmentFolder());
                 } else if (uid == client3.getValues().getUserId()) {
-                    assertTrue(
-                        "Reminder is incorrect after move for User " + uid + ".",
-                        rem.getFolder() == client3.getValues().getPrivateAppointmentFolder());
+                    assertTrue("Reminder is incorrect after move for User " + uid + ".", rem.getFolder() == client3.getValues().getPrivateAppointmentFolder());
                 }
             }
         }

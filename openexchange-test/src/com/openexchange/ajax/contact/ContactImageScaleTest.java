@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import java.io.FileInputStream;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.configuration.MailConfig;
@@ -63,15 +64,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class ContactImageScaleTest extends AbstractContactTest {
 
-    public ContactImageScaleTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testCreateContact() throws Exception {
         FileInputStream input = null;
         try {
@@ -101,6 +94,7 @@ public class ContactImageScaleTest extends AbstractContactTest {
         }
     }
 
+    @Test
     public void testUpdateContact() throws Exception {
         FileInputStream input = null;
         try {

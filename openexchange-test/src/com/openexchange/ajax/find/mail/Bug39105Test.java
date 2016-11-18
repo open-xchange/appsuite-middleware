@@ -46,12 +46,15 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.find.mail;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
@@ -78,8 +81,8 @@ public class Bug39105Test extends AbstractMailFindTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         String inboxFolder = client.getValues().getInboxFolder();
         String folderName = "Bug39105Test_" + System.currentTimeMillis();
@@ -90,37 +93,13 @@ public class Bug39105Test extends AbstractMailFindTest {
         testFolder = folderManager.insertFolderOnServer(testFolder);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testReturnCustomHeader() throws Exception {
-        String mail = "From: #FROM#\n" +
-            "To: #TO#\n" +
-            "CC: #TO#\n" +
-            "BCC: #TO#\n" +
-            "Received: from ox.open-xchange.com;#DATE#\n" +
-            "Date: #DATE#\n" +
-            "Subject: #SUBJECT#\n" +
-            "Disposition-Notification-To: #FROM#\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "X-OX-Test-Header: #HEADER_VALUE#\n" +
-            "\n" +
-            "Content\n" +
-            "#BODY#\n";
+        String mail = "From: #FROM#\n" + "To: #TO#\n" + "CC: #TO#\n" + "BCC: #TO#\n" + "Received: from ox.open-xchange.com;#DATE#\n" + "Date: #DATE#\n" + "Subject: #SUBJECT#\n" + "Disposition-Notification-To: #FROM#\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "X-OX-Test-Header: #HEADER_VALUE#\n" + "\n" + "Content\n" + "#BODY#\n";
 
         String header = randomUID();
         String subject = randomUID();
-        mail = mail
-            .replaceAll("#FROM#", defaultAddress)
-            .replaceAll("#TO#", defaultAddress)
-            .replaceAll("#DATE#", DateUtils.toStringRFC822(new Date(), TimeZones.UTC))
-            .replaceAll("#SUBJECT#", subject)
-            .replaceAll("#BODY#", randomUID())
-            .replaceAll("#HEADER_VALUE#", header);
+        mail = mail.replaceAll("#FROM#", defaultAddress).replaceAll("#TO#", defaultAddress).replaceAll("#DATE#", DateUtils.toStringRFC822(new Date(), TimeZones.UTC)).replaceAll("#SUBJECT#", subject).replaceAll("#BODY#", randomUID()).replaceAll("#HEADER_VALUE#", header);
         ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, true, true, new ByteArrayInputStream[] { mailStream });
         ImportMailResponse response = client.execute(request);
@@ -140,7 +119,7 @@ public class Bug39105Test extends AbstractMailFindTest {
 
         PropDocument foundMail = findByProperty(propDocuments, "id", mailIds[0][1]);
         assertNotNull("Mail not found", foundMail);
-        assertEquals("Header not set", header,  foundMail.getProps().get("X-OX-Test-Header"));
+        assertEquals("Header not set", header, foundMail.getProps().get("X-OX-Test-Header"));
     }
 
 }

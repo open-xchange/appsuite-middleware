@@ -60,24 +60,24 @@ import junit.framework.TestSuite;
  */
 public final class NetsolMailTestSuite extends TestSuite {
 
-	/**
-	 * Initializes a new {@link NetsolMailTestSuite}
-	 */
-	public NetsolMailTestSuite() {
-		super();
-	}
+    /**
+     * Initializes a new {@link NetsolMailTestSuite}
+     */
+    public NetsolMailTestSuite() {
+        super();
+    }
 
-	public static Test suite() {
-		final TestSuite mailSuite = new TestSuite();
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageDelete.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageOpen.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInbox.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestEmptyTrash.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSend.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInboxSort.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSendAttachment.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestViewFolders.class);
+    public static Test suite() {
+        final TestSuite mailSuite = new TestSuite();
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageDelete.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageOpen.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInbox.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestEmptyTrash.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSend.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInboxSort.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSendAttachment.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestViewFolders.class);
 
-		return mailSuite;
-	}
+        return mailSuite;
+    }
 }

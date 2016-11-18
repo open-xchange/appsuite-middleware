@@ -50,11 +50,11 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
-
 
 /**
  * These tests document a strange behaviour of the HTTP API: If you ask
@@ -72,7 +72,6 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
     public TestsForUsingRecurrencePositionToGetChangeExceptions() {
         super();
     }
-
 
     @Before
     public void setUp() throws Exception {
@@ -93,7 +92,8 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
 
     }
 
-    public void testShouldFindUnchangedFirstOccurrence() throws OXException{
+    @Test
+    public void testShouldFindUnchangedFirstOccurrence() throws OXException {
         Appointment actual = calendarManager.get(folder.getObjectID(), app.getObjectID(), 1);
 
         Expectations expectations = new Expectations();
@@ -103,7 +103,8 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
         expectations.verify(actual);
     }
 
-    public void testShouldFindSomethingElseAsSecondOccurrenceButDoesNot() throws OXException{
+    @Test
+    public void testShouldFindSomethingElseAsSecondOccurrenceButDoesNot() throws OXException {
         Appointment actual = calendarManager.get(folder.getObjectID(), app.getObjectID(), 2);
 
         Expectations expectations = new Expectations();
@@ -113,7 +114,8 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
         expectations.verify(actual);
     }
 
-    public void testShouldFindUnchangedLastOccurrence() throws OXException{
+    @Test
+    public void testShouldFindUnchangedLastOccurrence() throws OXException {
         Appointment actual = calendarManager.get(folder.getObjectID(), app.getObjectID(), 3);
 
         Expectations expectations = new Expectations();

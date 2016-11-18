@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
@@ -73,7 +74,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 
-
 /**
  * US 1601 on server side (TA1698)
  *
@@ -84,7 +84,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     /**
      *
      */
-    private static final int[] COLUMNS = new int[]{Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE};
+    private static final int[] COLUMNS = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };
     private AJAXClient client1;
     private AJAXClient client2;
     private FolderObject sharedFolder;
@@ -111,7 +111,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         client2 = new AJAXClient(user2);
         UserValues values = client1.getValues();
         int module = Module.CALENDAR.getFolderConstant();
-        sharedFolder = folderManager.generateSharedFolder("us1601_shared_"+(new Date().getTime()), module, values.getPrivateAppointmentFolder(), new int[]{values.getUserId(), client2.getValues().getUserId()});
+        sharedFolder = folderManager.generateSharedFolder("us1601_shared_" + (new Date().getTime()), module, values.getPrivateAppointmentFolder(), new int[] { values.getUserId(), client2.getValues().getUserId() });
         folderManager.insertFolderOnServer(sharedFolder);
 
         start = D("13.01.2010 07:00");
@@ -140,7 +140,8 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         publicAppointmentID = publicAppointment.getObjectID();
     }
 
-    public void testShouldFindABlockForAPrivateAppointmentViaAll() throws Exception{
+    @Test
+    public void testShouldFindABlockForAPrivateAppointmentViaAll() throws Exception {
         CommonAllResponse response = client2.execute(new AllRequest(sharedFolder.getObjectID(), COLUMNS, startRange, endRange, TimeZone.getDefault(), true, true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
@@ -153,8 +154,9 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         assertFalse("None of the two should be the private title", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));
     }
 
-    public void testShouldFindABlockForAPrivateAppointmentViaList() throws Exception{
-        CommonListResponse response = client2.execute(new ListRequest(ListIDs.l(new int[]{sharedFolder.getObjectID(),publicAppointmentID},new int[]{sharedFolder.getObjectID(),privateAppointmentID}), COLUMNS, true));
+    @Test
+    public void testShouldFindABlockForAPrivateAppointmentViaList() throws Exception {
+        CommonListResponse response = client2.execute(new ListRequest(ListIDs.l(new int[] { sharedFolder.getObjectID(), publicAppointmentID }, new int[] { sharedFolder.getObjectID(), privateAppointmentID }), COLUMNS, true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
         assertEquals("Should find two elements, a private and a public one", 2, objects.length);
@@ -166,8 +168,9 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         assertFalse("None of the two should be the private title", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));
     }
 
-    public void testShouldFindABlockForAPrivateAppointmentViaUpdates() throws Exception{
-        AppointmentUpdatesResponse response = client2.execute(new UpdatesRequest(sharedFolder.getObjectID(),COLUMNS,new Date(privateAppointment.getLastModified().getTime() - 1),true, true));
+    @Test
+    public void testShouldFindABlockForAPrivateAppointmentViaUpdates() throws Exception {
+        AppointmentUpdatesResponse response = client2.execute(new UpdatesRequest(sharedFolder.getObjectID(), COLUMNS, new Date(privateAppointment.getLastModified().getTime() - 1), true, true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
         assertEquals("Should find two elements, a private and a public one", 2, objects.length);
@@ -179,8 +182,9 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         assertFalse("None of the two should be the private title", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));
     }
 
-    public void testShouldNotAnonymizeOwnPrivateAppointments() throws OXException, IOException, SAXException, JSONException{
-        CommonListResponse response = client1.execute(new ListRequest(ListIDs.l(new int[]{sharedFolder.getObjectID(),publicAppointmentID},new int[]{sharedFolder.getObjectID(),privateAppointmentID}), COLUMNS, true));
+    @Test
+    public void testShouldNotAnonymizeOwnPrivateAppointments() throws OXException, IOException, SAXException, JSONException {
+        CommonListResponse response = client1.execute(new ListRequest(ListIDs.l(new int[] { sharedFolder.getObjectID(), publicAppointmentID }, new int[] { sharedFolder.getObjectID(), privateAppointmentID }), COLUMNS, true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
         assertEquals("Should find two elements, a private and a public one", 2, objects.length);
@@ -192,21 +196,21 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         assertTrue("One should be the _unchanged_ private one", app1[namePos].equals(privateAppointmentTitle) || app2[namePos].equals(privateAppointmentTitle));
     }
 
-
-    public void testShouldNotAllowToGetFullPrivateAppointmentsForNonOwner() throws Exception, Exception, Exception, Exception{ //this is actually a bug that has been around for some time
+    @Test
+    public void testShouldNotAllowToGetFullPrivateAppointmentsForNonOwner() throws Exception, Exception, Exception, Exception { //this is actually a bug that has been around for some time
         GetResponse response = client2.execute(new GetRequest(privateAppointment));
         Appointment expected = response.getAppointment(timeZone);
-        assertFalse("Title should be anonymized" , privateAppointmentTitle.equals(expected.getTitle()));
+        assertFalse("Title should be anonymized", privateAppointmentTitle.equals(expected.getTitle()));
     }
 
-    public void testShouldStillAllowToGetFullPrivateAppointmentsForOwner() throws Exception, Exception, Exception, Exception{ //this is actually a bug that has been around for some time
+    @Test
+    public void testShouldStillAllowToGetFullPrivateAppointmentsForOwner() throws Exception, Exception, Exception, Exception { //this is actually a bug that has been around for some time
         GetResponse response = client1.execute(new GetRequest(privateAppointment));
         Appointment expected = response.getAppointment(timeZone);
-        assertTrue("Title should not be anonymized" , privateAppointmentTitle.equals(expected.getTitle()));
+        assertTrue("Title should not be anonymized", privateAppointmentTitle.equals(expected.getTitle()));
     }
 
-
-    public void testShouldShowRecurrences() throws Exception{
-    }
+    @Test
+    public void testShouldShowRecurrences() throws Exception {}
 
 }

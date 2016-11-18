@@ -63,103 +63,102 @@ import com.openexchange.ajax.mail.actions.AbstractMailRequest;
  */
 public final class NetsolFolderRequest extends AbstractMailRequest {
 
-	final static class NetsolFolderParser extends AbstractAJAXParser<NetsolFolderResponse> {
+    final static class NetsolFolderParser extends AbstractAJAXParser<NetsolFolderResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		NetsolFolderParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        NetsolFolderParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		@Override
-		protected NetsolFolderResponse createResponse(final Response response) throws JSONException {
-			return new NetsolFolderResponse(response);
-		}
-	}
+        @Override
+        protected NetsolFolderResponse createResponse(final Response response) throws JSONException {
+            return new NetsolFolderResponse(response);
+        }
+    }
 
-	@Override
-	public String getServletPath() {
-		return "/ajax/folders";
-	}
+    @Override
+    public String getServletPath() {
+        return "/ajax/folders";
+    }
 
-	/**
-	 * Columns for default list request
-	 */
-	public static final int[] COLUMNS_DEFAULT_LIST = { 1, 301, 300, 307, 304, 306, 302, 305, 308, 311, 2, 314, 313, 315 };
+    /**
+     * Columns for default list request
+     */
+    public static final int[] COLUMNS_DEFAULT_LIST = { 1, 301, 300, 307, 304, 306, 302, 305, 308, 311, 2, 314, 313, 315 };
 
-	/**
-	 * Unique identifier
-	 */
-	private final String folderIdentifer;
+    /**
+     * Unique identifier
+     */
+    private final String folderIdentifer;
 
-	private final int[] columns;
+    private final int[] columns;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link NetsolFolderRequest}
-	 */
-	public NetsolFolderRequest(final String folderIdentifer) {
-		this(folderIdentifer, COLUMNS_DEFAULT_LIST, true);
-	}
+    /**
+     * Initializes a new {@link NetsolFolderRequest}
+     */
+    public NetsolFolderRequest(final String folderIdentifer) {
+        this(folderIdentifer, COLUMNS_DEFAULT_LIST, true);
+    }
 
-	/**
-	 * Initializes a new {@link NetsolFolderRequest}
-	 */
-	public NetsolFolderRequest(final String folderIdentifer, final int[] columns) {
-		this(folderIdentifer, columns, true);
-	}
+    /**
+     * Initializes a new {@link NetsolFolderRequest}
+     */
+    public NetsolFolderRequest(final String folderIdentifer, final int[] columns) {
+        this(folderIdentifer, columns, true);
+    }
 
-	/**
-	 * Initializes a new {@link NetsolFolderRequest}
-	 */
-	public NetsolFolderRequest(final String folderIdentifer, final int[] columns, final boolean failOnError) {
-		super();
-		this.folderIdentifer = folderIdentifer;
-		this.columns = columns;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link NetsolFolderRequest}
+     */
+    public NetsolFolderRequest(final String folderIdentifer, final int[] columns, final boolean failOnError) {
+        super();
+        this.folderIdentifer = folderIdentifer;
+        this.columns = columns;
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return null;
-	}
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.GET;
-	}
+        return Method.GET;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
-				new Parameter("parent", folderIdentifer), new Parameter("columns", columns) };
-	}
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST), new Parameter("parent", folderIdentifer), new Parameter("columns", columns) };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public AbstractAJAXParser<NetsolFolderResponse> getParser() {
-		return new NetsolFolderParser(failOnError);
-	}
+        return new NetsolFolderParser(failOnError);
+    }
 
 }

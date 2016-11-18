@@ -50,6 +50,7 @@
 package com.openexchange.ajax.attach;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.Types;
@@ -57,6 +58,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * This class tests attachments for tasks through the ajax interface.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TaskAttachmentTest extends AbstractAttachmentTest {
@@ -69,13 +71,11 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
      * {@inheritDoc}
      */
     @Override
-    public int createExclusiveWritableAttachable(final String sessionId,
-        final int folderId) throws Exception {
+    public int createExclusiveWritableAttachable(final String sessionId, final int folderId) throws Exception {
         final Task task = new Task();
         task.setTitle("AttachmentTest");
         task.setParentFolderID(folderId);
-        final int taskId = TaskTools.extractInsertId(TaskTools.insertTask(
-            getWebConversation(), getHostName(), sessionId, task));
+        final int taskId = TaskTools.extractInsertId(TaskTools.insertTask(getWebConversation(), getHostName(), sessionId, task));
         return taskId;
     }
 
@@ -83,10 +83,8 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
      * {@inheritDoc}
      */
     @Override
-    public int getExclusiveWritableFolder(final String sessionId)
-        throws Exception {
-        return TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), sessionId);
+    public int getExclusiveWritableFolder(final String sessionId) throws Exception {
+        return TaskTools.getPrivateTaskFolder(getWebConversation(), getHostName(), sessionId);
     }
 
     /**
@@ -101,68 +99,79 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
      * {@inheritDoc}
      */
     @Override
-    public void removeAttachable(final int folder, final int taskId,
-        final String sessionId) throws Exception {
+    public void removeAttachable(final int folder, final int taskId, final String sessionId) throws Exception {
 
-        final Response response = TaskTools.getTask(getWebConversation(),
-            getHostName(), sessionId, folderId, taskId);
+        final Response response = TaskTools.getTask(getWebConversation(), getHostName(), sessionId, folderId, taskId);
         final Date lastModified = response.getTimestamp();
-        TaskTools.deleteTask(getWebConversation(), getHostName(), sessionId,
-            lastModified, folder, taskId);
+        TaskTools.deleteTask(getWebConversation(), getHostName(), sessionId, lastModified, folder, taskId);
     }
 
     /**
      * Tests to get all attachments for a task.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testAll() throws Throwable {
         doAll();
     }
 
     /**
      * Tests uploading of multiple Attachments in one request.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testMultiple() throws Throwable {
         doMultiple();
     }
 
     /**
      * Tests to detach an attachment.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testDetach() throws Throwable {
         doDetach();
     }
 
     /**
      * Tests if the attached file is the same.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testDocument() throws Throwable {
         doDocument();
     }
 
     /**
      * Tests to list all attachments for a task.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testList() throws Throwable {
         doList();
     }
 
     /**
      * Tests if not exists attachments are discovered correctly.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testNotExists() throws Throwable {
         doNotExists();
     }
 
     /**
      * Tests if updated attachments are correctly send by the server.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testUpdates() throws Throwable {
         doUpdates();
     }
@@ -170,16 +179,20 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
     /**
      * Test to attach to a task that can't be read by a user. The server must
      * return an error if a user is trying to do so.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testForbidden() throws Throwable {
         doForbidden();
     }
 
     /**
      * Test to attach to a task.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testGet() throws Throwable {
         doGet();
     }

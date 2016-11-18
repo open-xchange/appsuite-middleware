@@ -52,6 +52,8 @@ package com.openexchange.ajax.task;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -81,12 +83,13 @@ public class ListTest extends AbstractTaskTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testTaskList() throws Throwable {
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
@@ -117,6 +120,7 @@ public class ListTest extends AbstractTaskTest {
         assertTrue("No error when listing not existing object.", listR.hasError());
     }
 
+    @Test
     public void testRemovedObjectHandling() throws Throwable {
         final int folderA = client.getValues().getPrivateTaskFolder();
         final AJAXClient clientB = new AJAXClient(User.User2);
@@ -144,7 +148,7 @@ public class ListTest extends AbstractTaskTest {
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
-            final InsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i);
+            final InsertResponse insertR = toDelete.remove((NUMBER - DELETES) / 2 + i);
             deletes1[i] = new DeleteRequest(folderB, insertR.getId(), insertR.getTimestamp());
         }
         clientB.execute(MultipleRequest.create(deletes1));

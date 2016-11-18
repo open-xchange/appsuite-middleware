@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -73,7 +74,6 @@ import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
 
-
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
@@ -87,7 +87,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
     /*
      * Perform autocomplete and query on contacts with showAdmin=false and
      * expect the context admin to be excluded.
-     */
+     */ @Test
     public void testAdminIsExcluded() throws Exception {
         AJAXClient adminClient = new AJAXClient(User.OXAdmin);
         int adminId = adminClient.getValues().getUserId();
@@ -111,7 +111,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
     /*
      * Perform autocomplete and query on contacts with showAdmin=true and
      * expect the context admin to be included.
-     */
+     */ @Test
     public void testAdminIsIncluded() throws Exception {
         AJAXClient adminClient = new AJAXClient(User.OXAdmin);
         int adminId = adminClient.getValues().getUserId();

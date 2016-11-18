@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.contact;
 
 import org.junit.After;
@@ -14,23 +15,23 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug4409Test extends ContactTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4409Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4409Test.class);
     private int objectId = -1;
 
-	public void testBug4409() throws Exception {
-		final Contact contactObj = new Contact();
-		contactObj.setSurName("testBug4409");
-		contactObj.setParentFolderID(contactFolderId);
+    public void testBug4409() throws Exception {
+        final Contact contactObj = new Contact();
+        contactObj.setSurName("testBug4409");
+        contactObj.setParentFolderID(contactFolderId);
 
-		objectId  = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
+        objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
 
-		loadImage(getWebConversation(),objectId, contactFolderId, getHostName(), getSessionId());
-	}
+        loadImage(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
+    }
 
     @After
     public void tearDown() throws Exception {
         super.tearDown();
-        if(objectId != -1){
+        if (objectId != -1) {
             deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
         }
     }

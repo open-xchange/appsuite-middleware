@@ -52,6 +52,8 @@ package com.openexchange.ajax.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -76,14 +78,15 @@ public class HasTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateAppointmentFolder();
         tz = client.getValues().getTimeZone();
     }
 
+    @Test
     public void testHasAppointment() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -119,6 +122,7 @@ public class HasTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testHasAppointmentFullTime() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));

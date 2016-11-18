@@ -50,6 +50,7 @@
 package com.openexchange.ajax.importexport;
 
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
@@ -85,12 +86,13 @@ public class Bug19089Test extends ManagedAppointmentTest {
         calendarManager.insert(appointment);
     }
 
+    @Test
     public void testBug19089() throws Exception {
         ICalExportRequest request = new ICalExportRequest(folder.getObjectID());
         ICalExportResponse response = getClient().execute(request);
         String ical = (String) response.getData();
         // System.out.println(ical);
-        assertTrue("Export should contain a VTIMEZONE Object"+System.getProperty("line.separator")+ical, ical.contains("BEGIN:VTIMEZONE"));
+        assertTrue("Export should contain a VTIMEZONE Object" + System.getProperty("line.separator") + ical, ical.contains("BEGIN:VTIMEZONE"));
     }
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -83,16 +84,19 @@ public class RemoveGuestPermissionTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testUpdateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
+    @Test
     public void testDeleteSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testDeleteSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module), false);
     }
 
+    @Test
     public void testHardDeleteSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testDeleteSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module), true);
@@ -108,14 +112,17 @@ public class RemoveGuestPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testUpdateSharedFileRandomly() throws Exception {
         testUpdateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }
 
+    @Test
     public void testDeleteSharedFileRandomly() throws Exception {
         testDeleteSharedFile(randomFolderAPI(), getDefaultFolder(FolderObject.INFOSTORE), randomGuestObjectPermission(), false);
     }
 
+    @Test
     public void testHardDeleteSharedFileRandomly() throws Exception {
         testDeleteSharedFile(randomFolderAPI(), getDefaultFolder(FolderObject.INFOSTORE), randomGuestObjectPermission(), true);
     }
@@ -287,7 +294,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -295,8 +302,8 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
         file.setLastModified(futureTimestamp);
-        file.setObjectPermissions(Collections.<FileStorageObjectPermission>emptyList());
-        file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS } );
+        file.setObjectPermissions(Collections.<FileStorageObjectPermission> emptyList());
+        file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
         /*
          * check permissions
          */
@@ -353,7 +360,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*

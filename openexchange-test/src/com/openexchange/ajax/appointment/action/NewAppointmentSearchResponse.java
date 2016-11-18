@@ -62,23 +62,23 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class NewAppointmentSearchResponse extends AbstractAJAXResponse {
 
-	private Appointment[] appointmentObj;
+    private Appointment[] appointmentObj;
 
-	private final int[] columns;
+    private final int[] columns;
 
-	private final TimeZone timeZone;
+    private final TimeZone timeZone;
 
     /**
      * @param response
      */
     NewAppointmentSearchResponse(final Response response, final int[] columns, final TimeZone timeZone) {
         super(response);
-		this.columns = columns;
-		this.timeZone = timeZone;
+        this.columns = columns;
+        this.timeZone = timeZone;
     }
 
-	public Appointment[] getAppointments() throws Exception {
-		final JSONArray jsonArray = (JSONArray)getResponse().getData();
-		return AppointmentTest.jsonArray2AppointmentArray(jsonArray, columns, timeZone);
-	}
+    public Appointment[] getAppointments() throws Exception {
+        final JSONArray jsonArray = (JSONArray) getResponse().getData();
+        return AppointmentTest.jsonArray2AppointmentArray(jsonArray, columns, timeZone);
+    }
 }

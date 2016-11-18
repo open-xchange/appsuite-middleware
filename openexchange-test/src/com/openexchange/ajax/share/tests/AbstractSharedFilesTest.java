@@ -80,7 +80,7 @@ public abstract class AbstractSharedFilesTest extends ShareTest {
     protected FolderObject userSourceFolder;
     protected FolderObject userDestFolder;
     protected File file;
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -89,7 +89,7 @@ public abstract class AbstractSharedFilesTest extends ShareTest {
         file = insertFile(userSourceFolder.getObjectID(), randomUID());
         infoMgr = new InfostoreTestManager(getClient());
     }
-    
+
     protected AbstractSharedFilesTest() {
         super();
     }

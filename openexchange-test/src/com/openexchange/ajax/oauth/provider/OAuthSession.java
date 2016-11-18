@@ -71,7 +71,6 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
-
 /**
  * {@link OAuthSession}
  *
@@ -128,13 +127,7 @@ public class OAuthSession extends AJAXSession {
         String password = AJAXConfig.getProperty(user.getPassword());
         String state = UUIDs.getUnformattedStringFromRandom();
 
-        OAuthParams params = new OAuthParams()
-            .setHostname(hostname)
-            .setClientId(clientId)
-            .setClientSecret(clientSecret)
-            .setRedirectURI(redirectURI)
-            .setScope(scope.toString())
-            .setState(state);
+        OAuthParams params = new OAuthParams().setHostname(hostname).setClientId(clientId).setClientSecret(clientSecret).setRedirectURI(redirectURI).setScope(scope.toString()).setState(state);
         grant = Protocol.obtainAccess(client, params, login, password);
     }
 

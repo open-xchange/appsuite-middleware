@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.exception.OXException;
@@ -64,11 +65,11 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
  */
 public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
 
-    private final String[] RESERVED_NAMES = new String[] {"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "NUL",
-                                                          "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "AUX", "PRN" };
+    private final String[] RESERVED_NAMES = new String[] { "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "NUL", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "AUX", "PRN" };
 
     /**
      * Initializes a new {@link CreateFileWithIllegalCharactersTest}.
+     * 
      * @param name
      */
     public CreateFileWithIllegalCharactersTest() {
@@ -85,6 +86,7 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         super.tearDown();
     }
 
+    @Test
     public void testCreateFileWithIllegalCharacters() throws Exception {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
@@ -106,6 +108,7 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("|"));
     }
 
+    @Test
     public void testCreateFileWithReservedName() throws Exception {
         for (String name : RESERVED_NAMES) {
             File file = new DefaultFile();
@@ -121,6 +124,7 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         }
     }
 
+    @Test
     public void testCreateFilenameEndsWithWithespace() throws Exception {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
@@ -134,6 +138,7 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("whitespace"));
     }
 
+    @Test
     public void testCreateFilenameEndsWithDot() throws Exception {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
@@ -147,6 +152,7 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("dot"));
     }
 
+    @Test
     public void testCreateReservedFolderName() throws Exception {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));

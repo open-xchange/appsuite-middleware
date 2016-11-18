@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.JMXInit;
+import junit.framework.TestCase;
 
 /**
  * {@link AbstractBundleTest} - Abstract super class for a test class that stops/starts a specific bundle to check behavior on absence.
@@ -198,12 +198,7 @@ public abstract class AbstractBundleTest extends TestCase {
     }
 
     protected static int getStandardCalendarFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-        final List<FolderObject> subfolders = getSubfolders(
-            conversation,
-            hostname,
-            sessionId,
-            "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            true);
+        final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID, true);
         for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
             final FolderObject subfolder = iter.next();
             if (subfolder.getModule() == FolderObject.CALENDAR && subfolder.isDefaultFolder()) {
@@ -214,12 +209,7 @@ public abstract class AbstractBundleTest extends TestCase {
     }
 
     protected static int getStandardInfostoreFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-        final List<FolderObject> subfolders = getSubfolders(
-            conversation,
-            hostname,
-            sessionId,
-            "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            true);
+        final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID, true);
         for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
             final FolderObject subfolder = iter.next();
             if (subfolder.getModule() == FolderObject.INFOSTORE && subfolder.isDefaultFolder()) {
@@ -260,9 +250,7 @@ public abstract class AbstractBundleTest extends TestCase {
                 subfolder.removeObjectID();
                 subfolder.setFullName(arr.getString(0));
             }
-            subfolder.setModule(FolderParser.getModuleFromString(
-                arr.getString(1),
-                subfolder.containsObjectID() ? subfolder.getObjectID() : -1));
+            subfolder.setModule(FolderParser.getModuleFromString(arr.getString(1), subfolder.containsObjectID() ? subfolder.getObjectID() : -1));
             subfolder.setFolderName(arr.getString(2));
             subfolder.setSubfolderFlag(arr.getBoolean(3));
             subfolder.setDefaultFolder(arr.getBoolean(4));

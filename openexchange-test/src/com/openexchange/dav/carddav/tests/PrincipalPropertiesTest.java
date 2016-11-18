@@ -73,17 +73,18 @@ import com.openexchange.groupware.container.Contact;
  */
 public class PrincipalPropertiesTest extends CardDAVTest {
 
-	public PrincipalPropertiesTest() {
-		super();
-	}
+    public PrincipalPropertiesTest() {
+        super();
+    }
 
-	/**
-	 * Checks if the CardDAV server reports some information about the current user principal.
-	 * @throws Exception
-	 */
-	@Test
-	public void testDiscoverPrincipalProperties() throws Exception {
-		final DavPropertyNameSet props = new DavPropertyNameSet();
+    /**
+     * Checks if the CardDAV server reports some information about the current user principal.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testDiscoverPrincipalProperties() throws Exception {
+        final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.ADDRESSBOOK_HOME_SET);
         props.add(PropertyNames.DIRECTORY_GATEWAY);
         props.add(PropertyNames.DISPLAYNAME);
@@ -92,21 +93,17 @@ public class PrincipalPropertiesTest extends CardDAVTest {
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCE_ID);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
-        final PropFindMethod propFind = new PropFindMethod(
-        		super.getWebDAVClient().getBaseURI() + "/principals/users/" + getClient().getValues().getUserId() + "/",
-        		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/principals/users/" + getClient().getValues().getUserId() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
-        final GetRequest getRequest = new GetRequest(super.getAJAXClient().getValues().getUserId(),
-        		super.getAJAXClient().getValues().getTimeZone());
+        final GetRequest getRequest = new GetRequest(super.getAJAXClient().getValues().getUserId(), super.getAJAXClient().getValues().getTimeZone());
         final GetResponse getResponse = Executor.execute(client, getRequest);
         final Contact contact = getResponse.getContact();
         final String expectedDisplayName = contact.getDisplayName();
-        assertEquals(PropertyNames.DISPLAYNAME + " wrong", expectedDisplayName,
-        		super.extractTextContent(PropertyNames.DISPLAYNAME, response));
+        assertEquals(PropertyNames.DISPLAYNAME + " wrong", expectedDisplayName, super.extractTextContent(PropertyNames.DISPLAYNAME, response));
         final String principalURL = super.extractHref(PropertyNames.PRINCIPAL_URL, response);
-    	assertTrue("username not found in href child of " + PropertyNames.PRINCIPAL_URL, principalURL.contains("/" + getClient().getValues().getUserId()));
+        assertTrue("username not found in href child of " + PropertyNames.PRINCIPAL_URL, principalURL.contains("/" + getClient().getValues().getUserId()));
         final String addressbookHome = super.extractHref(PropertyNames.ADDRESSBOOK_HOME_SET, response);
-    	assertEquals(PropertyNames.ADDRESSBOOK_HOME_SET + " wrong", "/carddav/", addressbookHome);
+        assertEquals(PropertyNames.ADDRESSBOOK_HOME_SET + " wrong", "/carddav/", addressbookHome);
 
-	}
+    }
 }

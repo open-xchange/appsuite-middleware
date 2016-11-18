@@ -4,6 +4,9 @@ package com.openexchange.ajax.mail;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -40,8 +43,8 @@ public class Bug15777Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         values = client.getValues();
@@ -55,6 +58,7 @@ public class Bug15777Test extends AbstractAJAXSession {
         ids = response.getIds();
     }
 
+    @Test
     public void testFlagsAfterMove() throws Exception {
         // Create new mail folder
         subFolder = Create.createPrivateFolder("bug15777movefolder", FolderObject.MAIL, values.getUserId());
@@ -73,20 +77,18 @@ public class Bug15777Test extends AbstractAJAXSession {
         final GetResponse getMovedMailResp = client.execute(getMovedMailReq);
 
         // Assert flags
-        assertTrue("Flag 'answered' is missing", MailFlag.transform(getMovedMailResp.getMail(TimeZone.getDefault()).getFlags()).contains(
-            MailFlag.ANSWERED));
+        assertTrue("Flag 'answered' is missing", MailFlag.transform(getMovedMailResp.getMail(TimeZone.getDefault()).getFlags()).contains(MailFlag.ANSWERED));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         // Delete Mail
         final DeleteRequest del = new DeleteRequest(ids);
         client.execute(del);
 
         // Delete MailFolder
-        final com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(
-            EnumAPI.OX_NEW,
-            subFolder);
+        final com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
         client.execute(fDel);
 
         super.tearDown();

@@ -91,13 +91,13 @@ public class ExamineRequest extends AbstractMailRequest<ExamineResponse> {
                 return new ExamineResponse(response);
             }
         };
-	}
+    }
 
-	@Override
-	public Object getBody() throws IOException, JSONException {
-		return null;
-	}
-	
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
     public ExamineRequest ignoreError() {
         failOnError = false;
         return this;

@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -89,6 +90,7 @@ public class ChangeTimeZoneTest extends AbstractAJAXSession {
         ctm.insert(app);
     }
 
+    @Test
     public void testSimpleTimeZoneChange() throws Exception {
         app.setLastModified(new Date(Long.MAX_VALUE));
         app.setTimezone("US/Eastern");

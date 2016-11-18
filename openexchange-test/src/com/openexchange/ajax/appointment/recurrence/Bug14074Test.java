@@ -52,6 +52,9 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -69,6 +72,7 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * Moves a weekly series appointment starting during no daylight saving time in a week with daylight saving time and verifies it is put at
  * the correct time.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug14074Test extends AbstractAJAXSession {
@@ -88,8 +92,8 @@ public final class Bug14074Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         AJAXClient client = getClient();
         tz = client.getValues().getTimeZone();
@@ -103,13 +107,14 @@ public final class Bug14074Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         DeleteRequest request = new DeleteRequest(appointment);
         getClient().execute(request);
         super.tearDown();
     }
 
+    @Test
     public void testDailyFullTimeUntil() throws Throwable {
         AJAXClient client = getClient();
         // Change appointment to 1400 in daylight saving time.

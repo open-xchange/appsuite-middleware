@@ -51,6 +51,9 @@ package com.openexchange.ajax.contact;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -77,52 +80,38 @@ public final class Bug12716Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name
      */
     public Bug12716Test() {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateContactFolder();
         contact = insertContact();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         deleteContact();
         super.tearDown();
     }
 
-    public void testListProblem() throws OXException, IOException,
-        SAXException, JSONException {
-        final int[] columns = new int[] {
-            20, 1, 5, 2, 3, 4, 20, 100, 101,
-            500, 501, 502, 503, 504, 505, 506, 507, 508, 509,
-            510, 511, 512, 513, 514, 515, 516, 517, 518, 519,
-            520, 521, 522, 523,      525, 526, 527, 528, 529,
-            530, 531, 532, 533, 534, 535, 536, 537, 538, 539,
-            540, 541, 542, 543, 544, 545, 546, 547, 548, 549,
-            550, 551, 552, 553, 554, 555, 556, 557, 558, 559,
-            560, 561, 562, 563, 564, 565, 566, 567, 568, 569,
-            570, 571, 572, 573, 574, 575, 576, 577, 578, 579,
-            580, 581, 582, 583, 584, 585, 586, 587, 588, 589,
-            590, 591, 592, 594, 595, 596, 597, 598, 599,
-            104, 601, 602, 605, 102, 524, 606};
-        final ListRequest request = new ListRequest(
-            ListIDs.l(new int[] { folderId, contact.getObjectID() }),
-            columns, false);
+    @Test
+    public void testListProblem() throws OXException, IOException, SAXException, JSONException {
+        final int[] columns = new int[] { 20, 1, 5, 2, 3, 4, 20, 100, 101, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 594, 595, 596, 597, 598, 599, 104, 601, 602, 605, 102, 524, 606 };
+        final ListRequest request = new ListRequest(ListIDs.l(new int[] { folderId, contact.getObjectID() }), columns, false);
         final CommonListResponse response = client.execute(request);
         if (response.hasError()) {
             fail(response.getException().toString());
         }
     }
 
-    private Contact insertContact() throws OXException, IOException,
-        SAXException, JSONException {
+    private Contact insertContact() throws OXException, IOException, SAXException, JSONException {
         final Contact contact = new Contact();
         contact.setParentFolderID(folderId);
         contact.setDisplayName("Test for bug 12716");
@@ -133,8 +122,7 @@ public final class Bug12716Test extends AbstractAJAXSession {
         return contact;
     }
 
-    private void deleteContact() throws OXException, IOException,
-        SAXException, JSONException {
+    private void deleteContact() throws OXException, IOException, SAXException, JSONException {
         client.execute(new DeleteRequest(contact));
     }
 }

@@ -91,8 +91,7 @@ public class Bug37424Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -100,8 +99,7 @@ public class Bug37424Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         if (null != client && null != tasksToDelete) {
             int folderID = client.getValues().getPrivateTaskFolder();
             Set<Integer> ids = new HashSet<Integer>();

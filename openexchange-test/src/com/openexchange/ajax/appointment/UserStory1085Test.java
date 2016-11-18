@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -95,21 +96,7 @@ public class UserStory1085Test extends AppointmentTest {
         userIdB = clientB.getValues().getUserId();
         userIdC = clientC.getValues().getUserId();
 
-        folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "UserStory1085Test - " + Long.toString(System.currentTimeMillis()),
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(userIdB, false, true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(userIdA, false, false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "UserStory1085Test - " + Long.toString(System.currentTimeMillis()), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(userIdB, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(userIdA, false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
         final CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
@@ -156,6 +143,7 @@ public class UserStory1085Test extends AppointmentTest {
         super.tearDown();
     }
 
+    @Test
     public void testUserStory1085() throws Exception {
         final Appointment[] appointmentsB = getFreeBusy(getWebConversation(), userIdB, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
         final Appointment[] appointmentsC = getFreeBusy(getWebConversation(), userIdC, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());

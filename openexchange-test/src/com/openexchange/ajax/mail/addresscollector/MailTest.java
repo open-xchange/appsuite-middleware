@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.mail.addresscollector;
 
 import static com.openexchange.java.Autoboxing.B;
@@ -6,6 +7,7 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -46,6 +48,7 @@ public class MailTest extends AbstractMailTest {
         this.client = getClient();
     }
 
+    @Test
     public void testAddressCollection() throws Throwable {
         FolderObject folder = null;
         try {
@@ -103,7 +106,7 @@ public class MailTest extends AbstractMailTest {
     }
 
     private void checkContacts(final int folderId) throws Exception {
-        final int[] cols = new int[]{Contact.OBJECT_ID, Contact.EMAIL1};
+        final int[] cols = new int[] { Contact.OBJECT_ID, Contact.EMAIL1 };
         final Contact[] contacts = ContactTest.listContact(client.getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), client.getSession().getId());
         assertEquals("Number of collected Contacts not correct.", 1, contacts.length);
         assertEquals("Email does not match.", getSendAddress(), contacts[0].getEmail1());

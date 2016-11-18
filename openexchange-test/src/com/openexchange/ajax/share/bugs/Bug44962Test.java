@@ -53,6 +53,7 @@ import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -113,92 +114,112 @@ public class Bug44962Test extends ShareTest {
     }
 
     protected static int randomPimModule() {
-        int[] pimModules = new int[] {
-            FolderObject.CONTACT, FolderObject.TASK, FolderObject.CALENDAR
+        int[] pimModules = new int[] { FolderObject.CONTACT, FolderObject.TASK, FolderObject.CALENDAR
         };
         return pimModules[random.nextInt(pimModules.length)];
     }
 
+    @Test
     public void testInviteGuestToDriveFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(FolderObject.INFOSTORE, true, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToDriveFolder() throws Exception {
         inviteGuestToFolder(FolderObject.INFOSTORE, false, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testInviteGuestToDriveFolderWithInviteGuests() throws Exception {
         inviteGuestToFolder(FolderObject.INFOSTORE, false, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToDriveFolderWithReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(FolderObject.INFOSTORE, true, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToDriveFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(FolderObject.INFOSTORE, true, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteUserToDriveFolder() throws Exception {
         inviteUserToFolder(FolderObject.INFOSTORE, false, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToDriveFolderWithInviteGuests() throws Exception {
         inviteUserToFolder(FolderObject.INFOSTORE, false, Boolean.TRUE, null);
     }
 
+    @Test
     public void testInviteGuestToPimFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToPimFolder() throws Exception {
         inviteGuestToFolder(randomPimModule(), false, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testDontInviteGuestToPimFolderWithInviteGuests() throws Exception {
         inviteGuestToFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0072");
     }
 
+    @Test
     public void testInviteUserToPimFolderWithReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(randomPimModule(), true, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToPimFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteUserToPimFolder() throws Exception {
         inviteUserToFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0072");
     }
 
+    @Test
     public void testDontInviteUserToPimFolderWithInviteGuests() throws Exception {
         inviteUserToFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0072");
     }
 
+    @Test
     public void testInviteGuestToPublicPimFolderWithInviteGuestsAndEditPublicFolders() throws Exception {
         inviteGuestToPublicFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteGuestToPublicPimFolder() throws Exception {
         inviteGuestToPublicFolder(randomPimModule(), false, Boolean.FALSE, "SHR-0019");
     }
 
+    @Test
     public void testDontInviteGuestToPublicPimFolderWithInviteGuests() throws Exception {
         inviteGuestToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0010");
     }
 
+    @Test
     public void testInviteUserToPublicPimFolderWithEditPublicFolders() throws Exception {
         inviteUserToPublicFolder(randomPimModule(), true, Boolean.FALSE, null);
     }
 
+    @Test
     public void testInviteUserToPublicPimFolderWithInviteGuestsAndEditPublicFolders() throws Exception {
         inviteUserToPublicFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
+    @Test
     public void testDontInviteUserToPublicPimFolder() throws Exception {
         inviteUserToPublicFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0010");
     }
 
+    @Test
     public void testDontInviteUserToPublicPimFolderWithInviteGuests() throws Exception {
         inviteUserToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0010");
     }
@@ -212,7 +233,7 @@ public class Bug44962Test extends ShareTest {
         moduleAccess.setReadCreateSharedFolders(readCreateSharedFolders);
         moduleAccess.setEditPublicFolders(editPublicFolders);
         userInterface.changeModuleAccess(context, user, moduleAccess, credentials);
-	}
+    }
 
     private void setInviteGuests(Boolean inviteGuests) throws Exception {
         changeCapability("invite_guests", inviteGuests);
@@ -224,11 +245,11 @@ public class Bug44962Test extends ShareTest {
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
         com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(client2.getValues().getContextId());
         if (null == value) {
-            userInterface.changeCapabilities(context, user, Collections.<String>emptySet(), Collections.<String>emptySet(), Collections.singleton(capability), credentials);
+            userInterface.changeCapabilities(context, user, Collections.<String> emptySet(), Collections.<String> emptySet(), Collections.singleton(capability), credentials);
         } else if (Boolean.TRUE.equals(value)) {
-            userInterface.changeCapabilities(context, user, Collections.singleton(capability), Collections.<String>emptySet(), Collections.<String>emptySet(), credentials);
+            userInterface.changeCapabilities(context, user, Collections.singleton(capability), Collections.<String> emptySet(), Collections.<String> emptySet(), credentials);
         } else {
-            userInterface.changeCapabilities(context, user, Collections.<String>emptySet(), Collections.singleton(capability), Collections.<String>emptySet(), credentials);
+            userInterface.changeCapabilities(context, user, Collections.<String> emptySet(), Collections.singleton(capability), Collections.<String> emptySet(), credentials);
         }
     }
 

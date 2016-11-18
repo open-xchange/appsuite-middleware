@@ -62,17 +62,17 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class CopyResponse extends AbstractAJAXResponse {
 
-	protected CopyResponse(Response response) {
-		super(response);
+    protected CopyResponse(Response response) {
+        super(response);
 
-	}
+    }
 
-	public String getFolder() throws JSONException{
+    public String getFolder() throws JSONException {
         JSONObject data = (JSONObject) getData();
         return data.getString("folder_id");
     }
 
-    public String getID() throws JSONException{
+    public String getID() throws JSONException {
         JSONObject data = (JSONObject) getData();
         return data.getString("id");
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.contact;
 
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -58,7 +59,6 @@ import com.openexchange.webdav.AbstractWebDAVSession;
 import com.openexchange.webdav.xml.contact.actions.InsertRequest;
 import com.openexchange.webdav.xml.contact.actions.InsertResponse;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
-
 
 /**
  * {@link Bug15051Test}
@@ -96,6 +96,7 @@ public class Bug15051Test extends AbstractWebDAVSession {
         super.tearDown();
     }
 
+    @Test
     public void testNewLine() throws Throwable {
         assertTrue(true);
     }

@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.tasks.Task;
 
-
 /**
  * {@link AbstractFindTasksTest}
  *
@@ -78,9 +77,10 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
         super();
 
     }
-    
+
     /**
      * Fetch the results from the QueryResponse
+     * 
      * @param qr the QueryResponse
      * @return the results as a JSONArray, or null if the respond does not contain a results payload
      */
@@ -90,7 +90,7 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
             ret = ((JSONObject) qr.getData()).optJSONArray("results");
         return ret;
     }
-    
+
     /**
      * Helper method to assert the query response (no paging)
      * 
@@ -103,7 +103,7 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
     protected final void assertResults(int expectedResultCount, List<ActiveFacet> f) throws OXException, IOException, JSONException {
         assertResults(expectedResultCount, f, -1, -1);
     }
-    
+
     /**
      * Helper method to assert the query response (with paging)
      * 
@@ -121,11 +121,11 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
         facets.addAll(f);
         final QueryResponse queryResponse = client.execute(new QueryRequest(start, size, facets, "tasks"));
         assertNotNull(queryResponse);
-        JSONArray results  = getResults(queryResponse);
+        JSONArray results = getResults(queryResponse);
         int actualResultCount = results.asList().size();
         assertEquals(expectedResultCount, actualResultCount);
-        
-        for(Object o : results.asList()) {
+
+        for (Object o : results.asList()) {
             Map<String, Object> m = (Map<String, Object>) o;
             Task t = FindTasksTestEnvironment.getInstance().getTask((Integer) m.get("id"));
             assertNotNull("Expected object not found", t);

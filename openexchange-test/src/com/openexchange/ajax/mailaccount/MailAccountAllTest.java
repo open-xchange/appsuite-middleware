@@ -52,6 +52,7 @@ package com.openexchange.ajax.mailaccount;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -60,7 +61,6 @@ import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-
 
 /**
  * {@link MailAccountAllTest}
@@ -88,20 +88,21 @@ public class MailAccountAllTest extends AbstractMailAccountTest {
         super.tearDown();
     }
 
+    @Test
     public void testAllShouldNotIncludePassword() throws OXException, IOException, SAXException, JSONException {
-        int[] fields = new int[]{Attribute.ID_LITERAL.getId(), Attribute.PASSWORD_LITERAL.getId()};
+        int[] fields = new int[] { Attribute.ID_LITERAL.getId(), Attribute.PASSWORD_LITERAL.getId() };
         MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
 
         List<MailAccountDescription> descriptions = response.getDescriptions();
         assertFalse(descriptions.isEmpty());
 
         boolean found = false;
-        for(MailAccountDescription description : descriptions) {
-            if(description.getId() == mailAccountDescription.getId()) {
+        for (MailAccountDescription description : descriptions) {
+            if (description.getId() == mailAccountDescription.getId()) {
                 assertTrue("Password was not null", null == description.getPassword());
                 found = true;
             }
         }
-        assertTrue("Did not find mail account in response" ,found);
+        assertTrue("Did not find mail account in response", found);
     }
 }

@@ -65,8 +65,8 @@ import com.openexchange.webdav.WebdavClientTest;
 public class NaughtyClientTest extends WebdavClientTest {
 
     // Bug 7642
-    // TODO Rewrite this test to get it working again.
-    public void testContentLengthTooLarge() throws Exception{
+    // TODO Rewrite this test to get it working again.    @Test
+    public void testContentLengthTooLarge() throws Exception {
         contentLengthTest(20, 30);
     }
 
@@ -80,25 +80,31 @@ public class NaughtyClientTest extends WebdavClientTest {
     public void contentLengthTest(final int size, final int pretendSize) throws MalformedURLException, IOException, InterruptedException {
         final byte[] data = new byte[size];
         final Random r = new Random();
-        for(int i = 0; i < data.length; i++) { data[i] = (byte) r.nextInt(); }
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) r.nextInt();
+        }
 
         HttpURL url = new HttpURL(getUrl("testFile.bin"));
 
         final PutMethod put = new PutMethod(url.getEscapedURI());
         put.getHostAuthState().setAuthScheme(new BasicScheme());
         put.setRequestEntity(new RequestEntity() {
+
             @Override
             public long getContentLength() {
                 return pretendSize;
             }
+
             @Override
             public String getContentType() {
                 return "application/octet-stream";
             }
+
             @Override
             public boolean isRepeatable() {
                 return false;
             }
+
             @Override
             public void writeRequest(OutputStream out) throws IOException {
                 out.write(data);
@@ -123,11 +129,11 @@ public class NaughtyClientTest extends WebdavClientTest {
         int i = 0;
         do {
             Thread.sleep(100);
-            get =  new GetMethod(url.getEscapedURI());
+            get = new GetMethod(url.getEscapedURI());
 
             client.executeMethod(get);
             i++;
-        } while(i < 10 && get.getStatusCode() != 200);
+        } while (i < 10 && get.getStatusCode() != 200);
 
         assertEquals(200, get.getStatusCode());
         assertEquals(String.valueOf(size), get.getResponseHeader("content-length").getValue());

@@ -50,6 +50,8 @@
 package com.openexchange.ajax.folder;
 
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -76,38 +78,23 @@ public class ShareFolderTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ShareFolderTest}.
+     * 
      * @param name name of the test.
      */
     public ShareFolderTest() {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         // Create 2. User
         secondClient = new AJAXClient(User.User2);
         secondUserValues = secondClient.getValues();
 
         // Create folder
-        final OCLPermission perm1 =
-            Create.ocl(
-                client.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
-        final OCLPermission perm2 =
-            Create.ocl(
-                secondUserValues.getUserId(),
-                false,
-                false,
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.NO_PERMISSIONS,
-                OCLPermission.NO_PERMISSIONS);
+        final OCLPermission perm1 = Create.ocl(client.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        final OCLPermission perm2 = Create.ocl(secondUserValues.getUserId(), false, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         parentId = client.getValues().getPrivateAppointmentFolder();
         testFolder = Create.folder(parentId, "TestShared" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, perm1, perm2);
         InsertRequest insFolder = new InsertRequest(EnumAPI.OX_OLD, testFolder);
@@ -134,6 +121,7 @@ public class ShareFolderTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testShareFolder() throws Throwable {
         final int folderId = testFolder.getObjectID();
 

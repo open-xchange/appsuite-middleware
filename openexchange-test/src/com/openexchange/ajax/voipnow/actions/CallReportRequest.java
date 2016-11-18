@@ -120,13 +120,7 @@ public class CallReportRequest extends AbstractVoipNowRequest<CallReportResponse
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "callreport"),
-            new Parameter("id", id),
-            new Parameter("answered", answered),
-            new Parameter("month", month),
-            new Parameter("year", year),
-            new Parameter("flow", flow.str) };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "callreport"), new Parameter("id", id), new Parameter("answered", answered), new Parameter("month", month), new Parameter("year", year), new Parameter("flow", flow.str) };
     }
 
     /**

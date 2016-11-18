@@ -50,6 +50,7 @@
 package com.openexchange.ajax.find.mail;
 
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
@@ -67,6 +68,7 @@ public class Bug35442Test extends AbstractMailFindTest {
         super();
     }
 
+    @Test
     public void testDefaultContactOptionIsSwitchedToToInSentFolder() throws Exception {
         String prefix = defaultAddress.substring(0, 3);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets());
@@ -81,10 +83,7 @@ public class Bug35442Test extends AbstractMailFindTest {
         Option option = contactFacet.getValues().get(0).getOptions().get(0);
         assertEquals("from", option.getId());
 
-        autocompleteRequest = new AutocompleteRequest(
-            prefix,
-            Module.MAIL.getIdentifier(),
-            prepareFacets(client.getValues().getSentFolder()));
+        autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets(client.getValues().getSentFolder()));
         autocompleteResponse = client.execute(autocompleteRequest);
         facets = autocompleteResponse.getFacets();
         contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);

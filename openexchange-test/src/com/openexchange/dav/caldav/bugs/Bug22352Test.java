@@ -66,7 +66,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug22352Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testLongNumericResourceName() throws Exception {
         /*
          * create appointment on client

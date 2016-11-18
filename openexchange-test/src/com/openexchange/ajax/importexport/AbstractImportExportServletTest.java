@@ -160,9 +160,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
     }
 
     protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, OXException {
-        final FolderObject folderObj = com.openexchange.ajax.FolderTest
-            .getStandardCalendarFolder(getWebConversation(),
-                getHostName(), getSessionId());
+        final FolderObject folderObj = com.openexchange.ajax.FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
 
         return folderObj.getCreatedBy();
     }
@@ -204,8 +202,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         folderObj.setModule(folderObjectModuleID);
         folderObj.setType(FolderObject.PRIVATE);
 
-        final OCLPermission[] permission = new OCLPermission[] {
-            FolderTest.createPermission(getUserId_FIXME(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(getUserId_FIXME(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
         };
 
         folderObj.setPermissionsAsArray(permission);

@@ -65,45 +65,42 @@ import com.openexchange.ajax.spellcheck.actions.check.CheckResponse;
  */
 public final class UserWordTest extends AbstractSpellCheckTest {
 
-	/**
-	 * Initializes a new {@link UserWordTest}
-	 *
-	 * @param name
-	 */
-	public UserWordTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link UserWordTest}
+     *
+     * @param name
+     */
+    public UserWordTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=add</code> request
-	 *
-	 * @throws Throwable
-	 */
-	public void testCheck() throws Throwable {
+    /**
+     * Tests the <code>action=add</code> request
+     *
+     * @throws Throwable
+     */
+    public void testCheck() throws Throwable {
 
-		final String userWord = "clazz";
-		UserWordResponse userWordResponse = (UserWordResponse) Executor.execute(getSession(), new UserWordRequest(userWord, true, true));
-		assertTrue("non NULL JSON object: ", JSONObject.NULL.equals(userWordResponse.getNullObject()));
+        final String userWord = "clazz";
+        UserWordResponse userWordResponse = (UserWordResponse) Executor.execute(getSession(), new UserWordRequest(userWord, true, true));
+        assertTrue("non NULL JSON object: ", JSONObject.NULL.equals(userWordResponse.getNullObject()));
 
-		/*
-		 * en
-		 */
-		final String htmlContent = "<html><head><title>quetsche</title></head><body>This is my clazz</body></html>";
-		CheckResponse checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(
-				htmlContent, "en", true));
+        /*
+         * en
+         */
+        final String htmlContent = "<html><head><title>quetsche</title></head><body>This is my clazz</body></html>";
+        CheckResponse checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
 
-		String[] mw = checkResponse.getMisspeltWords();
-		assertTrue("Misspelt words: " + Arrays.toString(mw), mw.length == 0);
+        String[] mw = checkResponse.getMisspeltWords();
+        assertTrue("Misspelt words: " + Arrays.toString(mw), mw.length == 0);
 
-		userWordResponse = (UserWordResponse) Executor.execute(getSession(), new UserWordRequest(userWord, false, true));
-		assertTrue("non NULL JSON object: ", JSONObject.NULL.equals(userWordResponse.getNullObject()));
+        userWordResponse = (UserWordResponse) Executor.execute(getSession(), new UserWordRequest(userWord, false, true));
+        assertTrue("non NULL JSON object: ", JSONObject.NULL.equals(userWordResponse.getNullObject()));
 
-		checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(
-				htmlContent, "en", true));
-		mw = checkResponse.getMisspeltWords();
-		assertTrue("No misspelt words: " + Arrays.toString(mw), mw.length == 1);
+        checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
+        mw = checkResponse.getMisspeltWords();
+        assertTrue("No misspelt words: " + Arrays.toString(mw), mw.length == 1);
 
-
-	}
+    }
 
 }

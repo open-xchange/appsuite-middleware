@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -66,12 +67,14 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * checks if the problem described in bug report #11195 appears again.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug11195Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * 
      * @param name name of the test.
      */
     public Bug11195Test() {
@@ -80,15 +83,16 @@ public final class Bug11195Test extends AbstractTaskTest {
 
     /**
      * Tries to move a task into some other task folder.
+     * 
      * @throws Throwable if some exception occurs.
      */
+    @Test
     public void testMove() throws Throwable {
         final AJAXClient client = getClient();
         final int folder = client.getValues().getPrivateTaskFolder();
         final TimeZone tz = client.getValues().getTimeZone();
         final Task task = Create.createWithDefaults(folder, "Bug 11195 test");
-        final FolderObject moveTo = com.openexchange.ajax.folder.Create
-            .createPrivateFolder("Bug 11195 test", FolderObject.TASK, client.getValues().getUserId());
+        final FolderObject moveTo = com.openexchange.ajax.folder.Create.createPrivateFolder("Bug 11195 test", FolderObject.TASK, client.getValues().getUserId());
         moveTo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
         try {
             // Insert task
@@ -98,8 +102,7 @@ public final class Bug11195Test extends AbstractTaskTest {
             }
             // Create folder to move task to
             {
-                final CommonInsertResponse response = client.execute(
-                    new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, moveTo));
+                final CommonInsertResponse response = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, moveTo));
                 moveTo.setObjectID(response.getId());
                 moveTo.setLastModified(response.getTimestamp());
             }
@@ -109,14 +112,12 @@ public final class Bug11195Test extends AbstractTaskTest {
                 move.setObjectID(task.getObjectID());
                 move.setParentFolderID(moveTo.getObjectID());
                 move.setLastModified(task.getLastModified());
-                final UpdateResponse response = TaskTools.update(client,
-                    new UpdateRequest(task.getParentFolderID(), move, tz));
+                final UpdateResponse response = TaskTools.update(client, new UpdateRequest(task.getParentFolderID(), move, tz));
                 task.setLastModified(response.getTimestamp());
             }
             // Try to get it from the destination folder
             {
-                final GetResponse response = TaskTools.get(client, new GetRequest(
-                    moveTo.getObjectID(), task.getObjectID(), false));
+                final GetResponse response = TaskTools.get(client, new GetRequest(moveTo.getObjectID(), task.getObjectID(), false));
                 assertFalse("Task was not moved.", response.hasError());
                 task.setParentFolderID(moveTo.getObjectID());
             }

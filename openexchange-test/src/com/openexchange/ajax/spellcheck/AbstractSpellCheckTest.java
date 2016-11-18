@@ -64,22 +64,23 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractSpellCheckTest extends AbstractAJAXSession {
 
-	/**
-	 * Initializes a new {@link AbstractSpellCheckTest}
-	 * @param name
-	 */
-	public AbstractSpellCheckTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link AbstractSpellCheckTest}
+     * 
+     * @param name
+     */
+    public AbstractSpellCheckTest() {
+        super();
+    }
 
-	/**
-	 * @return the private task folder of the user.
-	 */
-	protected int getPrivateFolder() throws OXException, IOException, SAXException, JSONException {
-		return getClient().getValues().getPrivateTaskFolder();
-	}
+    /**
+     * @return the private task folder of the user.
+     */
+    protected int getPrivateFolder() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getPrivateTaskFolder();
+    }
 
-	protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
-		return getClient().getValues().getTimeZone();
-	}
+    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getTimeZone();
+    }
 }

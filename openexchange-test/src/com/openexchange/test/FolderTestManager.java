@@ -90,7 +90,7 @@ import com.openexchange.tools.arrays.Arrays;
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - refactoring
  */
-public class FolderTestManager implements TestManager{
+public class FolderTestManager implements TestManager {
 
     private AbstractAJAXResponse lastResponse;
 
@@ -130,7 +130,6 @@ public class FolderTestManager implements TestManager{
     public AbstractAJAXResponse getLastResponse() {
         return lastResponse;
     }
-
 
     public FolderTestManager(final AJAXClient client) {
         this.client = client;
@@ -228,8 +227,7 @@ public class FolderTestManager implements TestManager{
                 it.remove();
             }
             // mail folder:
-            if (folder.containsFullName() && folderToDelete.containsFullName() && !folder.containsObjectID() && !folderToDelete.containsObjectID() && folder.getFullName().equals(
-                folderToDelete.getFullName())) {
+            if (folder.containsFullName() && folderToDelete.containsFullName() && !folder.containsObjectID() && !folderToDelete.containsObjectID() && folder.getFullName().equals(folderToDelete.getFullName())) {
                 it.remove();
             }
         }
@@ -256,7 +254,7 @@ public class FolderTestManager implements TestManager{
         final boolean oldValue = getFailOnError();
         setFailOnError(failOnErrorOverride);
         FolderObject returnedFolder = null;
-        final GetRequest request = new GetRequest(EnumAPI.OX_OLD, folderID, Arrays.addUniquely(FolderObject.ALL_COLUMNS,additionalColumns));
+        final GetRequest request = new GetRequest(EnumAPI.OX_OLD, folderID, Arrays.addUniquely(FolderObject.ALL_COLUMNS, additionalColumns));
         GetResponse response = null;
         try {
             response = client.execute(request);
@@ -348,7 +346,7 @@ public class FolderTestManager implements TestManager{
 
     public FolderObject[] listFoldersOnServer(final int parentFolderId, final int[] additionalFields) {
         final Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        final ListRequest request = new ListRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID },additionalFields), getFailOnError());
+        final ListRequest request = new ListRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), getFailOnError());
         try {
             final ListResponse response = client.execute(request);
             final Iterator<FolderObject> iterator = response.getFolder();
@@ -442,8 +440,8 @@ public class FolderTestManager implements TestManager{
     }
 
     private int findPositionOfColumn(final int[] haystack, final int needle) {
-        for(int i = 0; i < haystack.length; i++) {
-            if(haystack[i] == needle) {
+        for (int i = 0; i < haystack.length; i++) {
+            if (haystack[i] == needle) {
                 return i;
             }
         }
@@ -525,11 +523,7 @@ public class FolderTestManager implements TestManager{
         permissions.setEntity(userID);
         permissions.setGroupPermission(false);
         permissions.setFolderAdmin(true);
-        permissions.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        permissions.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
         folder.addPermission(permissions);
         return folder;
@@ -537,13 +531,14 @@ public class FolderTestManager implements TestManager{
 
     /**
      * Generates a folder with admin permissions for all given userIDs.
+     * 
      * @param name Name of the folder
      * @param moduleID moduleID of the folder (calendar, task, etc... from FolderObject, not from any other class)
      * @param parentID the parent folder's ID
      * @param userIDs the IDs of the users that have admin permission on this one
      * @return a fodler object according to the input parameters
      */
-    public FolderObject generatePublicFolder(final String name, final int moduleID, final int parentID, final int... userIDs){
+    public FolderObject generatePublicFolder(final String name, final int moduleID, final int parentID, final int... userIDs) {
         //create a folder
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
@@ -552,23 +547,19 @@ public class FolderTestManager implements TestManager{
         folder.setModule(moduleID);
         // create permissions
         final ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
-        for(final int userID: userIDs){
+        for (final int userID : userIDs) {
             final OCLPermission permissions = new OCLPermission();
             permissions.setEntity(userID);
             permissions.setGroupPermission(false);
             permissions.setFolderAdmin(true);
-            permissions.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            permissions.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             allPermissions.add(permissions);
         }
         folder.setPermissions(allPermissions);
         return folder;
     }
 
-    public FolderObject generateSharedFolder(final String name, final int moduleID, final int parentID, final int... userIDs){
+    public FolderObject generateSharedFolder(final String name, final int moduleID, final int parentID, final int... userIDs) {
         //create a folder
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
@@ -578,16 +569,12 @@ public class FolderTestManager implements TestManager{
         // create permissions
         final ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
         boolean firstUser = true;
-        for(final int userID: userIDs){
+        for (final int userID : userIDs) {
             final OCLPermission permissions = new OCLPermission();
             permissions.setEntity(userID);
             permissions.setGroupPermission(false);
             permissions.setFolderAdmin(firstUser);
-            permissions.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            permissions.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             allPermissions.add(permissions);
             firstUser = false;
         }

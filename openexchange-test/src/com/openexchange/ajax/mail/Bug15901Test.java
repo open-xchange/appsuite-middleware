@@ -52,6 +52,9 @@ package com.openexchange.ajax.mail;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -85,8 +88,8 @@ public class Bug15901Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folder = client.getValues().getInboxFolder();
@@ -99,13 +102,15 @@ public class Bug15901Test extends AbstractAJAXSession {
         ids = response.getIds();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         final DeleteRequest del = new DeleteRequest(ids);
         client.execute(del);
         super.tearDown();
     }
 
+    @Test
     public void testBug15901() throws Throwable {
         final GetRequest request = new GetRequest(folder, ids[0][1], false);
         final GetResponse response = client.execute(request);
@@ -130,15 +135,9 @@ public class Bug15901Test extends AbstractAJAXSession {
         final AttachmentRequest attachmentRequest = new AttachmentRequest(folder, ids[0][1], sequenceId);
         attachmentRequest.setSaveToDisk(false);
         attachmentRequest.setFilter(true);
-        final WebResponse webResponse = Executor.execute4Download(
-            getSession(),
-            attachmentRequest,
-            AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL),
-            AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
+        final WebResponse webResponse = Executor.execute4Download(getSession(), attachmentRequest, AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL), AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
         final String mailSourceCode = webResponse.getText();
 
-        assertTrue(
-            "Could not detect expected tags.",
-            mailSourceCode.contains("<dl>") && mailSourceCode.contains("<dt>") && mailSourceCode.contains("<dd>"));
+        assertTrue("Could not detect expected tags.", mailSourceCode.contains("<dl>") && mailSourceCode.contains("<dt>") && mailSourceCode.contains("<dd>"));
     }
 }

@@ -75,8 +75,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
     private static final String SLASH = "/";
 
-    public PlistSMSTest() {
-    }
+    public PlistSMSTest() {}
 
     @Test
     public void testExecute() throws Exception {

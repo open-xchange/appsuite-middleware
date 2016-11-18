@@ -4,6 +4,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -56,23 +57,13 @@ public class Bug15590Test extends AbstractAJAXSession {
         testFolder = Create.createPrivateFolder("bug15590folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getUserId());
         testFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
 
-        com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(
-            EnumAPI.OX_NEW,
-            testFolder);
+        com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, testFolder);
         InsertResponse folderInsertResponse = client.execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());
         // Only necessary because new folder API missed the time stamps.
         testFolder.setLastModified(client.execute(new GetRequest(EnumAPI.OX_NEW, testFolder.getObjectID())).getTimestamp());
 
-        FolderTools.shareFolder(
-            client,
-            EnumAPI.OX_NEW,
-            testFolder.getObjectID(),
-            secondUserValues.getUserId(),
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        FolderTools.shareFolder(client, EnumAPI.OX_NEW, testFolder.getObjectID(), secondUserValues.getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
         // Create an Appointment as User B
         testAppointment = new Appointment();
@@ -95,6 +86,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         insertR.fillAppointment(testAppointment);
     }
 
+    @Test
     public void testBug15590() throws Exception {
         Appointment moveAppointment = new Appointment();
         moveAppointment.setIgnoreConflicts(true);
@@ -121,8 +113,7 @@ public class Bug15590Test extends AbstractAJAXSession {
             secondClient.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(movedAppointment));
         } else if (testAppointment != null) {
             testAppointment.setLastModified(new Date(Long.MAX_VALUE));
-            final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(
-                testAppointment.getObjectID(), testFolder.getObjectID(), testAppointment.getLastModified());
+            final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(testAppointment.getObjectID(), testFolder.getObjectID(), testAppointment.getLastModified());
             secondClient.execute(delApp);
         }
 

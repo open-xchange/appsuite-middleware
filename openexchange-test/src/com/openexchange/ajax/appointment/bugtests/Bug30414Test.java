@@ -83,7 +83,7 @@ public class Bug30414Test extends AbstractAJAXSession {
         super.setUp();
         ctm = new CalendarTestManager(client);
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
-        
+
         single = new Appointment();
         single.setTitle("Bug 30414 single appointment.");
         single.setStartDate(D("03.02." + nextYear + " 08:00"));
@@ -91,7 +91,7 @@ public class Bug30414Test extends AbstractAJAXSession {
         single.setIgnoreConflicts(true);
         single.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         ctm.insert(single);
-        
+
         series = new Appointment();
         series.setTitle("Bug 30414 series appointment.");
         series.setStartDate(D("01.02." + nextYear + " 08:00"));
@@ -103,7 +103,7 @@ public class Bug30414Test extends AbstractAJAXSession {
         series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         ctm.insert(series);
     }
-    
+
     @Test
     public void testBug30414() throws Exception {
         Appointment exception2 = ctm.createIdentifyingCopy(series);
@@ -120,7 +120,7 @@ public class Bug30414Test extends AbstractAJAXSession {
         exception.setRecurrenceType(Appointment.NO_RECURRENCE);
         exception.setRecurrencePosition(2);
         ctm.update(exception);
-        
+
         List<ConflictObject> conflicts = ((UpdateResponse) ctm.getLastResponse()).getConflicts();
         boolean foundBadConflict = false;
         if (conflicts != null) {

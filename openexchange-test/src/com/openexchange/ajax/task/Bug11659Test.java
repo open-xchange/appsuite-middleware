@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -63,12 +64,14 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Checks if group 0 works for tasks.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug11659Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * 
      * @param name test name
      */
     public Bug11659Test() {
@@ -78,6 +81,7 @@ public final class Bug11659Test extends AbstractTaskTest {
     /**
      * Tries to create a task with group 0 as participant.
      */
+    @Test
     public void testAllInternalUsersGroup() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateTaskFolder();
@@ -86,11 +90,9 @@ public final class Bug11659Test extends AbstractTaskTest {
         task.setTitle("Bug 11659 test");
         task.setParentFolderID(folderId);
         task.setParticipants(new Participant[] { new GroupParticipant(0) });
-        final InsertResponse iResponse = Executor.execute(client,
-            new InsertRequest(task, tz));
+        final InsertResponse iResponse = Executor.execute(client, new InsertRequest(task, tz));
         try {
-            final GetResponse gResponse = Executor.execute(client,
-                new GetRequest(iResponse));
+            final GetResponse gResponse = Executor.execute(client, new GetRequest(iResponse));
             final Task reload = gResponse.getTask(tz);
             final Participant[] participants = reload.getParticipants();
             assertEquals("Participant number differs.", 1, participants.length);

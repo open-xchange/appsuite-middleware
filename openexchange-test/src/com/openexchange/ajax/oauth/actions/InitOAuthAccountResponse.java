@@ -58,6 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class InitOAuthAccountResponse extends AbstractAJAXResponse {
+
     /**
      * Initializes a new {@link InitOAuthAccountResponse}.
      * 

@@ -55,7 +55,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.contact.ContactUnificationState;
 
-
 /**
  * {@link GetAssociationResponse}
  *
@@ -67,7 +66,7 @@ public class GetAssociationResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public ContactUnificationState getState() throws JSONException{
+    public ContactUnificationState getState() throws JSONException {
         int num = ((JSONObject) getData()).getInt("state");
         return ContactUnificationState.getByNumber(num);
     }

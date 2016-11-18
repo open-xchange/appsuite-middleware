@@ -90,7 +90,7 @@ public class AutocompleteRequest extends AbstractContactRequest<CommonSearchResp
         if (null != collation) {
             params.add(new AJAXRequest.Parameter(AJAXServlet.PARAMETER_COLLATION, collation));
         }
-        if (null !=  inFolder) {
+        if (null != inFolder) {
             params.add(new AJAXRequest.Parameter(AJAXServlet.PARAMETER_INFOLDER, inFolder));
         }
     }

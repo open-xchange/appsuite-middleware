@@ -64,7 +64,7 @@ public class MailCategoriesTestSuite extends TestSuite {
     private MailCategoriesTestSuite() {
         super();
     }
-    
+
     public static Test suite() {
         final TestSuite mailSuite = new TestSuite("com.openexchange.ajax.mail.categories.MailCategoriesTestSuite");
         mailSuite.addTest(new JUnit4TestAdapter(AllRequestCategoryParameterTest.class));

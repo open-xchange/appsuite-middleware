@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -105,6 +106,7 @@ public class Bug35687Test extends AbstractAJAXSession {
         System.out.println("hello");
     }
 
+    @Test
     public void testBug35687() throws Exception {
         Appointment loaded = ctm.get(app);
         assertEquals("Wrong alarm value", 15, loaded.getAlarm());

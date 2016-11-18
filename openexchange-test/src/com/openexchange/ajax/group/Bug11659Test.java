@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group;
 
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.actions.ListRequest;
@@ -56,12 +57,14 @@ import com.openexchange.group.Group;
 
 /**
  * Checks if group 0 lacks its identifier in JSON.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug11659Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name name of the test.
      */
     public Bug11659Test() {
@@ -71,9 +74,9 @@ public class Bug11659Test extends AbstractAJAXSession {
     /**
      * Lists group 0 and checks if returned group contains its identifier.
      */
+    @Test
     public void testForMissingIdentifier() throws Throwable {
-        final Group[] groups = Executor.execute(getClient(),
-            new ListRequest(new int[] { 0 })).getGroups();
+        final Group[] groups = Executor.execute(getClient(), new ListRequest(new int[] { 0 })).getGroups();
         assertTrue("Identifier for group 0 is missing.", groups[0].getIdentifier() == 0);
     }
 }

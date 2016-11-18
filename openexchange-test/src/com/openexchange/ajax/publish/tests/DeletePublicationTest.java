@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.publish.actions.DeletePublicationRequest;
@@ -76,6 +77,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         super();
     }
 
+    @Test
     public void testDeletingAFolderDeletesThePublication() throws OXException, IOException, SAXException, JSONException, InterruptedException {
         Contact contact = createDefaultContactFolderWithOneContact();
 
@@ -99,6 +101,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         assertTrue("Reading a publication of a deleted folder should not work", getResp.hasError());
     }
 
+    @Test
     public void testDeletionOfPublicationShouldWork() throws OXException, IOException, SAXException, JSONException {
         Contact contact = createDefaultContactFolderWithOneContact();
 
@@ -112,7 +115,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         expected.setId(newResp.getId());
 
         // delete publication
-        DeletePublicationRequest delReq = new DeletePublicationRequest( expected.getId() );
+        DeletePublicationRequest delReq = new DeletePublicationRequest(expected.getId());
         GetPublicationResponse delResp = myClient.execute(delReq);
         assertFalse("Deletion should produce no errors", delResp.hasError());
 
@@ -122,6 +125,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         assertTrue("Reading deleted publication should produce exception", getResp.hasError());
     }
 
+    @Test
     public void testDeletionOfNonExistingPublicationShouldFail() throws OXException, IOException, SAXException, JSONException {
         // delete publication
         pubMgr.setFailOnError(false); // We'll provoke an error on purpose

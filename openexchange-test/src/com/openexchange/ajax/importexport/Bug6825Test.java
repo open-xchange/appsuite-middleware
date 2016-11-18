@@ -51,6 +51,7 @@ package com.openexchange.ajax.importexport;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -74,37 +75,36 @@ import com.openexchange.test.FolderTestManager;
  */
 public class Bug6825Test extends AbstractAJAXSession {
 
-	private FolderTestManager folderTestManager;
+    private FolderTestManager folderTestManager;
 
-	public Bug6825Test() {
-		super();
-	}
+    public Bug6825Test() {
+        super();
+    }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		folderTestManager = new FolderTestManager(getClient());
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        folderTestManager = new FolderTestManager(getClient());
+    }
 
-	@Override
+    @Override
     public void tearDown() throws Exception {
-	    if (null != folderTestManager) {
-	        folderTestManager.cleanUp();
-	    }
-	    super.tearDown();
-	}
+        if (null != folderTestManager) {
+            folderTestManager.cleanUp();
+        }
+        super.tearDown();
+    }
 
-	public void testImportVCard() throws Exception {
-	    /*
-	     * import vCard with too long field values
-	     */
-        FolderObject folder = folderTestManager.generatePrivateFolder(UUIDs.getUnformattedStringFromRandom(), Module.CONTACTS.getFolderConstant(),
-            getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+    public void testImportVCard() throws Exception {
+        /*
+         * import vCard with too long field values
+         */
+        FolderObject folder = folderTestManager.generatePrivateFolder(UUIDs.getUnformattedStringFromRandom(), Module.CONTACTS.getFolderConstant(), getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         folder = folderTestManager.insertFolderOnServer(folder);
-	    String originalSurname = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz00000000001111111111222222222233333333334444444444455555555556666666666777777777788888888889999999999";
+        String originalSurname = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz00000000001111111111222222222233333333334444444444455555555556666666666777777777788888888889999999999";
         String expectedSurname = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmm";
-	    String vCard = "BEGIN:VCARD\nVERSION:3.0\n\nN:" + originalSurname + ";givenName;;;\nEND:VCARD\n";
-	    VCardImportRequest importRequest = new VCardImportRequest(folder.getObjectID(), Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)));
+        String vCard = "BEGIN:VCARD\nVERSION:3.0\n\nN:" + originalSurname + ";givenName;;;\nEND:VCARD\n";
+        VCardImportRequest importRequest = new VCardImportRequest(folder.getObjectID(), Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)));
         VCardImportResponse importResponse = getClient().execute(importRequest);
         /*
          * check response & imported contact
@@ -115,14 +115,14 @@ public class Bug6825Test extends AbstractAJAXSession {
         Contact contact = new ContactTestManager(getClient()).getAction(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
         assertNotNull("Imported contact not found", contact);
         assertEquals("Surname not truncated as expected", expectedSurname, contact.getSurName());
-	}
+    }
 
+    @Test
     public void testImportICal() throws Exception {
         /*
          * import iCal with too long fiel values
          */
-        FolderObject folder = folderTestManager.generatePrivateFolder(UUIDs.getUnformattedStringFromRandom(), Module.CALENDAR.getFolderConstant(),
-            getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
+        FolderObject folder = folderTestManager.generatePrivateFolder(UUIDs.getUnformattedStringFromRandom(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         folder = folderTestManager.insertFolderOnServer(folder);
         String testMailAddress = "test@example.com";
         String originalTitle = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";

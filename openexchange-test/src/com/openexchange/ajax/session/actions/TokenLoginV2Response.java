@@ -51,7 +51,6 @@ package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link TokenLoginV2Response}
  *
@@ -66,6 +65,7 @@ public class TokenLoginV2Response extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link TokenLoginV2Response}.
+     * 
      * @param response
      */
     public TokenLoginV2Response(int status, String redirectUrl, boolean loginSuccessful) {

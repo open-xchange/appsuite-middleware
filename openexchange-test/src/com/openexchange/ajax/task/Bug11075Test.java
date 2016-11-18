@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -81,14 +82,15 @@ public final class Bug11075Test extends AbstractTaskTest {
     /**
      * Creates two public task folder where the user has only permission to read
      * own objects. Then a SQL command for searching tasks failed.
+     * 
      * @throws Throwable if some exception occurs.
      */
+    @Test
     public void testBug() throws Throwable {
         final AJAXClient client = getClient();
         final InsertRequest[] inserts = new InsertRequest[2];
         for (int i = 0; i < inserts.length; i++) {
-            inserts[i] = new InsertRequest(EnumAPI.OX_OLD, createFolder("Bug11075Test_" + i,
-                client.getValues().getUserId()));
+            inserts[i] = new InsertRequest(EnumAPI.OX_OLD, createFolder("Bug11075Test_" + i, client.getValues().getUserId()));
         }
         final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
         final int[] folderIds = new int[inserts.length];
@@ -103,8 +105,7 @@ public final class Bug11075Test extends AbstractTaskTest {
         try {
             final TaskSearchObject search = new TaskSearchObject();
             search.setPattern("");
-            final SearchRequest request = new SearchRequest(search,
-                AbstractTaskRequest.GUI_COLUMNS);
+            final SearchRequest request = new SearchRequest(search, AbstractTaskRequest.GUI_COLUMNS);
             final SearchResponse response = TaskTools.search(client, request);
             assertFalse("Searching over all folders failed.", response.hasError());
         } finally {
@@ -112,8 +113,7 @@ public final class Bug11075Test extends AbstractTaskTest {
         }
     }
 
-    private static final FolderObject createFolder(final String name,
-        final int userId) {
+    private static final FolderObject createFolder(final String name, final int userId) {
         final FolderObject folder = new FolderObject();
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         folder.setFolderName(name);
@@ -123,11 +123,7 @@ public final class Bug11075Test extends AbstractTaskTest {
         perm1.setEntity(userId);
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
-            OCLPermission.WRITE_OWN_OBJECTS,
-            OCLPermission.DELETE_OWN_OBJECTS);
+        perm1.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.DELETE_OWN_OBJECTS);
         folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
         return folder;
     }

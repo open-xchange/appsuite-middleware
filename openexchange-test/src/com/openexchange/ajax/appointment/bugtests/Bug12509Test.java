@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -97,20 +98,12 @@ public class Bug12509Test extends AbstractAJAXSession {
         ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(1);
         OCLPermission oclp = new OCLPermission();
         oclp.setEntity(clientA.getValues().getUserId());
-        oclp.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         permissions.add(oclp);
         OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(clientB.getValues().getUserId());
-        oclp2.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        oclp2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp2.setFolderAdmin(false);
         permissions.add(oclp2);
         folder.setPermissions(permissions);
@@ -146,6 +139,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         exception.setAlarm(15);
     }
 
+    @Test
     public void testBug12509() throws Exception {
         UpdateRequest appointmentUpdateRequest = new UpdateRequest(exception, clientB.getValues().getTimeZone());
         UpdateResponse appointmentUpdateResponse = clientB.execute(appointmentUpdateRequest);

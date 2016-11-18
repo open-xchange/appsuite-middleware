@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.actions.ListPublicationsRequest;
 import com.openexchange.ajax.publish.actions.ListPublicationsResponse;
@@ -64,7 +65,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-
 
 /**
  * {@link ListPublicationsTest}
@@ -77,24 +77,23 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         super();
     }
 
-    public void testListExistingPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
+    @Test
+    public void testListExistingPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         final Contact contact = createDefaultContactFolderWithOneContact();
-        String folderID = String.valueOf(contact.getParentFolderID() );
+        String folderID = String.valueOf(contact.getParentFolderID());
         String module = "contacts";
 
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(discovery);
 
-        Publication expected = generatePublication(module, folderID, discovery );
+        Publication expected = generatePublication(module, folderID, discovery);
         expected.setDisplayName("This will be changed");
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         NewPublicationResponse newResp = getClient().execute(newReq);
         assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
         expected.setId(newResp.getId());
 
-        ListPublicationsRequest listReq = new ListPublicationsRequest(
-            Arrays.asList(I(expected.getId())),
-            Arrays.asList("id","entity", "entityModule", "displayName", "target"));
+        ListPublicationsRequest listReq = new ListPublicationsRequest(Arrays.asList(I(expected.getId())), Arrays.asList("id", "entity", "entityModule", "displayName", "target"));
         ListPublicationsResponse listResp = getClient().execute(listReq);
 
         assertEquals("Should only find one element", 1, listResp.getList().size());
@@ -107,15 +106,16 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
 
-    public void testListExistingPublicationOfEmptyFolder() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
+    @Test
+    public void testListExistingPublicationOfEmptyFolder() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         final FolderObject contact = createDefaultContactFolder();
-        String folderID = String.valueOf(contact.getObjectID() );
+        String folderID = String.valueOf(contact.getObjectID());
         String module = "contacts";
 
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(discovery);
 
-        Publication expected = generatePublication(module, folderID , discovery);
+        Publication expected = generatePublication(module, folderID, discovery);
         expected.setDisplayName("This will be changed");
 
         pubMgr.newAction(expected);
@@ -123,9 +123,7 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
         expected.setId(newResp.getId());
 
-        pubMgr.listAction(
-            Arrays.asList(I(expected.getId())),
-            Arrays.asList("id","entity", "entityModule", "displayName", "target"));
+        pubMgr.listAction(Arrays.asList(I(expected.getId())), Arrays.asList("id", "entity", "entityModule", "displayName", "target"));
         ListPublicationsResponse listResp = (ListPublicationsResponse) pubMgr.getLastResponse();
 
         assertEquals("Should only find one element", 1, listResp.getList().size());

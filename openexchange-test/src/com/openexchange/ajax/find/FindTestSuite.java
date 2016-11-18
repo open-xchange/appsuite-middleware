@@ -67,7 +67,6 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-
 /**
  * {@link FindTestSuite}
  *
@@ -105,10 +104,12 @@ public final class FindTestSuite {
         tests.addTestSuite(Bug42970Test.class);
 
         TestSetup setup = new TestSetup(tests) {
+
             @Override
             protected void setUp() {
                 FindTasksTestEnvironment.getInstance().init();
             }
+
             @Override
             protected void tearDown() throws Exception {
                 FindTasksTestEnvironment.getInstance().cleanup();

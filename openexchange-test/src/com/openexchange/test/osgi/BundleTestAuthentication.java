@@ -51,6 +51,7 @@ package com.openexchange.test.osgi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.LoginTest;
 
 /**
@@ -69,14 +70,11 @@ public final class BundleTestAuthentication extends AbstractBundleTest {
         super();
     }
 
+    @Test
     public void testAuthenticationAbsence() {
         try {
             final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * Check for error
@@ -94,9 +92,7 @@ public final class BundleTestAuthentication extends AbstractBundleTest {
              */
             assertTrue("Missing error parameters", jsonObject.has("error_params") && !jsonObject.isNull("error_params"));
             final JSONArray jArray = jsonObject.getJSONArray("error_params");
-            assertTrue(
-                "Unexpected error parameters: " + jArray,
-                jArray.length() == 1 && "com.openexchange.authentication.AuthenticationService".equals(jArray.getString(0)));
+            assertTrue("Unexpected error parameters: " + jArray, jArray.length() == 1 && "com.openexchange.authentication.AuthenticationService".equals(jArray.getString(0)));
 
         } catch (final Exception e) {
             e.printStackTrace();

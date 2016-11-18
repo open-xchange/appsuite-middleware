@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -95,6 +96,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
         exception.setIgnoreConflicts(false);
     }
 
+    @Test
     public void testExcplicitWrongEndDate() throws Exception {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
         exception.setEndDate(TimeTools.D("03.08.2016 09:00"));
@@ -104,6 +106,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
         assertTrue("Wrong exception.", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
     }
 
+    @Test
     public void testImplicitWrongEndDate() throws Exception {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
         ctm.update(exception);
@@ -112,6 +115,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
         assertTrue("Wrong exception.", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
     }
 
+    @Test
     public void testExcplicitWrongStartDate() throws Exception {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
         exception.setEndDate(TimeTools.D("03.08.2016 07:00"));
@@ -121,6 +125,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
         assertTrue("Wrong exception.", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
     }
 
+    @Test
     public void testImplicitWrongStartDate() throws Exception {
         exception.setEndDate(TimeTools.D("03.08.2016 07:00"));
         ctm.update(exception);

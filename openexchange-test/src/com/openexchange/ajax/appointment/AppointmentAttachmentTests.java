@@ -53,6 +53,9 @@ import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -89,8 +92,8 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         folderId = client.getValues().getPrivateAppointmentFolder();
         tz = client.getValues().getTimeZone();
@@ -109,12 +112,13 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithGet() throws Throwable {
         GetResponse response = client.execute(new GetRequest(appointment.getParentFolderID(), appointment.getObjectID()));
         appointment.setLastModified(response.getTimestamp());
@@ -122,14 +126,9 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithAll() throws Throwable {
-        CommonAllResponse response = client.execute(new AllRequest(
-            appointment.getParentFolderID(),
-            new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT },
-            appointment.getStartDate(),
-            appointment.getEndDate(),
-            tz,
-            true));
+        CommonAllResponse response = client.execute(new AllRequest(appointment.getParentFolderID(), new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, appointment.getStartDate(), appointment.getEndDate(), tz, true));
         appointment.setLastModified(response.getTimestamp());
         Appointment test = null;
         int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
@@ -147,10 +146,9 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithList() throws Throwable {
-        CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] {
-            appointment.getParentFolderID(), appointment.getObjectID() }), new int[] {
-            Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
+        CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID() }), new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
         appointment.setLastModified(response.getTimestamp());
         Appointment test = null;
         int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);

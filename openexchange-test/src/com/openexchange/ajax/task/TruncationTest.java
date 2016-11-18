@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import org.junit.Test;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -59,12 +60,14 @@ import com.openexchange.tools.RandomString;
 /**
  * Tests if too long values for task attributes are correctly catched in the
  * server and sent to the AJAX client.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TruncationTest extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * 
      * @param name Name of the test.
      */
     public TruncationTest() {
@@ -74,8 +77,10 @@ public class TruncationTest extends AbstractTaskTest {
     /**
      * Creates a task with a to long title and checks if the data truncation
      * is detected.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testTruncation() throws Throwable {
         final Task task = new Task();
         // Title length in database is 256.
@@ -83,8 +88,7 @@ public class TruncationTest extends AbstractTaskTest {
         // Trip meter length in database is 255.
         task.setTripMeter(RandomString.generateChars(256));
         task.setParentFolderID(getPrivateFolder());
-        final InsertResponse response = getClient().execute(new InsertRequest(
-            task, getTimeZone(), false));
+        final InsertResponse response = getClient().execute(new InsertRequest(task, getTimeZone(), false));
         assertTrue("Server did not detect truncated data.", response.hasError());
         assertTrue("Array of truncated attribute identifier is empty.", response.getProblematics().length > 0);
         final StringBuilder sb = new StringBuilder();

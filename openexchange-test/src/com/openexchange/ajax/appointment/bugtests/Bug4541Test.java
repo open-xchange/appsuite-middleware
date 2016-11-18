@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.appointment.bugtests;
 
 import com.openexchange.ajax.AppointmentTest;
@@ -9,49 +10,48 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class Bug4541Test extends AppointmentTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4541Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4541Test.class);
 
-	public void testBug4541() throws Exception {
-		final FolderObject folderObj = new FolderObject();
-		folderObj.setFolderName("testBug4541" + System.currentTimeMillis());
-		folderObj.setParentFolderID(FolderObject.PRIVATE);
-		folderObj.setModule(FolderObject.CALENDAR);
-		folderObj.setType(FolderObject.PRIVATE);
+    public void testBug4541() throws Exception {
+        final FolderObject folderObj = new FolderObject();
+        folderObj.setFolderName("testBug4541" + System.currentTimeMillis());
+        folderObj.setParentFolderID(FolderObject.PRIVATE);
+        folderObj.setModule(FolderObject.CALENDAR);
+        folderObj.setType(FolderObject.PRIVATE);
 
-		final OCLPermission[] permission = new OCLPermission[] {
-			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-		};
+        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+        };
 
-		folderObj.setPermissionsAsArray( permission );
+        folderObj.setPermissionsAsArray(permission);
 
-		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
+        final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
 
-		final Appointment appointmentObj = createAppointmentObject("testBug4541");
-		appointmentObj.setParentFolderID(newFolderId);
-		appointmentObj.setIgnoreConflicts(true);
+        final Appointment appointmentObj = createAppointmentObject("testBug4541");
+        appointmentObj.setParentFolderID(newFolderId);
+        appointmentObj.setIgnoreConflicts(true);
 
-		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[1];
-		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userId);
+        final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[1];
+        participants[0] = new UserParticipant();
+        participants[0].setIdentifier(userId);
 
-		appointmentObj.setParticipants(participants);
+        appointmentObj.setParticipants(participants);
 
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-		appointmentObj.setObjectID(objectId);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        appointmentObj.setObjectID(objectId);
 
-		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
-		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
+        compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-		appointmentObj.setTitle("testBug4541 - update");
-		appointmentObj.removeParentFolderID();
+        appointmentObj.setTitle("testBug4541 - update");
+        appointmentObj.removeParentFolderID();
 
-		updateAppointment(getWebConversation(), appointmentObj, objectId, newFolderId, timeZone, getHostName(), getSessionId());
-		appointmentObj.setParentFolderID(newFolderId);
+        updateAppointment(getWebConversation(), appointmentObj, objectId, newFolderId, timeZone, getHostName(), getSessionId());
+        appointmentObj.setParentFolderID(newFolderId);
 
-		loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
-		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+        loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
+        compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-		deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getSessionId(), false);
-		FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword(), "");
-	}
+        deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getSessionId(), false);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword(), "");
+    }
 }

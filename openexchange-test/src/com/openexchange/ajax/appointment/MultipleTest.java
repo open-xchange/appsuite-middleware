@@ -2,6 +2,7 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
@@ -21,6 +22,7 @@ public class MultipleTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleTest.class);
 
+    @Test
     public void testMultipleInsert() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testMultipleInsert");
         appointmentObj.setIgnoreConflicts(true);
@@ -30,8 +32,7 @@ public class MultipleTest extends AppointmentTest {
         final InsertRequest insertRequest2 = new InsertRequest(appointmentObj, timeZone, true);
         final InsertRequest insertRequest3 = new InsertRequest(appointmentObj, timeZone, true);
 
-        final MultipleRequest multipleInsertRequest = MultipleRequest.create(new AJAXRequest[] {
-            insertRequest1, insertRequest2, insertRequest3 });
+        final MultipleRequest multipleInsertRequest = MultipleRequest.create(new AJAXRequest[] { insertRequest1, insertRequest2, insertRequest3 });
         final MultipleResponse multipleInsertResponse = (MultipleResponse) Executor.execute(ajaxSession, multipleInsertRequest);
 
         assertFalse("first insert request has errors: ", multipleInsertResponse.getResponse(0).hasError());
@@ -42,13 +43,7 @@ public class MultipleTest extends AppointmentTest {
         final int objectId2 = ((CommonInsertResponse) multipleInsertResponse.getResponse(1)).getId();
         final int objectId3 = ((CommonInsertResponse) multipleInsertResponse.getResponse(2)).getId();
 
-        final Appointment loadAppointment = loadAppointment(
-            getWebConversation(),
-            objectId3,
-            appointmentFolderId,
-            timeZone,
-            getHostName(),
-            getSessionId());
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId3, appointmentFolderId, timeZone, getHostName(), getSessionId());
         final Date modified = loadAppointment.getLastModified();
 
         final DeleteRequest deleteRequest1 = new DeleteRequest(objectId1, appointmentFolderId, modified);

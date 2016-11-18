@@ -58,6 +58,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -90,8 +93,8 @@ public class Bug34928Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         AJAXConfig.init();
         login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password = AJAXConfig.getProperty(Property.PASSWORD);
@@ -99,14 +102,15 @@ public class Bug34928Test extends AbstractAJAXSession {
         client.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != client && false == Strings.isEmpty(client.getSession().getId())) {
             client.logout();
         }
         super.tearDown();
     }
 
+    @Test
     public void testAutoHttpAuthLogin() throws Exception {
         /*
          * perform initial HTTP Auth login & store session cookie
@@ -127,6 +131,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         client.getSession().setId(firstSessionID);
     }
 
+    @Test
     public void testAutoHttpLoginWithWrongSecretCookie() throws Exception {
         /*
          * perform initial HTTP Auth login & store session cookie
@@ -148,6 +153,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         cookie.setValue(correctSecret);
     }
 
+    @Test
     public void testAutoHttpLoginWithWrongSessionCookie() throws Exception {
         /*
          * perform initial HTTP Auth login & store session cookie
@@ -169,6 +175,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         cookie.setValue(correctSession);
     }
 
+    @Test
     public void testAutoHttpLoginWithoutStore() throws Exception {
         /*
          * perform initial HTTP Auth login, don't store session cookie

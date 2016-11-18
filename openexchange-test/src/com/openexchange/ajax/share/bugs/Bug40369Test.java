@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -81,6 +82,7 @@ public class Bug40369Test extends ShareTest {
         super();
     }
 
+    @Test
     public void testCreateFolderLinkConcurrentlyRandomly() throws Exception {
         testCreateFolderLinkConcurrently(randomFolderAPI(), randomModule());
     }
@@ -97,6 +99,7 @@ public class Bug40369Test extends ShareTest {
         testCreateFolderLinkConcurrently(api, module, getDefaultFolder(module));
     }
 
+    @Test
     public void testCreateFileLinkConcurrently() throws Exception {
         /*
          * create folder and a file inside

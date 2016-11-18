@@ -51,7 +51,7 @@ package com.openexchange.webdav.xml.task;
 
 import java.util.Date;
 import java.util.Locale;
-
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -68,11 +68,13 @@ public class NewTest extends TaskTest {
         super();
     }
 
+    @Test
     public void testNewTask() throws Exception {
         final Task taskObj = createTask("testNewTask");
         insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testNewTaskWithParticipants() throws Exception {
         final Task taskObj = createTask("testNewTaskWithParticipants");
 
@@ -92,17 +94,19 @@ public class NewTest extends TaskTest {
         insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testNewTaskWithAlarm() throws Exception {
         final Task taskObj = createTask("testNewTaskWithAlarm");
-        taskObj.setAlarm(new Date(startTime.getTime()-(2*dayInMillis)));
+        taskObj.setAlarm(new Date(startTime.getTime() - (2 * dayInMillis)));
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
         taskObj.setObjectID(objectId);
         final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         compareObject(taskObj, loadTask);
-        final int[][] objectIdAndFolderId = { {objectId, taskFolderId } };
+        final int[][] objectIdAndFolderId = { { objectId, taskFolderId } };
         deleteTask(getWebConversation(), objectIdAndFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testNewTaskWithUsers() throws Exception {
         final Task taskObj = createTask("testNewTaskWithUsers");
 
@@ -119,6 +123,7 @@ public class NewTest extends TaskTest {
         insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testTaskWithPrivateFlagInPublicFolder() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testTaskWithPrivateFlagInPublicFolder" + System.currentTimeMillis());
@@ -126,11 +131,10 @@ public class NewTest extends TaskTest {
         folderObj.setType(FolderObject.PUBLIC);
         folderObj.setParentFolderID(2);
 
-        final OCLPermission[] permission = new OCLPermission[] {
-            FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
+        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
         };
 
-        folderObj.setPermissionsAsArray( permission );
+        folderObj.setPermissionsAsArray(permission);
 
         final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
@@ -144,18 +148,19 @@ public class NewTest extends TaskTest {
             deleteTask(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             fail("conflict exception expected!");
         } catch (final OXException exc) {
-        	assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), "TSK-0008");
+            assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), "TSK-0008");
         }
     }
-    // Bug 12011
+
+    // Bug 12011    @Test
     public void testBulkAdd() throws Exception {
         int[] objectIds = null;
 
         final int NUMBER_OF_TASKS = 30;
         final Task[] tasks = new Task[NUMBER_OF_TASKS];
 
-        for(int i = 0; i < NUMBER_OF_TASKS; i++) {
-            tasks[i] = createTask("TASK - "+i);
+        for (int i = 0; i < NUMBER_OF_TASKS; i++) {
+            tasks[i] = createTask("TASK - " + i);
         }
 
         try {
@@ -164,7 +169,7 @@ public class NewTest extends TaskTest {
 
             int i = 0;
 
-            for(final int objectId : objectIds) {
+            for (final int objectId : objectIds) {
                 final Task task = loadTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
                 tasks[i].setObjectID(objectId);
                 compareObject(task, tasks[i]);
@@ -173,10 +178,10 @@ public class NewTest extends TaskTest {
             }
 
         } finally {
-            if(null != objectIds) {
+            if (null != objectIds) {
                 int i = 0;
                 try {
-                    for(final int objectId : objectIds) {
+                    for (final int objectId : objectIds) {
                         deleteTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
                         i++;
                     }

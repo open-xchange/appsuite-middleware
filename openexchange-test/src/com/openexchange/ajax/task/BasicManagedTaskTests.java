@@ -51,6 +51,7 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.groupware.calendar.TimeTools.removeMilliseconds;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -62,6 +63,7 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         super();
     }
 
+    @Test
     public void testCreateAndGet() {
         Task expected = generateTask("Create test");
         manager.insertTaskOnServer(expected);
@@ -73,14 +75,15 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         assertEquals("Should have the same last modified", expected.getLastModified(), actual.getLastModified());
     }
 
+    @Test
     public void testAll() {
         int numberBefore = manager.getAllTasksOnServer(folderID, new int[] { 1, 4, 5, 20, 209 }).length;
         Task expected = generateTask("Create test");
         manager.insertTaskOnServer(expected);
         Task[] allTasksOnServer = manager.getAllTasksOnServer(folderID, new int[] { 1, 4, 5, 20, 209 });
         actual = null;
-        for(Task temp: allTasksOnServer){
-            if(expected.getObjectID() == temp.getObjectID()) {
+        for (Task temp : allTasksOnServer) {
+            if (expected.getObjectID() == temp.getObjectID()) {
                 actual = temp;
             }
         }
@@ -93,6 +96,7 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         assertEquals("Should have the same field #209", expected.get(209), actual.get(209));
     }
 
+    @Test
     public void testUpdateAndReceiveUpdates() {
         Task expected = generateTask("Create test");
         manager.insertTaskOnServer(expected);
@@ -104,7 +108,7 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
 
         manager.updateTaskOnServer(updated);
 
-        Date aMillisecondEarlier = new Date(expected.getLastModified().getTime()-1);
+        Date aMillisecondEarlier = new Date(expected.getLastModified().getTime() - 1);
         Task[] updates = manager.getUpdatedTasksOnServer(folderID, new int[] { 1, 4, 5, 209 }, aMillisecondEarlier);
         assertEquals("Should find one update only", 1, updates.length);
 
@@ -116,6 +120,7 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         assertEquals("Should have the same field #209", expected.get(209), actual.get(209));
     }
 
+    @Test
     public void testCreateAndDelete() {
         Task task = generateTask("Create test");
         manager.insertTaskOnServer(task);

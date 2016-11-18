@@ -51,7 +51,6 @@ package com.openexchange;
 
 import java.io.IOException;
 import java.util.Random;
-import junit.framework.AssertionFailedError;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.AuthorizationRequiredException;
 import com.meterware.httpunit.HeadMethodWebRequest;
@@ -67,9 +66,11 @@ import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
+import junit.framework.AssertionFailedError;
 
 /**
  * Tests if AJAX and WebDAV requests may get mixed up.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class MixTest {
@@ -111,12 +112,7 @@ public final class MixTest {
 
         private final AJAXSession session = new AJAXSession();
 
-        private final LoginRequest request = new LoginRequest(
-            AJAXConfig.getProperty(Property.LOGIN),
-            AJAXConfig.getProperty(Property.PASSWORD),
-            LoginTools.generateAuthId(),
-            MixTest.class.getName(),
-            "6.15.0");
+        private final LoginRequest request = new LoginRequest(AJAXConfig.getProperty(Property.LOGIN), AJAXConfig.getProperty(Property.PASSWORD), LoginTools.generateAuthId(), MixTest.class.getName(), "6.15.0");
 
         private final Random rand = new Random(System.currentTimeMillis());
 
@@ -161,25 +157,17 @@ public final class MixTest {
         @Override
         public void run() {
             final WebConversation conv = new WebConversation();
-            final WebRequest req = new HeadMethodWebRequest(
-                AJAXConfig.getProperty(Property.PROTOCOL) + "://"
-                    + AJAXConfig.getProperty(Property.HOSTNAME)
-                    + "/servlet/webdav.infostore");
-            conv.setAuthorization(
-                AJAXConfig.getProperty(Property.LOGIN),
-                AJAXConfig.getProperty(Property.PASSWORD));
+            final WebRequest req = new HeadMethodWebRequest(AJAXConfig.getProperty(Property.PROTOCOL) + "://" + AJAXConfig.getProperty(Property.HOSTNAME) + "/servlet/webdav.infostore");
+            conv.setAuthorization(AJAXConfig.getProperty(Property.LOGIN), AJAXConfig.getProperty(Property.PASSWORD));
             try {
                 while (true) {
                     try {
                         final WebResponse resp = conv.getResponse(req);
-                        if (resp.getResponseCode() != 200
-                            || !"httpd/unix-directory".equals(resp.getContentType())) {
+                        if (resp.getResponseCode() != 200 || !"httpd/unix-directory".equals(resp.getContentType())) {
                             System.out.println("discovered mod_jk problem!");
                         }
-                        if (resp.getResponseCode() == 200
-                            && resp.getContentType().startsWith("text/javascript")) {
-                            System.out.println("Invalid body found! \""
-                                + resp.getText() + "\"");
+                        if (resp.getResponseCode() == 200 && resp.getContentType().startsWith("text/javascript")) {
+                            System.out.println("Invalid body found! \"" + resp.getText() + "\"");
                         }
                     } catch (final AuthorizationRequiredException e) {
                         System.out.println("Login failed.");

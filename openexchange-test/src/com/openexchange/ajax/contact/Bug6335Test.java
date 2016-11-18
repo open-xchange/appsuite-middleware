@@ -68,54 +68,54 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * Tests if bug 6335 appears again in tasks.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug6335Test extends ContactTest {
 
-	public void testBug6335() throws Exception {
+    public void testBug6335() throws Exception {
 
-		final Contact contactObj = new Contact();
-		contactObj.setSurName("\u001f");
-		contactObj.setParentFolderID(contactFolderId);
+        final Contact contactObj = new Contact();
+        contactObj.setSurName("\u001f");
+        contactObj.setParentFolderID(contactFolderId);
 
-		//final int objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
-		final WebConversation webCon = getWebConversation();
-		String host = getHostName();
-		host = appendPrefix(host);
+        //final int objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
+        final WebConversation webCon = getWebConversation();
+        String host = getHostName();
+        host = appendPrefix(host);
 
-		final StringWriter stringWriter = new StringWriter();
-		final JSONObject jsonObj = new JSONObject();
-		final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
-		contactWriter.writeContact(contactObj, jsonObj, null);
+        final StringWriter stringWriter = new StringWriter();
+        final JSONObject jsonObj = new JSONObject();
+        final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
+        contactWriter.writeContact(contactObj, jsonObj, null);
 
-		stringWriter.write(jsonObj.toString());
-		stringWriter.flush();
+        stringWriter.write(jsonObj.toString());
+        stringWriter.flush();
 
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
+        final URLParameter parameter = new URLParameter();
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 
-		WebRequest req = null;
-		WebResponse resp = null;
+        WebRequest req = null;
+        WebResponse resp = null;
 
-		JSONObject jResponse = null;
+        JSONObject jResponse = null;
 
-		final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
+        final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 
-		req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		resp = webCon.getResponse(req);
+        req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
+        resp = webCon.getResponse(req);
 
-		jResponse = new JSONObject(resp.getText());
+        jResponse = new JSONObject(resp.getText());
 
-		assertEquals(200, resp.getResponseCode());
+        assertEquals(200, resp.getResponseCode());
 
-		final Response response = Response.parse(jResponse.toString());
-
+        final Response response = Response.parse(jResponse.toString());
 
         assertTrue("Invalid character was not detected.", response.hasError());
         //final OXException.Code code = OXException.Code.INVALID_DATA;
         final OXException exc = response.getException();
         assertEquals("Wrong exception message.", Category.CATEGORY_USER_INPUT, exc.getCategory());
         assertEquals("Wrong exception message.", 168, exc.getCode());
-	}
+    }
 }

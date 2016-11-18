@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import org.junit.Test;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;
 
@@ -70,6 +71,7 @@ public class Bug37211Test extends AbstractInfostoreTest {
         super();
     }
 
+    @Test
     public void testMoveFolderFromTrash() throws Exception {
         /*
          * create folder below trash

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
@@ -82,6 +83,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
     /**
      * Insert a single rule in position 0 when list is empty
      */
+    @Test
     public void testBug46589_0() throws Exception {
         // Create the rule
         final Rule expected;
@@ -105,6 +107,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
     /**
      * Insert multiple rules in positions when list is filled
      */
+    @Test
     public void testBug46589_1() throws Exception {
         // Create 5 rules and insert them
         LinkedList<Rule> expectedRules = new LinkedList<>();

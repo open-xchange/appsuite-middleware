@@ -33,8 +33,7 @@ public class AllTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
 
-    private static final int[] SIMPLE_COLUMNS = new int[] {
-        Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };
+    private static final int[] SIMPLE_COLUMNS = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };
 
     public AllTest() {
         super();
@@ -47,7 +46,7 @@ public class AllTest extends AppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-//        clean();
+        //        clean();
     }
 
     @Test
@@ -126,12 +125,7 @@ public class AllTest extends AppointmentTest {
         anotherAppointment.setParentFolderID(appointmentFolderId);
         create(anotherAppointment);
 
-        final AllRequest all = new AllRequest(
-            appointmentFolderId,
-            SIMPLE_COLUMNS,
-            D("01/01/1999 00:00"),
-            D("01/01/2000 00:00"),
-            TimeZones.UTC);
+        final AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1999 00:00"), D("01/01/2000 00:00"), TimeZones.UTC);
         final CommonAllResponse allResponse = getClient().execute(all);
 
         // Verify appointments are included in response
@@ -193,16 +187,7 @@ public class AllTest extends AppointmentTest {
 
         final int cols[] = new int[] { Appointment.OBJECT_ID };
 
-        listAppointment(
-            getWebConversation(),
-            appointmentFolderId,
-            cols,
-            start,
-            end,
-            timeZone,
-            false,
-            PROTOCOL + getHostName(),
-            getSessionId());
+        listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
     }
 
     @Test
@@ -212,16 +197,7 @@ public class AllTest extends AppointmentTest {
 
         final int cols[] = new int[] { Appointment.OBJECT_ID };
 
-        listAppointment(
-            getWebConversation(),
-            appointmentFolderId,
-            cols,
-            start,
-            end,
-            timeZone,
-            true,
-            PROTOCOL + getHostName(),
-            getSessionId());
+        listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
     }
 
     @Test
@@ -258,16 +234,7 @@ public class AllTest extends AppointmentTest {
         Date start = calendar.getTime();
         Date end = new Date(start.getTime() + dayInMillis);
 
-        Appointment[] appointmentArray = listAppointment(
-            getWebConversation(),
-            appointmentFolderId,
-            cols,
-            start,
-            end,
-            timeZone,
-            false,
-            getHostName(),
-            getSessionId());
+        Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
         boolean found = false;
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
@@ -279,16 +246,7 @@ public class AllTest extends AppointmentTest {
         // one day less
         start = new Date(calendar.getTimeInMillis() - dayInMillis);
         end = new Date(start.getTime() + dayInMillis);
-        appointmentArray = listAppointment(
-            getWebConversation(),
-            appointmentFolderId,
-            cols,
-            start,
-            end,
-            timeZone,
-            false,
-            getHostName(),
-            getSessionId());
+        appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
         found = false;
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
@@ -300,16 +258,7 @@ public class AllTest extends AppointmentTest {
         // one day more
         start = new Date(calendar.getTimeInMillis() + dayInMillis);
         end = new Date(start.getTime() + dayInMillis);
-        appointmentArray = listAppointment(
-            getWebConversation(),
-            appointmentFolderId,
-            cols,
-            start,
-            end,
-            timeZone,
-            false,
-            getHostName(),
-            getSessionId());
+        appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
         found = false;
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
@@ -337,8 +286,7 @@ public class AllTest extends AppointmentTest {
         try {
             objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 
-            final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, new Date(0), new Date(
-                Long.MAX_VALUE), timeZone, false, getHostName(), getSessionId());
+            final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), timeZone, false, getHostName(), getSessionId());
 
             for (final Appointment loaded : appointmentArray) {
                 if (loaded.getObjectID() == objectId) {
@@ -364,12 +312,7 @@ public class AllTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
         try {
-            final AllRequest req = new AllRequest(
-                appointmentFolderId,
-                cols,
-                new Date(0),
-                new Date(Long.MAX_VALUE),
-                TimeZone.getTimeZone("UTC"));
+            final AllRequest req = new AllRequest(appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), TimeZone.getTimeZone("UTC"));
 
             final CommonAllResponse response = Executor.execute(client, req);
             final JSONArray arr = (JSONArray) response.getResponse().getData();

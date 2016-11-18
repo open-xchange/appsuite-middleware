@@ -78,79 +78,82 @@ import com.openexchange.test.ContactTestManager;
  */
 public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 
-	private Contact contact;
+    private Contact contact;
 
-	public Bug18094Test_VCardRoundtrip(String name) {
-		super();
-	}
+    public Bug18094Test_VCardRoundtrip(String name) {
+        super();
+    }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		contact = ContactTestManager.generateFullContact(folderID);
-		manager.newAction(contact);
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        contact = ContactTestManager.generateFullContact(folderID);
+        manager.newAction(contact);
+    }
 
-	public void testFullVCardRoundtrip() throws Exception{
-		VCardExportRequest exportRequest = new VCardExportRequest(folderID, false);
-		VCardExportResponse exportResponse = manager.getClient().execute(exportRequest);
+    public void testFullVCardRoundtrip() throws Exception {
+        VCardExportRequest exportRequest = new VCardExportRequest(folderID, false);
+        VCardExportResponse exportResponse = manager.getClient().execute(exportRequest);
 
-		String vcard = exportResponse.getVCard();
-		manager.deleteAction(contact);
+        String vcard = exportResponse.getVCard();
+        manager.deleteAction(contact);
 
-		VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vcard.getBytes()));
-		VCardImportResponse importResponse = manager.getClient().execute(importRequest);
+        VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vcard.getBytes()));
+        VCardImportResponse importResponse = manager.getClient().execute(importRequest);
 
-		JSONArray response = (JSONArray) importResponse.getData();
-		assertEquals("Precondition: Should only find one contact in there", 1, response.length());
+        JSONArray response = (JSONArray) importResponse.getData();
+        assertEquals("Precondition: Should only find one contact in there", 1, response.length());
 
-		JSONObject jsonObject = response.getJSONObject(0);
+        JSONObject jsonObject = response.getJSONObject(0);
 
-		Contact actual = manager.getAction(
-				jsonObject.getInt("folder_id"),
-				jsonObject.getInt("id"));
+        Contact actual = manager.getAction(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
 
-		Set<ContactField> excluded = new HashSet<ContactField>(){{
-			add(ContactField.FOLDER_ID);
-			add(ContactField.OBJECT_ID);
-			add(ContactField.LAST_MODIFIED);
-			add(ContactField.MODIFIED_BY);
-			add(ContactField.CREATION_DATE);
-			add(ContactField.CREATED_BY);
-			add(ContactField.INTERNAL_USERID);
-			add(ContactField.MARK_AS_DISTRIBUTIONLIST);
-			add(ContactField.NUMBER_OF_ATTACHMENTS);
-			add(ContactField.NUMBER_OF_DISTRIBUTIONLIST);
-			add(ContactField.IMAGE1_URL);
-		}};
+        Set<ContactField> excluded = new HashSet<ContactField>() {
 
-		List<ContactField> mismatches = new LinkedList<ContactField>();
+            {
+                add(ContactField.FOLDER_ID);
+                add(ContactField.OBJECT_ID);
+                add(ContactField.LAST_MODIFIED);
+                add(ContactField.MODIFIED_BY);
+                add(ContactField.CREATION_DATE);
+                add(ContactField.CREATED_BY);
+                add(ContactField.INTERNAL_USERID);
+                add(ContactField.MARK_AS_DISTRIBUTIONLIST);
+                add(ContactField.NUMBER_OF_ATTACHMENTS);
+                add(ContactField.NUMBER_OF_DISTRIBUTIONLIST);
+                add(ContactField.IMAGE1_URL);
+            }
+        };
 
-		for(ContactField field: ContactField.values()){
-			if(excluded.contains(field)) {
+        List<ContactField> mismatches = new LinkedList<ContactField>();
+
+        for (ContactField field : ContactField.values()) {
+            if (excluded.contains(field)) {
                 continue;
             }
-			int number = field.getNumber();
-			Object actualValue = actual.get(number);
-			Object expectedValue = contact.get(number);
+            int number = field.getNumber();
+            Object actualValue = actual.get(number);
+            Object expectedValue = contact.get(number);
 
-			if(expectedValue == null && actualValue == null) {
+            if (expectedValue == null && actualValue == null) {
                 continue;
             }
 
-			if(expectedValue == null || !expectedValue.equals(actualValue)) {
+            if (expectedValue == null || !expectedValue.equals(actualValue)) {
                 mismatches.add(field);
             }
-		}
+        }
 
-		java.util.Collections.sort(mismatches, new Comparator<ContactField>(){
-			@Override
+        java.util.Collections.sort(mismatches, new Comparator<ContactField>() {
+
+            @Override
             public int compare(ContactField o1, ContactField o2) {
-				return o1.toString().compareTo(o2.toString());
-			}});
-		String fields = Strings.join(mismatches," ");
-		//System.out.println(fields);
-		assertTrue("Too many ("+mismatches.size()+") fields not surviving the roundtrip: \n"+fields, mismatches.size() < 58);
-	}
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+        String fields = Strings.join(mismatches, " ");
+        //System.out.println(fields);
+        assertTrue("Too many (" + mismatches.size() + ") fields not surviving the roundtrip: \n" + fields, mismatches.size() < 58);
+    }
 
 }

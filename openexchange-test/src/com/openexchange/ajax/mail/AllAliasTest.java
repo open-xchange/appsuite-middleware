@@ -50,6 +50,9 @@
 package com.openexchange.ajax.mail;
 
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
@@ -71,16 +74,18 @@ public class AllAliasTest extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void testAllAlias() throws Exception {
         final AJAXClient client = getClient();
         final AllRequest allAliasRequest = new AllRequest(client.getValues().getInboxFolder(), "all", 0, Order.ASCENDING, true);

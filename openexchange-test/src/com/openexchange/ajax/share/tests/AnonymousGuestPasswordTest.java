@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -81,6 +82,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testUpdatePasswordForAnonymousGuest() throws Exception {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         /*
@@ -158,6 +160,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         assertNull("Password is set", guest.getPassword());
     }
 
+    @Test
     public void testDontAllowAnonymousGuestPasswordUpdate() throws Exception {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission("secret");
         /*
@@ -193,8 +196,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * try to update password
          */
         String newPassword = "secret2";
-        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(
-            newPassword, ((AnonymousRecipient) guestPermission.getRecipient()).getPassword(), false);
+        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(newPassword, ((AnonymousRecipient) guestPermission.getRecipient()).getPassword(), false);
         PasswordChangeUpdateResponse response = guestClient.execute(updateRequest);
         assertTrue("No errors in response", response.hasError());
         /*

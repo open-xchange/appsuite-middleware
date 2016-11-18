@@ -76,6 +76,7 @@ public class Bug11519Test extends AbstractMailFilterTest {
     /**
      * Test for Bug 11519 - sieve filter could not be saved
      */
+    @org.junit.Test
     public void testBug11519() throws Exception {
         // Create rule
         Rule expectedRule = new Rule();

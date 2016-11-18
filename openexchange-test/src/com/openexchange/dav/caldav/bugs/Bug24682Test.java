@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -104,12 +106,8 @@ public class Bug24682Test extends CalDAVTest {
         /*
          * As user C, share your calendar to users B and A
          */
-        FolderTools.shareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(),
-            userA.getClient().getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
-        FolderTools.shareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(),
-            userB.getClient().getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        FolderTools.shareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userA.getClient().getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        FolderTools.shareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userB.getClient().getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
     }
 
     @After
@@ -129,12 +127,10 @@ public class Bug24682Test extends CalDAVTest {
          */
         if (null != userC && null != userC.getClient()) {
             if (null != userA && null != userA.getClient()) {
-                FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(),
-                    userA.getClient().getValues().getUserId());
+                FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userA.getClient().getValues().getUserId());
             }
             if (null != userB && null != userB.getClient()) {
-                FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(),
-                    userB.getClient().getValues().getUserId());
+                FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userB.getClient().getValues().getUserId());
             }
         }
         /*

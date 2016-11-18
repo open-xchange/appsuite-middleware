@@ -72,8 +72,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
      * 
      * @param name
      */
-    public PlistSMSUserLimitTest() {
-    }
+    public PlistSMSUserLimitTest() {}
 
     @Override
     public void setUp() throws Exception {

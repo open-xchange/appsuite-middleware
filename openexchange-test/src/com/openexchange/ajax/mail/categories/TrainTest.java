@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.mail.categories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
@@ -69,8 +69,7 @@ public class TrainTest extends AbstractMailCategoriesTest {
      * 
      * @param name
      */
-    public TrainTest() {
-    }
+    public TrainTest() {}
 
     private static final int[] COLUMNS = new int[] { 102, 600, 601, 602, 603, 604, 605, 606, 607, 608, 610, 611, 614, 652 };
 

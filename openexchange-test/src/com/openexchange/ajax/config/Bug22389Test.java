@@ -50,6 +50,7 @@
 package com.openexchange.ajax.config;
 
 import java.util.regex.Pattern;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.Tree;
@@ -70,6 +71,7 @@ public class Bug22389Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testVersion() throws Exception {
         GetRequest request = new GetRequest(Tree.ServerVersion);
         GetResponse response = client.execute(request);

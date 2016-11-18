@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.appointment;
 
 import java.io.ByteArrayInputStream;
@@ -24,24 +25,24 @@ import com.openexchange.tools.URLParameter;
 @RunWith(ConcurrentTestRunner.class)
 public class CopyTest extends AppointmentTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyTest.class);
     private int targetFolderId;
     private String login;
     private String context;
     private String password;
 
-	public CopyTest() {
-		super();
-	}
+    public CopyTest() {
+        super();
+    }
 
     @Before
     public void setUp() throws Exception {
-	    super.setUp();
-	    targetFolderId = 0;
-	    login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
-	    context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultContext");
-	    password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
-	}
+        super.setUp();
+        targetFolderId = 0;
+        login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+        context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultContext");
+        password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
+    }
 
     @After
     public void tearDown() throws Exception {
@@ -51,57 +52,55 @@ public class CopyTest extends AppointmentTest {
         super.tearDown();
     }
 
-	public void testCopy() throws Exception {
-		final Appointment appointmentObj = new Appointment();
-		final String date = String.valueOf(System.currentTimeMillis());
-		appointmentObj.setTitle("testCopy" + date);
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(Appointment.FREE);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
-		final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+    public void testCopy() throws Exception {
+        final Appointment appointmentObj = new Appointment();
+        final String date = String.valueOf(System.currentTimeMillis());
+        appointmentObj.setTitle("testCopy" + date);
+        appointmentObj.setStartDate(new Date(startTime));
+        appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setShownAs(Appointment.FREE);
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
+        final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
+        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
+        targetFolderId = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
 
+        final URLParameter parameter = new URLParameter();
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY);
+        parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId1);
+        parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, appointmentFolderId);
+        parameter.setParameter(AppointmentFields.IGNORE_CONFLICTS, true);
 
-		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-		targetFolderId = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
+        final JSONObject jsonObj = new JSONObject();
+        jsonObj.put(FolderChildFields.FOLDER_ID, targetFolderId);
+        final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
+        final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
+        final WebResponse resp = getWebConversation().getResponse(req);
 
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY);
-		parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId1);
-		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, appointmentFolderId);
-		parameter.setParameter(AppointmentFields.IGNORE_CONFLICTS, true);
+        assertEquals(200, resp.getResponseCode());
 
-		final JSONObject jsonObj = new JSONObject();
-		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolderId);
-		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-		final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		final WebResponse resp = getWebConversation().getResponse(req);
+        final Response response = Response.parse(resp.getText());
 
-		assertEquals(200, resp.getResponseCode());
+        if (response.hasError()) {
+            fail("json error: " + response.getErrorMessage());
+        }
 
-		final Response response = Response.parse(resp.getText());
+        int objectId2 = 0;
 
-		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
-		}
+        final JSONObject data = (JSONObject) response.getData();
+        if (data.has(DataFields.ID)) {
+            objectId2 = data.getInt(DataFields.ID);
+        }
 
-		int objectId2 = 0;
+        if (data.has("conflicts")) {
+            fail("conflicts found!");
+        }
 
-		final JSONObject data = (JSONObject)response.getData();
-		if (data.has(DataFields.ID)) {
-			objectId2 = data.getInt(DataFields.ID);
-		}
-
-		if (data.has("conflicts")) {
-			fail("conflicts found!");
-		}
-
-		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-		if (objectId2 > 0) {
-			deleteAppointment(getWebConversation(), objectId2, targetFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-		}
-	}
+        deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        if (objectId2 > 0) {
+            deleteAppointment(getWebConversation(), objectId2, targetFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        }
+    }
 }

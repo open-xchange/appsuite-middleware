@@ -90,12 +90,7 @@ public class GetRequest extends AbstractAttachmentRequest<GetResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-            new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderId),
-            new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, attached),
-            new URLParameter(AJAXServlet.PARAMETER_MODULE, module),
-            new URLParameter(AJAXServlet.PARAMETER_ID, id)
+        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET), new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderId), new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, attached), new URLParameter(AJAXServlet.PARAMETER_MODULE, module), new URLParameter(AJAXServlet.PARAMETER_ID, id)
         };
     }
 

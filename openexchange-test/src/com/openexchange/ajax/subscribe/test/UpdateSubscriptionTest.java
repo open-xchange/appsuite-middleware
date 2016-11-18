@@ -51,6 +51,7 @@ package com.openexchange.ajax.subscribe.test;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -58,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
-
 
 /**
  *
@@ -70,7 +70,8 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
         super();
     }
 
-    public void testUpdatingAnExistingValueWithinAnOMXFSubscription() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testUpdatingAnExistingValueWithinAnOMXFSubscription() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
 
         DynamicFormDescription formDescription = generateFormDescription();
@@ -88,7 +89,7 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
         //update
         expected.getConfiguration().put("url", "http://ox.open-exchange.com/2");
         subMgr.updateAction(expected);
-        assertTrue("Should return 1 if update worked", ((UpdateSubscriptionResponse)subMgr.getLastResponse()).wasSuccessful());
+        assertTrue("Should return 1 if update worked", ((UpdateSubscriptionResponse) subMgr.getLastResponse()).wasSuccessful());
 
         //verify via get
 
@@ -97,9 +98,8 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
         assertEquals("Should contain the same url in the configuration", expected.getConfiguration().get("url"), actual.getConfiguration().get("url"));
     }
 
-
-
-    public void testUpdatingAnOMXFSubscriptionWithANewValue() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testUpdatingAnOMXFSubscriptionWithANewValue() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
 
         DynamicFormDescription formDescription = generateFormDescription();
@@ -117,7 +117,7 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
         //update
         expected.getConfiguration().put("username", "Elvis Aaron Presley");
         subMgr.updateAction(expected);
-        assertTrue("Should return 1 if update worked", ((UpdateSubscriptionResponse)subMgr.getLastResponse()).wasSuccessful());
+        assertTrue("Should return 1 if update worked", ((UpdateSubscriptionResponse) subMgr.getLastResponse()).wasSuccessful());
 
         //verify via get
 

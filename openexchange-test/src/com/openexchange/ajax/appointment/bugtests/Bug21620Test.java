@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -125,6 +126,7 @@ public class Bug21620Test extends AbstractAJAXSession {
         appointment.setParticipants(participants);
     }
 
+    @Test
     public void testBug21620() throws Exception {
         InsertRequest insertRequest = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientA.execute(insertRequest);

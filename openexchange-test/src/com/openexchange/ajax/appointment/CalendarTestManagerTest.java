@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -90,11 +91,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         super.setUp();
         calendarMgr = new CalendarTestManager(getClient());
         folderMgr = new FolderTestManager(getClient());
-        testFolder = folderMgr.generatePublicFolder(
-            "Calendar Manager Tests " + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            getClient().getValues().getPrivateAppointmentFolder(),
-            getClient().getValues().getUserId());
+        testFolder = folderMgr.generatePublicFolder("Calendar Manager Tests " + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         folderMgr.insertFolderOnServer(testFolder);
     }
 
@@ -114,6 +111,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         return appointment;
     }
 
+    @Test
     public void testCreate() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
@@ -124,6 +122,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         assertExists(appointment);
     }
 
+    @Test
     public void testRemove() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
@@ -137,6 +136,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         assertDoesNotExist(appointment);
     }
 
+    @Test
     public void testGet() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
@@ -154,6 +154,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         assertEquals(appointment.getTitle(), reload.getTitle());
     }
 
+    @Test
     public void testUpdate() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
@@ -179,6 +180,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         assertEquals(25000, reload.getEndDate().getTime());
     }
 
+    @Test
     public void testUpdates() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
@@ -204,6 +206,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         assertEquals("Should contain the updated title", updatedTitle, updates.get(0).getTitle());
     }
 
+    @Test
     public void testGetAllInFolder() throws Exception {
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(testFolder.getObjectID());
@@ -214,10 +217,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
         calendarMgr.insert(appointment);
 
-        Appointment[] appointments = calendarMgr.all(
-            appointment.getParentFolderID(),
-            D("01/01/1999 00:00"),
-            D("01/03/1999 00:00"));
+        Appointment[] appointments = calendarMgr.all(appointment.getParentFolderID(), D("01/01/1999 00:00"), D("01/03/1999 00:00"));
 
         assertNotNull(appointments);
         assertInList(appointments, appointment);

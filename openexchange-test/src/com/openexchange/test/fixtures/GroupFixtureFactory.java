@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.HashMap;
@@ -57,19 +58,21 @@ import com.openexchange.group.Group;
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class GroupFixtureFactory implements FixtureFactory<Group> {
+
     private final FixtureLoader fixtureLoader;
 
-	public GroupFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
+    public GroupFixtureFactory(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
+    }
 
-	@Override
+    @Override
     public Fixtures<Group> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new GroupFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class GroupFixtures extends DefaultFixtures<Group> implements Fixtures<Group> {
+
         private final Map<String, Map<String, String>> entries;
 
         private final Map<String, Fixture<Group>> groupMap = new HashMap<String, Fixture<Group>>();
@@ -88,7 +91,7 @@ public class GroupFixtureFactory implements FixtureFactory<Group> {
             final Map<String, String> values = entries.get(entryName);
 
             if (null == values) {
-                throw new FixtureException("Entry with name "+entryName+" not found");
+                throw new FixtureException("Entry with name " + entryName + " not found");
             }
 
             final Group group = new Group();

@@ -66,43 +66,42 @@ import com.openexchange.resource.Resource;
  */
 public final class ResourceNewAJAXTest extends AbstractResourceTest {
 
-	/**
-	 * Initializes a new {@link ResourceNewAJAXTest}
-	 *
-	 * @param name
-	 *            The test name
-	 */
-	public ResourceNewAJAXTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceNewAJAXTest}
+     *
+     * @param name
+     *            The test name
+     */
+    public ResourceNewAJAXTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=new</code> request
-	 */
-	public void testNew() throws OXException, JSONException, IOException, SAXException {
-		int id = -1;
-		try {
-			/*
-			 * Create resource
-			 */
-			final Resource resource = new Resource();
-			resource.setAvailable(true);
-			resource.setMail("my.resource@domain.tdl");
-			resource.setSimpleName("MySimpleResourceIdentifier");
-			resource.setDisplayName("Resource 1337");
-			resource.setDescription("MySimpleResourceIdentifier - Resource 1337");
-			/*
-			 * Perform new request
-			 */
-			final ResourceNewResponse newResponse = Executor.execute(getSession(),
-					new ResourceNewRequest(resource, true));
-			id = newResponse.getID();
-			assertTrue("New request failed", id > 0);
+    /**
+     * Tests the <code>action=new</code> request
+     */
+    public void testNew() throws OXException, JSONException, IOException, SAXException {
+        int id = -1;
+        try {
+            /*
+             * Create resource
+             */
+            final Resource resource = new Resource();
+            resource.setAvailable(true);
+            resource.setMail("my.resource@domain.tdl");
+            resource.setSimpleName("MySimpleResourceIdentifier");
+            resource.setDisplayName("Resource 1337");
+            resource.setDescription("MySimpleResourceIdentifier - Resource 1337");
+            /*
+             * Perform new request
+             */
+            final ResourceNewResponse newResponse = Executor.execute(getSession(), new ResourceNewRequest(resource, true));
+            id = newResponse.getID();
+            assertTrue("New request failed", id > 0);
 
-		} finally {
-		    deleteResource(id);
-		}
+        } finally {
+            deleteResource(id);
+        }
 
-	}
+    }
 
 }

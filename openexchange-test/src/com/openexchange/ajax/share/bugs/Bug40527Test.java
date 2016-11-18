@@ -53,6 +53,7 @@ import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -64,7 +65,6 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import edu.emory.mathcs.backport.java.util.Collections;
-
 
 /**
  * Share links are broken - a link like https://ox.example.com/appsuite/ui#!&app=io.ox/files&folder=10&id=1234/9876
@@ -79,6 +79,7 @@ public class Bug40527Test extends ShareTest {
         super();
     }
 
+    @Test
     public void testInternalFileShareLinkOnSharedCreation() throws Exception {
         AJAXClient shareClient = new AJAXClient(User.User2);
         try {
@@ -101,6 +102,7 @@ public class Bug40527Test extends ShareTest {
         }
     }
 
+    @Test
     public void testInternalFileShareLinkOnSubsequentShare() throws Exception {
         AJAXClient shareClient = new AJAXClient(User.User2);
         try {

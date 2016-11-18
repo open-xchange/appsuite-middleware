@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -90,6 +91,7 @@ public class Bug30118Test extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug30118() throws Exception {
         ctm.insert(appointment);
         ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
@@ -97,6 +99,7 @@ public class Bug30118Test extends AbstractAJAXSession {
         assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
     }
 
+    @Test
     public void testBug30118Fulltime() throws Exception {
         appointment.setStartDate(D("17.12.2013 00:00"));
         appointment.setEndDate(D("18.12.2013 00:00"));
@@ -107,6 +110,7 @@ public class Bug30118Test extends AbstractAJAXSession {
         assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
     }
 
+    @Test
     public void testBug30118Fulltime2days() throws Exception {
         appointment.setStartDate(D("17.12.2013 00:00"));
         appointment.setEndDate(D("19.12.2013 00:00"));

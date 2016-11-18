@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -66,6 +67,7 @@ public class Bug8317Test extends AppointmentTest {
      *
      * TODO: Create a dynamic date/time in the future for testing.
      */
+    @Test
     public void testBug8317() throws Exception {
         final Calendar calendar = Calendar.getInstance(TimeZones.UTC);
         calendar.setTimeInMillis(startTime);

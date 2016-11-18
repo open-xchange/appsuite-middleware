@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail.contenttypes;
 import org.json.JSONException;
 import com.openexchange.ajax.mail.TestMail;
 
-
 /**
  * {@link PlainTextStrategy}
  *
@@ -68,8 +67,8 @@ public class PlainTextStrategy implements MailTypeStrategy {
 
     @Override
     public void sanitize(TestMail mail) throws JSONException {
-        if(mail.getBody() != null){
-            mail.setBody( mail.getBody().trim() );
+        if (mail.getBody() != null) {
+            mail.setBody(mail.getBody().trim());
         }
     }
 

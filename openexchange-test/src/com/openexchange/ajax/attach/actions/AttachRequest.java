@@ -107,10 +107,7 @@ public class AttachRequest extends AbstractAttachmentRequest<AttachResponse> {
 
     @Override
     public Parameter[] getParameters() throws JSONException {
-        return new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, Attachment.ACTION_ATTACH),
-            new FieldParameter("json_0", writeJSON()),
-            new FileParameter("file_0", fileName, data, mimeType)
+        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, Attachment.ACTION_ATTACH), new FieldParameter("json_0", writeJSON()), new FileParameter("file_0", fileName, data, mimeType)
         };
     }
 

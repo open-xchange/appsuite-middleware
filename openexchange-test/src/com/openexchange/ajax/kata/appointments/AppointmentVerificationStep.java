@@ -64,13 +64,13 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.HasRequest;
 import com.openexchange.ajax.appointment.action.HasResponse;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -155,9 +155,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
     }
 
     private void checkViaList(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
-        ListRequest listRequest = new ListRequest(
-            ListIDs.l(new int[] { expectedFolderId, appointment.getObjectID() }),
-            Appointment.ALL_COLUMNS);
+        ListRequest listRequest = new ListRequest(ListIDs.l(new int[] { expectedFolderId, appointment.getObjectID() }), Appointment.ALL_COLUMNS);
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
@@ -191,28 +189,13 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
     private Object[][] getViaAll(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
         long rangeStart = appointment.getStartDate().getTime() - 24 * 3600000;
         long rangeEnd = appointment.getEndDate().getTime() + 24 * 3600000;
-        AllRequest all = new AllRequest(
-            expectedFolderId,
-            Appointment.ALL_COLUMNS,
-            new Date(rangeStart),
-            new Date(rangeEnd),
-            getTimeZone(),
-            true);
+        AllRequest all = new AllRequest(expectedFolderId, Appointment.ALL_COLUMNS, new Date(rangeStart), new Date(rangeEnd), getTimeZone(), true);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
 
     private Object[][] getViaSearch(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
-        SearchRequest searchRequest = new SearchRequest(
-            "*",
-            expectedFolderId,
-            new Date(0),
-            new Date(Integer.MAX_VALUE),
-            Appointment.ALL_COLUMNS,
-            -1,
-            null,
-            false,
-            true); // TODO: Tierlieb - fix params
+        SearchRequest searchRequest = new SearchRequest("*", expectedFolderId, new Date(0), new Date(Integer.MAX_VALUE), Appointment.ALL_COLUMNS, -1, null, false, true); // TODO: Tierlieb - fix params
         SearchResponse searchResponse = client.execute(searchRequest);
         return searchResponse.getArray();
     }
@@ -290,7 +273,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
                 }
                 continue;
             }
-            if( column == CalendarObject.FOLDER_ID){
+            if (column == CalendarObject.FOLDER_ID) {
                 assertEquals(name + " Column: " + column, Integer.valueOf(expectedFolderId), row[i]);
                 continue;
             }
@@ -325,21 +308,21 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
     }
 
     protected <T> boolean compareArrays(T[] expected, T[] actual) {
-        if (expected == null && actual == null){
+        if (expected == null && actual == null) {
             return true;
         }
-        if (expected == null && actual != null){
+        if (expected == null && actual != null) {
             return false;
         }
-        if (expected != null && actual == null){
+        if (expected != null && actual == null) {
             return false;
         }
         Set<T> expectedParticipants = new HashSet<T>(Arrays.asList(expected));
         Set<T> actualParticipants = new HashSet<T>(Arrays.asList(actual));
-        if (expectedParticipants.size() != actualParticipants.size()){
+        if (expectedParticipants.size() != actualParticipants.size()) {
             return false;
         }
-        if (!expectedParticipants.containsAll(actualParticipants)){
+        if (!expectedParticipants.containsAll(actualParticipants)) {
             return false;
         }
         return true;
@@ -348,39 +331,39 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
     protected Object transform(int column, Object actual) throws OXException, IOException, SAXException, JSONException {
         switch (column) {
 
-        case Appointment.START_DATE:
-        case Appointment.END_DATE:
-            int offset = getTimeZone().getOffset(((Long) actual).longValue());
-            return new Date(((Long) actual).longValue() - offset);
+            case Appointment.START_DATE:
+            case Appointment.END_DATE:
+                int offset = getTimeZone().getOffset(((Long) actual).longValue());
+                return new Date(((Long) actual).longValue() - offset);
 
-        case Appointment.PARTICIPANTS:
-            JSONArray participantArr = (JSONArray) actual;
-            List<Participant> participants = new LinkedList<Participant>();
-            for (int i = 0, size = participantArr.length(); i < size; i++) {
-                JSONObject participantObj = participantArr.getJSONObject(i);
-                int type = participantObj.getInt("type");
-                switch (type) {
-                case Participant.USER:
-                    participants.add(new UserParticipant(participantObj.getInt("id")));
-                    break;
-                case Participant.GROUP:
-                    participants.add(new GroupParticipant(participantObj.getInt("id")));
-                    break;
-                case Participant.EXTERNAL_USER:
-                    participants.add(new ExternalUserParticipant(participantObj.getString("mail")));
-                    break;
+            case Appointment.PARTICIPANTS:
+                JSONArray participantArr = (JSONArray) actual;
+                List<Participant> participants = new LinkedList<Participant>();
+                for (int i = 0, size = participantArr.length(); i < size; i++) {
+                    JSONObject participantObj = participantArr.getJSONObject(i);
+                    int type = participantObj.getInt("type");
+                    switch (type) {
+                        case Participant.USER:
+                            participants.add(new UserParticipant(participantObj.getInt("id")));
+                            break;
+                        case Participant.GROUP:
+                            participants.add(new GroupParticipant(participantObj.getInt("id")));
+                            break;
+                        case Participant.EXTERNAL_USER:
+                            participants.add(new ExternalUserParticipant(participantObj.getString("mail")));
+                            break;
+                    }
                 }
-            }
-            return participants.toArray(new Participant[participants.size()]);
+                return participants.toArray(new Participant[participants.size()]);
 
-        case Appointment.USERS:
-            JSONArray userParticipantArr = (JSONArray) actual;
-            List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
-            for (int i = 0, size = userParticipantArr.length(); i < size; i++) {
-                JSONObject participantObj = userParticipantArr.getJSONObject(i);
-                userParticipants.add(new UserParticipant(participantObj.getInt("id")));
-            }
-            return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
+            case Appointment.USERS:
+                JSONArray userParticipantArr = (JSONArray) actual;
+                List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
+                for (int i = 0, size = userParticipantArr.length(); i < size; i++) {
+                    JSONObject participantObj = userParticipantArr.getJSONObject(i);
+                    userParticipants.add(new UserParticipant(participantObj.getInt("id")));
+                }
+                return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
         }
 
         return actual;

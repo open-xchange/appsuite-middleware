@@ -52,7 +52,6 @@ package com.openexchange.ajax.manifests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-
 /**
  * {@link ManifestsTestSuite}
  *
@@ -73,6 +72,5 @@ public class ManifestsTestSuite extends TestSuite {
         manifests.addTestSuite(Bug30835Test.class);
         return manifests;
     }
-
 
 }

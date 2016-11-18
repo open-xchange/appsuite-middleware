@@ -73,9 +73,7 @@ public final class ReminderTools extends Assert {
      * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}
      */
     @Deprecated
-    public static RangeResponse get(final AJAXClient client,
-        final RangeRequest request) throws OXException, IOException,
-        JSONException {
+    public static RangeResponse get(final AJAXClient client, final RangeRequest request) throws OXException, IOException, JSONException {
         return Executor.execute(client.getSession(), request);
     }
 

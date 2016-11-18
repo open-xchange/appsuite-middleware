@@ -52,7 +52,6 @@ package com.openexchange.grizzly;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-
 /**
  * {@link GrizzlyTestSuite}
  *

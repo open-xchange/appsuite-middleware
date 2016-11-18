@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
+import org.junit.Before;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -91,8 +92,8 @@ public class AbstractFolderTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         userId = client.getValues().getUserId();
@@ -141,11 +142,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
         permission.setEntity(userId);
         permission.setGroupPermission(false);
         permission.setFolderAdmin(true);
-        permission.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        permission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         newFolder.addPermission(permission);
         return newFolder;
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.user;
 
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.actions.ListRequest;
 import com.openexchange.ajax.user.actions.ListResponse;
@@ -63,12 +64,14 @@ public class ListTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ListTest}.
+     * 
      * @param name
      */
     public ListTest() {
         super();
     }
 
+    @Test
     public void testListUser() throws Exception {
         final int[] userIdArray = { client.getValues().getUserId() };
         final int[] cols = { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME };

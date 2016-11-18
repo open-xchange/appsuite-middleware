@@ -168,8 +168,7 @@ public class Bug36943Test extends CalDAVTest {
         props.add(PropertyNames.DISPLAYNAME);
         props.add(PropertyNames.RESOURCE_ID);
         props.add(PropertyNames.RESOURCETYPE);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/",
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no response", 0 < responses.length);
@@ -200,8 +199,7 @@ public class Bug36943Test extends CalDAVTest {
         props.add(PropertyNames.DISPLAYNAME);
         props.add(PropertyNames.RESOURCE_ID);
         props.add(PropertyNames.RESOURCETYPE);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/",
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no response", 0 < responses.length);

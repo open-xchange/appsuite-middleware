@@ -137,21 +137,13 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             permissionUser1.setEntity(client1.getValues().getUserId());
             permissionUser1.setGroupPermission(false);
             permissionUser1.setFolderAdmin(true);
-            permissionUser1.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            permissionUser1.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             OCLPermission permissionUser2 = new OCLPermission();
             permissionUser2.setEntity(client2.getValues().getUserId());
             permissionUser2.setGroupPermission(false);
             permissionUser2.setFolderAdmin(false);
-            permissionUser2.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_OWN_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            permissionUser2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, folderTestManager, permissionUser1, permissionUser2);
             Folder folder = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
@@ -185,21 +177,13 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             permissionUser1.setEntity(client1.getValues().getUserId());
             permissionUser1.setGroupPermission(false);
             permissionUser1.setFolderAdmin(true);
-            permissionUser1.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_OWN_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            permissionUser1.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             OCLPermission permissionUser2 = new OCLPermission();
             permissionUser2.setEntity(client2.getValues().getUserId());
             permissionUser2.setGroupPermission(false);
             permissionUser2.setFolderAdmin(false);
-            permissionUser2.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_OWN_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            permissionUser2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, folderTestManager, permissionUser1, permissionUser2);
             Folder folder = getFolder(client2, created.getObjectID(), DEFAULT_COLUMNS);

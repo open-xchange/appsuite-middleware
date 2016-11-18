@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -89,6 +90,7 @@ public class Bug29146Test extends AbstractAJAXSession {
         appointment.setUsers(new UserParticipant[] { user });
     }
 
+    @Test
     public void testInitialParticipantStatus() throws Exception {
         ctm.insert(appointment);
 

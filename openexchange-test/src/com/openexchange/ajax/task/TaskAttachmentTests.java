@@ -52,7 +52,9 @@ package com.openexchange.ajax.task;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
-import junit.framework.AssertionFailedError;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -67,6 +69,7 @@ import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
+import junit.framework.AssertionFailedError;
 
 /**
  * Attachment tests for tasks.
@@ -89,8 +92,8 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         folderId = client.getValues().getPrivateTaskFolder();
         tz = client.getValues().getTimeZone();
@@ -102,12 +105,13 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(task));
         super.tearDown();
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithGet() throws Throwable {
         GetResponse response = client.execute(new GetRequest(task.getParentFolderID(), task.getObjectID()));
         task.setLastModified(response.getTimestamp());
@@ -115,9 +119,9 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithAll() throws Throwable {
-        CommonAllResponse response = client.execute(new AllRequest(task.getParentFolderID(), new int[] {
-            Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, Task.OBJECT_ID, Order.ASCENDING));
+        CommonAllResponse response = client.execute(new AllRequest(task.getParentFolderID(), new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, Task.OBJECT_ID, Order.ASCENDING));
         task.setLastModified(response.getTimestamp());
         Task test = null;
         int objectIdPos = response.getColumnPos(Task.OBJECT_ID);
@@ -135,10 +139,9 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithList() throws Throwable {
-        CommonListResponse response = client.execute(new ListRequest(
-            ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() }),
-            new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
+        CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() }), new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
         task.setLastModified(response.getTimestamp());
         Task test = null;
         int objectIdPos = response.getColumnPos(Task.OBJECT_ID);

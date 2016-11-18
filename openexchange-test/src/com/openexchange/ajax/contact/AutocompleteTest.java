@@ -50,9 +50,8 @@
 package com.openexchange.ajax.contact;
 
 import java.util.List;
-
 import org.json.JSONArray;
-
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.container.Contact;
@@ -74,11 +73,12 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         super();
     }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
+    @Test
     public void testAutocompleteFirstAndLastname() throws Exception {
         /*
          * create contact
@@ -102,6 +102,7 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testAutocompleteSpecificContact() throws Exception {
         /*
          * create contacts
@@ -129,17 +130,15 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         assertEquals("wrong number of results", 1, contacts.size());
         assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());
     }
-    
-    
+
+    @Test
     public void testAutocompleteDistributionList() throws Exception {
         Contact distributionList = new Contact();
         distributionList.setParentFolderID(folderID);
         distributionList.setSurName("LisTe");
         distributionList.setGivenName("VerTeiLer");
         distributionList.setDisplayName(distributionList.getGivenName() + " " + distributionList.getSurName());
-        distributionList.setDistributionList(new DistributionListEntryObject[] {
-	        new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT),
-	        new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT)
+        distributionList.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT), new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT)
         });
         distributionList = manager.newAction(distributionList);
         /*

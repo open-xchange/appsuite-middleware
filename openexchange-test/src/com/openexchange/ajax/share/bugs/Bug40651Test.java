@@ -52,6 +52,7 @@ package com.openexchange.ajax.share.bugs;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -69,7 +70,6 @@ import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
 
-
 /**
  * {@link Bug40651Test}
  *
@@ -80,12 +80,14 @@ public class Bug40651Test extends ShareTest {
 
     /**
      * Initializes a new {@link Bug40651Test}.
+     * 
      * @param name
      */
     public Bug40651Test() {
         super();
     }
 
+    @Test
     public void testShareFileLinkAndSearchForItAsGuest() throws Exception {
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
@@ -107,6 +109,7 @@ public class Bug40651Test extends ShareTest {
         Assert.assertNotNull("Found no document with ID " + expectedId.toUniqueID(), expectedDoc);
     }
 
+    @Test
     public void testShareFolderLinkAndSearchForContainedItemAsGuest() throws Exception {
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");

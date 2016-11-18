@@ -61,63 +61,62 @@ import com.openexchange.ajax.mail.netsol.actions.NetsolFolderResponse;
  */
 public final class NetsolTestViewFolders extends AbstractNetsolTest {
 
-	/**
-	 * Initializes a new {@link NetsolTestViewFolders}
-	 *
-	 * @param name
-	 */
-	public NetsolTestViewFolders() {
-		super();
-	}
+    /**
+     * Initializes a new {@link NetsolTestViewFolders}
+     *
+     * @param name
+     */
+    public NetsolTestViewFolders() {
+        super();
+    }
 
-	public void testViewFolders() throws Throwable {
-		netsolClearFolder(getInboxFolder());
-		netsolClearFolder(getSentFolder());
-		netsolClearFolder(getTrashFolder());
+    public void testViewFolders() throws Throwable {
+        netsolClearFolder(getInboxFolder());
+        netsolClearFolder(getSentFolder());
+        netsolClearFolder(getTrashFolder());
 
-		final int runs = NetsolTestConstants.RUNS;
-		final DurationTracker requestTracker = new DurationTracker(runs * 3);
-		final DurationTracker parseTracker = new DurationTracker(runs * 3);
-		for (int i = 0; i < runs; i++) {
-			/*
-			 * Get private folders
-			 */
-			final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("1"));
-			assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
-			assertTrue("Duration corrupt", response.getRequestDuration() > 0);
-			requestTracker.addDuration(response.getRequestDuration());
-			parseTracker.addDuration(response.getParseDuration());
-		}
+        final int runs = NetsolTestConstants.RUNS;
+        final DurationTracker requestTracker = new DurationTracker(runs * 3);
+        final DurationTracker parseTracker = new DurationTracker(runs * 3);
+        for (int i = 0; i < runs; i++) {
+            /*
+             * Get private folders
+             */
+            final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("1"));
+            assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
+            assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+            requestTracker.addDuration(response.getRequestDuration());
+            parseTracker.addDuration(response.getParseDuration());
+        }
 
-		for (int i = 0; i < runs; i++) {
-			/*
-			 * Get first level folders
-			 */
-			final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("default"));
-			assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
-			assertTrue("Duration corrupt", response.getRequestDuration() > 0);
-			requestTracker.addDuration(response.getRequestDuration());
-			parseTracker.addDuration(response.getParseDuration());
-		}
+        for (int i = 0; i < runs; i++) {
+            /*
+             * Get first level folders
+             */
+            final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("default"));
+            assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
+            assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+            requestTracker.addDuration(response.getRequestDuration());
+            parseTracker.addDuration(response.getParseDuration());
+        }
 
-		for (int i = 0; i < runs; i++) {
-			/*
-			 * Get INBOX subfolders
-			 */
-			final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("default.INBOX"));
-			assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
-			assertTrue("Duration corrupt", response.getRequestDuration() > 0);
-			requestTracker.addDuration(response.getRequestDuration());
-			parseTracker.addDuration(response.getParseDuration());
-		}
+        for (int i = 0; i < runs; i++) {
+            /*
+             * Get INBOX subfolders
+             */
+            final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("default.INBOX"));
+            assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
+            assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+            requestTracker.addDuration(response.getRequestDuration());
+            parseTracker.addDuration(response.getParseDuration());
+        }
 
-
-		/*
-		 * Clean everything
-		 */
-		netsolClearFolder(getInboxFolder());
-		netsolClearFolder(getSentFolder());
-		netsolClearFolder(getTrashFolder());
-	}
+        /*
+         * Clean everything
+         */
+        netsolClearFolder(getInboxFolder());
+        netsolClearFolder(getSentFolder());
+        netsolClearFolder(getTrashFolder());
+    }
 
 }

@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -103,8 +105,8 @@ public class AggregateSharesTest extends ShareTest {
         clientsAndFolders.put(client2, new ArrayList<Integer>());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != clientsAndFolders) {
             for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
                 deleteFoldersSilently(entry.getKey(), entry.getValue());
@@ -122,6 +124,7 @@ public class AggregateSharesTest extends ShareTest {
         return ajaxClients[random.nextInt(ajaxClients.length)];
     }
 
+    @Test
     public void testAggregateSharesRandomly() throws Exception {
         testAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
     }
@@ -133,7 +136,7 @@ public class AggregateSharesTest extends ShareTest {
                 for (int module1 : TESTED_MODULES) {
                     for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
-//                            System.out.println("AggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
+                            //                            System.out.println("AggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testAggregateShares(api, client1, module1, client2, module2);
                         }
                     }
@@ -142,6 +145,7 @@ public class AggregateSharesTest extends ShareTest {
         }
     }
 
+    @Test
     public void testRemoveAggregateSharesRandomly() throws Exception {
         testRemoveAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
     }
@@ -153,7 +157,7 @@ public class AggregateSharesTest extends ShareTest {
                 for (int module1 : TESTED_MODULES) {
                     for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
-//                            System.out.println("RemoveAggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
+                            //                            System.out.println("RemoveAggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testRemoveAggregateShares(api, client1, module1, client2, module2);
                         }
                     }
@@ -381,7 +385,7 @@ public class AggregateSharesTest extends ShareTest {
         ResolveShareResponse shareResolveResponse = new GuestClient(shareURLA, guestPermission.getRecipient(), false).getShareResolveResponse();
         assertEquals("Login type wrong", "guest_password", shareResolveResponse.getLoginType());
         assertEquals("Status wrong", "not_found_continue", shareResolveResponse.getStatus());
-        assertEquals("Target wrong", folderBTarget,  shareResolveResponse.getTarget());
+        assertEquals("Target wrong", folderBTarget, shareResolveResponse.getTarget());
         /*
          * check if share link to folder A still accessible
          */

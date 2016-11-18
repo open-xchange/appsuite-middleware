@@ -64,56 +64,56 @@ import com.openexchange.groupware.search.Order;
  */
 public class ManagedSearchTests extends AbstractManagedContactTest {
 
-	public List<String> sinographs = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
+    public List<String> sinographs = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
 
-	public ManagedSearchTests(String name) {
-		super();
-	}
+    public ManagedSearchTests(String name) {
+        super();
+    }
 
-	public void testGuiLikeSearch(){
-		List<ContactSearchObject> searches = new LinkedList<ContactSearchObject>();
+    public void testGuiLikeSearch() {
+        List<ContactSearchObject> searches = new LinkedList<ContactSearchObject>();
 
-		for(String name: sinographs){
-			//create
-			Contact tmp = generateContact();
-			tmp.setSurName(name);
-			manager.newAction(tmp);
+        for (String name : sinographs) {
+            //create
+            Contact tmp = generateContact();
+            tmp.setSurName(name);
+            manager.newAction(tmp);
 
-			//prepare search
-			ContactSearchObject search = new ContactSearchObject();
-			search.setFolder(folderID);
-			search.setGivenName(name);
-			search.setSurname(name);
-			search.setDisplayName(name);
-			search.setEmail1(name);
-			search.setEmail2(name);
-			search.setEmail3(name);
-			search.setCatgories(name);
-			search.setYomiFirstname(name);
-			search.setYomiLastName(name);
-			search.setOrSearch(true);
-			searches.add(search);
-		}
-		for(int i = 0; i < sinographs.size(); i++){
-			Contact[] results= manager.searchAction(searches.get(i));
+            //prepare search
+            ContactSearchObject search = new ContactSearchObject();
+            search.setFolder(folderID);
+            search.setGivenName(name);
+            search.setSurname(name);
+            search.setDisplayName(name);
+            search.setEmail1(name);
+            search.setEmail2(name);
+            search.setEmail3(name);
+            search.setCatgories(name);
+            search.setYomiFirstname(name);
+            search.setYomiLastName(name);
+            search.setOrSearch(true);
+            searches.add(search);
+        }
+        for (int i = 0; i < sinographs.size(); i++) {
+            Contact[] results = manager.searchAction(searches.get(i));
 
-			assertEquals("#"+i+" Should find one contact", 1, results.length);
-			assertEquals("#"+i+" Should find the right contact", sinographs.get(i), results[0].getSurName());
-		}
-	}
+            assertEquals("#" + i + " Should find one contact", 1, results.length);
+            assertEquals("#" + i + " Should find the right contact", sinographs.get(i), results[0].getSurName());
+        }
+    }
 
-	public void testSearchPattern(){
-		for(String name: sinographs){
-			Contact tmp = generateContact();
-			tmp.setSurName(name);
-			manager.newAction(tmp);
-		}
-		Contact[] contacts= manager.searchAction("*", folderID, ContactField.SUR_NAME.getNumber(), Order.ASCENDING, "gb2312", Contact.ALL_COLUMNS);
+    public void testSearchPattern() {
+        for (String name : sinographs) {
+            Contact tmp = generateContact();
+            tmp.setSurName(name);
+            manager.newAction(tmp);
+        }
+        Contact[] contacts = manager.searchAction("*", folderID, ContactField.SUR_NAME.getNumber(), Order.ASCENDING, "gb2312", Contact.ALL_COLUMNS);
 
-		for(int i = 0; i < sinographs.size(); i++){
-			String name = contacts[i].getSurName();
-			assertEquals("#"+i+" Should have the right order", sinographs.get(i), name);
-		}
-	}
+        for (int i = 0; i < sinographs.size(); i++) {
+            String name = contacts[i].getSurName();
+            assertEquals("#" + i + " Should have the right order", sinographs.get(i), name);
+        }
+    }
 
 }

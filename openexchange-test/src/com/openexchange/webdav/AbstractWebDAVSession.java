@@ -63,6 +63,7 @@ public abstract class AbstractWebDAVSession extends TestCase {
 
     /**
      * Default constructor.
+     * 
      * @param name test name.
      */
     public AbstractWebDAVSession() {

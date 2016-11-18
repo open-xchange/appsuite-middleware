@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml.contact;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
 
@@ -59,6 +60,7 @@ public class Bug8182Test extends ContactTest {
         super();
     }
 
+    @Test
     public void testBug8182() throws Throwable {
         final Contact contactObj = createContactObject("testPropFindWithModified");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);

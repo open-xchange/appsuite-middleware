@@ -52,6 +52,7 @@ package com.openexchange.ajax.share.tests;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
@@ -82,6 +83,7 @@ public class AddGuestPermissionTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testUpdateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
@@ -97,6 +99,7 @@ public class AddGuestPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testUpdateSharedFileRandomly() throws Exception {
         testUpdateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }
@@ -107,6 +110,7 @@ public class AddGuestPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testUpdateSharedFolderWithCascadingPermissionsRandomly() throws Exception {
         int module = randomModule();
         testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module));
@@ -175,6 +179,7 @@ public class AddGuestPermissionTest extends ShareTest {
         rootFolder.addPermission(guestPermission);
         rootFolder.setLastModified(clientLastModified);
         rootFolder = updateFolder(api, rootFolder, new RequestCustomizer<UpdateRequest>() {
+
             @Override
             public void customize(UpdateRequest request) {
                 request.setCascadePermissions(true);
@@ -242,7 +247,7 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * update file, add permissions for guest
          */
-        file.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(guestPermission));
+        file.setObjectPermissions(Collections.<FileStorageObjectPermission> singletonList(guestPermission));
         file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
         /*
          * check permissions
@@ -264,7 +269,7 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }

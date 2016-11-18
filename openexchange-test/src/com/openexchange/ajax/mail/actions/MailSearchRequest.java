@@ -108,7 +108,7 @@ public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
         return body;
     }
 
-    public void setBody(JSONArray body){
+    public void setBody(JSONArray body) {
         this.body = body;
         param(AJAXServlet.PARAMETER_DATA, body.toString());
     }

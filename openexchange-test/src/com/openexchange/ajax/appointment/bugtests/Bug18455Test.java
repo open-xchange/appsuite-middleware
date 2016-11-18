@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.SearchRequest;
@@ -102,27 +103,7 @@ public class Bug18455Test extends AbstractAJAXSession {
         clientB = new AJAXClient(User.User2);
         clientC = new AJAXClient(User.User3);
 
-        folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "Folder to test bug 18455",
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(
-                clientA.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                clientB.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 18455", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
@@ -133,16 +114,15 @@ public class Bug18455Test extends AbstractAJAXSession {
         appointment.setEndDate(D("01.03.2011 09:00"));
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setIgnoreConflicts(true);
-        appointment.setUsers(new UserParticipant[] {
-            new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientC.getValues().getUserId()) });
-        appointment.setParticipants(new Participant[] {
-            new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientC.getValues().getUserId()) });
+        appointment.setUsers(new UserParticipant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientC.getValues().getUserId()) });
+        appointment.setParticipants(new Participant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientC.getValues().getUserId()) });
 
         InsertRequest insertRequest = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientA.execute(insertRequest);
         insertResponse.fillObject(appointment);
     }
 
+    @Test
     public void testBug18455() throws Exception {
         SearchRequest search = new SearchRequest("Bug 18455 Test", -1, new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE });
         SearchResponse searchResponse = clientB.execute(search);

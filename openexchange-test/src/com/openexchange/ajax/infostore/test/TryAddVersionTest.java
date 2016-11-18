@@ -52,6 +52,7 @@ package com.openexchange.ajax.infostore.test;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
@@ -103,6 +104,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         super.tearDown();
     }
 
+    @Test
     public void testAddVersion() throws Exception {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
@@ -119,6 +121,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         assertEquals(2, uploaded.getNumberOfVersions());
     }
 
+    @Test
     public void testFallback() throws Exception {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));

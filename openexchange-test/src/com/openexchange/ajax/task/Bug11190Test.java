@@ -81,7 +81,7 @@ public class Bug11190Test extends AbstractAJAXSession {
      * results in a broken recurrence.
      */
     @Test
-    public void testSwitchingBetweenMonthlyRecurrencePatternsShouldNotBreakRecurrence() throws OXException, IOException, SAXException, JSONException, OXException{
+    public void testSwitchingBetweenMonthlyRecurrencePatternsShouldNotBreakRecurrence() throws OXException, IOException, SAXException, JSONException, OXException {
         AJAXClient ajaxClient = getClient();
         final TimeZone timezone = ajaxClient.getValues().getTimeZone();
         final int folderId = ajaxClient.getValues().getPrivateTaskFolder();
@@ -116,7 +116,7 @@ public class Bug11190Test extends AbstractAJAXSession {
             // TODO The remove method clears the value in the object. If the value should be cleared over the AJAX interface it must be set to null. This is currently not possible with the int primitive type.
             taskWithRecurrence.removeDays(); //otherwise, the old value (Monday) will be kept, which then means "the twelfth Monday every two months" (which then is reduced to every 5th Monday)
             //send
-            UpdateRequest updateRequest = new IntToNullSettingUpdateRequest(taskWithRecurrence,timezone);
+            UpdateRequest updateRequest = new IntToNullSettingUpdateRequest(taskWithRecurrence, timezone);
             UpdateResponse updateResponse = ajaxClient.execute(updateRequest);
             taskWithRecurrence.setLastModified(updateResponse.getTimestamp());
             //get data
@@ -124,7 +124,7 @@ public class Bug11190Test extends AbstractAJAXSession {
             GetResponse getResponse = ajaxClient.execute(getRequest);
             Task resultingTask = getResponse.getTask(timezone);
             //compare
-            assertEquals("Recurrence type does not match",Task.MONTHLY, resultingTask.getRecurrenceType());
+            assertEquals("Recurrence type does not match", Task.MONTHLY, resultingTask.getRecurrenceType());
             assertEquals("Recurrence interval does not match", 2, resultingTask.getInterval());
             assertEquals("Recurring day in month does not match", 12, resultingTask.getDayInMonth());
             assertEquals("Recurring days should not be set anymore", false, resultingTask.containsDays());
@@ -135,6 +135,7 @@ public class Bug11190Test extends AbstractAJAXSession {
     }
 
     private class IntToNullSettingUpdateRequest extends UpdateRequest {
+
         public IntToNullSettingUpdateRequest(Task task, TimeZone timeZone) {
             super(task, timeZone);
         }

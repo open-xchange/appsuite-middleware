@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -96,6 +97,7 @@ public class Bug38404Test extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug38404() throws Exception {
         ctm1.insert(appointment);
         appointment.setRecurrenceType(Appointment.WEEKLY);
@@ -165,7 +167,8 @@ public class Bug38404Test extends AbstractAJAXSession {
             }
         }
     }
-    
+
+    @Test
     public void testSomethingElse() throws Exception {
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setDays(Appointment.TUESDAY + Appointment.WEDNESDAY + Appointment.THURSDAY);

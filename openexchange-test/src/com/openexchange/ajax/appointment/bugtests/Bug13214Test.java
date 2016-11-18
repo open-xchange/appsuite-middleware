@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -73,6 +74,7 @@ public class Bug13214Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testBugAsWritten() throws Exception {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
@@ -121,8 +123,7 @@ public class Bug13214Test extends AbstractAJAXSession {
                 assertTrue("No Exception occurred.", updateResponse.hasError());
                 OXException e = updateResponse.getException();
                 assertTrue("Wrong Exception", e instanceof OXException);
-                assertTrue(
-                    "Wrong Exception", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
+                assertTrue("Wrong Exception", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
             } finally {
                 if (!updateResponse.hasError()) {
                     updateAppointment.setLastModified(updateResponse.getTimestamp());

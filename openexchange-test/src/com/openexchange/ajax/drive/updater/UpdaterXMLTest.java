@@ -58,6 +58,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -71,6 +72,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -79,7 +81,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.java.Strings;
-import org.apache.commons.codec.binary.Hex;
 
 /**
  * {@link UpdaterXMLTest}
@@ -124,6 +125,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
         this.client = new AJAXClient(user);
     }
 
+    @Test
     public void testBasicAuth() throws Exception {
         DefaultHttpClient httpClient = new DefaultHttpClient();
         try {
@@ -134,9 +136,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
             EntityUtils.consume(entity);
             assertEquals(401, response.getStatusLine().getStatusCode());
 
-            httpClient.getCredentialsProvider().setCredentials(
-                new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-                new UsernamePasswordCredentials(login, password));
+            httpClient.getCredentialsProvider().setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()), new UsernamePasswordCredentials(login, password));
             response = httpClient.execute(targetHost, getXML);
             entity = response.getEntity();
             EntityUtils.consume(entity);
@@ -163,11 +163,10 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testUpdateXML() throws Exception {
         DefaultHttpClient httpClient = client.getSession().getHttpClient();
-        httpClient.getCredentialsProvider().setCredentials(
-            new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-            new UsernamePasswordCredentials(login, password));
+        httpClient.getCredentialsProvider().setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()), new UsernamePasswordCredentials(login, password));
         UpdateXMLRequest request = new UpdateXMLRequest();
         UpdateXMLResponse response = client.execute(request);
 
@@ -200,6 +199,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testAgainWithChangedLocale() throws Exception {
         SetRequest setRequest = new SetRequest(Tree.Language, "wx_YZ");
         client.execute(setRequest);

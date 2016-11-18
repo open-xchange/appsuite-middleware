@@ -53,6 +53,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.SearchByBirthdayRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.container.Contact;
@@ -70,15 +71,16 @@ public class Bug31993Test extends AbstractManagedContactTest {
         super();
     }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
+    @Test
     public void testSortOrder() throws Exception {
-    	/*
-    	 * create contacts
-    	 */
+        /*
+         * create contacts
+         */
         Contact contact1 = super.generateContact("Mike");
         contact1.setBirthday(D("1969-04-11 00:00:00"));
         contact1 = manager.newAction(contact1);
@@ -88,9 +90,9 @@ public class Bug31993Test extends AbstractManagedContactTest {
         Contact contact3 = super.generateContact("Oliver");
         contact3.setBirthday(D("1988-04-11 00:00:00"));
         contact3 = manager.newAction(contact3);
-    	/*
-    	 * search birthdays
-    	 */
+        /*
+         * search birthdays
+         */
         String parentFolderID = String.valueOf(contact1.getParentFolderID());
         int[] columns = { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.BIRTHDAY, Contact.FOLDER_ID };
         SearchByBirthdayRequest request;

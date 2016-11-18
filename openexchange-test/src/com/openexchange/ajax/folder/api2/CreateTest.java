@@ -50,6 +50,8 @@
 package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -77,12 +79,13 @@ public class CreateTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testCreatePrivate() throws Throwable {
         // Get root folder
         String newId = null;
@@ -96,11 +99,7 @@ public class CreateTest extends AbstractAJAXSession {
             oclP.setEntity(client.getValues().getUserId());
             oclP.setGroupPermission(false);
             oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
             final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);

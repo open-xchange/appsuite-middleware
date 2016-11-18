@@ -62,7 +62,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
-
 /**
  * {@link JSONApiTest}
  *
@@ -73,6 +72,7 @@ public class JSONApiTest extends AbstractOAuthTest {
 
     /**
      * Initializes a new {@link JSONApiTest}.
+     * 
      * @throws OXException
      */
     public JSONApiTest() throws OXException {

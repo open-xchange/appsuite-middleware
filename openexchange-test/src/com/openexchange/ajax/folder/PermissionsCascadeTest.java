@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -110,6 +111,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * 
      * @throws Exception
      */
+    @Test
     public void testCascadePermissionsInChildrenFolders() throws Exception {
         // Create a simple folder tree
         rootFolder = createSimpleTree("testCascadePermissionsInChildrenFolders", 5);
@@ -121,6 +123,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * 
      * @throws Exception
      */
+    @Test
     public void testCasccadePermissionsInSiblingFolders() throws Exception {
         rootFolder = createRandomTree("testCasccadePermissionsInSiblingFolders", 20);
         assertCascadePermissions();
@@ -141,14 +144,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         AJAXClient client2 = new AJAXClient(User.User2);
 
         // Apply permissions 
-        rootFolder.addPermission(Create.ocl(
-            client2.getValues().getUserId(),
-            false,
-            false,
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS));
+        rootFolder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
         rootFolder.setLastModified(new Date(timestamp));
         client.execute(new UpdateRequest(EnumAPI.OUTLOOK, rootFolder).setCascadePermissions(true));
 
@@ -178,6 +174,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * 
      * @throws Exception
      */
+    @Test
     public void testCascadePermissionsInTreeRollbackAndThenIgnore() throws Exception {
         rootFolder = createRandomTree("testCascadePermissionsInTreeRollback", 20);
 
@@ -213,14 +210,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         AJAXClient client2 = new AJAXClient(User.User2);
 
         // Make second user an admin
-        leaf.addPermission(Create.ocl(
-            client2.getValues().getUserId(),
-            false,
-            true,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION));
+        leaf.addPermission(Create.ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         leaf.setLastModified(new Date(timestamp));
         client.execute(new UpdateRequest(EnumAPI.OUTLOOK, leaf));
 
@@ -234,14 +224,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
         // Apply administrative permissions to the leaf of leaf folder.
         leafOfLeaf.removePermissions();
-        leafOfLeaf.addPermission(Create.ocl(
-            client2.getValues().getUserId(),
-            false,
-            true,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION));
+        leafOfLeaf.addPermission(Create.ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         leafOfLeaf.setLastModified(new Date(timestamp));
         client2.execute(new UpdateRequest(EnumAPI.OUTLOOK, leafOfLeaf));
 
@@ -251,14 +234,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         timestamp = ((JSONObject) response.getData()).getLong("last_modified");
 
         AJAXClient client3 = new AJAXClient(User.User3);
-        rootNode.addPermission(Create.ocl(
-            client3.getValues().getUserId(),
-            false,
-            false,
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS));
+        rootNode.addPermission(Create.ocl(client3.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
         rootNode.setLastModified(new Date(timestamp));
         UpdateRequest setCascadePermissions = new UpdateRequest(EnumAPI.OUTLOOK, rootNode, false).setCascadePermissions(true);
         client.execute(setCascadePermissions);

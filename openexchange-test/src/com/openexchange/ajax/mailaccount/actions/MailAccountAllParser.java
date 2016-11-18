@@ -56,7 +56,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.mailaccount.MailAccountDescription;
 
-
 /**
  * {@link MailAccountAllParser}
  *
@@ -81,7 +80,5 @@ public class MailAccountAllParser extends AbstractAJAXParser<MailAccountAllRespo
         resp.setDescriptions(accounts);
         return resp;
     }
-
-
 
 }

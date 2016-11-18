@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
@@ -59,7 +60,7 @@ import com.openexchange.groupware.container.Contact;
 /**
  * {@link Bug33576Test}
  *
- *  Autocomplete for contacts only shows contacts with e-mail address
+ * Autocomplete for contacts only shows contacts with e-mail address
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -74,6 +75,7 @@ public class Bug33576Test extends ContactsFindTest {
         super();
     }
 
+    @Test
     public void testAutocompleteContactWithoutEMailAddress() throws Exception {
         Contact contact = randomContact();
         contact.removeEmail1();

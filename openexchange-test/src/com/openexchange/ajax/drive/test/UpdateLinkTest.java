@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.junit.Test;
 import com.openexchange.ajax.drive.action.DeleteLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkResponse;
@@ -119,6 +120,7 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
         itm.newAction(file, new File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
+    @Test
     public void testUpdateFileLink() throws Exception {
         // Create Link
         DriveShareTarget target = new DriveShareTarget();
@@ -136,7 +138,7 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
         guestClient.checkShareAccessible(expectedPermission);
 
         // Update Link
-        Map<String, Object> newMeta = Collections.<String, Object>singletonMap("test", Boolean.TRUE);
+        Map<String, Object> newMeta = Collections.<String, Object> singletonMap("test", Boolean.TRUE);
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
         UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(rootFolder.getObjectID(), target, newExpiry.getTime(), newPassword, newMeta, true);
@@ -159,6 +161,7 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
         assertTrue("Permission was not deleted", objectPermissions.isEmpty());
     }
 
+    @Test
     public void testUpdateFolderLink() throws Exception {
         // Create Link
         DriveShareTarget target = new DriveShareTarget();
@@ -175,7 +178,7 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
         guestClient.checkShareAccessible(expectedPermission);
 
         // Update Link
-        Map<String, Object> newMeta = Collections.<String, Object>singletonMap("test", Boolean.TRUE);
+        Map<String, Object> newMeta = Collections.<String, Object> singletonMap("test", Boolean.TRUE);
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
         UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(rootFolder.getObjectID(), target, newExpiry.getTime(), newPassword, newMeta, true);

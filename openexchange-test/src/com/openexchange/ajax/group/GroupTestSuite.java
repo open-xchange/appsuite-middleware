@@ -54,6 +54,7 @@ import junit.framework.TestSuite;
 
 /**
  * Combines all group tests.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GroupTestSuite {

@@ -53,8 +53,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.Assert;
 import org.json.JSONException;
+import org.junit.Assert;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -80,6 +80,7 @@ import com.openexchange.tools.URLParameter;
 /**
  * Utility class that contains all methods for making config requests to the
  * server.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class ConfigTools extends Assert {
@@ -104,26 +105,23 @@ public final class ConfigTools extends Assert {
     /**
      * Reads a configuration setting. A tree of configuration settings can also
      * be read. This tree will be returned as a string in JSON.
+     * 
      * @param conversation web conversation.
      * @param hostName host name of the server.
      * @param sessionId session identifier of the user.
      * @param path path to the setting.
      * @return the value of the setting or a string with the tree of settings in
-     * JSON.
+     *         JSON.
      * @throws SAXException if parsing of the response fails.
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
      */
-    public static String readSetting(final WebConversation conversation,
-        final String hostName, final String sessionId, final String path)
-        throws IOException, SAXException, JSONException {
+    public static String readSetting(final WebConversation conversation, final String hostName, final String sessionId, final String path) throws IOException, SAXException, JSONException {
         LOG.trace("Reading setting.");
-        final WebRequest req = new GetMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + CONFIG_URL + '/' + path);
+        final WebRequest req = new GetMethodWebRequest(AbstractAJAXTest.PROTOCOL + hostName + CONFIG_URL + '/' + path);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: \"" + body + "\"");
         final Response response = Response.parse(body);
@@ -133,6 +131,7 @@ public final class ConfigTools extends Assert {
 
     /**
      * Stores a configuration setting.
+     * 
      * @param conversation web conversation.
      * @param hostName host name of the server.
      * @param sessionId session identifier of the user.
@@ -140,19 +139,13 @@ public final class ConfigTools extends Assert {
      * @param value the value to write.
      * @throws Throwable if an error occurs.
      */
-    public static void storeSetting(final WebConversation conversation,
-        final String hostName, final String sessionId, final String path,
-        final String value) throws Throwable {
+    public static void storeSetting(final WebConversation conversation, final String hostName, final String sessionId, final String path, final String value) throws Throwable {
         LOG.trace("Storing setting.");
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + CONFIG_URL + '/' + path + parameter.getURLParameters(),
-            new ByteArrayInputStream(value.getBytes(com.openexchange.java.Charsets.UTF_8)),
-            "application/octet-stream");
+        final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL + hostName + CONFIG_URL + '/' + path + parameter.getURLParameters(), new ByteArrayInputStream(value.getBytes(com.openexchange.java.Charsets.UTF_8)), "application/octet-stream");
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         LOG.trace("Setting stored.");
     }
 
@@ -160,21 +153,19 @@ public final class ConfigTools extends Assert {
      * @deprecated use {@link #getUserId(AJAXClient)}.
      */
     @Deprecated
-    public static int getUserId(final WebConversation conversation,
-        final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, OXException, OXException {
+    public static int getUserId(final WebConversation conversation, final String hostName, final String sessionId) throws IOException, SAXException, JSONException, OXException, OXException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         return Executor.execute(session, new GetRequest(Tree.Identifier), hostName).getInteger();
     }
 
-    public static int getUserId(final AJAXClient client) throws OXException,
-        IOException, SAXException, JSONException {
+    public static int getUserId(final AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         return client.getValues().getUserId();
     }
 
     /**
      * Reads the time zone of the user.
+     * 
      * @param conversation web conversation.
      * @param hostName host name of the server.
      * @param sessionId session identifier of the user.
@@ -184,18 +175,16 @@ public final class ConfigTools extends Assert {
      * @throws JSONException if parsing the response fails.
      * @throws OXException
      */
-    public static TimeZone getTimeZone(final WebConversation conversation,
-        final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, OXException, OXException {
+    public static TimeZone getTimeZone(final WebConversation conversation, final String hostName, final String sessionId) throws IOException, SAXException, JSONException, OXException, OXException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
-        final String value = ConfigTools.get(session, new GetRequest(Tree
-            .TimeZone)).getString();
+        final String value = ConfigTools.get(session, new GetRequest(Tree.TimeZone)).getString();
         return TimeZone.getTimeZone(value);
     }
 
     /**
      * Reads the mail filter value.
+     * 
      * @param conversation web conversation.
      * @param hostName host name of the server.
      * @param sessionId session identifier of the user.
@@ -205,13 +194,10 @@ public final class ConfigTools extends Assert {
      * @throws JSONException if parsing the response fails.
      * @throws OXException
      */
-    public static boolean getMailFilterValue(final WebConversation conversation,
-        final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, OXException, OXException {
+    public static boolean getMailFilterValue(final WebConversation conversation, final String hostName, final String sessionId) throws IOException, SAXException, JSONException, OXException, OXException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
-        final Boolean value = ConfigTools.get(session, new GetRequest(Tree
-            .MailFilter)).getBoolean();
+        final Boolean value = ConfigTools.get(session, new GetRequest(Tree.MailFilter)).getBoolean();
         return value;
     }
 
@@ -231,15 +217,12 @@ public final class ConfigTools extends Assert {
      * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}.
      */
     @Deprecated
-    public static SetResponse set(final AJAXClient client, final SetRequest request) throws OXException, IOException,
-        SAXException, JSONException {
+    public static SetResponse set(final AJAXClient client, final SetRequest request) throws OXException, IOException, SAXException, JSONException {
         return client.execute(request);
     }
 
-    public static GetResponse get(final AJAXSession session,
-        final GetRequest request, String protocol, String hostname) throws OXException, IOException,
-        SAXException, JSONException {
-        if(protocol != null && hostname != null) {
+    public static GetResponse get(final AJAXSession session, final GetRequest request, String protocol, String hostname) throws OXException, IOException, SAXException, JSONException {
+        if (protocol != null && hostname != null) {
             return Executor.execute(session, request, protocol, hostname);
         }
         return Executor.execute(session, request);

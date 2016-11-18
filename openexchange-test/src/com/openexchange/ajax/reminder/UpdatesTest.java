@@ -52,6 +52,7 @@ package com.openexchange.ajax.reminder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -71,6 +72,7 @@ public class UpdatesTest extends ReminderTest {
         super();
     }
 
+    @Test
     public void testRange() throws Exception {
         final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
         final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
@@ -93,18 +95,8 @@ public class UpdatesTest extends ReminderTest {
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int targetId = AppointmentTest.insertAppointment(
-            getWebConversation(),
-            appointmentObj,
-            timeZone,
-            getHostName(),
-            getSessionId());
-        final ReminderObject[] reminderObj = listUpdates(
-            getWebConversation(),
-            new Date(System.currentTimeMillis() - 5000),
-            getHostName(),
-            getSessionId(),
-            timeZone);
+        final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final ReminderObject[] reminderObj = listUpdates(getWebConversation(), new Date(System.currentTimeMillis() - 5000), getHostName(), getSessionId(), timeZone);
 
         int pos = -1;
         for (int a = 0; a < reminderObj.length; a++) {

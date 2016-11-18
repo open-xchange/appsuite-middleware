@@ -67,7 +67,7 @@ public class Bug42018Test extends AbstractAJAXSession {
 
     private CalendarTestManager ctm;
     private Appointment appointment;
-    
+
     boolean works = false;
 
     public Bug42018Test() {

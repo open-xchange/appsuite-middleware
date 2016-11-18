@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter.tests.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
@@ -100,6 +101,7 @@ public class AuxiliaryAPITest extends AbstractMailFilterTest {
     /**
      * Tests the auxiliary API call 'deletescript'
      */
+    @Test
     public void testDeleteScript() throws Exception {
         // Delete the entire script
         mailFilterAPI.deleteScript();
@@ -112,6 +114,7 @@ public class AuxiliaryAPITest extends AbstractMailFilterTest {
     /**
      * Tests the auxiliary API call 'getscript'
      */
+    @Test
     public void testGetScript() throws Exception {
         String script = mailFilterAPI.getScript();
         assertFalse("The script is empty", script.isEmpty());

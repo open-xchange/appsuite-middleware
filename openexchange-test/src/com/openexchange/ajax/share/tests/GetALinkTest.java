@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.UserValues;
@@ -68,14 +69,13 @@ import com.openexchange.ajax.share.actions.UpdateLinkRequest;
 import com.openexchange.ajax.share.actions.UpdateLinkResponse;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
-
 
 /**
  * {@link GetALinkTest}
@@ -91,6 +91,7 @@ public class GetALinkTest extends ShareTest {
 
     /**
      * Initializes a new {@link GetALinkTest}.
+     * 
      * @param name
      */
     public GetALinkTest(String name) {
@@ -122,6 +123,7 @@ public class GetALinkTest extends ShareTest {
         super.tearDown();
     }
 
+    @Test
     public void testCreateUpdateAndDeleteLinkForAFolder() throws Exception {
         /*
          * Get a link for the new drive subfolder
@@ -166,6 +168,7 @@ public class GetALinkTest extends ShareTest {
         assertEquals("Permission was not deleted", client.getValues().getUserId(), reloadedFolderPermissions.get(0).getEntity());
     }
 
+    @Test
     public void testCreateUpdateAndDeleteLinkForAFile() throws Exception {
         /*
          * Get a link for the file
@@ -208,6 +211,7 @@ public class GetALinkTest extends ShareTest {
         assertTrue("Permission was not deleted", null == objectPermissions || 0 == objectPermissions.size());
     }
 
+    @Test
     public void testMoveFileWithExistingLink() throws Exception {
         /*
          * We create a link for a file and then move it to another folder. Afterwards we expect the link to be removed, as

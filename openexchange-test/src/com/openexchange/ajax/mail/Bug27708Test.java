@@ -54,9 +54,9 @@ import java.util.List;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -91,9 +91,8 @@ public final class Bug27708Test extends AbstractMailTest {
         super();
     }
 
-    @BeforeClass
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         clients = new AJAXClient[NUM_THREADS];
         clients[0] = getClient();
@@ -112,9 +111,8 @@ public final class Bug27708Test extends AbstractMailTest {
         }
     }
 
-    @AfterClass
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         // Delete sent mails.
         for (int i = 0; i < clients.length; i++) {
             clients[i].execute(new DeleteRequest(sentMails[i].toArray(new String[sentMails[i].size()][]), true));
@@ -131,7 +129,8 @@ public final class Bug27708Test extends AbstractMailTest {
         // Logout clients.
         if (null != clients) {
             for (AJAXClient client : clients) {
-                if (null != client) client.logout();
+                if (null != client)
+                    client.logout();
             }
             clients = null;
         }
@@ -189,7 +188,6 @@ public final class Bug27708Test extends AbstractMailTest {
 
         private boolean running = true;
         private Throwable throwable;
-
 
         MailSender(AJAXClient client, String recipient, String identifier, String[] others, List<String[]> mails) {
             super();

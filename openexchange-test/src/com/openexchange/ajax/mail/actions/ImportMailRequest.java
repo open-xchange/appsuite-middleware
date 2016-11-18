@@ -138,6 +138,7 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
     @Override
     public AbstractAJAXParser<ImportMailResponse> getParser() {
         return new AbstractAJAXParser<ImportMailResponse>(failOnError) {
+
             @Override
             protected ImportMailResponse createResponse(final Response response) throws JSONException {
                 ImportMailResponse retval = new ImportMailResponse(response);

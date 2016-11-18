@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -187,10 +186,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         assertEqualsAndNotNull("categories is not equals", appointmentObj1.getCategories(), appointmentObj2.getCategories());
         assertEqualsAndNotNull("delete exception is not equals", appointmentObj1.getDeleteException(), appointmentObj2.getDeleteException());
 
-        assertEqualsAndNotNull(
-            "participants are not equals",
-            participants2String(appointmentObj1.getParticipants()),
-            participants2String(appointmentObj2.getParticipants()));
+        assertEqualsAndNotNull("participants are not equals", participants2String(appointmentObj1.getParticipants()), participants2String(appointmentObj2.getParticipants()));
         assertEqualsAndNotNull("users are not equals", users2String(appointmentObj1.getUsers()), users2String(appointmentObj2.getUsers()));
     }
 
@@ -256,16 +252,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
     }
 
     public static int updateAppointment(final WebConversation webCon, final Appointment appointmentObj, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws OXException, Exception {
-        return updateAppointment(
-            webCon,
-            appointmentObj,
-            objectId,
-            inFolder,
-            new Date(System.currentTimeMillis() + APPEND_MODIFIED),
-            host,
-            login,
-            password,
-            context);
+        return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password, context);
     }
 
     public static int updateAppointment(final WebConversation webCon, Appointment appointmentObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws OXException, Exception {
@@ -436,18 +423,18 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         final Element eConfirm = new Element("confirm", XmlServlet.NS);
         switch (confirm) {
-        case CalendarObject.NONE:
-            eConfirm.addContent("none");
-            break;
-        case CalendarObject.ACCEPT:
-            eConfirm.addContent("accept");
-            break;
-        case CalendarObject.DECLINE:
-            eConfirm.addContent("decline");
-            break;
-        default:
-            eConfirm.addContent("invalid");
-            break;
+            case CalendarObject.NONE:
+                eConfirm.addContent("none");
+                break;
+            case CalendarObject.ACCEPT:
+                eConfirm.addContent("accept");
+                break;
+            case CalendarObject.DECLINE:
+                eConfirm.addContent("decline");
+                break;
+            default:
+                eConfirm.addContent("invalid");
+                break;
         }
 
         eProp.addContent(eConfirm);
@@ -597,6 +584,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         return appointmentArray;
     }
+
     public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date modified, final String host, final String login, final String password, String context) throws OXException, Exception {
         final Appointment[] appointmentArray = listAppointment(webCon, inFolder, modified, true, false, host, login, password, context);
 
@@ -661,15 +649,13 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         return (Appointment) response[0].getDataObject();
     }
 
+    private static Credentials getCredentials(String login, String password, String context) {
+        return new UsernamePasswordCredentials((context == null || context.equals("")) ? login : login + "@" + context, password);
+    }
 
-    private static Credentials getCredentials(String login, String password,
-			String context) {
-		return new UsernamePasswordCredentials((context == null || context.equals("")) ? login : login+"@"+context, password);
-	}
+    protected int getFreeBusyState(final WebConversation webCon, String contextid, String username, String context, Date start, Date end) throws IOException, SAXException {
 
-	protected int getFreeBusyState(final WebConversation webCon, String contextid, String username, String context, Date start, Date end) throws IOException, SAXException {
-
-        String url = "http://"+getHostName()+"/servlet/webdav.freebusy?contextid="+contextid+"&username="+username+"&server="+context+"&start="+start.getTime()+"&end="+end.getTime();
+        String url = "http://" + getHostName() + "/servlet/webdav.freebusy?contextid=" + contextid + "&username=" + username + "&server=" + context + "&start=" + start.getTime() + "&end=" + end.getTime();
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = webCon.getResponse(request);
         String text = response.getText();

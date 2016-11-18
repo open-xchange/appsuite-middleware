@@ -52,6 +52,7 @@ package com.openexchange.ajax.importexport;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map.Entry;
+import org.junit.Test;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -81,6 +82,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
         folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(), FolderObject.CONTACT);
     }
 
+    @Test
     public void testVCardRoundtrip() throws Exception {
         //test: import
         InputStream is = new ByteArrayInputStream(IMPORT_VCARD.getBytes());
@@ -110,6 +112,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
         }
     }
 
+    @Test
     public void testMultiVCardRoundtrip() throws Exception {
         //test: import
         InputStream is = new ByteArrayInputStream((IMPORT_VCARD + IMPORT_VCARD_2).getBytes());
@@ -131,7 +134,6 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
         assertEquals("Expected two vCards.", 2, resultingVCards.length);
         String[] result0 = resultingVCards[0].split("\n");
         String[] result1 = resultingVCards[1].split("\n");
-        
 
         //finally: checking
         for (Entry<String, String> element : VCARD_ELEMENTS.entrySet()) {

@@ -53,6 +53,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -77,18 +80,20 @@ public class MaxMailSizeTest extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(client, true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         manager.cleanUp();
         super.tearDown();
     }
 
+    @Test
     public void testSendWithManager() throws OXException, IOException, SAXException, JSONException {
         UserValues values = client.getValues();
 

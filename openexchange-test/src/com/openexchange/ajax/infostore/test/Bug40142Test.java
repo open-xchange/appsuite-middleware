@@ -52,6 +52,7 @@ package com.openexchange.ajax.infostore.test;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -72,6 +73,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
         super();
     }
 
+    @Test
     public void testCreatingTwoEquallyNamedFiles() throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         fMgr.insertFolderOnServer(folder);
@@ -107,6 +109,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
         }
     }
 
+    @Test
     public void testUpdateFileWithExistingName() throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         fMgr.insertFolderOnServer(folder);
@@ -150,6 +153,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
         assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());
     }
 
+    @Test
     public void testCopyFile() throws OXException, IOException, SAXException, JSONException {
 
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
@@ -179,6 +183,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
     }
 
     @SuppressWarnings("unchecked")
+    @Test
     public void testDeleteFileWithExistingNameInTrash() throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         fMgr.insertFolderOnServer(folder);

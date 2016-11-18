@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 import org.junit.After;
@@ -92,13 +94,9 @@ public class Bug45028Test extends CalDAVTest {
         FolderObject folder = new FolderObject();
         folder.setModule(FolderObject.CALENDAR);
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        folder.setPermissions(PermissionTools.P(
-            Integer.valueOf(manager2.getClient().getValues().getUserId()), PermissionTools.ADMIN,
-            Integer.valueOf(client.getValues().getUserId()), "vr")
-        );
+        folder.setPermissions(PermissionTools.P(Integer.valueOf(manager2.getClient().getValues().getUserId()), PermissionTools.ADMIN, Integer.valueOf(client.getValues().getUserId()), "vr"));
         folder.setFolderName(randomUID());
-        com.openexchange.ajax.folder.actions.InsertRequest request =
-            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
+        com.openexchange.ajax.folder.actions.InsertRequest request = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
         com.openexchange.ajax.folder.actions.InsertResponse response = manager2.getClient().execute(request);
         response.fillObject(folder);
         publicFolder = folder;
@@ -119,14 +117,14 @@ public class Bug45028Test extends CalDAVTest {
     }
 
     @Test
-	public void testSetAlarmInReadOnlyFolder() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(fetchSyncToken(publicFolderId));
-		/*
-		 * create appointment with users A and B on server as user B in public folder
-		 */
+    public void testSetAlarmInReadOnlyFolder() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken(publicFolderId));
+        /*
+         * create appointment with users A and B on server as user B in public folder
+         */
         String uid = randomUID();
         Appointment appointment = new Appointment();
         appointment.setUid(uid);
@@ -150,14 +148,7 @@ public class Bug45028Test extends CalDAVTest {
          * add reminder in user a's client
          */
         iCalResource.getVEvent().getComponents().clear();
-        String iCal =
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "TRIGGER:-PT25M\r\n" +
-            "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
-            "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
-            "END:VALARM\r\n";
+        String iCal = "BEGIN:VALARM\r\n" + "ACTION:DISPLAY\r\n" + "DESCRIPTION:Alarm\r\n" + "TRIGGER:-PT25M\r\n" + "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "END:VALARM\r\n";
         ;
         Component vAlarm = SimpleICal.parse(iCal, "VALARM");
         iCalResource.getVEvent().getComponents().add(vAlarm);
@@ -177,8 +168,6 @@ public class Bug45028Test extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT25M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-	}
+    }
 
 }
-
-

@@ -52,7 +52,6 @@ package com.openexchange.ajax.drive.updater;
 import java.io.IOException;
 import org.json.JSONException;
 
-
 /**
  * {@link FileRequest}
  *
@@ -62,6 +61,7 @@ public class FileRequest extends AbstractUpdaterRequest<FileResponse> {
 
     /**
      * Initializes a new {@link FileRequest}.
+     * 
      * @param servletPath
      */
     public FileRequest(String fileName) {

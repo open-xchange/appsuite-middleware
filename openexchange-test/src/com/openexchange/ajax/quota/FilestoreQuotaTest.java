@@ -50,6 +50,7 @@
 package com.openexchange.ajax.quota;
 
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
@@ -68,6 +69,7 @@ public class FilestoreQuotaTest extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testFilestoreQuota() throws Exception {
         /*
          * get filestore usage quota

@@ -1,9 +1,12 @@
+
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.L;
 import java.math.BigDecimal;
 import java.util.TimeZone;
-import junit.framework.AssertionFailedError;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -14,6 +17,7 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
+import junit.framework.AssertionFailedError;
 
 public class Bug20008Test extends AbstractAJAXSession {
 
@@ -26,8 +30,8 @@ public class Bug20008Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = client.getValues().getTimeZone();
@@ -43,13 +47,14 @@ public class Bug20008Test extends AbstractAJAXSession {
         response.fillTask(task);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         DeleteRequest delete = new DeleteRequest(task);
         client.execute(delete);
         super.tearDown();
     }
 
+    @Test
     public void testUpdate() throws Throwable {
         task.setActualDuration(null);
         task.setTargetDuration(null);

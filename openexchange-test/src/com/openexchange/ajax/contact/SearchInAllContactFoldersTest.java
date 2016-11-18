@@ -50,7 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
-
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
@@ -65,10 +65,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
-* This test creates one folder and two users (one user in the new folder and one user in the private contacts folder). Then a search is performed for their common first name.
-* The search is asserted to return both contacts.
-* @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
-*/
+ * This test creates one folder and two users (one user in the new folder and one user in the private contacts folder). Then a search is performed for their common first name.
+ * The search is asserted to return both contacts.
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
+ */
 public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
 
     private AJAXClient client;
@@ -85,7 +86,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         //create a new folder
-        newFolder = Create.createPublicFolder(client, "SearchInAllFoldersTest ("+new Date().getTime()+")", FolderObject.CONTACT);
+        newFolder = Create.createPublicFolder(client, "SearchInAllFoldersTest (" + new Date().getTime() + ")", FolderObject.CONTACT);
         //create a contact in the private folder
         contact1 = new Contact();
         contact1.setDisplayName("Herbert Meier");
@@ -117,16 +118,17 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         contactDeleteRequest = new DeleteRequest(contact2);
         client.execute(contactDeleteRequest);
         //delete the new folder
-        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, newFolder);
+        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, newFolder);
         client.execute(folderDeleteRequest);
         super.tearDown();
     }
 
+    @Test
     public void testAllContactFoldersSearch() throws Throwable {
         //execute a search over first name and last name in all folders (folder id -1) that matches both contacts
-        int [] columns = new int [] {Contact.OBJECT_ID};
-        
-//        SearchRequest searchRequest = new SearchRequest("Herbert", -1, columns, true);
+        int[] columns = new int[] { Contact.OBJECT_ID };
+
+        //        SearchRequest searchRequest = new SearchRequest("Herbert", -1, columns, true);
         ContactSearchObject cso = new ContactSearchObject();
         cso.setGivenName("Herbert");
         SearchRequest searchRequest = new SearchRequest(cso, columns, true);
@@ -135,10 +137,9 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         assertFoundContacts(searchResponse);
     }
 
+    @Test
     public void testAutoCompleteSearchForAllFolders() throws Throwable {
-        int[] columns = {
-            Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.INTERNAL_USERID, Contact.EMAIL1, Contact.EMAIL2,
-            Contact.EMAIL3, Contact.DISTRIBUTIONLIST, Contact.MARK_AS_DISTRIBUTIONLIST };
+        int[] columns = { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.INTERNAL_USERID, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.DISTRIBUTIONLIST, Contact.MARK_AS_DISTRIBUTIONLIST };
         ContactSearchObject cso = new ContactSearchObject();
         cso.setDisplayName("herb*");
         cso.setEmail1("herb*");

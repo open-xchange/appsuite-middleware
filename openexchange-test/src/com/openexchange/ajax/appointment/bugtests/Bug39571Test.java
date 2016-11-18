@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -80,12 +81,12 @@ public class Bug39571Test extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
         UserParticipant up1 = new UserParticipant(client.getValues().getUserId());
         ResourceParticipant resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(client));
-        
+
         ctm = new CalendarTestManager(client);
         series = new Appointment();
         series.setTitle("Bug 39571 Series");
@@ -98,7 +99,7 @@ public class Bug39571Test extends AbstractAJAXSession {
         series.setIgnoreConflicts(true);
         series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         ctm.insert(series);
-        
+
         single = new Appointment();
         single.setTitle("Bug 39571 Single");
         single.setStartDate(TimeTools.D("02.08." + nextYear + " 09:00"));
@@ -109,6 +110,7 @@ public class Bug39571Test extends AbstractAJAXSession {
         ctm.insert(single);
     }
 
+    @Test
     public void testBug39571() throws Exception {
         Appointment exception = ctm.createIdentifyingCopy(series);
         exception.setStartDate(TimeTools.D("02.08." + nextYear + " 06:00"));

@@ -51,6 +51,7 @@ package com.openexchange.ajax.drive.test;
 
 import java.io.File;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.drive.action.DeleteLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkResponse;
@@ -104,6 +105,7 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         itm.newAction(file, new File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
+    @Test
     public void testDelete() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
         target.setDrivePath("/" + folder.getFolderName());

@@ -46,11 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
@@ -66,33 +68,23 @@ import com.openexchange.java.Charsets;
  */
 public class Bug15400Test extends AbstractManagedContactTest {
 
-	/**
-	 * Initializes a new {@link Bug15400Test}.
-	 *
-	 * @param name The test name
-	 */
-	public Bug15400Test() {
-		super();
-	}
+    /**
+     * Initializes a new {@link Bug15400Test}.
+     *
+     * @param name The test name
+     */
+    public Bug15400Test() {
+        super();
+    }
 
+    @Test
     public void testBug15400() throws Exception {
         /*
          * check import
          */
-        String name =
-            "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul " +
-            "Abbas Ibn Hadschi D...as War Knapp Und Wird Hier Abgeschnitten"
-        ;
-        String truncatedName =
-            "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul " +
-            "Abbas Ibn Hadschi D"
-        ;
-        String vCard =
-            "BEGIN:VCARD\n" +
-            "VERSION:2.1\n" +
-            "N;CHARSET=Windows-1252:" + name + ";;;\n" +
-            "END:VCARD"
-        ;
+        String name = "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul " + "Abbas Ibn Hadschi D...as War Knapp Und Wird Hier Abgeschnitten";
+        String truncatedName = "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul " + "Abbas Ibn Hadschi D";
+        String vCard = "BEGIN:VCARD\n" + "VERSION:2.1\n" + "N;CHARSET=Windows-1252:" + name + ";;;\n" + "END:VCARD";
         VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)));
         VCardImportResponse importResponse = getClient().execute(importRequest);
         JSONArray data = (JSONArray) importResponse.getData();

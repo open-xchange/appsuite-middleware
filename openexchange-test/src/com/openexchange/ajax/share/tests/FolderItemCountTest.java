@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
@@ -59,7 +60,6 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-
 
 /**
  * {@link FolderItemCountTest}
@@ -78,6 +78,7 @@ public class FolderItemCountTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testFolderItemCount() throws Exception {
         /*
          * create shared folder with some files inside

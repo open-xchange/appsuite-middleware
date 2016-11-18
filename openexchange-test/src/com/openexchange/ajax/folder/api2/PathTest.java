@@ -51,6 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -82,12 +84,13 @@ public class PathTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testPath1() throws Throwable {
         final PathRequest pathRequest = new PathRequest(EnumAPI.OUTLOOK, String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
         final PathResponse pathResponse = client.execute(pathRequest);
@@ -98,6 +101,7 @@ public class PathTest extends AbstractAJAXSession {
         assertEquals("Unexpected path length.", 0, length);
     }
 
+    @Test
     public void testPath2() throws Throwable {
         final PathRequest pathRequest = new PathRequest(EnumAPI.OUTLOOK, PRIVATE_FOLDER_ID);
         final PathResponse pathResponse = client.execute(pathRequest);
@@ -111,6 +115,7 @@ public class PathTest extends AbstractAJAXSession {
 
     }
 
+    @Test
     public void testPath3() throws Throwable {
         String newId = null;
         try {
@@ -123,11 +128,7 @@ public class PathTest extends AbstractAJAXSession {
             oclP.setEntity(client.getValues().getUserId());
             oclP.setGroupPermission(false);
             oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
             final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
@@ -144,7 +145,7 @@ public class PathTest extends AbstractAJAXSession {
 
             // System.out.println(jsonArray);
 
-            assertEquals("Unexpected path length:"+System.getProperty("line.separator")+ jsonArray, 2, length);
+            assertEquals("Unexpected path length:" + System.getProperty("line.separator") + jsonArray, 2, length);
 
             assertEquals("Unexpected path element.", newId, jsonArray.getJSONArray(0).getString(0));
             assertEquals("Unexpected path element.", PRIVATE_FOLDER_ID, jsonArray.getJSONArray(1).getString(0));

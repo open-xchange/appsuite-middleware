@@ -51,6 +51,9 @@ package com.openexchange.ajax.mail;
 
 import static com.openexchange.mail.MailListField.FLAGS;
 import static com.openexchange.mail.MailListField.ID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -78,8 +81,8 @@ public class Bug16087Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folder = client.getValues().getInboxFolder();
@@ -90,12 +93,14 @@ public class Bug16087Test extends AbstractAJAXSession {
         ids = response.getIds()[0];
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(ids, true));
         super.tearDown();
     }
 
+    @Test
     public void testGetRawWithUnseen() throws Throwable {
         {
             final GetRequest request = new GetRequest(folder, ids[1]);

@@ -232,6 +232,7 @@ public class MailTestManager {
     /**
      * Imports a mail either into the test mails folder or into the INBOX, if not specified.
      * After the succeful import folder and mail id are set on the TestMail object.
+     * 
      * @param mail The mail
      */
     public void importMail(TestMail mail) throws OXException, IOException, JSONException {
@@ -293,7 +294,7 @@ public class MailTestManager {
 
         return response.getUnreadCount(categoryId);
     }
-    
+
     /**
      * Trains the given category
      * 
@@ -307,7 +308,7 @@ public class MailTestManager {
     public void trainCategory(String categoryId, boolean applyToExistingOnes, boolean applyToFutureOnes, String... mails) throws Exception {
 
         TrainRequest request = new TrainRequest(categoryId, applyToFutureOnes, applyToExistingOnes);
-        for(String mail: mails){
+        for (String mail : mails) {
             request.addAddress(mail);
         }
 
@@ -517,7 +518,7 @@ public class MailTestManager {
         if (updates.getFlags() != -1) {
             request.setFlags(updates.getFlags());
         }
-        if(add) {
+        if (add) {
             request.doesUpdateFlags();
         } else {
             request.removeFlags();

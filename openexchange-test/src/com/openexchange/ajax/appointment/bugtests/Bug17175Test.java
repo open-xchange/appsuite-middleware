@@ -51,6 +51,9 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -80,8 +83,8 @@ public class Bug17175Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         appointment = new Appointment();
@@ -108,6 +111,7 @@ public class Bug17175Test extends AbstractAJAXSession {
         updateAppointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug17175() throws Exception {
         UpdateResponse updateResponse = client.execute(new UpdateRequest(updateAppointment, client.getValues().getTimeZone()));
         appointment.setLastModified(updateResponse.getTimestamp());
@@ -126,8 +130,8 @@ public class Bug17175Test extends AbstractAJAXSession {
         assertEquals("Wrong amount of occurrences", 4, count);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
         super.tearDown();
     }

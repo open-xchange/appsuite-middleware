@@ -23,23 +23,14 @@ public class ContactFixtureTransformer extends AbstractFixtureTransformer<Contac
 
     @Override
     public Step transform(Class class1, String fixtureName, Fixture fixture, String displayName) {
-        if ( isDelete( fixtureName ) ) {
-            return assign(fixtureName, new ContactDeleteStep(
-                (Contact) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
+        if (isDelete(fixtureName)) {
+            return assign(fixtureName, new ContactDeleteStep((Contact) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError")));
         } else if (isUpdate(fixtureName)) {
-            return assign(fixtureName, new ContactUpdateStep(
-                (Contact) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
+            return assign(fixtureName, new ContactUpdateStep((Contact) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError")));
         } else if (isVerification(fixtureName)) {
             return assign(fixtureName, new ContactVerificationStep((Contact) fixture.getEntry(), displayName));
         } else if (isCreate(fixtureName)) {
-            ContactCreateStep step = new ContactCreateStep(
-                (Contact) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError"));
+            ContactCreateStep step = new ContactCreateStep((Contact) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError"));
             remember(fixtureName, step);
             return step;
         }

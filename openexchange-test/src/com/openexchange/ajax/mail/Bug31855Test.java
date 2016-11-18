@@ -58,6 +58,9 @@ import java.io.InputStreamReader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -84,24 +87,24 @@ public class Bug31855Test extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         if (null != fmid) {
             client.execute(new DeleteRequest(fmid, true).ignoreError());
         }
         super.tearDown();
     }
 
+    @Test
     public void testBug31855() throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(
-            MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR),
-            "bug31855.eml")), "UTF-8");
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "bug31855.eml")), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -109,8 +112,7 @@ public class Bug31855Test extends AbstractMailTest {
             sb.append(buf, 0, length);
         }
         streamReader.close();
-        InputStream inputStream = new ByteArrayInputStream(
-            TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream).setStrictParsing(false);
         final ImportMailResponse importResp = client.execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();

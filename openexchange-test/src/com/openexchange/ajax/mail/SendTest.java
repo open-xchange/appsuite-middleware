@@ -54,6 +54,9 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
@@ -83,14 +86,15 @@ public final class SendTest extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(client, false);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         manager.cleanUp();
         super.tearDown();
     }
@@ -100,6 +104,7 @@ public final class SendTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testSend() throws Throwable {
 
         /*
@@ -125,6 +130,7 @@ public final class SendTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
+    @Test
     public void testSendWithManager() throws OXException, IOException, SAXException, JSONException {
         UserValues values = client.getValues();
 
@@ -146,6 +152,7 @@ public final class SendTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testSendUnicode() throws Throwable {
 
         /*
@@ -158,7 +165,6 @@ public final class SendTest extends AbstractMailTest {
          * Create JSON mail object
          */
         final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-
 
         JSONObject jMail = new JSONObject(mailObject_25kb);
         JSONObject jAttach = jMail.getJSONArray("attachments").getJSONObject(0);

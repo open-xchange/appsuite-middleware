@@ -51,6 +51,7 @@ package com.openexchange.test.osgi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.LoginTest;
 
 /**
@@ -76,14 +77,11 @@ public final class BundleTestSessionD extends AbstractBundleTest {
         return BUNDLE_ID;
     }
 
+    @Test
     public void testSessionDAbsenceThroughLogin() {
         try {
             final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * Check for error
@@ -102,6 +100,7 @@ public final class BundleTestSessionD extends AbstractBundleTest {
         }
     }
 
+    @Test
     public void testSessionDAbsence() {
         try {
             /*
@@ -110,11 +109,7 @@ public final class BundleTestSessionD extends AbstractBundleTest {
             startBundle.start(BUNDLE_ID);
 
             final LoginTest loginTest = new LoginTest();
-            final JSONObject loginObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject loginObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * Check for error
@@ -153,9 +148,7 @@ public final class BundleTestSessionD extends AbstractBundleTest {
              */
             assertTrue("Missing error parameters", jsonObject.has("error_params") && !jsonObject.isNull("error_params"));
             final JSONArray jArray = jsonObject.getJSONArray("error_params");
-            assertTrue(
-                "Unexpected error parameters: " + jArray,
-                jArray.length() == 1 && "com.openexchange.sessiond.SessiondService".equals(jArray.getString(0)));
+            assertTrue("Unexpected error parameters: " + jArray, jArray.length() == 1 && "com.openexchange.sessiond.SessiondService".equals(jArray.getString(0)));
 
         } catch (final Exception e) {
             e.printStackTrace();

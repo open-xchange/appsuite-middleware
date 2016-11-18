@@ -64,6 +64,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
@@ -132,8 +133,8 @@ public class AbstractContactTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         contactFolderId = client.getValues().getPrivateContactFolder();

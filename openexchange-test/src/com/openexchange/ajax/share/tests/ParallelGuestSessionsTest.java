@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
@@ -77,11 +78,13 @@ public class ParallelGuestSessionsTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testParallelInvitedGuestSessions() throws Exception {
         int module = randomModule();
         testParallelGuestSessions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(RecipientType.GUEST, module));
     }
 
+    @Test
     public void testParallelAnonymousGuestSessions() throws Exception {
         int module = randomModule();
         testParallelGuestSessions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(RecipientType.ANONYMOUS, module));
@@ -97,6 +100,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
          */
         folder.addPermission(guestPermission);
         folder = updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+
             @Override
             public void customize(UpdateRequest request) {
                 request.setCascadePermissions(false);

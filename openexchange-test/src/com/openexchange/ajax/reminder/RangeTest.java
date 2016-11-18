@@ -52,6 +52,7 @@ package com.openexchange.ajax.reminder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -69,12 +70,14 @@ public class RangeTest extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name Test name.
      */
     public RangeTest() {
         super();
     }
 
+    @Test
     public void testRange() throws Exception {
         final AJAXClient client = getClient();
         final int userId = client.getValues().getUserId();

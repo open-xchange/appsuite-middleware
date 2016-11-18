@@ -49,18 +49,19 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
 import com.openexchange.ajax.publish.tests.PublicationTestManager;
 import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 
-
 /**
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class AbstractPubSubRoundtripTest extends AbstractPubSubTest{
+public class AbstractPubSubRoundtripTest extends AbstractPubSubTest {
 
     private SubscriptionTestManager subMgr;
     private PublicationTestManager pubMgr;
@@ -85,15 +86,15 @@ public class AbstractPubSubRoundtripTest extends AbstractPubSubTest{
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         setSubscribeManager(new SubscriptionTestManager(getClient()));
         setPublishManager(new PublicationTestManager(getClient()));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         getSubscribeManager().cleanUp();
         getPublishManager().cleanUp();
         super.tearDown();
@@ -111,11 +112,10 @@ public class AbstractPubSubRoundtripTest extends AbstractPubSubTest{
     }
 
     protected void assertNoDataMessedUpMaximumRequirements(Contact expected, Contact actual) {
-        for(ContactField fieldEnum: ContactField.values()){
+        for (ContactField fieldEnum : ContactField.values()) {
             int field = fieldEnum.getNumber();
-            assertEquals("Expecting field "+fieldEnum+" to match", expected.get(field), actual.get(field));
+            assertEquals("Expecting field " + fieldEnum + " to match", expected.get(field), actual.get(field));
         }
     }
-
 
 }

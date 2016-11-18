@@ -51,6 +51,7 @@ package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.AbstractWebDAVSession;
@@ -64,12 +65,14 @@ public final class Bug10859Test2 extends AbstractWebDAVSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name
      */
     public Bug10859Test2() {
         super();
     }
 
+    @Test
     public void testYearly() throws Throwable {
         final WebDAVClient client = getClient();
         final FolderObject folder = client.getFolderTools().getDefaultAppointmentFolder();
@@ -90,7 +93,7 @@ public final class Bug10859Test2 extends AbstractWebDAVSession {
         appointment.setMonth(-1);
         appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
         appointment.setIgnoreConflicts(true);
-//        final int objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
-//        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        //        final int objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
+        //        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
     }
 }

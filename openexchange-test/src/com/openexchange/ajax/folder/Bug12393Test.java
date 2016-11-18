@@ -52,6 +52,7 @@ package com.openexchange.ajax.folder;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -95,7 +96,7 @@ public class Bug12393Test extends AbstractAJAXSession {
     int parentFolderId;
     List<OCLPermission> originalSubFolderPermissions;
 
-    public Bug12393Test (final String name) {
+    public Bug12393Test(final String name) {
         super();
     }
 
@@ -121,11 +122,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         perm.setEntity(myClient.getValues().getUserId());
         perm.setGroupPermission(false);
         perm.setFolderAdmin(true);
-        perm.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         final AJAXClient client2 = new AJAXClient(User.User2);
         final int userId2 = client2.getValues().getUserId();
         client2.logout();
@@ -133,11 +130,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         perm2.setEntity(userId2);
         perm2.setGroupPermission(false);
         perm2.setFolderAdmin(true);
-        perm2.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         subFolderObject.setPermissionsAsArray(new OCLPermission[] { perm, perm2 });
         originalSubFolderPermissions = subFolderObject.getPermissions();
         request = new InsertRequest(EnumAPI.OX_OLD, subFolderObject);
@@ -156,13 +149,14 @@ public class Bug12393Test extends AbstractAJAXSession {
         // lastModified has to be set separately
         parentFolderObject.setLastModified(getResponse.getTimestamp());
         //delete the parent folder and with it the subfolder
-        final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, parentFolderObject);
+        final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, parentFolderObject);
         myClient.execute(folderDeleteRequest);
 
         super.tearDown();
     }
 
-    public void testPermissionsOfSubfoldersRemainIntactAfterRemovalOfFolderGroupPermission() throws Exception{
+    @Test
+    public void testPermissionsOfSubfoldersRemainIntactAfterRemovalOfFolderGroupPermission() throws Exception {
         final AJAXClient myClient = getClient();
         // reload the parent folder (it has been changed since its creation by the addition of the subfolder)
         GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
@@ -175,11 +169,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         perm.setEntity(myClient.getValues().getUserId());
         perm.setGroupPermission(false);
         perm.setFolderAdmin(true);
-        perm.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         parentFolderObject.setPermissionsAsArray(new OCLPermission[] { perm });
         // update the parent folder
         final UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_OLD, parentFolderObject);

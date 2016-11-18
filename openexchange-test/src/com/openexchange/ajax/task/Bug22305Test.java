@@ -51,6 +51,9 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.ajax.task.TaskTools.valuesForUpdate;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -63,7 +66,7 @@ import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * This test ensures that bug 22305 does not occur again. 
+ * This test ensures that bug 22305 does not occur again.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -78,8 +81,8 @@ public class Bug22305Test extends AbstractTaskTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         anton = getClient();
         antonId = anton.getValues().getUserId();
@@ -100,13 +103,14 @@ public class Bug22305Test extends AbstractTaskTest {
         bertaTask.setLastModified(uResp.getTimestamp());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         DeleteRequest request = new DeleteRequest(bertaTask);
         berta.execute(request);
         super.tearDown();
     }
 
+    @Test
     public void testConfirmWithIdOnlyInBody() throws Throwable {
         bertaTask = valuesForUpdate(bertaTask);
         bertaTask.setNote("Update to test for NullPointerException");

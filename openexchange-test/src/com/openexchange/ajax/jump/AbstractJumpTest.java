@@ -63,20 +63,6 @@ import com.openexchange.exception.OXException;
 public abstract class AbstractJumpTest extends AbstractAJAXSession {
 
     /**
-     * Default constructor.
-     *
-     * @param name The name of the test.
-     */
-    protected AbstractJumpTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    /**
      * @return User's default send address
      */
     protected String getSendAddress() throws OXException, IOException, JSONException {

@@ -103,26 +103,7 @@ public class ContactTest extends AbstractAJAXTest {
         super();
     }
 
-    protected final static int[] CONTACT_FIELDS = {
-        DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
-        FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.ANNIVERSARY,
-        Contact.ASSISTANT_NAME, Contact.BIRTHDAY, Contact.BRANCHES, Contact.BUSINESS_CATEGORY, Contact.CELLULAR_TELEPHONE1,
-        Contact.CELLULAR_TELEPHONE2, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER, Contact.COLOR_LABEL,
-        Contact.COMMERCIAL_REGISTER, Contact.COMPANY, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER,
-        Contact.DEPARTMENT, Contact.DISPLAY_NAME, Contact.DISTRIBUTIONLIST, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3,
-        Contact.EMPLOYEE_TYPE, Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER, Contact.INFO, Contact.INSTANT_MESSENGER1,
-        Contact.INSTANT_MESSENGER2, Contact.IMAGE1, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME,
-        Contact.NICKNAME, Contact.NOTE, Contact.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_EMPLOYEE, Contact.POSITION,
-        Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.PRIVATE_FLAG, Contact.PROFESSION,
-        Contact.ROOM_NUMBER, Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER,
-        Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID, Contact.TELEPHONE_ASSISTANT,
-        Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK, Contact.TELEPHONE_CAR,
-        Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP, Contact.TELEPHONE_ISDN,
-        Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO, Contact.TELEPHONE_TELEX,
-        Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02, Contact.USERFIELD03,
-        Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08, Contact.USERFIELD09,
-        Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14, Contact.USERFIELD15,
-        Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20, Contact.DEFAULT_ADDRESS };
+    protected final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.ANNIVERSARY, Contact.ASSISTANT_NAME, Contact.BIRTHDAY, Contact.BRANCHES, Contact.BUSINESS_CATEGORY, Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER, Contact.COLOR_LABEL, Contact.COMMERCIAL_REGISTER, Contact.COMPANY, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER, Contact.DEPARTMENT, Contact.DISPLAY_NAME, Contact.DISTRIBUTIONLIST, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.EMPLOYEE_TYPE, Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER, Contact.INFO, Contact.INSTANT_MESSENGER1, Contact.INSTANT_MESSENGER2, Contact.IMAGE1, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME, Contact.NICKNAME, Contact.NOTE, Contact.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_EMPLOYEE, Contact.POSITION, Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.PRIVATE_FLAG, Contact.PROFESSION, Contact.ROOM_NUMBER, Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID, Contact.TELEPHONE_ASSISTANT, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK, Contact.TELEPHONE_CAR, Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP, Contact.TELEPHONE_ISDN, Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO, Contact.TELEPHONE_TELEX, Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02, Contact.USERFIELD03, Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08, Contact.USERFIELD09, Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14, Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20, Contact.DEFAULT_ADDRESS };
 
     protected static final String CONTACT_URL = "/ajax/contacts";
 
@@ -160,10 +141,7 @@ public class ContactTest extends AbstractAJAXTest {
         final DistributionListEntryObject[] entry = new DistributionListEntryObject[3];
         entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
         entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
-        entry[2] = new DistributionListEntryObject(
-            contactEntry.getDisplayName(),
-            contactEntry.getEmail1(),
-            DistributionListEntryObject.EMAILFIELD1);
+        entry[2] = new DistributionListEntryObject(contactEntry.getDisplayName(), contactEntry.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
         entry[2].setEntryID(contactEntry.getObjectID());
 
         contactObj.setDistributionList(entry);
@@ -181,30 +159,15 @@ public class ContactTest extends AbstractAJAXTest {
         OXTestToolkit.assertEqualsAndNotNull("assistant name is not equals", contactObj1.getAssistantName(), contactObj2.getAssistantName());
         OXTestToolkit.assertEqualsAndNotNull("birthday is not equals", contactObj1.getBirthday(), contactObj2.getBirthday());
         OXTestToolkit.assertEqualsAndNotNull("branches is not equals", contactObj1.getBranches(), contactObj2.getBranches());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "business categorie is not equals",
-            contactObj1.getBusinessCategory(),
-            contactObj2.getBusinessCategory());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "cellular telephone1 is not equals",
-            contactObj1.getCellularTelephone1(),
-            contactObj2.getCellularTelephone1());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "cellular telephone2 is not equals",
-            contactObj1.getCellularTelephone2(),
-            contactObj2.getCellularTelephone2());
+        OXTestToolkit.assertEqualsAndNotNull("business categorie is not equals", contactObj1.getBusinessCategory(), contactObj2.getBusinessCategory());
+        OXTestToolkit.assertEqualsAndNotNull("cellular telephone1 is not equals", contactObj1.getCellularTelephone1(), contactObj2.getCellularTelephone1());
+        OXTestToolkit.assertEqualsAndNotNull("cellular telephone2 is not equals", contactObj1.getCellularTelephone2(), contactObj2.getCellularTelephone2());
         OXTestToolkit.assertEqualsAndNotNull("city business is not equals", contactObj1.getCityBusiness(), contactObj2.getCityBusiness());
         OXTestToolkit.assertEqualsAndNotNull("city home is not equals", contactObj1.getCityHome(), contactObj2.getCityHome());
         OXTestToolkit.assertEqualsAndNotNull("city other is not equals", contactObj1.getCityOther(), contactObj2.getCityOther());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "commercial register is not equals",
-            contactObj1.getCommercialRegister(),
-            contactObj2.getCommercialRegister());
+        OXTestToolkit.assertEqualsAndNotNull("commercial register is not equals", contactObj1.getCommercialRegister(), contactObj2.getCommercialRegister());
         OXTestToolkit.assertEqualsAndNotNull("company is not equals", contactObj1.getCompany(), contactObj2.getCompany());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "country business is not equals",
-            contactObj1.getCountryBusiness(),
-            contactObj2.getCountryBusiness());
+        OXTestToolkit.assertEqualsAndNotNull("country business is not equals", contactObj1.getCountryBusiness(), contactObj2.getCountryBusiness());
         OXTestToolkit.assertEqualsAndNotNull("country home is not equals", contactObj1.getCountryHome(), contactObj2.getCountryHome());
         OXTestToolkit.assertEqualsAndNotNull("country other is not equals", contactObj1.getCountryOther(), contactObj2.getCountryOther());
         OXTestToolkit.assertEqualsAndNotNull("department is not equals", contactObj1.getDepartment(), contactObj2.getDepartment());
@@ -217,44 +180,20 @@ public class ContactTest extends AbstractAJAXTest {
         OXTestToolkit.assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
         OXTestToolkit.assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
         OXTestToolkit.assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "instant messenger1 is not equals",
-            contactObj1.getInstantMessenger1(),
-            contactObj2.getInstantMessenger1());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "instant messenger2 is not equals",
-            contactObj1.getInstantMessenger2(),
-            contactObj2.getInstantMessenger2());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "instant messenger2 is not equals",
-            contactObj1.getInstantMessenger2(),
-            contactObj2.getInstantMessenger2());
+        OXTestToolkit.assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
+        OXTestToolkit.assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
+        OXTestToolkit.assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
         OXTestToolkit.assertEqualsAndNotNull("marital status is not equals", contactObj1.getMaritalStatus(), contactObj2.getMaritalStatus());
         OXTestToolkit.assertEqualsAndNotNull("manager name is not equals", contactObj1.getManagerName(), contactObj2.getManagerName());
         OXTestToolkit.assertEqualsAndNotNull("middle name is not equals", contactObj1.getMiddleName(), contactObj2.getMiddleName());
         OXTestToolkit.assertEqualsAndNotNull("nickname is not equals", contactObj1.getNickname(), contactObj2.getNickname());
         OXTestToolkit.assertEqualsAndNotNull("note is not equals", contactObj1.getNote(), contactObj2.getNote());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "number of children is not equals",
-            contactObj1.getNumberOfChildren(),
-            contactObj2.getNumberOfChildren());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "number of employee is not equals",
-            contactObj1.getNumberOfEmployee(),
-            contactObj2.getNumberOfEmployee());
+        OXTestToolkit.assertEqualsAndNotNull("number of children is not equals", contactObj1.getNumberOfChildren(), contactObj2.getNumberOfChildren());
+        OXTestToolkit.assertEqualsAndNotNull("number of employee is not equals", contactObj1.getNumberOfEmployee(), contactObj2.getNumberOfEmployee());
         OXTestToolkit.assertEqualsAndNotNull("position is not equals", contactObj1.getPosition(), contactObj2.getPosition());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "postal code business is not equals",
-            contactObj1.getPostalCodeBusiness(),
-            contactObj2.getPostalCodeBusiness());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "postal code home is not equals",
-            contactObj1.getPostalCodeHome(),
-            contactObj2.getPostalCodeHome());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "postal code other is not equals",
-            contactObj1.getPostalCodeOther(),
-            contactObj2.getPostalCodeOther());
+        OXTestToolkit.assertEqualsAndNotNull("postal code business is not equals", contactObj1.getPostalCodeBusiness(), contactObj2.getPostalCodeBusiness());
+        OXTestToolkit.assertEqualsAndNotNull("postal code home is not equals", contactObj1.getPostalCodeHome(), contactObj2.getPostalCodeHome());
+        OXTestToolkit.assertEqualsAndNotNull("postal code other is not equals", contactObj1.getPostalCodeOther(), contactObj2.getPostalCodeOther());
         OXTestToolkit.assertEqualsAndNotNull("profession is not equals", contactObj1.getProfession(), contactObj2.getProfession());
         OXTestToolkit.assertEqualsAndNotNull("room number is not equals", contactObj1.getRoomNumber(), contactObj2.getRoomNumber());
         OXTestToolkit.assertEqualsAndNotNull("sales volume is not equals", contactObj1.getSalesVolume(), contactObj2.getSalesVolume());
@@ -262,69 +201,27 @@ public class ContactTest extends AbstractAJAXTest {
         OXTestToolkit.assertEqualsAndNotNull("state business is not equals", contactObj1.getStateBusiness(), contactObj2.getStateBusiness());
         OXTestToolkit.assertEqualsAndNotNull("state home is not equals", contactObj1.getStateHome(), contactObj2.getStateHome());
         OXTestToolkit.assertEqualsAndNotNull("state other is not equals", contactObj1.getStateOther(), contactObj2.getStateOther());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "street business is not equals",
-            contactObj1.getStreetBusiness(),
-            contactObj2.getStreetBusiness());
+        OXTestToolkit.assertEqualsAndNotNull("street business is not equals", contactObj1.getStreetBusiness(), contactObj2.getStreetBusiness());
         OXTestToolkit.assertEqualsAndNotNull("street home is not equals", contactObj1.getStreetHome(), contactObj2.getStreetHome());
         OXTestToolkit.assertEqualsAndNotNull("street other is not equals", contactObj1.getStreetOther(), contactObj2.getStreetOther());
         OXTestToolkit.assertEqualsAndNotNull("suffix is not equals", contactObj1.getSuffix(), contactObj2.getSuffix());
         OXTestToolkit.assertEqualsAndNotNull("tax id is not equals", contactObj1.getTaxID(), contactObj2.getTaxID());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone assistant is not equals",
-            contactObj1.getTelephoneAssistant(),
-            contactObj2.getTelephoneAssistant());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone business1 is not equals",
-            contactObj1.getTelephoneBusiness1(),
-            contactObj2.getTelephoneBusiness1());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone business2 is not equals",
-            contactObj1.getTelephoneBusiness2(),
-            contactObj2.getTelephoneBusiness2());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone callback is not equals",
-            contactObj1.getTelephoneCallback(),
-            contactObj2.getTelephoneCallback());
+        OXTestToolkit.assertEqualsAndNotNull("telephone assistant is not equals", contactObj1.getTelephoneAssistant(), contactObj2.getTelephoneAssistant());
+        OXTestToolkit.assertEqualsAndNotNull("telephone business1 is not equals", contactObj1.getTelephoneBusiness1(), contactObj2.getTelephoneBusiness1());
+        OXTestToolkit.assertEqualsAndNotNull("telephone business2 is not equals", contactObj1.getTelephoneBusiness2(), contactObj2.getTelephoneBusiness2());
+        OXTestToolkit.assertEqualsAndNotNull("telephone callback is not equals", contactObj1.getTelephoneCallback(), contactObj2.getTelephoneCallback());
         OXTestToolkit.assertEqualsAndNotNull("telephone car is not equals", contactObj1.getTelephoneCar(), contactObj2.getTelephoneCar());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telehpone company is not equals",
-            contactObj1.getTelephoneCompany(),
-            contactObj2.getTelephoneCompany());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone home1 is not equals",
-            contactObj1.getTelephoneHome1(),
-            contactObj2.getTelephoneHome1());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone home2 is not equals",
-            contactObj1.getTelephoneHome2(),
-            contactObj2.getTelephoneHome2());
+        OXTestToolkit.assertEqualsAndNotNull("telehpone company is not equals", contactObj1.getTelephoneCompany(), contactObj2.getTelephoneCompany());
+        OXTestToolkit.assertEqualsAndNotNull("telephone home1 is not equals", contactObj1.getTelephoneHome1(), contactObj2.getTelephoneHome1());
+        OXTestToolkit.assertEqualsAndNotNull("telephone home2 is not equals", contactObj1.getTelephoneHome2(), contactObj2.getTelephoneHome2());
         OXTestToolkit.assertEqualsAndNotNull("telehpone ip is not equals", contactObj1.getTelephoneIP(), contactObj2.getTelephoneIP());
         OXTestToolkit.assertEqualsAndNotNull("telehpone isdn is not equals", contactObj1.getTelephoneISDN(), contactObj2.getTelephoneISDN());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone other is not equals",
-            contactObj1.getTelephoneOther(),
-            contactObj2.getTelephoneOther());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone pager is not equals",
-            contactObj1.getTelephonePager(),
-            contactObj2.getTelephonePager());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone primary is not equals",
-            contactObj1.getTelephonePrimary(),
-            contactObj2.getTelephonePrimary());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone radio is not equals",
-            contactObj1.getTelephoneRadio(),
-            contactObj2.getTelephoneRadio());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone telex is not equals",
-            contactObj1.getTelephoneTelex(),
-            contactObj2.getTelephoneTelex());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "telephone ttytdd is not equals",
-            contactObj1.getTelephoneTTYTTD(),
-            contactObj2.getTelephoneTTYTTD());
+        OXTestToolkit.assertEqualsAndNotNull("telephone other is not equals", contactObj1.getTelephoneOther(), contactObj2.getTelephoneOther());
+        OXTestToolkit.assertEqualsAndNotNull("telephone pager is not equals", contactObj1.getTelephonePager(), contactObj2.getTelephonePager());
+        OXTestToolkit.assertEqualsAndNotNull("telephone primary is not equals", contactObj1.getTelephonePrimary(), contactObj2.getTelephonePrimary());
+        OXTestToolkit.assertEqualsAndNotNull("telephone radio is not equals", contactObj1.getTelephoneRadio(), contactObj2.getTelephoneRadio());
+        OXTestToolkit.assertEqualsAndNotNull("telephone telex is not equals", contactObj1.getTelephoneTelex(), contactObj2.getTelephoneTelex());
+        OXTestToolkit.assertEqualsAndNotNull("telephone ttytdd is not equals", contactObj1.getTelephoneTTYTTD(), contactObj2.getTelephoneTTYTTD());
         OXTestToolkit.assertEqualsAndNotNull("title is not equals", contactObj1.getTitle(), contactObj2.getTitle());
         OXTestToolkit.assertEqualsAndNotNull("url is not equals", contactObj1.getURL(), contactObj2.getURL());
         OXTestToolkit.assertEqualsAndNotNull("userfield01 is not equals", contactObj1.getUserField01(), contactObj2.getUserField01());
@@ -347,19 +244,10 @@ public class ContactTest extends AbstractAJAXTest {
         OXTestToolkit.assertEqualsAndNotNull("userfield18 is not equals", contactObj1.getUserField18(), contactObj2.getUserField18());
         OXTestToolkit.assertEqualsAndNotNull("userfield19 is not equals", contactObj1.getUserField19(), contactObj2.getUserField19());
         OXTestToolkit.assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "number of attachments is not equals",
-            contactObj1.getNumberOfAttachments(),
-            contactObj2.getNumberOfAttachments());
-        OXTestToolkit.assertEqualsAndNotNull(
-            "default address is not equals",
-            contactObj1.getDefaultAddress(),
-            contactObj2.getDefaultAddress());
+        OXTestToolkit.assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
+        OXTestToolkit.assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
 
-        OXTestToolkit.assertEqualsAndNotNull(
-            "distribution list is not equals",
-            distributionlist2String(contactObj1.getDistributionList()),
-            distributionlist2String(contactObj2.getDistributionList()));
+        OXTestToolkit.assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
     }
 
     protected Contact createContactObject(final String displayname) {
@@ -533,8 +421,7 @@ public class ContactTest extends AbstractAJAXTest {
             f.delete();
             jResponse = extractFromCallback(resp.getText());
         } else {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(
-                com.openexchange.java.Charsets.UTF_8));
+            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 
             req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
             resp = webCon.getResponse(req);
@@ -598,8 +485,7 @@ public class ContactTest extends AbstractAJAXTest {
             f.delete();
             jResponse = extractFromCallback(resp.getText());
         } else {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(
-                com.openexchange.java.Charsets.UTF_8));
+            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 
             req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
             resp = webCon.getResponse(req);
@@ -697,8 +583,7 @@ public class ContactTest extends AbstractAJAXTest {
         jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
         jsonObj.put("startletter", startletter);
 
-        final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(
-            jsonObj.toString().getBytes()), "text/javascript");
+        final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -745,8 +630,7 @@ public class ContactTest extends AbstractAJAXTest {
             // parameter.setParameter("emailAutoComplete","true");
         }
 
-        final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(
-            jsonObj.toString().getBytes()), "text/javascript");
+        final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -817,10 +701,7 @@ public class ContactTest extends AbstractAJAXTest {
     }
 
     public static Contact loadUser(final WebConversation webCon, final int userId, final int inFolder, final String host, final String session) throws Exception {
-        final int[] cols = {
-            DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
-            FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.EMAIL1, Contact.EMAIL2,
-            Contact.EMAIL3, Contact.INTERNAL_USERID };
+        final int[] cols = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.INTERNAL_USERID };
 
         final Contact[] contactArray = listContact(webCon, inFolder, cols, host, session);
 
@@ -958,541 +839,541 @@ public class ContactTest extends AbstractAJAXTest {
 
     private static void parse(final int pos, final int field, final JSONArray jsonArray, final Contact contactObj) throws Exception {
         switch (field) {
-        case Contact.OBJECT_ID:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setObjectID(jsonArray.getInt(pos));
-            }
-            break;
-        case Contact.CREATED_BY:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCreatedBy(jsonArray.getInt(pos));
-            }
-            break;
-        case Contact.CREATION_DATE:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCreationDate(new Date(jsonArray.getLong(pos)));
-            }
-            break;
-        case Contact.MODIFIED_BY:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setModifiedBy(jsonArray.getInt(pos));
-            }
-            break;
-        case Contact.LAST_MODIFIED:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setLastModified(new Date(jsonArray.getLong(pos)));
-            }
-            break;
-        case Contact.FOLDER_ID:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setParentFolderID(jsonArray.getInt(pos));
-            }
-            break;
-        case Contact.PRIVATE_FLAG:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setPrivateFlag(jsonArray.getBoolean(pos));
-            }
-            break;
-        case Contact.SUR_NAME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setSurName(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.GIVEN_NAME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setGivenName(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.ANNIVERSARY:
-            if (!jsonArray.isNull(pos)) {
-                final String lAnniversary = jsonArray.getString(pos);
-                if (lAnniversary != null && !lAnniversary.equals("null")) {
-                    contactObj.setAnniversary(new Date(Long.parseLong(lAnniversary)));
-                } else {
-                    contactObj.setAnniversary(null);
+            case Contact.OBJECT_ID:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setObjectID(jsonArray.getInt(pos));
                 }
-            }
-            break;
-        case Contact.ASSISTANT_NAME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setAssistantName(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.BIRTHDAY:
-            if (!jsonArray.isNull(pos)) {
-                final String lBirthday = jsonArray.getString(pos);
-                if (lBirthday != null && !lBirthday.equals("null")) {
-                    contactObj.setBirthday(new Date(Long.parseLong(lBirthday)));
-                } else {
-                    contactObj.setBirthday(null);
+                break;
+            case Contact.CREATED_BY:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCreatedBy(jsonArray.getInt(pos));
                 }
-            }
-            break;
-        case Contact.BRANCHES:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setBranches(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.BUSINESS_CATEGORY:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setBusinessCategory(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.CATEGORIES:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCategories(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.CELLULAR_TELEPHONE1:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCellularTelephone1(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.CELLULAR_TELEPHONE2:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCellularTelephone2(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.CITY_HOME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCityHome(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.CITY_BUSINESS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCityBusiness(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.CITY_OTHER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCityOther(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.COMMERCIAL_REGISTER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCommercialRegister(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.COMPANY:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCompany(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.COUNTRY_HOME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCountryHome(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.COUNTRY_BUSINESS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCountryBusiness(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.COUNTRY_OTHER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setCountryOther(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.DEPARTMENT:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setDepartment(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.DEFAULT_ADDRESS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setDefaultAddress(jsonArray.getInt(pos));
-            }
-            break;
-        case Contact.DISPLAY_NAME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setDisplayName(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.EMAIL1:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setEmail1(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.EMAIL2:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setEmail2(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.EMAIL3:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setEmail3(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.EMPLOYEE_TYPE:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setEmployeeType(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.FAX_BUSINESS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setFaxBusiness(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.FAX_HOME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setFaxHome(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.FAX_OTHER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setFaxOther(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.IMAGE1:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setImage1(jsonArray.getString(pos).getBytes());
-            }
-            break;
-        /*
-         * NO LONGER PRESENT case ContactObject.NUMBER_OF_IMAGES: contactObj.setNumberOfImages(jsonArray.getInt(pos)); break;
-         */
-        case Contact.INFO:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setInfo(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.INSTANT_MESSENGER1:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setInstantMessenger1(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.INSTANT_MESSENGER2:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setInstantMessenger2(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.INTERNAL_USERID:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setInternalUserId(jsonArray.getInt(pos));
-            }
-            break;
-        case Contact.COLOR_LABEL:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setLabel(jsonArray.getInt(pos));
-            }
-            break;
-        case Contact.MANAGER_NAME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setManagerName(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.MARITAL_STATUS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setMaritalStatus(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.MIDDLE_NAME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setMiddleName(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.NICKNAME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setNickname(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.NOTE:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setNote(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.NUMBER_OF_CHILDREN:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setNumberOfChildren(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.NUMBER_OF_EMPLOYEE:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setNumberOfEmployee(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.POSITION:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setPosition(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.POSTAL_CODE_HOME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setPostalCodeHome(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.POSTAL_CODE_BUSINESS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setPostalCodeBusiness(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.POSTAL_CODE_OTHER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setPostalCodeOther(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.PROFESSION:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setProfession(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.ROOM_NUMBER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setRoomNumber(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.SALES_VOLUME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setSalesVolume(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.SPOUSE_NAME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setSpouseName(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.STATE_HOME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setStateHome(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.STATE_BUSINESS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setStateBusiness(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.STATE_OTHER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setStateOther(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.STREET_HOME:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setStreetHome(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.STREET_BUSINESS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setStreetBusiness(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.STREET_OTHER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setStreetOther(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.SUFFIX:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setSuffix(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TAX_ID:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTaxID(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_ASSISTANT:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneAssistant(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_BUSINESS1:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneBusiness1(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_BUSINESS2:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneBusiness2(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_CALLBACK:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneCallback(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_CAR:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneCar(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_COMPANY:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneCompany(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_HOME1:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneHome1(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_HOME2:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneHome2(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_IP:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneIP(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_ISDN:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneISDN(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_OTHER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneOther(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_PAGER:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephonePager(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_PRIMARY:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephonePrimary(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_RADIO:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneRadio(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_TELEX:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneTelex(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TELEPHONE_TTYTDD:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTelephoneTTYTTD(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.TITLE:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setTitle(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.URL:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setURL(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD01:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField01(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD02:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField02(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD03:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField03(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD04:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField04(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD05:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField05(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD06:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField06(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD07:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField07(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD08:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField08(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD09:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField09(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD10:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField10(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD11:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField11(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD12:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField12(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD13:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField13(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD14:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField14(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD15:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField15(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD16:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField16(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD17:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField17(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD18:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField18(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD19:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField19(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.USERFIELD20:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUserField20(jsonArray.getString(pos));
-            }
-            break;
-        case Contact.DISTRIBUTIONLIST:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setDistributionList(parseDistributionList(contactObj, jsonArray.getJSONArray(pos)));
-            }
-            break;
-        case Contact.USE_COUNT:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setUseCount(jsonArray.getInt(pos));
-            }
-            break;
-        default:
-            throw new Exception("missing field in mapping: " + field);
+                break;
+            case Contact.CREATION_DATE:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCreationDate(new Date(jsonArray.getLong(pos)));
+                }
+                break;
+            case Contact.MODIFIED_BY:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setModifiedBy(jsonArray.getInt(pos));
+                }
+                break;
+            case Contact.LAST_MODIFIED:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setLastModified(new Date(jsonArray.getLong(pos)));
+                }
+                break;
+            case Contact.FOLDER_ID:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setParentFolderID(jsonArray.getInt(pos));
+                }
+                break;
+            case Contact.PRIVATE_FLAG:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setPrivateFlag(jsonArray.getBoolean(pos));
+                }
+                break;
+            case Contact.SUR_NAME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setSurName(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.GIVEN_NAME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setGivenName(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.ANNIVERSARY:
+                if (!jsonArray.isNull(pos)) {
+                    final String lAnniversary = jsonArray.getString(pos);
+                    if (lAnniversary != null && !lAnniversary.equals("null")) {
+                        contactObj.setAnniversary(new Date(Long.parseLong(lAnniversary)));
+                    } else {
+                        contactObj.setAnniversary(null);
+                    }
+                }
+                break;
+            case Contact.ASSISTANT_NAME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setAssistantName(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.BIRTHDAY:
+                if (!jsonArray.isNull(pos)) {
+                    final String lBirthday = jsonArray.getString(pos);
+                    if (lBirthday != null && !lBirthday.equals("null")) {
+                        contactObj.setBirthday(new Date(Long.parseLong(lBirthday)));
+                    } else {
+                        contactObj.setBirthday(null);
+                    }
+                }
+                break;
+            case Contact.BRANCHES:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setBranches(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.BUSINESS_CATEGORY:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setBusinessCategory(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.CATEGORIES:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCategories(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.CELLULAR_TELEPHONE1:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCellularTelephone1(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.CELLULAR_TELEPHONE2:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCellularTelephone2(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.CITY_HOME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCityHome(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.CITY_BUSINESS:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCityBusiness(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.CITY_OTHER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCityOther(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.COMMERCIAL_REGISTER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCommercialRegister(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.COMPANY:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCompany(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.COUNTRY_HOME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCountryHome(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.COUNTRY_BUSINESS:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCountryBusiness(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.COUNTRY_OTHER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setCountryOther(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.DEPARTMENT:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setDepartment(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.DEFAULT_ADDRESS:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setDefaultAddress(jsonArray.getInt(pos));
+                }
+                break;
+            case Contact.DISPLAY_NAME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setDisplayName(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.EMAIL1:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setEmail1(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.EMAIL2:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setEmail2(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.EMAIL3:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setEmail3(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.EMPLOYEE_TYPE:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setEmployeeType(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.FAX_BUSINESS:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setFaxBusiness(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.FAX_HOME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setFaxHome(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.FAX_OTHER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setFaxOther(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.IMAGE1:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setImage1(jsonArray.getString(pos).getBytes());
+                }
+                break;
+            /*
+             * NO LONGER PRESENT case ContactObject.NUMBER_OF_IMAGES: contactObj.setNumberOfImages(jsonArray.getInt(pos)); break;
+             */
+            case Contact.INFO:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setInfo(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.INSTANT_MESSENGER1:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setInstantMessenger1(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.INSTANT_MESSENGER2:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setInstantMessenger2(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.INTERNAL_USERID:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setInternalUserId(jsonArray.getInt(pos));
+                }
+                break;
+            case Contact.COLOR_LABEL:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setLabel(jsonArray.getInt(pos));
+                }
+                break;
+            case Contact.MANAGER_NAME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setManagerName(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.MARITAL_STATUS:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setMaritalStatus(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.MIDDLE_NAME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setMiddleName(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.NICKNAME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setNickname(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.NOTE:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setNote(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.NUMBER_OF_CHILDREN:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setNumberOfChildren(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.NUMBER_OF_EMPLOYEE:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setNumberOfEmployee(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.POSITION:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setPosition(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.POSTAL_CODE_HOME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setPostalCodeHome(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.POSTAL_CODE_BUSINESS:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setPostalCodeBusiness(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.POSTAL_CODE_OTHER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setPostalCodeOther(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.PROFESSION:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setProfession(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.ROOM_NUMBER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setRoomNumber(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.SALES_VOLUME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setSalesVolume(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.SPOUSE_NAME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setSpouseName(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.STATE_HOME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setStateHome(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.STATE_BUSINESS:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setStateBusiness(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.STATE_OTHER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setStateOther(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.STREET_HOME:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setStreetHome(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.STREET_BUSINESS:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setStreetBusiness(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.STREET_OTHER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setStreetOther(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.SUFFIX:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setSuffix(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TAX_ID:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTaxID(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_ASSISTANT:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneAssistant(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_BUSINESS1:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneBusiness1(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_BUSINESS2:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneBusiness2(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_CALLBACK:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneCallback(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_CAR:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneCar(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_COMPANY:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneCompany(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_HOME1:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneHome1(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_HOME2:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneHome2(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_IP:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneIP(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_ISDN:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneISDN(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_OTHER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneOther(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_PAGER:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephonePager(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_PRIMARY:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephonePrimary(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_RADIO:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneRadio(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_TELEX:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneTelex(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TELEPHONE_TTYTDD:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTelephoneTTYTTD(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.TITLE:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setTitle(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.URL:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setURL(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD01:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField01(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD02:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField02(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD03:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField03(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD04:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField04(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD05:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField05(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD06:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField06(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD07:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField07(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD08:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField08(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD09:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField09(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD10:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField10(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD11:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField11(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD12:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField12(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD13:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField13(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD14:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField14(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD15:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField15(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD16:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField16(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD17:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField17(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD18:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField18(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD19:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField19(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.USERFIELD20:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUserField20(jsonArray.getString(pos));
+                }
+                break;
+            case Contact.DISTRIBUTIONLIST:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setDistributionList(parseDistributionList(contactObj, jsonArray.getJSONArray(pos)));
+                }
+                break;
+            case Contact.USE_COUNT:
+                if (!jsonArray.isNull(pos)) {
+                    contactObj.setUseCount(jsonArray.getInt(pos));
+                }
+                break;
+            default:
+                throw new Exception("missing field in mapping: " + field);
 
         }
     }

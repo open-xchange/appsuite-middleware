@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -74,14 +75,17 @@ public class Bug40826Test extends ShareTest {
         super();
     }
 
+    @Test
     public void testShareCalendarToAuthor() throws Exception {
         testShareToAuthor(FolderObject.CALENDAR);
     }
 
+    @Test
     public void testShareTasksToAuthor() throws Exception {
         testShareToAuthor(FolderObject.TASK);
     }
 
+    @Test
     public void testShareContactsToAuthor() throws Exception {
         testShareToAuthor(FolderObject.CONTACT);
     }

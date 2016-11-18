@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
@@ -127,6 +128,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testBug13942() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(updateAppointment, getClientB().getValues().getTimeZone());
         UpdateResponse updateResponse = getClientB().execute(updateRequest);

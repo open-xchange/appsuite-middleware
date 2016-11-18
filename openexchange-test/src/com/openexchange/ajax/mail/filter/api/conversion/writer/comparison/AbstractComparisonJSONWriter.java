@@ -74,7 +74,7 @@ abstract class AbstractComparisonJSONWriter<A extends ComparisonArgument> implem
 
     JSONObject write(Comparison<ComparisonArgument> type, Set<A> arguments, JSONObject jsonObject) throws JSONException {
         jsonObject.put(CommonComparisonArgument.comparison.name(), type.getMatchType().name());
-        
+
         for (A argument : arguments) {
             Object value = type.getArgument(argument);
             if (JSONCoercion.needsJSONCoercion(value)) {

@@ -49,8 +49,9 @@
 
 package com.openexchange.ajax.framework;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
+import junit.framework.TestCase;
 
 /**
  * Tests for the {@link Params} class.
@@ -66,11 +67,12 @@ public class ParamsTest extends TestCase {
         super.setUp();
         defaultParams = new Params();
         defaultParams.add("key1", "value1");
-        defaultParams.add(new Parameter("key2","value2"));
-        defaultParams.add("key3","value3","key4","value4");
-        defaultParams.add(new Parameter("key5","value5"),new Parameter("key6","value6"));
+        defaultParams.add(new Parameter("key2", "value2"));
+        defaultParams.add("key3", "value3", "key4", "value4");
+        defaultParams.add(new Parameter("key5", "value5"), new Parameter("key6", "value6"));
     }
 
+    @Test
     public void testToString() {
         assertEquals("?key1=value1&key2=value2&key3=value3&key4=value4&key5=value5&key6=value6", defaultParams.toString());
     }
@@ -79,7 +81,7 @@ public class ParamsTest extends TestCase {
         // TODO
     }
 
-    public void _testToArray(){
+    public void _testToArray() {
         // TODO
     }
 }

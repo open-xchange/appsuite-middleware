@@ -54,13 +54,13 @@ import junit.framework.TestSuite;
 
 public class RecurrenceTestSuite {
 
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(DailyRecurrenceTest.class);
-		tests.addTestSuite(Bug6960Test.class);
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(DailyRecurrenceTest.class);
+        tests.addTestSuite(Bug6960Test.class);
         tests.addTestSuite(Bug7915Test.class);
         tests.addTestSuite(Bug8447Test.class);
         tests.addTestSuite(Bug10859Test.class);
-		return tests;
-	}
+        return tests;
+    }
 }

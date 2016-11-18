@@ -52,6 +52,7 @@ package com.openexchange.ajax.manifests;
 import java.util.Comparator;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.manifests.actions.ConfigRequest;
 import com.openexchange.ajax.manifests.actions.ConfigResponse;
@@ -85,6 +86,7 @@ public class Bug30835Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testBug30835() throws Exception {
         ConfigRequest request = new ConfigRequest();
         ConfigResponse response = client.execute(request);

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.jump;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.ajax.jump.actions.DummyRequest;
 import com.openexchange.ajax.jump.actions.IdentityTokenRequest;
@@ -63,27 +61,6 @@ import com.openexchange.ajax.jump.actions.IdentityTokenResponse;
  */
 public final class IdentityTokenTest extends AbstractJumpTest {
 
-    /**
-     * Initializes a new {@link IdentityTokenTest}.
-     *
-     * @param name
-     */
-    public IdentityTokenTest() {
-        super();
-    }
-
-    @BeforeClass
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @AfterClass
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testIdentityToken() {
         try {
@@ -93,7 +70,6 @@ public final class IdentityTokenTest extends AbstractJumpTest {
             String token = identityTokenResponse.getToken();
 
             assertNotNull(token);
-
 
         } catch (Exception e) {
             e.printStackTrace();

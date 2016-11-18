@@ -50,10 +50,10 @@
 package com.openexchange.ajax.infostore.test;
 
 import java.util.UUID;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.groupware.container.FolderObject;
-
 
 /**
  * {@link Bug32004Test}
@@ -73,6 +73,7 @@ public class Bug32004Test extends AbstractInfostoreTest {
         super();
     }
 
+    @Test
     public void testCreateFolderBelowTrash() throws Exception {
         /*
          * create folder below trash

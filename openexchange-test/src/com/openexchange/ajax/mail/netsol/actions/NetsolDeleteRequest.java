@@ -109,8 +109,7 @@ public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteReques
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
-                new Parameter("harddelete", hardDelete ? "1" : "0") };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter("harddelete", hardDelete ? "1" : "0") };
     }
 
     @Override

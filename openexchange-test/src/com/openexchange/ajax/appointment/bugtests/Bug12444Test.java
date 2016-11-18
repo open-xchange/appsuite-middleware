@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -69,12 +70,14 @@ public final class Bug12444Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name.
      */
     public Bug12444Test() {
         super();
     }
 
+    @Test
     public void testExternalWithoutEmail() throws Throwable {
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();

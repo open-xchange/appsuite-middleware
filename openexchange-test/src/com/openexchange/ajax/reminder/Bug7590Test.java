@@ -53,6 +53,9 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -80,12 +83,8 @@ public class Bug7590Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    public Bug7590Test() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = client.getValues().getTimeZone();
@@ -94,12 +93,13 @@ public class Bug7590Test extends AbstractAJAXSession {
         appointment = createAppointment();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
+    @Test
     public void testBug7590() throws Exception {
         final RangeRequest request = new RangeRequest(appointment.getEndDate());
         final RangeResponse response = client.execute(request);
@@ -114,8 +114,7 @@ public class Bug7590Test extends AbstractAJAXSession {
         assertNotNull("No reminder found for created appointment.", actual);
 
         final ReminderObject expected = new ReminderObject();
-        @SuppressWarnings("null")
-        int reminderId = actual.getObjectId();
+        @SuppressWarnings("null") int reminderId = actual.getObjectId();
         expected.setObjectId(reminderId);
         expected.setFolder(folderId);
         expected.setTargetId(appointment.getObjectID());

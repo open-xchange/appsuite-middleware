@@ -52,13 +52,13 @@ package com.openexchange.ajax.jslob;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-
 /**
  * {@link JSlobTestSuite}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class JSlobTestSuite {
+
     public static Test suite() {
         final TestSuite tests = new TestSuite(JSlobTestSuite.class.getName());
         tests.addTestSuite(Bug28821Test.class);

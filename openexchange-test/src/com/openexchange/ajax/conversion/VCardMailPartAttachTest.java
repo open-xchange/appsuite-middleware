@@ -51,6 +51,7 @@ package com.openexchange.ajax.conversion;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -88,6 +89,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testVCardAttach() throws Throwable {
         try {
             /*
@@ -95,8 +97,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
              */
             final int objectId;
             final int folderId = getPrivateContactFolder();
-            final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(folderId,
-                    new int[] { DataObject.OBJECT_ID }));
+            final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(folderId, new int[] { DataObject.OBJECT_ID }));
             final ListIDs listIDs = allR.getListIDs();
             if (listIDs.size() == 0) {
                 /*
@@ -125,8 +126,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
 
                     final JSONObject bodyObject = new JSONObject();
                     bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), "text/html");
-                    bodyObject.put(MailJSONField.CONTENT.getKey(), "Mail body text for test: "
-                            + VCardMailPartAttachTest.class.getName() + "<br>ENJOY!");
+                    bodyObject.put(MailJSONField.CONTENT.getKey(), "Mail body text for test: " + VCardMailPartAttachTest.class.getName() + "<br>ENJOY!");
 
                     final JSONArray attachments = new JSONArray();
                     attachments.put(bodyObject);
@@ -138,17 +138,13 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
                  */
                 {
                     final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.contact");
-                    jsonSource.put("args", new JSONArray().put(new JSONObject().put(
-                            "com.openexchange.groupware.contact.pairs", new JSONArray().put(
-                                    new JSONObject().put(AJAXServlet.PARAMETER_FOLDERID, folderId).put(
-                                            AJAXServlet.PARAMETER_ID, objectId)).toString())));
+                    jsonSource.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.groupware.contact.pairs", new JSONArray().put(new JSONObject().put(AJAXServlet.PARAMETER_FOLDERID, folderId).put(AJAXServlet.PARAMETER_ID, objectId)).toString())));
                     mailObject_25kb.put(MailJSONField.DATASOURCES.getKey(), new JSONArray().put(jsonSource));
                 }
                 /*
                  * Perform transport
                  */
-                final SendResponse response = Executor.execute(getSession(),
-                    new SendRequest(mailObject_25kb.toString()));
+                final SendResponse response = Executor.execute(getSession(), new SendRequest(mailObject_25kb.toString()));
                 assertTrue("Send failed", response.getFolderAndID() != null);
                 assertTrue("Duration corrupt", response.getRequestDuration() > 0);
                 mailFolderAndMailID = response.getFolderAndID();
@@ -174,14 +170,11 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
                 /*
                  * Get previously sent mail
                  */
-                final GetResponse resp = Executor.execute(getSession(),
-                    new GetRequest(mailFolderAndMailID[0], mailFolderAndMailID[1], true));
+                final GetResponse resp = Executor.execute(getSession(), new GetRequest(mailFolderAndMailID[0], mailFolderAndMailID[1], true));
                 final JSONObject fetchedMailObject = (JSONObject) resp.getData();
 
                 assertNotNull("Missing JSON mail object", fetchedMailObject);
-                assertTrue("JSON mail object misses field: " + MailJSONField.ATTACHMENTS.getKey(), fetchedMailObject
-                        .has(MailJSONField.ATTACHMENTS.getKey())
-                        && !fetchedMailObject.isNull(MailJSONField.ATTACHMENTS.getKey()));
+                assertTrue("JSON mail object misses field: " + MailJSONField.ATTACHMENTS.getKey(), fetchedMailObject.has(MailJSONField.ATTACHMENTS.getKey()) && !fetchedMailObject.isNull(MailJSONField.ATTACHMENTS.getKey()));
                 final JSONArray attachmentArray = fetchedMailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
                 assertTrue("Unexpected number of attachments in JSON mail object: " + attachmentArray.length(), attachmentArray.length() >= 2);
                 StringBuilder sb = new StringBuilder();

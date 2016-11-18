@@ -58,6 +58,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * Stores the parameters for inserting the appointment.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertResponse> {
@@ -79,13 +80,13 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
 
     /**
      * More detailed constructor.
+     * 
      * @param appointmentObj appointment to insert.
      * @param timeZone time zone of the user.
      * @param failOnError <code>true</code> to check the response for error
-     * messages.
+     *            messages.
      */
-    public InsertRequest(final Appointment appointmentObj, final TimeZone timeZone,
-        final boolean failOnError) {
+    public InsertRequest(final Appointment appointmentObj, final TimeZone timeZone, final boolean failOnError) {
         super();
         this.appointmentObj = appointmentObj;
         this.timeZone = timeZone;
@@ -94,6 +95,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
 
     /**
      * Default constructor.
+     * 
      * @param appointment appointment to insert.
      * @param timeZone time zone of the user.
      */
@@ -122,9 +124,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(appointmentObj.getParentFolderID()))
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(appointmentObj.getParentFolderID()))
         };
     }
 

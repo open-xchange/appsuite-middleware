@@ -71,6 +71,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link Bug37002Test} verifies that changing some task state does not
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug37002Test extends AbstractAJAXSession {
@@ -84,8 +85,7 @@ public class Bug37002Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         client2 = new AJAXClient(User.User2);
@@ -107,8 +107,7 @@ public class Bug37002Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         client1.execute(new DeleteRequest(task));
         super.tearDown();
     }

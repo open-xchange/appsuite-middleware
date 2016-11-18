@@ -50,18 +50,19 @@
 package com.openexchange.ajax.session;
 
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import junit.framework.TestCase;
 
 /**
  * Tests the HTTP authorization header on the login servlet.
@@ -95,6 +96,7 @@ public class HttpAuthTest extends TestCase {
         super.tearDown();
     }
 
+    @Test
     public void testAuthorizationRequired() throws Throwable {
         HttpClient client2 = AJAXSession.newHttpClient();
         HttpUriRequest request = new HttpGet(protocol + "://" + hostname + HttpAuthRequest.HTTP_AUTH_URL);
@@ -102,6 +104,7 @@ public class HttpAuthTest extends TestCase {
         assertEquals("HTTP auth URL does not respond with a required authorization.", HttpServletResponse.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
     }
 
+    @Test
     public void testRedirect() throws Throwable {
         final AJAXSession session = new AJAXSession();
         final AJAXClient myClient = new AJAXClient(session, false);

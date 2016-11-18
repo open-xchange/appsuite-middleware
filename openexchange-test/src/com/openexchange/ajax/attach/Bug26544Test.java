@@ -109,7 +109,7 @@ public class Bug26544Test {
     @Test
     public void testAllRequestWithSortOrder() throws OXException, IOException, JSONException {
         AJAXClient client = new AJAXClient(User1);
-        int cols[] = {800, 801, 802, 803, 804, 805, 806 };
+        int cols[] = { 800, 801, 802, 803, 804, 805, 806 };
 
         // test sort by id
         AllRequest allRequest = new AllRequest(contactA, cols, 1, Order.ASCENDING);
@@ -119,7 +119,7 @@ public class Bug26544Test {
         assertEquals("Wrong sort order", "C.txt", attachmentMetadata.get(0).getFilename());
         assertEquals("Wrong sort order", "A.txt", attachmentMetadata.get(1).getFilename());
         assertEquals("Wrong sort order", "B.txt", attachmentMetadata.get(2).getFilename());
-        
+
         // test sort by filename
         allRequest = new AllRequest(contactA, cols, 803, Order.ASCENDING);
         allResponse = client.execute(allRequest);
@@ -133,7 +133,7 @@ public class Bug26544Test {
     @Test
     public void testAllRequestWithoutSortOrder() throws OXException, IOException, JSONException {
         AJAXClient client = new AJAXClient(User1);
-        int cols[] = {800, 801, 802, 803, 804, 805, 806 };
+        int cols[] = { 800, 801, 802, 803, 804, 805, 806 };
         AllRequest allRequest = new AllRequest(contactA, cols);
         AllResponse allResponse = client.execute(allRequest);
         List<AttachmentMetadata> attachmentMetadata = allResponse.getAttachments();

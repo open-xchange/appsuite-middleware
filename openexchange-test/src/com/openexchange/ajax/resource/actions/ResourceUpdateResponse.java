@@ -60,14 +60,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class ResourceUpdateResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link ResourceUpdateResponse}
-	 *
-	 * @param response
-	 *            The JSON response container
-	 */
-	ResourceUpdateResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link ResourceUpdateResponse}
+     *
+     * @param response
+     *            The JSON response container
+     */
+    ResourceUpdateResponse(final Response response) {
+        super(response);
+    }
 
 }

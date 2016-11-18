@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
@@ -59,12 +60,12 @@ import com.openexchange.test.fixtures.SimpleCredentials;
  */
 public class UserIdTransformator extends CredentialsTransformator {
 
-	public UserIdTransformator(FixtureLoader fixtureLoader) {
-		super(fixtureLoader);
-	}
+    public UserIdTransformator(FixtureLoader fixtureLoader) {
+        super(fixtureLoader);
+    }
 
-	@Override
+    @Override
     public Object transform(final String value) throws OXException {
-		return ((SimpleCredentials)super.transform(value)).getUserId();
+        return ((SimpleCredentials) super.transform(value)).getUserId();
     }
 }

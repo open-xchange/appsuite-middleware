@@ -52,6 +52,9 @@ package com.openexchange.ajax.session;
 import static com.openexchange.java.Autoboxing.I;
 import org.apache.http.client.params.ClientPNames;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -81,24 +84,21 @@ public class TokenLoginTest extends AbstractAJAXSession {
 
     private String password;
 
-    public TokenLoginTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         AJAXConfig.init();
         login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password = AJAXConfig.getProperty(Property.PASSWORD);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         login = null;
         password = null;
         super.tearDown();
     }
 
+    @Test
     public void testTokenLogin() throws Exception {
         final AJAXSession session = new AJAXSession();
         session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
@@ -111,10 +111,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             // Activate session with tokens.
-            TokensResponse response2 = myClient.execute(new TokensRequest(
-                response.getHttpSessionId(),
-                response.getClientToken(),
-                response.getServerToken()));
+            TokensResponse response2 = myClient.execute(new TokensRequest(response.getHttpSessionId(), response.getClientToken(), response.getServerToken()));
             session.setId(response2.getSessionId());
             // Test if session really works
             int userId = myClient.execute(new GetRequest(Tree.Identifier)).getInteger();
@@ -124,6 +121,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testSessionExpire() throws Exception {
         final AJAXSession session = new AJAXSession();
         final AJAXClient myClient = new AJAXClient(session, false);
@@ -136,11 +134,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             Thread.sleep(60000);
             // Tokened session should be timed out.
-            TokensResponse response2 = myClient.execute(new TokensRequest(
-                response.getHttpSessionId(),
-                response.getClientToken(),
-                response.getServerToken(),
-                false));
+            TokensResponse response2 = myClient.execute(new TokensRequest(response.getHttpSessionId(), response.getClientToken(), response.getServerToken(), false));
             assertTrue("Tokened session should be expired.", response2.hasError());
             // Check for correct exception
             OXException expected = OXExceptionFactory.getInstance().create(SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN, "a", "b");
@@ -151,6 +145,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testTokenLogin_passwordInRequest_returnError() throws Exception {
         final AJAXSession session = new AJAXSession();
         session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
@@ -167,7 +162,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         }
     }
 
-
+    @Test
     public void testTokenLoginWithJSON_returnJsonResponse() throws Exception {
         final AJAXSession session = new AJAXSession();
         session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
@@ -186,6 +181,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testTokenLoginWithJSONResponse_passwordInRequest_returnError() throws Exception {
         final AJAXSession session = new AJAXSession();
         session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);

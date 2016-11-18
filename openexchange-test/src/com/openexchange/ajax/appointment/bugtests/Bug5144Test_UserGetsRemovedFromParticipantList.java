@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
@@ -60,41 +61,40 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 
-public class Bug5144Test_UserGetsRemovedFromParticipantList extends
-		ManagedAppointmentTest {
+public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppointmentTest {
 
-	public Bug5144Test_UserGetsRemovedFromParticipantList() {
-		super();
-	}
-	
-	public void testIt() throws Exception{
-		AJAXClient client2 = new AJAXClient(User.User2);
-		int uid1 = getClient().getValues().getUserId();
-		int uid2 = client2.getValues().getUserId();
-		
-		UserParticipant other = new UserParticipant(client2.getValues().getUserId());
-		assertTrue(other.getIdentifier() > 0);
-		int fid1 = folder.getObjectID();
-		
-		Appointment app = AbstractAssertion.generateDefaultAppointment(fid1);
-		app.addParticipant(other);
-		
-		calendarManager.insert(app);
-		
-		int appId = app.getObjectID();
-		int fid2 = client2.getValues().getPrivateAppointmentFolder();
-		
-		GetResponse getResponse = client2.execute(new GetRequest(fid2,appId));
-		Date lastMod = getResponse.getTimestamp();
+    public Bug5144Test_UserGetsRemovedFromParticipantList() {
+        super();
+    }
 
-		client2.execute(new DeleteRequest(appId, fid2, lastMod));
-		
-		Appointment actual = calendarManager.get(app);
-		
-		Participant[] participants = actual.getParticipants();
-		
-		assertEquals(1, participants.length);
-		assertEquals(uid1, participants[0].getIdentifier());
-	}
+    public void testIt() throws Exception {
+        AJAXClient client2 = new AJAXClient(User.User2);
+        int uid1 = getClient().getValues().getUserId();
+        int uid2 = client2.getValues().getUserId();
+
+        UserParticipant other = new UserParticipant(client2.getValues().getUserId());
+        assertTrue(other.getIdentifier() > 0);
+        int fid1 = folder.getObjectID();
+
+        Appointment app = AbstractAssertion.generateDefaultAppointment(fid1);
+        app.addParticipant(other);
+
+        calendarManager.insert(app);
+
+        int appId = app.getObjectID();
+        int fid2 = client2.getValues().getPrivateAppointmentFolder();
+
+        GetResponse getResponse = client2.execute(new GetRequest(fid2, appId));
+        Date lastMod = getResponse.getTimestamp();
+
+        client2.execute(new DeleteRequest(appId, fid2, lastMod));
+
+        Appointment actual = calendarManager.get(app);
+
+        Participant[] participants = actual.getParticipants();
+
+        assertEquals(1, participants.length);
+        assertEquals(uid1, participants[0].getIdentifier());
+    }
 
 }

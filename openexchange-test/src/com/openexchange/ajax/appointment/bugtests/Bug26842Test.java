@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -80,31 +81,25 @@ public class Bug26842Test extends AbstractAJAXSession {
         ftm = new FolderTestManager(client);
         ctm = new CalendarTestManager(client);
         ctm.setFailOnError(true);
-        folder = ftm.generatePublicFolder(
-            "26842-" + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        folder = ftm.generatePublicFolder("26842-" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
         OCLPermission permission = new OCLPermission();
         permission.setEntity(client.getValues().getUserId());
         permission.setGroupPermission(false);
         permission.setFolderAdmin(true);
-        permission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         folder.addPermission(permission);
 
         ftm.insertFolderOnServer(folder);
     }
 
+    @Test
     public void testBug() throws Exception {
         Appointment app = new Appointment();
         app.setTitle("Bug 26842 Test");
         app.setStartDate(D("29.05.2013 08:00"));
         app.setEndDate(D("29.05.2013 08:00"));
-        app.setParticipants(new Participant[]{});
+        app.setParticipants(new Participant[] {});
         app.setParentFolderID(folder.getObjectID());
         app.setIgnoreConflicts(true);
 

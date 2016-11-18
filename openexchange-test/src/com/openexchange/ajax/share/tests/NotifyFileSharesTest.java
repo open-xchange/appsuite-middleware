@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -81,16 +82,19 @@ public class NotifyFileSharesTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testNotifyGuest() throws Exception {
         testNotifyGuest(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyGuest(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
     }
 
+    @Test
     public void testNotifyGroup() throws Exception {
         testNotifyGroup(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyGroup(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
     }
 
+    @Test
     public void testNotifyUser() throws Exception {
         testNotifyUser(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyUser(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
@@ -103,8 +107,7 @@ public class NotifyFileSharesTest extends ShareTest {
     }
 
     private void testNotifyGroup(int parent) throws Exception {
-        DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(
-            GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ);
+        DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ);
         AJAXClient client2 = new AJAXClient(User.User2);
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();

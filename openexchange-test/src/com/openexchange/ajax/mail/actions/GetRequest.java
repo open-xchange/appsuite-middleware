@@ -191,7 +191,9 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         RAW("raw"),
         TEXT("text"),
         HTML("html");
+
         String value;
+
         View(String value) {
             this.value = value;
         }

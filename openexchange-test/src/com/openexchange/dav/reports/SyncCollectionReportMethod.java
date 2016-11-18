@@ -50,7 +50,6 @@
 package com.openexchange.dav.reports;
 
 import java.io.IOException;
-
 import org.apache.commons.httpclient.HttpConnection;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.jackrabbit.webdav.DavException;
@@ -60,61 +59,57 @@ import org.apache.jackrabbit.webdav.xml.DomUtil;
 import org.apache.jackrabbit.webdav.xml.ElementIterator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import com.openexchange.dav.PropertyNames;
 
 /**
- * {@link SyncCollectionReportMethod} - Report method for the 
+ * {@link SyncCollectionReportMethod} - Report method for the
  * "sync-collection" request.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SyncCollectionReportMethod extends ReportMethod {
-	
-	private String syncToken;
-	private Document responseDocument = null;
 
-	public SyncCollectionReportMethod(String uri, ReportInfo reportInfo) throws IOException {
-		super(uri, reportInfo);
-		this.syncToken = null;
-	}
-	
-	public String getSyncTokenFromResponse() {
-		return syncToken;
-	}
-	
-	public SyncCollectionResponse getResponseBodyAsSyncCollection() throws IOException, DavException {
+    private String syncToken;
+    private Document responseDocument = null;
+
+    public SyncCollectionReportMethod(String uri, ReportInfo reportInfo) throws IOException {
+        super(uri, reportInfo);
+        this.syncToken = null;
+    }
+
+    public String getSyncTokenFromResponse() {
+        return syncToken;
+    }
+
+    public SyncCollectionResponse getResponseBodyAsSyncCollection() throws IOException, DavException {
         checkUsed();
-		return new SyncCollectionResponse(this.getResponseBodyAsMultiStatus(), this.syncToken);  
-	}
-	
+        return new SyncCollectionResponse(this.getResponseBodyAsMultiStatus(), this.syncToken);
+    }
+
     @Override
     public Document getResponseBodyAsDocument() throws IOException {
-    	if (null == this.responseDocument) {
-    		this.responseDocument = super.getResponseBodyAsDocument();
-    	}
+        if (null == this.responseDocument) {
+            this.responseDocument = super.getResponseBodyAsDocument();
+        }
         return responseDocument;
     }
-	
+
     @Override
     protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
-    	super.processResponseBody(httpState, httpConnection);
-    	Document document = null;
-    	try {
-			document = getResponseBodyAsDocument();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        super.processResponseBody(httpState, httpConnection);
+        Document document = null;
+        try {
+            document = getResponseBodyAsDocument();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         if (null != document) {
-            ElementIterator it = DomUtil.getChildren(
-                document.getDocumentElement(),
-                PropertyNames.SYNC_TOKEN.getName(),
-                PropertyNames.SYNC_TOKEN.getNamespace());
+            ElementIterator it = DomUtil.getChildren(document.getDocumentElement(), PropertyNames.SYNC_TOKEN.getName(), PropertyNames.SYNC_TOKEN.getNamespace());
             if (it.hasNext()) {
                 Element respElem = it.nextElement();
                 this.syncToken = respElem.getTextContent();
             }
         }
-    }	
+    }
 
 }

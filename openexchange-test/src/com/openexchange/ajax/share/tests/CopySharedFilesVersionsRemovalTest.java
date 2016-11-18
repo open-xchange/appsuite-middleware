@@ -51,6 +51,7 @@ package com.openexchange.ajax.share.tests;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.VersionsRequest;
@@ -89,6 +90,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         super();
     }
 
+    @Test
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
 
@@ -117,6 +119,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         }
     }
 
+    @Test
     public void testCopySharedFile_ownerCopiesFileWithDefinedVersion_fileBecomesCopiedWithoutVersions() throws Exception {
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
 
@@ -168,6 +171,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         }
     }
 
+    @Test
     public void testCopySharedFile_guestCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
         OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
         userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), lGuestPermission);
@@ -217,6 +221,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         }
     }
 
+    @Test
     public void testCopySharedFile_guestCreatesNewVersionAndCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
         OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
         userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), lGuestPermission);
@@ -270,6 +275,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         }
     }
 
+    @Test
     public void testCopySharedFile_internalUserCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         int userId = client2.getValues().getUserId();
@@ -304,6 +310,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         }
     }
 
+    @Test
     public void testCopySharedFile_internalUserCreatesNewVersionsAndCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         int userId = client2.getValues().getUserId();

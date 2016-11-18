@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -70,6 +71,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         super();
     }
 
+    @Test
     public void testCreatingOneItem() throws OXException, IOException, SAXException, JSONException, OXException {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         fMgr.insertFolderOnServer(folder);
@@ -93,6 +95,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
     }
 
+    @Test
     public void testCreatingOneItemWithFile() throws Exception {
 
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
@@ -115,6 +118,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
     }
 
+    @Test
     public void testCreatingTwoItemWithFiles() throws Exception {
 
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");

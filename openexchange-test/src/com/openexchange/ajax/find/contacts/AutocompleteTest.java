@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.user.actions.GetRequest;
@@ -58,7 +59,6 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
-
 
 /**
  * {@link AutocompleteTest}
@@ -76,6 +76,7 @@ public class AutocompleteTest extends ContactsFindTest {
         super();
     }
 
+    @Test
     public void testAutocompleteCurrentUser() throws Exception {
         String defaultAddress = client.getValues().getDefaultAddress();
         Contact ownContact = client.execute(new GetRequest(client.getValues().getUserId(), TimeZones.UTC)).getContact();
@@ -83,6 +84,7 @@ public class AutocompleteTest extends ContactsFindTest {
         assertFoundFacetInAutocomplete(defaultAddress.substring(0, 3), displayItem.getDisplayName());
     }
 
+    @Test
     public void testAutocompleteOtherContact() throws Exception {
         Contact contact = manager.newAction(randomContact());
         ComplexDisplayItem displayItem = DisplayItems.convert(contact);

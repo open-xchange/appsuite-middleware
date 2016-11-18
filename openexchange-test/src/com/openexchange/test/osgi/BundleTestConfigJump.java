@@ -53,6 +53,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -82,14 +83,11 @@ public final class BundleTestConfigJump extends AbstractBundleTest {
         super();
     }
 
+    @Test
     public void testConfighJumpAbsence() {
         try {
             final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(
-                getWebConversation(),
-                loginTest.getHostName(),
-                loginTest.getLogin(),
-                loginTest.getPassword());
+            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
 
             /*
              * Login should work

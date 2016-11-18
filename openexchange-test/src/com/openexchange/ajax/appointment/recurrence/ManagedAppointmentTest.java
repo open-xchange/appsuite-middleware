@@ -119,11 +119,7 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
         resourceManager = new ResourceTestManager(getClient());
         UserValues values = getClient().getValues();
         userTimeZone = values.getTimeZone();
-        this.folder = folderManager.generatePublicFolder(
-            "MAT_"+ (new Date()).getTime(),
-            Module.CALENDAR.getFolderConstant(),
-            values.getPrivateAppointmentFolder(),
-            values.getUserId());
+        this.folder = folderManager.generatePublicFolder("MAT_" + (new Date()).getTime(), Module.CALENDAR.getFolderConstant(), values.getPrivateAppointmentFolder(), values.getUserId());
         folder = folderManager.insertFolderOnServer(folder);
 
         this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(calendarManager, folder.getObjectID());
@@ -180,11 +176,11 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
         return app;
     }
 
-    protected Date D(String dateString){
-    	return TimeTools.D(dateString);
+    protected Date D(String dateString) {
+        return TimeTools.D(dateString);
     }
 
-    protected Date D(String dateString, TimeZone tz){
-    	return TimeTools.D(dateString,tz);
+    protected Date D(String dateString, TimeZone tz) {
+        return TimeTools.D(dateString, tz);
     }
 }

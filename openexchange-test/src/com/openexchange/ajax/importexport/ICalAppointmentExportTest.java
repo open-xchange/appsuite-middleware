@@ -57,25 +57,24 @@ import com.openexchange.groupware.container.Appointment;
 
 public class ICalAppointmentExportTest extends ManagedAppointmentTest {
 
-	public void testExportICalAppointment() throws Exception {
-		final String title = "testExportICalAppointment" + System.currentTimeMillis();
-		int folderID = folder.getObjectID();
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle(title);
-		appointmentObj.setStartDate(new Date());
-		appointmentObj.setEndDate(new Date());
-		appointmentObj.setShownAs(Appointment.RESERVED);
-		appointmentObj.setParentFolderID(folderID);
-		appointmentObj.setIgnoreConflicts(true);
+    public void testExportICalAppointment() throws Exception {
+        final String title = "testExportICalAppointment" + System.currentTimeMillis();
+        int folderID = folder.getObjectID();
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle(title);
+        appointmentObj.setStartDate(new Date());
+        appointmentObj.setEndDate(new Date());
+        appointmentObj.setShownAs(Appointment.RESERVED);
+        appointmentObj.setParentFolderID(folderID);
+        appointmentObj.setIgnoreConflicts(true);
 
-		calendarManager.insert(appointmentObj);
-		ICalExportRequest exportRequest = new ICalExportRequest(folderID);
-		ICalExportResponse response = getClient().execute(exportRequest);
+        calendarManager.insert(appointmentObj);
+        ICalExportRequest exportRequest = new ICalExportRequest(folderID);
+        ICalExportResponse response = getClient().execute(exportRequest);
 
+        String iCal = response.getICal();
 
-		String iCal = response.getICal();
-
-		assertTrue(iCal.contains(title));
-	}
+        assertTrue(iCal.contains(title));
+    }
 
 }

@@ -53,6 +53,7 @@ import static com.openexchange.test.OXTestToolkit.assertSameStream;
 import java.io.FileInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -70,6 +71,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         super();
     }
 
+    @Test
     public void testLifeCycleOfInfostoreFolderPublication() throws Exception {
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
@@ -102,6 +104,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         assertSameStream(new FileInputStream(upload), getDownload(downloadUrl));
     }
 
+    @Test
     public void testLifeCycleOfInfostoreItemPublication() throws Exception {
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();

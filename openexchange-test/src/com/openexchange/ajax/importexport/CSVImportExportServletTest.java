@@ -64,66 +64,67 @@ import com.openexchange.groupware.importexport.csv.CSVParser;
 
 /**
  * Tests the CSV imports and exports (rewritten from webdav + servlet to test manager).
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class CSVImportExportServletTest extends AbstractManagedContactTest  {
-	String CSV = "Given name,Email 1, Display name\n Prinz, tobias.prinz@open-xchange.com, Tobias Prinz\nLaguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
-	private ContactField field;
+public class CSVImportExportServletTest extends AbstractManagedContactTest {
 
-	public CSVImportExportServletTest() {
-		super();
-	}
+    String CSV = "Given name,Email 1, Display name\n Prinz, tobias.prinz@open-xchange.com, Tobias Prinz\nLaguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
+    private ContactField field;
 
-	public Map<ContactField, Integer> getPositions(List<List<String>> csv){
-		HashMap<ContactField, Integer> result = new HashMap<ContactField, Integer>();
-		List<String> headers = csv.get(0);
-		for(int i = 0; i < headers.size(); i++) {
-			field = ContactField.getByDisplayName(headers.get(i));
-			if (field != null) {
-				result.put(field, i);
-			}
-		}
-		return result;
-	}
+    public CSVImportExportServletTest() {
+        super();
+    }
 
-	public void notestCSVRoundtrip() throws Exception{
-		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-		CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
+    public Map<ContactField, Integer> getPositions(List<List<String>> csv) {
+        HashMap<ContactField, Integer> result = new HashMap<ContactField, Integer>();
+        List<String> headers = csv.get(0);
+        for (int i = 0; i < headers.size(); i++) {
+            field = ContactField.getByDisplayName(headers.get(i));
+            if (field != null) {
+                result.put(field, i);
+            }
+        }
+        return result;
+    }
 
-		CSVParser parser = new CSVParser();
-		List<List<String>> expected = parser.parse(CSV);
-		List<List<String>> actual  = parser.parse((String) exportResponse.getData());
-		Map<ContactField, Integer> positions = getPositions(actual);
+    public void notestCSVRoundtrip() throws Exception {
+        client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+        CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
 
-		for(int i = 1; i <= 2; i++) {
-			assertEquals("Mismatch of given name in row #"+i, expected.get(i).get(0), actual.get(i).get(positions.get(ContactField.GIVEN_NAME)));
-			assertEquals("Mismatch of email 1 in row #"+i, expected.get(i).get(1), actual.get(i).get(positions.get(ContactField.EMAIL1)));
-			assertEquals("Mismatch of display name in row #"+i, expected.get(i).get(2), actual.get(i).get(positions.get(ContactField.DISPLAY_NAME)));
-		}
-	}
+        CSVParser parser = new CSVParser();
+        List<List<String>> expected = parser.parse(CSV);
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());
+        Map<ContactField, Integer> positions = getPositions(actual);
 
+        for (int i = 1; i <= 2; i++) {
+            assertEquals("Mismatch of given name in row #" + i, expected.get(i).get(0), actual.get(i).get(positions.get(ContactField.GIVEN_NAME)));
+            assertEquals("Mismatch of email 1 in row #" + i, expected.get(i).get(1), actual.get(i).get(positions.get(ContactField.EMAIL1)));
+            assertEquals("Mismatch of display name in row #" + i, expected.get(i).get(2), actual.get(i).get(positions.get(ContactField.DISPLAY_NAME)));
+        }
+    }
 
-	public void testUnknownFile() throws Exception{
-		final String insertedCSV = "bla1\nbla2,bla3";
+    public void testUnknownFile() throws Exception {
+        final String insertedCSV = "bla1\nbla2,bla3";
 
-		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(insertedCSV.getBytes()), false));
-		assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-0804", importResponse.getException().getErrorCode());
-	}
+        CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(insertedCSV.getBytes()), false));
+        assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-0804", importResponse.getException().getErrorCode());
+    }
 
-	public void testEmptyFileUploaded() throws Exception{
-		final InputStream is = new ByteArrayInputStream("Given name,Email 1, Display name".getBytes());
-		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, is, false));
-		assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-1315", importResponse.getException().getErrorCode());
-	}
+    public void testEmptyFileUploaded() throws Exception {
+        final InputStream is = new ByteArrayInputStream("Given name,Email 1, Display name".getBytes());
+        CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, is, false));
+        assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-1315", importResponse.getException().getErrorCode());
+    }
 
-	public void notestDoubleImport() throws Exception{
-		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-		CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
+    public void notestDoubleImport() throws Exception {
+        client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+        client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+        CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
 
-		CSVParser parser = new CSVParser();
-		List<List<String>> expected = parser.parse(CSV);
-		assertEquals(3, expected.size());
-	}
+        CSVParser parser = new CSVParser();
+        List<List<String>> expected = parser.parse(CSV);
+        assertEquals(3, expected.size());
+    }
 }

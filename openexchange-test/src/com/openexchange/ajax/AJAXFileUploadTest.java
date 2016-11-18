@@ -77,165 +77,152 @@ import com.openexchange.tools.URLParameter;
  */
 public final class AJAXFileUploadTest extends AbstractAJAXTest {
 
-	private final static String URL = "/ajax/file";
+    private final static String URL = "/ajax/file";
 
-	private final static String FILE_CONTENT = "A hash table supporting full concurrency of retrievals and adjustable expected concurrency for updates.\n"
-			+ "This class obeys the same functional specification as Hashtable, and includes versions of methods corresponding to each method of Hashtable.\n"
-			+ "However, even though all operations are thread-safe, retrieval operations do not entail locking, and there is not any support for locking the entire table in a way that prevents all access.\n"
-			+ "This class is fully interoperable with Hashtable in programs that rely on its thread safety but not on its synchronization details.\n\n"
-			+ "Retrieval operations (including get) generally do not block, so may overlap with update operations (including put and remove).\n"
-			+ "Retrievals reflect the results of the most recently completed update operations holding upon their onset.\n"
-			+ "For aggregate operations such as putAll and clear, concurrent retrievals may reflect insertion or removal of only some entries.\n"
-			+ "Similarly, Iterators and Enumerations return elements reflecting the state of the hash table at some point at or since the creation of the iterator/enumeration.\n"
-			+ "They do not throw ConcurrentModificationException. However, iterators are designed to be used by only one thread at a time.";
+    private final static String FILE_CONTENT = "A hash table supporting full concurrency of retrievals and adjustable expected concurrency for updates.\n" + "This class obeys the same functional specification as Hashtable, and includes versions of methods corresponding to each method of Hashtable.\n" + "However, even though all operations are thread-safe, retrieval operations do not entail locking, and there is not any support for locking the entire table in a way that prevents all access.\n" + "This class is fully interoperable with Hashtable in programs that rely on its thread safety but not on its synchronization details.\n\n" + "Retrieval operations (including get) generally do not block, so may overlap with update operations (including put and remove).\n" + "Retrievals reflect the results of the most recently completed update operations holding upon their onset.\n" + "For aggregate operations such as putAll and clear, concurrent retrievals may reflect insertion or removal of only some entries.\n" + "Similarly, Iterators and Enumerations return elements reflecting the state of the hash table at some point at or since the creation of the iterator/enumeration.\n" + "They do not throw ConcurrentModificationException. However, iterators are designed to be used by only one thread at a time.";
 
-	private String sessionId;
+    private String sessionId;
 
-	/**
-	 * @param name
-	 *            The name
-	 */
-	public AJAXFileUploadTest() {
-	    super();
-	}
+    /**
+     * @param name
+     *            The name
+     */
+    public AJAXFileUploadTest() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	@Override
-	public void setUp() throws Exception {
-		sessionId = getSessionId();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see junit.framework.TestCase#setUp()
+     */
+    @Override
+    public void setUp() throws Exception {
+        sessionId = getSessionId();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see junit.framework.TestCase#tearDown()
-	 */
-	@Override
-	public void tearDown() throws Exception {
-		logout();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    public void tearDown() throws Exception {
+        logout();
+    }
 
-	private static final String getUploadedFile(final WebConversation conversation, final String hostname,
-			final String sessionId, final String id) throws IOException, SAXException {
+    private static final String getUploadedFile(final WebConversation conversation, final String hostname, final String sessionId, final String id) throws IOException, SAXException {
 
-		final GetMethodWebRequest getRequest = new GetMethodWebRequest(hostname + URL);
-		getRequest.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		getRequest.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
-		getRequest.setParameter(AJAXServlet.PARAMETER_ID, id);
+        final GetMethodWebRequest getRequest = new GetMethodWebRequest(hostname + URL);
+        getRequest.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        getRequest.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
+        getRequest.setParameter(AJAXServlet.PARAMETER_ID, id);
 
-		final WebResponse resp = conversation.getResponse(getRequest);
-		return resp.getText();
-	}
+        final WebResponse resp = conversation.getResponse(getRequest);
+        return resp.getText();
+    }
 
-	private static final JSONObject uploadFiles(final WebConversation conversation, final String hostname,
-			final String sessionId, final File[] files, final String module, final String fileFilter,
-			final boolean setCookie) throws IOException, JSONException {
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-		parameter.setParameter(AJAXServlet.PARAMETER_MODULE, module);
-		parameter.setParameter(AJAXServlet.PARAMETER_TYPE, fileFilter);
+    private static final JSONObject uploadFiles(final WebConversation conversation, final String hostname, final String sessionId, final File[] files, final String module, final String fileFilter, final boolean setCookie) throws IOException, JSONException {
+        final URLParameter parameter = new URLParameter();
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
+        parameter.setParameter(AJAXServlet.PARAMETER_MODULE, module);
+        parameter.setParameter(AJAXServlet.PARAMETER_TYPE, fileFilter);
 
-		WebRequest req = null;
-		WebResponse resp = null;
+        WebRequest req = null;
+        WebResponse resp = null;
 
-		if (setCookie) {
-			/*
-			 * Add cookie
-			 */
-			final CookieJar cookieJar = new CookieJar();
-			cookieJar.putCookie(LoginServlet.SESSION_PREFIX + sessionId, sessionId);
-		}
+        if (setCookie) {
+            /*
+             * Add cookie
+             */
+            final CookieJar cookieJar = new CookieJar();
+            cookieJar.putCookie(LoginServlet.SESSION_PREFIX + sessionId, sessionId);
+        }
 
-		final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + URL + parameter.getURLParameters(), true);
+        final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + URL + parameter.getURLParameters(), true);
 
-		for (int i = 0; i < files.length; i++) {
-			final File f = files[i];
-			postReq.selectFile(new StringBuilder("file_").append(i).toString(), f, getFileContentType(f));
-		}
+        for (int i = 0; i < files.length; i++) {
+            final File f = files[i];
+            postReq.selectFile(new StringBuilder("file_").append(i).toString(), f, getFileContentType(f));
+        }
 
-		req = postReq;
-		resp = conversation.getResource(req);
-		if (resp.getResponseCode() >= 300) {
-			throw new Error("Error Status Code " + resp.getResponseCode() + ": " + resp.getResponseMessage());
-		}
-		final JSONObject jResponse = extractFromCallback(resp.getText());
-		return jResponse;
-	}
+        req = postReq;
+        resp = conversation.getResource(req);
+        if (resp.getResponseCode() >= 300) {
+            throw new Error("Error Status Code " + resp.getResponseCode() + ": " + resp.getResponseMessage());
+        }
+        final JSONObject jResponse = extractFromCallback(resp.getText());
+        return jResponse;
+    }
 
-	private static final String getFileContentType(final File f) {
-		return new MimetypesFileTypeMap().getContentType(f);
-	}
+    private static final String getFileContentType(final File f) {
+        return new MimetypesFileTypeMap().getContentType(f);
+    }
 
-	private static final File createTempFile() {
-		try {
-			final File tmpFile = File.createTempFile("file_", ".txt");
-			final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmpFile)));
-			final BufferedReader reader = new BufferedReader(new StringReader(FILE_CONTENT));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				writer.write(new StringBuilder(line).append("\r\n").toString());
-			}
-			reader.close();
-			writer.flush();
-			writer.close();
-			tmpFile.deleteOnExit();
-			return tmpFile;
-		} catch (final IOException e) {
-			return null;
-		}
-	}
+    private static final File createTempFile() {
+        try {
+            final File tmpFile = File.createTempFile("file_", ".txt");
+            final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmpFile)));
+            final BufferedReader reader = new BufferedReader(new StringReader(FILE_CONTENT));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                writer.write(new StringBuilder(line).append("\r\n").toString());
+            }
+            reader.close();
+            writer.flush();
+            writer.close();
+            tmpFile.deleteOnExit();
+            return tmpFile;
+        } catch (final IOException e) {
+            return null;
+        }
+    }
 
-	public void testUploadFile() {
-		try {
-			final File[] fa = { createTempFile(), createTempFile(), createTempFile() };
-			final JSONObject jResp = uploadFiles(getWebConversation(), PROTOCOL + getHostName(), sessionId, fa,
-					AJAXServlet.MODULE_MAIL, "file", false);
+    public void testUploadFile() {
+        try {
+            final File[] fa = { createTempFile(), createTempFile(), createTempFile() };
+            final JSONObject jResp = uploadFiles(getWebConversation(), PROTOCOL + getHostName(), sessionId, fa, AJAXServlet.MODULE_MAIL, "file", false);
 
-			assertTrue("JSON response is either null or has key \"error\"!", jResp != null && !jResp.has("error"));
-			assertTrue("JSON response has no key \"data\"", jResp.has("data"));
-			final JSONArray jArray = jResp.getJSONArray("data");
-			assertTrue("Number of received IDs is " + jArray.length() + " but should be 3", jArray.length() == 3);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+            assertTrue("JSON response is either null or has key \"error\"!", jResp != null && !jResp.has("error"));
+            assertTrue("JSON response has no key \"data\"", jResp.has("data"));
+            final JSONArray jArray = jResp.getJSONArray("data");
+            assertTrue("Number of received IDs is " + jArray.length() + " but should be 3", jArray.length() == 3);
+        } catch (final IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        } catch (final JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	public void testGetUploadedFile() {
-		try {
-			final File[] fa = { createTempFile() };
-			final JSONObject jResp = uploadFiles(getWebConversation(), PROTOCOL + getHostName(), sessionId, fa,
-					AJAXServlet.MODULE_MAIL, "file", false);
+    public void testGetUploadedFile() {
+        try {
+            final File[] fa = { createTempFile() };
+            final JSONObject jResp = uploadFiles(getWebConversation(), PROTOCOL + getHostName(), sessionId, fa, AJAXServlet.MODULE_MAIL, "file", false);
 
-			assertTrue("JSON response is either null or has key \"error\"!", jResp != null && !jResp.has("error"));
-			assertTrue("JSON response has no key \"data\"", jResp.has("data"));
-			final JSONArray jArray = jResp.getJSONArray("data");
-			assertTrue("Number of received IDs is " + jArray.length() + " but should be 1", jArray.length() == 1);
+            assertTrue("JSON response is either null or has key \"error\"!", jResp != null && !jResp.has("error"));
+            assertTrue("JSON response has no key \"data\"", jResp.has("data"));
+            final JSONArray jArray = jResp.getJSONArray("data");
+            assertTrue("Number of received IDs is " + jArray.length() + " but should be 1", jArray.length() == 1);
 
-			final String id = jArray.getString(0);
-			final String content = getUploadedFile(getWebConversation(), PROTOCOL + getHostName(), sessionId, id);
+            final String id = jArray.getString(0);
+            final String content = getUploadedFile(getWebConversation(), PROTOCOL + getHostName(), sessionId, id);
 
-			assertTrue("File content was not present!", content != null && content.length() > 0);
-			assertTrue("File content is not equal to expected one", FILE_CONTENT.replaceAll("\r?\n", "").equalsIgnoreCase(content.replaceAll("\r?\n", "")));
+            assertTrue("File content was not present!", content != null && content.length() > 0);
+            assertTrue("File content is not equal to expected one", FILE_CONTENT.replaceAll("\r?\n", "").equalsIgnoreCase(content.replaceAll("\r?\n", "")));
 
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        } catch (final JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        } catch (final SAXException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
 }

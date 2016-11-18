@@ -80,7 +80,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TaskTestManager;
 
-
 /**
  * {@link FindTasksQueryTests}
  *
@@ -107,7 +106,7 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
      */
     @Test
     public void testWithSimpleQuery() throws OXException, IOException, JSONException {
-        assertResults(30, Collections.<ActiveFacet>emptyList(), -1, 30);
+        assertResults(30, Collections.<ActiveFacet> emptyList(), -1, 30);
     }
 
     /**
@@ -119,7 +118,7 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
      */
     @Test
     public void testPagination() throws OXException, IOException, JSONException {
-        assertResults(5, Collections.<ActiveFacet>emptyList(), 5, 10);
+        assertResults(5, Collections.<ActiveFacet> emptyList(), 5, 10);
     }
 
     /**
@@ -171,22 +170,9 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
             AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
             FolderObject[] folders = new FolderObject[3];
-            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
-                randomUID(),
-                FolderObject.TASK,
-                client.getValues().getPrivateTaskFolder(),
-                client.getValues().getUserId()));
-            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(
-                randomUID(),
-                FolderObject.TASK,
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                client.getValues().getUserId()));
-            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(
-                randomUID(),
-                FolderObject.TASK,
-                client.getValues().getPrivateTaskFolder(),
-                client.getValues().getUserId(),
-                client2.getValues().getUserId()));
+            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.TASK, client.getValues().getPrivateTaskFolder(), client.getValues().getUserId()));
+            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.TASK, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, client.getValues().getUserId()));
+            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.TASK, client.getValues().getPrivateTaskFolder(), client.getValues().getUserId(), client2.getValues().getUserId()));
 
             Task[] tasks = new Task[3];
             tasks[0] = manager.insertTaskOnServer(manager.newTask(randomUID(), folders[0].getObjectID()));

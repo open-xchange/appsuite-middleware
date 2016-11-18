@@ -51,6 +51,9 @@ package com.openexchange.ajax.mail;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
@@ -74,17 +77,9 @@ public class Bug30703Test extends AbstractAJAXSession {
 
     private MailAccountDescription mailAccountDescription;
 
-    public Bug30703Test() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         try {
             StopPOP3ServerRequest stopReq = new StopPOP3ServerRequest();
             client.execute(stopReq);
@@ -103,6 +98,7 @@ public class Bug30703Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testProtocolError() throws Exception {
         setupServerAndAccount(true, false);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());
@@ -110,6 +106,7 @@ public class Bug30703Test extends AbstractAJAXSession {
         assertException(ResponseWriter.getJSON(listResponse.getResponse()), MimeMailExceptionCode.CONNECT_ERROR);
     }
 
+    @Test
     public void testWrongCredentials() throws Exception {
         setupServerAndAccount(false, true);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());
@@ -117,6 +114,7 @@ public class Bug30703Test extends AbstractAJAXSession {
         assertException(ResponseWriter.getJSON(listResponse.getResponse()), MimeMailExceptionCode.INVALID_CREDENTIALS_EXT);
     }
 
+    @Test
     public void testServerOffline() throws Exception {
         setupAccount("localhost", 1234);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());

@@ -49,7 +49,10 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -102,25 +105,25 @@ public class Bug46811Test extends CalDAVTest {
     }
 
     @Test
-	public void testDeleteShiftedException() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(fetchSyncToken());
-		/*
-		 * create appointment series on server as user b with external organizer x
-		 */
-		String uid = randomUID();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(TimeTools.D("tomorrow in the morning", TimeZone.getTimeZone("Europe/Berlin")));
-	    Appointment appointment = new Appointment();
-	    appointment.setUid(uid);
-	    appointment.setTitle("Bug46811Test");
-	    appointment.setIgnoreConflicts(true);
+    public void testDeleteShiftedException() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment series on server as user b with external organizer x
+         */
+        String uid = randomUID();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("tomorrow in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle("Bug46811Test");
+        appointment.setIgnoreConflicts(true);
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
-	    appointment.setStartDate(calendar.getTime());
-	    calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
 
         calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -139,21 +142,21 @@ public class Bug46811Test extends CalDAVTest {
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
-		Date clientLastModified = manager2.getLastModification();
+        Date clientLastModified = manager2.getLastModification();
         /*
          * create change exception on server as user b, and invite user a there
          */
-		Appointment exception = new Appointment();
-		exception.setTitle("Bug46811Test_edit");
-		exception.setObjectID(appointment.getObjectID());
+        Appointment exception = new Appointment();
+        exception.setTitle("Bug46811Test_edit");
+        exception.setObjectID(appointment.getObjectID());
         exception.setStartDate(new Date(exceptionStart));
         exception.setEndDate(new Date(exceptionEnd));
-		exception.setRecurrencePosition(6);
-		exception.setLastModified(clientLastModified);
-		exception.setParentFolderID(appointment.getParentFolderID());
-		exception.setOrganizer("46811@example.com");
-		exception.addParticipant(new ExternalUserParticipant("46811@example.com"));
-		exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        exception.setRecurrencePosition(6);
+        exception.setLastModified(clientLastModified);
+        exception.setParentFolderID(appointment.getParentFolderID());
+        exception.setOrganizer("46811@example.com");
+        exception.addParticipant(new ExternalUserParticipant("46811@example.com"));
+        exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         exception.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         manager2.update(exception);
         clientLastModified = getManager().getLastModification();
@@ -198,6 +201,6 @@ public class Bug46811Test extends CalDAVTest {
                 fail("User is still participant");
             }
         }
-	}
+    }
 
 }

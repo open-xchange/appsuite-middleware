@@ -67,11 +67,7 @@ public final class TokensRequest extends AbstractRequest<TokensResponse> {
     private final boolean failOnError;
 
     public TokensRequest(String httpSessionId, String clientToken, String serverToken, String client, boolean failOnError) {
-        super(new Parameter[] {
-            new URLParameter(PARAMETER_ACTION, ACTION_TOKENS),
-            new FieldParameter(CLIENT_TOKEN, clientToken),
-            new FieldParameter(SERVER_TOKEN, serverToken),
-            new FieldParameter(CLIENT_PARAM, client)
+        super(new Parameter[] { new URLParameter(PARAMETER_ACTION, ACTION_TOKENS), new FieldParameter(CLIENT_TOKEN, clientToken), new FieldParameter(SERVER_TOKEN, serverToken), new FieldParameter(CLIENT_PARAM, client)
         });
         this.httpSessionId = httpSessionId;
         this.failOnError = failOnError;

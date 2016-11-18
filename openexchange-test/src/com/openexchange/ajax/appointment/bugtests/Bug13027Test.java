@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -78,6 +79,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         super();
     }
 
+    @Test
     public void testNegativeTimeZone() throws Exception {
         AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
@@ -138,6 +140,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testPositiveTimeZone() throws Exception {
         AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
@@ -198,6 +201,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testUTC() throws Exception {
         AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
@@ -258,6 +262,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testBugAsWritten() throws Exception {
         AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
@@ -339,12 +344,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         end.set(Calendar.SECOND, 0);
         end.set(Calendar.MILLISECOND, 0);
 
-        AllRequest request = new AllRequest(
-            folderId,
-            new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED },
-            start.getTime(),
-            end.getTime(),
-            tz);
+        AllRequest request = new AllRequest(folderId, new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED }, start.getTime(), end.getTime(), tz);
         CommonAllResponse response = client.execute(request);
 
         Object[][] responseColumns = response.getArray();

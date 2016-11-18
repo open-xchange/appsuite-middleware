@@ -52,6 +52,9 @@ package com.openexchange.ajax.folder.api2;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.Iterator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -82,8 +85,8 @@ public class Bug16303Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
         clientB = new AJAXClient(User.User2);
@@ -112,8 +115,7 @@ public class Bug16303Test extends AbstractAJAXSession {
         }
         assertNotNull("Expected user named shared folder below root shared folder.", foundUserShared);
 
-        @SuppressWarnings("null")
-        ListRequest listRequest2 = new ListRequest(EnumAPI.OUTLOOK, foundUserShared.getFullName());
+        @SuppressWarnings("null") ListRequest listRequest2 = new ListRequest(EnumAPI.OUTLOOK, foundUserShared.getFullName());
         listResponse = clientB.execute(listRequest2);
         iter = listResponse.getFolder();
         FolderObject foundShared = null;
@@ -126,12 +128,13 @@ public class Bug16303Test extends AbstractAJAXSession {
         assertNotNull("Shared folder expected below shared parent folder.", foundShared);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdFolder));
         super.tearDown();
     }
 
+    @Test
     public void testForDisappearingFolder() throws Throwable {
         GetRequest request = new GetRequest(EnumAPI.OUTLOOK, clientA.getValues().getPrivateAppointmentFolder());
         GetResponse response = clientA.execute(request);

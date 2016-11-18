@@ -54,6 +54,8 @@ import java.util.Collection;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mail.actions.ForwardRequest;
 import com.openexchange.ajax.mail.actions.ForwardResponse;
@@ -73,20 +75,21 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
 
     protected ContactTestManager contactManager;
 
-    public AbstractReplyTest(){
+    public AbstractReplyTest() {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
         this.contactManager = new ContactTestManager(client);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Before
+    @After
+    public void tearDown() throws Exception {
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
         contactManager.cleanUp();
@@ -110,7 +113,6 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         return (JSONObject) response.getData();
     }
 
-
     protected JSONObject getReplyAllEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ReplyAllRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
@@ -127,11 +129,11 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         return (JSONObject) response.getData();
     }
 
-    public static void assertNullOrEmpty(String msg, Collection coll){
-        if(coll == null) {
+    public static void assertNullOrEmpty(String msg, Collection coll) {
+        if (coll == null) {
             return;
         }
-        if(coll.size() == 0) {
+        if (coll.size() == 0) {
             return;
         }
         fail(msg);

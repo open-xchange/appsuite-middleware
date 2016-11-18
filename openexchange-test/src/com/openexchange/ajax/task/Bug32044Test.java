@@ -98,8 +98,7 @@ public final class Bug32044Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         timeZone1 = client1.getValues().getTimeZone();
@@ -107,9 +106,7 @@ public final class Bug32044Test extends AbstractAJAXSession {
         timeZone2 = client2.getValues().getTimeZone();
         cal = TimeTools.createCalendar(TimeZones.UTC);
         // Create a shared folder
-        folder1 = com.openexchange.ajax.folder.Create.createPrivateFolder("test for bug 32044 folder 1", FolderObject.TASK, client1.getValues().getUserId(),
-            com.openexchange.ajax.folder.Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS)
-        );
+        folder1 = com.openexchange.ajax.folder.Create.createPrivateFolder("test for bug 32044 folder 1", FolderObject.TASK, client1.getValues().getUserId(), com.openexchange.ajax.folder.Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS));
         folder1.setParentFolderID(client1.getValues().getPrivateTaskFolder());
         CommonInsertResponse response = client1.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder1));
         folder1.setObjectID(response.getId());
@@ -145,8 +142,7 @@ public final class Bug32044Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         task = client1.execute(new GetRequest(task)).getTask(timeZone1);
         client1.execute(new DeleteRequest(task));
         GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder2.getObjectID(), false));

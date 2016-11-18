@@ -1,3 +1,4 @@
+
 package com.openexchange.test.fixtures.ajax;
 
 import java.io.IOException;
@@ -13,62 +14,61 @@ import com.openexchange.test.fixtures.TestUserConfig;
 
 public class AJAXUserConfig implements TestUserConfig {
 
-	private final AJAXClient client;
+    private final AJAXClient client;
 
-	public AJAXUserConfig(AJAXClient client) {
-		this.client = client;
-	}
+    public AJAXUserConfig(AJAXClient client) {
+        this.client = client;
+    }
 
-	@Override
+    @Override
     public Object get(Tree tree) {
-		try {
-			return ConfigTools.get(client,
-			        new GetRequest(tree)).getData();
-		} catch (OXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+        try {
+            return ConfigTools.get(client, new GetRequest(tree)).getData();
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public boolean getBool(Tree tree) {
-		return (Boolean) get(tree);
-	}
+        return (Boolean) get(tree);
+    }
 
-	@Override
+    @Override
     public int getInt(Tree tree) {
-		return (Integer) get(tree);
-	}
+        return (Integer) get(tree);
+    }
 
-	@Override
+    @Override
     public long getLong(Tree tree) {
-		return (Long) get(tree);
-	}
+        return (Long) get(tree);
+    }
 
-	@Override
+    @Override
     public String getString(Tree tree) {
-		return get(tree).toString();
-	}
+        return get(tree).toString();
+    }
 
-	@Override
+    @Override
     public void set(Tree tree, Object value) {
-		try {
-			ConfigTools.set(client, new SetRequest(tree, value));
-		} catch (OXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            ConfigTools.set(client, new SetRequest(tree, value));
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

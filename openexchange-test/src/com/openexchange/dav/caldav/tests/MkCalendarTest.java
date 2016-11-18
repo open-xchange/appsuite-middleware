@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -79,7 +81,7 @@ public class MkCalendarTest extends CalDAVTest {
      *
      * @throws Exception
      */
-	@Test
+    @Test
     public void testOptions() throws Exception {
         OptionsMethod options = null;
         try {
@@ -91,7 +93,7 @@ public class MkCalendarTest extends CalDAVTest {
         }
     }
 
-	@Test
+    @Test
     public void testCreateCalendar() throws Exception {
         /*
          * perform mkcalendar request
@@ -103,30 +105,7 @@ public class MkCalendarTest extends CalDAVTest {
         setProperties.add(new SupportedCalendarComponentSetProperty(SupportedCalendarComponentSetProperty.Comp.VEVENT));
         setProperties.add(new DefaultDavProperty<String>(PropertyNames.DISPLAYNAME, name));
         setProperties.add(new DefaultDavProperty<Integer>(PropertyNames.CALENDAR_ORDER, 35));
-        setProperties.add(new DefaultDavProperty<String>(PropertyNames.CALENDAR_TIMEZONE,
-            "BEGIN:VCALENDAR\r\n" +
-            "VERSION:2.0\r\n" +
-            "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN\r\n" +
-            "CALSCALE:GREGORIAN\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" +
-            "DTSTART:19810329T020000\r\n" +
-            "TZNAME:MESZ\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" +
-            "DTSTART:19961027T030000\r\n" +
-            "TZNAME:MEZ\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "END:VCALENDAR\r\n"
-        ));
+        setProperties.add(new DefaultDavProperty<String>(PropertyNames.CALENDAR_TIMEZONE, "BEGIN:VCALENDAR\r\n" + "VERSION:2.0\r\n" + "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN\r\n" + "CALSCALE:GREGORIAN\r\n" + "BEGIN:VTIMEZONE\r\n" + "TZID:Europe/Berlin\r\n" + "BEGIN:DAYLIGHT\r\n" + "TZOFFSETFROM:+0100\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" + "DTSTART:19810329T020000\r\n" + "TZNAME:MESZ\r\n" + "TZOFFSETTO:+0200\r\n" + "END:DAYLIGHT\r\n" + "BEGIN:STANDARD\r\n" + "TZOFFSETFROM:+0200\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" + "DTSTART:19961027T030000\r\n" + "TZNAME:MEZ\r\n" + "TZOFFSETTO:+0100\r\n" + "END:STANDARD\r\n" + "END:VTIMEZONE\r\n" + "END:VCALENDAR\r\n"));
         super.mkCalendar(uid, setProperties);
         /*
          * verify calendar on server
@@ -174,8 +153,7 @@ public class MkCalendarTest extends CalDAVTest {
         props.add(PropertyNames.SYNC_TOKEN);
         props.add(PropertyNames.XMPP_SERVER);
         props.add(PropertyNames.XMPP_URI);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/",
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no response", 0 < responses.length);

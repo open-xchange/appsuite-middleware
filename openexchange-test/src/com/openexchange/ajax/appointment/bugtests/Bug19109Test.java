@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -104,19 +105,20 @@ public class Bug19109Test extends AbstractAJAXSession {
         updateAppointment.setLastModified(new Date(Long.MAX_VALUE));
     }
 
+    @Test
     public void testBug19109() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(updateAppointment, getClient().getValues().getTimeZone());
         UpdateResponse updateResponse = getClient().execute(updateRequest);
         updateResponse.fillObject(appointment);
 
-        AllRequest allRequest = new AllRequest(getClient().getValues().getPrivateAppointmentFolder(), new int[] {Appointment.OBJECT_ID}, new Date(1313452800000L), new Date(1313539200000L), getClient().getValues().getTimeZone());
+        AllRequest allRequest = new AllRequest(getClient().getValues().getPrivateAppointmentFolder(), new int[] { Appointment.OBJECT_ID }, new Date(1313452800000L), new Date(1313539200000L), getClient().getValues().getTimeZone());
         CommonAllResponse allResponse = getClient().execute(allRequest);
         assertTrue("Expected a result.", allResponse.getArray().length > 0);
 
         boolean found = false;
         Object[][] objects = allResponse.getArray();
         for (Object[] object : objects) {
-            if ((Integer)object[0] == appointment.getObjectID()) {
+            if ((Integer) object[0] == appointment.getObjectID()) {
                 found = true;
             }
         }

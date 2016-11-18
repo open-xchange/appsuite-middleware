@@ -52,6 +52,7 @@ package com.openexchange.ajax.contact;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -63,9 +64,9 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
 
     private String originalLocale;
 
-	public SortingInJapanTest() {
-		super();
-	}
+    public SortingInJapanTest() {
+        super();
+    }
 
     @Override
     public void setUp() throws Exception {
@@ -85,20 +86,12 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
         super.tearDown();
     }
 
+    @Test
     public void testCustomSortingForJapan() throws Exception {
         /*
          * generate test contacts on server
          */
-        Contact[] orderedContacts = new Contact[] {
-            generateContact("\u30a1"),
-            generateContact("\u30a3"),
-            generateContact("\u30a6"),
-            generateContact("\u30ac"),
-            generateContact("#*+$&& ASCII Art"),
-            generateContact("012345"),
-            generateContact("AAAAA"),
-            generateContact("Hans Dampf"),
-            generateContact("Max Mustermann"),
+        Contact[] orderedContacts = new Contact[] { generateContact("\u30a1"), generateContact("\u30a3"), generateContact("\u30a6"), generateContact("\u30ac"), generateContact("#*+$&& ASCII Art"), generateContact("012345"), generateContact("AAAAA"), generateContact("Hans Dampf"), generateContact("Max Mustermann"),
         };
         List<Contact> unorderedContacts = new ArrayList<Contact>(Arrays.asList(orderedContacts));
         Collections.shuffle(unorderedContacts);
@@ -115,6 +108,6 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
         for (int i = 0; i < receivedContacts.length; i++) {
             assertEquals("contact order wrong", orderedContacts[i].getSurName(), receivedContacts[i].getSurName());
         }
-	}
+    }
 
 }

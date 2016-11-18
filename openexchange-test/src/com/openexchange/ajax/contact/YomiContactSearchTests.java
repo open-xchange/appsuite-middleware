@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.contact;
 
 import com.openexchange.groupware.container.Contact;
@@ -5,17 +6,17 @@ import com.openexchange.groupware.search.ContactSearchObject;
 
 public class YomiContactSearchTests extends AbstractManagedContactTest {
 
-	private static final String YOMI_LAST_NAME = "\u4f50\u85e4";
-	protected static final String YOMI_FIRST_NAME = "\u660e\u65e5\u9999";
-	private Contact contact;
+    private static final String YOMI_LAST_NAME = "\u4f50\u85e4";
+    protected static final String YOMI_FIRST_NAME = "\u660e\u65e5\u9999";
+    private Contact contact;
 
-	public YomiContactSearchTests(String name) {
-		super();
-	}
+    public YomiContactSearchTests(String name) {
+        super();
+    }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
 
         contact = new Contact();
         contact.setTitle("Herr");
@@ -33,40 +34,40 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
         contact.setYomiFirstName(YOMI_FIRST_NAME);
         contact.setYomiLastName(YOMI_LAST_NAME);
         contact.setParentFolderID(folderID);
-		manager.newAction(contact);
-	}
+        manager.newAction(contact);
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		super.tearDown();
-	}
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-//	public void testFindByLastName(){
-//
-//	}
+    //	public void testFindByLastName(){
+    //
+    //	}
 
-	/**
-	 * This is how the GUI does a search
-	 */
-	public void testFindWithContactSearchObject(){
-		ContactSearchObject search = new ContactSearchObject();
-		search.setFolder(folderID);
-		String b = YOMI_LAST_NAME;
-		search.setGivenName(b);
-		search.setSurname(b);
-		search.setDisplayName(b);
-		search.setEmail1(b);
-		search.setEmail2(b);
-		search.setEmail3(b);
-		search.setCatgories(b);
-		search.setYomiFirstname(b);
-		search.setYomiLastName(b);
-		search.setOrSearch(true);
-		Contact[] results= manager.searchAction(search);
+    /**
+     * This is how the GUI does a search
+     */
+    public void testFindWithContactSearchObject() {
+        ContactSearchObject search = new ContactSearchObject();
+        search.setFolder(folderID);
+        String b = YOMI_LAST_NAME;
+        search.setGivenName(b);
+        search.setSurname(b);
+        search.setDisplayName(b);
+        search.setEmail1(b);
+        search.setEmail2(b);
+        search.setEmail3(b);
+        search.setCatgories(b);
+        search.setYomiFirstname(b);
+        search.setYomiLastName(b);
+        search.setOrSearch(true);
+        Contact[] results = manager.searchAction(search);
 
-		assertEquals("Should find one contact", 1, results.length);
-		assertEquals("Should find the right contact", YOMI_LAST_NAME, results[0].getYomiLastName());
+        assertEquals("Should find one contact", 1, results.length);
+        assertEquals("Should find the right contact", YOMI_LAST_NAME, results[0].getYomiLastName());
 
-	}
+    }
 
 }

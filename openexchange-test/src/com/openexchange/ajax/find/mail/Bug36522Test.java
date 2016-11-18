@@ -1,12 +1,14 @@
+
 package com.openexchange.ajax.find.mail;
 
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.UUIDs;
-
 
 public class Bug36522Test extends AbstractMailFindTest {
 
@@ -16,8 +18,8 @@ public class Bug36522Test extends AbstractMailFindTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         contact = randomContact(UUIDs.getUnformattedStringFromRandom(), client.getValues().getPrivateContactFolder());
         /*
@@ -28,6 +30,7 @@ public class Bug36522Test extends AbstractMailFindTest {
         contact = contactManager.newAction(contact);
     }
 
+    @Test
     public void testDontReturnEmptyFilterQueries() throws Exception {
         List<ActiveFacet> activeFacets = prepareFacets("default0/INBOX");
         List<Facet> facets = autocomplete(contact.getGivenName(), activeFacets);

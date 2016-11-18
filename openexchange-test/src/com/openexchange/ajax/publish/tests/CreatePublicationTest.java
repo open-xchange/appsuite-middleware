@@ -52,6 +52,7 @@ package com.openexchange.ajax.publish.tests;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.publish.actions.GetPublicationRequest;
@@ -64,7 +65,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -74,10 +74,11 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         super();
     }
 
-    public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
+    @Test
+    public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         //create contact folder
-        FolderObject folder = fMgr.generatePublicFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        fMgr.insertFolderOnServer( folder );
+        FolderObject folder = fMgr.generatePublicFolder("publishedContacts" + new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        fMgr.insertFolderOnServer(folder);
 
         //fill contact folder
         Contact contact = generateContact("Herbert", "Meier");
@@ -87,14 +88,14 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         //publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
-        Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID() ), discovery );
+        Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID()), discovery);
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         AJAXClient myClient = getClient();
         NewPublicationResponse newResp = myClient.execute(newReq);
-        expected.setId( newResp.getId() );
+        expected.setId(newResp.getId());
 
         //verify
-        GetPublicationRequest getReq = new GetPublicationRequest( expected.getId() );
+        GetPublicationRequest getReq = new GetPublicationRequest(expected.getId());
         GetPublicationResponse getResp = myClient.execute(getReq);
         Publication actual = getResp.getPublication(discovery);
 
@@ -106,10 +107,11 @@ public class CreatePublicationTest extends AbstractPublicationTest {
 
     }
 
-    public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
+    @Test
+    public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         //create contact folder
-        FolderObject folder = fMgr.generatePublicFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        fMgr.insertFolderOnServer( folder );
+        FolderObject folder = fMgr.generatePublicFolder("publishedContacts" + new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        fMgr.insertFolderOnServer(folder);
 
         //fill contact folder
         Contact contact = generateContact("Herbert", "Meier");
@@ -119,7 +121,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         //publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
-        Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID() ), discovery );
+        Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID()), discovery);
         pubMgr.setPublicationTargetDiscoveryService(discovery);
         pubMgr.newAction(expected);
 

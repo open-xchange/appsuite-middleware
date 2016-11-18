@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -76,8 +77,10 @@ public class InsertTest extends AbstractTaskTest {
 
     /**
      * Tests inserting a private task.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testInsertPrivateTask() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateTaskFolder();
@@ -93,6 +96,7 @@ public class InsertTest extends AbstractTaskTest {
 
     /**
      * Tests inserting a private task.
+     * 
      * @throws Throwable if an error occurs.
      */
     public void _testInsertTonnenTasks() throws Throwable {

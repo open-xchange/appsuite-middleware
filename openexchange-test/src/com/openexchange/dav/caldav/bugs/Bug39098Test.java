@@ -70,45 +70,12 @@ import com.openexchange.groupware.container.Appointment;
 public class Bug39098Test extends CalDAVTest {
 
     @Test
-	public void testCreateInAsiaShanghai() throws Exception {
-	    /*
-	     * create appointment on client
-	     */
+    public void testCreateInAsiaShanghai() throws Exception {
+        /*
+         * create appointment on client
+         */
         String uid = randomUID();
-        String iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "VERSION:2.0\r\n" +
-            "PRODID:-//Apple Inc.//Mac OS X 10.10.3//EN\r\n" +
-            "CALSCALE:GREGORIAN\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Asia/Shanghai\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0900\r\n" +
-            "RRULE:FREQ=YEARLY;UNTIL=19910914T150000Z;BYMONTH=9;BYDAY=3SU\r\n" +
-            "DTSTART:19890917T000000\r\n" +
-            "TZNAME:GMT+8\r\n" +
-            "TZOFFSETTO:+0800\r\n" +
-            "END:STANDARD\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0800\r\n" +
-            "DTSTART:19910414T000000\r\n" +
-            "TZNAME:GMT+8\r\n" +
-            "TZOFFSETTO:+0900\r\n" +
-            "RDATE:19910414T000000\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:20150629T100123Z\r\n" +
-            "UID:" + uid + "\r\n" +
-            "DTSTART;TZID=Asia/Shanghai:20150630T190000\r\n" +
-            "DTEND;TZID=Asia/Shanghai:20150630T200000\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "SUMMARY:test\r\n" +
-            "DTSTAMP:20150629T100123Z\r\n" +
-            "SEQUENCE:0\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
+        String iCal = "BEGIN:VCALENDAR\r\n" + "VERSION:2.0\r\n" + "PRODID:-//Apple Inc.//Mac OS X 10.10.3//EN\r\n" + "CALSCALE:GREGORIAN\r\n" + "BEGIN:VTIMEZONE\r\n" + "TZID:Asia/Shanghai\r\n" + "BEGIN:STANDARD\r\n" + "TZOFFSETFROM:+0900\r\n" + "RRULE:FREQ=YEARLY;UNTIL=19910914T150000Z;BYMONTH=9;BYDAY=3SU\r\n" + "DTSTART:19890917T000000\r\n" + "TZNAME:GMT+8\r\n" + "TZOFFSETTO:+0800\r\n" + "END:STANDARD\r\n" + "BEGIN:DAYLIGHT\r\n" + "TZOFFSETFROM:+0800\r\n" + "DTSTART:19910414T000000\r\n" + "TZNAME:GMT+8\r\n" + "TZOFFSETTO:+0900\r\n" + "RDATE:19910414T000000\r\n" + "END:DAYLIGHT\r\n" + "END:VTIMEZONE\r\n" + "BEGIN:VEVENT\r\n" + "CREATED:20150629T100123Z\r\n" + "UID:" + uid + "\r\n" + "DTSTART;TZID=Asia/Shanghai:20150630T190000\r\n" + "DTEND;TZID=Asia/Shanghai:20150630T200000\r\n" + "TRANSP:OPAQUE\r\n" + "SUMMARY:test\r\n" + "DTSTAMP:20150629T100123Z\r\n" + "SEQUENCE:0\r\n" + "END:VEVENT\r\n" + "END:VCALENDAR\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
@@ -133,6 +100,6 @@ public class Bug39098Test extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertEquals(expectedStartDate, iCalResource.getVEvent().getDTStart());
         assertEquals(expectedEndDate, iCalResource.getVEvent().getDTEnd());
-	}
+    }
 
 }

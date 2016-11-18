@@ -72,8 +72,7 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
      *
      * @param name
      */
-    protected AbstractPlistSMSTest() {
-    }
+    protected AbstractPlistSMSTest() {}
 
     @Override
     public void setUp() throws Exception {

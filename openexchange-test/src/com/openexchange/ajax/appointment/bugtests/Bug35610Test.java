@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -106,6 +107,7 @@ public class Bug35610Test extends AbstractAJAXSession {
         app.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testTimeChange() throws Exception {
         ctm1.insert(app);
         ctm2.confirm(app, Appointment.ACCEPT, "yay");
@@ -133,6 +135,7 @@ public class Bug35610Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testNoTimeChange() throws Exception {
         ctm1.insert(app);
         ctm2.confirm(app, Appointment.ACCEPT, "yay");
