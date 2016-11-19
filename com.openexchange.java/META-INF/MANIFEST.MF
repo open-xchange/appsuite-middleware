@@ -30,6 +30,7 @@ Import-Package: com.fasterxml.jackson.core,
  sun.misc
 Export-Package: com.damienmiller,
  com.davekoelle,
+ com.eaio.util.text,
  com.openexchange.java,
  com.openexchange.java.util,
  it.geosolutions.imageio.stream.eraf

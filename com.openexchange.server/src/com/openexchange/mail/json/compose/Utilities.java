@@ -437,9 +437,6 @@ public enum Utilities {
         if (source.containsDispositionNotification()) {
             composedMail.setDispositionNotification(source.getDispositionNotification());
         }
-        if (source.containsDispositionNotification()) {
-            composedMail.setDispositionNotification(source.getDispositionNotification());
-        }
         if (source.containsPriority()) {
             composedMail.setPriority(source.getPriority());
         }

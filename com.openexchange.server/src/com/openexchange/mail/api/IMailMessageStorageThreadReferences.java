@@ -47,65 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.mail.api;
 
-import java.io.IOException;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailThread;
+import com.openexchange.mail.search.SearchTerm;
 
 /**
- * {@link ExamineRequest}
+ * {@link IMailMessageStorageThreadReferences} - Extends basic folder storage by requesting a mailbox' conversation threads.
  *
- * @author <a href="mailto:joshua.wirtz@open-xchange.com">Joshua Wirtz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+public interface IMailMessageStorageThreadReferences extends IMailMessageStorage {
 
-public class ExamineRequest extends AbstractMailRequest<ExamineResponse> {
-	
-	String folder;
-	boolean failOnError;
+    /**
+     * Indicates if thread references are supported.
+     *
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isThreadReferencesSupported() throws OXException;
 
-	public ExamineRequest(String folder, boolean failOnError) {
-		this.folder = folder;
-		this.failOnError = failOnError;
-	}
-
-	@Override
-	public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-		return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
-	}
-
-	@Override
-	public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-		return new Parameter[] {
-	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_EXAMINE), new Parameter("folder", folder) };
-	    }
-
-	@Override
-	public AbstractAJAXParser<? extends ExamineResponse> getParser() {
-		return new AbstractAJAXParser<ExamineResponse>(this.failOnError) {
-
-            @Override
-            protected ExamineResponse createResponse(final Response response) {
-                return new ExamineResponse(response);
-            }
-        };
-	}
-
-	@Override
-	public Object getBody() throws IOException, JSONException {
-		return null;
-	}
-	
-    public ExamineRequest ignoreError() {
-        failOnError = false;
-        return this;
-    }
-
-    public ExamineRequest failOnError() {
-        failOnError = true;
-        return this;
-    }
+    /**
+     * Gets the thread references (aka. mail conversations) for specified full name.
+     *
+     * @param fullName the folder full name
+     * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
+     *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
+     *            range is <code>end - start</code>.
+     * @param sortField The sort field
+     * @param order Whether ascending or descending sort order
+     * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @return The thread references
+     * @throws OXException If an error occurs
+     */
+    List<MailThread> getThreadReferences(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
 }

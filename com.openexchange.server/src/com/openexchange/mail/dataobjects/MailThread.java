@@ -47,65 +47,66 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.mail.dataobjects;
 
-import java.io.IOException;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * {@link ExamineRequest}
+ * {@link MailThread} - Represents the thread references for a certain folder.
+ * <p>
+ * Example:
+ * <p>
+ * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in;">
+ *   <img src="./thread-example.png" alt="OX Drive Stand-Alone">
+ * </div>
+ * <p>
+ * The first thread consists only of message 2. The second thread consists of the messages 3 (parent) and 6 (child), after which it
+ * splits into two sub-threads; the first of which contains messages 4 (child of 6, sibling of 44) and 23 (child of 4), and the second
+ * of which contains messages 44 (child of 6, sibling of 4), 7 (child of 44), and 96 (child of 7). Since some later messages are
+ * parents of earlier messages, the messages were probably moved from some other mailbox at different times.
  *
- * @author <a href="mailto:joshua.wirtz@open-xchange.com">Joshua Wirtz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+public class MailThread {
 
-public class ExamineRequest extends AbstractMailRequest<ExamineResponse> {
-	
-	String folder;
-	boolean failOnError;
+    private final MailMessage parent;
+    private final List<MailThread> children;
 
-	public ExamineRequest(String folder, boolean failOnError) {
-		this.folder = folder;
-		this.failOnError = failOnError;
-	}
-
-	@Override
-	public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-		return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
-	}
-
-	@Override
-	public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-		return new Parameter[] {
-	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_EXAMINE), new Parameter("folder", folder) };
-	    }
-
-	@Override
-	public AbstractAJAXParser<? extends ExamineResponse> getParser() {
-		return new AbstractAJAXParser<ExamineResponse>(this.failOnError) {
-
-            @Override
-            protected ExamineResponse createResponse(final Response response) {
-                return new ExamineResponse(response);
-            }
-        };
-	}
-
-	@Override
-	public Object getBody() throws IOException, JSONException {
-		return null;
-	}
-	
-    public ExamineRequest ignoreError() {
-        failOnError = false;
-        return this;
+    /**
+     * Initializes a new {@link MailThread} without a parent message.
+     */
+    public MailThread() {
+        this(null);
     }
 
-    public ExamineRequest failOnError() {
-        failOnError = true;
-        return this;
+    /**
+     * Initializes a new {@link MailThread}.
+     *
+     * @param parent The thread's parent message or <code>null</code>
+     */
+    public MailThread(MailMessage parent) {
+        super();
+        this.parent = parent;
+        children = new ArrayList<>();
+    }
+
+    /**
+     * Gets the parent
+     *
+     * @return The parent
+     */
+    public MailMessage getParent() {
+        return parent;
+    }
+
+    /**
+     * Gets the children
+     *
+     * @return The children
+     */
+    public List<MailThread> getChildren() {
+        return children;
     }
 
 }

@@ -131,6 +131,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorageThreadReferences;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageBatchCopyMove;
@@ -143,6 +144,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.MailThread;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -203,7 +205,7 @@ import net.htmlparser.jericho.Source;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructureEnhanced, IMailMessageStorageMimeSupport, IMailMessageStorageBatchCopyMove {
+public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructureEnhanced, IMailMessageStorageMimeSupport, IMailMessageStorageBatchCopyMove, IMailMessageStorageThreadReferences {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPMessageStorage.class);
 
@@ -2441,6 +2443,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     public MailMessage[] getThreadSortedMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
         return conversationWorker.getThreadSortedMessages(fullName, indexRange, sortField, order, searchTerm, mailFields);
+    }
+
+    @Override
+    public boolean isThreadReferencesSupported() throws OXException {
+        return imapConfig.getImapCapabilities().hasThreadReferences();
+    }
+
+    @Override
+    public List<MailThread> getThreadReferences(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields) throws OXException {
+        IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
+        return conversationWorker.getThreadReferences(fullName, indexRange, sortField, order, searchTerm, mailFields);
     }
 
     @Override
