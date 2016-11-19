@@ -51,9 +51,11 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Utils.asList;
@@ -78,9 +80,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.impl.EventConflictImpl;
-import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -102,6 +102,9 @@ import com.openexchange.java.util.TimeZones;
  * @since v7.10.0
  */
 public class ConflictChecker {
+
+    /** Specifies the maximum number of conflicts between two recurring event series */
+    private static final int MAX_CONFLICTS_PER_RECURRENCE = 5;
 
     private final CalendarSession session;
     private final CalendarStorage storage;
@@ -154,6 +157,7 @@ public class ConflictChecker {
         /*
          * derive checked period (+/- one day to cover floating events in different timezone)
          */
+        //TODO check that
         Date until = new Date(event.getEndDate().getTime() + 86400000);
         if (today.after(until)) {
             return Collections.emptyList();
@@ -261,10 +265,11 @@ public class ConflictChecker {
                 /*
                  * expand & check all occurrences of event series in period
                  */
+                int count = 0;
                 long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
                 Iterator<RecurrenceId> iterator = Services.getService(RecurrenceService.class)
                     .getRecurrenceIterator(eventInPeriod, initCalendar(TimeZones.UTC, from), initCalendar(TimeZones.UTC, until), false);
-                while (iterator.hasNext()) {
+                while (iterator.hasNext() && count < MAX_CONFLICTS_PER_RECURRENCE) {
                     RecurrenceId recurrenceId = iterator.next();
                     for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
                         if (eventRecurrenceId.getValue() >= recurrenceId.getValue() + duration) {
@@ -277,6 +282,7 @@ public class ConflictChecker {
                              * add conflict for occurrence
                              */
                             conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict));
+                            count++;
                         }
                     }
                 }
@@ -309,9 +315,18 @@ public class ConflictChecker {
      */
     private EventConflict getEventConflict(Event event, List<Attendee> conflictingAttendees, boolean hardConflict) throws OXException {
         Event eventData = new Event();
-        EventMapper.getInstance().copy(event, eventData, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.ALL_DAY, EventField.ID, EventField.CREATED_BY, EventField.SUMMARY, EventField.LOCATION);
-        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), eventData);
-        return new EventConflictImpl(userizedEvent, conflictingAttendees, hardConflict);
+        eventData.setStartDate(event.getStartDate());
+        eventData.setEndDate(event.getEndDate());
+        eventData.setAllDay(event.isAllDay());
+        eventData.setId(event.getId());
+        eventData.setRecurrenceId(event.getRecurrenceId());
+        eventData.setCreatedBy(event.getCreatedBy());
+        eventData.setTransp(event.getTransp());
+        if (detailsVisible(event)) {
+            eventData.setSummary(event.getSummary());
+            eventData.setLocation(event.getLocation());
+        }
+        return new EventConflictImpl(new UserizedEvent(session.getSession(), eventData), conflictingAttendees, hardConflict);
     }
 
     /**
@@ -325,12 +340,18 @@ public class ConflictChecker {
      */
     private EventConflict getSeriesConflict(Event seriesMaster, RecurrenceId recurrenceId, List<Attendee> conflictingAttendees, boolean hardConflict) throws OXException {
         Event eventData = new Event();
-        EventMapper.getInstance().copy(seriesMaster, eventData, EventField.TRANSP, EventField.ALL_DAY, EventField.ID, EventField.CREATED_BY, EventField.SUMMARY, EventField.LOCATION);
         eventData.setStartDate(new Date(recurrenceId.getValue()));
         eventData.setEndDate(new Date(recurrenceId.getValue() + (seriesMaster.getEndDate().getTime() - seriesMaster.getStartDate().getTime())));
+        eventData.setAllDay(seriesMaster.isAllDay());
+        eventData.setId(seriesMaster.getId());
         eventData.setRecurrenceId(recurrenceId);
-        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), eventData);
-        return new EventConflictImpl(userizedEvent, conflictingAttendees, hardConflict);
+        eventData.setCreatedBy(seriesMaster.getCreatedBy());
+        eventData.setTransp(seriesMaster.getTransp());
+        if (detailsVisible(seriesMaster)) {
+            eventData.setSummary(seriesMaster.getSummary());
+            eventData.setLocation(seriesMaster.getLocation());
+        }
+        return new EventConflictImpl(new UserizedEvent(session.getSession(), eventData), conflictingAttendees, hardConflict);
     }
 
     /**
@@ -370,12 +391,18 @@ public class ConflictChecker {
         return 0 < conflictingAttendees.size() ? conflictingAttendees : null;
     }
 
+    /**
+     * Gets a value indicating whether detailed event data is available for the current user based on the user's access rights.
+     *
+     * @param conflictingEvent The conflicting event to decide whether details are visible or not
+     * @return <code>true</code> if details are available, <code>false</code>, otherwise
+     */
     private boolean detailsVisible(Event conflictingEvent) throws OXException {
         int userID = session.getUser().getId();
         /*
          * details available if user is creator or attendee
          */
-        if (conflictingEvent.getCreatedBy() == userID || CalendarUtils.isAttendee(conflictingEvent, userID)) {
+        if (conflictingEvent.getCreatedBy() == userID || isAttendee(conflictingEvent, userID) || isOrganizer(conflictingEvent, userID)) {
             return true;
         }
         /*
