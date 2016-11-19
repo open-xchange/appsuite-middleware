@@ -84,10 +84,17 @@ public class MemoryMonitoringInitializer implements ServiceTrackerCustomizer<Tim
     public synchronized TimerService addingService(ServiceReference<TimerService> reference) {
         TimerService timerService = context.getService(reference);
 
-        Runnable task = new MemoryMonitoring(periodMinutes, threshold);
-        timerTask = timerService.scheduleAtFixedRate(task, periodMinutes, periodMinutes, TimeUnit.MINUTES);
+        try {
+            Runnable task = new MemoryMonitoring(periodMinutes, threshold);
+            timerTask = timerService.scheduleAtFixedRate(task, periodMinutes, periodMinutes, TimeUnit.MINUTES);
+            return timerService;
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MemoryMonitoringInitializer.class);
+            logger.warn("Failed to initialize memory monitoring task", e);
+        }
 
-        return timerService;
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
