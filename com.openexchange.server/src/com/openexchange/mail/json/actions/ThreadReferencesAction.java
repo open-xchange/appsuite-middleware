@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,7 +60,6 @@ import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
@@ -74,7 +72,6 @@ import com.openexchange.mail.api.IMailMessageStorageThreadReferences;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailThread;
 import com.openexchange.mail.dataobjects.MailThreads;
 import com.openexchange.mail.json.MailRequest;
@@ -112,42 +109,17 @@ public class ThreadReferencesAction extends AbstractMailAction {
         if (sort != null && order == null) {
             throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ORDER);
         }
-        int[] fromToIndices;
+        int size;
         {
-            final String s = req.getParameter(AJAXServlet.PARAMETER_LIMIT);
+            String s = req.getParameter("size");
             if (null == s) {
-                final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
-                final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
-                if (leftHandLimit == MailRequest.NOT_FOUND || rightHandLimit == MailRequest.NOT_FOUND) {
-                    fromToIndices = null;
-                } else {
-                    fromToIndices = new int[] { leftHandLimit < 0 ? 0 : leftHandLimit, rightHandLimit < 0 ? 0 : rightHandLimit};
-                    if (fromToIndices[0] >= fromToIndices[1]) {
-                        return new AJAXRequestResult(Collections.<MailMessage>emptyList(), "mail");
-                    }
-                }
+                size = -1;
             } else {
-                int start;
-                int end;
                 try {
-                    final int pos = s.indexOf(',');
-                    if (pos < 0) {
-                        start = 0;
-                        final int i = Integer.parseInt(s.trim());
-                        end = i < 0 ? 0 : i;
-                    } else {
-                        int i = Integer.parseInt(s.substring(0, pos).trim());
-                        start = i < 0 ? 0 : i;
-                        i = Integer.parseInt(s.substring(pos+1).trim());
-                        end = i < 0 ? 0 : i;
-                    }
-                } catch (final NumberFormatException e) {
+                    size = Integer.parseInt(s.trim());
+                } catch (NumberFormatException e) {
                     throw MailExceptionCode.INVALID_INT_VALUE.create(e, s);
                 }
-                if (start >= end) {
-                    return new AJAXRequestResult(Collections.<MailMessage>emptyList(), "mail");
-                }
-                fromToIndices = new int[] {start,end};
             }
         }
         columns = prepareColumns(columns, MailListField.RECEIVED_DATE.getField());
@@ -166,7 +138,6 @@ public class ThreadReferencesAction extends AbstractMailAction {
         ServerSession session = req.getSession();
         int sortCol = req.getSortFieldFor(sort);
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folderId);
-        IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
         MailSortField sortField = MailSortField.getField(sortCol);
         OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
 
@@ -221,7 +192,7 @@ public class ThreadReferencesAction extends AbstractMailAction {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }
 
-            List<MailThread> threadReferences = threadReferencesMessageStorage.getThreadReferences(fullnameArgument.getFullName(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns), headers);
+            List<MailThread> threadReferences = threadReferencesMessageStorage.getThreadReferences(fullnameArgument.getFullName(), size, sortField, orderDirection, searchTerm, MailField.getFields(columns), headers);
 
             return new AJAXRequestResult(new MailThreads(threadReferences), "mail");
         }

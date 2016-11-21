@@ -849,7 +849,7 @@ public final class IMAPConversationWorker {
      * Performs the IMAP THREAD REFERENCE command.
      *
      * @param fullName The full name
-     * @param indexRange The index range to apply
+     * @param size The number of recent/latest messages
      * @param sortField The sort field (for root elements)
      * @param order The sort order
      * @param searchTerm The optional search term to apply
@@ -858,7 +858,11 @@ public final class IMAPConversationWorker {
      * @return The mail threads
      * @throws OXException If mail threads cannot be returned
      */
-    public List<MailThread> getThreadReferences(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
+    public List<MailThread> getThreadReferences(String fullName, int size, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
+        if (0 == size) {
+            return Collections.emptyList();
+        }
+
         try {
             imapMessageStorage.openReadOnly(fullName);
             int messageCount = imapMessageStorage.getImapFolder().getMessageCount();
@@ -892,15 +896,15 @@ public final class IMAPConversationWorker {
             }
 
             // Define heading search keys
-            IndexRange idxRange = indexRange;
+            int numMsgs;
             String[] searchKeys;
-            if (null == idxRange) {
+            if (size < 0 || size >= messageCount) {
                 searchKeys = null;
+                numMsgs = messageCount;
             } else {
-                if (idxRange.end > messageCount) {
-                    idxRange = new IndexRange(idxRange.start, messageCount);
-                }
-                searchKeys = new String[] { new StringBuilder(16).append(idxRange.start + 1).append(':').append(idxRange.end).toString() };
+                int start = messageCount - size + 1;
+                searchKeys = new String[] { new StringBuilder(16).append(start).append(':').append(messageCount).toString() };
+                numMsgs = size;
             }
 
             // Issue command
@@ -910,7 +914,7 @@ public final class IMAPConversationWorker {
             }
 
             // Parse unified THREAD response
-            return parseThreadList(toUnifiedThreadResponse(threadList), fullName, null == idxRange ? messageCount : idxRange.end - idxRange.start, sortField, order, usedFields, headerNames);
+            return parseThreadList(toUnifiedThreadResponse(threadList), fullName, numMsgs, sortField, order, usedFields, headerNames);
         } catch (final MessagingException e) {
             throw imapMessageStorage.handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
