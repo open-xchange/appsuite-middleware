@@ -10,6 +10,7 @@ Package: open-xchange
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-authentication, open-xchange-authorization, open-xchange-mailstore, open-xchange-smtp (>= @OXVERSION@), open-xchange-grizzly | open-xchange-httpservice
 Conflicts: open-xchange-linkedin
+Replaces: open-xchange-linkedin
 Description: The Open-Xchange backend
  This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
  installed. Additionally this package provides the init script for starting the backend on system boot.
