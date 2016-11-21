@@ -268,12 +268,6 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
         return addOrganizer(delegate.getObjectById(objectId, inFolder));
     }
 
-    @Override
-    public CalendarDataObject getObjectById(final int objectId, final int inFolder, final Connection readConnection)
-        throws OXException, SQLException {
-        return addOrganizer(delegate.getObjectById(objectId, inFolder, readConnection));
-    }
-    
     private CalendarDataObject addOrganizer(final CalendarDataObject objectById) throws OXException{
         if (objectById.getOrganizer() == null) {
             final User u = users.getUser(objectById.getCreatedBy(), ctx);

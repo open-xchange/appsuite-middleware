@@ -438,11 +438,6 @@ public class CalendarSql implements AppointmentSQLInterface {
         return getObjectById(oid, inFolder, null, true);
     }
 
-    @Override
-    public CalendarDataObject getObjectById(final int oid, final int inFolder, final Connection readConnection) throws OXException, SQLException {
-        return getObjectById(oid, inFolder, readConnection, true);
-    }
-    
     /**
      * Gets the appointment denoted by specified object ID in given folder
      *

@@ -239,30 +239,6 @@ public interface AppointmentSQLInterface {
     public CalendarDataObject getObjectById(int objectId, int inFolder) throws OXException, SQLException;
 
     /**
-     * Loads one appointment by the given ID
-     * <p>
-     * Note that this method is less isolated as one passes a {@link Connection},
-     * but it is required in some cases where this needs to be called as part of
-     * a batch of operations, in order to use the same {@link Connection} and
-     * avoid potential deadlocks.
-     * <p>
-     * Futhermore, this method does <em>not</em> perform any transactional control
-     * and does not commit nor rollback the specified {@link Connection}, which is
-     * left to the caller.
-     * 
-     * @param objectId
-     * The Object ID
-     * @param inFolder
-     * Object in folder
-     * @param readCon
-     * the {@link Connection} to use to retrieve the {@link CalendarDataObject}
-     * @return
-     * return the AppointmentObject
-     * @throws OXException, OXPermissionException
-     */
-    public CalendarDataObject getObjectById(int objectId, int inFolder, Connection readConnection) throws OXException, SQLException;
-    
-    /**
      * Loads a range of appointments by the given IDs
      * @param objectIdAndInFolder[]
      * array with two dimensions. First dimension contains a seond array with two values.
