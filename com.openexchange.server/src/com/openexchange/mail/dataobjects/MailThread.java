@@ -50,6 +50,7 @@
 package com.openexchange.mail.dataobjects;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -107,6 +108,17 @@ public class MailThread {
      */
     public List<MailThread> getChildren() {
         return children;
+    }
+
+    /**
+     * Adds specified children to this mail thread.
+     *
+     * @param children The children to add
+     */
+    public void addChildren(Collection<MailThread> children) {
+        if (null != children) {
+            this.children.addAll(children);
+        }
     }
 
 }

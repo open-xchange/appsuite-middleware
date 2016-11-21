@@ -3868,16 +3868,32 @@ public class IMAPProtocol extends Protocol {
     }
 
     /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
+    private static String toUpperCase(String chars) {
         if (null == chars) {
             return null;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+
+        int i = chars.length();
+        char[] c = null;
+
+        // look for first conversion
+        while (i-- > 0) {
+            char c1 = chars.charAt(i);
+            if ((c1 >= 'a') && (c1 <= 'z')) {
+                c1 = (char) (c1 & 0x5f);
+                c = chars.toCharArray();
+                c[i] = c1;
+                break;
+            }
         }
-        return builder.toString();
+
+        while (i-- > 0) {
+            char c1 = c[i];
+            if ((c1 >= 'a') && (c1 <= 'z')) {
+                c[i] = (char) (c1 & 0x5f);
+            }
+        }
+
+        return c == null ? chars : new String(c);
     }
 }
