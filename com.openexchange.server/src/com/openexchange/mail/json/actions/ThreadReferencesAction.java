@@ -64,6 +64,7 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -149,7 +150,8 @@ public class ThreadReferencesAction extends AbstractMailAction {
                 fromToIndices = new int[] {start,end};
             }
         }
-        columns = prepareColumns(columns);
+        columns = prepareColumns(columns, MailListField.RECEIVED_DATE.getField());
+
         int orderDir = OrderDirection.ASC.getOrder();
         if (order != null) {
             if (order.equalsIgnoreCase("asc")) {

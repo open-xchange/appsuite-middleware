@@ -845,6 +845,19 @@ public final class IMAPConversationWorker {
 
     // -----------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Performs the IMAP THREAD REFERENCE command.
+     *
+     * @param fullName The full name
+     * @param indexRange The index range to apply
+     * @param sortField The sort field (for root elements)
+     * @param order The sort order
+     * @param searchTerm The optional search term to apply
+     * @param mailFields The mail fields to query
+     * @param headerNames The optional header names to query
+     * @return The mail threads
+     * @throws OXException If mail threads cannot be returned
+     */
     public List<MailThread> getThreadReferences(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
         try {
             imapMessageStorage.openReadOnly(fullName);
