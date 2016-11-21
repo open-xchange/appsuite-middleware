@@ -55,6 +55,7 @@ import javax.mail.internet.AddressException;
 import com.damienmiller.BCrypt;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
@@ -103,7 +104,7 @@ public class GenericChecks {
      * @throws InvalidDataException If given address string is not a valid email address
      */
     public final static void checkValidMailAddress(final String address) throws InvalidDataException {
-        if (null != address && !isValidMailAddress(address)) {
+        if (!Strings.isEmpty(address) && !isValidMailAddress(address)) {
             throw new InvalidDataException("Invalid email address");
         }
     }
