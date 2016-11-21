@@ -339,14 +339,25 @@ public final class ThreadSortUtil {
 
     private static final Pattern PATTERN_NUM = Pattern.compile("[0-9]+");
 
-    static String toUnifiedThreadResponse(final String resp) {
-        final Matcher matcher = PATTERN_NUM.matcher(resp);
-        final StringBuffer sb = new StringBuffer(resp.length() << 1);
-        final StringBuilder tmp = new StringBuilder(8);
+    /**
+     * Converts given raw THREAD=REFERENCES response to its unified form
+     *
+     * @param result The THREAD=REFERENCES response
+     * @return The unified form
+     */
+    public static String toUnifiedThreadResponse(String result) {
+        Matcher matcher = PATTERN_NUM.matcher(result);
+        if (false == matcher.find()) {
+            return result;
+        }
+        
+        StringBuffer sb = new StringBuffer(result.length() + (result.length() >> 1));
+        StringBuilder tmp = new StringBuilder(8);
+        // First match
+        matcher.appendReplacement(sb, tmp.append('{').append(matcher.group()).append('}').toString());
         while (matcher.find()) {
-            if (tmp.length() > 0) {
-                tmp.setLength(0);
-            }
+            // Other matches
+            tmp.setLength(0);
             matcher.appendReplacement(sb, tmp.append('{').append(matcher.group()).append('}').toString());
         }
         matcher.appendTail(sb);

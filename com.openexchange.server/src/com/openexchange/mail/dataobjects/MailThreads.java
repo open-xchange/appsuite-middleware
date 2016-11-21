@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,35 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.mail.dataobjects;
 
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailThread;
-import com.openexchange.mail.search.SearchTerm;
 
 /**
- * {@link IMailMessageStorageThreadReferences} - Extends basic folder storage by requesting a mailbox' conversation threads.
+ * {@link MailThreads} - A collection of mail threads.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public interface IMailMessageStorageThreadReferences extends IMailMessageStorage {
+public class MailThreads {
+
+    private final List<MailThread> mailThreads;
 
     /**
-     * Indicates if thread references are supported.
-     *
-     * @return <code>true</code> if supported; otherwise <code>false</code>
-     * @throws OXException If check fails
+     * Initializes a new {@link MailThreads}.
      */
-    boolean isThreadReferencesSupported() throws OXException;
+    public MailThreads(List<MailThread> mailThreads) {
+        super();
+        this.mailThreads = mailThreads;
+    }
 
     /**
-     * Gets the thread references (aka. mail conversations) for specified full name.
+     * Gets the listing of mail threads
      *
-     * @param fullName the folder full name
-     * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
-     *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
-     *            range is <code>end - start</code>.
-     * @param sortField The sort field
-     * @param order Whether ascending or descending sort order
-     * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
-     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
-     * @param headerNames The headers to pre-fill or <code>null</code>
-     * @return The thread references
-     * @throws OXException If an error occurs
+     * @return The mail threads
      */
-    List<MailThread> getThreadReferences(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException;
+    public List<MailThread> getMailThreads() {
+        return mailThreads;
+    }
 
 }

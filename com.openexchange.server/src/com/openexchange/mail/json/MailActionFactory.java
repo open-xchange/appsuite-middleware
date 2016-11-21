@@ -96,6 +96,7 @@ import com.openexchange.mail.json.actions.ResolveShareReference;
 import com.openexchange.mail.json.actions.SearchAction;
 import com.openexchange.mail.json.actions.SendDataAction;
 import com.openexchange.mail.json.actions.SimpleThreadStructureAction;
+import com.openexchange.mail.json.actions.ThreadReferencesAction;
 import com.openexchange.mail.json.actions.TransportMailAction;
 import com.openexchange.mail.json.actions.UpdateAction;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
@@ -190,6 +191,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         builder.put("all_seen", new AllSeenAction(services));
         builder.put("resolve_share_reference", new ResolveShareReference(services));
         builder.put("examine", new ExamineAction(services));
+        builder.put("thread_references", new ThreadReferencesAction(services));
 
         this.actions = builder.build();
     }

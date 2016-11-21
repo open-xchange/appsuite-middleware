@@ -87,6 +87,8 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailThread;
+import com.openexchange.mail.dataobjects.MailThreads;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
@@ -189,6 +191,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 }
             } else if (resultObject instanceof ThreadedStructure) {
                 convertThreadStructure((ThreadedStructure) resultObject, requestData, result, session);
+            } else if (resultObject instanceof MailThreads) {
+                convertMailThreads((MailThreads) resultObject, requestData, result, session);
             } else {
                 @SuppressWarnings("unchecked") final Collection<MailMessage> mails = (Collection<MailMessage>) resultObject;
                 if (AJAXServlet.ACTION_ALL.equalsIgnoreCase(action)) {
@@ -201,6 +205,75 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             }
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void convertMailThreads(final MailThreads mailThreads, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData).getColumns();
+        String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        tmp = null;
+
+        MailFields mailFields = new MailFields();
+        List<MailFieldWriter> writers = new ArrayList<MailFieldWriter>(columns.size());
+        for (Column column : columns) {
+            MailFieldWriter fieldWriter;
+            if (column.getField() > 0) {
+                fieldWriter = MessageWriter.getMailFieldWriter(MailListField.getField(column.getField()));
+                MailField mailField = MailField.getField(column.getField());
+                if (null != mailField) {
+                    mailFields.add(mailField);
+                }
+            } else {
+                fieldWriter = MessageWriter.getHeaderFieldWriter(column.getHeader());
+            }
+            writers.add(fieldWriter);
+        }
+
+        OXJSONWriter jsonWriter = new OXJSONWriter();
+        jsonWriter.array();
+        try {
+            final int userId = session.getUserId();
+            final int contextId = session.getContextId();
+            for (MailThread mailThread : mailThreads.getMailThreads()) {
+                JSONObject jo = new JSONObject(32);
+                writeMailThread(mailThread, jo, writers, mailFields, userId, contextId, timeZone);
+                jsonWriter.value(jo);
+            }
+        } finally {
+            jsonWriter.endArray();
+        }
+        final JSONValue newJsonValue = jsonWriter.getObject();
+        result.setResultObject(newJsonValue, "json");
+    }
+
+    private void writeMailThread(MailThread mailThread, JSONObject jMail, List<MailFieldWriter> writers, MailFields mailFields, int userId, int contextId, TimeZone optTimeZone) throws OXException, JSONException {
+        MailMessage rootMessage = mailThread.getParent();
+        int accountId = rootMessage.getAccountId();
+        for (MailFieldWriter writer : writers) {
+            writer.writeField(jMail, rootMessage, 0, true, accountId, userId, contextId, optTimeZone);
+        }
+        // Add child nodes
+        List<MailThread> subthreads = mailThread.getChildren();
+        JSONArray jChildMessages = new JSONArray(subthreads.size());
+        writeSubThreads(subthreads, accountId, jChildMessages, writers, mailFields, userId, contextId, optTimeZone);
+        jMail.put("thread", jChildMessages);
+    }
+
+    private void writeSubThreads(List<MailThread> subthreads, int accountId, JSONArray jChildMessages, List<MailFieldWriter> writers, MailFields mailFields, int userId, int contextId, TimeZone optTimeZone) throws OXException {
+        for (MailThread subthread : subthreads) {
+            MailMessage mail = subthread.getParent();
+            if (seemsValid(mail, mailFields)) {
+                JSONObject jChild = new JSONObject(writers.size());
+                for (MailFieldWriter writer : writers) {
+                    writer.writeField(jChild, mail, 0, true, accountId, userId, contextId, optTimeZone);
+                }
+                jChildMessages.put(jChild);
+            }
+            List<MailThread> subSubThreads = subthread.getChildren();
+            if (null != subSubThreads && !subSubThreads.isEmpty()) {
+                writeSubThreads(subSubThreads, accountId, jChildMessages, writers, mailFields, userId, contextId, optTimeZone);
+            }
         }
     }
 
