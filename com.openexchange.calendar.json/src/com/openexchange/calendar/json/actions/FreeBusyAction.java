@@ -68,6 +68,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -160,7 +161,11 @@ public final class FreeBusyAction extends ChronosAction {
         Attendee attendee = new Attendee();
         attendee.setEntity(request.checkInt(AJAXServlet.PARAMETER_ID));
         attendee.setCuType(Appointment2Event.getCalendarUserType(request.checkInt("type")));
-        Map<Attendee, List<UserizedEvent>> eventsPerAttendee = session.getCalendarService().getFreeBusy(session, Collections.singletonList(attendee), from, until);
+        FreeBusyService freeBusyService = session.getFreeBusyService();
+        if (null == freeBusyService) {
+            throw ServiceExceptionCode.absentService(FreeBusyService.class);
+        }
+        Map<Attendee, List<UserizedEvent>> eventsPerAttendee = freeBusyService.getFreeBusy(session, Collections.singletonList(attendee), from, until);
         List<UserizedEvent> events = eventsPerAttendee.get(attendee);
         return getAppointmentResultWithTimestamp(session, null == events ? Collections.<UserizedEvent> emptyList() : events);
     }

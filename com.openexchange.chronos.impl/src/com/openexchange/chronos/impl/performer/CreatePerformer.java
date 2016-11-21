@@ -121,7 +121,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * check for conflicts
          */
-        List<EventConflict> conflicts = new ConflictChecker(session, storage).checkConflicts(newEvent, newAttendees);
+        List<EventConflict> conflicts = new ConflictCheckPerformer(session, storage).perform(newEvent, newAttendees);
         if (null != conflicts && 0 < conflicts.size()) {
             for (EventConflict eventConflict : conflicts) {
                 result.addConflict(eventConflict);

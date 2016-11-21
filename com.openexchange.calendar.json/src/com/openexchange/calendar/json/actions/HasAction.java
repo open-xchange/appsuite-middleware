@@ -63,6 +63,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -135,7 +136,11 @@ public final class HasAction extends ChronosAction {
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        boolean[] hasEventsArray = session.getCalendarService().hasEventsBetween(session, from, until);
+        FreeBusyService freeBusyService = session.getFreeBusyService();
+        if (null == freeBusyService) {
+            throw ServiceExceptionCode.absentService(FreeBusyService.class);
+        }
+        boolean[] hasEventsArray = freeBusyService.hasEventsBetween(session, from, until);
         JSONArray jsonArray = new JSONArray(hasEventsArray.length);
         for (int i = 0; i < hasEventsArray.length; i++) {
             jsonArray.put(hasEventsArray[i]);

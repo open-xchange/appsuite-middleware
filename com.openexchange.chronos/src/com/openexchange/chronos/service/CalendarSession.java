@@ -105,6 +105,13 @@ public interface CalendarSession extends CalendarParameters {
     CalendarService getCalendarService();
 
     /**
+     * Gets a reference to the free/busy service.
+     *
+     * @return The free/busy service
+     */
+    FreeBusyService getFreeBusyService();
+
+    /**
      * Logs a debug message with an associated identifier of this particular CalendarSession.
      *
      * @param message The message to be logged
@@ -121,7 +128,7 @@ public interface CalendarSession extends CalendarParameters {
 
     /**
      * Determines if debug is enabled.
-     * 
+     *
      * @return True if debug is enabled, false otherwise
      */
     boolean isDebugEnabled();

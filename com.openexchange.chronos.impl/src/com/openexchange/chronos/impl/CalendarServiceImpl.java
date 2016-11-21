@@ -63,9 +63,7 @@ import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.impl.performer.DeletePerformer;
-import com.openexchange.chronos.impl.performer.FreeBusyPerformer;
 import com.openexchange.chronos.impl.performer.GetPerformer;
-import com.openexchange.chronos.impl.performer.HasPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
@@ -91,7 +89,7 @@ import com.openexchange.osgi.ServiceSet;
 import com.openexchange.session.Session;
 
 /**
- * {@link CalendarService}
+ * {@link CalendarServiceImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
@@ -113,17 +111,6 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarSession init(Session session) throws OXException {
         return new DefaultCalendarSession(session, this);
-    }
-
-    @Override
-    public boolean[] hasEventsBetween(final CalendarSession session, final Date from, final Date until) throws OXException {
-        return new StorageOperation<boolean[]>(session) {
-
-            @Override
-            protected boolean[] execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new HasPerformer(session, storage).perform(session.getUser().getId(), from, until);
-            }
-        }.executeQuery();
     }
 
     @Override
@@ -232,17 +219,6 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected UpdatesResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new UpdatesPerformer(session, storage).perform(updatedSince);
-            }
-        }.executeQuery();
-    }
-
-    @Override
-    public Map<Attendee, List<UserizedEvent>> getFreeBusy(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new StorageOperation<Map<Attendee, List<UserizedEvent>>>(session) {
-
-            @Override
-            protected Map<Attendee, List<UserizedEvent>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new FreeBusyPerformer(session, storage).perform(attendees, from, until);
             }
         }.executeQuery();
     }

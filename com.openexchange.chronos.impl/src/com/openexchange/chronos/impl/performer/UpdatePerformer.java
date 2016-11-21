@@ -213,7 +213,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 } else {
                     newAttendees = originalEvent.getAttendees();
                 }
-                List<EventConflict> conflicts = new ConflictChecker(session, storage).checkConflicts(newEvent, newAttendees);
+                List<EventConflict> conflicts = new ConflictCheckPerformer(session, storage).perform(newEvent, newAttendees);
                 if (null != conflicts && 0 < conflicts.size()) {
                     result.addConflicts(conflicts);
                     return;

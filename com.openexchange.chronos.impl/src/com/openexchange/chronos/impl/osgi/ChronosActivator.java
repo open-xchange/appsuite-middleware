@@ -52,8 +52,10 @@ package com.openexchange.chronos.impl.osgi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
+import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
@@ -90,6 +92,11 @@ public class ChronosActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { FreeBusyService.class };
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle: \"com.openexchange.chronos.impl\"");
@@ -104,6 +111,7 @@ public class ChronosActivator extends HousekeepingActivator {
              * register services
              */
             registerService(CalendarService.class, new CalendarServiceImpl(calendarHandlers));
+            registerService(FreeBusyService.class, new FreeBusyServiceImpl());
         } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.chronos.impl\"", e);
             throw e;

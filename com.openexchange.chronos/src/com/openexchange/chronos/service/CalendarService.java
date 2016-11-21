@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.EventField;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -94,16 +93,6 @@ public interface CalendarService {
      * @return The sequence number
      */
     long getSequenceNumber(CalendarSession session, int folderID) throws OXException;
-
-    /**
-     * Gets an array of <code>boolean</code> values representing the days where the current session's user has events at.
-     *
-     * @param session The calendar session
-     * @param from The start date of the period to consider
-     * @param until The end date of the period to consider
-     * @return The "has" result, i.e. an array of <code>boolean</code> values representing the days where the user has events at
-     */
-    boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException;
 
     /**
      * Searches for events by pattern in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
@@ -219,18 +208,6 @@ public interface CalendarService {
      * @return The updates result yielding lists of new/modified and deleted events
      */
     UpdatesResult getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
-
-    /**
-     * Gets free/busy information in a certain interval for one ore more attendees. Only <i>internal</i> attendees of types
-     * {@link CalendarUserType#INDIVIDUAL} and {@link CalendarUserType#RESOURCE} are considered.
-     *
-     * @param session The calendar session
-     * @param attendees The attendees to get the free/busy data for
-     * @param from The start of the requested time range
-     * @param until The end of the requested time range
-     * @return The free/busy data for the attendees, which are stripped down event objects based on the current session user's access permissions for the events
-     */
-    Map<Attendee, List<UserizedEvent>> getFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     CalendarResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;
 
