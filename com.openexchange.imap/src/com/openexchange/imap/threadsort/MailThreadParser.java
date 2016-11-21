@@ -96,6 +96,8 @@ public class MailThreadParser {
      * Parses the specified unified THREAD=REFERENCES response.
      *
      * @param unifiedResult The unified THREAD=REFERENCES response
+     * @param fullName The full name
+     * @param numMsgs Approximate number of queried messages for sizing
      * @return The parse result
      * @throws OXException If parsing fails
      */

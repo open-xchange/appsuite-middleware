@@ -2451,9 +2451,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public List<MailThread> getThreadReferences(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
+    public List<MailThread> getThreadReferences(String fullName, int size, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
-        return conversationWorker.getThreadReferences(fullName, indexRange, sortField, order, searchTerm, mailFields, headerNames);
+        return conversationWorker.getThreadReferences(fullName, size, sortField, order, searchTerm, mailFields, headerNames);
     }
 
     @Override
