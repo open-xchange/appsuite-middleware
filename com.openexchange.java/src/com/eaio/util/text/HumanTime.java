@@ -241,6 +241,19 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
     }
 
     /**
+     * Formats the given time delta, preserving all data.
+     * <p>
+     * Equivalent to <code>new HumanTime(in).getExactly()</code>
+     * 
+     * @param l the time delta
+     * @param compress <code>true</code> to append a compressed representation; otherwise <code>false</code>
+     * @return a formatted String, never <code>null</code>
+     */
+    public static String exactly(long l, boolean compress) {
+        return new HumanTime(l).getExactly(compress);
+    }
+
+    /**
      * Parses and formats the given char sequence, potentially removing some data to make the output easier to
      * understand.
      * <p>
@@ -456,6 +469,16 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
     }
 
     /**
+     * Returns a human-formatted representation of the time delta.
+     * 
+     * @param compress <code>true</code> to append a compressed representation; otherwise <code>false</code>
+     * @return a formatted representation of the time delta, never <code>null</code>
+     */
+    public String getExactly(boolean compress) {
+        return getExactly(new StringBuilder(), compress).toString();
+    }
+
+    /**
      * Appends a human-formatted representation of the time delta to the given {@link Appendable} object.
      * 
      * @param <T> the return type
@@ -463,12 +486,26 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      * @return the given Appendable object, never <code>null</code>
      */
     public <T extends Appendable> T getExactly(T a) {
+           return getExactly(a, false);
+    }
+
+    /**
+     * Appends a human-formatted representation of the time delta to the given {@link Appendable} object.
+     * 
+     * @param <T> the return type
+     * @param compress <code>true</code> to append a compressed representation; otherwise <code>false</code>
+     * @param a the Appendable object, may not be <code>null</code>
+     * @return the given Appendable object, never <code>null</code>
+     */
+    public <T extends Appendable> T getExactly(T a, boolean compress) {
         try {
             boolean prependBlank = false;
             long d = delta;
             if (d >= YEAR) {
                 a.append(floor(d, YEAR));
-                a.append(' ');
+                if (!compress) {
+                    a.append(' ');
+                }
                 a.append('y');
                 prependBlank = true;
             }
@@ -478,7 +515,9 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
                     a.append(' ');
                 }
                 a.append(floor(d, DAY));
-                a.append(' ');
+                if (!compress) {
+                    a.append(' ');
+                }
                 a.append('d');
                 prependBlank = true;
             }
@@ -488,7 +527,9 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
                     a.append(' ');
                 }
                 a.append(floor(d, HOUR));
-                a.append(' ');
+                if (!compress) {
+                    a.append(' ');
+                }
                 a.append('h');
                 prependBlank = true;
             }
@@ -498,7 +539,9 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
                     a.append(' ');
                 }
                 a.append(floor(d, MINUTE));
-                a.append(' ');
+                if (!compress) {
+                    a.append(' ');
+                }
                 a.append('m');
                 prependBlank = true;
             }
@@ -508,7 +551,9 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
                     a.append(' ');
                 }
                 a.append(floor(d, SECOND));
-                a.append(' ');
+                if (!compress) {
+                    a.append(' ');
+                }
                 a.append('s');
                 prependBlank = true;
             }
@@ -518,7 +563,9 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
                     a.append(' ');
                 }
                 a.append(Integer.toString((int) d));
-                a.append(' ');
+                if (!compress) {
+                    a.append(' ');
+                }
                 a.append('m');
                 a.append('s');
             }
@@ -749,6 +796,19 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      */
     public String toString() {
         return getExactly();
+    }
+
+    /**
+     * Returns a String representation of this.
+     * <p>
+     * The output is identical to {@link #getExactly()}.
+     * 
+     * @see java.lang.Object#toString()
+     * @see #getExactly(boolean)
+     * @return a String, never <code>null</code>
+     */
+    public String toMinimumString() {
+        return getExactly(true);
     }
 
     /**
