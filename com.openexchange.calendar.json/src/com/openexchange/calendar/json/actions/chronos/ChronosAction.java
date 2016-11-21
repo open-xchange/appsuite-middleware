@@ -72,7 +72,9 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -84,6 +86,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.results.CollectionDelta;
@@ -226,7 +229,14 @@ public abstract class ChronosAction extends AppointmentAction {
             if (null != conflict.getConflictingAttendees()) {
                 List<Participant> participants = new ArrayList<Participant>();
                 for (Attendee attendee : conflict.getConflictingAttendees()) {
-                    getEventConverter().convertAttendee(attendee, participants, new ArrayList<UserParticipant>(), new ArrayList<ConfirmableParticipant>());
+                    if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+                        UserParticipant userParticipant = new UserParticipant(attendee.getEntity());
+                        userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
+                        participants.add(userParticipant);
+                    } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
+                        ResourceParticipant resourceParticipant = new ResourceParticipant(attendee.getEntity());
+                        participants.add(resourceParticipant);
+                    }
                 }
                 appointment.setParticipants(participants);
                 appointment.setConfirmations(new ConfirmableParticipant[0]);
