@@ -862,7 +862,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             Exception exception = null;
             try {
                 // Check listener chain
-                Result result = listenerChain.onBeforeMessageTransport(messageToSend, securitySettings, session);
+                Result result = listenerChain.onBeforeMessageTransport(messageToSend, recipients, securitySettings, session);
 
                 // Examine reply of the listener chain
                 {
@@ -876,6 +876,13 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         // Just return the processed message
                         return result.getMimeMessage();
                     }
+                    // Check recipient list from result
+                    recipients = result.getRecipients();
+                    // If not recipients, no need to continue sending.
+                    if (recipients == null || recipients.length == 0) {
+                        return result.getMimeMessage();
+                    }
+
                 }
 
                 // Grab possibly new MIME message

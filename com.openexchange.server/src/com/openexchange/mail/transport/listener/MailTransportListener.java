@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.transport.listener;
 
+import javax.mail.Address;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.SecuritySettings;
@@ -67,12 +68,13 @@ public interface MailTransportListener {
      * Called before a message transport takes place.
      *
      * @param message The message about to send
+     * @param recipients.  Array of recipients
      * @param securitySettings The optional security settings to consider or <code>null</code>
      * @param session The associated session
      * @return The processing result
      * @throws OXException If processing the message fails
      */
-    Result onBeforeMessageTransport(MimeMessage message, SecuritySettings securitySettings, Session session) throws OXException;
+    Result onBeforeMessageTransport(MimeMessage message, Address[] recipients, SecuritySettings securitySettings, Session session) throws OXException;
 
     /**
      * Called after a message transport took place.

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.transport.listener;
 
+import javax.mail.Address;
 import javax.mail.internet.MimeMessage;
 
 
@@ -73,5 +74,11 @@ public interface Result {
      * @return The resulting MIME message
      */
     MimeMessage getMimeMessage();
+
+    /**
+     * Gets the list of recipients
+     */
+    Address[] getRecipients();
+
 
 }
