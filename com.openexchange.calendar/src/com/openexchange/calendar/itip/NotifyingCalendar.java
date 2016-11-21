@@ -307,6 +307,11 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
+    public CalendarDataObject getObjectById(final int objectId, final int inFolder, final Connection readConnection) throws OXException, SQLException {
+        return delegate.getObjectById(objectId, inFolder, readConnection);
+    }
+    
+    @Override
     public SearchIterator<Appointment> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
         return delegate.getObjectsById(objectIdAndInFolder, cols);
     }

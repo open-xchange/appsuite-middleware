@@ -200,6 +200,11 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
     }
 
     @Override
+    public CalendarDataObject getObjectById(int objectId, int inFolder, Connection readConnection) throws OXException, SQLException {
+        return delegate.getObjectById(objectId, inFolder, readConnection);
+    }
+    
+    @Override
     public SearchIterator<Appointment> getObjectsById(
         int[][] objectIdAndInFolder, int[] cols)
             throws com.openexchange.exception.OXException {

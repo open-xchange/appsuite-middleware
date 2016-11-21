@@ -66,6 +66,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -2818,9 +2819,15 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (exceptions != null && !exceptions.isEmpty()) {
                 final Integer oids[] = exceptions.toArray(new Integer[exceptions.size()]);
                 if (oids.length > 0) {
+                    // fix for bug 48598 where we previously sent a shallow CalenderDataObject that only
+                    // contained the objectID and parentFolderID, but that made it impossible to compute
+                    // recurrence information in event listeners; hence, we need to retrieve the complete
+                    // Appointment object that is to be deleted prior to its deletion in order to pass
+                    // it to the event listeners below:
+                    final Iterable<CalendarDataObject> exceptionsBeforeDelete = loadAppointmentsByOids(so, exceptions, inFolder, writecon);
                     deleteAllRecurringExceptions(oids, so, writecon, false);
-                    for (int a = 0; a < exceptions.size(); a++) {
-                        triggerDeleteEvent(writecon, exceptions.get(a).intValue(), inFolder, so, ctx, null);
+                    for (final CalendarDataObject exceptionBeforeDelete : exceptionsBeforeDelete) {
+                        triggerDeleteEvent(writecon, exceptionBeforeDelete.getObjectID(), inFolder, so, ctx, exceptionBeforeDelete);
                     }
                 }
             }
@@ -2831,9 +2838,15 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (exceptions != null && !exceptions.isEmpty()) {
                 final Integer oids[] = exceptions.toArray(new Integer[exceptions.size()]);
                 if (oids.length > 0) {
+                    // fix for bug 48598 where we previously sent a shallow CalenderDataObject that only
+                    // contained the objectID and parentFolderID, but that made it impossible to compute
+                    // recurrence information in event listeners; hence, we need to retrieve the complete
+                    // Appointment object that is to be deleted prior to its deletion in order to pass
+                    // it to the event listeners below:
+                    final Iterable<CalendarDataObject> exceptionsBeforeDelete = loadAppointmentsByOids(so, exceptions, inFolder, writecon);
                     deleteAllRecurringExceptions(oids, so, writecon);
-                    for (int a = 0; a < exceptions.size(); a++) {
-                        triggerDeleteEvent(writecon, exceptions.get(a).intValue(), inFolder, so, ctx, null);
+                    for (final CalendarDataObject exceptionBeforeDelete : exceptionsBeforeDelete) {
+                        triggerDeleteEvent(writecon, exceptionBeforeDelete.getObjectID(), inFolder, so, ctx, exceptionBeforeDelete);
                     }
                 }
             }
@@ -4506,7 +4519,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return isInvited;
     }
 
-    private final long deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid, final int fid, final Context c, final Connection writecon, final Session so) throws SQLException, OXException {
+    private final long deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid, final int fid, final Context c, final Connection writecon, final Session so, final CalendarDataObject cdao, final CalendarDataObject edao) throws SQLException, OXException {
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cid));
         final long lastModified = System.currentTimeMillis();
         final PreparedStatement pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
@@ -4601,10 +4614,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 COLLECTION.closePreparedStatement(ddu);
             }
         }
-        final Appointment ao = new Appointment();
-        ao.setObjectID(oid);
-        ao.setParentFolderID(fid);
-        COLLECTION.triggerEvent(so, CalendarOperation.UPDATE, ao);
+        COLLECTION.triggerModificationEvent(so, cdao, edao);
         deleteReminder(oid, uid, c, writecon);
 
         return lastModified;
@@ -4647,7 +4657,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SQL_SELECT_WHOLE_RECURRENCE = "SELECT " + COLLECTION.getFieldName(Appointment.OBJECT_ID) + " FROM prg_dates WHERE cid = ? AND " + COLLECTION.getFieldName(Appointment.RECURRENCE_ID) + " = ? ORDER BY " + COLLECTION.getFieldName(Appointment.OBJECT_ID);
 
-    private final void deleteOnlyOneRecurringParticipantInPrivateFolder(final int recurrenceId, final int cid, final int uid, final int fid, final Context c, final Connection writecon, final Session so) throws SQLException, OXException {
+    private final void deleteOnlyOneRecurringParticipantInPrivateFolder(final int recurrenceId, final int cid, final int uid, final int fid, final Context c, final Connection writecon, final Session so, final CalendarDataObject cdao, final CalendarDataObject edao) throws SQLException, OXException {
         /*
          * Get all object IDs belonging to specified recurrence ID
          */
@@ -4670,7 +4680,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
         for (final Integer objectId : objectIDs) {
-            deleteOnlyOneParticipantInPrivateFolder(objectId.intValue(), cid, uid, fid, c, writecon, so);
+            deleteOnlyOneParticipantInPrivateFolder(objectId.intValue(), cid, uid, fid, c, writecon, so, cdao, edao);
         }
     }
 
@@ -5035,7 +5045,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 fid,
                                 new ContextImpl(cid),
                                 writecon,
-                                so);
+                                so,
+                                cdao,
+                                edao);
                     } else {
                         // Delete by object ID
                         final long lastModified = deleteOnlyOneParticipantInPrivateFolder(
@@ -5045,7 +5057,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                             fid,
                             new ContextImpl(cid),
                             writecon,
-                            so);
+                            so,
+                            cdao,
+                            edao);
                         // Update last-modified time stamp of master
                         final int recurrenceId = edao == null ? (cdao == null ? -1 : cdao.getRecurrenceID()) : edao.getRecurrenceID();
                         if (recurrenceId > 0) {
@@ -5236,14 +5250,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (le.isGeneric(Generic.NOT_FOUND)) {
                                 LOG.info("Unable to find master during Exception delete. Ignoring. Seems to be corrupt data.", le);
                                 final long modified = deleteAppointment(writecon, cid, oid, uid);
-
-                                if (edao == null) {
-                                    triggerDeleteEvent(writecon, oid, fid, so, ctx, null);
-                                } else {
-                                    edao.setModifiedBy(uid);
-                                    edao.setLastModified(new Date(modified));
-                                    triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
-                                }
+                                edao.setModifiedBy(uid);
+                                edao.setLastModified(new Date(modified));
+                                triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
                             } else {
                                 throw le;
                             }
@@ -5295,12 +5304,11 @@ public class CalendarMySQL implements CalendarSqlImp {
         } else if (recurring_action == CalendarCollectionService.RECURRING_FULL_DELETE) {
             final List<Integer> al = getExceptionList(readcon, ctx, edao.getRecurrenceID());
             if (al != null && !al.isEmpty()) {
+                final Iterable<CalendarDataObject> exceptionsBeforeDelete = loadAppointmentsByOids(so, al, fid, writecon);
                 final Integer oids[] = al.toArray(new Integer[al.size()]);
-                if (oids.length > 0) {
-                    deleteAllRecurringExceptions(oids, so, writecon);
-                }
-                for (int a = 0; a < al.size(); a++) {
-                    triggerDeleteEvent(writecon, al.get(a).intValue(), fid, so, ctx, null);
+                deleteAllRecurringExceptions(oids, so, writecon);
+                for (final CalendarDataObject exceptionBeforeDelete : exceptionsBeforeDelete) {
+                    triggerDeleteEvent(writecon, exceptionBeforeDelete.getObjectID(), fid, so, ctx, exceptionBeforeDelete);
                 }
             }
             oid = edao.getRecurrenceID();
@@ -5327,17 +5335,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     private final void triggerDeleteEvent(final Connection con, final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
         final CalendarDataObject ao;
         if (edao == null) {
-            // fix for bug 48598 where we previously sent a shallow CalenderDataObject that only
-            // contained the objectID and parentFolderID (as of the setters invoked below), but that
-            // made it impossible to compute recurrence information in event listeners; hence, for
-            // those cases where this method gets called without the CalenderDataObject, we need to
-            // retrieve the complete Appointment object that is to be deleted:
-            final AppointmentSQLInterface calendarSql = FACTORY_REF.get().createAppointmentSql(so);
-            try {
-                ao = calendarSql.getObjectById(oid, fid);
-            } catch (final SQLException e) {
-                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
-            }
+            ao = new CalendarDataObject();
         } else {
             ao = edao.clone();
         }
@@ -5983,4 +5981,19 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     }
 
+    private static Iterable<CalendarDataObject> loadAppointmentsByOids(final Session so, final List<Integer> oids, final int folderId, final Connection connection) throws OXException, SQLException {
+        final Collection<CalendarDataObject> result;
+        {
+            final AppointmentSQLInterface calendarSql = FACTORY_REF.get().createAppointmentSql(so);
+            result = new ArrayList<CalendarDataObject>(oids.size());
+            for (final Integer oid : oids) {
+                if (oid != null) {
+                    final CalendarDataObject cdo = calendarSql.getObjectById(oid, folderId, connection);
+                    result.add(cdo);
+                }
+            }
+        }
+        return result;
+    }
+    
 }
