@@ -94,6 +94,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Reference;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -192,11 +193,11 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             /*
              * determine intersecting attendees
              */
-            List<Attendee> conflictingAttendees = getConflictingAttendees(attendeesToCheck, eventInPeriod);
+            Reference<Boolean> hardConflict = new Reference<Boolean>(Boolean.FALSE);
+            List<Attendee> conflictingAttendees = getConflictingAttendees(attendeesToCheck, eventInPeriod, hardConflict);
             if (null == conflictingAttendees || 0 == conflictingAttendees.size()) {
                 continue;
             }
-            boolean hardConflict = isHardConflict(conflictingAttendees);
             if (isSeriesMaster(eventInPeriod)) {
                 /*
                  * expand & check all occurrences of event series in period
@@ -210,16 +211,15 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
                         /*
                          * add conflict for occurrence
                          */
-                        conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict));
+                        conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict.getValue()));
                     }
                 }
             } else {
                 if (isInRange(eventInPeriod, event, eventTimeZone)) {
-                    //                if (event.getStartDate().getTime() < eventInPeriod.getEndDate().getTime() && event.getEndDate().getTime() > eventInPeriod.getStartDate().getTime()) {
                     /*
                      * add conflict
                      */
-                    conflicts.add(getEventConflict(eventInPeriod, conflictingAttendees, hardConflict));
+                    conflicts.add(getEventConflict(eventInPeriod, conflictingAttendees, hardConflict.getValue()));
                 }
             }
         }
@@ -266,11 +266,11 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             /*
              * determine intersecting attendees
              */
-            List<Attendee> conflictingAttendees = getConflictingAttendees(attendeesToCheck, eventInPeriod);
+            Reference<Boolean> hardConflict = new Reference<Boolean>(Boolean.FALSE);
+            List<Attendee> conflictingAttendees = getConflictingAttendees(attendeesToCheck, eventInPeriod, hardConflict);
             if (null == conflictingAttendees || 0 == conflictingAttendees.size()) {
                 continue;
             }
-            boolean hardConflict = isHardConflict(conflictingAttendees);
             if (isSeriesMaster(eventInPeriod)) {
                 /*
                  * expand & check all occurrences of event series in period
@@ -291,7 +291,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
                             /*
                              * add conflict for occurrence
                              */
-                            conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict));
+                            conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict.getValue()));
                             count++;
                         }
                     }
@@ -307,7 +307,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
                         /*
                          * add conflict
                          */
-                        conflicts.add(getEventConflict(eventInPeriod, conflictingAttendees, hardConflict));
+                        conflicts.add(getEventConflict(eventInPeriod, conflictingAttendees, hardConflict.getValue()));
                     }
                 }
             }
@@ -320,10 +320,10 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
      *
      * @param event The conflicting event
      * @param conflictingAttendees The conflicting attendees to apply
-     * @param hardConflict <code>true</code> to mark as <i>hard</i> conflict, <code>false</code>, otherwise
+     * @param hardConflict {@link Boolean#TRUE} to mark as <i>hard</i> conflict, {@link Boolean#FALSE} or <code>null</code>, otherwise
      * @return The event conflict
      */
-    private EventConflict getEventConflict(Event event, List<Attendee> conflictingAttendees, boolean hardConflict) throws OXException {
+    private EventConflict getEventConflict(Event event, List<Attendee> conflictingAttendees, Boolean hardConflict) throws OXException {
         Event eventData = new Event();
         eventData.setStartDate(event.getStartDate());
         eventData.setEndDate(event.getEndDate());
@@ -336,7 +336,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             eventData.setSummary(event.getSummary());
             eventData.setLocation(event.getLocation());
         }
-        return new EventConflictImpl(new UserizedEvent(session.getSession(), eventData), conflictingAttendees, hardConflict);
+        return new EventConflictImpl(new UserizedEvent(session.getSession(), eventData), conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
     }
 
     /**
@@ -345,10 +345,10 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
      * @param seriesMaster The series master event of the conflicting occurrence
      * @param recurrenceId The recurrence identifier of the conflicting occurrence
      * @param conflictingAttendees The conflicting attendees to apply
-     * @param hardConflict <code>true</code> to mark as <i>hard</i> conflict, <code>false</code>, otherwise
+     * @param hardConflict {@link Boolean#TRUE} to mark as <i>hard</i> conflict, {@link Boolean#FALSE} or <code>null</code>, otherwise
      * @return The event conflict
      */
-    private EventConflict getSeriesConflict(Event seriesMaster, RecurrenceId recurrenceId, List<Attendee> conflictingAttendees, boolean hardConflict) throws OXException {
+    private EventConflict getSeriesConflict(Event seriesMaster, RecurrenceId recurrenceId, List<Attendee> conflictingAttendees, Boolean hardConflict) throws OXException {
         Event eventData = new Event();
         eventData.setStartDate(new Date(recurrenceId.getValue()));
         eventData.setEndDate(new Date(recurrenceId.getValue() + (seriesMaster.getEndDate().getTime() - seriesMaster.getStartDate().getTime())));
@@ -361,7 +361,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             eventData.setSummary(seriesMaster.getSummary());
             eventData.setLocation(seriesMaster.getLocation());
         }
-        return new EventConflictImpl(new UserizedEvent(session.getSession(), eventData), conflictingAttendees, hardConflict);
+        return new EventConflictImpl(new UserizedEvent(session.getSession(), eventData), conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
     }
 
     /**
@@ -387,13 +387,15 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
      *
      * @param checkedAttendees The attendees where conflicts are checked for
      * @param conflictingEvent The conflicting event
+     * @param hardConflict A reference that gets set to {@link Boolean#TRUE} if the conflicting attendees will indicate a <i>hard</i> conflict
      * @return The conflicting attendees, i.e. those checked attendees that also attend the conflicting event
      */
-    private List<Attendee> getConflictingAttendees(List<Attendee> checkedAttendees, Event conflictingEvent) throws OXException {
+    private List<Attendee> getConflictingAttendees(List<Attendee> checkedAttendees, Event conflictingEvent, Reference<Boolean> hardConflict) throws OXException {
         List<Attendee> conflictingAttendees = new ArrayList<Attendee>();
         List<Attendee> allAttendees = conflictingEvent.containsAttendees() ? conflictingEvent.getAttendees() : storage.getAttendeeStorage().loadAttendees(conflictingEvent.getId());
         for (Attendee checkedAttendee : checkedAttendees) {
             if (isHardConflict(checkedAttendee)) {
+                hardConflict.setValue(Boolean.TRUE);
                 Attendee matchingAttendee = find(allAttendees, checkedAttendee);
                 if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
                     conflictingAttendees.add(0, matchingAttendee);
@@ -499,19 +501,19 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         return checkedAttendees;
     }
 
-    private static boolean isHardConflict(List<Attendee> conflictingAttendees) {
-        for (Attendee attendee : conflictingAttendees) {
-            if (isHardConflict(attendee)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    /**
+     * Gets a value indicating whether a conflicting attendee would indicate a <i>hard</i> conflict or not.
+     *
+     * @param conflictingAttendee The attendee to check
+     * @return <code>true</code> if the conflicting attendee would indicate a <i>hard</i> conflict, <code>false</code>, otherwise
+     */
     private static boolean isHardConflict(Attendee conflictingAttendee) {
         return CalendarUserType.RESOURCE.equals(conflictingAttendee.getCuType()) || CalendarUserType.ROOM.equals(conflictingAttendee.getCuType());
     }
 
+    /**
+     * A comparator for event conflicts that orders <i>hard</i> conflicts first, otherwise compares the conflicting event's start dates.
+     */
     private static final Comparator<EventConflict> HARD_CONFLICTS_FIRST_COMPARATOR = new Comparator<EventConflict>() {
 
         @Override
