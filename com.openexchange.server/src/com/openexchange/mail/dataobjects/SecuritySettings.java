@@ -94,8 +94,9 @@ public class SecuritySettings {
 
         /**
          * Sets if PGP Inline should be used.
-         * @param pgpInline
-         * @return
+         *
+         * @param pgpInline <code>true</code> to use PGP Inline; otherwise <code>false</code>
+         * @return This builder
          */
         public Builder pgpInline(boolean pgpInline) {
             this.pgpInline = pgpInline;
@@ -130,7 +131,7 @@ public class SecuritySettings {
          * @return The <code>SecuritySettings</code> instance
          */
         public SecuritySettings build() {
-            return new SecuritySettings(encrypt, sign, authentication);
+            return new SecuritySettings(encrypt, pgpInline, sign, authentication);
         }
     }
 
@@ -140,17 +141,6 @@ public class SecuritySettings {
     private final boolean sign;
     private final boolean pgpInline;
     private final String authentication;
-
-    /**
-     * Initializes a new {@link SecuritySettings}.
-     */
-    SecuritySettings(boolean encrypt, boolean sign, String authentication) {
-        super();
-        this.encrypt = encrypt;
-        this.sign = sign;
-        this.pgpInline = false;
-        this.authentication = authentication;
-    }
 
     SecuritySettings(boolean encrypt, boolean pgpInline, boolean sign, String authentication) {
         super();
