@@ -78,7 +78,7 @@ public final class Bug12437Test {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession();
         client = new AJAXClient(session, true);

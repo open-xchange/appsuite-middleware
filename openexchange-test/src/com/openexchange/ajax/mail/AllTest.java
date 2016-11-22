@@ -74,15 +74,6 @@ public final class AllTest extends AbstractMailTest {
 
     String mailObject_25kb;
 
-    /**
-     * Default constructor.
-     *
-     * @param name Name of this test.
-     */
-    public AllTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

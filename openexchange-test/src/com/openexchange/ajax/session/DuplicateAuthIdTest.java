@@ -93,7 +93,7 @@ public class DuplicateAuthIdTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         AJAXConfig.init();
         sameAuthId = LoginTools.generateAuthId();
         final AJAXSession session1 = new AJAXSession();

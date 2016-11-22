@@ -106,22 +106,8 @@ public abstract class AbstractMailTest {
 
     private SessionObject session;
 
-    /**
-     *
-     */
-    public AbstractMailTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public AbstractMailTest(final String name) {
-        super();
-    }
-
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         /*
          * Init
          */

@@ -15,7 +15,7 @@ import com.openexchange.server.impl.DBPool;
 public class SimpleDBPoolTest {
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
     }
 

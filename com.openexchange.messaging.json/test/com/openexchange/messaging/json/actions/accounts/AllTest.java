@@ -77,7 +77,7 @@ public class AllTest {
     private SimMessagingServiceRegistry registry;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         registry = new SimMessagingServiceRegistry();
 
         final SimMessagingService service1 = new SimMessagingService();

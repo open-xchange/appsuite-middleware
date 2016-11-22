@@ -79,15 +79,6 @@ public class FunctionTests extends AbstractAJAXSession {
 
     private AJAXClient client;
 
-    /**
-     * Default constructor.
-     * 
-     * @param name Name of the test.
-     */
-    public FunctionTests(final String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

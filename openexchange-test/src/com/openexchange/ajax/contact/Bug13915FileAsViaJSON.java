@@ -58,20 +58,11 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
 
     private Contact contact;
 
-    public Bug13915FileAsViaJSON(String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         contact = ContactTestManager.generateContact(folderID);
         contact.removeFileAs();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     public void testFileAsViaCreate() {

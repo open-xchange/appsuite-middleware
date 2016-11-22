@@ -23,7 +23,7 @@ public class Bug4395Test extends AppointmentTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         folderObj = null;
         parentFolderId = 0;

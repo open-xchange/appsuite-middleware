@@ -113,7 +113,7 @@ public class ImageComparingTest {
     private final String TEST_DATA_DIR = "testconf/";
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(com.openexchange.imagetransformation.java.osgi.Services.class);
 

@@ -66,7 +66,7 @@ public class CPCalendarTest {
     private CPCalendar calendar;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         calendar = new CPCalendar();
     }
 

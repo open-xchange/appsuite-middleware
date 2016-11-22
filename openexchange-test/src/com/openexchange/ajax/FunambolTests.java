@@ -84,7 +84,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * -> request columns 1,4,5,20
          */
 
-        BasicManagedContactTests test = new BasicManagedContactTests("funambol: all contacts");
+        BasicManagedContactTests test = new BasicManagedContactTests();
         try {
             test.setUp();
             test.testGetAllContactsWithColumns();
@@ -118,7 +118,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 608000000&columns=1%2C4%2C5%2C20%2C209
          */
         //start and end dates are not specified in the HTTP EnumAPI.
-        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: all tasks");
+        BasicManagedTaskTests test = new BasicManagedTaskTests();
         try {
             test.setUp();
             test.testAll();
@@ -133,7 +133,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://192.168.0.76/ajax/contacts? action=updates&session=e4533629a58e8de2d550ee0a0a78cd33&folder=38&timestamp=12061116
          * 47532&ignore=none&columns=1%2C4%2C5
          */
-        BasicManagedContactTests test = new BasicManagedContactTests("funambol: updates for contact");
+        BasicManagedContactTests test = new BasicManagedContactTests();
         try {
             test.setUp();
             test.testUpdateContactAndGetUpdates();
@@ -167,7 +167,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Funambol platform stores the Ids of the items handled by the sync, in this way we can understand the items handled between the
          * last sync and the current sync session.
          */
-        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: updates for tasks");
+        BasicManagedTaskTests test = new BasicManagedTaskTests();
         try {
             test.setUp();
             test.testUpdateAndReceiveUpdates();
@@ -183,7 +183,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Parameter "column" is not used, 'get' always return the whole object.
          */
 
-        BasicManagedContactTests test = new BasicManagedContactTests("funambol: add contact");
+        BasicManagedContactTests test = new BasicManagedContactTests();
         try {
             test.setUp();
             test.testCreateAndGetContact();
@@ -213,7 +213,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://192.168.0.76/ajax/tasks? action=get&session=cfbaa1d35d0aab24f0145f60b62c8302&folder=39&id=215&columns=1
          */
         //columns is a useless param here - get always return everything
-        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: get task");
+        BasicManagedTaskTests test = new BasicManagedTaskTests();
         try {
             test.setUp();
             test.testCreateAndGet();
@@ -229,7 +229,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 1212760797891
          */
 
-        BasicManagedContactTests test = new BasicManagedContactTests("funambol: update contact");
+        BasicManagedContactTests test = new BasicManagedContactTests();
         try {
             test.setUp();
             test.testUpdateContactAndGetUpdates();
@@ -264,7 +264,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 15,"ignore_conflicts":true,"private_flag":false,"title":"testing","end_date":
          * 1196420400000,"start_date":1196416800000,"location":"","note":"","recurrence_type": 0,"full_time":false}
          */
-        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: update tasks");
+        BasicManagedTaskTests test = new BasicManagedTaskTests();
         try {
             test.setUp();
             test.testUpdateAndReceiveUpdates();
@@ -278,7 +278,7 @@ public class FunambolTests extends AbstractAJAXSession {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=new&session=092644bdf45610f622b6b631e74c0d17
          */
-        BasicManagedContactTests test = new BasicManagedContactTests("funambol: add contact");
+        BasicManagedContactTests test = new BasicManagedContactTests();
         try {
             test.setUp();
             test.testCreateAndGetContact();
@@ -312,7 +312,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * 15,"folder_id":"256","ignore_conflicts":true,"private_flag":false,"title":"1","end_date":
          * 1198054800000,"start_date":1198051200000,"location":"","note":"","recurrence_type": 0,"full_time":false}
          */
-        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: add task");
+        BasicManagedTaskTests test = new BasicManagedTaskTests();
         try {
             test.setUp();
             test.testCreateAndGet();
@@ -327,7 +327,7 @@ public class FunambolTests extends AbstractAJAXSession {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=delete&session=887e15e1497fddf59e67ba0450a346e0&timestamp=1206111782257
          */
-        BasicManagedContactTests test = new BasicManagedContactTests("funambol: delete contact");
+        BasicManagedContactTests test = new BasicManagedContactTests();
         try {
             test.setUp();
             test.testDeleteContact();
@@ -357,7 +357,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://192.168.0.76/ajax/tasks? action=delete&session=cfbaa1d35d0aab24f0145f60b62c8302&timestamp=1212762011919 Following
          * is a sample request body for a delete calendar item: REQUEST BODY: {"folder":38,"id":293}
          */
-        BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: delete task");
+        BasicManagedTaskTests test = new BasicManagedTaskTests();
         try {
             test.setUp();
             test.testCreateAndDelete();

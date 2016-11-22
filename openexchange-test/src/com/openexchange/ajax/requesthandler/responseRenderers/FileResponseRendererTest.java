@@ -113,7 +113,7 @@ public class FileResponseRendererTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
         final SimConfigurationService simConfigurationService = new SimConfigurationService();
         simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");

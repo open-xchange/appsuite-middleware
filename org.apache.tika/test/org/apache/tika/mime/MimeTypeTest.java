@@ -14,26 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.tika.mime;
 
-import org.junit.Test;
-import org.junit.After;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class MimeTypeTest {
+
     private MimeTypes types;
     private MimeType text;
 
-    protected void setUp() throws MimeTypeException {
+    @Before
+    public void setUp() throws MimeTypeException {
         types = new MimeTypes();
         text = types.forName("text/plain");
     }
 
     /** Test MimeType constructor */
-         @Test
-     public void testConstrctor() {
+    @Test
+    public void testConstrctor() {
         // Missing name
         try {
             new MimeType(null);
@@ -43,8 +46,8 @@ public class MimeTypeTest {
         }
     }
 
-         @Test
-     public void testIsValidName() {
+    @Test
+    public void testIsValidName() {
         assertTrue(MimeType.isValid("application/octet-stream"));
         assertTrue(MimeType.isValid("text/plain"));
         assertTrue(MimeType.isValid("foo/bar"));
@@ -68,8 +71,8 @@ public class MimeTypeTest {
     }
 
     /** Test MimeType setDescription() */
-         @Test
-     public void testSetDescription() {
+    @Test
+    public void testSetDescription() {
         try {
             text.setDescription(null);
             fail("Expected IllegalArgumentException");

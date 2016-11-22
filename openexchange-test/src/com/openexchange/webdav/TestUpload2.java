@@ -80,7 +80,7 @@ public class TestUpload2 {
      * {@inheritDoc}
      */
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         webdavProps = WebdavInit.getWebdavProperties();
         login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
         password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");

@@ -83,7 +83,7 @@ public class FolderTest {
      * @see junit.framework.TestCase#setUp()
      */
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         if (!init) {
             Init.startServer();
         }

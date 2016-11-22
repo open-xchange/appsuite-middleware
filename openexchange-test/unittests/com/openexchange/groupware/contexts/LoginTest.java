@@ -63,7 +63,7 @@ public class LoginTest {
      * {@inheritDoc}
      */
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
     }
 

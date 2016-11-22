@@ -74,7 +74,7 @@ public class FileStorageThreadTest {
     static File tempFile;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         new LocalFileStorage(tempFile.toURI()); // initialize file storage

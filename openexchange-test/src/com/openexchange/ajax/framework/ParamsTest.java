@@ -64,7 +64,7 @@ public class ParamsTest {
     protected Params defaultParams;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         defaultParams = new Params();
         defaultParams.add("key1", "value1");
         defaultParams.add(new Parameter("key2", "value2"));
@@ -75,13 +75,5 @@ public class ParamsTest {
     @Test
     public void testToString() {
         assertEquals("?key1=value1&key2=value2&key3=value3&key4=value4&key5=value5&key6=value6", defaultParams.toString());
-    }
-
-    public void _testToList() {
-        // TODO
-    }
-
-    public void _testToArray() {
-        // TODO
     }
 }

@@ -27,7 +27,7 @@ public class TestFolder {
     private WebResponse resp = null;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         wc = new WebConversation();
         sessionId = LoginTest.getSessionId(wc, "127.0.0.1", "marcus", "netline");
     }

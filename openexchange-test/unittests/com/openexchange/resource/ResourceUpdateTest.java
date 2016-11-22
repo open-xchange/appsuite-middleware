@@ -82,23 +82,6 @@ public final class ResourceUpdateTest {
 
     private User admin;
 
-    /**
-     * Initializes a new {@link ResourceUpdateTest}
-     */
-    public ResourceUpdateTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link ResourceUpdateTest}
-     *
-     * @param name
-     *            The test's name
-     */
-    public ResourceUpdateTest(final String name) {
-        super();
-    }
-
     private static Context resolveContext(final String ctxStr) throws Exception {
         try {
             int pos = -1;
@@ -122,7 +105,7 @@ public final class ResourceUpdateTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         try {
             /*
              * Init

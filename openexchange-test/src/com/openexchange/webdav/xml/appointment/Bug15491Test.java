@@ -71,17 +71,8 @@ public class Bug15491Test extends AppointmentTest {
     private Appointment appointment;
     private int objectId;
 
-    /**
-     * Initializes a new {@link Bug15491Test}.
-     *
-     * @param name
-     */
-    public Bug15491Test() {
-        super();
-    }
-
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         appointment = new Appointment();

@@ -92,18 +92,18 @@ public class OXHCalendarParserTest {
     	"</div>";
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         sdf = new SimpleDateFormat();
         this.parser = new OXHCalendarParser();
     }
 
-         @Test
-     public void testDateParsing(){
+    @Test
+    public void testDateParsing() {
         Calendar cal = Calendar.getInstance();
-        for(String dateString : new String[]{"2005-06-20", "20.06.2005", "06/20/2005", "20.6.2005 0:0:0", "2005-06-20T00:00+00:0000"}){
+        for (String dateString : new String[] { "2005-06-20", "20.06.2005", "06/20/2005", "20.6.2005 0:0:0", "2005-06-20T00:00+00:0000" }) {
             cal.setTime(OXHCalendarParser.parseDate(dateString));
             assertEquals(dateString + ": Year should match", 2005, cal.get(Calendar.YEAR));
-            assertEquals(dateString + ": Month should match", Calendar.JUNE , cal.get(Calendar.MONTH));
+            assertEquals(dateString + ": Month should match", Calendar.JUNE, cal.get(Calendar.MONTH));
             assertEquals(dateString + ": Day should match", 20, cal.get(Calendar.DAY_OF_MONTH));
             assertEquals(dateString + ": Hours should match", 0, cal.get(Calendar.HOUR_OF_DAY));
             assertEquals(dateString + ": Minutes should match", 0, cal.get(Calendar.MINUTE));
@@ -111,39 +111,27 @@ public class OXHCalendarParserTest {
         }
     }
 
-         @Test
-     public void testShouldParseISO8601Date(){
+    @Test
+    public void testShouldParseISO8601Date() {
         Calendar cal = Calendar.getInstance();
         String dateString = "2005-06-20T13:14+02:0600";
-            cal.setTime(OXHCalendarParser.parseDate(dateString));
-            assertEquals(dateString + ": Year should match", 2005, cal.get(Calendar.YEAR));
-            assertEquals(dateString + ": Month should match", Calendar.JUNE , cal.get(Calendar.MONTH));
-            assertEquals(dateString + ": Day should match", 20, cal.get(Calendar.DAY_OF_MONTH));
-            assertEquals(dateString + ": Hours should match", 13+2, cal.get(Calendar.HOUR_OF_DAY));
-            assertEquals(dateString + ": Minutes should match", 14, cal.get(Calendar.MINUTE));
-            assertEquals(dateString + ": Seconds should match", 6, cal.get(Calendar.SECOND));
+        cal.setTime(OXHCalendarParser.parseDate(dateString));
+        assertEquals(dateString + ": Year should match", 2005, cal.get(Calendar.YEAR));
+        assertEquals(dateString + ": Month should match", Calendar.JUNE, cal.get(Calendar.MONTH));
+        assertEquals(dateString + ": Day should match", 20, cal.get(Calendar.DAY_OF_MONTH));
+        assertEquals(dateString + ": Hours should match", 13 + 2, cal.get(Calendar.HOUR_OF_DAY));
+        assertEquals(dateString + ": Minutes should match", 14, cal.get(Calendar.MINUTE));
+        assertEquals(dateString + ": Seconds should match", 6, cal.get(Calendar.SECOND));
     }
 
-         @Test
-     public void testShouldParseWhenStartingWithVCalendar(){
-        String html =
-        "<div id=\"hcalendar-event-title\" class=\"vevent\">" +
-            "<abbr title=\"2010-02-01\" class=\"dtstart\">February 1th</abbr>, " +
-            "<abbr title=\"2010-02-02\" class=\"dtend\"> 2010</abbr> " +
-            "<span class=\"summary\">event title</span>" +
-            "<p>This <a href=\"http://microformats.org/wiki/hcalendar\">hCalendar event</a> brought to you by the <a href=\"http://microformats.org/code/hcalendar/creator\">hCalendar Creator</a>." +
-            "</p>" +
-        "</div>";
+    @Test
+    public void testShouldParseWhenStartingWithVCalendar() {
+        String html = "<div id=\"hcalendar-event-title\" class=\"vevent\">" + "<abbr title=\"2010-02-01\" class=\"dtstart\">February 1th</abbr>, " + "<abbr title=\"2010-02-02\" class=\"dtend\"> 2010</abbr> " + "<span class=\"summary\">event title</span>" + "<p>This <a href=\"http://microformats.org/wiki/hcalendar\">hCalendar event</a> brought to you by the <a href=\"http://microformats.org/code/hcalendar/creator\">hCalendar Creator</a>." + "</p>" + "</div>";
     }
 
-         @Test
-     public void testShouldParseWhenStartingWithVEvent() throws OXException, ParseException{
-        String html = "<span class=\"vevent\">"+
-            "<span class=\"summary\">The microformats.org site was launched</span>"+
-            "on <span class=\"dtstart\">2005-06-20</span>"+
-            "at the Supernova Conference "+
-            "in <span class=\"location\">San Francisco, CA, USA</span>."+
-       "</span>";
+    @Test
+    public void testShouldParseWhenStartingWithVEvent() throws OXException, ParseException {
+        String html = "<span class=\"vevent\">" + "<span class=\"summary\">The microformats.org site was launched</span>" + "on <span class=\"dtstart\">2005-06-20</span>" + "at the Supernova Conference " + "in <span class=\"location\">San Francisco, CA, USA</span>." + "</span>";
         Collection<Appointment> entries = parser.parse(new StringReader(html));
         assertEquals("Should find one entry", 1, entries.size());
         Appointment app = entries.iterator().next();
@@ -153,25 +141,10 @@ public class OXHCalendarParserTest {
         assertEquals("Date should match", OXHCalendarParser.parseDate("2005-06-20"), app.getStartDate());
     }
 
-         @Test
-     public void testShouldParseWhenHavingNestedVCalendarAndVEvent() throws OXException{
-        String html = "<div class=\"vCalendar\">"
-            +fullAppointment
-            +fullAppointment.replaceFirst("hcalendar-My-hCalendar-event", "hcalendar-My-other-hCalendar-event")
-            +"</div>";
+    @Test
+    public void testShouldParseWhenHavingNestedVCalendarAndVEvent() throws OXException {
+        String html = "<div class=\"vCalendar\">" + fullAppointment + fullAppointment.replaceFirst("hcalendar-My-hCalendar-event", "hcalendar-My-other-hCalendar-event") + "</div>";
         Collection<Appointment> entries = parser.parse(new StringReader(html));
         assertEquals("Should find two entries", 2, entries.size());
     }
-
-         @Test
-     public void testShouldDealWithMalformedXML(){
-
-    }
-
-         @Test
-     public void testShouldDealWithHTML401Transitional(){
-
-    }
-
-
 }

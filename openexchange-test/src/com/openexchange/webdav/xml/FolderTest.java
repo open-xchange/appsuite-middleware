@@ -67,6 +67,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
+import org.junit.Before;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -105,12 +106,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 
     protected String groupParticipant = null;
 
-    public FolderTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");

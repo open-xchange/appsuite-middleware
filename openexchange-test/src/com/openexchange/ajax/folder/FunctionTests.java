@@ -85,10 +85,6 @@ public class FunctionTests extends AbstractAJAXSession {
     private AJAXClient client;
     private AJAXClient client2;
 
-    public FunctionTests(String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

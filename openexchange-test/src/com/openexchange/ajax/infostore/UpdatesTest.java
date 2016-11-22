@@ -199,8 +199,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     }
 
     //Bug 4269
-    @Test
-    public void virtualFolderTest(int folderId) throws Exception {
+    private void virtualFolderTest(int folderId) throws Exception {
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(folderId, new int[] { Metadata.ID }, Metadata.ID, Order.ASCENDING, Ignore.NONE, new Date(0L), true);
         UpdatesInfostoreResponse resp = client.execute(req);
         assertEquals("Wrong number of modified documents", 0, resp.getNewAndModified().size() + resp.getDeleted().size());

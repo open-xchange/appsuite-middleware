@@ -123,7 +123,7 @@ public class ConsistencyTest {
     };
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
 
         storage = new InMemoryFileStorage();
         quotaFileStorageService = new SimQuotaFileStorageService(storage);

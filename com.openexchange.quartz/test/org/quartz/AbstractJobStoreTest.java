@@ -49,7 +49,7 @@ public abstract class AbstractJobStoreTest {
 
     @SuppressWarnings("deprecation")
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         this.fSignaler = new SampleSignaler();
         ClassLoadHelper loadHelper = new CascadingClassLoadHelper();
         loadHelper.initialize();

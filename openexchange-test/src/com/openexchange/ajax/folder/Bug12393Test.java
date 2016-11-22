@@ -100,10 +100,6 @@ public class Bug12393Test extends AbstractAJAXSession {
     int parentFolderId;
     List<OCLPermission> originalSubFolderPermissions;
 
-    public Bug12393Test(final String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

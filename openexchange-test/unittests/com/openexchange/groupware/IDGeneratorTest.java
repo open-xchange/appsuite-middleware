@@ -90,7 +90,7 @@ public class IDGeneratorTest {
     Context context;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
         final ContextStorage cs = ContextStorage.getInstance();
         final TestConfig config = new TestConfig();

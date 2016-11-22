@@ -25,7 +25,7 @@ public class ComplexDBPoolTest {
     private static int totalcount = 0;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
         AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
     }

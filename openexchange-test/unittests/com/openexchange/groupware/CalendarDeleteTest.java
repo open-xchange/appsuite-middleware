@@ -84,7 +84,7 @@ public class CalendarDeleteTest {
     private static boolean init = false;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
 
         final TestConfig config = new TestConfig();

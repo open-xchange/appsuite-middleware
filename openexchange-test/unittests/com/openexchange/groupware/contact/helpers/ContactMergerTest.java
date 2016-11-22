@@ -62,7 +62,7 @@ public class ContactMergerTest {
     private Contact c1, c2;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         c1 = new Contact();
         c1.setGivenName("Given Name 1");
         c1.setCompany("Company 1");

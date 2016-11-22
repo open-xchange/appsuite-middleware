@@ -75,7 +75,7 @@ public class PublicationTargetCollectorTest {
     private PublicationTargetCollector collector;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         collector = new PublicationTargetCollector();
 
         PublicationTarget target1 = new PublicationTarget();

@@ -92,7 +92,7 @@ public class CalendarPerformanceTests {
     private static final String testfile = "/home/bishoph/tmp/supertemp/sqloutput"; // "/home/bishoph/tmp/supertemp/sql_dump_dev_prototype"
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
         init = true;
         //com.openexchange.groupware.Init.initContext();

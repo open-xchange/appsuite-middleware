@@ -85,7 +85,7 @@ public abstract class AbstractICalParserTest {
     protected UserResolver oldUserResolver;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         fixtures = new ICALFixtures();
         users = new MockUserLookup();
         parser = new ICal4JParser();

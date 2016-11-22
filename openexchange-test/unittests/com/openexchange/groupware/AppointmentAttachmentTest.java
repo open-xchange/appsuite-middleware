@@ -31,7 +31,7 @@ public class AppointmentAttachmentTest {
     private SessionObject session;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         userid = CalendarTest.getUserId();

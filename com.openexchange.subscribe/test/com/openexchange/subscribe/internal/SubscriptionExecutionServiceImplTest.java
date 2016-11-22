@@ -89,7 +89,7 @@ public class SubscriptionExecutionServiceImplTest {
     private Subscription subscription;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         final SubscriptionSource source = new SubscriptionSource();
         source.setId(SOURCE_NAME);
         subscribeService = new SimSubscribeService();

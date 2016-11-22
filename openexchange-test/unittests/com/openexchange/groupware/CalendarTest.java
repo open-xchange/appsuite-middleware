@@ -130,7 +130,7 @@ public class CalendarTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
         init = true;
         final EventConfigImpl event = new EventConfigImpl();

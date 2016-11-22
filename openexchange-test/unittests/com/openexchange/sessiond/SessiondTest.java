@@ -92,7 +92,7 @@ public class SessiondTest {
     private static boolean isInit = false;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         if (isInit) {
             return;
         }

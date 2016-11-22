@@ -54,7 +54,6 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -83,17 +82,6 @@ import com.openexchange.mail.MailListField;
 public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     /**
-     * Default constructor.
-     *
-     * @param name
-     *            name of the test.
-     */
-    protected AbstractMailTest() {
-        super();
-    }
-
-    @Before
-    /**
      * Gets the message count of specified mail folder.
      *
      * @param folder The mail folder identifier
@@ -102,7 +90,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      * @throws IOException If an I/O error occurs
      * @throws JSONException If a JSON error occurs
      */
-    protected int count(final String folder) throws OXException, IOException, JSONException {
+    public int count(final String folder) throws OXException, IOException, JSONException {
         final JSONObject data = (JSONObject) client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
         return data.getInt(FolderField.TOTAL.getName());
     }

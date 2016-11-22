@@ -71,7 +71,7 @@ public class FormContentParserTest {
     private DynamicFormDescription form = null;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         object = new JSONObject();
         object.put("login", "blupp");
         object.put("password", "secret");

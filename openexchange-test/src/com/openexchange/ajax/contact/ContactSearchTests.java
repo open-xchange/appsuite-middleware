@@ -17,10 +17,6 @@ public class ContactSearchTests extends AbstractManagedContactTest {
     private static final String BOB_MAIL2 = "bob@thebuilder.invalid";
     private static final String BOB_DEPARTMENT = "Department_" + new UID().toString();
 
-    public ContactSearchTests(String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -73,7 +73,7 @@ public class Bug16158Test {
     private SimThreadPoolService threadPoolService;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         sessionData = new SessionData(100, 1, 60000, 167, false);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);

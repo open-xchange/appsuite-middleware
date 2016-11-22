@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarSql;
@@ -109,8 +110,8 @@ public class CalendarRecurringTests {
 
     private static boolean init = false;
 
-    @After
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Init.startServer();
         init = true;
 

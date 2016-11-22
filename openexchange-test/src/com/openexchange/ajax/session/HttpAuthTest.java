@@ -79,12 +79,8 @@ public class HttpAuthTest {
     private String login;
     private String password;
 
-    public HttpAuthTest() {
-        super();
-    }
-
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         AJAXConfig.init();
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);

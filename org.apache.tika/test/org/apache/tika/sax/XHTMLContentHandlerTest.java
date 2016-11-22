@@ -14,28 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.tika.sax;
 
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.tika.metadata.Metadata;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link XHTMLContentHandler} class.
  */
 public class XHTMLContentHandlerTest {
+
     private ContentHandler output;
 
     private XHTMLContentHandler xhtml;
 
-    protected void setUp() {
+    @Before
+    public void setUp() {
         output = new BodyContentHandler();
         xhtml = new XHTMLContentHandler(output, new Metadata());
     }
@@ -46,8 +47,8 @@ public class XHTMLContentHandlerTest {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-188">TIKA-188</a>
      */
-         @Test
-     public void testExtraWhitespace() throws SAXException {
+    @Test
+    public void testExtraWhitespace() throws SAXException {
         xhtml.startDocument();
 
         xhtml.element("p", "foo");
@@ -78,15 +79,15 @@ public class XHTMLContentHandlerTest {
         assertEquals("a", words[4]);
         assertEquals("b", words[5]);
     }
-    
+
     /**
      * Test that content in option elements are properly separated in text
      * output.
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-394">TIKA-394</a>
      */
-         @Test
-     public void testWhitespaceWithOptions() throws Exception {
+    @Test
+    public void testWhitespaceWithOptions() throws Exception {
         xhtml.startDocument();
         xhtml.startElement("form");
         xhtml.startElement("select");
@@ -101,16 +102,16 @@ public class XHTMLContentHandlerTest {
         assertEquals("opt1", words[0]);
         assertEquals("opt2", words[1]);
     }
-    
-         @Test
-     public void testWhitespaceWithMenus() throws Exception {
+
+    @Test
+    public void testWhitespaceWithMenus() throws Exception {
         xhtml.startDocument();
         xhtml.startElement("menu");
         xhtml.element("li", "one");
         xhtml.element("li", "two");
         xhtml.endElement("menu");
         xhtml.endDocument();
-        
+
         String[] words = getRealWords(output.toString());
         assertEquals(2, words.length);
         assertEquals("one", words[0]);
@@ -132,7 +133,7 @@ public class XHTMLContentHandlerTest {
                 words.add(word);
             }
         }
-        
+
         return words.toArray(new String[words.size()]);
     }
 

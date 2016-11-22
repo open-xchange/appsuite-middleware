@@ -14,37 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.tika.detect;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
-import org.junit.Test;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Test cases for the {@link NameDetector} class.
  */
 public class NameDetectorTest {
+
     private Detector detector;
 
-    protected void setUp() {
+    @Before
+    public void setUp() {
         Map<Pattern, MediaType> patterns = new HashMap<Pattern, MediaType>();
-        patterns.put(
-                Pattern.compile(".*\\.txt", Pattern.CASE_INSENSITIVE),
-                MediaType.TEXT_PLAIN);
+        patterns.put(Pattern.compile(".*\\.txt", Pattern.CASE_INSENSITIVE), MediaType.TEXT_PLAIN);
         patterns.put(Pattern.compile("README"), MediaType.TEXT_PLAIN);
         detector = new NameDetector(patterns);
     }
 
-         @Test
-     public void testDetect() {
+    @Test
+    public void testDetect() {
         assertDetect(MediaType.TEXT_PLAIN, "text.txt");
         assertDetect(MediaType.TEXT_PLAIN, "text.txt ");    // trailing space
         assertDetect(MediaType.TEXT_PLAIN, "text.txt\n");   // trailing newline
@@ -63,9 +63,7 @@ public class NameDetectorTest {
         assertDetect(MediaType.OCTET_STREAM, "README.NOW");
 
         // tough one
-        assertDetect(
-                MediaType.TEXT_PLAIN,
-                " See http://www.example.com:1234/README.txt?a=b#c \n");
+        assertDetect(MediaType.TEXT_PLAIN, " See http://www.example.com:1234/README.txt?a=b#c \n");
         assertDetect(MediaType.TEXT_PLAIN, "See README.txt"); // even this!
         assertDetect(MediaType.OCTET_STREAM, "See README");   // but not this
 
@@ -73,15 +71,13 @@ public class NameDetectorTest {
         assertDetect(MediaType.OCTET_STREAM, "");
         assertDetect(MediaType.OCTET_STREAM, null);
         try {
-            assertEquals(
-                    MediaType.OCTET_STREAM,
-                    detector.detect(null, new Metadata()));
+            assertEquals(MediaType.OCTET_STREAM, detector.detect(null, new Metadata()));
         } catch (IOException e) {
             fail("NameDetector should never throw an IOException");
         }
     }
 
-    private void assertDetect(MediaType type, String name){
+    private void assertDetect(MediaType type, String name) {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.RESOURCE_NAME_KEY, name);
         try {

@@ -66,7 +66,7 @@ public class AbstractHashingFileStorageTest {
     protected HashingFileStorage fs;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         tmpFile = new File("/tmp/" + this.getClass().getCanonicalName() + "_" + System.currentTimeMillis());
         tmpFile.mkdirs();
         fs = new HashingFileStorage(tmpFile);

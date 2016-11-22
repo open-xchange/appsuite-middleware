@@ -56,7 +56,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
  * {@link AdditionalFolderFieldListTest}
  *
@@ -64,12 +63,13 @@ import org.junit.Test;
  *
  */
 public class AdditionalFolderFieldListTest {
+
     private SimFolderField field;
     private SimFolderField field2;
     private AdditionalFolderFieldList fields;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         field = new SimFolderField();
         field.setColumnId(12);
         field.setColumnName("someField");
@@ -88,8 +88,8 @@ public class AdditionalFolderFieldListTest {
 
     }
 
-         @Test
-     public void testLookup() {
+    @Test
+    public void testLookup() {
         assertEquals(field, fields.get(12));
         assertEquals(field2, fields.get(13));
         assertEquals(field, fields.get("someField"));
@@ -97,8 +97,8 @@ public class AdditionalFolderFieldListTest {
 
     }
 
-         @Test
-     public void testColumnIDCollision() {
+    @Test
+    public void testColumnIDCollision() {
         // First come first serve
         SimFolderField collision = new SimFolderField();
         collision.setColumnId(field.getColumnID());
@@ -107,8 +107,8 @@ public class AdditionalFolderFieldListTest {
         assertEquals(field, fields.get(12));
     }
 
-         @Test
-     public void testColumnNameCollision() {
+    @Test
+    public void testColumnNameCollision() {
         // First come first serve
         SimFolderField collision = new SimFolderField();
         collision.setColumnName(field.getColumnName());
@@ -117,22 +117,22 @@ public class AdditionalFolderFieldListTest {
         assertEquals(field, fields.get("someField"));
     }
 
-         @Test
-     public void testKnows() {
+    @Test
+    public void testKnows() {
         assertTrue(fields.knows(12));
         assertTrue(fields.knows("someField"));
         assertFalse(fields.knows(23));
         assertFalse(fields.knows("someUnknownField"));
     }
 
-         @Test
-     public void testRemove() {
+    @Test
+    public void testRemove() {
         fields.remove(12);
         assertFalse(fields.knows(12));
     }
 
-         @Test
-     public void testNullField() {
+    @Test
+    public void testNullField() {
         AdditionalFolderField field3 = fields.get(23);
         assertNotNull(field3);
         assertEquals(null, field3.getValue(null, null));

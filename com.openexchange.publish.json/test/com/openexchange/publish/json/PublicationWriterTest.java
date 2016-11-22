@@ -78,7 +78,7 @@ public class PublicationWriterTest {
     private Publication publication;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
 
         PublicationTarget target = new PublicationTarget();
         target.setId("com.openexchange.publish.test");

@@ -106,15 +106,11 @@ public abstract class AbstractWebdavTest {
 
     public static final String AUTHORIZATION = "authorization";
 
-    public AbstractWebdavTest() {
-        super();
-    }
-
     /**
      * {@inheritDoc}
      */
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         webCon = new WebConversation();
         secondWebCon = new WebConversation();
 

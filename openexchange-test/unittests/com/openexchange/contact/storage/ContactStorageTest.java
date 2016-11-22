@@ -61,7 +61,7 @@ public class ContactStorageTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         if (false == initialized) {
             Init.startServer();
         }

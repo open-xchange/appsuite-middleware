@@ -13,10 +13,6 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
     protected static final String YOMI_FIRST_NAME = "\u660e\u65e5\u9999";
     private Contact contact;
 
-    public YomiContactSearchTests(String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

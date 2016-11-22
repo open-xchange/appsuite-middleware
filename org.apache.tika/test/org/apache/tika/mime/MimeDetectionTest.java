@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.tika.mime;
 
 import static org.junit.Assert.assertEquals;
@@ -28,19 +29,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class MimeDetectionTest {
+
     private MimeTypes mimeTypes;
 
     private MediaTypeRegistry registry;
 
     /** @inheritDoc */
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         this.mimeTypes = TikaConfig.getDefaultConfig().getMimeRepository();
         this.registry = mimeTypes.getMediaTypeRegistry();
     }
 
-         @Test
-     public void testDetection() throws Exception {
+    @Test
+    public void testDetection() throws Exception {
         testFile("image/svg+xml", "circles.svg");
         testFile("image/svg+xml", "circles-with-prefix.svg");
         testFile("image/png", "datamatrix.png");
@@ -52,69 +54,41 @@ public class MimeDetectionTest {
         testFile("application/xml", "test-utf16be.xml");
         testFile("application/xml", "test-long-comment.xml");
         testFile("application/xslt+xml", "stylesheet.xsl");
-        testUrl(
-                "application/rdf+xml",
-                "http://www.ai.sri.com/daml/services/owl-s/1.2/Process.owl",
-                "test-difficult-rdf1.xml");
-        testUrl(
-                "application/rdf+xml",
-                "http://www.w3.org/2002/07/owl#",
-                "test-difficult-rdf2.xml");
+        testUrl("application/rdf+xml", "http://www.ai.sri.com/daml/services/owl-s/1.2/Process.owl", "test-difficult-rdf1.xml");
+        testUrl("application/rdf+xml", "http://www.w3.org/2002/07/owl#", "test-difficult-rdf2.xml");
         // add evil test from TIKA-327
         testFile("text/html", "evilhtml.html");
         // add another evil html test from TIKA-357
         testFile("text/html", "testlargerbuffer.html");
     }
 
-         @Test
-     public void testByteOrderMark() throws Exception {
-        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream("\ufefftest".getBytes("UTF-16LE")),
-                new Metadata()));
-        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream("\ufefftest".getBytes("UTF-16BE")),
-                new Metadata()));
-        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream("\ufefftest".getBytes("UTF-8")),
-                new Metadata()));
+    @Test
+    public void testByteOrderMark() throws Exception {
+        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(new ByteArrayInputStream("\ufefftest".getBytes("UTF-16LE")), new Metadata()));
+        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(new ByteArrayInputStream("\ufefftest".getBytes("UTF-16BE")), new Metadata()));
+        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(new ByteArrayInputStream("\ufefftest".getBytes("UTF-8")), new Metadata()));
     }
 
-         @Test
-     public void testSuperTypes() {
-        assertTrue(registry.isSpecializationOf(
-                MediaType.parse("text/something; charset=UTF-8"),
-                MediaType.parse("text/something")));
+    @Test
+    public void testSuperTypes() {
+        assertTrue(registry.isSpecializationOf(MediaType.parse("text/something; charset=UTF-8"), MediaType.parse("text/something")));
 
-        assertTrue(registry.isSpecializationOf(
-                MediaType.parse("text/something; charset=UTF-8"),
-                MediaType.TEXT_PLAIN));
+        assertTrue(registry.isSpecializationOf(MediaType.parse("text/something; charset=UTF-8"), MediaType.TEXT_PLAIN));
 
-        assertTrue(registry.isSpecializationOf(
-                MediaType.parse("text/something; charset=UTF-8"),
-                MediaType.OCTET_STREAM));
+        assertTrue(registry.isSpecializationOf(MediaType.parse("text/something; charset=UTF-8"), MediaType.OCTET_STREAM));
 
-        assertTrue(registry.isSpecializationOf(
-                MediaType.parse("text/something"),
-                MediaType.TEXT_PLAIN));
+        assertTrue(registry.isSpecializationOf(MediaType.parse("text/something"), MediaType.TEXT_PLAIN));
 
-        assertTrue(registry.isSpecializationOf(
-                MediaType.parse("application/something+xml"),
-                MediaType.APPLICATION_XML));
+        assertTrue(registry.isSpecializationOf(MediaType.parse("application/something+xml"), MediaType.APPLICATION_XML));
 
-        assertTrue(registry.isSpecializationOf(
-                MediaType.parse("application/something+zip"),
-                MediaType.APPLICATION_ZIP));
+        assertTrue(registry.isSpecializationOf(MediaType.parse("application/something+zip"), MediaType.APPLICATION_ZIP));
 
-        assertTrue(registry.isSpecializationOf(
-                MediaType.APPLICATION_XML,
-                MediaType.TEXT_PLAIN));
+        assertTrue(registry.isSpecializationOf(MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN));
 
-        assertTrue(registry.isSpecializationOf(
-                MediaType.parse("application/vnd.apple.iwork"),
-                MediaType.APPLICATION_ZIP));
+        assertTrue(registry.isSpecializationOf(MediaType.parse("application/vnd.apple.iwork"), MediaType.APPLICATION_ZIP));
     }
 
-    private void testUrl(String expected, String url, String file) throws IOException{
+    private void testUrl(String expected, String url, String file) throws IOException {
         InputStream in = getClass().getResourceAsStream(file);
         testStream(expected, url, in);
     }
@@ -124,8 +98,8 @@ public class MimeDetectionTest {
         testStream(expected, filename, in);
     }
 
-    private void testStream(String expected, String urlOrFileName, InputStream in) throws IOException{
-        assertNotNull("Test stream: ["+urlOrFileName+"] is null!", in);
+    private void testStream(String expected, String urlOrFileName, InputStream in) throws IOException {
+        assertNotNull("Test stream: [" + urlOrFileName + "] is null!", in);
         if (!in.markSupported()) {
             in = new java.io.BufferedInputStream(in);
         }
@@ -140,7 +114,7 @@ public class MimeDetectionTest {
             assertEquals(urlOrFileName + " is not properly detected after adding resource name.", expected, mime);
         } finally {
             in.close();
-        }        
+        }
     }
 
     /**
@@ -148,20 +122,17 @@ public class MimeDetectionTest {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-483">TIKA-483</a>
      */
-         @Test
-     public void testEmptyDocument() throws IOException {
-        assertEquals(MediaType.OCTET_STREAM, mimeTypes.detect(
-                new ByteArrayInputStream(new byte[0]), new Metadata()));
+    @Test
+    public void testEmptyDocument() throws IOException {
+        assertEquals(MediaType.OCTET_STREAM, mimeTypes.detect(new ByteArrayInputStream(new byte[0]), new Metadata()));
 
         Metadata namehint = new Metadata();
         namehint.set(Metadata.RESOURCE_NAME_KEY, "test.txt");
-        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream(new byte[0]), namehint));
+        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(new ByteArrayInputStream(new byte[0]), namehint));
 
         Metadata typehint = new Metadata();
         typehint.set(Metadata.CONTENT_TYPE, "text/plain");
-        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream(new byte[0]), typehint));
+        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(new ByteArrayInputStream(new byte[0]), typehint));
 
     }
 
@@ -171,23 +142,21 @@ public class MimeDetectionTest {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-426">TIKA-426</a>
      */
-         @Test
-     public void testNotXML() throws IOException {
-        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream("<!-- test -->".getBytes("UTF-8")),
-                new Metadata()));
+    @Test
+    public void testNotXML() throws IOException {
+        assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(new ByteArrayInputStream("<!-- test -->".getBytes("UTF-8")), new Metadata()));
     }
 
     /**
      * Tests that when we repeatedly test the detection of a document
-     *  that can be detected with Mime Magic, that we consistently
-     *  detect it correctly. See TIKA-391 for more details.
+     * that can be detected with Mime Magic, that we consistently
+     * detect it correctly. See TIKA-391 for more details.
      */
-         @Test
-     public void testMimeMagicStability() throws IOException {
-       for(int i=0; i<100; i++) {
-          testFile("application/vnd.ms-excel", "test.xls");
-       }
+    @Test
+    public void testMimeMagicStability() throws IOException {
+        for (int i = 0; i < 100; i++) {
+            testFile("application/vnd.ms-excel", "test.xls");
+        }
     }
 
 }

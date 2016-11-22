@@ -62,10 +62,6 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class BasicManagedTaskTests extends ManagedTaskTest {
 
-    public BasicManagedTaskTests(String name) {
-        super();
-    }
-
     @Test
     public void testCreateAndGet() {
         Task expected = generateTask("Create test");

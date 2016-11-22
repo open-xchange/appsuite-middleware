@@ -68,10 +68,6 @@ import com.openexchange.test.ContactTestManager;
  */
 public class BasicManagedContactTests extends AbstractManagedContactTest {
 
-    public BasicManagedContactTests(String name) {
-        super();
-    }
-
     @Test
     public void testCreateAndGetContact() {
         Contact expected = generateContact();

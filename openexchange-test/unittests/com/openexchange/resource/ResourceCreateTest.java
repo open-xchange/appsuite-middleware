@@ -81,23 +81,6 @@ public final class ResourceCreateTest {
 
     private User admin;
 
-    /**
-     * Initializes a new {@link ResourceCreateTest}
-     */
-    public ResourceCreateTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link ResourceCreateTest}
-     *
-     * @param name
-     *            The test's name
-     */
-    public ResourceCreateTest(final String name) {
-        super();
-    }
-
     private static Context resolveContext(final String ctxStr) throws Exception {
         int pos = -1;
         final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
@@ -111,7 +94,7 @@ public final class ResourceCreateTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         /*
          * Init
          */

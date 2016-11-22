@@ -63,19 +63,10 @@ public abstract class AbstractWebDAVSession {
     private WebDAVClient client;
 
     /**
-     * Default constructor.
-     * 
-     * @param name test name.
-     */
-    public AbstractWebDAVSession() {
-        super();
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         client = new WebDAVClient(User.User1);
     }
 

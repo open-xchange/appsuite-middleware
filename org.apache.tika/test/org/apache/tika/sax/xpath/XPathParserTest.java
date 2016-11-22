@@ -16,18 +16,19 @@
  */
 package org.apache.tika.sax.xpath;
 
-import org.junit.Test;
-import org.junit.After;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class XPathParserTest {
     private static final String NS = "test namespace";
 
     private XPathParser parser;
 
-    protected void setUp() {
+    @Before
+    public void setUp() {
         parser = new XPathParser();
         parser.addPrefix(null, null);
         parser.addPrefix("prefix", NS);

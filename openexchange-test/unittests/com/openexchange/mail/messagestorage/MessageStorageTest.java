@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import org.junit.After;
+import org.junit.Before;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailField;
@@ -258,8 +259,8 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         return mailAccess;
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         this.testmessages = getMessages(getTestMailDir(), -1);
         this.mailAccess = getMailAccess();

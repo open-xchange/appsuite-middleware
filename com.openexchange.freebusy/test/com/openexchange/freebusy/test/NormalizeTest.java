@@ -76,7 +76,7 @@ public class NormalizeTest {
     private FreeBusyData normalizedData;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTime(TimeTools.D("first day last month"));

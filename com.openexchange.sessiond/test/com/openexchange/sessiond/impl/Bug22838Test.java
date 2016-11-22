@@ -69,7 +69,7 @@ public class Bug22838Test {
     private SessiondConfigInterface config;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         config = new SessiondConfigImpl(new SimConfigurationService());
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();

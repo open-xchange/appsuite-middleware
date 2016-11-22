@@ -107,16 +107,12 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
     private static final String TASK_URL = "/servlet/webdav.tasks";
 
-    public TaskTest() {
-        super();
-    }
-
     protected static Date decrementDate(final Date date) {
         return new Date(date.getTime() - 1);
     }
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         final Calendar c = Calendar.getInstance();

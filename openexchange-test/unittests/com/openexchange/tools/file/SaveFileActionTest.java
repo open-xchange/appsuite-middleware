@@ -75,7 +75,7 @@ public class SaveFileActionTest extends AbstractActionTest {
     private com.openexchange.filestore.FileStorage storage = null;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
     }

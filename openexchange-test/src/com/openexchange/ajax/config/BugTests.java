@@ -75,15 +75,6 @@ public class BugTests extends AbstractAJAXSession {
 
     private Random rand;
 
-    /**
-     * Default constructor.
-     * 
-     * @param name Name of the test.
-     */
-    public BugTests(final String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

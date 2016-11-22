@@ -51,6 +51,7 @@ package com.openexchange.webdav.xml.contact;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -74,12 +75,8 @@ public class Bug15051Test extends AbstractWebDAVSession {
     private AJAXClient client2;
     private Contact contact;
 
-    public Bug15051Test() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folder = client.getFolderTools().getDefaultContactFolder();

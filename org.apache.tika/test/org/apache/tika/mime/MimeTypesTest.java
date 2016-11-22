@@ -14,17 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.tika.mime;
 
 import static org.apache.tika.mime.MediaType.OCTET_STREAM;
 import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
-import org.junit.Test;
-import org.junit.After;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class MimeTypesTest {
+
     private MimeTypes types;
 
     private MediaTypeRegistry registry;
@@ -35,7 +40,8 @@ public class MimeTypesTest {
 
     private MimeType html;
 
-    protected void setUp() throws MimeTypeException {
+    @Before
+    public void setUp() throws MimeTypeException {
         types = new MimeTypes();
         registry = types.getMediaTypeRegistry();
         binary = types.forName("application/octet-stream");
@@ -45,8 +51,8 @@ public class MimeTypesTest {
         types.setSuperType(html, TEXT_PLAIN);
     }
 
-         @Test
-     public void testForName() throws MimeTypeException {
+    @Test
+    public void testForName() throws MimeTypeException {
         assertEquals(text, types.forName("text/plain"));
         assertEquals(text, types.forName("TEXT/PLAIN"));
 
@@ -58,15 +64,15 @@ public class MimeTypesTest {
         }
     }
 
-         @Test
-     public void testRegisteredMimes() throws MimeTypeException {
+    @Test
+    public void testRegisteredMimes() throws MimeTypeException {
         String dummy = "text/xxxxx";
         assertEquals(text, types.getRegisteredMimeType("text/plain"));
         assertNull(types.getRegisteredMimeType(dummy));
         assertNotNull(types.forName(dummy));
         assertEquals(dummy, types.forName("text/xxxxx").getType().toString());
         assertEquals(dummy, types.getRegisteredMimeType("text/xxxxx").getType().toString());
-        
+
         try {
             types.forName("invalid");
             fail("MimeTypeException not thrown on invalid type name");
@@ -75,15 +81,15 @@ public class MimeTypesTest {
         }
     }
 
-         @Test
-     public void testSuperType() throws MimeTypeException {
+    @Test
+    public void testSuperType() throws MimeTypeException {
         assertNull(registry.getSupertype(OCTET_STREAM));
         assertEquals(OCTET_STREAM, registry.getSupertype(TEXT_PLAIN));
         assertEquals(TEXT_PLAIN, registry.getSupertype(html.getType()));
-   }
+    }
 
-         @Test
-     public void testIsDescendantOf() {
+    @Test
+    public void testIsDescendantOf() {
         assertFalse(registry.isSpecializationOf(OCTET_STREAM, OCTET_STREAM));
         assertFalse(registry.isSpecializationOf(TEXT_PLAIN, TEXT_PLAIN));
         assertFalse(registry.isSpecializationOf(html.getType(), html.getType()));
@@ -98,8 +104,8 @@ public class MimeTypesTest {
         assertFalse(registry.isSpecializationOf(OCTET_STREAM, TEXT_PLAIN));
     }
 
-         @Test
-     public void testCompareTo() {
+    @Test
+    public void testCompareTo() {
         assertTrue(binary.compareTo(binary) == 0);
         assertTrue(binary.compareTo(text) != 0);
         assertTrue(binary.compareTo(html) != 0);

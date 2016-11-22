@@ -115,9 +115,8 @@ public class AppointmentBugTests extends CalendarTest {
     private static int userid = 11; // bishoph
     public static int contextid = 1;
 
-    @Override
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         Init.startServer();
         final EventConfigImpl event = new EventConfigImpl();

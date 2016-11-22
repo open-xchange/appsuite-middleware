@@ -138,7 +138,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         final Calendar c = Calendar.getInstance();

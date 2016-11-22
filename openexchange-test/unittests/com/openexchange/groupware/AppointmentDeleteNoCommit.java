@@ -80,7 +80,7 @@ public class AppointmentDeleteNoCommit {
     private static boolean init = false;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         AppointmentDeleteNoCommit.userid = getUserId();
