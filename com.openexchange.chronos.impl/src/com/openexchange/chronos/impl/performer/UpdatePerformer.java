@@ -175,9 +175,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 }
                 /*
                  * reload the newly created exception as 'original' & perform the update
+                 * recurrence rule is forcibly ignored during update to satisfy UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
                  */
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
-                updateEvent(newExceptionEvent, updatedEvent);
+                updateEvent(newExceptionEvent, updatedEvent, EventField.RECURRENCE_RULE);
                 addChangeExceptionDate(originalEvent, recurrenceID);
                 result.addCreation(new CreateResultImpl(loadEventData(newExceptionEvent.getId())));
             }
@@ -194,12 +195,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
     }
 
-    private void updateEvent(Event originalEvent, Event updatedEvent) throws OXException {
+    private void updateEvent(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
         /*
          * update event data
          */
         boolean wasUpdated = false;
-        ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent);
+        ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent, ignoredFields);
         if (null != eventUpdate) {
             /*
              * check for conflicts
@@ -379,11 +380,16 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         return false;
     }
 
-    private ItemUpdate<Event, EventField> prepareEventUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+    private ItemUpdate<Event, EventField> prepareEventUpdate(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
         /*
          * determine & check modified fields
          */
         Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, updatedEvent);
+        if (null != ignoredFields && 0 < ignoredFields.length) {
+            for (EventField ignoredField : ignoredFields) {
+                EventMapper.getInstance().get(ignoredField).remove(eventUpdate);
+            }
+        }
         EventField[] updatedFields = EventMapper.getInstance().getAssignedFields(eventUpdate);
         if (0 == updatedFields.length) {
             // TODO or throw?

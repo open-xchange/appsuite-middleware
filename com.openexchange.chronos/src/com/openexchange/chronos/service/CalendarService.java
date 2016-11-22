@@ -148,6 +148,11 @@ public interface CalendarService {
 
     /**
      * Gets a list of events.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
      *
      * @param session The calendar session
      * @param folderID The identifier of the folder representing the current user's calendar view
@@ -158,6 +163,16 @@ public interface CalendarService {
 
     /**
      * Gets all events in a specific calendar folder.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * </ul>
      *
      * @param session The calendar session
      * @param folderID The identifier of the folder to get the events from
@@ -167,6 +182,15 @@ public interface CalendarService {
 
     /**
      * Gets all events of the session's user.
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * </ul>
      *
      * @param session The calendar session
      * @return The events
@@ -209,12 +233,65 @@ public interface CalendarService {
      */
     UpdatesResult getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
 
+    /**
+     * Creates a new event.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param event The event data to create
+     * @return The create result
+     */
     CalendarResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;
 
+    /**
+     * Updates an existing event.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to update
+     * @param event The event data to update
+     * @return The update result
+     */
     CalendarResult updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
 
+    /**
+     * Updates a specific attendee of an existing event.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to update
+     * @param attendee The attendee to update
+     * @return The update result
+     */
     CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee) throws OXException;
 
+    /**
+     * Deletes one or more existing events.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param eventIDs The identifiers of the events to delete
+     * @return The delete result
+     */
     Map<EventID, CalendarResult> deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
 
 }
