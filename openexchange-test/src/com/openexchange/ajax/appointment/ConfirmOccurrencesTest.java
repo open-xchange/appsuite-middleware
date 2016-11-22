@@ -171,6 +171,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         exception.setRecurrencePosition(this.occurrence);
         exception.setTitle(appointment.getTitle() + " - Exception");
         exception.setLastModified(new Date(Long.MAX_VALUE));
+        exception.setIgnoreConflicts(true);
         ctm.update(exception);
         appointment.setLastModified(exception.getLastModified());
 
@@ -241,6 +242,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         exception.setRecurrencePosition(this.occurrence);
         exception.setTitle(appointment.getTitle() + " - Exception");
         exception.setLastModified(new Date(Long.MAX_VALUE));
+        exception.setIgnoreConflicts(true);
         ctm.update(exception);
         appointment.setLastModified(exception.getLastModified());
 
