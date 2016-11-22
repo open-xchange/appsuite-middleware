@@ -7,7 +7,10 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/jTidy.jar
-Import-Package: com.openexchange.config,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.config,
  com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.java,

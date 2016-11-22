@@ -59,6 +59,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -415,9 +416,6 @@ public enum Utilities {
         if (source.containsUserFlags()) {
             composedMail.addUserFlags(source.getUserFlags());
         }
-        if (source.containsUserFlags()) {
-            composedMail.addUserFlags(source.getUserFlags());
-        }
         if (source.containsHeaders()) {
             composedMail.addHeaders(source.getHeaders());
         }
@@ -435,9 +433,6 @@ public enum Utilities {
         }
         if (source.containsReplyTo()) {
             composedMail.addReplyTo(source.getReplyTo());
-        }
-        if (source.containsDispositionNotification()) {
-            composedMail.setDispositionNotification(source.getDispositionNotification());
         }
         if (source.containsDispositionNotification()) {
             composedMail.setDispositionNotification(source.getDispositionNotification());
@@ -468,6 +463,12 @@ public enum Utilities {
         }
         if (source.containsContentType()) {
             composedMail.setContentType(source.getContentType());
+        }
+        {
+            SecuritySettings securitySettings = source.getSecuritySettings();
+            if (null != securitySettings) {
+                composedMail.setSecuritySettings(securitySettings);
+            }
         }
         return composedMail;
     } // End of copyOfSourceMessage()

@@ -100,6 +100,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
@@ -821,6 +822,23 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                 Date date = new Date(jMail.getLong(MailJSONField.RECEIVED_DATE.getKey()));
                 int offset = timeZone.getOffset(date.getTime());
                 composedMail.setReceivedDate(new Date(jMail.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
+            }
+            /*
+             * Security settings
+             */
+            {
+                JSONObject jSecuritySettings = jMail.optJSONObject("security");
+                if (null != jSecuritySettings) {
+                    SecuritySettings settings = SecuritySettings.builder()
+                        .encrypt(jSecuritySettings.optBoolean("encrypt", false))
+                        .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
+                        .sign(jSecuritySettings.optBoolean("sign", false))
+                        .authentication(jSecuritySettings.optString("authentication", null))
+                        .build();
+                    if (settings.anythingSet()) {
+                        composedMail.setSecuritySettings(settings);
+                    }
+                }
             }
             /*
              * Drop special "x-original-headers" header

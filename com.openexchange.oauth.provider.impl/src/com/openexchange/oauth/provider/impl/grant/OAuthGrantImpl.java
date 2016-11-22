@@ -64,18 +64,14 @@ import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 public class OAuthGrantImpl implements Grant {
 
     private final int contextId;
-
     private final int userId;
-
     private String accessToken;
-
     private String refreshToken;
-
     private Date expirationDate;
-
     private Scope scope;
+    private String clientId;
 
-    public OAuthGrantImpl(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) {
+    public OAuthGrantImpl(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate, String clientId) {
         super();
         contextId = authCodeInfo.getContextId();
         userId = authCodeInfo.getUserId();
@@ -83,6 +79,7 @@ public class OAuthGrantImpl implements Grant {
         this.refreshToken = refreshToken;
         this.expirationDate = expirationDate;
         scope = authCodeInfo.getScope();
+        this.clientId = clientId;
     }
 
     public OAuthGrantImpl(StoredGrant storedGrant) {
@@ -93,6 +90,7 @@ public class OAuthGrantImpl implements Grant {
         refreshToken = storedGrant.getRefreshToken().getToken();
         expirationDate = storedGrant.getExpirationDate();
         scope = storedGrant.getScope();
+        clientId = storedGrant.getClientId();
     }
 
     /**
@@ -106,7 +104,9 @@ public class OAuthGrantImpl implements Grant {
         refreshToken = grant.getRefreshToken();
         expirationDate = grant.getExpirationDate();
         scope = grant.getScope();
+        clientId = grant.getClientId();
     }
+
     @Override
     public int getContextId() {
         return contextId;
@@ -137,6 +137,11 @@ public class OAuthGrantImpl implements Grant {
         return scope;
     }
 
+    @Override
+    public String getClientId() {
+        return clientId;
+    }
+
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
@@ -151,6 +156,10 @@ public class OAuthGrantImpl implements Grant {
 
     public void setScope(Scope scope) {
         this.scope = scope;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
 }

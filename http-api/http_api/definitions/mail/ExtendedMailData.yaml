@@ -1,0 +1,18 @@
+type: object
+properties:
+  $ref: ./RawMailData.yaml
+  answered:
+    type: string
+    description: Special field to sort mails by answered status.
+  forwarded:
+    type: string
+    description: Special field to sort mails by forwarded status. Note that mail service needs either support a system flag or a $Forwarded user flag
+  draft:
+    type: string
+    description: Special field to sort mails by draft flag.
+  flagged:
+    type: string
+    description: Special field to sort mails by flagged status.
+  date:
+    type: string
+    description: The date of a mail message. As configured, either the internal received date or mail's sent date (as given by "Date" header). Supposed to be the replacement for sent_date (609) or received_date (610) to let the Open-Xchange Middleware decide based on configuration for com.openexchange.mail.preferSentDate property what to consider. Supported at both - columns parameter and sort parameter.

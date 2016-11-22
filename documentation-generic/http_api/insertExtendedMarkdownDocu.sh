@@ -11,5 +11,5 @@ sed -e '/OX_MARKDOWN_APPENDIX/r../backend/documentation-generic/http_api/documen
 cp ./html/index.html tmp.html
 sed -e 's/<!--OX_MARKDOWN_TITLE-->/OX HTTP API/' > ./html/index.html < tmp.html
 cp ./html/index.html tmp.html
-sed -e 's/<!--OX_MARKDOWN_SWAGGER_FOLDER-->/http_api/' > ./html/index.html < tmp.html
+sed -e 's/<!--OX_MARKDOWN_SWAGGER_FOLDER-->/http/' > ./html/index.html < tmp.html
 rm tmp.html

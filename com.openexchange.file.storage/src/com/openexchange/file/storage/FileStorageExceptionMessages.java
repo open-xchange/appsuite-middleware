@@ -179,6 +179,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // File name must not end with a dot or whitespace.
     public static final String WHITESPACE_END_MSG = "File name must not end with a dot or whitespace.";
+    
+    // A file with that name already exists.
+    public static final String FILE_ALREADY_EXISTS = "A file with that name already exists.";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

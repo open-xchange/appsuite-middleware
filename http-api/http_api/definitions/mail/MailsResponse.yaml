@@ -2,5 +2,7 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    type: object
+    type: array
     description: Array of mails. Each mail is described as an array itself.
+    items: 
+      $ref: "#/definitions/ExtendedMailData"

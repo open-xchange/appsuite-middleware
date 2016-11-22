@@ -1276,6 +1276,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // change cached admin credentials if necessary
         if (isContextAdmin && usrdata.getPassword() != null) {
             final Credentials cauth = cache.getAdminCredentials(ctx);
+            if(cauth==null){
+                // change via master credentials and no admin credentials in cache
+                return;
+            }
+
             final String mech = cache.getAdminAuthMech(ctx);
             if ("{CRYPT}".equalsIgnoreCase(mech)) {
                 try {

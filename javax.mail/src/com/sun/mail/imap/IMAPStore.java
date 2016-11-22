@@ -1106,7 +1106,7 @@ public class IMAPStore extends Store
 				String user, String password)
 				throws ProtocolException {
 	// this list must match the "if" statements below
-	String defaultAuthenticationMechanisms = "PLAIN LOGIN NTLM XOAUTH2";
+	String defaultAuthenticationMechanisms = "PLAIN LOGIN NTLM XOAUTH2 OAUTHBEARER";
 
 	// setting mail.imap.auth.mechanisms controls which mechanisms will
 	// be used, and in what order they'll be considered.  only the first
@@ -1158,6 +1158,8 @@ public class IMAPStore extends Store
 		p.authntlm(authzid, user, password);
 	    else if (m.equals("XOAUTH2"))
 		p.authoauth2(user, password);
+        else if (m.equals("OAUTHBEARER"))
+        p.authoauthbearer(user, password);
 	    else {
 		logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
 		continue;

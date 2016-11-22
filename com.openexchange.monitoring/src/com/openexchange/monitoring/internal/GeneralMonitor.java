@@ -53,7 +53,7 @@ import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import com.openexchange.monitoring.MonitoringInfo;
-import com.openexchange.monitoring.services.MonitoringServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -63,10 +63,12 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GeneralMonitor.class);
 
-    private MBeanServer server;
+    private final ServiceLookup services;
+    private volatile MBeanServer server;
 
-    public GeneralMonitor() {
+    public GeneralMonitor(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -101,7 +103,7 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 
     @Override
     public int getNumberOfActiveSessions() {
-        final SessiondService sessiondService = MonitoringServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+        SessiondService sessiondService = services.getService(SessiondService.class);
         if (sessiondService != null) {
             return sessiondService.getNumberOfActiveSessions();
         }
@@ -139,6 +141,11 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 
     @Override
     public Integer getNbObjects() {
+        MBeanServer server = this.server;
+        if (null == server) {
+            return Integer.valueOf(-1);
+        }
+
         try {
             return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());
         } catch (final Exception e) {
