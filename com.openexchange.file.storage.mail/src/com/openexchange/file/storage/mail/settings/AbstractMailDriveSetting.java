@@ -128,7 +128,7 @@ public abstract class AbstractMailDriveSetting implements PreferencesItemService
                 try {
                     int contextId = userConfig.getContext().getContextId();
                     int userId = userConfig.getUserId();
-                    return userConfig.hasWebMail() && mailDriveService.isEnabledFor(userId, contextId) && (null != getFullName(userId, contextId));
+                    return userConfig.hasWebMail() && userConfig.hasInfostore() && mailDriveService.isEnabledFor(userId, contextId) && (null != getFullName(userId, contextId));
                 } catch (OXException e) {
                     // Failed to check
                     LOG.error("Failed to check Mail Drive availability", e);
