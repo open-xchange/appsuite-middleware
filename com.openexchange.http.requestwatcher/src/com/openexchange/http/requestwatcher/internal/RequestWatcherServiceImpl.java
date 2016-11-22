@@ -241,7 +241,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 trace.setStackTrace(stackTrace);
             }
             try {
-                logBuilder.append("Request with age ").append(ageInfo.sAge).append("ms (").append(exactly(entry.getAge())).append(") exceeds max. age of ").append(ageInfo.sMaxAge).append("ms (").append(exactly(requestMaxAge)).append(").") ;
+                logBuilder.append("Request with age ").append(ageInfo.sAge).append("ms (").append(exactly(entry.getAge(), true)).append(") exceeds max. age of ").append(ageInfo.sMaxAge).append("ms (").append(exactly(requestMaxAge, true)).append(").") ;
             } catch (Exception e) {
                 LOG.trace("", e);
                 logBuilder.append("Request with age ").append(ageInfo.sAge).append("ms exceeds max. age of ").append(ageInfo.sMaxAge).append("ms.");

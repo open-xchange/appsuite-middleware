@@ -277,7 +277,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     }
 
     private boolean checkNoQuota(String id) {
-        long quota = this.quota;
+        long quota = getQuota();
         if (quota == 0) {
             // Advertise no quota to listeners
             for (QuotaFileStorageListener listener : listeners) {
