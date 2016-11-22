@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -61,6 +62,8 @@ import org.apache.commons.httpclient.HttpException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -92,7 +95,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         this.sessionId = getSessionId();
         final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), sessionId);
@@ -116,7 +119,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         return FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false, parent, "NewInfostoreFolder" + System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         try {
             removeDocumentsAndFolders();

@@ -70,8 +70,8 @@ public class MessageParserTest {
         super();
     }
 
-    @Test
-    public void testForBug35683() {
+     @Test
+     public void testForBug35683() {
         try {
             JSONObject jMail = new JSONObject().put("from", new JSONArray().put(new JSONArray().put("Jane Doe").put("jane@barfoo.de")));
 

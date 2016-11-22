@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail.filter.tests.bug;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.LinkedList;
 import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;

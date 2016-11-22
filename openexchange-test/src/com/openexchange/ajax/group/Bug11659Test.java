@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group;
 
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;

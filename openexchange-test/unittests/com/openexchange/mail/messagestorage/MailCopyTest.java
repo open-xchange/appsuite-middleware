@@ -49,9 +49,15 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import javax.mail.MessagingException;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -64,8 +70,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public final class MailCopyTest extends MessageStorageTest {
 
     /**
-	 *
-	 */
+     *
+     */
     public MailCopyTest() {
         super();
     }
@@ -74,13 +80,11 @@ public final class MailCopyTest extends MessageStorageTest {
 
     private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
 
-    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM,
-        MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT,
-        MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC,
-        MailField.BCC, MailField.FOLDER_ID };
+    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };
 
     private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
+    @Test
     public void testMailCopyNotExistingMails() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -93,8 +97,7 @@ public final class MailCopyTest extends MessageStorageTest {
                 String[] tmpCopy = null;
                 try {
                     final long currentTimeMillis = System.currentTimeMillis();
-                    tmpCopy = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, new String[] {
-                        String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) }, false);
+                    tmpCopy = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, new String[] { String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) }, false);
                 } catch (final Exception e) {
                     fail("No exception should be thrown here");
                 }
@@ -110,6 +113,7 @@ public final class MailCopyTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailCopyNotExistingMailsMixed() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -121,8 +125,7 @@ public final class MailCopyTest extends MessageStorageTest {
                  */
                 String[] tmpCopy = null;
                 try {
-                    tmpCopy = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, new String[] {
-                        String.valueOf(System.currentTimeMillis()), uids[0] }, false);
+                    tmpCopy = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, new String[] { String.valueOf(System.currentTimeMillis()), uids[0] }, false);
                 } catch (final Exception e) {
                     fail("No exception should be thrown here");
                 }
@@ -138,6 +141,7 @@ public final class MailCopyTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailCopyToNotExistingFolder() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -156,6 +160,7 @@ public final class MailCopyTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailCopyFromNotExistingFolder() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -178,6 +183,7 @@ public final class MailCopyTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailCopy() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {

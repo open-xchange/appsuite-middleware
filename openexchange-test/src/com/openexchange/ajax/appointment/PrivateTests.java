@@ -51,6 +51,11 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -94,7 +99,7 @@ public class PrivateTests extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -221,7 +226,7 @@ public class PrivateTests extends AbstractAJAXSession {
         assertEquals("Missing data.", app.getLocation(), loaded.getLocation());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         client1.execute(new DeleteRequest(app));
         client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, folder));

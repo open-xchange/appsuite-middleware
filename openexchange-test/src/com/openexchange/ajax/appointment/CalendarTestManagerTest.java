@@ -50,10 +50,18 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -77,16 +85,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     private FolderObject testFolder;
 
-    /**
-     * Initializes a new {@link CalendarTestManagerTest}.
-     *
-     * @param name
-     */
-    public CalendarTestManagerTest() {
-        super();
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         calendarMgr = new CalendarTestManager(getClient());
@@ -95,7 +94,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         folderMgr.insertFolderOnServer(testFolder);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         calendarMgr.cleanUp();
         folderMgr.cleanUp();
@@ -105,7 +104,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
     protected Appointment generateAppointment() {
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(testFolder.getObjectID());
-        appointment.setTitle(getName());
+        appointment.setTitle(this.getClass().getCanonicalName());
         appointment.setStartDate(new Date());
         appointment.setEndDate(new Date());
         return appointment;
@@ -189,7 +188,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
         Date beforeUpdate = appointment.getLastModified(); // TODO use global timestamp from ALL request
         Appointment update = calendarMgr.createIdentifyingCopy(appointment);
-        String updatedTitle = getName() + "2";
+        String updatedTitle = this.getClass().getCanonicalName() + "2";
         update.setTitle(updatedTitle);
         update.setIgnoreConflicts(true);
 
@@ -210,7 +209,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
     public void testGetAllInFolder() throws Exception {
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(testFolder.getObjectID());
-        appointment.setTitle(getName());
+        appointment.setTitle(this.getClass().getCanonicalName());
         appointment.setStartDate(D("12/02/1999 10:00"));
         appointment.setEndDate(D("12/02/1999 12:00"));
         appointment.setIgnoreConflicts(true);

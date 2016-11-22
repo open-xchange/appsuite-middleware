@@ -1,8 +1,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 
@@ -12,6 +14,7 @@ public class Bug19500Test_NewAppointmentRequestWeirdBehaviour extends ManagedApp
         super();
     }
 
+    @Test
     public void testNewappointmentsRequestConsistency() {
         Date start = D("yesterday");
         Date end = D("tomorrow");

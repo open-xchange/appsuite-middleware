@@ -50,6 +50,9 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.groupware.calendar.TimeTools.removeMilliseconds;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import org.junit.Test;
 import com.openexchange.groupware.tasks.Task;

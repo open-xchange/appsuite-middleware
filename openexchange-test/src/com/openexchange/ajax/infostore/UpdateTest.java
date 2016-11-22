@@ -1,6 +1,11 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;

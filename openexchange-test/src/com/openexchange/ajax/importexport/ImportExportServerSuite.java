@@ -49,39 +49,37 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * This suite is meant to be used with a running OX.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    ICalTestSuite.class,
+    VCardTestSuite.class,
+    Bug9475Test.class,
+    
+    //CSV
+    CSVImportExportServletTest.class,
+    Bug18482Test_ByteOrderMarkOnUtf8.class,
+    Bug20516Test.class,
+    Bug32200Test.class,
+    Bug33748Test.class,
+    Bug32994Test.class,
+    Bug34499Test.class,
+    Bug36687Test.class,
+    Bug36943Test.class,
+    
+    // Overall bug tests.
+    Bug6825Test.class,
+    Bug9209Test.class,
+    DistributionListExportTest.class,
+
+})
 public final class ImportExportServerSuite {
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.importexport.ImportExportServerSuite");
-        tests.addTest(ICalTestSuite.suite());
-
-        //VCARD
-        tests.addTest(VCardTestSuite.suite());
-        tests.addTestSuite(Bug9475Test.class);
-
-        //CSV
-        tests.addTestSuite(CSVImportExportServletTest.class);
-        tests.addTestSuite(Bug18482Test_ByteOrderMarkOnUtf8.class);
-        tests.addTestSuite(Bug20516Test.class);
-        tests.addTestSuite(Bug32200Test.class);
-        tests.addTestSuite(Bug33748Test.class);
-        tests.addTestSuite(Bug32994Test.class);
-        tests.addTestSuite(Bug34499Test.class);
-        tests.addTestSuite(Bug36687Test.class);
-        tests.addTestSuite(Bug36943Test.class);
-
-        // Overall bug tests.
-        tests.addTestSuite(Bug6825Test.class);
-        tests.addTestSuite(Bug9209Test.class);
-        tests.addTestSuite(DistributionListExportTest.class);
-        return tests;
-    }
 }

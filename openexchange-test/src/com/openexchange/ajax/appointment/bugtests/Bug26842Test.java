@@ -50,6 +50,8 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
@@ -108,7 +110,7 @@ public class Bug26842Test extends AbstractAJAXSession {
         assertEquals("Wrong participants.", client.getValues().getUserId(), appointment.getParticipants()[0].getIdentifier());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         ftm.cleanUp();

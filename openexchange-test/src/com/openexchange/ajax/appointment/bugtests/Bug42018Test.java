@@ -50,6 +50,8 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +77,6 @@ public class Bug42018Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -108,7 +109,6 @@ public class Bug42018Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
     public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();

@@ -1,6 +1,10 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -17,6 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -62,7 +69,7 @@ public class MailTest extends AbstractAJAXTest {
      * 
      * @see junit.framework.TestCase#setUp()
      */
-    @Override
+    @Before
     public void setUp() throws Exception {
         sessionId = getSessionId();
     }
@@ -72,7 +79,7 @@ public class MailTest extends AbstractAJAXTest {
      * 
      * @see junit.framework.TestCase#tearDown()
      */
-    @Override
+    @After
     public void tearDown() throws Exception {
         logout();
     }
@@ -245,6 +252,7 @@ public class MailTest extends AbstractAJAXTest {
 
     private static final String MAILTEXT = "This is mail text!<br>Next line<br/><br/>best regards,<br>Max Mustermann";
 
+    @Test
     public void testFail() {
         try {
             JSONObject jResp = null;
@@ -269,6 +277,7 @@ public class MailTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testSendSimpleMail() throws IOException, SAXException, Exception {
         JSONObject jResp = null;
         try {
@@ -302,6 +311,7 @@ public class MailTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testSendMailWithMultipleAttachment() throws IOException, SAXException, JSONException, Exception {
         JSONObject jResp = null;
         try {
@@ -331,6 +341,7 @@ public class MailTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testForwardMail() throws IOException, SAXException, JSONException, Exception {
         JSONObject jResp = null;
         String mailIdentifer = null;
@@ -369,6 +380,7 @@ public class MailTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testSendForwardMailWithAttachments() throws IOException, SAXException, JSONException, Exception {
         JSONObject jResp = null;
         String mailIdentifer = null;
@@ -409,10 +421,12 @@ public class MailTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testNewMailsInInbox() {
         assertTrue(true);
     }
 
+    @Test
     public void testGetMails() throws IOException, SAXException, JSONException, Exception {
         JSONObject jResp = null;
         final JSONObject mailObj = new JSONObject();
@@ -449,6 +463,7 @@ public class MailTest extends AbstractAJAXTest {
         assertTrue(jResp != null);
     }
 
+    @Test
     public void testGetMsgSrc() throws IOException, SAXException, JSONException, Exception {
         JSONObject jResp = null;
         final JSONObject mailObj = new JSONObject();
@@ -489,6 +504,7 @@ public class MailTest extends AbstractAJAXTest {
         assertFalse(jResp.has("error"));
     }
 
+    @Test
     public void testReplyMail() {
         assertTrue(true);
     }

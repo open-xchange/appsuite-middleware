@@ -50,6 +50,9 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;

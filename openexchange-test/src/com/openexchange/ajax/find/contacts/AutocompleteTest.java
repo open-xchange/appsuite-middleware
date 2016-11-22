@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;

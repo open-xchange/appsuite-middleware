@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.settings.extensions;
 
 import java.util.ArrayList;
@@ -62,11 +63,10 @@ public class MockServiceRegistry implements ServicePublisher {
     private final Map<Class, List> added = new HashMap<Class, List>();
     private final Map<Class, List> removed = new HashMap<Class, List>();
 
-
     @Override
-    public void publishService(final Class clazz,final Object service) {
-        if(!clazz.isAssignableFrom(service.getClass())) {
-            throw new IllegalArgumentException("The service is not a "+clazz);
+    public void publishService(final Class clazz, final Object service) {
+        if (!clazz.isAssignableFrom(service.getClass())) {
+            throw new IllegalArgumentException("The service is not a " + clazz);
         }
         getAllServices(clazz).add(service);
         getAdded(clazz).add(service);
@@ -80,9 +80,9 @@ public class MockServiceRegistry implements ServicePublisher {
 
     @Override
     public void removeAllServices() {
-        for(final Class clazz : services.keySet()) {
+        for (final Class clazz : services.keySet()) {
             final List serviceList = services.get(clazz);
-            for(final Object service : serviceList) {
+            for (final Object service : serviceList) {
                 removeService(clazz, service);
             }
         }
@@ -90,7 +90,7 @@ public class MockServiceRegistry implements ServicePublisher {
 
     public List getAllServices(final Class clazz) {
         List retval = services.get(clazz);
-        if(retval == null) {
+        if (retval == null) {
             retval = new ArrayList();
             services.put(clazz, retval);
         }
@@ -99,7 +99,7 @@ public class MockServiceRegistry implements ServicePublisher {
 
     public List getAdded(final Class clazz) {
         List retval = added.get(clazz);
-        if(retval == null) {
+        if (retval == null) {
             retval = new ArrayList();
             added.put(clazz, retval);
         }
@@ -108,7 +108,7 @@ public class MockServiceRegistry implements ServicePublisher {
 
     public List getRemoved(final Class clazz) {
         List retval = removed.get(clazz);
-        if(retval == null) {
+        if (retval == null) {
             retval = new ArrayList();
             removed.put(clazz, retval);
         }

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;

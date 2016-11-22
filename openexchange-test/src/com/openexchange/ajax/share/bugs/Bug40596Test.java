@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;

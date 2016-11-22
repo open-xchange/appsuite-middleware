@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -81,7 +84,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -110,7 +113,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         insertResponse.fillObject(contact2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         //delete the two contacts
         DeleteRequest contactDeleteRequest = new DeleteRequest(contact1);

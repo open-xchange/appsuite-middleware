@@ -63,44 +63,44 @@ import com.openexchange.java.SimpleTokenizer;
  */
 public class AutoCompleteAdapterTest {
 
-    @Test
-    public void testDetectWildcard() throws Exception {
+     @Test
+     public void testDetectWildcard() throws Exception {
         String query = "hund wu?st hallo* ot*to d?d?* * hier";
         assertPatterns(query, "%");
     }
 
-    @Test
-    public void testExcludeDuplicatePatterns() throws Exception {
+     @Test
+     public void testExcludeDuplicatePatterns() throws Exception {
         String query = "hund wurst wurst hund hund hund wurst hund";
         assertPatterns(query, "hund%", "wurst%");
     }
 
-    @Test
-    public void testExcludeRedundantPatterns_1() throws Exception {
+     @Test
+     public void testExcludeRedundantPatterns_1() throws Exception {
         String query = "hund hundewurst hu hu husten hustenanfall";
         assertPatterns(query, "hu%");
     }
 
-    @Test
-    public void testExcludeRedundantPatterns_2() throws Exception {
+     @Test
+     public void testExcludeRedundantPatterns_2() throws Exception {
         String query = "hu*nd hundewurst hun husten hustenanfall";
         assertPatterns(query, "hu%nd%", "hun%", "husten%");
     }
 
-    @Test
-    public void testShrinkWildcards_1() throws Exception {
+     @Test
+     public void testShrinkWildcards_1() throws Exception {
         String query = "*********";
         assertPatterns(query, "%");
     }
 
-    @Test
-    public void testShrinkWildcards_2() throws Exception {
+     @Test
+     public void testShrinkWildcards_2() throws Exception {
         String query = "hu**n*****d*********";
         assertPatterns(query, "hu%n%d%");
     }
 
-    @Test
-    public void testShrinkWildcards_() throws Exception {
+     @Test
+     public void testShrinkWildcards_() throws Exception {
         String query = "hu**n**\\***d*********";
         assertPatterns(query, "hu%n%\\%%d%");
     }

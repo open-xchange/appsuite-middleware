@@ -61,12 +61,16 @@ import static com.openexchange.file.storage.File.Field.VERSION_COMMENT;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -74,9 +78,9 @@ import com.openexchange.file.storage.File;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileParserTest extends TestCase {
-
-    public void testParse() throws JSONException, OXException {
+public class FileParserTest {
+         @Test
+     public void testParse() throws JSONException, OXException {
         final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
         object.put("color_label", 12);
@@ -122,7 +126,8 @@ public class FileParserTest extends TestCase {
         assertEquals("This is the best version", file.getVersionComment());
     }
 
-    public void testFindFields() throws JSONException {
+         @Test
+     public void testFindFields() throws JSONException {
         final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
         object.put("color_label", 12);

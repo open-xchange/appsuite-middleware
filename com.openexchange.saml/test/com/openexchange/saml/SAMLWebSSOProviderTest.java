@@ -219,14 +219,14 @@ public class SAMLWebSSOProviderTest {
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
     }
 
-    @Test
-    public void testMetadata() throws Exception {
+     @Test
+     public void testMetadata() throws Exception {
         String metadataXML = provider.getMetadataXML();
         Assert.assertNotNull(metadataXML);
     }
 
-    @Test
-    public void testLoginRoundtrip() throws Exception {
+     @Test
+     public void testLoginRoundtrip() throws Exception {
         /*
          * Trigger AuthnRequest
          */
@@ -281,8 +281,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Test
-    public void testAutoLogin() throws Exception {
+     @Test
+     public void testAutoLogin() throws Exception {
         /*
          * Fake SAML cookie and try auto login
          */
@@ -324,8 +324,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), sessionMatcher.group(1));
     }
 
-    @Test
-    public void testSPInitiatedLogoutRoundtripPOST() throws Exception {
+     @Test
+     public void testSPInitiatedLogoutRoundtripPOST() throws Exception {
         /*
          * Create sim session
          */
@@ -393,8 +393,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), redirectParams.get("session"));
     }
 
-    @Test
-    public void testSPInitiatedLogoutRoundtripREDIRECT() throws Exception {
+     @Test
+     public void testSPInitiatedLogoutRoundtripREDIRECT() throws Exception {
         /*
          * Create sim session
          */
@@ -478,8 +478,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), redirectParams.get("session"));
     }
 
-    @Test
-    public void testIdPInitiatedLogout() throws Exception {
+     @Test
+     public void testIdPInitiatedLogout() throws Exception {
         /*
          * Create sim session
          */
@@ -549,8 +549,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNull(sessiondService.getSession(session.getSessionID()));
     }
 
-    @Test
-    public void testIdPInitiatedLogin() throws Exception {
+     @Test
+     public void testIdPInitiatedLogin() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         /*
@@ -580,8 +580,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Test
-    public void testIdPInitiatedLoginWithRelayState() throws Exception {
+     @Test
+     public void testIdPInitiatedLoginWithRelayState() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         String requestHost = "webmail2.example.com";
@@ -625,8 +625,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Test
-    public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
+     @Test
+     public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         String requestHost = "webmail2.example.com";
@@ -664,8 +664,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Test
-    public void testCachingHeadersOnInit() throws Exception {
+     @Test
+     public void testCachingHeadersOnInit() throws Exception {
         InitService initService = new InitService(config, provider, new DefaultExceptionHandler(), new TestLoginConfigurationLookup(), services);
         /*
          * login

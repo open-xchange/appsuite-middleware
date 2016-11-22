@@ -1,6 +1,9 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 
@@ -14,7 +17,7 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -37,18 +40,10 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
         manager.newAction(contact);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    //	public void testFindByLastName(){
-    //
-    //	}
-
     /**
      * This is how the GUI does a search
      */
+    @Test
     public void testFindWithContactSearchObject() {
         ContactSearchObject search = new ContactSearchObject();
         search.setFolder(folderID);

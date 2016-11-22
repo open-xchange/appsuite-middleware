@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;

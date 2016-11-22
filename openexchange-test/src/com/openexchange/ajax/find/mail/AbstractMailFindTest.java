@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.find.mail;
 
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;

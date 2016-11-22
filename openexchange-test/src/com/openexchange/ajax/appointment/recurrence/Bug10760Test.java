@@ -1,10 +1,12 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
@@ -24,7 +26,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         objectId = -1;

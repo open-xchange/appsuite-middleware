@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.mail.filter.tests.bug;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -132,7 +135,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
         assertFalse("No mail was found", null == mails);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (folder != null) {
             client.execute(new DeleteRequest(EnumAPI.OX_NEW, folder));

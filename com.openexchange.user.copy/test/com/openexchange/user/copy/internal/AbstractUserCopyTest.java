@@ -63,7 +63,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
@@ -91,8 +94,7 @@ import com.openexchange.user.copy.internal.user.UserMapping;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractUserCopyTest extends TestCase {
-    
+public abstract class AbstractUserCopyTest {    
     private static final String SELECT_ARBITRARY_FILESTORE =
         "SELECT " +
             "id " +
@@ -467,8 +469,9 @@ public abstract class AbstractUserCopyTest extends TestCase {
     /*
      * Tear down
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         dbService.backWritable(FIRST_CID, srcCon);
         dbService.backWritable(FIRST_CID, dstCon);
 

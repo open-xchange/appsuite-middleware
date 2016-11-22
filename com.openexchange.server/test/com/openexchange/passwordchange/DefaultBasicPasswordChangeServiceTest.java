@@ -107,8 +107,8 @@ public class DefaultBasicPasswordChangeServiceTest {
         PowerMockito.when(mockedServiceRegistry.getService(PasswordMechFactory.class)).thenReturn(factory);
     }
 
-    @Test
-    public void testPrepareUserUpdate_userHasPasswordMechSHA_returnUpdatedUserWithSHA() throws OXException {
+     @Test
+     public void testPrepareUserUpdate_userHasPasswordMechSHA_returnUpdatedUserWithSHA() throws OXException {
         PasswordChangeEvent event = new PasswordChangeEvent(session, context, "neuesPasswort", password);
         UserImpl origUser = new UserImpl();
         origUser.setPasswordMech(IPasswordMech.SHA);
@@ -121,8 +121,8 @@ public class DefaultBasicPasswordChangeServiceTest {
         Assert.assertNotNull("Password should not be empty", updatedUser.getUserPassword());
     }
 
-    @Test
-    public void testPrepareUserUpdate_passwordMechEmpty_useBcryptAsDefault() throws OXException {
+     @Test
+     public void testPrepareUserUpdate_passwordMechEmpty_useBcryptAsDefault() throws OXException {
         PasswordChangeEvent event = new PasswordChangeEvent(session, context, "neuesPasswort", password);
         UserImpl origUser = new UserImpl();
         origUser.setPasswordMech("");
@@ -134,8 +134,8 @@ public class DefaultBasicPasswordChangeServiceTest {
         Assert.assertNotNull("Password should not be empty", updatedUser.getUserPassword());
     }
 
-    @Test
-    public void testPrepareUserUpdate_newPasswordEmpty_setEmptyPassword() throws OXException {
+     @Test
+     public void testPrepareUserUpdate_newPasswordEmpty_setEmptyPassword() throws OXException {
         PasswordChangeEvent event = new PasswordChangeEvent(session, context, "", password);
         UserImpl origUser = new UserImpl();
         UserImpl updatedUser = new UserImpl(origUser);

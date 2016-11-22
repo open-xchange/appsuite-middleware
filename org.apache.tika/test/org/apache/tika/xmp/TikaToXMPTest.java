@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.OfficeOpenXMLCore;
@@ -31,7 +30,6 @@ import org.apache.tika.xmp.convert.MSOfficeXMLConverter;
 import org.apache.tika.xmp.convert.TikaToXMP;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.adobe.xmp.XMPConst;
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPIterator;

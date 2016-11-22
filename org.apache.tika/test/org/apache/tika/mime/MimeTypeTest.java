@@ -16,10 +16,13 @@
  */
 package org.apache.tika.mime;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class MimeTypeTest extends TestCase {
-
+public class MimeTypeTest {
     private MimeTypes types;
     private MimeType text;
 
@@ -29,7 +32,8 @@ public class MimeTypeTest extends TestCase {
     }
 
     /** Test MimeType constructor */
-    public void testConstrctor() {
+         @Test
+     public void testConstrctor() {
         // Missing name
         try {
             new MimeType(null);
@@ -39,7 +43,8 @@ public class MimeTypeTest extends TestCase {
         }
     }
 
-    public void testIsValidName() {
+         @Test
+     public void testIsValidName() {
         assertTrue(MimeType.isValid("application/octet-stream"));
         assertTrue(MimeType.isValid("text/plain"));
         assertTrue(MimeType.isValid("foo/bar"));
@@ -63,7 +68,8 @@ public class MimeTypeTest extends TestCase {
     }
 
     /** Test MimeType setDescription() */
-    public void testSetDescription() {
+         @Test
+     public void testSetDescription() {
         try {
             text.setDescription(null);
             fail("Expected IllegalArgumentException");

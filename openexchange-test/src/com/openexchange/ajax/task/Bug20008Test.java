@@ -2,6 +2,8 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.L;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.util.TimeZone;
 import org.junit.After;
@@ -17,7 +19,6 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
-import junit.framework.AssertionFailedError;
 
 public class Bug20008Test extends AbstractAJAXSession {
 
@@ -64,7 +65,7 @@ public class Bug20008Test extends AbstractAJAXSession {
         try {
             UpdateResponse response = client.execute(req);
             task.setLastModified(response.getTimestamp());
-        } catch (AssertionFailedError e) {
+        } catch (Exception e) {
             fail("Deleting task attributes actualDuration, targetDuration, actualCosts, targetCosts failed!");
         }
         GetRequest request = new GetRequest(task);

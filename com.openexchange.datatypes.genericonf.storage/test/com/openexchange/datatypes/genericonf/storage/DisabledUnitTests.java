@@ -49,23 +49,18 @@
 
 package com.openexchange.datatypes.genericonf.storage;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link DisabledUnitTests}
  * FIXME Setup MySQL to run this tests.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    MySQLGenericConfigurationStorageTest.class
+})
 public final class DisabledUnitTests {
 
-    public DisabledUnitTests() {
-        super();
-    }
-
-    public static final Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MySQLGenericConfigurationStorageTest.class);
-        return tests;
-    }
 }

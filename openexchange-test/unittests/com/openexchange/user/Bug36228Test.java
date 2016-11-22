@@ -49,8 +49,12 @@
 
 package com.openexchange.user;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -67,8 +71,6 @@ import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.test.TestInit;
-import junit.framework.TestCase;
-
 
 /**
  * {@link Bug36228Test}
@@ -76,7 +78,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.6.2
  */
-public class Bug36228Test extends TestCase {
+public class Bug36228Test {
 
     private static boolean init;
     private final String NEW_NAME = "testBug36228";
@@ -87,10 +89,8 @@ public class Bug36228Test extends TestCase {
     private Contact contact;
     private String oldName;
 
-
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         TestInit.loadTestProperties();
         if (!init) {
             Init.startServer();
@@ -105,16 +105,16 @@ public class Bug36228Test extends TestCase {
         user = UserStorage.getInstance().getUser(userId, context);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != oldName) {
             Contact update = new Contact();
             update.setSurName(oldName);
             cs.updateUser(createSession(user, context), String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID), String.valueOf(contact.getObjectID()), update, new Date());
         }
-        super.tearDown();
     }
 
+    @Test
     public void testBug36228() throws Exception {
         Session session = createSession(user, context);
         contact = cs.getUser(session, user.getId());

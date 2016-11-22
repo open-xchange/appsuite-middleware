@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.conversion;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.InputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
 import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.Executor;
@@ -92,6 +96,7 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testVCardImport() throws Throwable {
         final String[] mailFolderAndMailID;
         try {

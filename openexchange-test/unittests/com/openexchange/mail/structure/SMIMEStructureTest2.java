@@ -49,11 +49,15 @@
 
 package com.openexchange.mail.structure;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.configuration.MailConfig.Property;
 import com.openexchange.mail.AbstractMailTest;
@@ -87,6 +91,7 @@ public class SMIMEStructureTest2 extends AbstractMailTest {
         baos.close();
     }
 
+    @Test
     public void testMIMEStructure() {
         try {
             getSession();

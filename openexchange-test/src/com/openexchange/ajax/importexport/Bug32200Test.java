@@ -1,8 +1,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.CSVExportRequest;
 import com.openexchange.ajax.importexport.actions.CSVExportResponse;
@@ -28,6 +33,7 @@ public class Bug32200Test extends AbstractManagedContactTest {
         super();
     }
 
+    @Test
     public void testImportCategories() throws Exception {
         String categories = "Wichtig,Firma,Neu";
         String csv = "\"Sur name\",\"Given name\",\"Email 1\",\"Categories\"\n" + "\"Walter\",\"Otto\",\"otto.walter@example.com\",\"" + categories + "\"\n";
@@ -43,6 +49,7 @@ public class Bug32200Test extends AbstractManagedContactTest {
         assertEquals("wrong categories imported", categories, contact.getCategories());
     }
 
+    @Test
     public void testExportCategories() throws Exception {
         String categories = "Unwichtig,Privat,Alt";
         Contact contact = generateContact(getClass().getName());

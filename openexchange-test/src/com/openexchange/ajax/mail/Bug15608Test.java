@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail;
 
 import static com.openexchange.mail.MailListField.FLAGS;
 import static com.openexchange.mail.MailListField.ID;
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import org.junit.After;

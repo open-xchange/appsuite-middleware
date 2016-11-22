@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -79,7 +82,7 @@ public class Bug41184Test extends ShareTest {
 
     private AJAXClient client2;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(User.User2);

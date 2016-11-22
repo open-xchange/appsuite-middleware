@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -60,6 +62,9 @@ import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -96,7 +101,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
      *
      * @see junit.framework.TestCase#setUp()
      */
-    @Override
+    @Before
     public void setUp() throws Exception {
         sessionId = getSessionId();
     }
@@ -106,7 +111,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
      *
      * @see junit.framework.TestCase#tearDown()
      */
-    @Override
+    @After
     public void tearDown() throws Exception {
         logout();
     }
@@ -179,6 +184,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testUploadFile() {
         try {
             final File[] fa = { createTempFile(), createTempFile(), createTempFile() };
@@ -197,6 +203,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
         }
     }
 
+    @Test
     public void testGetUploadedFile() {
         try {
             final File[] fa = { createTempFile() };

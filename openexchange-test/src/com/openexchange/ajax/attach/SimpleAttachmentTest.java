@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.attach;
 
+import org.junit.Test;
+
 public class SimpleAttachmentTest extends AbstractAttachmentTest {
 
     public SimpleAttachmentTest() {
@@ -75,38 +77,47 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
         return 22;
     }
 
+    @Test
     public void testMultiple() throws Exception {
         doMultiple();
     }
 
+    @Test
     public void testDetach() throws Exception {
         doDetach();
     }
 
+    @Test
     public void testUpdates() throws Exception {
         doUpdates();
     }
 
+    @Test
     public void testAll() throws Exception {
         doAll();
     }
 
+    @Test
     public void testGet() throws Exception {
         doGet();
     }
 
+    @Test
     public void testDocument() throws Exception {
         doDocument();
     }
 
+    @Test
     public void testList() throws Exception {
         doList();
     }
 
+    @Test
     public void testQuota() throws Exception {
         doQuota();
     }
     /*
+     * @Test
      * public void testMany() throws Exception {
      * while(true) {
      * upload();
@@ -114,6 +125,7 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
      * }
      */
 
+    @Test
     public void testDatasource() throws Exception {
         doDatasource();
     }

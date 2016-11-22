@@ -50,7 +50,12 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.Arrays;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -79,7 +84,7 @@ public class Bug15354Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -97,7 +102,7 @@ public class Bug15354Test extends AbstractAJAXSession {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         for (int i = 0; i < writer.length; i++) {
             writer[i].stop();

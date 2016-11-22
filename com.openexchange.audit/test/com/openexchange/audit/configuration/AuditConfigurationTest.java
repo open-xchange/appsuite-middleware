@@ -63,7 +63,6 @@ import com.openexchange.audit.services.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 
-
 /**
  * Unit tests for {@link AuditConfiguration}
  *
@@ -97,8 +96,7 @@ public class AuditConfigurationTest {
     public void testGetFileAccessLogging_ServiceAvailableAndConfiguredTrue_ReturnTrue() throws OXException {
         PowerMockito.mockStatic(Services.class);
         Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
-        Mockito.when(this.configurationService.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true")).thenReturn(
-            "true");
+        Mockito.when(this.configurationService.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true")).thenReturn("true");
 
         boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
         Assert.assertTrue(fileAccessLogging);

@@ -1,8 +1,11 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -18,10 +21,12 @@ public class Bug10733Test extends AppointmentTest {
         super();
     }
 
+    @Test
     public void testDummy() {
 
     }
 
+    @Test
     public void testBug10733() throws Exception {
         final StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("testBug10733");

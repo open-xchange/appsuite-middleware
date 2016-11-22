@@ -49,6 +49,8 @@
 
 package com.openexchange.test.osgi;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.LoginTest;
@@ -61,13 +63,6 @@ import com.openexchange.ajax.LoginTest;
 public final class BundleTestConfiguration extends AbstractBundleTest {
 
     private static final String BUNDLE_ID = "com.openexchange.configread";
-
-    /**
-     * Initializes a new {@link BundleTestConfiguration}
-     */
-    public BundleTestConfiguration(final String name) {
-        super();
-    }
 
     @Test
     public void testConfigurationAbsence() {

@@ -1,8 +1,10 @@
 
 package com.openexchange.webdav;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
+import org.junit.Test;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
@@ -21,11 +23,7 @@ public class ICalTest extends AbstractWebdavTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testUpload() throws Exception {
         final WebRequest initRequest = new GetMethodWebRequest(PROTOCOL + hostName + ICAL_URL);
         initRequest.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
@@ -40,6 +38,7 @@ public class ICalTest extends AbstractWebdavTest {
         assertEquals(200, resp.getResponseCode());
     }
 
+    @Test
     public void testDownload() throws Exception {
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + ICAL_URL);
         req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));

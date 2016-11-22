@@ -49,9 +49,13 @@
 
 package com.openexchange.subscribe.google;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
@@ -81,6 +85,7 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
         super();
     }
 
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         calendarMgr = new CalendarTestManager(client);

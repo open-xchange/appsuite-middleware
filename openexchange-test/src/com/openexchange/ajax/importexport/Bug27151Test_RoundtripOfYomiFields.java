@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.VCardExportRequest;
 import com.openexchange.ajax.importexport.actions.VCardExportResponse;
@@ -68,6 +71,7 @@ public class Bug27151Test_RoundtripOfYomiFields extends AbstractManagedContactTe
         super();
     }
 
+    @Test
     public void testShouldImportXPhoneticAsYomiField() throws Exception, Exception, Exception {
         contact = ContactTestManager.generateFullContact(folderID);
         contact.setYomiFirstName("YomiFirstName1");

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.After;

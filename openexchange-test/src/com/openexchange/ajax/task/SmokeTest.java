@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.L;
+import static org.junit.Assert.assertTrue;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;

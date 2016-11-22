@@ -50,10 +50,16 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -101,7 +107,7 @@ public class Bug33242Test extends AbstractAJAXSession {
      * 2.) User B (member of group) deletes single occurrence.
      */
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
@@ -308,7 +314,7 @@ public class Bug33242Test extends AbstractAJAXSession {
         ctm.delete(single);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
         exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());

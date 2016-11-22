@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -78,7 +82,7 @@ public class Bug44891Test extends AbstractInfostoreTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         folder = generateInfostoreFolder("TestBug44891");
@@ -87,7 +91,7 @@ public class Bug44891Test extends AbstractInfostoreTest {
         resp.fillObject(folder);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != folder) {
             DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, folder);

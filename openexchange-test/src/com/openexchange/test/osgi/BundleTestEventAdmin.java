@@ -49,6 +49,9 @@
 
 package com.openexchange.test.osgi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -83,13 +86,6 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
     private static final String BUNDLE_ID = "org.eclipse.equinox.event";
 
     private static final String APPOINTMENT_URL = "/ajax/calendar";
-
-    /**
-     * Initializes a new {@link BundleTestEventAdmin}
-     */
-    public BundleTestEventAdmin(final String name) {
-        super();
-    }
 
     @Test
     public void testEventAdminAbsence() {

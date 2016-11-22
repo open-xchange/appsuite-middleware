@@ -18,11 +18,13 @@ package org.apache.tika.mime;
 
 import static org.apache.tika.mime.MediaType.OCTET_STREAM;
 import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class MimeTypesTest extends TestCase {
-
+public class MimeTypesTest {
     private MimeTypes types;
 
     private MediaTypeRegistry registry;
@@ -43,7 +45,8 @@ public class MimeTypesTest extends TestCase {
         types.setSuperType(html, TEXT_PLAIN);
     }
 
-    public void testForName() throws MimeTypeException {
+         @Test
+     public void testForName() throws MimeTypeException {
         assertEquals(text, types.forName("text/plain"));
         assertEquals(text, types.forName("TEXT/PLAIN"));
 
@@ -55,7 +58,8 @@ public class MimeTypesTest extends TestCase {
         }
     }
 
-    public void testRegisteredMimes() throws MimeTypeException {
+         @Test
+     public void testRegisteredMimes() throws MimeTypeException {
         String dummy = "text/xxxxx";
         assertEquals(text, types.getRegisteredMimeType("text/plain"));
         assertNull(types.getRegisteredMimeType(dummy));
@@ -71,13 +75,15 @@ public class MimeTypesTest extends TestCase {
         }
     }
 
-    public void testSuperType() throws MimeTypeException {
+         @Test
+     public void testSuperType() throws MimeTypeException {
         assertNull(registry.getSupertype(OCTET_STREAM));
         assertEquals(OCTET_STREAM, registry.getSupertype(TEXT_PLAIN));
         assertEquals(TEXT_PLAIN, registry.getSupertype(html.getType()));
    }
 
-    public void testIsDescendantOf() {
+         @Test
+     public void testIsDescendantOf() {
         assertFalse(registry.isSpecializationOf(OCTET_STREAM, OCTET_STREAM));
         assertFalse(registry.isSpecializationOf(TEXT_PLAIN, TEXT_PLAIN));
         assertFalse(registry.isSpecializationOf(html.getType(), html.getType()));
@@ -92,7 +98,8 @@ public class MimeTypesTest extends TestCase {
         assertFalse(registry.isSpecializationOf(OCTET_STREAM, TEXT_PLAIN));
     }
 
-    public void testCompareTo() {
+         @Test
+     public void testCompareTo() {
         assertTrue(binary.compareTo(binary) == 0);
         assertTrue(binary.compareTo(text) != 0);
         assertTrue(binary.compareTo(html) != 0);

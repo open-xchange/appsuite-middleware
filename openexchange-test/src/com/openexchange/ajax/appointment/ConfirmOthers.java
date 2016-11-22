@@ -50,9 +50,11 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -93,7 +95,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 

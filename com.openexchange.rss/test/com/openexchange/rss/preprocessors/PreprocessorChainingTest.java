@@ -1,10 +1,13 @@
 package com.openexchange.rss.preprocessors;
 
+import org.junit.Test;
 import com.openexchange.rss.RssResult;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class PreprocessorChainingTest extends TestCase {
-
+public class PreprocessorChainingTest {
 	class Pre1 extends AbstractPreprocessor {
 		@Override
 		public String innerProcess(String payload, RssResult rssResult) {
@@ -26,12 +29,14 @@ public class PreprocessorChainingTest extends TestCase {
 		}
 	}
 
-	public void testChaining(){
+	     @Test
+     public void testChaining(){
 		String actual = new Pre1().chain(new Pre2().chain(new Pre3())).process("", null);
 		assertEquals("ABC", actual);
 	}
 
-	public void testNoChain(){
+	     @Test
+     public void testNoChain(){
 		String actual = new Pre1().process("", null);
 		assertEquals("A", actual);
 	}

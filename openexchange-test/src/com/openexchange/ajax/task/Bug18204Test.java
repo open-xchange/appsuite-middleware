@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -81,7 +84,7 @@ public class Bug18204Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -112,7 +115,7 @@ public class Bug18204Test extends AbstractAJAXSession {
         assertFalse("Task contains Occurrences although it should not.", toCompare.containsOccurrence());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         client.execute(new DeleteRequest(task, true));
 

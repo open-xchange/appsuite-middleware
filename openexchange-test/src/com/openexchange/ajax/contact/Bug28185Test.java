@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -64,15 +67,6 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug28185Test extends AbstractManagedContactTest {
-
-    public Bug28185Test() {
-        super();
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
 
     @Test
     public void testWrongMemberReference() throws OXException {

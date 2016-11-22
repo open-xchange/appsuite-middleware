@@ -49,25 +49,21 @@
 
 package com.openexchange.publish.json;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    PublicationParserTest.class,
+    PublicationTargetWriterTest.class,
+    PublicationWriterTest.class,
+
+})
 public final class UnitTests {
 
-    public UnitTests() {
-        super();
-    }
-
-    public static final Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(PublicationParserTest.class);
-        tests.addTestSuite(PublicationTargetWriterTest.class);
-        tests.addTestSuite(PublicationWriterTest.class);
-        return tests;
-    }
 }

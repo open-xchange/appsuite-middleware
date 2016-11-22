@@ -4,6 +4,7 @@ package com.openexchange.webdav.xml.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -16,11 +17,7 @@ public class Bug8453Test extends AppointmentTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testBug8453() throws Exception {
         final TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
 

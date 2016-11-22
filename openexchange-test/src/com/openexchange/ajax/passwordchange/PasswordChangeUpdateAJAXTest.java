@@ -51,6 +51,7 @@ package com.openexchange.ajax.passwordchange;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -85,6 +86,7 @@ public final class PasswordChangeUpdateAJAXTest extends AbstractPasswordChangeAJ
      * @throws IOException
      * @throws OXException
      */
+    @Test
     public void testUpdate() throws OXException, IOException, SAXException, JSONException {
         /*
          * Perform update request

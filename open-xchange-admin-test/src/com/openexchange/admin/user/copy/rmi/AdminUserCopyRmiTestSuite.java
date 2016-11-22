@@ -67,7 +67,4 @@ import org.junit.runners.Suite.SuiteClasses;
 //temporary removal    MailAttachmentFolderTest.class
 })
 public class AdminUserCopyRmiTestSuite {
-
-    private AdminUserCopyRmiTestSuite() {
-    }
 }

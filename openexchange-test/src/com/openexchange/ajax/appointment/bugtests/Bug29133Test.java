@@ -2,7 +2,10 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -35,7 +38,7 @@ public class Bug29133Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
@@ -80,7 +83,7 @@ public class Bug29133Test extends AbstractAJAXSession {
         assertEquals("Wrong confirm status.", Appointment.ACCEPT, load.getUsers()[1].getConfirm());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctmA.cleanUp();
         super.tearDown();

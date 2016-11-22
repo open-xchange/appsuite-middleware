@@ -4,6 +4,7 @@ package com.openexchange.ajax.appointment;
 import java.util.Date;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
@@ -46,6 +47,7 @@ public class MoveTest extends AppointmentTest {
         super.tearDown();
     }
 
+    @Test
     public void testMove2PrivateFolder() throws Exception {
         final Appointment appointmentObj = new Appointment();
         final String date = String.valueOf(System.currentTimeMillis());
@@ -68,6 +70,7 @@ public class MoveTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
     }
 
+    @Test
     public void testMove2PublicFolder() throws Exception {
         final Appointment appointmentObj = new Appointment();
         final String date = String.valueOf(System.currentTimeMillis());

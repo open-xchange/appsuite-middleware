@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -72,6 +76,7 @@ public class ICalImportTest extends AbstractICalTest {
     }
 
     // Bug 12177    @Test
+    @Test
     public void testWarnings() throws JSONException, OXException, IOException, SAXException {
         StringBuilder icalText = new StringBuilder(1500);
         icalText.append("BEGIN:VCALENDAR\n");

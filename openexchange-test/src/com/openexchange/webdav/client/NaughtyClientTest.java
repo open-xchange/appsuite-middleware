@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.client;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,12 +61,14 @@ import org.apache.commons.httpclient.auth.BasicScheme;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
+import org.junit.Test;
 import com.openexchange.webdav.WebdavClientTest;
 
 public class NaughtyClientTest extends WebdavClientTest {
 
     // Bug 7642
     // TODO Rewrite this test to get it working again.    @Test
+    @Test
     public void testContentLengthTooLarge() throws Exception {
         contentLengthTest(20, 30);
     }
@@ -73,7 +76,8 @@ public class NaughtyClientTest extends WebdavClientTest {
     // Bug 7642
     // This doesn't work, as the webserver faithfully closes the stream after receiving content-length bytes.
     // In this case the file would be truncated to the claimed length.
-    //public void testContentLengthTooSmall() throws Exception {
+    //     @Test
+    //     public void testContentLengthTooSmall() throws Exception {
     //    contentLengthTest(20,10);
     //}
 

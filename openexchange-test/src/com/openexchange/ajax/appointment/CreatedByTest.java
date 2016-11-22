@@ -50,6 +50,9 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -83,7 +86,7 @@ public class CreatedByTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -111,7 +114,7 @@ public class CreatedByTest extends AbstractAJAXSession {
         assertEquals("Wrong created by", client.getValues().getUserId(), loadAppointment.getCreatedBy());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
 

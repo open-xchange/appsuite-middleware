@@ -18,18 +18,19 @@ package org.apache.tika.sax;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.tika.metadata.Metadata;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link XHTMLContentHandler} class.
  */
-public class XHTMLContentHandlerTest extends TestCase {
-
+public class XHTMLContentHandlerTest {
     private ContentHandler output;
 
     private XHTMLContentHandler xhtml;
@@ -45,7 +46,8 @@ public class XHTMLContentHandlerTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-188">TIKA-188</a>
      */
-    public void testExtraWhitespace() throws SAXException {
+         @Test
+     public void testExtraWhitespace() throws SAXException {
         xhtml.startDocument();
 
         xhtml.element("p", "foo");
@@ -83,7 +85,8 @@ public class XHTMLContentHandlerTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-394">TIKA-394</a>
      */
-    public void testWhitespaceWithOptions() throws Exception {
+         @Test
+     public void testWhitespaceWithOptions() throws Exception {
         xhtml.startDocument();
         xhtml.startElement("form");
         xhtml.startElement("select");
@@ -99,7 +102,8 @@ public class XHTMLContentHandlerTest extends TestCase {
         assertEquals("opt2", words[1]);
     }
     
-    public void testWhitespaceWithMenus() throws Exception {
+         @Test
+     public void testWhitespaceWithMenus() throws Exception {
         xhtml.startDocument();
         xhtml.startElement("menu");
         xhtml.element("li", "one");

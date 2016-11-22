@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.util.UUID;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.CopyRequest;
 import com.openexchange.ajax.contact.action.CopyResponse;
 import com.openexchange.ajax.fields.DataFields;
@@ -72,6 +76,7 @@ public class Bug34075Test extends AbstractManagedContactTest {
         super();
     }
 
+    @Test
     public void testAssignNewUidDuringCopy() throws Exception {
         /*
          * create contact

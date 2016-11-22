@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
 import org.junit.Test;
@@ -86,6 +88,7 @@ public class SearchTest extends AppointmentTest {
     }
 
     // Node 2652    @Test
+    @Test
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC };

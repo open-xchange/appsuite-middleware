@@ -49,11 +49,13 @@
 
 package com.openexchange.webdav;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Properties;
 import javax.xml.parsers.SAXParserFactory;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
+import org.junit.Before;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -62,12 +64,11 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.framework.Constants;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public abstract class AbstractWebdavTest extends TestCase {
+public abstract class AbstractWebdavTest {
 
     protected static final String PROTOCOL = "http://";
 
@@ -112,9 +113,8 @@ public abstract class AbstractWebdavTest extends TestCase {
     /**
      * {@inheritDoc}
      */
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         webCon = new WebConversation();
         secondWebCon = new WebConversation();
 

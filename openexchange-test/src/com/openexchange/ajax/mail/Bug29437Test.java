@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNull;
 import java.nio.charset.Charset;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.mail.actions.AttachmentRequest;
 import com.openexchange.ajax.mail.actions.AttachmentResponse;
@@ -85,6 +87,7 @@ public class Bug29437Test extends AbstractMailTest {
         folderAndId = importResp.getIds();
     }
 
+    @After
     public void tearDown() throws Exception {
         DeleteRequest deleteReq = new DeleteRequest(folderAndId, true);
         getClient().execute(deleteReq);

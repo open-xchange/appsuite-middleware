@@ -50,10 +50,14 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.framework.ListIDs.l;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -287,6 +291,7 @@ public class ListTest extends AppointmentTest {
     }
 
     // Node 2652    @Test
+    @Test
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC };
@@ -311,7 +316,7 @@ public class ListTest extends AppointmentTest {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm1.cleanUp();
         ftm.cleanUp();

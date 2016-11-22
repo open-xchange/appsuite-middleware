@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.json.JSONArray;
@@ -79,10 +83,6 @@ public class UserTest extends AbstractAJAXTest {
 
     public final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, Contact.INTERNAL_USERID, Contact.EMAIL1, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.DISPLAY_NAME
     };
-
-    public UserTest() {
-        super();
-    }
 
     private static final String USER_URL = "/ajax/contacts";
 

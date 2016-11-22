@@ -50,7 +50,10 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertFalse;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.ListIDs;
@@ -72,7 +75,7 @@ public class Bug32278Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -104,7 +107,7 @@ public class Bug32278Test extends AbstractAJAXSession {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();

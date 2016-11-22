@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.infostore.thirdparty.test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.util.List;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.infostore.thirdparty.AbstractInfostoreThirdpartyTest;
@@ -82,9 +85,15 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
         super();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        ThirdpartyTestEnvironment.getInstance().cleanup();
+    }
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        ThirdpartyTestEnvironment.getInstance().init();
         filestorages = getConnectedInfostoreId();
     }
 

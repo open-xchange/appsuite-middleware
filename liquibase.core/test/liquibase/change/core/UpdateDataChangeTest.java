@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
-
+import org.junit.Assert;
+import org.junit.Test;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
@@ -15,13 +16,10 @@ import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 public class UpdateDataChangeTest {
 
-    @Test
-    public void testChecksumCalculation() throws Exception {
+     @Test
+     public void testChecksumCalculation() throws Exception {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "\n" +
                 "<databaseChangeLog xmlns=\"urn:liquibase\"\n" +

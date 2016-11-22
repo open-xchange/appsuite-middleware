@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -78,12 +83,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
+    @After
     public void tearDown() throws Exception {
         deleteFoldersSilently(client, Collections.singletonList(folder.getObjectID()));
         super.tearDown();

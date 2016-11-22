@@ -49,14 +49,13 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.exception.OXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-
-import junit.framework.TestCase;
-
+import org.junit.After;
+import org.junit.Before;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.CollectionTest;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -64,7 +63,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
-public abstract class ActionTestCase extends TestCase {
+public abstract class ActionTestCase {
 
     protected List<WebdavPath> clean = new LinkedList<WebdavPath>();
 
@@ -72,13 +71,13 @@ public abstract class ActionTestCase extends TestCase {
 
     protected WebdavPath testCollection = null;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         TestWebdavFactoryBuilder.setUp();
         factory = TestWebdavFactoryBuilder.buildFactory();
         factory.beginRequest();
         try {
-            testCollection = new WebdavPath("public_infostore", "testCollection"+System.currentTimeMillis());
+            testCollection = new WebdavPath("public_infostore", "testCollection" + System.currentTimeMillis());
             final WebdavCollection coll = factory.resolveCollection(testCollection);
             coll.create();
             clean.add(coll.getUrl());
@@ -91,10 +90,10 @@ public abstract class ActionTestCase extends TestCase {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         try {
-            for(final WebdavPath url : clean) {
+            for (final WebdavPath url : clean) {
                 factory.resolveResource(url).delete();
             }
         } finally {
@@ -105,7 +104,7 @@ public abstract class ActionTestCase extends TestCase {
 
     public String getContent(final WebdavPath url) throws OXException, IOException {
         final WebdavResource res = factory.resolveResource(url);
-        final byte[] bytes = new byte[(int)res.getLength().longValue()];
+        final byte[] bytes = new byte[(int) res.getLength().longValue()];
         final InputStream in = res.getBody();
         in.read(bytes);
         return new String(bytes, com.openexchange.java.Charsets.UTF_8);

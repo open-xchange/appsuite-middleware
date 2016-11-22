@@ -49,9 +49,15 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
@@ -78,7 +84,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         ids = new ArrayList<>(2);
@@ -91,7 +97,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         ids.add(resp.getID());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (ids != null) {
             for (String id : ids) {

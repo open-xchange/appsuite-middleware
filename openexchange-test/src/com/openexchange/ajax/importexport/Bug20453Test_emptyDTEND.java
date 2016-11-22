@@ -1,8 +1,10 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -14,6 +16,7 @@ public class Bug20453Test_emptyDTEND extends ManagedAppointmentTest {
         super();
     }
 
+    @Test
     public void testWhatever() throws IOException, JSONException, OXException {
         final ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));
         assertFalse("Should not stumble over an empty DTEND; fragment", response.hasError());

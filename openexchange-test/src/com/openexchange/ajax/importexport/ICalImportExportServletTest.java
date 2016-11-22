@@ -52,6 +52,8 @@ package com.openexchange.ajax.importexport;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import org.json.JSONObject;
+import org.junit.Assert;
+import org.junit.Test;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -71,6 +73,7 @@ public class ICalImportExportServletTest extends AbstractImportExportServletTest
         super();
     }
 
+    @Test
     public void testIcalMessage() throws Exception {
         final InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
         final WebConversation webconv = getWebConversation();
@@ -81,7 +84,7 @@ public class ICalImportExportServletTest extends AbstractImportExportServletTest
             req.selectFile("file", "empty.ics", is, format.getMimeType());
             final WebResponse webRes = webconv.getResource(req);
             final JSONObject response = extractFromCallback(webRes.getText());
-            assertEquals("Must contain error ", "I_E-1100", response.optString("code"));
+            Assert.assertEquals("Must contain error ", "I_E-1100", response.optString("code"));
         } finally {
             removeFolder(folderId);
         }

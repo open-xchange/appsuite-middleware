@@ -49,12 +49,17 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -95,7 +100,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         types = new int[4];
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, String.valueOf(client.getValues().getPrivateInfostoreFolder()), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.TYPE, FolderObject.STANDARD_FOLDER }, true);
@@ -134,11 +139,6 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
             //                types[4] = FolderObject.TEMPLATES;
             //            }
         }
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

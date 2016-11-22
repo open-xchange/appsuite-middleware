@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;

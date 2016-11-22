@@ -25,13 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.apache.tika.exception.TikaException;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class LanguageProfilerBuilderTest extends TestCase {
-    /* Test members */
+public class LanguageProfilerBuilderTest {    /* Test members */
     private LanguageProfilerBuilder ngramProfile = null;
     private LanguageProfile langProfile = null;
     private final String profileName = "../tika-core/src/test/resources/org/apache/tika/language/langbuilder/"
@@ -42,7 +41,8 @@ public class LanguageProfilerBuilderTest extends TestCase {
     private final String LANGUAGE = "welsh";
     private final int maxlen = 1000;
 
-    public void testCreateProfile() throws TikaException, IOException, URISyntaxException {
+         @Test
+     public void testCreateProfile() throws TikaException, IOException, URISyntaxException {
         InputStream is =
                 LanguageProfilerBuilderTest.class.getResourceAsStream(corpusName);
         try {
@@ -58,7 +58,8 @@ public class LanguageProfilerBuilderTest extends TestCase {
         Assert.assertEquals(maxlen, ngramProfile.getSorted().size());
     }
 
-    public void testNGramProfile() throws IOException, TikaException, URISyntaxException {
+         @Test
+     public void testNGramProfile() throws IOException, TikaException, URISyntaxException {
         createLanguageProfile();
         LanguageIdentifier.addProfile(LANGUAGE, langProfile);
         LanguageIdentifier identifier = new LanguageIdentifier(langProfile);
@@ -94,7 +95,9 @@ public class LanguageProfilerBuilderTest extends TestCase {
         }
     }
 
-    public void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         File profile = new File(profileName + "." + FILE_EXTENSION);
         if (profile.exists())
             profile.delete();

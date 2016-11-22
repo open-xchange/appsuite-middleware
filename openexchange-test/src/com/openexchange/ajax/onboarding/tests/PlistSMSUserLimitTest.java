@@ -55,6 +55,7 @@ import static org.junit.Assert.fail;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
@@ -74,7 +75,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
      */
     public PlistSMSUserLimitTest() {}
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         //Wait until sms tokens are refreshed

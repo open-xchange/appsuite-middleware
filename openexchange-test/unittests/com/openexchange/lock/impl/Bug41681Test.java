@@ -49,11 +49,14 @@
 
 package com.openexchange.lock.impl;
 
+import static org.junit.Assert.fail;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
@@ -65,7 +68,7 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug41681Test extends TestCase {
+public class Bug41681Test {
 
     private CustomThreadPoolExecutorTimerService ts;
     private CustomThreadPoolExecutor tpe;
@@ -74,9 +77,8 @@ public class Bug41681Test extends TestCase {
     private static final int THREAD_COUNT = 10;
     private static final int ACQUIRIES_PER_THREAD = 10;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         ServerServiceRegistry services = ServerServiceRegistry.getInstance();
 
         CustomThreadPoolExecutor tpe = new CustomThreadPoolExecutor(3, 10, 2000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
@@ -88,14 +90,14 @@ public class Bug41681Test extends TestCase {
         lockService = new LockServiceImpl();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         lockService.dispose();
         ts.purge();
         tpe.shutdownNow();
-        super.tearDown();
     }
 
+    @Test
     public void testLockService() throws Exception {
         Thread[] threads = new Thread[THREAD_COUNT];
         final AtomicReference<OXException> exceptionHolder = new AtomicReference<OXException>();

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import org.junit.After;
 import org.junit.Before;

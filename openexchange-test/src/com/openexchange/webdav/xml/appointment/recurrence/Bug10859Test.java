@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment.recurrence;
 
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.junit.Test;

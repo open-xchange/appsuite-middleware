@@ -31,7 +31,6 @@ public class PoolRunner implements Runnable {
     private boolean isrunning = true;
     private int modrunner = 0;
 
-
     public PoolRunner(final Context c, final boolean close_connections) {
         this.c = c;
         this.close_connections = close_connections;
@@ -50,7 +49,8 @@ public class PoolRunner implements Runnable {
                 final Connection con = DBPool.pickup(c);
                 try {
                     Thread.sleep(WAIT_TIME);
-                } catch(final java.lang.InterruptedException ie) { }
+                } catch (final java.lang.InterruptedException ie) {
+                }
                 if (close_connections) {
                     if (modrunner % 8 == 0) {
                         con.close();
@@ -64,7 +64,7 @@ public class PoolRunner implements Runnable {
                 DBPool.push(c, con);
 
                 current_run++;
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
             }
         }

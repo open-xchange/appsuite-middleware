@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav.xml.contact;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -90,8 +92,8 @@ public class Bug15051Test extends AbstractWebDAVSession {
         response.fillObject(contact);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client2.execute(new DeleteRequest(contact));
         super.tearDown();
     }

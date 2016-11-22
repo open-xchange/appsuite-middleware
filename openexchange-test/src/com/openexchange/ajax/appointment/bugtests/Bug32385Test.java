@@ -51,9 +51,12 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -86,7 +89,7 @@ public class Bug32385Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         ctm = new CalendarTestManager(getClient());
@@ -131,7 +134,7 @@ public class Bug32385Test extends AbstractAJAXSession {
         assertEquals("Wrong amount of appointments found (in Folder " + inFolder + ")", 1, count);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();

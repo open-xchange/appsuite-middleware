@@ -55,7 +55,9 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Assume;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.capabilities.actions.AllRequest;
 import com.openexchange.ajax.capabilities.actions.AllResponse;
@@ -95,7 +97,7 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
      */
     public AbstractMailCategoriesTest() {}
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         AJAXClient configClient = new AJAXClient(User.User1);
         setUpConfiguration(configClient, true);
@@ -107,7 +109,7 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
         EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Message-ID: <1508703313.17483.1353357411049>\n" + "Subject: Test mail\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/alternative; \n" + "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + "\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Test\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/html; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" + " <head>\n" + "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + " \n" + "  <div>\n" + "   Test\n" + "  </div>\n" + " \n" + "</body></html>\n" + "------=_Part_17482_1388684087.1353357411002--\n";
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (values != null) {
             clearFolder(values.getSentFolder());

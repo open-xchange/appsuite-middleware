@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
@@ -61,7 +65,7 @@ public class Bug25300Test extends AbstractManagedContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         contact = generateContact();

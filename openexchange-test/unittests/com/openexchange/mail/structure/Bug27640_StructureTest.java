@@ -49,10 +49,13 @@
 
 package com.openexchange.mail.structure;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import javax.mail.internet.MimeMessage;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -82,76 +85,11 @@ public class Bug27640_StructureTest extends AbstractMailTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testMIMEStructure() {
         try {
             getSession();
-            final InputStream is = new ByteArrayInputStream(("date: Thu, 18 Jul 2013 17:56:26 +0200\n" +
-                "from: =?UTF-8?Q?=22de_la_Fert=C3=A9=2C_Maurice=22?= <maurice.delaferte@open-xchange.com>\n" +
-                "To: \n" +
-                "    =?UTF-8?Q?=22de_la_Fert=C3=A9=2C_Maurice=22?= <maurice.delaferte@open-xchange.com>\n" +
-                "subject: =?UTF-8?Q?Ufersicherungen_an_Seeschifffahr?= =?UTF-8?Q?ts-_und_Binnenschifffahrtsstrassen?=\n" +
-                "MIME-Version: 1.0\n" +
-                "Content-Type: multipart/alternative; \n" +
-                "    boundary=\"----=_Part_3625_315087694.1374162989634\"\n" +
-                "Message-ID: <123456>\n" +
-                "\n" +
-                "------=_Part_3625_315087694.1374162989634\n" +
-                "Content-Type: text/plain; charset=utf-8\n" +
-                "Content-Transfer-Encoding: 7bit\n" +
-                "\n" +
-                "test2\n" +
-                "\n" +
-                "\n" +
-                "------=_Part_3625_315087694.1374162989634\n" +
-                "Content-Type: text/html; charset=utf-8\n" +
-                "Content-Transfer-Encoding: 7bit\n" +
-                "\n" +
-                "<html xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" xmlns:m=\"http://schemas.microsoft.com/office/2004/12/omml\" xmlns=\"http://www.w3.org/TR/REC-html40\"><head><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><meta name=Generator content=\"Microsoft Word 14 (filtered medium)\"><style><!--\n" +
-                "/* Font Definitions */\n" +
-                "@font-face\n" +
-                "    {font-family:Calibri;\n" +
-                "    panose-1:2 15 5 2 2 2 4 3 2 4;}\n" +
-                "/* Style Definitions */\n" +
-                "p.MsoNormal, li.MsoNormal, div.MsoNormal\n" +
-                "    {margin:0cm;\n" +
-                "    margin-bottom:.0001pt;\n" +
-                "    font-size:11.0pt;\n" +
-                "    font-family:\"Calibri\",\"sans-serif\";\n" +
-                "    mso-fareast-language:EN-US;}\n" +
-                "a:link, span.MsoHyperlink\n" +
-                "    {mso-style-priority:99;\n" +
-                "    color:blue;\n" +
-                "    text-decoration:underline;}\n" +
-                "a:visited, span.MsoHyperlinkFollowed\n" +
-                "    {mso-style-priority:99;\n" +
-                "    color:purple;\n" +
-                "    text-decoration:underline;}\n" +
-                "span.E-MailFormatvorlage17\n" +
-                "    {mso-style-type:personal-compose;\n" +
-                "    font-family:\"Calibri\",\"sans-serif\";\n" +
-                "    color:windowtext;}\n" +
-                ".MsoChpDefault\n" +
-                "    {mso-style-type:export-only;\n" +
-                "    font-family:\"Calibri\",\"sans-serif\";\n" +
-                "    mso-fareast-language:EN-US;}\n" +
-                "@page WordSection1\n" +
-                "    {size:612.0pt 792.0pt;\n" +
-                "    margin:70.85pt 70.85pt 2.0cm 70.85pt;}\n" +
-                "div.WordSection1\n" +
-                "    {page:WordSection1;}\n" +
-                "--></style><!--[if gte mso 9]><xml>\n" +
-                "<o:shapedefaults v:ext=\"edit\" spidmax=\"1026\" />\n" +
-                "</xml><![endif]--><!--[if gte mso 9]><xml>\n" +
-                "<o:shapelayout v:ext=\"edit\">\n" +
-                "<o:idmap v:ext=\"edit\" data=\"1\" />\n" +
-                "</o:shapelayout></xml><![endif]--></head><body lang=DE link=blue vlink=purple><div class=WordSection1><p class=MsoNormal>test2<o:p></o:p></p></div></body></html>\n" +
-                "------=_Part_3625_315087694.1374162989634--\n" +
-                "").getBytes());
+            final InputStream is = new ByteArrayInputStream(("date: Thu, 18 Jul 2013 17:56:26 +0200\n" + "from: =?UTF-8?Q?=22de_la_Fert=C3=A9=2C_Maurice=22?= <maurice.delaferte@open-xchange.com>\n" + "To: \n" + "    =?UTF-8?Q?=22de_la_Fert=C3=A9=2C_Maurice=22?= <maurice.delaferte@open-xchange.com>\n" + "subject: =?UTF-8?Q?Ufersicherungen_an_Seeschifffahr?= =?UTF-8?Q?ts-_und_Binnenschifffahrtsstrassen?=\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/alternative; \n" + "    boundary=\"----=_Part_3625_315087694.1374162989634\"\n" + "Message-ID: <123456>\n" + "\n" + "------=_Part_3625_315087694.1374162989634\n" + "Content-Type: text/plain; charset=utf-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "test2\n" + "\n" + "\n" + "------=_Part_3625_315087694.1374162989634\n" + "Content-Type: text/html; charset=utf-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<html xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" xmlns:m=\"http://schemas.microsoft.com/office/2004/12/omml\" xmlns=\"http://www.w3.org/TR/REC-html40\"><head><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><meta name=Generator content=\"Microsoft Word 14 (filtered medium)\"><style><!--\n" + "/* Font Definitions */\n" + "@font-face\n" + "    {font-family:Calibri;\n" + "    panose-1:2 15 5 2 2 2 4 3 2 4;}\n" + "/* Style Definitions */\n" + "p.MsoNormal, li.MsoNormal, div.MsoNormal\n" + "    {margin:0cm;\n" + "    margin-bottom:.0001pt;\n" + "    font-size:11.0pt;\n" + "    font-family:\"Calibri\",\"sans-serif\";\n" + "    mso-fareast-language:EN-US;}\n" + "a:link, span.MsoHyperlink\n" + "    {mso-style-priority:99;\n" + "    color:blue;\n" + "    text-decoration:underline;}\n" + "a:visited, span.MsoHyperlinkFollowed\n" + "    {mso-style-priority:99;\n" + "    color:purple;\n" + "    text-decoration:underline;}\n" + "span.E-MailFormatvorlage17\n" + "    {mso-style-type:personal-compose;\n" + "    font-family:\"Calibri\",\"sans-serif\";\n" + "    color:windowtext;}\n" + ".MsoChpDefault\n" + "    {mso-style-type:export-only;\n" + "    font-family:\"Calibri\",\"sans-serif\";\n" + "    mso-fareast-language:EN-US;}\n" + "@page WordSection1\n" + "    {size:612.0pt 792.0pt;\n" + "    margin:70.85pt 70.85pt 2.0cm 70.85pt;}\n" + "div.WordSection1\n" + "    {page:WordSection1;}\n" + "--></style><!--[if gte mso 9]><xml>\n" + "<o:shapedefaults v:ext=\"edit\" spidmax=\"1026\" />\n" + "</xml><![endif]--><!--[if gte mso 9]><xml>\n" + "<o:shapelayout v:ext=\"edit\">\n" + "<o:idmap v:ext=\"edit\" data=\"1\" />\n" + "</o:shapelayout></xml><![endif]--></head><body lang=DE link=blue vlink=purple><div class=WordSection1><p class=MsoNormal>test2<o:p></o:p></p></div></body></html>\n" + "------=_Part_3625_315087694.1374162989634--\n" + "").getBytes());
             MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
             final MailMessage mail = MimeMessageConverter.convertMessage(mimeMessage);
 

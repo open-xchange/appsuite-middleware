@@ -50,9 +50,13 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -101,7 +105,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -346,7 +350,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();

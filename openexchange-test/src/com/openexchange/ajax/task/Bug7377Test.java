@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.After;

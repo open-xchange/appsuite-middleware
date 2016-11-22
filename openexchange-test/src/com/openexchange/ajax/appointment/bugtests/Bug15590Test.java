@@ -1,9 +1,12 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -45,7 +48,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -105,7 +108,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         assertEquals(movedAppointment.getParentFolderID(), moveAppointment.getParentFolderID());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         // Delete testAppointment
         if (movedAppointment != null) {

@@ -50,8 +50,11 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import static com.openexchange.time.TimeTools.D;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -66,6 +69,7 @@ import com.openexchange.groupware.results.Results;
  */
 public class UpdatesTest extends FileActionTest {
 
+    @Test
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -75,15 +79,10 @@ public class UpdatesTest extends FileActionTest {
         }
     }
 
+    @Test
     public void testAction() throws OXException {
-        request()
-            .param("folder", "12")
-            .param("columns", "1,700,702") // id, title and filename
-            .param("timestamp", ""+D("Yesterday at 12:00").getTime())
-            .param("sort", "700")
-            .param("order", "desc")
-            .param("ignore", "deleted")
-            .param("timezone", "Europe/Berlin");
+        request().param("folder", "12").param("columns", "1,700,702") // id, title and filename
+            .param("timestamp", "" + D("Yesterday at 12:00").getTime()).param("sort", "700").param("order", "desc").param("ignore", "deleted").param("timezone", "Europe/Berlin");
 
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
         fileAccess().expectCall("getDelta", "12", D("Yesterday at 12:00").getTime(), columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta());
@@ -94,14 +93,10 @@ public class UpdatesTest extends FileActionTest {
 
     }
 
+    @Test
     public void testTimestampDefaultsToDistantPast() throws OXException {
-        request()
-        .param("folder", "12")
-        .param("columns", "1,700,702") // id, title and filename
-        .param("sort", "700")
-        .param("order", "desc")
-        .param("ignore", "deleted")
-        .param("timezone", "Europe/Berlin");
+        request().param("folder", "12").param("columns", "1,700,702") // id, title and filename
+            .param("sort", "700").param("order", "desc").param("ignore", "deleted").param("timezone", "Europe/Berlin");
 
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
         fileAccess().expectCall("getDelta", "12", FileStorageFileAccess.DISTANT_PAST, columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta());

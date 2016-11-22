@@ -2,6 +2,7 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug7915Test extends AbstractRecurrenceTest {
@@ -13,6 +14,7 @@ public class Bug7915Test extends AbstractRecurrenceTest {
         simpleDateFormatUTC.setTimeZone(timeZoneUTC);
     }
 
+    @Test
     public void testBug7915() throws Exception {
         final Date startDate = simpleDateFormatUTC.parse("2007-06-01 00:00:00");
         final Date endDate = simpleDateFormatUTC.parse("2007-06-02 00:00:00");

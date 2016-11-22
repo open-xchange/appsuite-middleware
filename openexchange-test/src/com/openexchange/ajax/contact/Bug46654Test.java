@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;

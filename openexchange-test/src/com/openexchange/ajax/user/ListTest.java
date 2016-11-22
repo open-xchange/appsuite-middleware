@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.user;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.actions.ListRequest;

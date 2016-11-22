@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import org.junit.After;
 import org.junit.Before;
@@ -144,7 +147,8 @@ public class Bug33697Test extends AbstractAppointmentTest {
      * - UserY:
      * - sees appointment "Bug33697Appointment" in folder "Bug33697AppointmentSubfolderY"
      * - he became a participant
-     */ @Test
+     */
+    @Test
     public void testMoveFromUserXSharedSubFolderToUserYPrivateSubFolder() throws Exception {
         bug33697Appointment.setParentFolderID(bug33697SubfolderY.getObjectID());
         Pair<Appointment, FolderObject> pair = new Pair<Appointment, FolderObject>(bug33697Appointment, bug33697SubfolderX);
@@ -211,6 +215,8 @@ public class Bug33697Test extends AbstractAppointmentTest {
      * - became a participant
      * 
      * @Ignore @Test
+     * 
+     * @Test
      * public void testMoveFromUserXSharedSubFolderToUserZPrivateSubFolder() throws Exception {
      * bug33697Appointment.setParentFolderID(bug33697SubfolderZ.getObjectID());
      * Pair<Appointment, FolderObject> pair = new Pair<Appointment, FolderObject>(bug33697Appointment, bug33697SubfolderX);

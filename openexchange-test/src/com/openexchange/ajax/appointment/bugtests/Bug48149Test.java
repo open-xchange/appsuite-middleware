@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Iterator;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -85,7 +88,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(User.User2);
@@ -163,7 +166,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         assertTrue("Excpected something with permissions. (" + ctm3.getLastResponse().getErrorMessage() + ")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         ctm2.cleanUp();

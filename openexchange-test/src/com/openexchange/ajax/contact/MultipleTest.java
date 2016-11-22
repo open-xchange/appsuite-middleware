@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertFalse;
 import java.util.Date;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;

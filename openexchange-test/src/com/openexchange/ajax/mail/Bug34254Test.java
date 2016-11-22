@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.mail.actions.AutosaveRequest;

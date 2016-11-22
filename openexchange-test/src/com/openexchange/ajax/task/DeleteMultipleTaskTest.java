@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -83,7 +86,7 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(User.User1);
@@ -108,7 +111,7 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
         insRes2.fillTask(task2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         final GetRequest getReq1 = new GetRequest(task1.getParentFolderID(), task1.getObjectID(), false);
         final GetResponse getRes1 = client.execute(getReq1);

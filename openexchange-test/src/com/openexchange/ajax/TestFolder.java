@@ -1,8 +1,12 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -11,9 +15,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.container.FolderObject;
-import junit.framework.TestCase;
 
-public class TestFolder extends TestCase {
+public class TestFolder {
 
     private String sessionId = null;
 
@@ -23,24 +26,20 @@ public class TestFolder extends TestCase {
 
     private WebResponse resp = null;
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         wc = new WebConversation();
         sessionId = LoginTest.getSessionId(wc, "127.0.0.1", "marcus", "netline");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testGetRootFolders() throws IOException, SAXException {
         req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId);
         resp = wc.getResponse(req);
         assertFalse(resp.getText().indexOf("error") > -1);
     }
 
+    @Test
     public void testGetSubfolders() throws IOException, SAXException {
         req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&gparent=127");
         resp = wc.getResponse(req);
@@ -50,6 +49,7 @@ public class TestFolder extends TestCase {
         assertFalse(resp.getText().indexOf("error") > -1);
     }
 
+    @Test
     public void testGetFolder() throws IOException, SAXException {
         req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=290");
         resp = wc.getResponse(req);
@@ -59,6 +59,7 @@ public class TestFolder extends TestCase {
         assertFalse(resp.getText().indexOf("error") > -1);
     }
 
+    @Test
     public void testCreateUpdateDeleteFolder() throws IOException, SAXException {
         final String oxFolderName = "CalendarFolder07";
         final String mailFolderName = "MyMailFolder25";

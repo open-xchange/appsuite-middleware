@@ -49,6 +49,9 @@
 
 package com.openexchange.mail;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -62,54 +65,56 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public class MailFolderTest extends AbstractMailTest {
 
-	/**
-	 * Default constructor
-	 */
-	public MailFolderTest() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    public MailFolderTest() {
+        super();
+    }
 
-	/**
-	 * @param name
-	 */
-	public MailFolderTest(final String name) {
-		super();
-	}
+    /**
+     * @param name
+     */
+    public MailFolderTest(final String name) {
+        super();
+    }
 
-	public void testGetINBOXFolder() {
-		try {
-			final SessionObject session = getSession();
+    @Test
+    public void testGetINBOXFolder() {
+        try {
+            final SessionObject session = getSession();
 
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
-			try {
-				final MailFolder inboxFolder = mailAccess.getFolderStorage().getFolder("INBOX");
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
+            try {
+                final MailFolder inboxFolder = mailAccess.getFolderStorage().getFolder("INBOX");
 
-				assertTrue("No INBOX folder returned!", inboxFolder != null && inboxFolder.getName().equals("INBOX"));
-			} finally {
-				mailAccess.close(true);
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+                assertTrue("No INBOX folder returned!", inboxFolder != null && inboxFolder.getName().equals("INBOX"));
+            } finally {
+                mailAccess.close(true);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	public void testGetSubfolders() throws OXException {
-			final SessionObject session = getSession();
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect(/* mailConfig */);
-			try {
-				final MailFolder[] flds = mailAccess.getFolderStorage().getSubfolders("default", true);
+    @Test
+    public void testGetSubfolders() throws OXException {
+        final SessionObject session = getSession();
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        mailAccess.connect(/* mailConfig */);
+        try {
+            final MailFolder[] flds = mailAccess.getFolderStorage().getSubfolders("default", true);
 
-				assertTrue("No subfolders returned!", flds != null && flds.length > 0);
+            assertTrue("No subfolders returned!", flds != null && flds.length > 0);
 
-				for (int i = 0; i < flds.length; i++) {
-				}
+            for (int i = 0; i < flds.length; i++) {
+            }
 
-			} finally {
-				mailAccess.close(true);
-			}
-	}
+        } finally {
+            mailAccess.close(true);
+        }
+    }
 
 }

@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AttachmentRequest;
@@ -85,6 +88,7 @@ public final class AttachmentTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testGet() throws Throwable {
         String[] folderAndID = null;
         try {

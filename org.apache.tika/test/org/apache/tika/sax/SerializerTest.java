@@ -16,14 +16,17 @@
  */
 package org.apache.tika.sax;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class SerializerTest extends TestCase {
-
-    public void testToTextContentHandler() throws Exception {
+public class SerializerTest {
+         @Test
+     public void testToTextContentHandler() throws Exception {
         assertStartDocument("", new ToTextContentHandler());
         assertCharacters("content", new ToTextContentHandler());
         assertCharacterEscaping("<&\">", new ToTextContentHandler());
@@ -35,7 +38,8 @@ public class SerializerTest extends TestCase {
         assertElementWithAttributes("content", new ToTextContentHandler());
     }
 
-    public void testToXMLContentHandler() throws Exception {
+         @Test
+     public void testToXMLContentHandler() throws Exception {
         assertStartDocument("", new ToXMLContentHandler());
         assertStartDocument(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
@@ -56,7 +60,8 @@ public class SerializerTest extends TestCase {
                 new ToXMLContentHandler());
     }
 
-    public void testToHTMLContentHandler() throws Exception {
+         @Test
+     public void testToHTMLContentHandler() throws Exception {
         assertStartDocument("", new ToHTMLContentHandler());
         assertCharacters("content", new ToHTMLContentHandler());
         assertCharacterEscaping("&lt;&amp;\"&gt;", new ToHTMLContentHandler());

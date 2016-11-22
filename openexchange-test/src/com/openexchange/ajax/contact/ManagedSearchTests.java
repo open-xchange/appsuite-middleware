@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -70,6 +72,7 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
         super();
     }
 
+    @Test
     public void testGuiLikeSearch() {
         List<ContactSearchObject> searches = new LinkedList<ContactSearchObject>();
 
@@ -102,6 +105,7 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testSearchPattern() {
         for (String name : sinographs) {
             Contact tmp = generateContact();

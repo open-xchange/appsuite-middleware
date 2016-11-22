@@ -49,8 +49,13 @@
 
 package com.openexchange.mail.structure;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -79,24 +84,9 @@ public class MailUUEncodedStructureTest extends AbstractMailTest {
         super();
     }
 
-    private static final byte[] SIMPLE = ("Date: Mon, 2 Nov 2009 06:50:42 +0100 (CET)\n" +
-    		"Message-Id: <200911020550.nA25oglg029683@datacom.sender.com>\n" +
-    		"Subject: \n" +
-    		"To: d.user@receiver.de\n" +
-    		"From: datacom@sender.com\n" +
-    		"\n" +
-    		"Daten\n" +
-    		"\n" +
-    		"begin 644 uuencode-Test.txt\n" +
-    		"M1V5S8VAI8VAT90T*#0I$87,@554@<W1E:'0@9OQR(&1I92!7=7)Z96QN(&EN\n" +
-    		"M(%5.25@N($1A<R!552!I;B!5565N8V]D92!U;F0@+61E8V]D92!S=&5H=\"`-\n" +
-    		"M\"F5B96YS;R!W:64@9&%S(%55(&)E:2!556-P(&;\\<B!53DE8('1O(%5.25@@\n" +
-    		"M8V]P>2!P<F]T;V-O;\"X@06QS;R!D:64@W&)E<G1R86=U;F<@#0IV;VX@96EN\n" +
-    		"M96T@54Y)6\"U#;VUP=71E<B!Z=2!E:6YE;2!A;F1E<F5N(%5.25@M0V]M<'5T\n" +
-    		"%97(N#0H`\n" +
-    		"`\n" +
-    		"end").getBytes();
+    private static final byte[] SIMPLE = ("Date: Mon, 2 Nov 2009 06:50:42 +0100 (CET)\n" + "Message-Id: <200911020550.nA25oglg029683@datacom.sender.com>\n" + "Subject: \n" + "To: d.user@receiver.de\n" + "From: datacom@sender.com\n" + "\n" + "Daten\n" + "\n" + "begin 644 uuencode-Test.txt\n" + "M1V5S8VAI8VAT90T*#0I$87,@554@<W1E:'0@9OQR(&1I92!7=7)Z96QN(&EN\n" + "M(%5.25@N($1A<R!552!I;B!5565N8V]D92!U;F0@+61E8V]D92!S=&5H=\"`-\n" + "M\"F5B96YS;R!W:64@9&%S(%55(&)E:2!556-P(&;\\<B!53DE8('1O(%5.25@@\n" + "M8V]P>2!P<F]T;V-O;\"X@06QS;R!D:64@W&)E<G1R86=U;F<@#0IV;VX@96EN\n" + "M96T@54Y)6\"U#;VUP=71E<B!Z=2!E:6YE;2!A;F1E<F5N(%5.25@M0V]M<'5T\n" + "%97(N#0H`\n" + "`\n" + "end").getBytes();
 
+    @Test
     public void testMIMEStructure() {
         try {
             getSession();
@@ -127,6 +117,7 @@ public class MailUUEncodedStructureTest extends AbstractMailTest {
         }
     }
 
+    @Test
     public void testMIMEStructureWithParsedUUEncodedParts() {
         try {
             getSession();

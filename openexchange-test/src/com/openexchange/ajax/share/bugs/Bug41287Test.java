@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -76,7 +79,7 @@ public class Bug41287Test extends ShareTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         parent = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
@@ -88,7 +91,7 @@ public class Bug41287Test extends ShareTest {
         client.execute(req);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         try {
             DeleteLinkRequest req = new DeleteLinkRequest(target, System.currentTimeMillis());

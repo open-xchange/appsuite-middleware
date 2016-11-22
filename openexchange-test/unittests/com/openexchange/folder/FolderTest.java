@@ -1,12 +1,18 @@
 /**
  *
  */
+
 package com.openexchange.folder;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.FolderSQLInterface;
@@ -45,7 +51,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class FolderTest extends TestCase {
+public class FolderTest {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderTest.class);
 
@@ -76,9 +82,8 @@ public class FolderTest extends TestCase {
      *
      * @see junit.framework.TestCase#setUp()
      */
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         if (!init) {
             Init.startServer();
         }
@@ -96,19 +101,19 @@ public class FolderTest extends TestCase {
      *
      * @see junit.framework.TestCase#tearDown()
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (init) {
             init = false;
             Init.stopServer();
         }
-        super.tearDown();
     }
 
-    public AppointmentSQLInterface getAppointmentHandler(){
+    public AppointmentSQLInterface getAppointmentHandler() {
         return ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
     }
 
+    @Test
     public void testFolderInsertSuccess() throws Throwable {
         final int userId = session.getUserId();
         // final OXFolderAction oxfa = new OXFolderAction(session);
@@ -122,8 +127,7 @@ public class FolderTest extends TestCase {
             fo.setType(FolderObject.PRIVATE);
             final OCLPermission ocl = new OCLPermission();
             ocl.setEntity(userId);
-            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             ocl.setGroupPermission(false);
             ocl.setFolderAdmin(true);
             fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -171,6 +175,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testFolderInsertFail001() {
         try {
             final int userId = session.getUserId();
@@ -182,8 +187,7 @@ public class FolderTest extends TestCase {
             final OCLPermission ocl = new OCLPermission();
             // Wrong user id in permission!
             ocl.setEntity(userId - 2);
-            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             ocl.setGroupPermission(false);
             ocl.setFolderAdmin(true);
             fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -206,6 +210,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testFolderInsertFail002() {
         try {
             final int userId = session.getUserId();
@@ -217,8 +222,7 @@ public class FolderTest extends TestCase {
             final ArrayList<OCLPermission> perms = new ArrayList<OCLPermission>();
             OCLPermission ocl = new OCLPermission();
             ocl.setEntity(userId);
-            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             ocl.setGroupPermission(false);
             ocl.setFolderAdmin(true);
             perms.add(ocl);
@@ -227,8 +231,7 @@ public class FolderTest extends TestCase {
              */
             ocl = new OCLPermission();
             ocl.setEntity(resolveUser(AjaxInit.getAJAXProperty("seconduser"), ctx));
-            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             ocl.setGroupPermission(false);
             ocl.setFolderAdmin(true);
             perms.add(ocl);
@@ -258,6 +261,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testFolderInsertFail003() {
         try {
             final int userId = session.getUserId();
@@ -273,8 +277,7 @@ public class FolderTest extends TestCase {
             final ArrayList<OCLPermission> perms = new ArrayList<OCLPermission>();
             final OCLPermission ocl = new OCLPermission();
             ocl.setEntity(userId);
-            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             ocl.setGroupPermission(false);
             ocl.setFolderAdmin(true);
             perms.add(ocl);
@@ -305,6 +308,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testFolderInsertFail004() {
         try {
             final int userId = session.getUserId();
@@ -319,8 +323,7 @@ public class FolderTest extends TestCase {
             final ArrayList<OCLPermission> perms = new ArrayList<OCLPermission>();
             final OCLPermission ocl = new OCLPermission();
             ocl.setEntity(userId);
-            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             ocl.setGroupPermission(false);
             ocl.setFolderAdmin(true);
             perms.add(ocl);
@@ -351,6 +354,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testFolderInsertFail005() {
         try {
             final int userId = session.getUserId();
@@ -366,8 +370,7 @@ public class FolderTest extends TestCase {
             {
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 perms.add(ocl);
@@ -376,8 +379,7 @@ public class FolderTest extends TestCase {
             {
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(secondUser);
-                ocl.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
-                        OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+                ocl.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(false);
                 perms.add(ocl);
@@ -385,8 +387,7 @@ public class FolderTest extends TestCase {
             {
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(secondUser);
-                ocl.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
-                        OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+                ocl.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(false);
                 perms.add(ocl);
@@ -418,6 +419,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testUpdateFolderSuccessRename() {
         try {
             final int userId = session.getUserId();
@@ -431,8 +433,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -481,6 +482,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testUpdateFolderSuccessMove() {
         try {
             final int userId = session.getUserId();
@@ -495,8 +497,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -547,6 +548,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testUpdateFolderSuccessRenameMove() {
         try {
             final int userId = session.getUserId();
@@ -561,8 +563,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -614,6 +615,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testUpdateFolderSuccessAll() {
         try {
             final int userId = session.getUserId();
@@ -628,8 +630,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -660,15 +661,13 @@ public class FolderTest extends TestCase {
                 final ArrayList<OCLPermission> perms = new ArrayList<OCLPermission>();
                 OCLPermission updateOCL = new OCLPermission();
                 updateOCL.setEntity(userId);
-                updateOCL.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                updateOCL.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 updateOCL.setGroupPermission(false);
                 updateOCL.setFolderAdmin(true);
                 perms.add(updateOCL);
                 updateOCL = new OCLPermission();
                 updateOCL.setEntity(secondUserId);
-                updateOCL.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                updateOCL.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 updateOCL.setGroupPermission(false);
                 updateOCL.setFolderAdmin(false);
                 perms.add(updateOCL);
@@ -683,8 +682,7 @@ public class FolderTest extends TestCase {
                 assertTrue(fo.getLastModified().getTime() == lastModified);
                 assertTrue(fo.getModifiedBy() == userId);
                 assertTrue(fo.getParentFolderID() == stdCalFolder);
-                final EffectivePermission ep = fo.getEffectiveUserPermission(secondUserId, CapabilityUserConfigurationStorage
-                        .loadUserConfiguration(secondUserId, new ContextImpl(CONTEXT_ID)));
+                final EffectivePermission ep = fo.getEffectiveUserPermission(secondUserId, CapabilityUserConfigurationStorage.loadUserConfiguration(secondUserId, new ContextImpl(CONTEXT_ID)));
                 assertTrue(ep.isFolderVisible());
                 assertTrue(ep.canCreateSubfolders());
                 assertTrue(ep.canDeleteAllObjects());
@@ -708,6 +706,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testDeleteFolder() {
         try {
             final int userId = session.getUserId();
@@ -721,8 +720,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -751,8 +749,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -768,8 +765,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -787,8 +783,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -804,8 +799,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PRIVATE);
                 ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -852,8 +846,7 @@ public class FolderTest extends TestCase {
 
     private static MutableUserConfigurationStorage STORAGE = null;
 
-    public static final MutableUserConfiguration getUserConfiguration(final Context ctx, final int userId)
-            throws OXException {
+    public static final MutableUserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
         if (STORAGE == null) {
             STORAGE = new MutableUserConfigurationStorage(UserConfigurationStorage.getInstance());
         }
@@ -867,6 +860,7 @@ public class FolderTest extends TestCase {
         STORAGE.saveUserConfiguration(uc);
     }
 
+    @Test
     public void testWithModifiedUserConfig001() {
         try {
             final int userId = session.getUserId();
@@ -883,8 +877,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PUBLIC);
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -942,6 +935,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testWithModifiedUserConfig002() {
         try {
             final int userId = session.getUserId();
@@ -958,8 +952,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PUBLIC);
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -1010,6 +1003,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testFolderCleaning() {
         try {
             final int userId = session.getUserId();
@@ -1026,8 +1020,7 @@ public class FolderTest extends TestCase {
                 fo.setType(FolderObject.PUBLIC);
                 final OCLPermission ocl = new OCLPermission();
                 ocl.setEntity(userId);
-                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 ocl.setGroupPermission(false);
                 ocl.setFolderAdmin(true);
                 fo.setPermissionsAsArray(new OCLPermission[] { ocl });
@@ -1113,6 +1106,7 @@ public class FolderTest extends TestCase {
         return properties;
     }
 
+    @Test
     public void testGetSubfolders() {
         try {
             final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(session));
@@ -1145,6 +1139,7 @@ public class FolderTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetSubfoldersWithRestrictedAccess() {
         try {
             final MutableUserConfiguration uc = getUserConfiguration(ctx, userId);
@@ -1152,8 +1147,7 @@ public class FolderTest extends TestCase {
             saveUserConfiguration(uc);
             try {
                 final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(session));
-                final SearchIterator<?> it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                        null);
+                final SearchIterator<?> it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, null);
                 try {
                     if (it.size() != -1) {
                         final int size = it.size();

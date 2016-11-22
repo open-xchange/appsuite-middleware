@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.resource.ResourceTools;
@@ -78,7 +81,7 @@ public class Bug39571Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -125,7 +128,7 @@ public class Bug39571Test extends AbstractAJAXSession {
         assertTrue("Excpected conflicting ressource.", ctm.getLastResponse().hasConflicts());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();

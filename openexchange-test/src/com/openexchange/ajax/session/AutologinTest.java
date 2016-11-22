@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpState;

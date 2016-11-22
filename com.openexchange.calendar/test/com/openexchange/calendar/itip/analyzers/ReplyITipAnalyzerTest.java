@@ -63,7 +63,6 @@ import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
-import com.openexchange.calendar.itip.analyzers.ReplyITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
@@ -83,8 +82,8 @@ import com.openexchange.sim.SimBuilder;
  */
 public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
-    @Test
-    public void testMethods() {
+     @Test
+     public void testMethods() {
         List<ITipMethod> methods = new ReplyITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.REPLY), methods);
     }
@@ -168,26 +167,26 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testAccept() throws OXException {
+     @Test
+     public void testAccept() throws OXException {
         statusTest(ConfirmStatus.ACCEPT);
     }
 
 
-    @Test
-    public void testDecline() throws OXException {
+     @Test
+     public void testDecline() throws OXException {
         statusTest(ConfirmStatus.DECLINE);
     }
 
 
-    @Test
-    public void testTentative() throws OXException {
+     @Test
+     public void testTentative() throws OXException {
         statusTest(ConfirmStatus.TENTATIVE);
     }
 
 
-    @Test
-    public void testPartyCrasher() throws OXException {
+     @Test
+     public void testPartyCrasher() throws OXException {
      // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -276,11 +275,13 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    public void testDelegation() {
+         @Test
+     public void testDelegation() {
         // TODO
     }
 
-    public void testOnBehalfOf() {
+         @Test
+     public void testOnBehalfOf() {
         // TODO
     }
 
@@ -378,23 +379,23 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testAcceptsException() throws OXException {
+     @Test
+     public void testAcceptsException() throws OXException {
         exceptionStatusTest(ConfirmStatus.ACCEPT);
     }
 
-    @Test
-    public void testDeclinesException() throws OXException {
+     @Test
+     public void testDeclinesException() throws OXException {
         exceptionStatusTest(ConfirmStatus.DECLINE);
     }
 
-    @Test
-    public void testTentativelyAcceptsException() throws OXException {
+     @Test
+     public void testTentativelyAcceptsException() throws OXException {
         exceptionStatusTest(ConfirmStatus.TENTATIVE);
     }
 
-    @Test
-    public void testPartyCrasherForException() throws OXException {
+     @Test
+     public void testPartyCrasherForException() throws OXException {
         ConfirmStatus status = ConfirmStatus.ACCEPT;
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
@@ -497,16 +498,18 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    public void testDelegationInException() {
+         @Test
+     public void testDelegationInException() {
         // TODO
     }
 
-    public void testOnBehalfOfInException() {
+         @Test
+     public void testOnBehalfOfInException() {
         // TODO
     }
 
-    @Test
-    public void testContainsOnlyException() throws OXException {
+     @Test
+     public void testContainsOnlyException() throws OXException {
         ConfirmStatus status = ConfirmStatus.ACCEPT;
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -599,8 +602,8 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
     // Error Cases
 
-    @Test
-    public void testAppointmentDoesntExistAnymore() throws OXException {
+     @Test
+     public void testAppointmentDoesntExistAnymore() throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -637,8 +640,8 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testExceptionDoesntExistAnymore() throws OXException {
+     @Test
+     public void testExceptionDoesntExistAnymore() throws OXException {
         ConfirmStatus status = ConfirmStatus.ACCEPT;
         SimBuilder integrationBuilder = new SimBuilder();
 

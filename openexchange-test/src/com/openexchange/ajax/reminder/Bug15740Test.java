@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;

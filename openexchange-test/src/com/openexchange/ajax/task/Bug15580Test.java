@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;

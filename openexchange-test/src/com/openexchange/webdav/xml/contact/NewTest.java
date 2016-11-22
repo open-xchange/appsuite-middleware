@@ -1,8 +1,11 @@
 
 package com.openexchange.webdav.xml.contact;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.util.Locale;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -20,6 +23,7 @@ public class NewTest extends ContactTest {
         super();
     }
 
+    @Test
     public void testNewContact() throws Exception {
         final Contact contactObj = createContactObject("testNewContact");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
@@ -28,6 +32,7 @@ public class NewTest extends ContactTest {
         compareObject(contactObj, loadContact);
     }
 
+    @Test
     public void testNewContactWithAttachment() throws Exception {
         final Contact contactObj = createContactObject("testNewContactWithAttachment");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
@@ -53,6 +58,7 @@ public class NewTest extends ContactTest {
         compareObject(contactObj, loadContact);
     }
 
+    @Test
     public void testContactInPrivateFlagInPublicFolder() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testContactInPrivateFlagInPublicFolder" + System.currentTimeMillis());
@@ -81,6 +87,7 @@ public class NewTest extends ContactTest {
         }
     }
 
+    @Test
     public void testContactWithAttachment() throws Exception {
         final Contact contactObj = createContactObject("testContactWithAttachment");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);

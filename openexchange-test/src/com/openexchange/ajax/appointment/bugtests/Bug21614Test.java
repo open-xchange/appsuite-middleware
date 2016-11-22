@@ -50,12 +50,15 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -88,7 +91,7 @@ public class Bug21614Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -150,7 +153,7 @@ public class Bug21614Test extends AbstractAJAXSession {
         assertFalse("Should not find the appointment.", found);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(appointment));
         super.tearDown();

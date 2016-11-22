@@ -50,7 +50,11 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -66,7 +70,7 @@ public class Bug24682Test extends CalendarSqlTest {
 
     private CalendarCollectionService calendarCollectionService;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         folders.sharePrivateFolder(session, ctx, secondUserId);
@@ -75,6 +79,7 @@ public class Bug24682Test extends CalendarSqlTest {
         calendarCollectionService = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
     }
 
+    @Test
     public void testBug24682() throws Exception {
         appointments.switchUser(secondUser);
         CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, fourthUser);
@@ -97,11 +102,11 @@ public class Bug24682Test extends CalendarSqlTest {
         appointments.switchUser(thirdUser);
         int[] columns = new int[] { CalendarDataObject.OBJECT_ID, CalendarDataObject.FOLDER_ID };
         CalendarDataObject[] changeExceptionsByRecurrence = calendarCollectionService.getChangeExceptionsByRecurrence(appointment.getObjectID(), columns, appointments.getSession());
-        assertEquals("Wrong folder id"+System.getProperty("line.separator")+Arrays.toString(changeExceptionsByRecurrence), sharedFolderId1, changeExceptionsByRecurrence[0].getParentFolderID());
+        assertEquals("Wrong folder id" + System.getProperty("line.separator") + Arrays.toString(changeExceptionsByRecurrence), sharedFolderId1, changeExceptionsByRecurrence[0].getParentFolderID());
         // System.out.println(changeExceptionsByRecurrence.toString());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         folders.unsharePrivateFolder(session, ctx);
         super.tearDown();

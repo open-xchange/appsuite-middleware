@@ -1,5 +1,8 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
@@ -7,19 +10,15 @@ import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDefaultValueStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class DropDefaultValueChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropDefaultValue", ChangeFactory.getInstance().getChangeMetaData(new DropDefaultValueChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         DropDefaultValueChange change = new DropDefaultValueChange();
         change.setSchemaName("SCHEMA_NAME");
@@ -34,8 +33,7 @@ public class DropDefaultValueChangeTest extends StandardChangeTest {
         assertEquals("COL_HERE", ((DropDefaultValueStatement) sqlStatements[0]).getColumnName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         DropDefaultValueChange change = new DropDefaultValueChange();
         change.setTableName("TABLE_NAME");

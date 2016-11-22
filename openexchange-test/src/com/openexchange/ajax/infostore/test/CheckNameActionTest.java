@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.CheckNameRequest;
 import com.openexchange.ajax.infostore.actions.CheckNameResponse;
@@ -70,16 +73,6 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
      */
     public CheckNameActionTest() {
         super();
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

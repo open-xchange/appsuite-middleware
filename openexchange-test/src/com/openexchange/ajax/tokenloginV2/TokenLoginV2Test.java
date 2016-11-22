@@ -50,6 +50,11 @@
 package com.openexchange.ajax.tokenloginV2;
 
 import static com.openexchange.ajax.session.LoginTools.generateAuthId;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -76,11 +81,6 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
 
     public TokenLoginV2Test() {
         super();
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
     }
 
     @Test

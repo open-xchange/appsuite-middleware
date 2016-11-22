@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
@@ -83,7 +84,7 @@ public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
         return confs;
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration(client, false);

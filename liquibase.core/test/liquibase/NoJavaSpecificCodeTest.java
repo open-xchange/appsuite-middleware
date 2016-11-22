@@ -1,11 +1,10 @@
 package liquibase;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-
+import static org.junit.Assert.fail;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import org.junit.Test;
 
 public class NoJavaSpecificCodeTest {
 

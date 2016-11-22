@@ -1,6 +1,8 @@
 
 package com.openexchange.webdav.xml.contact;
 
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -11,14 +13,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class PermissionTest extends ContactTest {
 
-    public PermissionTest() {
-        super();
-    }
-
-    public void testDummy() {
-
-    }
-
+    @Test
     public void testInsertContactInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertContactInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -47,6 +42,7 @@ public class PermissionTest extends ContactTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testInsertContactInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertContactInPublicFolderWithoutPermission" + System.currentTimeMillis());
@@ -75,6 +71,7 @@ public class PermissionTest extends ContactTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateContactInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertContactInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -106,6 +103,7 @@ public class PermissionTest extends ContactTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateContactInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testUpdateContactInPublicFolderWithoutPermission" + System.currentTimeMillis());
@@ -137,6 +135,7 @@ public class PermissionTest extends ContactTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testDeleteContactInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testDeleteContactInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -168,6 +167,7 @@ public class PermissionTest extends ContactTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testDeleteContactInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testDeleteContactInPublicFolderWithoutPermission" + System.currentTimeMillis());

@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.TimeZone;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -73,6 +76,7 @@ import com.openexchange.tools.URLParameter;
  */
 public class Bug6335Test extends ContactTest {
 
+    @Test
     public void testBug6335() throws Exception {
 
         final Contact contactObj = new Contact();

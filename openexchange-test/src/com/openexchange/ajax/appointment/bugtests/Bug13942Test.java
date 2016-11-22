@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -88,7 +91,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -119,7 +122,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         updateAppointment.setAlarm(30);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (appointment != null && appointment.getObjectID() != 0) {
             DeleteRequest delete = new DeleteRequest(appointment);

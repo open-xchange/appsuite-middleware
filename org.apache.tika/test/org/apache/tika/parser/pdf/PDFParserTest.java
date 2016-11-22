@@ -16,8 +16,9 @@
  */
 package org.apache.tika.parser.pdf;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
-
 import org.apache.tika.TikaTest;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.OfficeOpenXMLCore;
@@ -27,13 +28,15 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.PasswordProvider;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 /**
  * Test case for parsing pdf files.
  */
 public class PDFParserTest extends TikaTest {
 
-    public void testPdfParsing() throws Exception {
+         @Test
+     public void testPdfParsing() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -69,7 +72,8 @@ public class PDFParserTest extends TikaTest {
                 !content.contains("libraries.Apache"));
     }
 
-    public void testCustomMetadata() throws Exception {
+         @Test
+     public void testCustomMetadata() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -103,7 +107,8 @@ public class PDFParserTest extends TikaTest {
      *  they're encrypted (potentially both text and metadata),
      *  but we can decrypt them easily.
      */
-    public void testProtectedPDF() throws Exception {
+         @Test
+     public void testProtectedPDF() throws Exception {
        Parser parser = new AutoDetectParser(); // Should auto-detect!
        ContentHandler handler = new BodyContentHandler();
        Metadata metadata = new Metadata();
@@ -160,7 +165,8 @@ public class PDFParserTest extends TikaTest {
        assertTrue(content.contains("In many important respects"));
     }
 
-    public void testTwoTextBoxes() throws Exception {
+         @Test
+     public void testTwoTextBoxes() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -179,7 +185,8 @@ public class PDFParserTest extends TikaTest {
         assertTrue(content.contains("Left column line 1 Left column line 2 Right column line 1 Right column line 2"));
     }
 
-    public void testVarious() throws Exception {
+         @Test
+     public void testVarious() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -252,7 +259,8 @@ public class PDFParserTest extends TikaTest {
         //assertContains("\uD800\uDF32\uD800\uDF3f\uD800\uDF44\uD800\uDF39\uD800\uDF43\uD800\uDF3A", content);
     }
 
-    public void testAnnotations() throws Exception {
+         @Test
+     public void testAnnotations() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -292,7 +300,8 @@ public class PDFParserTest extends TikaTest {
     }
 
     // TIKA-981
-    public void testPopupAnnotation() throws Exception {
+         @Test
+     public void testPopupAnnotation() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -308,7 +317,8 @@ public class PDFParserTest extends TikaTest {
         assertContains("igalsh", content);
     }
 
-    public void testEmbeddedPDFs() throws Exception {
+         @Test
+     public void testEmbeddedPDFs() throws Exception {
         String xml = getXML("testPDFPackage.pdf").xml;
         assertContains("PDF1", xml);
         assertContains("PDF2", xml);
@@ -329,7 +339,8 @@ public class PDFParserTest extends TikaTest {
         return count;
     }
 
-    public void testPageNumber() throws Exception {
+         @Test
+     public void testPageNumber() throws Exception {
         final XMLResult result = getXML("testPageNumber.pdf");
         final String content = result.xml.replaceAll("\\s+","");
         assertContains("<p>1</p>", content);
@@ -343,12 +354,14 @@ public class PDFParserTest extends TikaTest {
      *  test will need updating when we're able to apply the annotation
      *  to the text itself, rather than following on afterwards as now 
      */
-    public void testLinks() throws Exception {
+         @Test
+     public void testLinks() throws Exception {
         final XMLResult result = getXML("testPDFVarious.pdf");
         assertContains("<div class=\"annotation\"><a href=\"http://tika.apache.org/\"/></div>", result.xml);
     }
 
-    public void testDisableAutoSpace() throws Exception {
+         @Test
+     public void testDisableAutoSpace() throws Exception {
         PDFParser parser = new PDFParser();
         parser.setEnableAutoSpace(false);
         ContentHandler handler = new BodyContentHandler();
@@ -383,7 +396,8 @@ public class PDFParserTest extends TikaTest {
         assertEquals(-1, content.indexOf("Here is some formatted text"));
     }
 
-    public void testDuplicateOverlappingText() throws Exception {
+         @Test
+     public void testDuplicateOverlappingText() throws Exception {
         PDFParser parser = new PDFParser();
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -413,7 +427,8 @@ public class PDFParserTest extends TikaTest {
         assertContains("Text the first timesecond time", content);
     }
 
-    public void testSortByPosition() throws Exception {
+         @Test
+     public void testSortByPosition() throws Exception {
         PDFParser parser = new PDFParser();
         parser.setEnableAutoSpace(false);
         ContentHandler handler = new BodyContentHandler();
@@ -447,7 +462,8 @@ public class PDFParserTest extends TikaTest {
     }
 
     // TIKA-1035
-    public void testBookmarks() throws Exception {
+         @Test
+     public void testBookmarks() throws Exception {
         String xml = getXML("testPDF_bookmarks.pdf").xml;
         int i = xml.indexOf("Denmark bookmark is here");
         int j = xml.indexOf("</body>");

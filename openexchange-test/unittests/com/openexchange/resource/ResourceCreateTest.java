@@ -49,14 +49,16 @@
 
 package com.openexchange.resource;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import junit.framework.TestCase;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -71,247 +73,250 @@ import com.openexchange.test.AjaxInit;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class ResourceCreateTest extends TestCase {
+public final class ResourceCreateTest {
 
-	private Context ctx;
+    private Context ctx;
 
-	private User user;
+    private User user;
 
-	private User admin;
+    private User admin;
 
-	/**
-	 * Initializes a new {@link ResourceCreateTest}
-	 */
-	public ResourceCreateTest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceCreateTest}
+     */
+    public ResourceCreateTest() {
+        super();
+    }
 
-	/**
-	 * Initializes a new {@link ResourceCreateTest}
-	 *
-	 * @param name
-	 *            The test's name
-	 */
-	public ResourceCreateTest(final String name) {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceCreateTest}
+     *
+     * @param name
+     *            The test's name
+     */
+    public ResourceCreateTest(final String name) {
+        super();
+    }
 
-	private static Context resolveContext(final String ctxStr) throws Exception {
-	    int pos = -1;
-	    final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
-	    return ContextStorage.getStorageContext(ContextStorage.getInstance().getContextId(c));
-	}
+    private static Context resolveContext(final String ctxStr) throws Exception {
+        int pos = -1;
+        final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
+        return ContextStorage.getStorageContext(ContextStorage.getInstance().getContextId(c));
+    }
 
-	private static User resolveUser(final String user, final Context ctx) throws Exception {
-		int pos = -1;
-		final String u = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
-		return UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(u, ctx), ctx);
-	}
+    private static User resolveUser(final String user, final Context ctx) throws Exception {
+        int pos = -1;
+        final String u = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
+        return UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(u, ctx), ctx);
+    }
 
-	@Override
-	protected void setUp() throws Exception {
-		/*
-		 * Init
-		 */
-		Init.startServer();
-		/*
-		 * Init test environment
-		 */
-		final String login = AjaxInit.getAJAXProperty("login");
-		ctx = resolveContext(login);
-		user = resolveUser(login, ctx);
-		admin = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
-	}
+    @Before
+    protected void setUp() throws Exception {
+        /*
+         * Init
+         */
+        Init.startServer();
+        /*
+         * Init test environment
+         */
+        final String login = AjaxInit.getAJAXProperty("login");
+        ctx = resolveContext(login);
+        user = resolveUser(login, ctx);
+        admin = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
+    }
 
-	@Override
-	protected void tearDown() throws Exception {
-		Init.stopServer();
-	}
+    @After
+    public void tearDown() throws Exception {
+        Init.stopServer();
+    }
 
-	public void testResourceCreation() throws SQLException, OXException {
-		final Resource resource = new Resource();
-		resource.setAvailable(true);
-		resource.setDescription("My test resource");
-		resource.setDisplayName("MyTestResource");
-		resource.setMail("mytestresource@somewhere.com");
-		resource.setSimpleName("M-T-R");
-		int id = -1;
-		try {
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
-			id = resource.getIdentifier();
+    @Test
+    public void testResourceCreation() throws SQLException, OXException {
+        final Resource resource = new Resource();
+        resource.setAvailable(true);
+        resource.setDescription("My test resource");
+        resource.setDisplayName("MyTestResource");
+        resource.setMail("mytestresource@somewhere.com");
+        resource.setSimpleName("M-T-R");
+        int id = -1;
+        try {
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
+            id = resource.getIdentifier();
 
-			assertTrue("Invalid ID detected: " + id + ". ID has not been properly set through creation", id != -1);
-			assertTrue("Invalid last-modified detected: " + resource.getLastModified()
-					+ ". Last-modified timestamp has not been properly set through creation", resource
-					.getLastModified() != null
-					&& resource.getLastModified().getTime() < System.currentTimeMillis());
+            assertTrue("Invalid ID detected: " + id + ". ID has not been properly set through creation", id != -1);
+            assertTrue("Invalid last-modified detected: " + resource.getLastModified() + ". Last-modified timestamp has not been properly set through creation", resource.getLastModified() != null && resource.getLastModified().getTime() < System.currentTimeMillis());
 
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-	}
+    }
 
-	public void testResourceCreationFail001() throws SQLException {
-		final Resource resource = new Resource();
-		resource.setAvailable(true);
-		resource.setDescription("My test resource");
-		resource.setDisplayName("MyTestResource");
-		resource.setMail("mytestresource@somewhere.com");
-		resource.setSimpleName("M-T-R\u00f6\u00e4\u00fc");
-		int id = -1;
-		try {
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
-			id = resource.getIdentifier();
+    @Test
+    public void testResourceCreationFail001() throws SQLException {
+        final Resource resource = new Resource();
+        resource.setAvailable(true);
+        resource.setDescription("My test resource");
+        resource.setDisplayName("MyTestResource");
+        resource.setMail("mytestresource@somewhere.com");
+        resource.setSimpleName("M-T-R\u00f6\u00e4\u00fc");
+        int id = -1;
+        try {
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
+            id = resource.getIdentifier();
 
-			fail("Creation succeeded with invalid string identifier");
-		} catch (final OXException e) {
-		    // Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+            fail("Creation succeeded with invalid string identifier");
+        } catch (final OXException e) {
+            // Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-	}
+    }
 
-	public void testResourceCreationFail002() throws SQLException {
-		final Resource resource = new Resource();
-		resource.setAvailable(true);
-		resource.setDescription("My test resource");
-		resource.setDisplayName("MyTestResource");
-		resource.setMail("mytestresourcesomewhere.com");
-		resource.setSimpleName("M-T-R");
-		int id = -1;
-		try {
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
-			id = resource.getIdentifier();
+    @Test
+    public void testResourceCreationFail002() throws SQLException {
+        final Resource resource = new Resource();
+        resource.setAvailable(true);
+        resource.setDescription("My test resource");
+        resource.setDisplayName("MyTestResource");
+        resource.setMail("mytestresourcesomewhere.com");
+        resource.setSimpleName("M-T-R");
+        int id = -1;
+        try {
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
+            id = resource.getIdentifier();
 
-			fail("Creation succeeded with invalid email address");
-		} catch (final OXException e) {
-		 //   Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+            fail("Creation succeeded with invalid email address");
+        } catch (final OXException e) {
+            //   Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-	}
+    }
 
-	public void testResourceCreationFail003() throws SQLException {
-		final Resource resource = new Resource();
-		resource.setAvailable(true);
-		resource.setDescription("My test resource");
-		resource.setDisplayName("MyTestResource");
-		resource.setMail("mytestresource@somewhere.com");
-		resource.setSimpleName("M-T-R");
+    @Test
+    public void testResourceCreationFail003() throws SQLException {
+        final Resource resource = new Resource();
+        resource.setAvailable(true);
+        resource.setDescription("My test resource");
+        resource.setDisplayName("MyTestResource");
+        resource.setMail("mytestresource@somewhere.com");
+        resource.setSimpleName("M-T-R");
 
-		final Resource duplicate = new Resource();
-		duplicate.setAvailable(true);
-		duplicate.setDescription("My test resource");
-		duplicate.setDisplayName("MyTestResource");
-		duplicate.setMail("mytestresource2@somewhere.com");
-		duplicate.setSimpleName("M-T-R");
+        final Resource duplicate = new Resource();
+        duplicate.setAvailable(true);
+        duplicate.setDescription("My test resource");
+        duplicate.setDisplayName("MyTestResource");
+        duplicate.setMail("mytestresource2@somewhere.com");
+        duplicate.setSimpleName("M-T-R");
 
-		int id = -1;
-		try {
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
-			id = resource.getIdentifier();
+        int id = -1;
+        try {
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
+            id = resource.getIdentifier();
 
-			assertTrue("Invalid identifier detected: " + id, id != -1);
+            assertTrue("Invalid identifier detected: " + id, id != -1);
 
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, duplicate);
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, duplicate);
 
-			fail("Creation succeeded with duplicate identifier");
+            fail("Creation succeeded with duplicate identifier");
 
-		} catch (final OXException e) {
-		    // Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+        } catch (final OXException e) {
+            // Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-	}
+    }
 
-	public void testResourceCreationFail004() throws SQLException {
-		final Resource resource = new Resource();
-		resource.setAvailable(true);
-		resource.setDescription("My test resource");
-		resource.setDisplayName("MyTestResource");
-		resource.setMail("mytestresource@somewhere.com");
-		resource.setSimpleName("M-T-R");
+    @Test
+    public void testResourceCreationFail004() throws SQLException {
+        final Resource resource = new Resource();
+        resource.setAvailable(true);
+        resource.setDescription("My test resource");
+        resource.setDisplayName("MyTestResource");
+        resource.setMail("mytestresource@somewhere.com");
+        resource.setSimpleName("M-T-R");
 
-		final Resource duplicate = new Resource();
-		duplicate.setAvailable(true);
-		duplicate.setDescription("My test resource");
-		duplicate.setDisplayName("MyTestResource");
-		duplicate.setMail("mytestresource@somewhere.com");
-		duplicate.setSimpleName("M-T-R2");
+        final Resource duplicate = new Resource();
+        duplicate.setAvailable(true);
+        duplicate.setDescription("My test resource");
+        duplicate.setDisplayName("MyTestResource");
+        duplicate.setMail("mytestresource@somewhere.com");
+        duplicate.setSimpleName("M-T-R2");
 
-		int id = -1;
-		try {
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
-			id = resource.getIdentifier();
+        int id = -1;
+        try {
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
+            id = resource.getIdentifier();
 
-			assertTrue("Invalid identifier detected: " + id, id != -1);
+            assertTrue("Invalid identifier detected: " + id, id != -1);
 
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, duplicate);
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, duplicate);
 
-			fail("Creation succeeded with duplicate email address");
+            fail("Creation succeeded with duplicate email address");
 
-		} catch (final OXException e) {
-		    // Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+        } catch (final OXException e) {
+            // Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-	}
+    }
 
-	public void testResourceFail007() throws SQLException {
-		final Resource resource = new Resource();
-		resource.setAvailable(true);
-		resource.setDescription("My test resource");
-		resource.setDisplayName("MyTestResource");
-		resource.setMail("mytestresource@somewhere.com");
-		resource.setSimpleName(null);
-		int id = -1;
-		try {
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
-			id = resource.getIdentifier();
+    @Test
+    public void testResourceFail007() throws SQLException {
+        final Resource resource = new Resource();
+        resource.setAvailable(true);
+        resource.setDescription("My test resource");
+        resource.setDisplayName("MyTestResource");
+        resource.setMail("mytestresource@somewhere.com");
+        resource.setSimpleName(null);
+        int id = -1;
+        try {
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
+            id = resource.getIdentifier();
 
-			fail("Creation succeeded with missing mandatory field");
-		} catch (final OXException e) {
-		    // Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
-	}
+            fail("Creation succeeded with missing mandatory field");
+        } catch (final OXException e) {
+            // Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
+    }
 
-	private static final String SQL_DELETE = "DELETE FROM resource WHERE cid = ? AND id = ?";
+    private static final String SQL_DELETE = "DELETE FROM resource WHERE cid = ? AND id = ?";
 
-	private static final void deleteResource(final int id, final int cid) throws SQLException {
-		if (-1 == id) {
-			return;
-		}
-		final Connection writeCon;
-		try {
-			writeCon = Database.get(cid, true);
-		} catch (final OXException e) {
-			e.printStackTrace();
-			return;
-		}
-		PreparedStatement stmt = null;
-		try {
-			stmt = writeCon.prepareStatement(SQL_DELETE);
-			stmt.setInt(1, cid);
-			stmt.setInt(2, id);
-			stmt.executeUpdate();
+    private static final void deleteResource(final int id, final int cid) throws SQLException {
+        if (-1 == id) {
+            return;
+        }
+        final Connection writeCon;
+        try {
+            writeCon = Database.get(cid, true);
+        } catch (final OXException e) {
+            e.printStackTrace();
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_DELETE);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
 
-		} finally {
-			if (null != stmt) {
-				try {
-					stmt.close();
-				} catch (final SQLException e) {
-				}
-				stmt = null;
-			}
-			Database.back(cid, true, writeCon);
-		}
+        } finally {
+            if (null != stmt) {
+                try {
+                    stmt.close();
+                } catch (final SQLException e) {
+                }
+                stmt = null;
+            }
+            Database.back(cid, true, writeCon);
+        }
 
-	}
+    }
 }

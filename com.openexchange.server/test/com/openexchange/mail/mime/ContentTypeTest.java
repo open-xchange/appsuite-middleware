@@ -49,7 +49,11 @@
 
 package com.openexchange.mail.mime;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -57,8 +61,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTypeTest extends TestCase {
-
+public class ContentTypeTest {
     /**
      * Initializes a new {@link ContentTypeTest}.
      */
@@ -66,7 +69,8 @@ public class ContentTypeTest extends TestCase {
         super();
     }
 
-    public void testTruncatedNameParameter() {
+         @Test
+     public void testTruncatedNameParameter() {
         try {
             String hdr = "application/pdf; name=The New York Times - Breaking News, World News & Multimedia.loc.pdf";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
@@ -81,7 +85,8 @@ public class ContentTypeTest extends TestCase {
         }
     }
 
-    public void testWithCurlyBraces() {
+         @Test
+     public void testWithCurlyBraces() {
         try {
             String hdr = "{\"application/octet-stream\"}; name=\"6N1911.pdf\"";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
@@ -96,7 +101,8 @@ public class ContentTypeTest extends TestCase {
         }
     }
 
-    public void testMalformedHeaderValue() {
+         @Test
+     public void testMalformedHeaderValue() {
         try {
             String hdr = "=?windows-1252?q?application/pdf; name=\"blatt8.pdf\"";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);

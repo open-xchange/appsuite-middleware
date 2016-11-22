@@ -49,44 +49,18 @@
 
 package com.openexchange.ajax.infostore.thirdparty.test;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.infostore.thirdparty.AbstractInfostoreThirdpartyEnvironments;
-import com.openexchange.ajax.infostore.thirdparty.AbstractInfostoreThirdpartyTest;
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * {@link AbstractInfostoreThirdpartyEnvironments}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ThirdpartyInfostoreTestSuite extends AbstractInfostoreThirdpartyTest {
-
-    /**
-     * Initializes a new {@link ThirdpartyInfostoreTestSuite}.
-     * 
-     * @param name
-     */
-    public ThirdpartyInfostoreTestSuite(String name) {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.ajax.infostore.thirdparty.test.ThirdpartyInfostoreTestSuite");
-        suite.addTestSuite(ThirdpartyLifecycleTest.class);
-
-        TestSetup setup = new TestSetup(suite) {
-
-            @Override
-            protected void setUp() {
-                ThirdpartyTestEnvironment.getInstance().init();
-            }
-
-            @Override
-            protected void tearDown() throws Exception {
-                ThirdpartyTestEnvironment.getInstance().cleanup();
-            }
-        };
-        return setup;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    ThirdpartyLifecycleTest.class
+})
+public class ThirdpartyInfostoreTestSuite {
 }

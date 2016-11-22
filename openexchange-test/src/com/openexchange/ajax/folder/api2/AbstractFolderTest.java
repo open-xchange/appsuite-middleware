@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

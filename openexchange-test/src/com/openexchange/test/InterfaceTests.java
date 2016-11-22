@@ -49,6 +49,8 @@
 
 package com.openexchange.test;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.advertisement.AdvertisementTestSuite;
 import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
@@ -56,95 +58,87 @@ import com.openexchange.ajax.jslob.JSlobTestSuite;
 import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
 import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Test suite for all AJAX interface tests.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    com.openexchange.SmokeTestSuite.class,
+    
+    com.openexchange.ajax.FolderTest.class,
+    com.openexchange.ajax.MultipleTest.class,
+    com.openexchange.ajax.UserTest.class,
+    
+    com.openexchange.ajax.mailaccount.MailAccountSuite.class,
+    com.openexchange.ajax.appointment.AppointmentAJAXSuite.class,
+    com.openexchange.ajax.attach.AttachmentTests.class,
+    com.openexchange.ajax.config.ConfigTestSuite.class,
+    com.openexchange.ajax.contact.ContactAJAXSuite.class,
+    com.openexchange.ajax.folder.FolderTestSuite.class,
+    com.openexchange.ajax.group.GroupTestSuite.class,
+    com.openexchange.ajax.importexport.ImportExportServerSuite.class,
+    com.openexchange.ajax.infostore.InfostoreAJAXSuite.class,
+    com.openexchange.ajax.mail.MailTestSuite.class,
+    com.openexchange.ajax.mail.filter.MailFilterTestSuite.class,
+    com.openexchange.ajax.redirect.RedirectTests.class,
+    com.openexchange.ajax.reminder.ReminderAJAXSuite.class,
+    com.openexchange.ajax.session.SessionTestSuite.class,
+    com.openexchange.ajax.task.TaskTestSuite.class,
+    com.openexchange.ajax.publish.PublishTestSuite.class,
+    com.openexchange.ajax.subscribe.SubscribeTestSuite.class,
+    com.openexchange.ajax.user.UserAJAXSuite.class,
+    com.openexchange.subscribe.google.GoogleTestSuite.class,
+    // TODO: enable when MSLiveOAuthClient is implemented
+    // com.openexchange.subscribe.mslive.MSLiveTestSuite.class,
+    
+    com.openexchange.dav.caldav.tests.CalDAVTestSuite.class,
+    com.openexchange.dav.caldav.bugs.CalDAVBugSuite.class,
+    com.openexchange.dav.carddav.tests.CardDAVTestSuite.class,
+    com.openexchange.dav.carddav.bugs.CardDAVBugSuite.class,
+    
+    com.openexchange.grizzly.GrizzlyTestSuite.class,
+    
+    com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.class,
+    com.openexchange.webdav.xml.contact.ContactWebdavSuite.class,
+    com.openexchange.webdav.xml.folder.FolderWebdavSuite.class,
+    com.openexchange.webdav.xml.task.TaskWebdavSuite.class,
+    com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.class,
+    com.openexchange.ajax.resource.ResourceSuite.class,
+    
+    com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.class,
+    com.openexchange.webdav.xml.GroupUserTest.class,
+    /*
+     * TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
+     * com.openexchange.webdav.client.NaughtyClientTest.class,
+     */
+    com.openexchange.ajax.FunambolTests.class,
+    com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class,
+    com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class,
+    com.openexchange.ajax.contact.AggregatingContactTest.class,
+    com.openexchange.ajax.framework.ParamsTest.class,
+    com.openexchange.ajax.contact.AdvancedSearchTest.class,
+    com.openexchange.ajax.tokenloginV2.TokenLoginV2Test.class,
+    com.openexchange.ajax.oauth.OAuthTests.class,
+    com.openexchange.test.resourcecache.ResourceCacheTest.class,
+    FindTestSuite.class,
+    com.openexchange.ajax.quota.QuotaTestSuite.class,
+    JSlobTestSuite.class,
+    ShareAJAXSuite.class,
+    // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
+    // ManifestsTestSuite.class,
+    OAuthProviderTests.class,
+    // TODO: enable
+    DriveAJAXSuite.class,
+    OnboardingAJAXSuite.class,
+    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
+    AdvertisementTestSuite.class,
+
+
+})
 public final class InterfaceTests {
 
-    private InterfaceTests() {
-        super();
-    }
 
-    public static final Test suite() {
-        final TestSuite tests = new TestSuite();
-        // First of all the smoke tests.
-        tests.addTest(com.openexchange.SmokeTestSuite.suite());
-
-        tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
-        tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
-        tests.addTestSuite(com.openexchange.ajax.UserTest.class);
-
-        tests.addTest(com.openexchange.ajax.mailaccount.MailAccountSuite.suite());
-        tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.attach.AttachmentTests.class));
-        tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.folder.FolderTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.group.GroupTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
-        tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.mail.MailTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.mail.filter.MailFilterTestSuite.suite());
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class));
-        tests.addTest(com.openexchange.ajax.reminder.ReminderAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.session.SessionTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
-        tests.addTest(com.openexchange.subscribe.google.GoogleTestSuite.suite());
-        // TODO: enable when MSLiveOAuthClient is implemented
-        // tests.addTest(com.openexchange.subscribe.mslive.MSLiveTestSuite.suite());
-
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.caldav.tests.CalDAVTestSuite.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.carddav.tests.CardDAVTestSuite.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.carddav.bugs.CardDAVBugSuite.class));
-
-        tests.addTest(com.openexchange.grizzly.GrizzlyTestSuite.suite());
-
-        tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
-        tests.addTest(com.openexchange.webdav.xml.contact.ContactWebdavSuite.suite());
-        tests.addTest(com.openexchange.webdav.xml.folder.FolderWebdavSuite.suite());
-        tests.addTest(com.openexchange.webdav.xml.task.TaskWebdavSuite.suite());
-        tests.addTest(com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.suite());
-        tests.addTest(com.openexchange.ajax.resource.ResourceSuite.suite());
-
-        tests.addTest(com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.suite());
-        tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
-        /*
-         * TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
-         * tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class);
-         */
-        tests.addTestSuite(com.openexchange.ajax.FunambolTests.class);
-        tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class);
-        tests.addTestSuite(com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class);
-        tests.addTestSuite(com.openexchange.ajax.contact.AggregatingContactTest.class);
-        tests.addTestSuite(com.openexchange.ajax.framework.ParamsTest.class);
-        tests.addTestSuite(com.openexchange.ajax.contact.AdvancedSearchTest.class);
-        tests.addTestSuite(com.openexchange.ajax.tokenloginV2.TokenLoginV2Test.class);
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.oauth.OAuthTests.class));
-        tests.addTestSuite(com.openexchange.test.resourcecache.ResourceCacheTest.class);
-        tests.addTest(FindTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.quota.QuotaTestSuite.suite());
-        tests.addTest(JSlobTestSuite.suite());
-        tests.addTest(ShareAJAXSuite.suite());
-        // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
-        // tests.addTest(ManifestsTestSuite.suite());
-        tests.addTest(new JUnit4TestAdapter(OAuthProviderTests.class));
-        // TODO: enable
-        tests.addTest(DriveAJAXSuite.suite());
-        tests.addTest(OnboardingAJAXSuite.suite());
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class));
-
-        tests.addTest(AdvertisementTestSuite.suite());
-
-        return tests;
-    }
 }

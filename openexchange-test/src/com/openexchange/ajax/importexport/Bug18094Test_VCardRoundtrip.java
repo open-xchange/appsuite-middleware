@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -57,6 +59,8 @@ import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.VCardExportRequest;
 import com.openexchange.ajax.importexport.actions.VCardExportResponse;
@@ -84,13 +88,14 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         contact = ContactTestManager.generateFullContact(folderID);
         manager.newAction(contact);
     }
 
+    @Test
     public void testFullVCardRoundtrip() throws Exception {
         VCardExportRequest exportRequest = new VCardExportRequest(folderID, false);
         VCardExportResponse exportResponse = manager.getClient().execute(exportRequest);

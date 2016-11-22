@@ -52,7 +52,7 @@ package com.openexchange.groupware.infostore.search.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.AndTerm;
@@ -67,6 +67,10 @@ import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -74,8 +78,7 @@ import com.openexchange.tools.session.SimServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ToMySqlQueryVisitorTest extends TestCase {
-
+public class ToMySqlQueryVisitorTest {
     private final static Pattern WRONG_OPERATORS = Pattern.compile("AND[ \t\r\n\f]*OR|AND[ \\t\\r\\n\\f]*AND|OR[ \\t\\r\\n\\f]*OR");
     private final static Pattern MULTIPLE_WHITESPACE = Pattern.compile("[ ]{2,}");
 
@@ -89,7 +92,8 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         this.session = new SimServerSession(1, 1);
     }
 
-    public void testSqlPattern() {
+         @Test
+     public void testSqlPattern() {
 
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", true, true);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
@@ -135,7 +139,8 @@ public class ToMySqlQueryVisitorTest extends TestCase {
 
     }
 
-    public void testFolders() {
+         @Test
+     public void testFolders() {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] {120}, "SELECT field01");
         visitor.visit(dtz);
@@ -144,7 +149,8 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
 
-    public void testWithoutAllFolders() {
+         @Test
+     public void testWithoutAllFolders() {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, null, new int[] {120}, "SELECT field01");
         visitor.visit(dtz);
@@ -161,7 +167,8 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
 
-    public void testWithoutOwnFolders() {
+         @Test
+     public void testWithoutOwnFolders() {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
@@ -178,7 +185,8 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
 
-    public void testWithLimit() {
+         @Test
+     public void testWithLimit() {
         FileNameTerm term = new FileNameTerm("test123");
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", null, InfostoreSearchEngine.NOT_SET, 0, 5);
         visitor.visit(term);
@@ -188,7 +196,8 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         assertTrue("Unexpected SQL query", result.endsWith("WHERE infostore.cid = 1 AND infostore.created_by=1 AND UPPER(infostore_document.filename) LIKE UPPER('%test123%') LIMIT 0,5"));
     }
 
-    public void testWithLimitAndOrder() {
+         @Test
+     public void testWithLimitAndOrder() {
         FileNameTerm term = new FileNameTerm("test123");
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, InfostoreSearchEngine.ASC, 0, 5);
         visitor.visit(term);
@@ -199,7 +208,8 @@ public class ToMySqlQueryVisitorTest extends TestCase {
     }
 
     // see bug 32874
-    public void testUnsupportedTerms() throws OXException {
+         @Test
+     public void testUnsupportedTerms() throws OXException {
         ContentTerm term1 = new ContentTerm("test123", false, false);
         FileSizeTerm term2 = new FileSizeTerm(new ComparablePattern<Number>() {
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -195,10 +197,6 @@ public class GetStructureTest extends AbstractMailTest {
 
     @Before
     @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testGetStructure() throws OXException, IOException, JSONException {
 

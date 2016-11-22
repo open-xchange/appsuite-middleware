@@ -2,6 +2,7 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
@@ -10,6 +11,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         super();
     }
 
+    @Test
     public void testDailyRecurrenceFromWinter2SummerTime() throws Exception {
         final Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
 
@@ -40,6 +42,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testDailyRecurrenceFromSummer2WinterTime() throws Exception {
         final Date until = simpleDateFormatUTC.parse("2007-11-01 00:00:00");
 

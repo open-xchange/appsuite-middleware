@@ -51,8 +51,11 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -89,7 +92,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -124,7 +127,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         appointmentPublic.setIgnoreConflicts(true);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (appointmentPrivate.getObjectID() > 0) {
             clientA.execute(new DeleteRequest(appointmentPrivate));

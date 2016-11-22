@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.config;
 
+import static org.junit.Assert.assertTrue;
 import java.util.regex.Pattern;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;

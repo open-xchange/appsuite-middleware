@@ -1,7 +1,10 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
 import com.openexchange.ajax.importexport.actions.CSVImportResponse;
@@ -24,6 +27,7 @@ public class Bug33748Test extends AbstractManagedContactTest {
         super();
     }
 
+    @Test
     public void testImportUTF16LE() throws Exception {
         /*
          * import csv

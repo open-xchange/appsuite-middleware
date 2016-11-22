@@ -1,9 +1,12 @@
 
 package com.openexchange.webdav.xml.appointment.recurrence;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug6960Test extends AbstractRecurrenceTest {
@@ -14,10 +17,7 @@ public class Bug6960Test extends AbstractRecurrenceTest {
         super();
     }
 
-    public void testDummy() {
-
-    }
-
+    @Test
     public void testBug6960() throws Exception {
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(startTime);

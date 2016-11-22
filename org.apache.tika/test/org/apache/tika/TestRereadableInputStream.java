@@ -22,20 +22,22 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.apache.tika.utils.RereadableInputStream;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class TestRereadableInputStream extends TestCase {
-
+public class TestRereadableInputStream {
     private final int TEST_SIZE = 3;
 
     private final int MEMORY_THRESHOLD = 1;
 
     private final int NUM_PASSES = 4;
 
-    public void test() throws IOException {
+         @Test
+     public void test() throws IOException {
 
         InputStream is = createTestInputStream();
         RereadableInputStream ris = new RereadableInputStream(is,
@@ -63,7 +65,8 @@ public class TestRereadableInputStream extends TestCase {
      * 
      * @throws IOException
      */
-    public void testRewind() throws IOException {
+         @Test
+     public void testRewind() throws IOException {
         doTestRewind(true);
         doTestRewind(false);
     }
@@ -106,7 +109,8 @@ public class TestRereadableInputStream extends TestCase {
     }
 
 
-    public void testCloseBehavior() throws IOException {
+         @Test
+     public void testCloseBehavior() throws IOException {
         doACloseBehaviorTest(true);
         doACloseBehaviorTest(false);
     }

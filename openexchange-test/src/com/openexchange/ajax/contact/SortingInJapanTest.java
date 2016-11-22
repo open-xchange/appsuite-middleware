@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -68,7 +73,7 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         originalLocale = client.execute(new GetRequest(Tree.Language)).getString();
@@ -78,7 +83,7 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
         client.execute(new SetRequest(Tree.Language, "ja-JP"));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != originalLocale) {
             client.execute(new SetRequest(Tree.Language, originalLocale));

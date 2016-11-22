@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -58,6 +62,9 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -83,7 +90,7 @@ public class LockTest extends InfostoreAJAXTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         sessionId = getSessionId();
@@ -116,7 +123,7 @@ public class LockTest extends InfostoreAJAXTest {
 
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
 
         FolderTest.deleteFolders(getWebConversation(), getHostName(), sessionId, new int[] { folderId }, Long.MAX_VALUE, false);
@@ -124,6 +131,7 @@ public class LockTest extends InfostoreAJAXTest {
 
     }
 
+    @Test
     public void testLock() throws Exception {
 
         Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
@@ -200,6 +208,7 @@ public class LockTest extends InfostoreAJAXTest {
 
     }
 
+    @Test
     public void testUnlock() throws Exception {
         Response res = lock(getWebConversation(), getHostName(), sessionId, clean.get(0));
         assertNoError(res);

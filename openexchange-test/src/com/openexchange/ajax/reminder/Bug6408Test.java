@@ -1,9 +1,11 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
@@ -17,6 +19,7 @@ public class Bug6408Test extends ReminderTest {
         super();
     }
 
+    @Test
     public void testBug6408() throws Exception {
         ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
         final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());

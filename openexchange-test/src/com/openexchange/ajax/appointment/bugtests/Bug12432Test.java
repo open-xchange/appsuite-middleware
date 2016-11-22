@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;

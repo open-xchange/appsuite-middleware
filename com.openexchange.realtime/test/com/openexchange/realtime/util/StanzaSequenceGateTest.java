@@ -51,8 +51,8 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         lastInternallyHandledSeqNum = -1L;
     }
 
-    @Test
-    public void testFirstStanzaGetsLost() throws Exception {
+     @Test
+     public void testFirstStanzaGetsLost() throws Exception {
         Stanza stanza0 = createStanza(0L);
         Stanza stanza1 = createStanza(1L);
         Stanza stanza2 = createStanza(2L);
@@ -76,8 +76,8 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertNull("Inbox has not been removed", inbox);
     }
 
-    @Test
-    public void testLostStanza() throws Exception {
+     @Test
+     public void testLostStanza() throws Exception {
         Stanza stanza0 = createStanza(0L);
         Stanza stanza1 = createStanza(1L);
         Stanza stanza2 = createStanza(2L);
@@ -100,8 +100,8 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertNull("Inbox has not been removed", inbox);
     }
 
-    @Test
-    public void testGapGreaterOne() throws Exception {
+     @Test
+     public void testGapGreaterOne() throws Exception {
         Stanza stanza0 = createStanza(0L);
         Stanza stanza1 = createStanza(1L);
         Stanza stanza2 = createStanza(2L);
@@ -149,8 +149,8 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertEquals("Handled stanzas in wrong order", 3L, lastInternallyHandledSeqNum);
     }
 
-    @Test
-    public void testMultipleGaps() throws Exception {
+     @Test
+     public void testMultipleGaps() throws Exception {
         Stanza stanza0 = createStanza(0L);
         Stanza stanza1 = createStanza(1L);
         Stanza stanza2 = createStanza(2L);
@@ -181,8 +181,8 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertEquals("Handled stanzas in wrong order", 5L, lastInternallyHandledSeqNum);
     }
 
-    @Test
-    public void testBufferSize() throws Exception {
+     @Test
+     public void testBufferSize() throws Exception {
         Stanza stanza = createStanza(0L);
         for (int i = 1; i <= BUFFER_SIZE; i++) {
             Stanza tmp = createStanza(i);
@@ -213,8 +213,8 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertEquals("Handled stanzas in wrong order", BUFFER_SIZE, lastInternallyHandledSeqNum);
     }
 
-    @Test
-    public void testArbitraryStanzaLoss() throws Exception {
+     @Test
+     public void testArbitraryStanzaLoss() throws Exception {
         int messages = BUFFER_SIZE;
         int div;
         Random random = new Random(System.currentTimeMillis());

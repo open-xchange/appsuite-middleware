@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -57,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
@@ -146,17 +149,12 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         //  final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
         //  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
         //  sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, OXException {

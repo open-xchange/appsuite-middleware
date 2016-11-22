@@ -1,9 +1,11 @@
 
 package com.openexchange.webdav.xml.attachment;
 
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import org.junit.Test;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -19,6 +21,7 @@ public class ListTest extends AttachmentTest {
         super();
     }
 
+    @Test
     public void testLoadAttachment() throws Exception {
         final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
         final int contactFolderId = folderObj.getObjectID();
@@ -52,6 +55,7 @@ public class ListTest extends AttachmentTest {
         assertEqualsAndNotNull("byte[] are not equals", data, byteArrayOutputStream.toByteArray());
     }
 
+    @Test
     public void testLoadAttachmentWithRtf() throws Exception {
         final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
         final int contactFolderId = folderObj.getObjectID();

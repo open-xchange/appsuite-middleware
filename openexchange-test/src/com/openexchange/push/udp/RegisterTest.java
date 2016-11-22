@@ -1,12 +1,13 @@
 
 package com.openexchange.push.udp;
 
+import static org.junit.Assert.assertEquals;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class RegisterTest extends TestCase {
+public class RegisterTest {
 
     public static final int MAGIC = 1337;
 
@@ -39,6 +40,7 @@ public class RegisterTest extends TestCase {
         this.contextId = contextId;
     }
 
+    @Test
     public void testRegister() throws Exception {
         if (datagramSocket == null) {
             throw new Exception("DatagramSocket is null");

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
@@ -71,16 +73,6 @@ public class ConfigTest extends AbstractAJAXSession {
 
     public ConfigTest() {
         super();
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

@@ -18,20 +18,20 @@ package org.apache.tika.sax;
 
 import java.io.StringReader;
 import java.net.ConnectException;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link OfflineContentHandler} class.
  */
-public class OfflineContentHandlerTest extends TestCase {
-
+public class OfflineContentHandlerTest {
     private SAXParser parser;
 
     private DefaultHandler offline;
@@ -41,7 +41,8 @@ public class OfflineContentHandlerTest extends TestCase {
         offline = new OfflineContentHandler(new DefaultHandler());
     }
 
-    public void testExternalDTD() throws Exception {
+         @Test
+     public void testExternalDTD() throws Exception {
         String xml =
             "<!DOCTYPE foo SYSTEM \"http://127.234.172.38:7845/bar\"><foo/>";
         try {
@@ -51,7 +52,8 @@ public class OfflineContentHandlerTest extends TestCase {
         }
     }
 
-    public void testExternalEntity() throws Exception {
+         @Test
+     public void testExternalEntity() throws Exception {
         String xml =
             "<!DOCTYPE foo ["
             + " <!ENTITY bar SYSTEM \"http://127.234.172.38:7845/bar\">"

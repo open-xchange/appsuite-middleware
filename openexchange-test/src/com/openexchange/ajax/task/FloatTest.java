@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
 import java.math.BigDecimal;
 import org.junit.Test;
 import com.openexchange.ajax.task.actions.DeleteRequest;

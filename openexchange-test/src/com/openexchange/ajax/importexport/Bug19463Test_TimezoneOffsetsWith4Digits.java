@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -13,6 +15,7 @@ public class Bug19463Test_TimezoneOffsetsWith4Digits extends ManagedAppointmentT
         super();
     }
 
+    @Test
     public void testTimezoneOffsetWith4DigitsIsPassed() throws Exception {
         ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));
         assertFalse("Should not fail because of 4-digit timezone code", response.hasError());

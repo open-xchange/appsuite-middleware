@@ -67,7 +67,12 @@ import static com.openexchange.groupware.container.CalendarObject.START_DATE;
 import static com.openexchange.groupware.container.CalendarObject.TITLE;
 import static com.openexchange.groupware.container.CalendarObject.UNTIL;
 import static com.openexchange.groupware.container.CalendarObject.USERS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -84,6 +89,7 @@ public class CalendarObjectTest extends CommonObjectTest {
 
     private CalendarObject single = null;
 
+    @Test
     public void testIsPartOfSeries() {
         assertTrue(seriesMaster.isPartOfSeries());
         assertTrue(ocurrence1.isPartOfSeries());
@@ -94,6 +100,7 @@ public class CalendarObjectTest extends CommonObjectTest {
 
     }
 
+    @Test
     public void testIsSpecificOcurrence() {
         assertTrue(ocurrence1.isSpecificOcurrence());
         assertTrue(ocurrence2.isSpecificOcurrence());
@@ -103,6 +110,7 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertFalse(single.isSpecificOcurrence());
     }
 
+    @Test
     public void testIsException() {
         assertTrue(exception.isException());
         assertTrue(ocurrence1.isException());
@@ -112,6 +120,7 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertFalse(single.isException());
     }
 
+    @Test
     public void testIsMaster() {
         assertTrue(seriesMaster.isMaster());
 
@@ -122,6 +131,7 @@ public class CalendarObjectTest extends CommonObjectTest {
 
     }
 
+    @Test
     public void testIsSingle() {
         assertTrue(single.isSingle());
 
@@ -132,7 +142,7 @@ public class CalendarObjectTest extends CommonObjectTest {
 
     }
 
-    @Override
+    @Before
     public void setUp() {
         int masterId = 12;
         int singleId = 14;
@@ -196,7 +206,7 @@ public class CalendarObjectTest extends CommonObjectTest {
 
     }
 
-    @Override
+    @Test
     public void testAttrAccessors() {
 
         CalendarObject object = new TestCalendarObject();
@@ -210,14 +220,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsOccurrence());
         assertEquals(-12, object.get(RECURRENCE_COUNT));
 
-        object.set(RECURRENCE_COUNT,12);
+        object.set(RECURRENCE_COUNT, 12);
         assertEquals(12, object.getOccurrence());
 
         object.remove(RECURRENCE_COUNT);
         assertFalse(object.contains(RECURRENCE_COUNT));
         assertFalse(object.containsOccurrence());
-
-
 
         // UNTIL
         assertFalse(object.contains(UNTIL));
@@ -228,20 +236,19 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsUntil());
         assertEquals(new Date(42), object.get(UNTIL));
 
-        object.set(UNTIL,new Date(23));
+        object.set(UNTIL, new Date(23));
         assertEquals(new Date(23), object.getUntil());
 
         object.remove(UNTIL);
         assertFalse(object.contains(UNTIL));
         assertFalse(object.containsUntil());
 
-
         // USERS
         assertFalse(object.contains(USERS));
         assertFalse(object.containsUserParticipants());
 
-        UserParticipant[] users = new UserParticipant[]{new UserParticipant(1)};
-        UserParticipant[] otherUsers = new UserParticipant[]{new UserParticipant(2)};
+        UserParticipant[] users = new UserParticipant[] { new UserParticipant(1) };
+        UserParticipant[] otherUsers = new UserParticipant[] { new UserParticipant(2) };
 
         object.setUsers(users);
         assertTrue(object.contains(USERS));
@@ -255,8 +262,6 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertFalse(object.contains(USERS));
         assertFalse(object.containsUserParticipants());
 
-
-
         // NOTE
         assertFalse(object.contains(NOTE));
         assertFalse(object.containsNote());
@@ -266,14 +271,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsNote());
         assertEquals("Bla", object.get(NOTE));
 
-        object.set(NOTE,"Blupp");
+        object.set(NOTE, "Blupp");
         assertEquals("Blupp", object.getNote());
 
         object.remove(NOTE);
         assertFalse(object.contains(NOTE));
         assertFalse(object.containsNote());
-
-
 
         // RECURRENCE_DATE_POSITION
         assertFalse(object.contains(RECURRENCE_DATE_POSITION));
@@ -284,14 +287,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsRecurrenceDatePosition());
         assertEquals(new Date(42), object.get(RECURRENCE_DATE_POSITION));
 
-        object.set(RECURRENCE_DATE_POSITION,new Date(23));
+        object.set(RECURRENCE_DATE_POSITION, new Date(23));
         assertEquals(new Date(23), object.getRecurrenceDatePosition());
 
         object.remove(RECURRENCE_DATE_POSITION);
         assertFalse(object.contains(RECURRENCE_DATE_POSITION));
         assertFalse(object.containsRecurrenceDatePosition());
-
-
 
         // END_DATE
         assertFalse(object.contains(END_DATE));
@@ -302,14 +303,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsEndDate());
         assertEquals(new Date(42), object.get(END_DATE));
 
-        object.set(END_DATE,new Date(23));
+        object.set(END_DATE, new Date(23));
         assertEquals(new Date(23), object.getEndDate());
 
         object.remove(END_DATE);
         assertFalse(object.contains(END_DATE));
         assertFalse(object.containsEndDate());
-
-
 
         // RECURRENCE_POSITION
         assertFalse(object.contains(RECURRENCE_POSITION));
@@ -320,24 +319,19 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsRecurrencePosition());
         assertEquals(-12, object.get(RECURRENCE_POSITION));
 
-        object.set(RECURRENCE_POSITION,12);
+        object.set(RECURRENCE_POSITION, 12);
         assertEquals(12, object.getRecurrencePosition());
 
         object.remove(RECURRENCE_POSITION);
         assertFalse(object.contains(RECURRENCE_POSITION));
         assertFalse(object.containsRecurrencePosition());
 
-
-
         // RECURRENCE_CALCULATOR
         object.setRecurrenceCalculator(-12);
         assertEquals(-12, object.get(RECURRENCE_CALCULATOR));
 
-        object.set(RECURRENCE_CALCULATOR,12);
+        object.set(RECURRENCE_CALCULATOR, 12);
         assertEquals(12, object.getRecurrenceCalculator());
-
-
-
 
         // DAYS
         assertFalse(object.contains(DAYS));
@@ -348,14 +342,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsDays());
         assertEquals(-12, object.get(DAYS));
 
-        object.set(DAYS,12);
+        object.set(DAYS, 12);
         assertEquals(12, object.getDays());
 
         object.remove(DAYS);
         assertFalse(object.contains(DAYS));
         assertFalse(object.containsDays());
-
-
 
         // NOTIFICATION
         assertFalse(object.contains(NOTIFICATION));
@@ -366,14 +358,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsNotification());
         assertEquals(false, object.get(NOTIFICATION));
 
-        object.set(NOTIFICATION,true);
+        object.set(NOTIFICATION, true);
         assertEquals(true, object.getNotification());
 
         object.remove(NOTIFICATION);
         assertFalse(object.contains(NOTIFICATION));
         assertFalse(object.containsNotification());
-
-
 
         // MONTH
         assertFalse(object.contains(MONTH));
@@ -384,14 +374,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsMonth());
         assertEquals(-12, object.get(MONTH));
 
-        object.set(MONTH,12);
+        object.set(MONTH, 12);
         assertEquals(12, object.getMonth());
 
         object.remove(MONTH);
         assertFalse(object.contains(MONTH));
         assertFalse(object.containsMonth());
-
-
 
         // RECURRENCE_COUNT
         assertFalse(object.contains(RECURRENCE_COUNT));
@@ -402,13 +390,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsRecurrenceCount());
         assertEquals(-12, object.get(RECURRENCE_COUNT));
 
-        object.set(RECURRENCE_COUNT,12);
+        object.set(RECURRENCE_COUNT, 12);
         assertEquals(12, object.getRecurrenceCount());
 
         object.remove(RECURRENCE_COUNT);
         assertFalse(object.contains(RECURRENCE_COUNT));
         assertFalse(object.containsRecurrenceCount());
-
 
         // DAY_IN_MONTH
         assertFalse(object.contains(DAY_IN_MONTH));
@@ -419,14 +406,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsDayInMonth());
         assertEquals(-12, object.get(DAY_IN_MONTH));
 
-        object.set(DAY_IN_MONTH,12);
+        object.set(DAY_IN_MONTH, 12);
         assertEquals(12, object.getDayInMonth());
 
         object.remove(DAY_IN_MONTH);
         assertFalse(object.contains(DAY_IN_MONTH));
         assertFalse(object.containsDayInMonth());
-
-
 
         // RECURRENCE_TYPE
         assertFalse(object.contains(RECURRENCE_TYPE));
@@ -437,14 +422,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsRecurrenceType());
         assertEquals(-12, object.get(RECURRENCE_TYPE));
 
-        object.set(RECURRENCE_TYPE,12);
+        object.set(RECURRENCE_TYPE, 12);
         assertEquals(12, object.getRecurrenceType());
 
         object.remove(RECURRENCE_TYPE);
         assertFalse(object.contains(RECURRENCE_TYPE));
         assertFalse(object.containsRecurrenceType());
-
-
 
         // START_DATE
         assertFalse(object.contains(START_DATE));
@@ -455,14 +438,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsStartDate());
         assertEquals(new Date(42), object.get(START_DATE));
 
-        object.set(START_DATE,new Date(23));
+        object.set(START_DATE, new Date(23));
         assertEquals(new Date(23), object.getStartDate());
 
         object.remove(START_DATE);
         assertFalse(object.contains(START_DATE));
         assertFalse(object.containsStartDate());
-
-
 
         // INTERVAL
         assertFalse(object.contains(INTERVAL));
@@ -473,14 +454,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsInterval());
         assertEquals(-12, object.get(INTERVAL));
 
-        object.set(INTERVAL,12);
+        object.set(INTERVAL, 12);
         assertEquals(12, object.getInterval());
 
         object.remove(INTERVAL);
         assertFalse(object.contains(INTERVAL));
         assertFalse(object.containsInterval());
-
-
 
         // TITLE
         assertFalse(object.contains(TITLE));
@@ -491,14 +470,12 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsTitle());
         assertEquals("Bla", object.get(TITLE));
 
-        object.set(TITLE,"Blupp");
+        object.set(TITLE, "Blupp");
         assertEquals("Blupp", object.getTitle());
 
         object.remove(TITLE);
         assertFalse(object.contains(TITLE));
         assertFalse(object.containsTitle());
-
-
 
         // RECURRENCE_ID
         assertFalse(object.contains(RECURRENCE_ID));
@@ -509,19 +486,16 @@ public class CalendarObjectTest extends CommonObjectTest {
         assertTrue(object.containsRecurrenceID());
         assertEquals(-12, object.get(RECURRENCE_ID));
 
-        object.set(RECURRENCE_ID,12);
+        object.set(RECURRENCE_ID, 12);
         assertEquals(12, object.getRecurrenceID());
 
         object.remove(RECURRENCE_ID);
         assertFalse(object.contains(RECURRENCE_ID));
         assertFalse(object.containsRecurrenceID());
 
-
-
         // PARTICIPANTS
         assertFalse(object.contains(PARTICIPANTS));
         assertFalse(object.containsParticipants());
-
 
         object.setParticipants(users);
         assertTrue(object.contains(PARTICIPANTS));
@@ -534,7 +508,6 @@ public class CalendarObjectTest extends CommonObjectTest {
         object.remove(PARTICIPANTS);
         assertFalse(object.contains(PARTICIPANTS));
         assertFalse(object.containsParticipants());
-
 
     }
 

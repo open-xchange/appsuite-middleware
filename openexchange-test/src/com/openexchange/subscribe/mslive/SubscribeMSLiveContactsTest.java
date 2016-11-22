@@ -49,8 +49,11 @@
 
 package com.openexchange.subscribe.mslive;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
@@ -71,25 +74,20 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
 
     private ContactTestManager contactMgr;
 
-    /**
-     * Initializes a new {@link SubscribeMSLiveContactsTest}.
-     * 
-     * @param name
-     */
-    public SubscribeMSLiveContactsTest() {
-        super();
-    }
-
+    @Before
     public void setUp() throws Exception {
         super.setUp();
+        MSLiveSubscribeTestEnvironment.getInstance().init();
         folderMgr = new FolderTestManager(client);
         contactMgr = new ContactTestManager(client);
     }
 
+    @After
     public void tearDown() throws Exception {
         if (folderMgr != null) {
             folderMgr.cleanUp();
         }
+        MSLiveSubscribeTestEnvironment.getInstance().cleanup();
         super.tearDown();
     }
 

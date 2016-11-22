@@ -51,6 +51,9 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -90,7 +93,7 @@ public class Bug24502Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -128,7 +131,7 @@ public class Bug24502Test extends AbstractAJAXSession {
         assertTrue("Appointment should be deleted completely.", getResponse.getErrorMessage().contains("not found"));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
         super.tearDown();

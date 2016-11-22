@@ -1,9 +1,11 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.fail;
 import java.util.Date;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.CopyRequest;
 import com.openexchange.ajax.contact.action.CopyResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
@@ -25,6 +27,7 @@ public class CopyTest extends AbstractContactTest {
     private int targetFolder;
     private FolderObject folder;
 
+    @Test
     public void testCopy() throws Exception {
         final Contact contactObj = new Contact();
         contactObj.setSurName("testCopy");

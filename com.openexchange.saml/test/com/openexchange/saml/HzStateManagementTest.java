@@ -124,8 +124,8 @@ public class HzStateManagementTest {
         stateManagement = new HzStateManagement(hz1);
     }
 
-    @Test
-    public void testAuthRequestInfoPortable() throws Exception {
+     @Test
+     public void testAuthRequestInfoPortable() throws Exception {
         String requestId = UUIDs.getUnformattedString(UUID.randomUUID());
         String domainName = "example.com";
         String loginPath = "/appsuite/";

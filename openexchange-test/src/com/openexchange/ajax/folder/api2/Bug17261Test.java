@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

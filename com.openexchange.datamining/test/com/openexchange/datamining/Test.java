@@ -49,10 +49,11 @@
 
 package com.openexchange.datamining;
 
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
-import junit.framework.TestCase;
+import org.junit.Before;
 
 
 /**
@@ -60,11 +61,10 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class Test extends TestCase {
-
+public class Test {
     PrintStream out;
 
-    @Override
+    @Before
     public void setUp(){
         String printString = new String();
         out = new PrintStream(new ByteArrayOutputStream());

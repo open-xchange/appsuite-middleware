@@ -50,8 +50,10 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -74,7 +76,7 @@ public class Bug31810Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -106,10 +108,4 @@ public class Bug31810Test extends AbstractAJAXSession {
         List<ConflictObject> conflicts = ctm.getLastResponse().getConflicts();
         assertFalse("No conflict expected.", conflicts != null && conflicts.size() > 1);
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
 }

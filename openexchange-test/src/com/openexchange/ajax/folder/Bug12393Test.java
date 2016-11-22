@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -100,7 +104,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         final AJAXClient myClient = getClient();
@@ -139,7 +143,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         subFolderId = subFolderObject.getObjectID();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         final AJAXClient myClient = getClient();
         // reload the parent folder (it has been changed since its creation by the modification of permissions)

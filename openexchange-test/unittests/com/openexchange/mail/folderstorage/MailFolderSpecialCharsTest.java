@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.folderstorage;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailProviderRegistry;
@@ -68,235 +70,226 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 
-	private static final String INBOX = "INBOX";
+    private static final String INBOX = "INBOX";
 
-	/**
-	 *
-	 */
-	public MailFolderSpecialCharsTest() {
-		super();
-	}
+    /**
+     *
+     */
+    public MailFolderSpecialCharsTest() {
+        super();
+    }
 
-	/**
-	 * @param name
-	 */
-	public MailFolderSpecialCharsTest(final String name) {
-		super();
-	}
+    /**
+     * @param name
+     */
+    public MailFolderSpecialCharsTest(final String name) {
+        super();
+    }
 
-	public void testFolderCreateAndSubfolders() throws OXException {
-			final SessionObject session = getSession();
+    @Test
+    public void testFolderCreateAndSubfolders() throws OXException {
+        final SessionObject session = getSession();
 
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        mailAccess.connect();
 
-			String fullname = null;
-			try {
+        String fullname = null;
+        try {
 
-				String parentFullname = null;
-				final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-				final String invalidName = "Foo" + inbox.getSeparator() + "Bar";
-				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName)
-							.toString();
-					parentFullname = INBOX;
-				} else {
-					fullname = invalidName;
-					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-				}
+            String parentFullname = null;
+            final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+            final String invalidName = "Foo" + inbox.getSeparator() + "Bar";
+            if (inbox.isHoldsFolders()) {
+                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName).toString();
+                parentFullname = INBOX;
+            } else {
+                fullname = invalidName;
+                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+            }
 
-				final MailFolderDescription mfd = new MailFolderDescription();
-				mfd.setExists(false);
-				mfd.setParentFullname(parentFullname);
-				mfd.setSeparator(inbox.getSeparator());
-				mfd.setSubscribed(false);
-				mfd.setName(invalidName);
+            final MailFolderDescription mfd = new MailFolderDescription();
+            mfd.setExists(false);
+            mfd.setParentFullname(parentFullname);
+            mfd.setSeparator(inbox.getSeparator());
+            mfd.setSubscribed(false);
+            mfd.setName(invalidName);
 
-				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-						.createNewMailPermission(session, MailAccount.DEFAULT_ID);
-				p.setEntity(getUser());
-				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-				p.setFolderAdmin(true);
-				p.setGroupPermission(false);
-				mfd.addPermission(p);
-				OXException me = null;
-				try {
-					mailAccess.getFolderStorage().createFolder(mfd);
-				} catch (final OXException e) {
-					me = e;
-				}
-				assertTrue("Folder created although an invalid name was specified", me != null);
+            final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
+            p.setEntity(getUser());
+            p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            p.setFolderAdmin(true);
+            p.setGroupPermission(false);
+            mfd.addPermission(p);
+            OXException me = null;
+            try {
+                mailAccess.getFolderStorage().createFolder(mfd);
+            } catch (final OXException e) {
+                me = e;
+            }
+            assertTrue("Folder created although an invalid name was specified", me != null);
 
-				String validName = "Foo&Bar";
-				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName)
-							.toString();
-					parentFullname = INBOX;
-				} else {
-					fullname = validName;
-					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-				}
-				mfd.setExists(false);
-				mfd.setParentFullname(parentFullname);
-				mfd.setSeparator(inbox.getSeparator());
-				mfd.setSubscribed(false);
-				mfd.setName(validName);
-				mailAccess.getFolderStorage().createFolder(mfd);
-				assertTrue(mailAccess.getFolderStorage().getFolder(fullname).getName().equals(validName));
-				if (fullname != null) {
-					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-				}
+            String validName = "Foo&Bar";
+            if (inbox.isHoldsFolders()) {
+                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName).toString();
+                parentFullname = INBOX;
+            } else {
+                fullname = validName;
+                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+            }
+            mfd.setExists(false);
+            mfd.setParentFullname(parentFullname);
+            mfd.setSeparator(inbox.getSeparator());
+            mfd.setSubscribed(false);
+            mfd.setName(validName);
+            mailAccess.getFolderStorage().createFolder(mfd);
+            assertTrue(mailAccess.getFolderStorage().getFolder(fullname).getName().equals(validName));
+            if (fullname != null) {
+                mailAccess.getFolderStorage().deleteFolder(fullname, true);
+            }
 
-				validName = "Foo 1 Bar";
-				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName)
-							.toString();
-					parentFullname = INBOX;
-				} else {
-					fullname = validName;
-					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-				}
-				mfd.setExists(false);
-				mfd.setParentFullname(parentFullname);
-				mfd.setSeparator(inbox.getSeparator());
-				mfd.setSubscribed(false);
-				mfd.setName(validName);
-				mailAccess.getFolderStorage().createFolder(mfd);
-				assertTrue(mailAccess.getFolderStorage().getFolder(fullname).getName().equals(validName));
-				if (fullname != null) {
-					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-				}
+            validName = "Foo 1 Bar";
+            if (inbox.isHoldsFolders()) {
+                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName).toString();
+                parentFullname = INBOX;
+            } else {
+                fullname = validName;
+                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+            }
+            mfd.setExists(false);
+            mfd.setParentFullname(parentFullname);
+            mfd.setSeparator(inbox.getSeparator());
+            mfd.setSubscribed(false);
+            mfd.setName(validName);
+            mailAccess.getFolderStorage().createFolder(mfd);
+            assertTrue(mailAccess.getFolderStorage().getFolder(fullname).getName().equals(validName));
+            if (fullname != null) {
+                mailAccess.getFolderStorage().deleteFolder(fullname, true);
+            }
 
-				validName = "1 und 2";
-				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName)
-							.toString();
-					parentFullname = INBOX;
-				} else {
-					fullname = validName;
-					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-				}
-				mfd.setExists(false);
-				mfd.setParentFullname(parentFullname);
-				mfd.setSeparator(inbox.getSeparator());
-				mfd.setSubscribed(false);
-				mfd.setName(validName);
-				mailAccess.getFolderStorage().createFolder(mfd);
-				assertTrue(mailAccess.getFolderStorage().getFolder(fullname).getName().equals(validName));
+            validName = "1 und 2";
+            if (inbox.isHoldsFolders()) {
+                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName).toString();
+                parentFullname = INBOX;
+            } else {
+                fullname = validName;
+                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+            }
+            mfd.setExists(false);
+            mfd.setParentFullname(parentFullname);
+            mfd.setSeparator(inbox.getSeparator());
+            mfd.setSubscribed(false);
+            mfd.setName(validName);
+            mailAccess.getFolderStorage().createFolder(mfd);
+            assertTrue(mailAccess.getFolderStorage().getFolder(fullname).getName().equals(validName));
 
-			} finally {
-				if (fullname != null) {
-					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-				}
+        } finally {
+            if (fullname != null) {
+                mailAccess.getFolderStorage().deleteFolder(fullname, true);
+            }
 
-				/*
-				 * close
-				 */
-				mailAccess.close(false);
-			}
-	}
+            /*
+             * close
+             */
+            mailAccess.close(false);
+        }
+    }
 
-	public void testFailIfSeparatorContained() throws OXException {
-			final SessionObject session = getSession();
+    @Test
+    public void testFailIfSeparatorContained() throws OXException {
+        final SessionObject session = getSession();
 
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        mailAccess.connect();
 
-			String fullname = null;
-			try {
+        String fullname = null;
+        try {
 
-				String parentFullname = null;
-				final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-				String invalidName = "Foo" + inbox.getSeparator() + "Bar";
-				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName)
-							.toString();
-					parentFullname = INBOX;
-				} else {
-					fullname = invalidName;
-					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-				}
+            String parentFullname = null;
+            final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+            String invalidName = "Foo" + inbox.getSeparator() + "Bar";
+            if (inbox.isHoldsFolders()) {
+                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName).toString();
+                parentFullname = INBOX;
+            } else {
+                fullname = invalidName;
+                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+            }
 
-				final MailFolderDescription mfd = new MailFolderDescription();
-				mfd.setExists(false);
-				mfd.setParentFullname(parentFullname);
-				mfd.setSeparator(inbox.getSeparator());
-				mfd.setSubscribed(false);
-				mfd.setName(invalidName);
+            final MailFolderDescription mfd = new MailFolderDescription();
+            mfd.setExists(false);
+            mfd.setParentFullname(parentFullname);
+            mfd.setSeparator(inbox.getSeparator());
+            mfd.setSubscribed(false);
+            mfd.setName(invalidName);
 
-				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-						.createNewMailPermission(session, MailAccount.DEFAULT_ID);
-				p.setEntity(getUser());
-				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-				p.setFolderAdmin(true);
-				p.setGroupPermission(false);
-				mfd.addPermission(p);
-				OXException me = null;
-				try {
-					mailAccess.getFolderStorage().createFolder(mfd);
-				} catch (final OXException e) {
-					me = e;
-					fullname = null;
-				}
-				assertTrue("Folder created although an invalid name was specified", me != null);
+            final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
+            p.setEntity(getUser());
+            p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            p.setFolderAdmin(true);
+            p.setGroupPermission(false);
+            mfd.addPermission(p);
+            OXException me = null;
+            try {
+                mailAccess.getFolderStorage().createFolder(mfd);
+            } catch (final OXException e) {
+                me = e;
+                fullname = null;
+            }
+            assertTrue("Folder created although an invalid name was specified", me != null);
 
-				invalidName = inbox.getSeparator() + "Foobar";
-				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName)
-							.toString();
-					parentFullname = INBOX;
-				} else {
-					fullname = invalidName;
-					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-				}
-				mfd.setExists(false);
-				mfd.setParentFullname(parentFullname);
-				mfd.setSeparator(inbox.getSeparator());
-				mfd.setSubscribed(false);
-				mfd.setName(invalidName);
-				me = null;
-				try {
-					mailAccess.getFolderStorage().createFolder(mfd);
-				} catch (final OXException e) {
-					me = e;
-					fullname = null;
-				}
-				assertTrue("Folder created although an invalid name was specified", me != null);
+            invalidName = inbox.getSeparator() + "Foobar";
+            if (inbox.isHoldsFolders()) {
+                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName).toString();
+                parentFullname = INBOX;
+            } else {
+                fullname = invalidName;
+                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+            }
+            mfd.setExists(false);
+            mfd.setParentFullname(parentFullname);
+            mfd.setSeparator(inbox.getSeparator());
+            mfd.setSubscribed(false);
+            mfd.setName(invalidName);
+            me = null;
+            try {
+                mailAccess.getFolderStorage().createFolder(mfd);
+            } catch (final OXException e) {
+                me = e;
+                fullname = null;
+            }
+            assertTrue("Folder created although an invalid name was specified", me != null);
 
-				invalidName = "Foobar" + inbox.getSeparator();
-				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName)
-							.toString();
-					parentFullname = INBOX;
-				} else {
-					fullname = invalidName;
-					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-				}
-				mfd.setExists(false);
-				mfd.setParentFullname(parentFullname);
-				mfd.setSeparator(inbox.getSeparator());
-				mfd.setSubscribed(false);
-				mfd.setName(invalidName);
-				me = null;
-				try {
-					mailAccess.getFolderStorage().createFolder(mfd);
-				} catch (final OXException e) {
-					me = e;
-					fullname = null;
-				}
-				assertTrue("Folder created although an invalid name was specified", me != null);
+            invalidName = "Foobar" + inbox.getSeparator();
+            if (inbox.isHoldsFolders()) {
+                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName).toString();
+                parentFullname = INBOX;
+            } else {
+                fullname = invalidName;
+                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+            }
+            mfd.setExists(false);
+            mfd.setParentFullname(parentFullname);
+            mfd.setSeparator(inbox.getSeparator());
+            mfd.setSubscribed(false);
+            mfd.setName(invalidName);
+            me = null;
+            try {
+                mailAccess.getFolderStorage().createFolder(mfd);
+            } catch (final OXException e) {
+                me = e;
+                fullname = null;
+            }
+            assertTrue("Folder created although an invalid name was specified", me != null);
 
-			} finally {
-				if (fullname != null) {
-					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-				}
+        } finally {
+            if (fullname != null) {
+                mailAccess.getFolderStorage().deleteFolder(fullname, true);
+            }
 
-				/*
-				 * close
-				 */
-				mailAccess.close(false);
-			}
-	}
+            /*
+             * close
+             */
+            mailAccess.close(false);
+        }
+    }
 }

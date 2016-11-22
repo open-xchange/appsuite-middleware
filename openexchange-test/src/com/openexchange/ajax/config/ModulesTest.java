@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.config;
 
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;

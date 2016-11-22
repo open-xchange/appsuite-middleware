@@ -1,9 +1,8 @@
 package liquibase.logging.jvm;
 
-import static org.junit.Assert.*;
-
-import liquibase.logging.LogFactory;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
+import liquibase.logging.LogFactory;
 
 public class LogFactoryTest {
     

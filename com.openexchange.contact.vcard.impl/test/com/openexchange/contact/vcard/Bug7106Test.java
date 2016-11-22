@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -67,7 +70,8 @@ public class Bug7106Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard() throws Exception {
+         @Test
+     public void testImportVCard() throws Exception {
         /*
          * import vCard
          */
@@ -84,7 +88,7 @@ public class Bug7106Test extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n", contact.getDisplayName());
+        Assert.assertEquals("H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n", contact.getDisplayName());
     }
 
 }

@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,6 +10,8 @@ import java.util.Iterator;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -63,7 +67,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -196,7 +200,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         // Delete Appointment
         client.execute(new DeleteRequest(appointment, false));

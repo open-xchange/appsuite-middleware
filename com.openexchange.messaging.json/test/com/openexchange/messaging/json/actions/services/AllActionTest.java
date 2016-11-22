@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.json.actions.services;
 
-import junit.framework.TestCase;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.SimContext;
@@ -58,16 +58,20 @@ import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link AllActionTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AllActionTest extends TestCase {
-
+public class AllActionTest {
     // Success Case
-    public void testSuccess() throws OXException {
+         @Test
+     public void testSuccess() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimMessagingService messagingService = new SimMessagingService();
@@ -92,7 +96,8 @@ public class AllActionTest extends TestCase {
 
     // Error Cases
 
-    public void testOXException() throws OXException {
+         @Test
+     public void testOXException() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException());
 

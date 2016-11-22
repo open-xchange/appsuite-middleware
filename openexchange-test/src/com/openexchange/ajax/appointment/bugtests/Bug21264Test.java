@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;

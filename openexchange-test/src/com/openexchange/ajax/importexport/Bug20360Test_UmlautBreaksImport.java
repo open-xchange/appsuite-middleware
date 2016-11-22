@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
@@ -68,6 +71,7 @@ public class Bug20360Test_UmlautBreaksImport extends AbstractManagedContactTest 
         super();
     }
 
+    @Test
     public void testUmlaut() throws IOException, JSONException, OXException {
         VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vcard.getBytes("UTF-8")));
         VCardImportResponse importResponse = getClient().execute(importRequest);

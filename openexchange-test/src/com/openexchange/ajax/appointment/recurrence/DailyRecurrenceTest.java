@@ -1,9 +1,11 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 
@@ -16,10 +18,12 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         simpleDateFormatUTC.setTimeZone(timeZoneUTC);
     }
 
+    @Test
     public void testDummy() {
 
     }
 
+    @Test
     public void testDailyRecurrenceFromWinter2SummerTime() throws Exception {
         final Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
 
@@ -77,6 +81,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testFullTimeDailyRecurrenceFromWinter2SummerTime() throws Exception {
         final Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
 
@@ -135,6 +140,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testDailyRecurrenceFromSummer2WinterTime() throws Exception {
         final Date until = simpleDateFormatUTC.parse("2007-11-01 00:00:00");
 
@@ -192,6 +198,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testFullTimeDailyRecurrenceFromSummer2WinterTime() throws Exception {
         final Date until = simpleDateFormatUTC.parse("2007-11-01 00:00:00");
 

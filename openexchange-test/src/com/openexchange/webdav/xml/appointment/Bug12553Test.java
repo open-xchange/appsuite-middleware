@@ -1,9 +1,11 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -22,6 +24,7 @@ public class Bug12553Test extends AppointmentTest {
         super();
     }
 
+    @Test
     public void testBug12553() throws Exception {
         int objectId = -1;
         try {

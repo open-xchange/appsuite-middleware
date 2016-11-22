@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mobilenotifier;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;

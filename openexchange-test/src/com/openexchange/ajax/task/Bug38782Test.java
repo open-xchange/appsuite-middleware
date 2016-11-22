@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.junit.After;

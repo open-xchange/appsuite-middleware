@@ -2,6 +2,7 @@
 package com.openexchange.webdav.xml.appointment;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -17,11 +18,7 @@ public class Bug8196Test extends AppointmentTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testBug8196() throws Exception {
         final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostName(), getSecondLogin(), getPassword(), context);
         final int secondAppointmentFolderId = folderObj.getObjectID();

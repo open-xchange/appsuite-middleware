@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -57,12 +61,11 @@ import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Bug12437Test extends TestCase {
+public final class Bug12437Test {
 
     private AJAXClient client;
 
@@ -74,9 +77,8 @@ public final class Bug12437Test extends TestCase {
         super();
     }
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession();
         client = new AJAXClient(session, true);
@@ -84,10 +86,9 @@ public final class Bug12437Test extends TestCase {
         password = "some invalid password";
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.getSession().getConversation().clearContents();
-        super.tearDown();
     }
 
     /**

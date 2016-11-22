@@ -1,26 +1,25 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropColumnStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link DropColumnChange}
  */
 public class DropColumnChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropColumn", ChangeFactory.getInstance().getChangeMetaData(new DropColumnChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         DropColumnChange change = new DropColumnChange();
         change.setSchemaName("SCHEMA_NAME");
@@ -35,8 +34,7 @@ public class DropColumnChangeTest extends StandardChangeTest {
         assertEquals("COL_HERE", ((DropColumnStatement) sqlStatements[0]).getColumnName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         DropColumnChange change = new DropColumnChange();
         change.setTableName("TABLE_NAME");

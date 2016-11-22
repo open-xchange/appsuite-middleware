@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.find.mail;
 
+import static org.junit.Assert.assertFalse;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;

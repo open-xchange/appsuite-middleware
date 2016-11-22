@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import com.openexchange.subscribe.crawler.internal.Step;
 
@@ -62,7 +63,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testWKW() {
+         @Test
+     public void testWKW() {
         // insert valid credentials here
         final String username = "";
         final String password = "";

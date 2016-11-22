@@ -50,6 +50,11 @@
 package com.openexchange.ajax.session;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.apache.http.client.params.ClientPNames;
 import org.json.JSONObject;
 import org.junit.After;

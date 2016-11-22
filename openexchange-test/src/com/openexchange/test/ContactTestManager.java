@@ -98,7 +98,6 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
-import junit.framework.TestCase;
 
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. If multiple users are needed use multiple
@@ -675,7 +674,7 @@ public class ContactTestManager implements TestManager {
 
 }
 
-final class ContactMapping extends TestCase {
+final class ContactMapping {
 
     private static HashMap<Integer, String> columns2fields;
 

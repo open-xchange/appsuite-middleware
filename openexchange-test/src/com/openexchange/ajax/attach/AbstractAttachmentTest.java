@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.attach;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -64,6 +69,8 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -89,7 +96,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
     protected String sessionId;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -101,7 +108,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         moduleId = getModule();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         removeAttachments();
         removeAttachable(folderId, attachedId, sessionId);

@@ -65,17 +65,10 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.setuptools.TestConfig;
-import junit.framework.JUnit4TestAdapter;
 
 public class Bug8681forVCard extends AbstractVCardTest {
 
-    //workaround for JUnit 3 runner
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(Bug8681forVCard.class);
-    }
-
     @BeforeClass
-
     public static void initialize() throws Exception {
         AbstractVCardTest.initialize();
         final TestConfig config = new TestConfig();
@@ -115,6 +108,4 @@ public class Bug8681forVCard extends AbstractVCardTest {
         }
     }
 
-    @Test
-    public void testDummy() {}
 }

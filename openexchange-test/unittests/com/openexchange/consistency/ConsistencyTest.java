@@ -50,6 +50,9 @@
 package com.openexchange.consistency;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,7 +63,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.management.MBeanException;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
@@ -81,7 +85,7 @@ import com.openexchange.tools.file.InMemoryFileStorage;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ConsistencyTest extends TestCase {
+public class ConsistencyTest {
 
     private final InMemoryInfostoreDatabase database = new InMemoryInfostoreDatabase();
     private InMemoryFileStorage storage = null;
@@ -118,9 +122,8 @@ public class ConsistencyTest extends TestCase {
         }
     };
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
 
         storage = new InMemoryFileStorage();
         quotaFileStorageService = new SimQuotaFileStorageService(storage);
@@ -146,6 +149,7 @@ public class ConsistencyTest extends TestCase {
 
     // Tests //
 
+    @Test
     public void testListMissingFilesInContext() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final List<String> missing = consistency.listMissingFilesInContext(ctx.getContextId());
@@ -158,24 +162,28 @@ public class ConsistencyTest extends TestCase {
         assertTrue(missing.toString(), expected.isEmpty());
     }
 
+    @Test
     public void testListMissingFilesInFilestore() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<MBeanEntity, List<String>> missing = consistency.listMissingFilesInFilestore(1);
         assertContextEntities(missing, MISSING, ctx, ctx2);
     }
 
+    @Test
     public void testListMissingFilesInDatabase() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<MBeanEntity, List<String>> missing = consistency.listMissingFilesInDatabase(1);
         assertContextEntities(missing, MISSING, ctx, ctx3);
     }
 
+    @Test
     public void testListAllMissingFiles() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<MBeanEntity, List<String>> missing = consistency.listAllMissingFiles();
         assertContextEntities(missing, MISSING, ctx, ctx2, ctx3);
     }
 
+    @Test
     public void testListUnassignedFilesInContext() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final List<String> unassigned = consistency.listUnassignedFilesInContext(ctx.getContextId());
@@ -189,24 +197,28 @@ public class ConsistencyTest extends TestCase {
 
     }
 
+    @Test
     public void testListUnassignedFilesInFilestore() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<MBeanEntity, List<String>> unassigned = consistency.listUnassignedFilesInFilestore(1);
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx2);
     }
 
+    @Test
     public void testListUnassignedFilesInDatabase() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<MBeanEntity, List<String>> unassigned = consistency.listUnassignedFilesInDatabase(1);
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx3);
     }
 
+    @Test
     public void testListAllUnassignedFiles() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         final Map<MBeanEntity, List<String>> unassigned = consistency.listAllUnassignedFiles();
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx2, ctx3);
     }
 
+    @Test
     public void testCreateDummyFilesForInfoitems() throws MBeanException, OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         database.forgetChanges(ctx);
@@ -228,6 +240,7 @@ public class ConsistencyTest extends TestCase {
         }
     }
 
+    @Test
     public void testCreateDummyFilesForAttachments() throws MBeanException, OXException {
         final ConsistencyMBean consistency = getConsistencyTool();
         attachments.forgetChanges(ctx);
@@ -248,6 +261,7 @@ public class ConsistencyTest extends TestCase {
 
     }
 
+    @Test
     public void testDeleteStaleInfoitems() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         database.forgetDeletions(ctx);
@@ -264,6 +278,7 @@ public class ConsistencyTest extends TestCase {
 
     }
 
+    @Test
     public void testDeleteStaleAttachments() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         attachments.forgetDeletions(ctx);
@@ -279,6 +294,7 @@ public class ConsistencyTest extends TestCase {
         assertEquals(2, missing.size());
     }
 
+    @Test
     public void testCreateInfoitemForUnassignedFile() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         database.forgetCreated(ctx);
@@ -303,6 +319,7 @@ public class ConsistencyTest extends TestCase {
         }
     }
 
+    @Test
     public void testDeleteUnassignedFile() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
         storage.forgetDeleted(ctx);

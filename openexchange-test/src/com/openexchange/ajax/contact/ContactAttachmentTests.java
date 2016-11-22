@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
@@ -67,7 +69,6 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Contact;
-import junit.framework.AssertionFailedError;
 
 /**
  * Attachment tests for contacts.
@@ -85,10 +86,6 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
     private int attachmentId;
 
     private Date creationDate;
-
-    public ContactAttachmentTests(String name) {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -133,9 +130,7 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
                 break;
             }
         }
-        if (null == test) {
-            throw new AssertionFailedError("Can not find the created contact with an attachment.");
-        }
+        Assert.assertNotNull("Can not find the created appointment with an attachment.", test);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
@@ -153,9 +148,7 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
                 break;
             }
         }
-        if (null == test) {
-            throw new AssertionFailedError("Can not find the created contact with an attachment.");
-        }
+        Assert.assertNotNull("Can not find the created appointment with an attachment.", test);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 }

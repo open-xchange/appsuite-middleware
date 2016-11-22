@@ -49,12 +49,18 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.exception.OXException;
@@ -85,7 +91,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(AJAXClient.User.User2);
@@ -113,7 +119,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
         referencedContact2 = manager2.newAction(referencedContact2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         manager2.cleanUp();
         folderManager2.cleanUp();

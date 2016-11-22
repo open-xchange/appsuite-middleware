@@ -46,27 +46,32 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.impl;
 
-import junit.framework.TestCase;
-
-import java.io.FileNotFoundException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Locale;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class FileDiscovererTest extends TestCase {
+public class FileDiscovererTest {
+
     private FileDiscoverer fileDiscoverer;
 
-    @Override
+    @Before
     public void setUp() throws FileNotFoundException {
         fileDiscoverer = new FileDiscoverer(new File("/tmp"));
     }
 
+    @Test
     public void testComputeLocale() throws FileNotFoundException {
-        assertLocale("de","DE", "de_DE.po");
+        assertLocale("de", "DE", "de_DE.po");
         assertLocale("de", "DE", "server.de_DE.po");
         try {
             fileDiscoverer.getLocale("invalidButSurvivable.po");
@@ -78,7 +83,7 @@ public class FileDiscovererTest extends TestCase {
     }
 
     private void assertLocale(String language, String country, String filename) {
-        Locale computedLocale = fileDiscoverer.getLocale( filename );
+        Locale computedLocale = fileDiscoverer.getLocale(filename);
         assertEquals(language, computedLocale.getLanguage());
         assertEquals(country, computedLocale.getCountry());
     }

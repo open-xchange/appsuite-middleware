@@ -78,8 +78,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.download.limit.FileAccess;
 import com.openexchange.download.limit.internal.Services;
-import com.openexchange.download.limit.limiter.FilesDownloadLimiter;
-import com.openexchange.download.limit.limiter.InfostoreDownloadLimiter;
 import com.openexchange.download.limit.storage.RdbFileAccessStorage;
 import com.openexchange.download.limit.util.LimitConfig;
 import com.openexchange.exception.OXException;
@@ -373,7 +371,7 @@ public class FilesDownloadLimiterTest {
 
         assertTrue(applicable);
     }
-    
+
     @Test
     public void testApplicableWithDocumentAction_isGuestAndDL_applicable() throws OXException {
         Mockito.when(session.getUser()).thenReturn(guest);
@@ -387,7 +385,7 @@ public class FilesDownloadLimiterTest {
     @Test
     public void testApplicable_isGuest_isApplicable() throws OXException {
         requestData.setAction("zipdocuments");
-        
+
         boolean applicable = limiter.applicable(requestData);
 
         assertTrue(applicable);

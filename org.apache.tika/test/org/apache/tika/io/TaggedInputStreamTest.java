@@ -16,13 +16,11 @@
  */
 package org.apache.tika.io;
 
-import org.junit.Test;
-
+import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-
-import static org.junit.Assert.fail;
+import org.junit.Test;
 
 public class TaggedInputStreamTest {
 

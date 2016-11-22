@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
@@ -69,6 +72,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         super();
     }
 
+    @Test
     public void testCsvDistributionListsAreExported() throws OXException, IOException, JSONException {
         Contact list = generateContact("Distribution list");
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
@@ -82,6 +86,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         assertEquals("Should only contain the header line but no content", 2, csv.size());
     }
 
+    @Test
     public void testCsvDistributionListsAreNotExported() throws OXException, IOException, JSONException {
         Contact list = generateContact("Distribution list");
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;

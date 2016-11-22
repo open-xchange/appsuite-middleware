@@ -1,6 +1,9 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -9,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -25,7 +29,7 @@ public class SearchTest extends InfostoreAJAXTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
 
         super.setUp();
@@ -43,6 +47,7 @@ public class SearchTest extends InfostoreAJAXTest {
         }
     }
 
+    @Test
     public void testBasic() throws Exception {
         final Response res = search(getWebConversation(), getHostName(), sessionId, "5", COLS, folderId, -1, null, -1, -1);
         assertNoError(res);
@@ -51,6 +56,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     }
 
+    @Test
     public void testPattern() throws Exception {
         Response res = search(getWebConversation(), getHostName(), sessionId, "*", COLS, folderId);
         assertNoError(res);
@@ -62,18 +68,21 @@ public class SearchTest extends InfostoreAJAXTest {
 
     }
 
+    @Test
     public void testAll() throws Exception {
         final Response res = search(getWebConversation(), getHostName(), sessionId, "", COLS, folderId);
         assertNoError(res);
         assertTitles(res, all);
     }
 
+    @Test
     public void testCaseInsensitive() throws Exception {
         final Response res = search(getWebConversation(), getHostName(), sessionId, "test", COLS, folderId);
         assertNoError(res);
         assertTitles(res, all);
     }
 
+    @Test
     public void testStartAndStop() throws Exception {
         Response res = search(getWebConversation(), getHostName(), sessionId, "5", COLS, folderId, Metadata.DESCRIPTION, "ASC", 0, 1);
         assertNoError(res);
@@ -112,6 +121,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     }
 
+    @Test
     public void testLimit() throws Exception {
         final Response res = search(getWebConversation(), getHostName(), sessionId, "5", COLS, folderId, Metadata.DESCRIPTION, "ASC", 1);
         assertNoError(res);
@@ -122,6 +132,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     }
 
+    @Test
     public void testSort() throws Exception {
         Response res = search(getWebConversation(), getHostName(), sessionId, "5", COLS, folderId, Metadata.DESCRIPTION, "ASC", -1, -1);
         assertNoError(res);
@@ -143,6 +154,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     }
 
+    @Test
     public void testVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
@@ -186,12 +198,14 @@ public class SearchTest extends InfostoreAJAXTest {
 
     }
 
+    @Test
     public void testPermissions() throws Exception {
         final String sessionId2 = this.getSecondSessionId();
         final Response res = search(getSecondWebConversation(), getHostName(), sessionId2, "*", COLS, folderId);
         assertEquals("IFO-0400", res.getException().getErrorCode());
     }
 
+    @Test
     public void testCategories() throws Exception {
         final String id = clean.get(0);
 

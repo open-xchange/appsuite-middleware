@@ -49,15 +49,16 @@
 
 package com.openexchange.webdav;
 
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
 import com.openexchange.webdav.xml.framework.WebDAVClient.User;
-import junit.framework.TestCase;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
+public abstract class AbstractWebDAVSession {
 
     private WebDAVClient client;
 
@@ -73,20 +74,18 @@ public abstract class AbstractWebDAVSession extends TestCase {
     /**
      * {@inheritDoc}
      */
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         client = new WebDAVClient(User.User1);
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
+    @After
     protected void tearDown() throws Exception {
         client.logout();
         client = null;
-        super.tearDown();
     }
 
     /**

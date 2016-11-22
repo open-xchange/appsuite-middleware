@@ -17,9 +17,6 @@
 package org.apache.tika.parser.mp4;
 
 import java.io.InputStream;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
@@ -28,17 +25,22 @@ import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test case for parsing mp4 files.
  */
-public class MP4ParserTest extends TestCase {
-    /**
+public class MP4ParserTest {    /**
      * Test that we can extract information from
      *  a M4A MP4 Audio file
      */
-    public void testMP4ParsingAudio() throws Exception {
+         @Test
+     public void testMP4ParsingAudio() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();

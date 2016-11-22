@@ -54,7 +54,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -62,8 +66,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug27708Test extends TestCase {
-
+public class Bug27708Test {
     private static final int NUM_THREADS = 20;
     private static final int NUM_RUNS = 100;
     private static final Pattern uidPattern = Pattern.compile(
@@ -76,7 +79,8 @@ public class Bug27708Test extends TestCase {
         super();
     }
 
-    public void testThreadSafety() throws Exception {
+         @Test
+     public void testThreadSafety() throws Exception {
         Thread[] threads = new Thread[NUM_THREADS];
         CheckHtmlCleaner[] runnables = new CheckHtmlCleaner[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
@@ -73,7 +75,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 

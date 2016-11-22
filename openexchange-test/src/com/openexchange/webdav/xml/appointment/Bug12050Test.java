@@ -49,7 +49,10 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -70,7 +73,7 @@ public class Bug12050Test extends AppointmentTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -106,13 +109,11 @@ public class Bug12050Test extends AppointmentTest {
         updateException();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (objectId != -1) {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         }
-
-        super.tearDown();
     }
 
     private void createAppointment() throws Exception {

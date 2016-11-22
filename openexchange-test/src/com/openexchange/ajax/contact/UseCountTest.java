@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
@@ -89,7 +94,7 @@ public class UseCountTest extends ContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(User.User1);
@@ -114,7 +119,7 @@ public class UseCountTest extends ContactTest {
         mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test"));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         mtm.cleanUp();
         ctm.cleanUp();

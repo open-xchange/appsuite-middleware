@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
@@ -57,6 +59,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class ICalAppointmentExportTest extends ManagedAppointmentTest {
 
+    @Test
     public void testExportICalAppointment() throws Exception {
         final String title = "testExportICalAppointment" + System.currentTimeMillis();
         int folderID = folder.getObjectID();

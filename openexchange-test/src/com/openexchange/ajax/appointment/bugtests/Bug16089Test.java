@@ -1,9 +1,13 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -43,7 +47,7 @@ public class Bug16089Test extends AbstractAJAXSession {
 
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -104,7 +108,7 @@ public class Bug16089Test extends AbstractAJAXSession {
         return Integer.parseInt(sub);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment, false));
         manager.cleanUp();

@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.simple;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -60,14 +63,13 @@ import java.util.Properties;
 import org.apache.commons.httpclient.HttpMethod;
 import org.json.JSONObject;
 import com.openexchange.test.json.JSONAssertion;
-import junit.framework.TestCase;
 
 /**
  * Yet another OX testing framework. This one is for simple cases, when the full blown framework would be too much.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AbstractSimpleClientTest extends TestCase {
+public class AbstractSimpleClientTest {
 
     protected static final String USER1 = "login";
     protected static final String USER2 = "seconduser";

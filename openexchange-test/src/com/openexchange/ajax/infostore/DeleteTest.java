@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,6 +23,7 @@ public class DeleteTest extends InfostoreAJAXTest {
         super();
     }
 
+    @Test
     public void testBasic() throws Exception {
         super.removeAll();
 
@@ -35,6 +38,7 @@ public class DeleteTest extends InfostoreAJAXTest {
         clean.clear();
     }
 
+    @Test
     public void testConflict() throws Exception {
 
         final String[][] toDelete = new String[clean.size()][2];

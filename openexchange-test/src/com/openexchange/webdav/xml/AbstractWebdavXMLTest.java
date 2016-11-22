@@ -49,6 +49,9 @@
 
 package com.openexchange.webdav.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -71,10 +74,6 @@ import com.openexchange.webdav.xml.request.PropFindMethod;
 public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 
     protected static final int APPEND_MODIFIED = 1000000;
-
-    public AbstractWebdavXMLTest() {
-        super();
-    }
 
     protected static int parseResponse(final Document response, final boolean delete) throws Exception {
         return parseRootElement(response.getRootElement(), delete);

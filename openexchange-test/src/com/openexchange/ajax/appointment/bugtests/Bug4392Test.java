@@ -1,9 +1,11 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -22,6 +24,7 @@ public class Bug4392Test extends AppointmentTest {
     /**
      * This test case check the until date of recurrence appointments
      */
+    @Test
     public void testBug4392() throws Exception {
         final int occurrences = 4;
 

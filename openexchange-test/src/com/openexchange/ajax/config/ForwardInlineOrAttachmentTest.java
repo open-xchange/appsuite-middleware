@@ -51,6 +51,7 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.ajax.config.ConfigTools.readSetting;
 import static com.openexchange.ajax.config.ConfigTools.storeSetting;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.ajax.AbstractAJAXTest;
 

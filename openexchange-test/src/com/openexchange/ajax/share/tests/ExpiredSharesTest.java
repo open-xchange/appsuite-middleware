@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -79,6 +84,7 @@ public class ExpiredSharesTest extends ShareTest {
         super();
     }
 
+    @Test
     public void testAccessExpiredShareRandomly() throws Exception {
         testAccessExpiredShare(randomFolderAPI(), randomModule());
     }

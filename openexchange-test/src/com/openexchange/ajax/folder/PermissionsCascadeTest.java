@@ -49,12 +49,15 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -94,7 +97,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (CLEANUP) {
             client.execute(new DeleteRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID(), rootFolder.getLastModified()));

@@ -79,8 +79,8 @@ public class RTResultFormatterTest {
     /**
      * Test method for {@link com.openexchange.realtime.json.util.RTResultFormatter#format(java.util.Map)}.
      */
-    @Test
-    public void testFormatEmptyMap() {
+     @Test
+     public void testFormatEmptyMap() {
         String format = RTResultFormatter.format(emptyMap);
         assertEquals("Empty Map didn't match expected format",EMPTYMAP, format);
     }
@@ -88,8 +88,8 @@ public class RTResultFormatterTest {
     /**
      * Test method for {@link com.openexchange.realtime.json.util.RTResultFormatter#shortenOutput(java.lang.String)}.
      */
-    @Test
-    public void testShortenOutput() {
+     @Test
+     public void testShortenOutput() {
         String shortenedOutput = RTResultFormatter.shortenOutput(TOO_LONG);
         char[] fivehundredA = new char[500];
         Arrays.fill(fivehundredA, 'A');

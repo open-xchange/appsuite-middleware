@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.spellcheck;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.spellcheck.actions.add.UserWordRequest;
 import com.openexchange.ajax.spellcheck.actions.list.ListRequest;
@@ -77,6 +79,7 @@ public final class ListTest extends AbstractSpellCheckTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testList() throws Throwable {
 
         final String userWord = "clazz";

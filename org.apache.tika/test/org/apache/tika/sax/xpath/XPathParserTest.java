@@ -16,10 +16,13 @@
  */
 package org.apache.tika.sax.xpath;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class XPathParserTest extends TestCase {
-
+public class XPathParserTest {
     private static final String NS = "test namespace";
 
     private XPathParser parser;
@@ -30,7 +33,8 @@ public class XPathParserTest extends TestCase {
         parser.addPrefix("prefix", NS);
     }
 
-    public void testText() {
+         @Test
+     public void testText() {
         Matcher matcher = parser.parse("/text()");
         assertTrue(matcher.matchesText());
         assertFalse(matcher.matchesElement());
@@ -38,7 +42,8 @@ public class XPathParserTest extends TestCase {
         assertEquals(Matcher.FAIL, matcher.descend(NS, "name"));
     }
 
-    public void testAnyAttribute() {
+         @Test
+     public void testAnyAttribute() {
         Matcher matcher = parser.parse("/@*");
         assertFalse(matcher.matchesText());
         assertFalse(matcher.matchesElement());
@@ -48,7 +53,8 @@ public class XPathParserTest extends TestCase {
         assertEquals(Matcher.FAIL, matcher.descend(NS, "name"));
     }
 
-    public void testNamedAttribute() {
+         @Test
+     public void testNamedAttribute() {
         Matcher matcher = parser.parse("/@name");
         assertFalse(matcher.matchesText());
         assertFalse(matcher.matchesElement());
@@ -58,7 +64,8 @@ public class XPathParserTest extends TestCase {
         assertEquals(Matcher.FAIL, matcher.descend(NS, "name"));
     }
 
-    public void testPrefixedAttribute() {
+         @Test
+     public void testPrefixedAttribute() {
         Matcher matcher = parser.parse("/@prefix:name");
         assertFalse(matcher.matchesText());
         assertFalse(matcher.matchesElement());
@@ -68,7 +75,8 @@ public class XPathParserTest extends TestCase {
         assertEquals(Matcher.FAIL, matcher.descend(NS, "name"));
     }
 
-    public void testAnyElement() {
+         @Test
+     public void testAnyElement() {
         Matcher matcher = parser.parse("/*");
         assertFalse(matcher.matchesText());
         assertFalse(matcher.matchesElement());
@@ -84,7 +92,8 @@ public class XPathParserTest extends TestCase {
         assertEquals(Matcher.FAIL, matcher.descend(NS, "name"));
     }
 
-    public void testNamedElement() {
+         @Test
+     public void testNamedElement() {
         Matcher matcher = parser.parse("/name");
         assertFalse(matcher.matchesText());
         assertFalse(matcher.matchesElement());
@@ -101,7 +110,8 @@ public class XPathParserTest extends TestCase {
         assertFalse(matcher.matchesAttribute(NS, "eman"));
     }
 
-    public void testPrefixedElement() {
+         @Test
+     public void testPrefixedElement() {
         Matcher matcher = parser.parse("/prefix:name");
         assertFalse(matcher.matchesText());
         assertFalse(matcher.matchesElement());

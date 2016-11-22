@@ -1,10 +1,12 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -16,6 +18,7 @@ public class DeleteTest extends AppointmentTest {
         super();
     }
 
+    @Test
     public void testDelete() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testDelete");
         appointmentObj.setIgnoreConflicts(true);
@@ -27,6 +30,7 @@ public class DeleteTest extends AppointmentTest {
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testDeleteConcurentConflict() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
         appointmentObj.setIgnoreConflicts(true);
@@ -42,6 +46,7 @@ public class DeleteTest extends AppointmentTest {
         deleteAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testDeleteNotFound() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
         appointmentObj.setIgnoreConflicts(true);
@@ -57,6 +62,7 @@ public class DeleteTest extends AppointmentTest {
         deleteAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testDeleteRecurrenceWithDatePosition() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -94,6 +100,7 @@ public class DeleteTest extends AppointmentTest {
         deleteAppointment(webCon, new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testDeleteRecurrenceWithDeleteExceptions() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));

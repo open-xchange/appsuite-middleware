@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,6 +60,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -91,7 +94,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -149,7 +152,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         return new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), address).getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (ids != null) {
             client.execute(new DeleteRequest(ids));

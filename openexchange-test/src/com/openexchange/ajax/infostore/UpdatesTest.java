@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
@@ -91,7 +95,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         itm = new InfostoreTestManager(client);
@@ -113,7 +117,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         itm.newAction(urlDoc);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         itm.cleanUp();
         ftm.cleanUp();
@@ -187,6 +191,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     }
 
     //Bug 4269
+    @Test
     public void testVirtualFolder() throws Exception {
         for (int folderId : virtualFolders) {
             virtualFolderTest(folderId);
@@ -202,6 +207,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     }
 
     // Node 2652    @Test
+    @Test
     public void testLastModifiedUTC() throws Exception {
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.LAST_MODIFIED_UTC }, Metadata.LAST_MODIFIED_UTC, Order.ASCENDING, Ignore.NONE, new Date(0L), true);
         UpdatesInfostoreResponse resp = client.execute(req);
@@ -209,6 +215,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     }
 
     // Bug 12427
+    @Test
     public void testNumberOfVersions() throws Exception {
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         DefaultFile updateDoc = new DefaultFile();

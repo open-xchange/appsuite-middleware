@@ -49,27 +49,30 @@
 
 package com.openexchange.http.deferrer.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.servlet.DeferrerServlet;
-
 
 /**
  * {@link DefaultDeferringURLServiceTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DefaultDeferringURLServiceTest extends TestCase {
-
+public class DefaultDeferringURLServiceTest {
     TestDeferringURLService service = new TestDeferringURLService();
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
         DefaultDeferringURLService.PREFIX.set(new DispatcherPrefixService() {
 
@@ -78,38 +81,41 @@ public class DefaultDeferringURLServiceTest extends TestCase {
                 return "/ajax/";
             }
         });
-        super.setUp();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         DefaultDeferringURLService.PREFIX.set(null);
     }
 
+    @Test
     public void testBasic() throws UnsupportedEncodingException {
         final String url = "http://mydomain.de/ajax/someModule";
         final String encodedUrl = URLEncoder.encode(url, "UTF-8");
-        assertTransformed(url, "https://www.open-xchange.com/ajax/defer?redirect="+encodedUrl);
+        assertTransformed(url, "https://www.open-xchange.com/ajax/defer?redirect=" + encodedUrl);
     }
 
+    @Test
     public void testEncoding() throws UnsupportedEncodingException {
         final String url = "http://mydomain.de/ajax/someModule?arg1=value1&arg2=value2";
         final String encodedUrl = URLEncoder.encode(url, "UTF-8");
-        assertTransformed(url, "https://www.open-xchange.com/ajax/defer?redirect="+encodedUrl);
+        assertTransformed(url, "https://www.open-xchange.com/ajax/defer?redirect=" + encodedUrl);
 
     }
 
+    @Test
     public void testNoDeferrer() {
         service.setUrl(null);
         final String url = "http://mydomain.de/ajax/someModule";
         assertTransformed(url, url);
     }
 
+    @Test
     public void testNull() {
         assertTrue(null == service.getDeferredURL(null, 0, 0));
     }
 
+    @Test
     public void testForBug44583() throws Exception {
         final SimHttpServletRequest req = new SimHttpServletRequest();
         req.setParameter("redirect", "http://evil.hacker.com/ajax/someModule");

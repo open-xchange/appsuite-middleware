@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.subscribe.test;
 
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;

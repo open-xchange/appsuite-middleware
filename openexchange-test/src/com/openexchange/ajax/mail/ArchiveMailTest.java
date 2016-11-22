@@ -79,10 +79,6 @@ public class ArchiveMailTest extends AbstractMailTest {
 
     @Before
     @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testShouldArchive() throws OXException, IOException, SAXException, JSONException {
         MailTestManager manager = new MailTestManager(client, false);

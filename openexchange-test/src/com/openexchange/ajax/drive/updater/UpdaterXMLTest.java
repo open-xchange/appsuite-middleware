@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.drive.updater;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,6 +75,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -112,7 +116,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         User user = User.User1;
@@ -236,10 +240,4 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
         }
         return new String(Hex.encodeHex(digest.digest()));
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
 }

@@ -56,7 +56,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
 
     public void testParticipantsAgreeViaDifferentLoadMethods() throws Exception {
@@ -66,11 +65,11 @@ public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
 
         AppointmentSQLInterface appointmentSql = appointments.getCurrentAppointmentSQLInterface();
 
-        SearchIterator<Appointment> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[]{Appointment.OBJECT_ID, Appointment.PARTICIPANTS}, new Date(0), new Date(appointment.getEndDate().getTime()+1000),-1, null);
+        SearchIterator<Appointment> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[] { Appointment.OBJECT_ID, Appointment.PARTICIPANTS }, new Date(0), new Date(appointment.getEndDate().getTime() + 1000), -1, null);
         Appointment loadedViaFolderListing = null;
-        while(appointmentsBetweenInFolder.hasNext()) {
+        while (appointmentsBetweenInFolder.hasNext()) {
             Appointment temp = appointmentsBetweenInFolder.next();
-            if(temp.getObjectID() == appointment.getObjectID()) {
+            if (temp.getObjectID() == appointment.getObjectID()) {
                 loadedViaFolderListing = temp;
             }
         }

@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
@@ -90,11 +93,7 @@ public class Bug30903Test extends AbstractMailTest {
     }
 
     @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
+    @After
     public void tearDown() throws Exception {
         DeleteRequest delReq = new DeleteRequest(fmids, true);
         client.execute(delReq);

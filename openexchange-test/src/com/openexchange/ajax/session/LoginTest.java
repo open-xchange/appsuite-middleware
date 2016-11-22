@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -91,7 +95,8 @@ public class LoginTest extends AbstractLoginTest {
 
     /*
      * Response now lacks the random unless configured otherwise via login.properties:com.openexchange.ajax.login.randomToken=false
-     */ @Test
+     */
+    @Test
     public void testSuccessfulLoginLacksRandom() throws Exception {
         assertResponseLacks("random");
     }

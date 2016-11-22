@@ -51,8 +51,13 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -94,7 +99,7 @@ public class Bug18558Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -165,7 +170,7 @@ public class Bug18558Test extends AbstractAJAXSession {
         assertFalse("No error expected.", getResponse.hasError());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         if (appointment.getObjectID() > 0) {

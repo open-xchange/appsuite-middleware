@@ -50,6 +50,8 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -83,7 +85,7 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
 
     private FolderObject folderB;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(User.User2);
@@ -114,7 +116,7 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
         System.out.println(loaded.getTitle());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         ftm.cleanUp();

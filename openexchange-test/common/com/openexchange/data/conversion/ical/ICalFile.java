@@ -62,7 +62,7 @@ public class ICalFile {
     public ICalFile(final Reader reader) throws IOException {
         final BufferedReader lines = new BufferedReader(reader);
         String line = null;
-        while((line = lines.readLine()) != null) {
+        while ((line = lines.readLine()) != null) {
             addLine(line);
         }
     }
@@ -96,8 +96,8 @@ public class ICalFile {
     }
 
     public String getValue(final String key) {
-        for(final String[] line : lines) {
-            if(line[0].equals(key)) {
+        for (final String[] line : lines) {
+            if (line[0].equals(key)) {
                 return line[2];
             }
         }
@@ -132,7 +132,7 @@ public class ICalFile {
         for (final String[] line : lines) {
             final String key = line[0];
             final String val = line[2];
-            if(key.equals(name) && val.equals(value)) {
+            if (key.equals(name) && val.equals(value)) {
                 return true;
             }
         }
@@ -154,7 +154,7 @@ public class ICalFile {
     public boolean containsLine(final String line) {
         for (final String[] l : lines) {
             final String key = l[0];
-            if(key.equals(line)) {
+            if (key.equals(line)) {
                 return true;
             }
         }

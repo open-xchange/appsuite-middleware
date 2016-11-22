@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
@@ -76,15 +77,4 @@ public class Bug42225Test extends AbstractManagedContactTest {
         CommonSearchResponse resp = client.execute(req);
         assertFalse("Response has error.", resp.hasError());
     }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
 }

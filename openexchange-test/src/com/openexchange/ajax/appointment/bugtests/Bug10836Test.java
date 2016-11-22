@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
@@ -88,6 +90,7 @@ public final class Bug10836Test extends AbstractAJAXSession {
      * 
      * @throws Throwable if some exception occurs.
      */
+    @Test
     public void testVulnerability() throws Throwable {
         final AJAXClient clientA = getClient();
         final AJAXClient clientB = new AJAXClient(User.User2);

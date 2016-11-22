@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.config;
 
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.AbstractAJAXTest;
 

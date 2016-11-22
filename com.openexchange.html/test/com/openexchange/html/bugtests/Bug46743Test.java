@@ -2,14 +2,13 @@ package com.openexchange.html.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import org.apache.commons.lang.StringUtils;
-import org.jsoup.helper.StringUtil;
 import org.junit.Test;
 import com.openexchange.html.AbstractSanitizing;
 
 public class Bug46743Test extends AbstractSanitizing {
     
-    @Test
-    public void testInsuficentParanthesesAtEndOfComment() {
+     @Test
+     public void testInsuficentParanthesesAtEndOfComment() {
         String content = "<style type=\"text/css\">\n"+
     "<!--\n"+   
         "@media screen and (max-width: 440px) {\n"+

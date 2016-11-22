@@ -125,8 +125,8 @@ public class LoaderActivatorTest {
         MockUtils.injectValueIntoPrivateField(this.loaderActivator, InjectionFieldConstants.CONTEXT, bundleContext);
     }
 
-    @Test
-    public void testStartBundle_Fine_ServiceRegistered() throws Exception {
+     @Test
+     public void testStartBundle_Fine_ServiceRegistered() throws Exception {
         this.loaderActivator.startBundle();
 
         ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.loaderActivator, 1);

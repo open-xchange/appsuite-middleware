@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;

@@ -1,9 +1,13 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -33,7 +37,7 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
         this.client = new AJAXClient(User.User1);
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         folder = getSentFolder();
@@ -44,7 +48,7 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
         clearFolder(folder);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         clearFolder(folder);
         super.tearDown();

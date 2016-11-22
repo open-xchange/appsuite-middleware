@@ -49,7 +49,10 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
 import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 
 /**
@@ -66,7 +69,8 @@ public class WarningsTest extends VCardTest {
         super();
     }
 
-    public void testImportWithoutN() throws OXException {
+         @Test
+     public void testImportWithoutN() throws OXException {
         String vCardString =
             "BEGIN:VCARD\r\n"+
             "VERSION:2.1\r\n"+
@@ -77,10 +81,11 @@ public class WarningsTest extends VCardTest {
         assertNotNull(vCardImport.getContact());
         List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
-        assertEquals(1, warnings.size());
+        Assert.assertEquals(1, warnings.size());
     }
 
-    public void testImportWithInvalidEMail() throws OXException {
+         @Test
+     public void testImportWithInvalidEMail() throws OXException {
         String vCardString =
             "BEGIN:VCARD\r\n"+
             "VERSION:2.1\r\n"+
@@ -93,10 +98,11 @@ public class WarningsTest extends VCardTest {
         assertNotNull(vCardImport.getContact());
         List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
-        assertEquals(1, warnings.size());
+        Assert.assertEquals(1, warnings.size());
     }
 
-    public void testImportInvalidPhoto() throws OXException {
+         @Test
+     public void testImportInvalidPhoto() throws OXException {
         String vCardString =
             "BEGIN:VCARD\r\n"+
             "VERSION:2.1\r\n"+
@@ -109,10 +115,11 @@ public class WarningsTest extends VCardTest {
         assertNotNull(vCardImport.getContact());
         List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
-        assertEquals(1, warnings.size());
+        Assert.assertEquals(1, warnings.size());
     }
 
-    public void testImportInvalidBirthday() throws OXException {
+         @Test
+     public void testImportInvalidBirthday() throws OXException {
         String vCardString =
             "BEGIN:VCARD\r\n"+
             "VERSION:2.1\r\n"+
@@ -125,7 +132,7 @@ public class WarningsTest extends VCardTest {
         assertNotNull(vCardImport.getContact());
         List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
-        assertEquals(1, warnings.size());
+        Assert.assertEquals(1, warnings.size());
     }
 
 }

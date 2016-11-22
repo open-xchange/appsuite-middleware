@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map.Entry;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -76,7 +80,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(), FolderObject.CONTACT);
@@ -131,7 +135,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
         String resultingVCard = OXTestToolkit.readStreamAsString(is);
         System.out.println(resultingVCard);
         String[] resultingVCards = resultingVCard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-        assertEquals("Expected two vCards.", 2, resultingVCards.length);
+        Assert.assertEquals("Expected two vCards.", 2, resultingVCards.length);
         String[] result0 = resultingVCards[0].split("\n");
         String[] result1 = resultingVCards[1].split("\n");
 
@@ -156,7 +160,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         removeFolder(folderId);
         super.tearDown();

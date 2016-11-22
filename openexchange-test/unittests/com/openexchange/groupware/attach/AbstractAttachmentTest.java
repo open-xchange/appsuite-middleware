@@ -1,56 +1,60 @@
+
 package com.openexchange.groupware.attach;
 
-import junit.framework.TestCase;
-
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.groupware.Init;
 
-public abstract class AbstractAttachmentTest extends TestCase {
-	private Mode mode;
+public abstract class AbstractAttachmentTest {
 
-	@Override
+    private Mode mode;
+
+    @Before
     public void setUp() throws Exception {
-		  super.setUp();
-		  mode().setUp();
-	}
-
-    @Override
-    protected void tearDown() throws Exception {
-        mode().tearDown();
-        super.tearDown();
+        mode().setUp();
     }
 
-    protected Mode mode(){
-		if(mode==null) {
-			mode = getMode();
-		}
-		return mode;
-	}
+    @After
+    public void tearDown() throws Exception {
+        mode().tearDown();
+    }
 
-	public abstract Mode getMode();
+    protected Mode mode() {
+        if (mode == null) {
+            mode = getMode();
+        }
+        return mode;
+    }
 
-	public static interface Mode {
-		public void setUp() throws Exception;
+    public abstract Mode getMode();
+
+    public static interface Mode {
+
+        public void setUp() throws Exception;
+
+        @After
         public void tearDown() throws Exception;
-	}
+    }
 
+    public static class INTEGRATION implements Mode {
 
-	public static class INTEGRATION implements Mode {
-		@Override
-        public void setUp() throws Exception {
-	        Init.startServer();
-		}
         @Override
+        public void setUp() throws Exception {
+            Init.startServer();
+        }
+
+        @After
         public void tearDown() throws Exception {
             Init.stopServer();
         }
-	}
+    }
 
-	public static class ISOLATION implements Mode {
-		@Override
-        public void setUp() throws Exception {
-	    }
+    public static class ISOLATION implements Mode {
+
         @Override
-        public void tearDown() throws Exception {
-        }
-	}
+        public void setUp() throws Exception {}
+
+        @After
+        public void tearDown() throws Exception {}
+    }
 }

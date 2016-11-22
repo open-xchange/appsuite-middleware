@@ -50,8 +50,12 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.ajax.folder.Create.ocl;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -83,7 +87,7 @@ public class Bug13931Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -129,7 +133,7 @@ public class Bug13931Test extends AbstractAJAXSession {
         assertEquals("Wrong order", bbb.getObjectID(), jsonArray.getJSONArray(3).getInt(0));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
 

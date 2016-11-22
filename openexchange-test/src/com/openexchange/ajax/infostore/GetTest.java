@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -14,6 +16,7 @@ public class GetTest extends InfostoreAJAXTest {
         super();
     }
 
+    @Test
     public void testBasic() throws Exception {
 
         final Response res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0));
@@ -52,6 +55,7 @@ public class GetTest extends InfostoreAJAXTest {
     }
 
     // Node 2652    @Test
+    @Test
     public void testLastModifiedUTC() throws Exception {
         final Response res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 

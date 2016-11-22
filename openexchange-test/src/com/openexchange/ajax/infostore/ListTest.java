@@ -1,6 +1,9 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,6 +24,7 @@ public class ListTest extends InfostoreAJAXTest {
         super();
     }
 
+    @Test
     public void testBasic() throws Exception {
         final String[][] bothEntries = new String[2][2];
         bothEntries[0][1] = clean.get(0);
@@ -53,6 +57,7 @@ public class ListTest extends InfostoreAJAXTest {
     }
 
     // Node 2652    @Test
+    @Test
     public void testLastModifiedUTC() throws JSONException, IOException, SAXException {
         final String[][] bothEntries = new String[2][2];
         bothEntries[0][1] = clean.get(0);

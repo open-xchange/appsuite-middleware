@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.UUID;
@@ -103,10 +106,6 @@ public class TrashTest extends AbstractInfostoreTest {
     }
 
     @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testHardDeleteFolder() throws Exception {
         /*

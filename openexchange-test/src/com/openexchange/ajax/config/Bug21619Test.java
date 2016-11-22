@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.config;
 
+import static org.junit.Assert.fail;
 import org.apache.http.params.HttpConnectionParams;
 import org.junit.After;
 import org.junit.Before;

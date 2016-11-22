@@ -49,6 +49,7 @@
 
 package com.openexchange.test.osgi;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -58,6 +59,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -74,14 +77,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.JMXInit;
-import junit.framework.TestCase;
 
 /**
  * {@link AbstractBundleTest} - Abstract super class for a test class that stops/starts a specific bundle to check behavior on absence.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractBundleTest extends TestCase {
+public abstract class AbstractBundleTest {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractBundleTest.class);
 
@@ -136,22 +138,20 @@ public abstract class AbstractBundleTest extends TestCase {
         return new WebConversation();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         stopBundle = new StopBundle(getJMXHost(), getJMXPort(), getJMXLogin(), getJMXPassword());
         startBundle = new StartBundle(getJMXHost(), getJMXPort(), getJMXLogin(), getJMXPassword());
         stopBundle.stop(getBundleName());
         LOG.info("Bundle stopped: " + getBundleName());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         startBundle.start(getBundleName());
         LOG.info("Bundle started: " + getBundleName());
         stopBundle = null;
         startBundle = null;
-        super.tearDown();
     }
 
     protected abstract String getBundleName();

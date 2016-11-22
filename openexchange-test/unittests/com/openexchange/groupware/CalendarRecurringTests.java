@@ -50,7 +50,11 @@
 package com.openexchange.groupware;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,12 +63,14 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
@@ -93,7 +99,7 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
-public class CalendarRecurringTests extends TestCase {
+public class CalendarRecurringTests {
 
     //public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
@@ -103,9 +109,8 @@ public class CalendarRecurringTests extends TestCase {
 
     private static boolean init = false;
 
-    @Override
+    @After
     protected void setUp() throws Exception {
-        super.setUp();
         Init.startServer();
         init = true;
 
@@ -122,17 +127,16 @@ public class CalendarRecurringTests extends TestCase {
         contextid = ctx.getContextId();
         userid = user;
         ContextStorage.start();
-        
+
         CalendarMySQL.setApppointmentSqlFactory(new AppointmentSqlFactory());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (init) {
             init = false;
             Init.stopServer();
         }
-        super.tearDown();
     }
 
     private static Properties getAJAXProperties() {
@@ -165,6 +169,7 @@ public class CalendarRecurringTests extends TestCase {
         return privatefolder;
     }
 
+    @Test
     public void testBasicRecurring() throws Throwable {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -183,6 +188,7 @@ public class CalendarRecurringTests extends TestCase {
         assertTrue(cdao.calculateRecurrence());
     }
 
+    @Test
     public void testBasicRecurringWithOccurrence() throws Throwable {
 
         final Context context = new ContextImpl(contextid);
@@ -223,6 +229,7 @@ public class CalendarRecurringTests extends TestCase {
         new CalendarCollection().fillDAO(cdao);
     }
 
+    @Test
     public void testBasicRecurringWithoutUntilAndWithoutOccurrence() throws Throwable {
 
         final Context context = new ContextImpl(contextid);
@@ -253,8 +260,7 @@ public class CalendarRecurringTests extends TestCase {
         final RecurringResultsInterface rresults;
         try {
             rresults = new CalendarCollection().calculateRecurring(clone, 0, 0, 0);
-            final RecurringResultInterface rresult = rresults
-                    .getRecurringResultByPosition(CalendarCollection.MAX_OCCURRENCESE);
+            final RecurringResultInterface rresult = rresults.getRecurringResultByPosition(CalendarCollection.MAX_OCCURRENCESE);
             if (rresult != null) {
                 test_until = new CalendarCollection().normalizeLong(rresult.getEnd());
             }
@@ -276,6 +282,7 @@ public class CalendarRecurringTests extends TestCase {
         //assertFalse("Test that until is not set", test_dao.containsUntil()); // Check this
     }
 
+    @Test
     public void testBasicRecurringWithoutUntil() throws Throwable {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -293,13 +300,13 @@ public class CalendarRecurringTests extends TestCase {
         assertTrue(cdao.calculateRecurrence());
     }
 
-
+    @Test
     public void testDailyRecurring() throws Throwable {
         final long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         final long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         final long u = 1150156800000L; // 13.06.2006 00:00 (GMT)
         final long u_test = 1150106400000L; // 12.06.2006 10:00 (GMT)
-        final String testrecurrence = "t|1|i|1|s|"+s+"|e|"+u+"|";
+        final String testrecurrence = "t|1|i|1|s|" + s + "|e|" + u + "|";
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
@@ -309,7 +316,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrence(testrecurrence);
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
-
 
         final long pass_one_start = System.currentTimeMillis();
 
@@ -332,11 +338,12 @@ public class CalendarRecurringTests extends TestCase {
         m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 1);
         assertEquals("Check calculation", 1, m.size());
 
-        double percent = pass_two_time/10;
+        double percent = pass_two_time / 10;
         percent = pass_one_time * 100 / percent;
 
     }
 
+    @Test
     public void testDailyByPosition() throws Throwable {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -351,17 +358,17 @@ public class CalendarRecurringTests extends TestCase {
             final RecurringResultInterface rr = rrs_check.getRecurringResult(0);
             assertEquals("Check correct recurrence position", rrs.getRecurringResult(a).getPosition(), rr.getPosition());
             assertEquals("Check correct start time", rrs.getRecurringResult(a).getStart(), rr.getStart());
-            assertTrue("Check correct position calculation", a+1 == rr.getPosition());
+            assertTrue("Check correct position calculation", a + 1 == rr.getPosition());
         }
     }
 
-
+    @Test
     public void testDailyRecurringWithDAO() throws Throwable {
         final long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         final long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         final long u = 1150070400000L; // 12.06.2006 00:00 (GMT)
         final long u_test = 1150106400000L; // 12.06.2006 10:00 (GMT)
-        final String testrecurrence = "t|1|i|1|s|"+s+"|e|"+u+"|";
+        final String testrecurrence = "t|1|i|1|s|" + s + "|e|" + u + "|";
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
@@ -382,17 +389,17 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check calculation", 1, m.size());
     }
 
-
+    @Test
     public void testWeeklyRecurrence() throws Throwable {
 
-//
-//      Juni 2006
-//So Mo Di Mi Do Fr Sa
-//             1  2  3
-// 4  5  6  7  8  9 10
-//11 12 13 14 15 16 17
-//18 19 20 21 22 23 24
-//25 26 27 28 29 30
+        //
+        //      Juni 2006
+        //So Mo Di Mi Do Fr Sa
+        //             1  2  3
+        // 4  5  6  7  8  9 10
+        //11 12 13 14 15 16 17
+        //18 19 20 21 22 23 24
+        //25 26 27 28 29 30
 
         final long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         final long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
@@ -417,7 +424,6 @@ public class CalendarRecurringTests extends TestCase {
         m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
         assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
-
 
         // SUNDAY
         cdao = new CalendarDataObject();
@@ -452,7 +458,6 @@ public class CalendarRecurringTests extends TestCase {
         m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
         assertEquals("First day check (TUESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.TUESDAY);
-
 
         // WEDNESDAY
         cdao = new CalendarDataObject();
@@ -543,7 +548,6 @@ public class CalendarRecurringTests extends TestCase {
         c.setTimeInMillis(new Date(m.getRecurringResult(1).getStart()).getTime());
         assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
 
-
         // SUNDAY + MONDAY
         cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -565,9 +569,9 @@ public class CalendarRecurringTests extends TestCase {
         c.setTimeInMillis(new Date(m.getRecurringResult(1).getStart()).getTime());
         assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
 
-
     }
 
+    @Test
     public void testSaveRecurring() throws Throwable {
         final Context context = new ContextImpl(contextid);
 
@@ -575,16 +579,16 @@ public class CalendarRecurringTests extends TestCase {
 
         long s = System.currentTimeMillis();
         long cals = s;
-        final long calsmod = s%new CalendarCollection().MILLI_DAY;
-        cals = cals- calsmod;
+        final long calsmod = s % new CalendarCollection().MILLI_DAY;
+        cals = cals - calsmod;
         final long endcalc = 3600000;
-        long mod = s%3600000;
+        long mod = s % 3600000;
         s = s - mod;
         final long saves = s;
         final long e = s + endcalc;
         final long savee = e;
         long u = s + (new CalendarCollection().MILLI_DAY * 10);
-        mod = u%new CalendarCollection().MILLI_DAY;
+        mod = u % new CalendarCollection().MILLI_DAY;
         u = u - mod;
 
         final Calendar start = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
@@ -614,30 +618,30 @@ public class CalendarRecurringTests extends TestCase {
             final RecurringResultInterface rs = rss.getRecurringResult(a);
             assertEquals("Testing start time", rs.getStart(), start.getTimeInMillis());
             assertEquals("Testing end time", rs.getEnd(), ende.getTimeInMillis());
-            assertEquals("Testing Position", a+1, rs.getPosition());
+            assertEquals("Testing Position", a + 1, rs.getPosition());
             start.add(Calendar.DAY_OF_MONTH, 1);
             ende.add(Calendar.DAY_OF_MONTH, 1);
         }
     }
 
+    @Test
     public void testDeleteSingleRecurringAppointment() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
 
         long s = D("04.10.2013 08:00").getTime();
         long cals = s;
-        final long calsmod = s%Constants.MILLI_DAY;
-        cals = cals- calsmod;
+        final long calsmod = s % Constants.MILLI_DAY;
+        cals = cals - calsmod;
         final long endcalc = 3600000;
-        long mod = s%3600000;
+        long mod = s % 3600000;
         s = s - mod;
         final long saves = s;
         final long e = s + endcalc;
         final long savee = e;
         long u = s + (Constants.MILLI_DAY * 10);
-        mod = u%Constants.MILLI_DAY;
+        mod = u % Constants.MILLI_DAY;
         u = u - mod;
-
 
         final Calendar start = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         start.setTimeInMillis(saves);
@@ -685,7 +689,7 @@ public class CalendarRecurringTests extends TestCase {
             final RecurringResultInterface rs = rss.getRecurringResult(a);
             assertEquals("Testing start time", start.getTimeInMillis(), rs.getStart());
             assertEquals("Testing end time", ende.getTimeInMillis(), rs.getEnd());
-            assertEquals("Testing Position", a+1, rs.getPosition());
+            assertEquals("Testing Position", a + 1, rs.getPosition());
             start.add(Calendar.DAY_OF_MONTH, 1);
             ende.add(Calendar.DAY_OF_MONTH, 1);
         }
@@ -725,7 +729,7 @@ public class CalendarRecurringTests extends TestCase {
         final UserParticipant up[] = test_master_object.getUsers();
         assertEquals("Testing participants in master object", up.length, 2);
 
-        final int cols[] = new int[] { Appointment.TITLE,  Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
+        final int cols[] = new int[] { Appointment.TITLE, Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
 
         SearchIterator<Appointment> si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
 
@@ -735,15 +739,15 @@ public class CalendarRecurringTests extends TestCase {
             if (tcdao.getRecurrenceID() == object_id && tcdao.getObjectID() != object_id) {
                 // found the single exception we have just created
                 found_exception = true;
-                assertNull("Deleted exceptions should be null." , tcdao.getDeleteException());
+                assertNull("Deleted exceptions should be null.", tcdao.getDeleteException());
                 assertEquals("Check correct recurrence position", 5, tcdao.getRecurrencePosition());
                 assertEquals("Recurrence date position is not correct.", recurrence_date_position, tcdao.getRecurrenceDatePosition());
             } else if (tcdao.getObjectID() == object_id) {
                 final Date test_deleted_exceptions[] = tcdao.getDeleteException();
                 final Date test_changed_exceptions[] = tcdao.getChangeException();
                 //assertTrue("Test deleted exception is NULL" , test_deleted_exceptions == null); // TODO: Don't know what this check was for... makes no sense to my mind.
-                assertTrue("Test changed exception is ! NULL" , test_changed_exceptions != null);
-                assertTrue("Test changed exception is 1" , test_changed_exceptions.length == 1);
+                assertTrue("Test changed exception is ! NULL", test_changed_exceptions != null);
+                assertTrue("Test changed exception is 1", test_changed_exceptions.length == 1);
                 assertEquals("Check master recurrence position", 0, tcdao.getRecurrencePosition());
             }
         }
@@ -764,7 +768,7 @@ public class CalendarRecurringTests extends TestCase {
 
     }
 
-
+    @Test
     public void testRecurringSimpleUpdate() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -788,7 +792,6 @@ public class CalendarRecurringTests extends TestCase {
         csql.insertAppointmentObject(cdao);
         final int object_id = cdao.getObjectID();
 
-
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         final Date save_start = testobject.getStartDate();
         final Date save_end = testobject.getEndDate();
@@ -806,7 +809,6 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check start date", save_start, testobject_update.getStartDate());
         assertEquals("Check end date", save_end, testobject_update.getEndDate());
         assertTrue("Check rec string", rec_string.equals(new CalendarCollection().createDSString(testobject_update)));
-
 
         final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(testobject_update, 0, 0, 1);
         assertTrue("Got results ", rss.size() == 1);
@@ -828,14 +830,13 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check end date", save_end, testobject_update.getEndDate());
         assertEquals("Check rec string", rec_string, new CalendarCollection().createDSString(testobject_update));
 
-
         final CalendarDataObject update_with_changed_times = new CalendarDataObject();
 
         update_with_changed_times.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update_with_changed_times.setTitle("testRecurringSimpleUpdate - Step 4 - Update");
         update_with_changed_times.setObjectID(object_id);
-        update_with_changed_times.setStartDate(new Date(rs.getStart()+3600000));
-        update_with_changed_times.setEndDate(new Date(rs.getEnd()+3600000));
+        update_with_changed_times.setStartDate(new Date(rs.getStart() + 3600000));
+        update_with_changed_times.setEndDate(new Date(rs.getEnd() + 3600000));
         update_with_changed_times.setRecurrenceType(CalendarObject.DAILY);
         update_with_changed_times.setInterval(1);
         update_with_changed_times.setIgnoreConflicts(true);
@@ -843,13 +844,14 @@ public class CalendarRecurringTests extends TestCase {
         csql.updateAppointmentObject(update_with_changed_times, folder_id, new Date());
 
         testobject_update = csql.getObjectById(object_id, folder_id);
-        assertEquals("Check start date", new Date(save_start.getTime()+3600000), testobject_update.getStartDate());
-        assertEquals("Check end date", new Date(save_end.getTime()+3600000), testobject_update.getEndDate());
+        assertEquals("Check start date", new Date(save_start.getTime() + 3600000), testobject_update.getStartDate());
+        assertEquals("Check end date", new Date(save_end.getTime() + 3600000), testobject_update.getEndDate());
 
         assertTrue("Check rec string", !rec_string.equals(new CalendarCollection().createDSString(testobject_update)));
 
     }
 
+    @Test
     public void testUpdateSimpleAppointmentToRecurring() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -904,12 +906,13 @@ public class CalendarRecurringTests extends TestCase {
 
         final CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);
         assertEquals("Check if appointment is no sequence", CalendarDataObject.NO_RECURRENCE, testobject2.getRecurrenceType());
-        final String null_check = "\""+testobject2.getRecurrence()+"\"";
+        final String null_check = "\"" + testobject2.getRecurrence() + "\"";
         assertEquals("Check that the recurrence is null ", "\"null\"", null_check);
         //assertNull("Check that the recurrence is null", testobject2.getRecurrence()); // This seems to be a bug, but i cant check null!!
 
     }
 
+    @Test
     public void testCreateExceptionFromRecurring() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -939,11 +942,10 @@ public class CalendarRecurringTests extends TestCase {
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
 
-
         final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 3);
         final RecurringResultInterface rs = rss.getRecurringResult(0);
-        final long new_start = rs.getStart()+3600000;
-        final long new_end = rs.getEnd()+3600000;
+        final long new_start = rs.getStart() + 3600000;
+        final long new_end = rs.getEnd() + 3600000;
 
         final Date test_new_start_date = new Date(new_start);
         final Date test_new_end_date = new Date(new_end);
@@ -954,14 +956,12 @@ public class CalendarRecurringTests extends TestCase {
         update.setTitle("testCreateExceptionFromRecurring - Step 2 - Update (create exception)");
         update.setRecurrencePosition(3);
 
-
         csql.updateAppointmentObject(update, folder_id, new Date());
-        assertTrue("Got a new object_id" , object_id != update.getObjectID());
+        assertTrue("Got a new object_id", object_id != update.getObjectID());
 
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         new CalendarCollection().calculateRecurring(testobject, 0, 0, 3, 999, true);
         final RecurringResultInterface rs_test = rss.getRecurringResult(0);
-
 
         assertTrue("Got RecurringResultInterface", rs_test != null);
         assertEquals("Check first calc", rs.getStart(), rs_test.getStart());
@@ -974,30 +974,29 @@ public class CalendarRecurringTests extends TestCase {
 
         assertEquals("Check correct exception calculation", exception_date, exceptions[0].getTime());
 
-
-        final int cols[] = new int[] { Appointment.TITLE,  Appointment.START_DATE, Appointment.END_DATE, Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
+        final int cols[] = new int[] { Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
         SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
 
         boolean found_exception = false;
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tcdao = (CalendarDataObject) si.next();
             if (tcdao.getRecurrenceID() == object_id && tcdao.getRecurrencePosition() == 3) {
                 // found the single exception we have just have created
                 assertTrue("Test if we got a unique ID", tcdao.getRecurrenceID() != tcdao.getObjectID());
                 found_exception = true;
-                assertEquals("Test exception start date" , test_new_start_date.getTime(), tcdao.getStartDate().getTime());
-                assertEquals("Test exception end date" , test_new_end_date.getTime(), tcdao.getEndDate().getTime());
+                assertEquals("Test exception start date", test_new_start_date.getTime(), tcdao.getStartDate().getTime());
+                assertEquals("Test exception end date", test_new_end_date.getTime(), tcdao.getEndDate().getTime());
             }
         }
         si.close();
-        assertTrue("Found exception",  found_exception);
+        assertTrue("Found exception", found_exception);
 
         si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(253402210800000L), 0, null);
         int counter = 0;
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tcdao = (CalendarDataObject) si.next();
             if (tcdao.getRecurrenceID() == object_id) {
-                counter ++;
+                counter++;
             } else if (tcdao.getRecurrenceID() == object_id && tcdao.getRecurrencePosition() == 3) {
                 final java.util.Date check_exception[] = tcdao.getChangeException();
                 assertTrue("Got exceptions", check_exception != null);
@@ -1005,11 +1004,12 @@ public class CalendarRecurringTests extends TestCase {
 
         }
         si.close();
-        assertEquals("Check correct number of results" , 2 , counter);
+        assertEquals("Check correct number of results", 2, counter);
 
     }
 
-    public void testWeeklyMonday()  throws Throwable {
+    @Test
+    public void testWeeklyMonday() throws Throwable {
         RecurringResultsInterface m = null;
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -1029,6 +1029,7 @@ public class CalendarRecurringTests extends TestCase {
         }
     }
 
+    @Test
     public void testCreateExceptionFromRecurringWithDatePosition() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1063,11 +1064,10 @@ public class CalendarRecurringTests extends TestCase {
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
 
-
         final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 3);
         final RecurringResultInterface rs = rss.getRecurringResult(0);
-        final long new_start = rs.getStart()+3600000;
-        final long new_end = rs.getEnd()+3600000;
+        final long new_start = rs.getStart() + 3600000;
+        final long new_end = rs.getEnd() + 3600000;
 
         final Date test_new_start_date = new Date(new_start);
         final Date test_new_end_date = new Date(new_end);
@@ -1080,13 +1080,11 @@ public class CalendarRecurringTests extends TestCase {
         final long changeExceptionDate = new CalendarCollection().normalizeLong(new_start);
         update.setRecurrenceDatePosition(new Date(changeExceptionDate));
 
-
         csql.updateAppointmentObject(update, folder_id, new Date());
 
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         final RecurringResultsInterface rss_test = new CalendarCollection().calculateRecurring(testobject, 0, 0, 3, 999, true);
         final RecurringResultInterface rs_test = rss_test.getRecurringResult(0);
-
 
         assertTrue("Got RecurringResultInterface", rs_test != null);
         assertEquals("Check first calc", rs.getStart(), rs_test.getStart());
@@ -1100,38 +1098,38 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check correct exception calculation", exception_date, changeExceptionDate);
         assertEquals("Check correct exception calculation with stored date", exception_date, exceptions[0].getTime());
 
-
-        final int cols[] = new int[] { Appointment.TITLE,  Appointment.START_DATE, Appointment.END_DATE, Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
+        final int cols[] = new int[] { Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS };
         SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
 
         boolean found_exception = false;
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tcdao = (CalendarDataObject) si.next();
             if (tcdao.getRecurrenceID() == object_id && tcdao.getRecurrencePosition() == 3) {
                 // found the single exception we have just have created
                 assertTrue("Test if we got a unique ID", tcdao.getRecurrenceID() != tcdao.getObjectID());
                 found_exception = true;
-                assertEquals("Test exception start date" , test_new_start_date.getTime(), tcdao.getStartDate().getTime());
-                assertEquals("Test exception end date" , test_new_end_date.getTime(), tcdao.getEndDate().getTime());
+                assertEquals("Test exception start date", test_new_start_date.getTime(), tcdao.getStartDate().getTime());
+                assertEquals("Test exception end date", test_new_end_date.getTime(), tcdao.getEndDate().getTime());
             }
         }
         si.close();
-        assertTrue("Found exception",  found_exception);
+        assertTrue("Found exception", found_exception);
 
         si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(253402210800000L), 0, null);
         int counter = 0;
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tcdao = (CalendarDataObject) si.next();
             if (tcdao.getRecurrenceID() == object_id) {
-                counter ++;
+                counter++;
             }
         }
         si.close();
-        assertEquals("Check correct number of results" , 2 , counter);
+        assertEquals("Check correct number of results", 2, counter);
 
     }
 
-    public void testWeeklyDifferentInterval()  throws Throwable {
+    @Test
+    public void testWeeklyDifferentInterval() throws Throwable {
 
         final long s = 1149501600000L; // 05.06.2006 12:00 (GMT)
         final long e = 1149505200000L; // 05.06.2006 13:00 (GMT)
@@ -1162,7 +1160,7 @@ public class CalendarRecurringTests extends TestCase {
         c.setTimeInMillis(new Date(m.getRecurringResult(2).getStart()).getTime());
         assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);
     }
-    
+
     private long addYears(long base, int years) {
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(base);
@@ -1170,7 +1168,8 @@ public class CalendarRecurringTests extends TestCase {
         return calendar.getTimeInMillis();
     }
 
-    public void testCorrectUntilCalculation()  throws Throwable {
+    @Test
+    public void testCorrectUntilCalculation() throws Throwable {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         CalendarTest.fillDatesInDao(cdao);
@@ -1187,8 +1186,7 @@ public class CalendarRecurringTests extends TestCase {
         final RecurringResultsInterface rresults;
         try {
             rresults = new CalendarCollection().calculateRecurring(clone, 0, 0, 0);
-            final RecurringResultInterface rresult = rresults
-                    .getRecurringResultByPosition(CalendarCollection.MAX_OCCURRENCESE);
+            final RecurringResultInterface rresult = rresults.getRecurringResultByPosition(CalendarCollection.MAX_OCCURRENCESE);
             if (rresult != null) {
                 check_until = new CalendarCollection().normalizeLong(rresult.getEnd());
             }
@@ -1196,7 +1194,7 @@ public class CalendarRecurringTests extends TestCase {
             // Keep max. end date
         }
 
-        assertEquals("Check correct until for !yearly " , check_until , cdao.getUntil().getTime());
+        assertEquals("Check correct until for !yearly ", check_until, cdao.getUntil().getTime());
 
         final int MONTH = Calendar.AUGUST;
         final int DAY = 20;
@@ -1230,9 +1228,10 @@ public class CalendarRecurringTests extends TestCase {
 
         Date expected = new Date(coll.normalizeLong(check_until2.getTimeInMillis()));
         Date actual = cdao2.getUntil();
-        assertEquals("Check correct until for yearly " , expected, actual);
+        assertEquals("Check correct until for yearly ", expected, actual);
     }
 
+    @Test
     public void testFlagSingleException() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1268,15 +1267,16 @@ public class CalendarRecurringTests extends TestCase {
         final int object_exception_id = flag_exception.getObjectID();
         flag_exception.getLastModified();
 
-        assertTrue("Exception created (object_id:object_exception_id) ("+object_id+":"+object_exception_id+")", object_id != object_exception_id);
+        assertTrue("Exception created (object_id:object_exception_id) (" + object_id + ":" + object_exception_id + ")", object_id != object_exception_id);
         //assertEquals("Return value is recurrence position", 2, flag_exception.getRecurrencePosition());
 
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         final CalendarDataObject testobject_exception = csql.getObjectById(object_exception_id, folder_id);
         assertEquals("Check recurrence id", testobject.getRecurrenceID(), testobject_exception.getRecurrenceID());
 
-
     }
+
+    @Test
     public void testWholeDayRecurringWithOccurrence() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1290,7 +1290,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.removeUntil();
         final long s = new CalendarCollection().normalizeLong(cdao.getStartDate().getTime());
         cdao.setStartDate(new Date(s));
-        final long e = s+new CalendarCollection().MILLI_DAY;
+        final long e = s + new CalendarCollection().MILLI_DAY;
         cdao.setEndDate(new Date(e));
         cdao.setFullTime(true);
         long start_time = cdao.getStartDate().getTime();
@@ -1313,11 +1313,12 @@ public class CalendarRecurringTests extends TestCase {
 
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
 
-        final Date check_time = new Date(start_time + (new CalendarCollection().MILLI_DAY*(occurrence-1)));
+        final Date check_time = new Date(start_time + (new CalendarCollection().MILLI_DAY * (occurrence - 1)));
 
         assertEquals("Check correct until", check_time, testobject.getUntil());
     }
 
+    @Test
     public void testComplexOccurrence() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1352,7 +1353,6 @@ public class CalendarRecurringTests extends TestCase {
         //update.setStartDate(cdao.getStartDate());
         //update.setEndDate(cdao.getEndDate());
 
-
         csql.updateAppointmentObject(update, folder_id, cdao.getLastModified());
 
         final CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);
@@ -1366,6 +1366,7 @@ public class CalendarRecurringTests extends TestCase {
      * See <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11210">Bug 11210</a>,
      * com.openexchange.groupware.calendar.calendarsqltests.Bug11210Test
      * and <a href="https://rally1.rallydev.com/slm/detail/ar/443993595">User Story 2237</a>.
+     * 
      * @throws Throwable
      */
     public void no_testRecurringConflictHandling() throws Throwable {
@@ -1411,7 +1412,7 @@ public class CalendarRecurringTests extends TestCase {
         assertTrue("Recurring Appointments should not conflict!", conflicts == null);
     }
 
-
+    @Test
     public void testMonthlyRecurringWithDayLightSavingTimeShift() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1467,14 +1468,14 @@ public class CalendarRecurringTests extends TestCase {
             final int test_start_hour = test_start.get(Calendar.HOUR);
             final int test_start_minute = test_start.get(Calendar.MINUTE);
 
-            assertEquals("Test hour (of occurence "+rs.getPosition()+")", check_start_hour, test_start_hour);
-            assertEquals("Test minute (of occurence "+rs.getPosition()+")", check_start_minute, test_start_minute);
+            assertEquals("Test hour (of occurence " + rs.getPosition() + ")", check_start_hour, test_start_hour);
+            assertEquals("Test minute (of occurence " + rs.getPosition() + ")", check_start_minute, test_start_minute);
 
         }
 
     }
 
-
+    @Test
     public void testYearly() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1516,14 +1517,14 @@ public class CalendarRecurringTests extends TestCase {
             final int test_month = test_start.get(Calendar.MONTH);
             final int test_day_of_month = test_start.get(Calendar.DAY_OF_MONTH);
 
-            assertEquals("Test month (of occurence "+rs.getPosition()+")", Calendar.FEBRUARY, test_month);
-            assertEquals("Test day_of_month (of occurence "+rs.getPosition()+")", 19, test_day_of_month);
+            assertEquals("Test month (of occurence " + rs.getPosition() + ")", Calendar.FEBRUARY, test_month);
+            assertEquals("Test day_of_month (of occurence " + rs.getPosition() + ")", 19, test_day_of_month);
 
         }
 
     }
 
-
+    @Test
     public void testErrors() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -1538,7 +1539,7 @@ public class CalendarRecurringTests extends TestCase {
         try {
             new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
             fail("An error must occur at this time. Fix me!");
-        } catch(final OXException oxce) {
+        } catch (final OXException oxce) {
             check_if_error_is_thrown = true;
         }
 
@@ -1546,6 +1547,7 @@ public class CalendarRecurringTests extends TestCase {
 
     }
 
+    @Test
     public void testMoveExceptionToDifferentFolerAndSetPrivateFlag() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -1589,7 +1591,6 @@ public class CalendarRecurringTests extends TestCase {
             cdao.setInterval(1);
             cdao.setIgnoreConflicts(true);
 
-
             csql.insertAppointmentObject(cdao);
             final int object_id = cdao.getObjectID();
 
@@ -1603,7 +1604,7 @@ public class CalendarRecurringTests extends TestCase {
             csql.updateAppointmentObject(exception, fid, new Date());
             final int exception_id = exception.getObjectID();
             assertTrue("Object was created", exception_id > 0);
-            assertTrue("Got a new object_id" , object_id != exception_id);
+            assertTrue("Got a new object_id", object_id != exception_id);
 
             final CalendarDataObject test_move_folder = new CalendarDataObject();
             test_move_folder.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -1613,7 +1614,7 @@ public class CalendarRecurringTests extends TestCase {
             try {
                 csql.updateAppointmentObject(test_move_folder, fid, new Date());
                 fail("An exception should not be moved to a different folder");
-            } catch(final OXException oxca) {
+            } catch (final OXException oxca) {
                 // this is what we want
                 assertEquals("Check correct error code", 66, oxca.getCode());
             }
@@ -1627,7 +1628,7 @@ public class CalendarRecurringTests extends TestCase {
             try {
                 csql.updateAppointmentObject(test_private_flag, fid, new Date());
                 fail("An exception should not be flagged as private");
-            } catch(final OXException oxca) {
+            } catch (final OXException oxca) {
                 // this is what we want
                 assertEquals("Check correct error code", 69, oxca.getCode());
             }
@@ -1637,7 +1638,7 @@ public class CalendarRecurringTests extends TestCase {
                 if (test_folder > 0) {
                     oxma.deleteFolder(new FolderObject(test_folder), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -1645,12 +1646,13 @@ public class CalendarRecurringTests extends TestCase {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
     }
 
+    @Test
     public void testCreateAndDeleteException() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1680,11 +1682,10 @@ public class CalendarRecurringTests extends TestCase {
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
 
-
         final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 3);
         final RecurringResultInterface rs = rss.getRecurringResult(0);
-        final long new_start = rs.getStart()+3600000;
-        final long new_end = rs.getEnd()+3600000;
+        final long new_start = rs.getStart() + 3600000;
+        final long new_end = rs.getEnd() + 3600000;
 
         final Date test_new_start_date = new Date(new_start);
         final Date test_new_end_date = new Date(new_end);
@@ -1695,9 +1696,8 @@ public class CalendarRecurringTests extends TestCase {
         update.setTitle("testCreateAndDeleteException - Exception");
         update.setRecurrencePosition(3);
 
-
         csql.updateAppointmentObject(update, folder_id, new Date());
-        assertTrue("Got a new object_id" , object_id != update.getObjectID());
+        assertTrue("Got a new object_id", object_id != update.getObjectID());
 
         final int exception_object_id = update.getObjectID();
 
@@ -1705,12 +1705,11 @@ public class CalendarRecurringTests extends TestCase {
         assertTrue("Got correct exception", 3 == testobject.getRecurrencePosition());
 
         assertTrue("Check if recurring_id is set", testobject.containsRecurrenceID());
-        assertTrue("Check if recurring_id ("+testobject.getRecurrenceID()+") > 0 ", testobject.getRecurrenceID() > 0);
+        assertTrue("Check if recurring_id (" + testobject.getRecurrenceID() + ") > 0 ", testobject.getRecurrenceID() > 0);
         assertEquals("Check if object is still a recurring event", true, testobject.isSequence());
 
         // Now delete the existing exception with the global recurring instead
         // with the direct delete command
-
 
         final CalendarDataObject delete = new CalendarDataObject();
         delete.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -1726,14 +1725,13 @@ public class CalendarRecurringTests extends TestCase {
 
         final CalendarDataObject test_dao = csql.getObjectById(object_id, folder_id);
         assertTrue("Check if recurring_id is set", test_dao.containsRecurrenceID());
-        assertTrue("Check if recurring_id ("+test_dao.getRecurrenceID()+") > 0 ", test_dao.getRecurrenceID() > 0);
+        assertTrue("Check if recurring_id (" + test_dao.getRecurrenceID() + ") > 0 ", test_dao.getRecurrenceID() > 0);
         assertEquals("Check if object is still a recurring event", true, test_dao.isSequence());
-
 
         try {
             csql.getObjectById(exception_object_id, folder_id);
             fail("The exception still exists but should be deleted!");
-        } catch(final OXException e) {
+        } catch (final OXException e) {
         }
 
         assertTrue("Change exception has not been removed in database", test_dao.getChangeException() == null || test_dao.getChangeException().length == 0);
@@ -1741,6 +1739,7 @@ public class CalendarRecurringTests extends TestCase {
         assertTrue("Delete exception date is not equal to previous change exception date", changeExceptionDate == test_dao.getDeleteException()[0].getTime());
     }
 
+    @Test
     public void testDeleteException() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1785,9 +1784,9 @@ public class CalendarRecurringTests extends TestCase {
 
         assertTrue("Delete exception not contained in recurring appointment", tdao.containsDeleteExceptions() && tdao.getDeleteException() != null && tdao.getDeleteException().length > 0);
 
-
     }
 
+    @Test
     public void testDeleteExceptionUntilFullDelete() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1836,28 +1835,28 @@ public class CalendarRecurringTests extends TestCase {
         try {
             csql.getObjectById(object_id, folder_id);
             fail("The recurring appointment still exists but should have been deleted!");
-        } catch(final OXException e) {
+        } catch (final OXException e) {
         }
     }
 
+    @Test
     public void testDeleteSingleRecurringAppointmentsUntilFullDelete() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
 
         long s = D("04.10.2013 08:00").getTime();
         long cals = s;
-        final long calsmod = s%new CalendarCollection().MILLI_DAY;
-        cals = cals- calsmod;
+        final long calsmod = s % new CalendarCollection().MILLI_DAY;
+        cals = cals - calsmod;
         final long endcalc = 3600000;
-        long mod = s%3600000;
+        long mod = s % 3600000;
         s = s - mod;
         final long saves = s;
         final long e = s + endcalc;
         final long savee = e;
         long u = s + (new CalendarCollection().MILLI_DAY * 10);
-        mod = u%new CalendarCollection().MILLI_DAY;
+        mod = u % new CalendarCollection().MILLI_DAY;
         u = u - mod;
-
 
         final Calendar start = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
         start.setTimeInMillis(saves);
@@ -1905,7 +1904,7 @@ public class CalendarRecurringTests extends TestCase {
             final RecurringResultInterface rs = rss.getRecurringResult(a);
             assertEquals("Testing start time", rs.getStart(), start.getTimeInMillis());
             assertEquals("Testing end time", rs.getEnd(), ende.getTimeInMillis());
-            assertEquals("Testing Position", a+1, rs.getPosition());
+            assertEquals("Testing Position", a + 1, rs.getPosition());
             start.add(Calendar.DAY_OF_MONTH, 1);
             ende.add(Calendar.DAY_OF_MONTH, 1);
         }
@@ -1917,26 +1916,24 @@ public class CalendarRecurringTests extends TestCase {
         for (int i = 1; i <= rss.size(); i++) {
             final RecurringResultsInterface foo = new CalendarCollection().calculateRecurring(cdao, 0, 0, i);
             final RecurringResultInterface bar = foo.getRecurringResult(0);
-            assertTrue("Recurrence position is null",bar != null);
+            assertTrue("Recurrence position is null", bar != null);
             assertEquals("Recurrence position mismatch", bar.getPosition(), i);
         }
 
         for (int i = 1; i <= rss.size(); i++) {
-             final CalendarDataObject delete_owner = new CalendarDataObject();
-             delete_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
-             delete_owner.setRecurrencePosition(i);
-             delete_owner.setObjectID(object_id);
-             csql.deleteAppointmentObject(delete_owner, folder_id, new Date());
+            final CalendarDataObject delete_owner = new CalendarDataObject();
+            delete_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+            delete_owner.setRecurrencePosition(i);
+            delete_owner.setObjectID(object_id);
+            csql.deleteAppointmentObject(delete_owner, folder_id, new Date());
         }
 
         // Check if full delete has been performed since all occurrences were deleted
         try {
             final CalendarDataObject check_object = csql.getObjectById(object_id, folder_id);
             fail("The recurring appointment still exists but should have been deleted! " + check_object.getObjectID());
-        } catch(final OXException exc) {
+        } catch (final OXException exc) {
         }
-
-
 
     }
 }

@@ -49,9 +49,13 @@
 
 package com.openexchange.mail.messagestorage;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -68,19 +72,17 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public final class MailDeleteTest extends MessageStorageTest {
 
     /**
-	 *
-	 */
+     *
+     */
     public MailDeleteTest() {
         super();
     }
 
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
-    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM,
-        MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT,
-        MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC,
-        MailField.BCC, MailField.FOLDER_ID };
+    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };
 
+    @Test
     public void testMailDeleteNonExistingMails() throws OXException {
         /*
          * Delete non existing mail
@@ -93,6 +95,7 @@ public final class MailDeleteTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailDeleteNonExistingMailsMixed() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         /*
@@ -111,6 +114,7 @@ public final class MailDeleteTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailDeleteNonExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         /*
@@ -125,6 +129,7 @@ public final class MailDeleteTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailDelete() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         String[] trashedIDs = null;
@@ -145,7 +150,7 @@ public final class MailDeleteTest extends MessageStorageTest {
             final boolean countCap = getMessageCount(mailAccess, trashFullname) >= 0;
             if (countCap) {
                 assertTrue("Trash's number of message has not been increased appropriately", prevMessageCount + uids.length == getMessageCount(mailAccess, trashFullname));
-    
+
                 trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
                 assertTrue("Size mismatch: " + trashed.length + " but should be " + getMessageCount(mailAccess, trashFullname), trashed.length == getMessageCount(mailAccess, trashFullname));
                 final Set<String> ids = new HashSet<String>(getMessageCount(mailAccess, trashFullname));
@@ -154,7 +159,7 @@ public final class MailDeleteTest extends MessageStorageTest {
                 }
                 ids.removeAll(prevIds);
                 assertTrue("Size mismatch: " + ids.size() + " but should be " + uids.length, ids.size() == uids.length);
-    
+
                 trashedIDs = new String[uids.length];
                 {
                     int k = 0;
@@ -162,12 +167,9 @@ public final class MailDeleteTest extends MessageStorageTest {
                         trashedIDs[k++] = id;
                     }
                 }
-    
+
                 trashed = mailAccess.getMessageStorage().getMessages(trashFullname, trashedIDs, FIELDS_EVEN_MORE);
-                assertTrue("No matching trashed messages found: "
-                    + (null == trashed ? "null" : String.valueOf(trashed.length))
-                    + " IDs: "
-                    + Arrays.toString(trashedIDs), trashed != null && trashed.length == uids.length);
+                assertTrue("No matching trashed messages found: " + (null == trashed ? "null" : String.valueOf(trashed.length)) + " IDs: " + Arrays.toString(trashedIDs), trashed != null && trashed.length == uids.length);
                 for (int i = 0; i < trashed.length; i++) {
                     assertFalse("Missing mail ID", trashed[i].getMailId() == null);
                     assertTrue("Missing content type", trashed[i].containsContentType());

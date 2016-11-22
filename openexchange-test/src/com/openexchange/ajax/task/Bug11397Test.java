@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;

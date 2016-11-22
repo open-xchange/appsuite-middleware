@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;

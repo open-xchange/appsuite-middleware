@@ -3,7 +3,6 @@ package liquibase.serializer.core.string;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -18,10 +17,19 @@ import java.util.Map;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import liquibase.change.*;
+import org.junit.Test;
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.change.core.*;
+import liquibase.change.core.AddColumnChange;
+import liquibase.change.core.AddForeignKeyConstraintChange;
+import liquibase.change.core.AddUniqueConstraintChange;
+import liquibase.change.core.InsertDataChange;
+import liquibase.change.core.LoadDataColumnConfig;
+import liquibase.change.core.RawSQLChange;
+import liquibase.change.core.SQLFileChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.ExampleCustomSqlChange;
@@ -30,10 +38,8 @@ import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.DatabaseFunction;
-
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import org.junit.Test;
 
 public class StringChangeLogSerializerTest {
 

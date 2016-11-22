@@ -61,19 +61,18 @@ import com.openexchange.tools.session.ServerSessionFactory;
 
 public abstract class AbstractICalImportTest extends AbstractContactTest {
 
-	public final Format format = Format.ICAL;
-	
+    public final Format format = Format.ICAL;
 
     @BeforeClass
-	public static void initialize() throws Exception {
-		Init.startServer();
-		final UserStorage uStorage = UserStorage.getInstance();
+    public static void initialize() throws Exception {
+        Init.startServer();
+        final UserStorage uStorage = UserStorage.getInstance();
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(AjaxInit.getAJAXProperty("contextName")));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
-	    sessObj = ServerSessionFactory.createServerSession(userId, ctx.getContextId(), "csv-tests");
-		userId = sessObj.getUserId();
-		imp = new ICalImporter(null);
-	}
+        sessObj = ServerSessionFactory.createServerSession(userId, ctx.getContextId(), "csv-tests");
+        userId = sessObj.getUserId();
+        imp = new ICalImporter(null);
+    }
 
     @AfterClass
     public static void shutdown() throws Exception {
@@ -81,26 +80,11 @@ public abstract class AbstractICalImportTest extends AbstractContactTest {
     }
 
     public AbstractICalImportTest() {
-		super();
-	}
+        super();
+    }
 
-	public String generateRecurringICAL(final int interval, final String frequency) {
-		return
-		"BEGIN:VCALENDAR\n" +
-		"VERSION:2.0\n" +
-		"PRODID:-//The Horde Project//Horde_iCalendar Library//EN\n" +
-		"METHOD:PUBLISH\n" +
-		"BEGIN:VEVENT\n" +
-		"DTSTART;VALUE=DATE:20070616\n" +
-		"DTEND;VALUE=DATE:20070617\n" +
-		"DTSTAMP:20070530T200206Z\n" +
-		"UID:20070530220126.23mszu01hoo0@www.klein-intern.de\n" +
-		"SUMMARY:Marc beim Umzug helfen\n" +
-		"TRANSP:OPAQUE\nORGANIZER;CN=Marcus Klein:MAILTO:m.klein@sendung-mit-der-maus.com\n" +
-		"LOCATION:Olpe\n" +
-		"RRULE:FREQ="+frequency+";INTERVAL="+interval+";UNTIL=20070627\n" +
-		"END:VEVENT\n" +
-		"END:VCALENDAR\n";
-	}
+    public String generateRecurringICAL(final int interval, final String frequency) {
+        return "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//The Horde Project//Horde_iCalendar Library//EN\n" + "METHOD:PUBLISH\n" + "BEGIN:VEVENT\n" + "DTSTART;VALUE=DATE:20070616\n" + "DTEND;VALUE=DATE:20070617\n" + "DTSTAMP:20070530T200206Z\n" + "UID:20070530220126.23mszu01hoo0@www.klein-intern.de\n" + "SUMMARY:Marc beim Umzug helfen\n" + "TRANSP:OPAQUE\nORGANIZER;CN=Marcus Klein:MAILTO:m.klein@sendung-mit-der-maus.com\n" + "LOCATION:Olpe\n" + "RRULE:FREQ=" + frequency + ";INTERVAL=" + interval + ";UNTIL=20070627\n" + "END:VEVENT\n" + "END:VCALENDAR\n";
+    }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,10 +84,6 @@ public class Bug14234Test extends AbstractMailTest {
 
     @Before
     @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testTransportNewRFC822MailWithoutFrom() throws Exception {
         NewMailRequest newMailRequest = null;

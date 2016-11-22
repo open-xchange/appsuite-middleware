@@ -50,11 +50,15 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -79,7 +83,7 @@ public class Bug14357Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -114,7 +118,7 @@ public class Bug14357Test extends AbstractAJAXSession {
         checkYear(10, 2019, 4);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
         getClient().execute(appointmentDeleteRequest);

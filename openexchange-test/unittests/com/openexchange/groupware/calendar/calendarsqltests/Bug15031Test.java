@@ -49,10 +49,15 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import static com.openexchange.groupware.calendar.TimeTools.D;
 
 /**
  * {@link Bug15031Test}
@@ -65,7 +70,7 @@ public class Bug15031Test extends CalendarSqlTest {
     private CalendarDataObject appointment2;
     private CalendarDataObject appointment2Update;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -73,8 +78,8 @@ public class Bug15031Test extends CalendarSqlTest {
 
         appointment = appointments.buildAppointmentWithResourceParticipants(resource1);
         appointment.setParentFolderID(appointments.getPrivateFolder());
-        appointment.setStartDate(D("01.01."+nextYear+" 08:00"));
-        appointment.setEndDate(D("01.01."+nextYear+" 09:00"));
+        appointment.setStartDate(D("01.01." + nextYear + " 08:00"));
+        appointment.setEndDate(D("01.01." + nextYear + " 09:00"));
         appointment.setIgnoreConflicts(true);
         appointments.save(appointment);
         clean.add(appointment);
@@ -83,17 +88,18 @@ public class Bug15031Test extends CalendarSqlTest {
 
         appointment2 = appointments.buildAppointmentWithResourceParticipants(resource1);
         appointment2.setParentFolderID(appointments.getPrivateFolder());
-        appointment2.setStartDate(D("02.01."+nextYear+" 08:00"));
-        appointment2.setEndDate(D("02.01."+nextYear+" 09:00"));
+        appointment2.setStartDate(D("02.01." + nextYear + " 08:00"));
+        appointment2.setEndDate(D("02.01." + nextYear + " 09:00"));
         appointment2.setIgnoreConflicts(true);
         appointments.save(appointment2);
         clean.add(appointment2);
 
         appointment2Update = appointments.load(appointment2.getObjectID(), appointment2.getParentFolderID());
-        appointment2Update.setStartDate(D("01.01."+nextYear+" 08:00"));
-        appointment2Update.setEndDate(D("01.01."+nextYear+" 09:00"));
+        appointment2Update.setStartDate(D("01.01." + nextYear + " 08:00"));
+        appointment2Update.setEndDate(D("01.01." + nextYear + " 09:00"));
     }
 
+    @Test
     public void testBug15031() throws Exception {
         CalendarDataObject[] conflicts = appointments.save(appointment2Update);
 
@@ -104,7 +110,7 @@ public class Bug15031Test extends CalendarSqlTest {
         assertEquals("Wrong conflic", appointment.getObjectID(), conflicts[0].getObjectID());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         super.tearDown();
     }

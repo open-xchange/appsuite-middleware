@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;

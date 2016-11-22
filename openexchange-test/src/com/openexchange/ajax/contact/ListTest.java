@@ -1,6 +1,9 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -123,6 +126,7 @@ public class ListTest extends AbstractContactTest {
     }
 
     // Node 2652    @Test
+    @Test
     public void testLastModifiedUTC() throws Exception {
         final int cols[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
 

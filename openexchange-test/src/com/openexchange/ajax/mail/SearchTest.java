@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import javax.mail.internet.MailDateFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
@@ -82,7 +86,7 @@ public final class SearchTest extends AbstractMailTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         /*
@@ -98,7 +102,7 @@ public final class SearchTest extends AbstractMailTest {
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         /*
          * Clean everything

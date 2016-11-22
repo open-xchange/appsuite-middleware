@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.conversion;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;

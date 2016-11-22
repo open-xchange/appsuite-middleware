@@ -2,6 +2,8 @@
 package com.openexchange.ajax.task;
 
 import java.util.Calendar;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.modules.Module;
@@ -20,7 +22,7 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         manager = new TaskTestManager(getClient());
@@ -29,7 +31,7 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
         actual = null;
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         manager.cleanUp();
         fManager.cleanUp();

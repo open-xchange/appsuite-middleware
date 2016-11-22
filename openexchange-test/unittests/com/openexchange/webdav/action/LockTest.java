@@ -1,12 +1,17 @@
 
 package com.openexchange.webdav.action;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.XMLCompare;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -24,7 +29,7 @@ public class LockTest extends ActionTestCase {
 
     private WebdavPath LOCK_HTML_URL;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         INDEX_HTML_URL = testCollection.dup().append("index.html");
@@ -32,6 +37,7 @@ public class LockTest extends ActionTestCase {
         LOCK_HTML_URL = testCollection.dup().append("lock.html");
     }
 
+    @Test
     public void testLock() throws Exception {
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";
 
@@ -67,6 +73,7 @@ public class LockTest extends ActionTestCase {
 
     }
 
+    @Test
     public void testLockOwnerInXML() throws Exception {
 
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner><shortName xmlns=\"" + TEST_NS.getURI() + "\">me</shortName></owner></lockinfo>";
@@ -104,6 +111,7 @@ public class LockTest extends ActionTestCase {
 
     }
 
+    @Test
     public void testDepth() throws Exception {
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";
 
@@ -142,6 +150,7 @@ public class LockTest extends ActionTestCase {
         assertEquals(1, lock.getDepth());
     }
 
+    @Test
     public void testTimeoutInSeconds() throws Exception {
 
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";
@@ -173,6 +182,7 @@ public class LockTest extends ActionTestCase {
 
     }
 
+    @Test
     public void testLockNull() throws Exception {
 
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";
@@ -205,6 +215,7 @@ public class LockTest extends ActionTestCase {
     }
 
     // Bug 13482
+    @Test
     public void testLockWithoutXMLBody() throws OXException, UnsupportedEncodingException, JDOMException, IOException {
 
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -238,6 +249,7 @@ public class LockTest extends ActionTestCase {
 
     }
 
+    @Test
     public void testRelock() throws OXException, UnsupportedEncodingException, JDOMException, IOException {
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>Administrator</owner></lockinfo>";
 
@@ -256,7 +268,7 @@ public class LockTest extends ActionTestCase {
         req = new MockWebdavRequest(factory, "http://localhost/");
         req.setUrl(INDEX_HTML_URL);
         req.setHeader("Timeout", "infinite");
-        req.setHeader("If", "(<"+lockToken+">)");
+        req.setHeader("If", "(<" + lockToken + ">)");
         req.getUserInfo().put("mentionedLocks", Arrays.asList(lockToken));
         res = new MockWebdavResponse();
 
@@ -273,7 +285,7 @@ public class LockTest extends ActionTestCase {
         final XMLCompare compare = new XMLCompare();
         compare.setCheckTextNames("owner", "locktoken", "timeout", "shortName");
 
-        assertTrue("got: "+res.getResponseBodyAsString(), compare.compare(expect, res.getResponseBodyAsString()));
+        assertTrue("got: " + res.getResponseBodyAsString(), compare.compare(expect, res.getResponseBodyAsString()));
 
         final WebdavResource r = factory.resolveResource(INDEX_HTML_URL);
         r.unlock(lockToken);

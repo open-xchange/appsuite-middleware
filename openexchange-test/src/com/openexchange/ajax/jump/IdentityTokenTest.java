@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.jump;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import com.openexchange.ajax.jump.actions.DummyRequest;
 import com.openexchange.ajax.jump.actions.IdentityTokenRequest;

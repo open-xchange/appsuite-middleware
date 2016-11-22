@@ -1,6 +1,8 @@
 
 package com.openexchange.webdav.xml.task;
 
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
@@ -11,14 +13,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class PermissionTest extends TaskTest {
 
-    public PermissionTest() {
-        super();
-    }
-
-    public void testDummy() {
-
-    }
-
+    @Test
     public void testInsertTaskInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertTaskInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -49,6 +44,7 @@ public class PermissionTest extends TaskTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testInsertTaskInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertTaskInPublicFolderWithoutPermission" + System.currentTimeMillis());
@@ -79,6 +75,7 @@ public class PermissionTest extends TaskTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateTaskInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertTaskInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -112,6 +109,7 @@ public class PermissionTest extends TaskTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateTaskInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testUpdateTaskInPublicFolderWithoutPermission" + System.currentTimeMillis());
@@ -145,6 +143,7 @@ public class PermissionTest extends TaskTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testDeleteTaskInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testDeleteTaskInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -178,6 +177,7 @@ public class PermissionTest extends TaskTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testDeleteTaskInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testDeleteTaskInPublicFolderWithoutPermission" + System.currentTimeMillis());

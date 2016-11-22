@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;

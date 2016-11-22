@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -73,7 +78,7 @@ public class ClearTest extends AbstractMailTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         /*
@@ -84,7 +89,7 @@ public class ClearTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         /*
          * Clean everything
@@ -95,6 +100,7 @@ public class ClearTest extends AbstractMailTest {
         super.tearDown();
     }
 
+    @Test
     public void testClearingOneFolder() throws OXException, IOException, SAXException, JSONException, AddressException, OXException {
         /*
          * Insert <numOfMails> mails through a send request

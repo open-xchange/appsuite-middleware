@@ -2,6 +2,7 @@
 package com.openexchange.ajax.user;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,7 @@ public class AllTest extends AbstractAJAXSession {
     }
 
     @Before
+    @Test
     public void testAllSimple() throws Exception {
 
         final AllRequest request = new AllRequest(null);

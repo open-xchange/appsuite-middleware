@@ -208,8 +208,8 @@ public class CSVContactImporterTest {
         MockUtils.injectValueIntoPrivateField(csvContactImporter, "currentMapper", new PropertyDrivenMapper(properties, "test.properties"));
     }
 
-    @Test
-    public void testConvertCsvToContact_importCorrect_nameSetCorrectlyBirthdayIgnored() throws OXException {
+     @Test
+     public void testConvertCsvToContact_importCorrect_nameSetCorrectlyBirthdayIgnored() throws OXException {
         ContactSwitcher contactSwitcher = csvContactImporter.getContactSwitcher();
 
         Contact contact = csvContactImporter.convertCsvToContact(fields, emptyEntry, contactSwitcher, lineNumber, result, atLeastOneFieldInserted);
@@ -219,8 +219,8 @@ public class CSVContactImporterTest {
         Assert.assertNull(contact.getBirthday());
     }
 
-    @Test
-    public void testConvertCsvToContact_importCorrect_correctlySet() throws OXException {
+     @Test
+     public void testConvertCsvToContact_importCorrect_correctlySet() throws OXException {
         ContactSwitcher contactSwitcher = csvContactImporter.getContactSwitcher();
 
         Contact contact = csvContactImporter.convertCsvToContact(fields, midEntry, contactSwitcher, lineNumber, result, atLeastOneFieldInserted);

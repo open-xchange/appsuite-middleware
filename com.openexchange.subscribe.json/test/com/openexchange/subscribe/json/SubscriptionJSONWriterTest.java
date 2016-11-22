@@ -50,14 +50,16 @@
 package com.openexchange.subscribe.json;
 
 import static com.openexchange.json.JSONAssertion.assertValidates;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -70,12 +72,11 @@ import com.openexchange.subscribe.SubscriptionSource;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SubscriptionJSONWriterTest extends TestCase {
-
+public class SubscriptionJSONWriterTest {
     private Subscription subscription;
     private DynamicFormDescription form;
 
-    @Override
+    @Before
     public void setUp() {
         subscription = new Subscription();
         subscription.setFolderId("12");
@@ -98,7 +99,8 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
     }
 
-    public void testWriteAsObject() throws JSONException, OXException {
+         @Test
+     public void testWriteAsObject() throws JSONException, OXException {
 
         JSONObject object = new SubscriptionJSONWriter().write(subscription, form, null, TimeZone.getTimeZone("utc"));
 
@@ -117,7 +119,8 @@ public class SubscriptionJSONWriterTest extends TestCase {
         assertValidates(assertion, object);
     }
 
-    public void testWriteArray() throws OXException {
+         @Test
+     public void testWriteArray() throws OXException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "source", "displayName", "enabled" };
         specialCols.put("com.openexchange.subscribe.test1", new String[] { "username" });
@@ -135,7 +138,8 @@ public class SubscriptionJSONWriterTest extends TestCase {
         assertValidates(assertion, array);
     }
 
-    public void testWriteArrayWithUnusedSource() throws OXException {
+         @Test
+     public void testWriteArrayWithUnusedSource() throws OXException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "source" };
         specialCols.put("com.openexchange.subscribe.test2", new String[] { "username", "field1", "field2" });
@@ -157,7 +161,8 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
     }
 
-    public void testUnknownColumnGeneratesException() {
+         @Test
+     public void testUnknownColumnGeneratesException() {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "unknownColumn" };
 

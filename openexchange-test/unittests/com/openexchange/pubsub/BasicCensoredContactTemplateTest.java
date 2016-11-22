@@ -49,6 +49,8 @@
 
 package com.openexchange.pubsub;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -56,6 +58,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
@@ -68,11 +71,7 @@ import com.openexchange.templating.OXTemplate;
  */
 public abstract class BasicCensoredContactTemplateTest extends BasicContactTemplateTest {
 
-    public static final int[] CENSORED_COLUMNS = new int[] {
-            Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.BIRTHDAY, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER,
-            Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.CITY_BUSINESS, Contact.CITY_HOME,
-            Contact.CITY_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.COUNTRY_BUSINESS,
-            Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER };
+    public static final int[] CENSORED_COLUMNS = new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.BIRTHDAY, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER, Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER };
 
     /**
      * Initializes a new {@link BasicCensoredContactTemplateTest}.
@@ -83,6 +82,7 @@ public abstract class BasicCensoredContactTemplateTest extends BasicContactTempl
 
     /**
      * Initializes a new {@link BasicCensoredContactTemplateTest}.
+     * 
      * @param name
      */
     public BasicCensoredContactTemplateTest(String name) {
@@ -98,13 +98,14 @@ public abstract class BasicCensoredContactTemplateTest extends BasicContactTempl
         contact.setGivenName("givenname" + identifier);
         contact.setSurName("surname" + identifier);
         contact.setMiddleName("middlename" + identifier);
-//        contact.setDisplayName("displayname" + identifier);
+        //        contact.setDisplayName("displayname" + identifier);
         contact.setPosition("position" + identifier);
         contact.setTitle("title" + identifier);
         contact.setCompany("company" + identifier);
         return contact;
     }
 
+    @Test
     public void testShouldNotPublishCensoredFields() throws Exception {
         SubscriptionSource source = getSubscriptionSource();
         MicroformatSubscribeService service = getSubscribeService();

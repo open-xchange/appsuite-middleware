@@ -16,29 +16,31 @@
  */
 package org.apache.tika.parser.image;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
-
+import org.junit.Test;
 import com.drew.metadata.Directory;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.jpeg.JpegCommentDirectory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-import static org.mockito.Mockito.*;
-
-public class ImageMetadataExtractorTest extends TestCase {
-    
+public class ImageMetadataExtractorTest {    
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testHandleDirectories() throws MetadataException {
+         @Test
+     public void testHandleDirectories() throws MetadataException {
         Metadata metadata = mock(Metadata.class);
         ImageMetadataExtractor.DirectoryHandler handler1 = mock(ImageMetadataExtractor.DirectoryHandler.class);
         ImageMetadataExtractor e = new ImageMetadataExtractor(metadata, handler1);
@@ -54,14 +56,16 @@ public class ImageMetadataExtractorTest extends TestCase {
         verify(handler1).handle(directory, metadata);
     }
     
-    public void testExifHandlerSupports() {
+         @Test
+     public void testExifHandlerSupports() {
         assertTrue(new ImageMetadataExtractor.ExifHandler().supports(ExifIFD0Directory.class));
         assertTrue(new ImageMetadataExtractor.ExifHandler().supports(ExifSubIFDDirectory.class));
         assertFalse(new ImageMetadataExtractor.ExifHandler().supports(Directory.class));
         assertFalse(new ImageMetadataExtractor.ExifHandler().supports(JpegCommentDirectory.class));
     }
     
-    public void testExifHandlerParseDate() throws MetadataException {
+         @Test
+     public void testExifHandlerParseDate() throws MetadataException {
         ExifSubIFDDirectory exif = mock(ExifSubIFDDirectory.class);
         when(exif.containsTag(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL)).thenReturn(true);
         when(exif.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL)).thenReturn(
@@ -73,7 +77,8 @@ public class ImageMetadataExtractorTest extends TestCase {
                 metadata.get(TikaCoreProperties.CREATED));
     }
 
-    public void testExifHandlerParseDateFallback() throws MetadataException {
+         @Test
+     public void testExifHandlerParseDateFallback() throws MetadataException {
         ExifIFD0Directory exif = mock(ExifIFD0Directory.class);
         when(exif.containsTag(ExifIFD0Directory.TAG_DATETIME)).thenReturn(true);
         when(exif.getDate(ExifIFD0Directory.TAG_DATETIME)).thenReturn(
@@ -85,7 +90,8 @@ public class ImageMetadataExtractorTest extends TestCase {
                 metadata.get(TikaCoreProperties.CREATED));
     }
     
-    public void testExifHandlerParseDateError() throws MetadataException {
+         @Test
+     public void testExifHandlerParseDateError() throws MetadataException {
         ExifIFD0Directory exif = mock(ExifIFD0Directory.class);
         when(exif.containsTag(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL)).thenReturn(true);
         when(exif.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL)).thenReturn(null);
@@ -96,7 +102,8 @@ public class ImageMetadataExtractorTest extends TestCase {
                 metadata.get(TikaCoreProperties.CREATED));
     }
     
-    public void testCopyUnknownFieldsHandler() throws MetadataException {
+         @Test
+     public void testCopyUnknownFieldsHandler() throws MetadataException {
         Directory d = mock(Directory.class);
         Tag t1 = mock(Tag.class);
         when(t1.getTagName()).thenReturn("Image Description");

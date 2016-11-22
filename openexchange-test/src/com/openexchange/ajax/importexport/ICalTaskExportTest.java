@@ -1,7 +1,9 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
 import com.openexchange.ajax.task.ManagedTaskTest;
@@ -13,6 +15,7 @@ public class ICalTaskExportTest extends ManagedTaskTest {
         super();
     }
 
+    @Test
     public void testExportICalTask() throws Exception {
         final String title = "testExportICalTask" + System.currentTimeMillis();
 

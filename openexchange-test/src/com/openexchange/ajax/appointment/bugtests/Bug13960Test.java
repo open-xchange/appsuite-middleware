@@ -50,6 +50,8 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;

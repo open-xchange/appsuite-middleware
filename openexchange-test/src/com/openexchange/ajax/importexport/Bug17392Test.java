@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -9,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -68,6 +71,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
         calendar.set(Calendar.HOUR_OF_DAY, startHour);
     }
 
+    @Test
     public void testZuluTimezoneImport() throws Exception {
         String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "BEGIN:VEVENT\n" + "SUMMARY:Zulu-Time Appointment\n" + "DTSTART:" + start + "Z\n" + "DTEND:" + end + "Z\n"
         //+ "RRULE:FREQ=MONTHLY;INTERVAL=1;COUNT=2\n"
@@ -83,6 +87,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
         assertEquals("Should not be shifted by time zones, because it is UTC/Zulu time", startHour, actualHour);
     }
 
+    @Test
     public void testTzidTimezoneImport() throws Exception {
         String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "BEGIN:VEVENT\n" + "SUMMARY: EST/New York Time Appointment\n" + "DTSTART;TZID=America/New_York:" + start + "\n" + "DTEND;TZID=America/New_York:" + end + "\n" + "END:VEVENT\n";
 
@@ -95,19 +100,23 @@ public class Bug17392Test extends ManagedAppointmentTest {
         assertEquals("Should be shifted by +4 hours, because it was 1300 EDT originally", startHour - edtOffset, actualHour);
     }
 
+    @Test
     public void testTzidExport() throws Exception {
         verifyTimezoneDoesNotGetLost("America/New_York");
         verifyTimezoneDoesNotGetLost("Europe/Berlin");
     }
 
+    @Test
     public void testRoundtripUTC() throws Exception {
         roundtrip("UTC");
     }
 
+    @Test
     public void testRoundtripNewYork() throws Exception {
         roundtrip("America/New_York");
     }
 
+    @Test
     public void testRoundtripBerlin() throws Exception {
         roundtrip("Europe/Berlin");
     }

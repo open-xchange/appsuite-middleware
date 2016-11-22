@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -93,7 +96,7 @@ public class QuotaTest extends ShareTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
@@ -123,7 +126,7 @@ public class QuotaTest extends ShareTest {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         try {
             if (null != client2) {

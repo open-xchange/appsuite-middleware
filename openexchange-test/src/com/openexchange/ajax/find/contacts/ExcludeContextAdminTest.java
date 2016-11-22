@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -87,7 +89,8 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
     /*
      * Perform autocomplete and query on contacts with showAdmin=false and
      * expect the context admin to be excluded.
-     */ @Test
+     */
+    @Test
     public void testAdminIsExcluded() throws Exception {
         AJAXClient adminClient = new AJAXClient(User.OXAdmin);
         int adminId = adminClient.getValues().getUserId();
@@ -111,7 +114,8 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
     /*
      * Perform autocomplete and query on contacts with showAdmin=true and
      * expect the context admin to be included.
-     */ @Test
+     */
+    @Test
     public void testAdminIsIncluded() throws Exception {
         AJAXClient adminClient = new AJAXClient(User.OXAdmin);
         int adminId = adminClient.getValues().getUserId();

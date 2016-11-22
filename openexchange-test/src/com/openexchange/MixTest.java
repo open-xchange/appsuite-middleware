@@ -66,7 +66,6 @@ import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
-import junit.framework.AssertionFailedError;
 
 /**
  * Tests if AJAX and WebDAV requests may get mixed up.
@@ -129,8 +128,7 @@ public final class MixTest {
                     session.setId(resp.getSessionId());
                     Executor.execute(session, new LogoutRequest());
                     session.setId(null);
-                } catch (final AssertionFailedError e) {
-
+                } catch (final Exception e) {
                     System.out.println("Login failed! " + e.getMessage());
                 } catch (final Throwable t) {
                     t.printStackTrace();

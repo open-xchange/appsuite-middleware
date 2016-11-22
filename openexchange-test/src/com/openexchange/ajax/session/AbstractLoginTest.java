@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.fail;
 import org.apache.commons.httpclient.Cookie;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;

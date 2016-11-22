@@ -50,6 +50,8 @@
 package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.Arrays;
 import org.json.JSONArray;

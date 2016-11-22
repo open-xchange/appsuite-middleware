@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -67,6 +70,7 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
         super();
     }
 
+    @Test
     public void testIt() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         int uid1 = getClient().getValues().getUserId();

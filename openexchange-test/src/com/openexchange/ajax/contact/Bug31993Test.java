@@ -50,6 +50,8 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
@@ -66,15 +68,6 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug31993Test extends AbstractManagedContactTest {
-
-    public Bug31993Test() {
-        super();
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
 
     @Test
     public void testSortOrder() throws Exception {

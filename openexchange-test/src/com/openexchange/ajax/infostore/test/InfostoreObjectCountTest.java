@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import org.junit.Test;
 import com.openexchange.ajax.folder.AbstractObjectCountTest;

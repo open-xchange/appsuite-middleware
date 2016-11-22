@@ -19,18 +19,20 @@ package org.apache.tika.detect;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the {@link MagicDetector} class.
  */
-public class MagicDetectorTest extends TestCase {
-
-    public void testDetectNull() throws Exception {
+public class MagicDetectorTest {
+         @Test
+     public void testDetectNull() throws Exception {
         MediaType html = new MediaType("text", "html");
         Detector detector = new MagicDetector(html, "<html".getBytes("ASCII"));
         assertEquals(
@@ -38,7 +40,8 @@ public class MagicDetectorTest extends TestCase {
                 detector.detect(null, new Metadata()));
     }
 
-    public void testDetectSimple() throws Exception {
+         @Test
+     public void testDetectSimple() throws Exception {
         MediaType html = new MediaType("text", "html");
         Detector detector = new MagicDetector(html, "<html".getBytes("ASCII"));
 
@@ -50,7 +53,8 @@ public class MagicDetectorTest extends TestCase {
         assertDetect(detector, MediaType.OCTET_STREAM, "");
     }
 
-    public void testDetectOffsetRange() throws Exception {
+         @Test
+     public void testDetectOffsetRange() throws Exception {
         MediaType html = new MediaType("text", "html");
         Detector detector = new MagicDetector(
                 html, "<html".getBytes("ASCII"), null, 0, 64);
@@ -74,7 +78,8 @@ public class MagicDetectorTest extends TestCase {
         assertDetect(detector, MediaType.OCTET_STREAM, "");
     }
 
-    public void testDetectMask() throws Exception {
+         @Test
+     public void testDetectMask() throws Exception {
         MediaType html = new MediaType("text", "html");
         byte up = (byte) 0xdf;
         Detector detector = new MagicDetector(
@@ -101,7 +106,8 @@ public class MagicDetectorTest extends TestCase {
         assertDetect(detector, MediaType.OCTET_STREAM, "");
     }
 
-    public void testDetectRegExPDF() throws Exception {
+         @Test
+     public void testDetectRegExPDF() throws Exception {
         MediaType pdf = new MediaType("application", "pdf");
         Detector detector = new MagicDetector(
                 pdf, "(?s)\\A.{0,144}%PDF-".getBytes("ASCII"), null, true, 0, 0);
@@ -122,7 +128,8 @@ public class MagicDetectorTest extends TestCase {
         assertDetect(detector, MediaType.OCTET_STREAM, "");
     }
 
-    public void testDetectRegExGreedy() throws Exception {
+         @Test
+     public void testDetectRegExGreedy() throws Exception {
         String pattern =
                 "(?s)\\x3chtml xmlns=\"http://www\\.w3\\.org/1999/xhtml"
                 + "\".*\\x3ctitle\\x3e.*\\x3c/title\\x3e";
@@ -136,7 +143,8 @@ public class MagicDetectorTest extends TestCase {
                 + "<head><title>XHTML test document</title></head>");
     }
 
-    public void testDetectRegExOptions() throws Exception {
+         @Test
+     public void testDetectRegExOptions() throws Exception {
         String pattern =
                 "(?s)\\A.{0,1024}\\x3c\\!(?:DOCTYPE|doctype) (?:HTML|html) "
                 + "(?:PUBLIC|public) \"-//.{1,16}//(?:DTD|dtd) .{0,64}"
@@ -169,7 +177,8 @@ public class MagicDetectorTest extends TestCase {
         assertDetect(detector, MediaType.OCTET_STREAM, data2);
     }
 
-    public void testDetectStreamReadProblems() throws Exception {
+         @Test
+     public void testDetectStreamReadProblems() throws Exception {
         byte[] data = "abcdefghijklmnopqrstuvwxyz0123456789".getBytes("ASCII");
         MediaType testMT = new MediaType("application", "test");
         Detector detector = new MagicDetector(testMT, data, null, false, 0, 0);

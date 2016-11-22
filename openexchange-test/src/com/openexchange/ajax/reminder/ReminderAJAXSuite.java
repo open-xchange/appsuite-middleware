@@ -49,21 +49,20 @@
 
 package com.openexchange.ajax.reminder;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class ReminderAJAXSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    RangeTest.class,
+    UpdatesTest.class,
+    DeleteTest.class,
+    RemindAgainTest.class,
+    SharedFolderTest.class,
+    DeleteMultipleReminderTest.class,
+    ReminderBugTestSuite.class,
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.reminder.ReminderAJAXSuite");
-        tests.addTestSuite(RangeTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(RemindAgainTest.class);
-        tests.addTestSuite(SharedFolderTest.class);
-        tests.addTestSuite(DeleteMultipleReminderTest.class);
+})
+public class ReminderAJAXSuite  {
 
-        tests.addTest(ReminderBugTestSuite.suite());
-        return tests;
-    }
 }

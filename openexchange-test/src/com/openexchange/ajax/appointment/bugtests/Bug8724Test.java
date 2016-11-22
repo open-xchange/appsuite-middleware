@@ -1,7 +1,9 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -21,6 +23,7 @@ public class Bug8724Test extends AppointmentTest {
      * This test checks if the list action return an object not found exception
      * if one id is requested trhat doesn't exist
      */
+    @Test
     public void testBug8724_I() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testBug8724_I");
         appointmentObj.setIgnoreConflicts(true);
@@ -46,6 +49,7 @@ public class Bug8724Test extends AppointmentTest {
      * This test checks if the list action return an object not found exception
      * if one id is requested trhat doesn't exist
      */
+    @Test
     public void testBug8724_II() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testBug8724_II");
         appointmentObj.setIgnoreConflicts(true);

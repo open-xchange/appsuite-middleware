@@ -1,11 +1,12 @@
 
 package com.openexchange.push.udp;
 
+import static org.junit.Assert.assertEquals;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class PushResponseTest extends TestCase {
+public class PushResponseTest {
 
     private static String host = "localhost";
 
@@ -28,6 +29,7 @@ public class PushResponseTest extends TestCase {
         this.contextId = contextId;
     }
 
+    @Test
     public void testPushResponse() throws Exception {
         if (datagramSocket == null) {
             throw new Exception("DatagramSocket is null");

@@ -1,10 +1,13 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.Before;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -30,7 +33,7 @@ public class AbstractRecurrenceTest extends AppointmentTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         simpleDateFormatUTC.setTimeZone(timeZoneUTC);

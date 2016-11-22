@@ -49,10 +49,13 @@
 
 package com.openexchange.sms;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Locale;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.TestServiceRegistry;
-import junit.framework.TestCase;
 
 /**
  * {@link PhoneNumberParserServiceTest}
@@ -60,12 +63,13 @@ import junit.framework.TestCase;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class PhoneNumberParserServiceTest extends TestCase {
+public class PhoneNumberParserServiceTest {
 
     private final String EXPECTED = "491234567890";
 
     private final String[] TO_PARSE = new String[] { "00491234567890", "01234567890", "+491234567890", "004901234567890", "+4901234567890", "0049 123 4567890", "0123/4567890" };
 
+    @Test
     public void testParsePhoneNumbers() throws Exception {
         PhoneNumberParserService service = TestServiceRegistry.getInstance().getService(PhoneNumberParserService.class);
         for (String number : TO_PARSE) {
@@ -74,16 +78,14 @@ public class PhoneNumberParserServiceTest extends TestCase {
         }
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         Init.startServer();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         Init.stopServer();
-        super.tearDown();
     }
 
 }

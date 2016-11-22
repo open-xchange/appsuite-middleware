@@ -1,6 +1,10 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -9,6 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -23,7 +29,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         Contact alice = ContactTestManager.generateContact(folderID);
@@ -39,11 +45,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         manager.newAction(alice, bob, charlie);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testSearchWithEquals() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
         ContactField folderField = ContactField.FOLDER_ID;
@@ -63,6 +65,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         assertEquals("Bob", actual);
     }
 
+    @Test
     public void testSearchWithEqualsInAllFolders() throws Exception {
         ContactField field = ContactField.SUR_NAME;
         JSONObject filter = new JSONObject("{'filter' : [ '=' , {'field' : '" + field.getAjaxName() + "'} , '" + BOB_LASTNAME + "']}");
@@ -84,6 +87,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     /**
      * Tests a SQL injection using our good friend Bobby, from 'Exploits of a mom', http://xkcd.com/327/
      */
+    @Test
     public void testLittleBobbyTables() throws Exception {
         ContactField field = ContactField.SUR_NAME;
         String bobby = "Robert\\\"); DROP TABLE prg_contacts; --";
@@ -104,6 +108,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         assertEquals(BOB_LASTNAME, actual);
     }
 
+    @Test
     public void testSearchAlphabetRange() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
         JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['>=' , {'field' : '" + field.getAjaxName() + "'} , 'A'], " + "['<' , {'field' : '" + field.getAjaxName() + "'}, 'C'], " + "['=' , {'field' : '" + ContactField.FOLDER_ID.getAjaxName() + "'}, " + folderID + "]" + "]})");
@@ -125,6 +130,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         assertTrue(names.contains("Alice"));
     }
 
+    @Test
     public void testSearchOrdering() throws Exception {
         manager.newAction(ContactTestManager.generateContact(folderID, "Elvis"), ContactTestManager.generateContact(folderID, "Feelvis"), ContactTestManager.generateContact(folderID, "Gelvis"), ContactTestManager.generateContact(folderID, "Geena"), ContactTestManager.generateContact(folderID, "Hellvis"));
         ContactField field = ContactField.SUR_NAME;
@@ -163,6 +169,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
 
     }
 
+    @Test
     public void testSearchOrderingWithKana() throws Exception {
         manager.newAction(ContactTestManager.generateContact(folderID, "\u30ef"), ContactTestManager.generateContact(folderID, "\u30ea"), ContactTestManager.generateContact(folderID, "\u30e9"), ContactTestManager.generateContact(folderID, "\u30e5"), ContactTestManager.generateContact(folderID, "\u30e4"), ContactTestManager.generateContact(folderID, "\u30df"), ContactTestManager.generateContact(folderID, "\u30de"), ContactTestManager.generateContact(folderID, "\u30d0"), ContactTestManager.generateContact(folderID, "\u30cf"), ContactTestManager.generateContact(folderID, "\u30cb"), ContactTestManager.generateContact(folderID, "\u30ca"), ContactTestManager.generateContact(folderID, "\u30c0"), ContactTestManager.generateContact(folderID, "\u30bf"), ContactTestManager.generateContact(folderID, "\u30b6"), ContactTestManager.generateContact(folderID, "\u30b5"), ContactTestManager.generateContact(folderID, "\u30ac"), ContactTestManager.generateContact(folderID, "\u30ab"), ContactTestManager.generateContact(folderID, "\u30a3"), ContactTestManager.generateContact(folderID, "\u30a2"));
 
@@ -195,6 +202,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testSearchOrderingWithHanzi() throws Exception {
         List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
         for (String graphem : sinograph) {
@@ -226,6 +234,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testOrderByWithCollation() throws Exception {
         ContactField field = ContactField.SUR_NAME;
 
@@ -257,6 +266,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testNameThatAppearedTwice() throws Exception {
         String name = "\u7802\u7cd6";
         manager.newAction(ContactTestManager.generateContact(folderID, name));
@@ -279,6 +289,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         assertEquals("Should only appear once", 1, occurences);
     }
 
+    @Test
     public void testQuestionmarkWildcardInTheBeginning() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
         ContactField folderField = ContactField.FOLDER_ID;
@@ -299,6 +310,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         assertEquals("Bob", actual);
     }
 
+    @Test
     public void testQuestionmarkWildcardInTheEnd() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
         ContactField folderField = ContactField.FOLDER_ID;
@@ -319,6 +331,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         assertEquals("Bob", actual);
     }
 
+    @Test
     public void testAsteriskWildcardInTheBeginning() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
         ContactField folderField = ContactField.FOLDER_ID;
@@ -339,6 +352,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         assertEquals("Bob", actual);
     }
 
+    @Test
     public void testAsteriskWildcardInTheEnd() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
         ContactField folderField = ContactField.FOLDER_ID;

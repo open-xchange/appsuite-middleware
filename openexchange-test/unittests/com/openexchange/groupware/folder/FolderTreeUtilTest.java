@@ -50,8 +50,10 @@
 package com.openexchange.groupware.folder;
 
 import static com.openexchange.java.Autoboxing.i;
+import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.util.Random;
+import org.junit.Test;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.FolderTreeUtil;
@@ -63,8 +65,9 @@ public class FolderTreeUtilTest extends FolderTestCase {
 
     private final Random r = new Random();
 
+    @Test
     public void testPathIDs() throws Exception {
-        final FolderObject folder = mkdir(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, "folder"+r.nextInt());
+        final FolderObject folder = mkdir(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, "folder" + r.nextInt());
         clean.add(folder);
 
         final FolderObject subfolder = mkdir(folder.getObjectID(), "subfolder");

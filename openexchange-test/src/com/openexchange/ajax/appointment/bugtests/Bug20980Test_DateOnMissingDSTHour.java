@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertNull;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 
@@ -59,6 +61,7 @@ public class Bug20980Test_DateOnMissingDSTHour extends ManagedAppointmentTest {
         super();
     }
 
+    @Test
     public void testBugWithDST() throws Exception {
         int fid = folder.getObjectID();
         Appointment series = generateDailyAppointment();

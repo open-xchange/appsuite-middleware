@@ -160,8 +160,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         getResourceMapping().destroy();
     }
 
-    @Test
-    public void testSetNewResource() throws Exception {
+     @Test
+     public void testSetNewResource() throws Exception {
         ID concreteId = generateId();
         ID generalId = concreteId.toGeneralForm();
         Resource resource = generateResource(concreteId);
@@ -179,8 +179,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong SocketAddress in reloaded routing info", localMember.getSocketAddress(), routingInfo.getSocketAddress());
     }
 
-    @Test
-    public void testResourceEviction() throws Exception {
+     @Test
+     public void testResourceEviction() throws Exception {
         final CyclicBarrier barrier = new CyclicBarrier(2);
         final ResourceMappingEntryAdapter listener = new ResourceMappingEntryAdapter() {
             @Override
@@ -210,8 +210,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         }
     }
 
-    @Test
-    public void testUpdateResource() throws Exception {
+     @Test
+     public void testUpdateResource() throws Exception {
         //Generate and ad Presence in ResourceDirectory
         ID concreteId = generateId();
         ID generalId = concreteId.toGeneralForm();
@@ -232,8 +232,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong Timestamp in reloaded Resource", changedResource.getTimestamp(), reloadedResource.getTimestamp());
     }
 
-    @Test
-    public void testSetAndRemoveMultiple() throws Exception {
+     @Test
+     public void testSetAndRemoveMultiple() throws Exception {
         ID id1 = generateId();
         ID id2 = generateId();
         ID id3 = generateId();
@@ -292,8 +292,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
 
-    @Test
-    public void testSetAndGetAndRemoveMultipleWithMixedIdTypes() throws Exception {
+     @Test
+     public void testSetAndGetAndRemoveMultipleWithMixedIdTypes() throws Exception {
         ID id1 = generateId();
         ID id2 = generateId();
         ID id3 = generateId();
@@ -343,8 +343,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     /*
      * https://github.com/hazelcast/hazelcast/issues/441
      */
-    @Test
-    public void testTransactionsInSet() throws Exception {
+     @Test
+     public void testTransactionsInSet() throws Exception {
         final ID testID = generateId();
         final Resource testResource = generateResource(testID);
 

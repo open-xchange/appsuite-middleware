@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;

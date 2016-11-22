@@ -1,7 +1,9 @@
 
 package com.openexchange.webdav.xml.attachment;
 
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
+import org.junit.Test;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -13,10 +15,7 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class NewTest extends AttachmentTest {
 
-    public NewTest() {
-        super();
-    }
-
+    @Test
     public void testInsertAttachment() throws Exception {
         final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
         final int contactFolderId = folderObj.getObjectID();

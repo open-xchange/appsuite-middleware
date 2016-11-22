@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -57,6 +59,7 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -90,7 +93,7 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
 
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(User.User1);
@@ -134,11 +137,6 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
                 p.close();
             }
         }
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

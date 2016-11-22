@@ -20,8 +20,8 @@ import org.junit.Test;
  */
 public class DBWeightComparatorTest {
 
-    @Test
-    public void testLowValues() {
+     @Test
+     public void testLowValues() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
         dbList.add(db(1, 100, 2, 1000));
         dbList.add(db(2, 100, 1, 1000));
@@ -29,8 +29,8 @@ public class DBWeightComparatorTest {
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
 
-    @Test
-    public void testDevPrototyp() {
+     @Test
+     public void testDevPrototyp() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
         dbList.add(db(1, 100, 67909, 150000));
         dbList.add(db(2, 100, 2044, 150000));
@@ -38,8 +38,8 @@ public class DBWeightComparatorTest {
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
 
-    @Test
-    public void testLargeValues() {
+     @Test
+     public void testLargeValues() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
         dbList.add(db(1, 100, 999999999, 1000000000));
         dbList.add(db(2, 100, 999999998, 1000000000));
@@ -47,8 +47,8 @@ public class DBWeightComparatorTest {
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
 
-    @Test
-    public void testOneZero() {
+     @Test
+     public void testOneZero() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
         dbList.add(db(1, 100, 1, 1000));
         dbList.add(db(2, 100, 0, 1000));
@@ -56,8 +56,8 @@ public class DBWeightComparatorTest {
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
 
-    @Test
-    public void testOneFull() {
+     @Test
+     public void testOneFull() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
         dbList.add(db(1, 100, 1000000000, 1000000000));
         dbList.add(db(2, 100, 999999999, 1000000000));

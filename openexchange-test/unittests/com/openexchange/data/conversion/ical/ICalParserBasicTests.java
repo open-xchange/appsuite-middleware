@@ -51,7 +51,10 @@ package com.openexchange.data.conversion.ical;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -60,6 +63,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -71,13 +75,13 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ICalParserBasicTests extends AbstractICalParserTest {
     // Appointments
 
+    @Test
     public void testAppStartToEndWithUTC() throws ConversionError {
 
         final Date start = D("24/02/1981 10:00");
@@ -89,12 +93,13 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         String icalText = fixtures.veventWithLocalDTStartAndDTEnd(start, end);
         Appointment appointment = parseAppointment(icalText, utc);
-        
+
         assertEquals(start, appointment.getStartDate());
         assertEquals(end, appointment.getEndDate());
         assertEquals("UTC", appointment.getTimezone());
     }
 
+    @Test
     public void testAppStartToEnd() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -106,9 +111,10 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         assertEquals(start, appointment.getStartDate());
         assertEquals(end, appointment.getEndDate());
-		assertEquals(defaultTZone.getID(), appointment.getTimezone());
- }
+        assertEquals(defaultTZone.getID(), appointment.getTimezone());
+    }
 
+    @Test
     public void testAppStartToEndWithKnownTZID() throws ConversionError {
 
         final Date start = D("24/02/1981 10:00");
@@ -117,16 +123,17 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         // Known TZID
         final TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
-        assertFalse("Bad test TimeZone",timeZone.equals(TimeZone.getDefault()));
+        assertFalse("Bad test TimeZone", timeZone.equals(TimeZone.getDefault()));
 
         String icalText = fixtures.veventWithDTStartAndEndInTimeZone(start, end, timeZone);
         CalendarDataObject appointment = parseAppointment(icalText, timeZone);
 
-        assertEquals(recalculate(start, utc , timeZone), appointment.getStartDate());
+        assertEquals(recalculate(start, utc, timeZone), appointment.getStartDate());
         assertEquals(recalculate(end, utc, timeZone), appointment.getEndDate());
         assertEquals(timeZone.getID(), appointment.getTimezone());
     }
 
+    @Test
     public void testAppStartToEndWithVTimeZone() throws ConversionError {
 
         final Date start = D("24/02/1981 10:00");
@@ -135,13 +142,14 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         TimeZone defaultTzone = TimeZone.getDefault();
 
         String icalText = fixtures.veventWithDTStartAndDTEndInCustomTimezone(start, end);
-		CalendarDataObject appointment = parseAppointment(icalText, defaultTzone);
+        CalendarDataObject appointment = parseAppointment(icalText, defaultTzone);
 
         assertEquals(D("24/02/1981 01:00"), appointment.getStartDate());
         assertEquals(D("24/02/1981 03:00"), appointment.getEndDate());
         assertEquals(defaultTzone.getID(), appointment.getTimezone());
     }
 
+    @Test
     public void testDTSTARTAsDateWithoutValue() throws ConversionError {
         final Date start = D("24/02/1981 00:00");
 
@@ -152,6 +160,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testAppDuration() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -168,6 +177,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testAppPrivateFlag() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -188,13 +198,13 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testAppCreated() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-        
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "CREATED", "20081023T100000Z");
         final Appointment appointment = parseAppointment(icalText, utc);
 
@@ -202,39 +212,39 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testAppLastModified() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "LAST-MODIFIED", "20081023T100000Z");
         final Appointment appointment = parseAppointment(icalText, utc);
 
         assertEquals(D("23/10/2008 10:00"), appointment.getLastModified());
-        
+
     }
 
+    @Test
     public void testAppDTSTAMP() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "DTSTAMP", "20081023T100000Z");
         final Appointment appointment = parseAppointment(icalText, utc);
 
-        assertEquals(D("23/10/2008 10:00"), appointment.getCreationDate());   
+        assertEquals(D("23/10/2008 10:00"), appointment.getCreationDate());
     }
 
+    @Test
     public void testAppNote() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
-
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "DESCRIPTION", "A fine description");
         final Appointment appointment = parseAppointment(icalText, utc);
@@ -245,12 +255,12 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testAppLocation() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
-
 
         final String icalText = fixtures.veventWithSimpleProperties(start, end, "LOCATION", "Mars");
         final Appointment appointment = parseAppointment(icalText, utc);
@@ -258,6 +268,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals("Mars", appointment.getLocation());
     }
 
+    @Test
     public void testAppTitle() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -270,6 +281,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals("A fine title", appointment.getTitle());
     }
 
+    @Test
     public void testAppReserved() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -282,6 +294,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(Appointment.RESERVED, appointment.getShownAs());
     }
 
+    @Test
     public void testAppFree() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -294,6 +307,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(Appointment.FREE, appointment.getShownAs());
     }
 
+    @Test
     public void testAppAttendees() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -302,7 +316,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         String[] mails = new String[3];
         int i = 0;
-        for(final User user : U(1,2,5)) {
+        for (final User user : U(1, 2, 5)) {
             mails[i++] = user.getMail();
         }
 
@@ -311,28 +325,26 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         String icalText = fixtures.veventWithAttendees(start, end, mails);
         Appointment appointment = parseAppointment(icalText, utc);
 
-        final Set<Integer> ids = new HashSet<Integer>(Arrays.asList(1,2,5));
+        final Set<Integer> ids = new HashSet<Integer>(Arrays.asList(1, 2, 5));
         assertNotNull(appointment.getParticipants());
-        for(final Participant p  : appointment.getParticipants()) {
+        for (final Participant p : appointment.getParticipants()) {
             assertTrue(UserParticipant.class.isAssignableFrom(p.getClass()));
             final UserParticipant participant = (UserParticipant) p;
             assertTrue(ids.remove(participant.getIdentifier()));
         }
         assertTrue(ids.isEmpty());
-        
 
         // TODO: Status ?
 
         // External Users
 
-        mails = new String[]{"mickey@disney.invalid", "donald@disney.invalid", "goofy@disney.invalid"};
+        mails = new String[] { "mickey@disney.invalid", "donald@disney.invalid", "goofy@disney.invalid" };
         icalText = fixtures.veventWithAttendees(start, end, mails);
         appointment = parseAppointment(icalText, utc);
 
-
         final Set<String> mailSet = new HashSet<String>(Arrays.asList(mails));
         assertNotNull(appointment.getParticipants());
-        for(final Participant p  : appointment.getParticipants()) {
+        for (final Participant p : appointment.getParticipants()) {
             assertTrue(ExternalUserParticipant.class.isAssignableFrom(p.getClass()));
             final ExternalUserParticipant participant = (ExternalUserParticipant) p;
             assertTrue(mailSet.remove(participant.getEmailAddress()));
@@ -341,31 +353,33 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testAppResources() throws ConversionError {
-     
+
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-        final String[] resources = new String[]{"Toaster", "Deflector", "Subspace Anomaly"};
+        final String[] resources = new String[] { "Toaster", "Deflector", "Subspace Anomaly" };
 
         final String icalText = fixtures.veventWithResources(start, end, resources);
         final Appointment appointment = parseAppointment(icalText, utc);
 
-        final Set<Integer> resourceSet = new HashSet<Integer>(Arrays.asList(1,2,3));
+        final Set<Integer> resourceSet = new HashSet<Integer>(Arrays.asList(1, 2, 3));
 
         assertNotNull(appointment.getParticipants());
-        for(final Participant p  : appointment.getParticipants()) {
+        for (final Participant p : appointment.getParticipants()) {
             assertTrue(ResourceParticipant.class.isAssignableFrom(p.getClass()));
             final ResourceParticipant participant = (ResourceParticipant) p;
             assertTrue(resourceSet.remove(participant.getIdentifier()));
         }
 
         assertTrue(resourceSet.isEmpty());
-        
+
     }
 
+    @Test
     public void testAppResourcesInParticipants() throws ConversionError {
         // Resources can also be specified in the attendee property with a cutype
         final Date start = D("24/02/1981 10:00");
@@ -373,31 +387,32 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-        final String[] resources = new String[]{"Toaster", "Deflector", "Subspace Anomaly"};
+        final String[] resources = new String[] { "Toaster", "Deflector", "Subspace Anomaly" };
 
         final String icalText = fixtures.veventWithResourcesInAttendees(start, end, resources);
         final Appointment appointment = parseAppointment(icalText, utc);
 
-        final Set<Integer> resourceSet = new HashSet<Integer>(Arrays.asList(1,2,3));
+        final Set<Integer> resourceSet = new HashSet<Integer>(Arrays.asList(1, 2, 3));
 
         assertNotNull(appointment.getParticipants());
-        for(final Participant p  : appointment.getParticipants()) {
+        for (final Participant p : appointment.getParticipants()) {
             assertTrue(ResourceParticipant.class.isAssignableFrom(p.getClass()));
             final ResourceParticipant participant = (ResourceParticipant) p;
-            assertTrue("Didn't expect: "+participant.getIdentifier(), resourceSet.remove(participant.getIdentifier()));
+            assertTrue("Didn't expect: " + participant.getIdentifier(), resourceSet.remove(participant.getIdentifier()));
         }
 
         assertTrue(resourceSet.toString(), resourceSet.isEmpty());
 
     }
 
+    @Test
     public void testAppCategories() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-        final String[] categories = new String[]{"Toaster", "Deflector", "Subspace Anomaly"};
+        final String[] categories = new String[] { "Toaster", "Deflector", "Subspace Anomaly" };
         final String categoriesString = "Toaster,Deflector,Subspace Anomaly";
 
         final String icalText = fixtures.veventWithCategories(start, end, categories);
@@ -406,10 +421,11 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(categoriesString, appointment.getCategories());
     }
 
+    @Test
     public void testAppRecurrence() throws ConversionError {
 
         final Date start = D("24/02/1981 10:00");
-        final Date end =   D("24/02/1981 12:00");
+        final Date end = D("24/02/1981 12:00");
 
         // DAILY
 
@@ -435,7 +451,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertFalse(Appointment.THURSDAY == (Appointment.THURSDAY & days));
         assertFalse(Appointment.SATURDAY == (Appointment.SATURDAY & days));
         assertFalse(Appointment.SUNDAY == (Appointment.SUNDAY & days));
-
 
         // Default Day taken from DTSTART
 
@@ -465,14 +480,12 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertTrue(Appointment.MONDAY == (Appointment.MONDAY & days));
         assertTrue(Appointment.TUESDAY == (Appointment.TUESDAY & days)); // Is this correct? Can an appintment recur on more than one day in MONTHLY series?
 
-
         // Second form : the last tuesday every 2 months
 
         appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYSETPOS=-1", start, end);
         days = appointment.getDays();
         assertEquals(5, appointment.getDayInMonth());
         assertTrue(Appointment.TUESDAY == (Appointment.TUESDAY & days));
-
 
         // Default taken from start date
 
@@ -512,7 +525,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(5, appointment.getDayInMonth());
         assertEquals(Appointment.SUNDAY, appointment.getDays());
         assertEquals(1, appointment.getInterval());
-        
 
         // Default
 
@@ -522,7 +534,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(1, appointment.getMonth());
         assertEquals(24, appointment.getDayInMonth());
 
-
         // UNTIL
 
         appointment = appointmentWithRecurrence("FREQ=YEARLY;INTERVAL=2;UNTIL=19890423", start, end);
@@ -531,6 +542,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testAppDeleteExceptions() throws ConversionError {
         final Date start = D("24/01/1981 10:00");
         final Date end = D("24/01/1981 12:00");
@@ -538,7 +550,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
         final String rrule = "FREQ=DAILY;INTERVAL=2;COUNT=5";
-        final Date[] exceptions = new Date[]{D("26/01/1981 12:00"), D("30/01/1981 12:00")};
+        final Date[] exceptions = new Date[] { D("26/01/1981 12:00"), D("30/01/1981 12:00") };
 
         String icalText = fixtures.veventWithDeleteExceptionsAsDateTime(start, end, rrule, exceptions);
         Appointment appointment = parseAppointment(icalText, utc);
@@ -548,29 +560,27 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         Set<Date> expectedExceptions = new HashSet<Date>(Arrays.asList(D("26/01/1981 00:00"), D("30/01/1981 00:00")));
 
         assertNotNull(appointment.getDeleteException());
-        for(final Date exception  : appointment.getDeleteException()) {
-            assertTrue("Didn't expect: "+exception+ " Expected one of: "+expectedExceptions, expectedExceptions.remove(exception));
+        for (final Date exception : appointment.getDeleteException()) {
+            assertTrue("Didn't expect: " + exception + " Expected one of: " + expectedExceptions, expectedExceptions.remove(exception));
         }
         assertTrue(expectedExceptions.isEmpty());
 
         icalText = fixtures.veventWithDeleteExceptionsAsDate(start, end, rrule, exceptions);
-        
-        appointment = parseAppointment(icalText, utc);
 
+        appointment = parseAppointment(icalText, utc);
 
         expectedExceptions = new HashSet<Date>(Arrays.asList(D("26/01/1981 00:00"), D("30/01/1981 00:00")));
 
-
         assertNotNull(appointment.getDeleteException());
-        for(final Date exception  : appointment.getDeleteException()) {
-            assertTrue("Didn't expect: "+exception+ " Expected one of: "+expectedExceptions, expectedExceptions.remove(exception));
+        for (final Date exception : appointment.getDeleteException()) {
+            assertTrue("Didn't expect: " + exception + " Expected one of: " + expectedExceptions, expectedExceptions.remove(exception));
         }
         assertTrue(expectedExceptions.isEmpty());
         assertEquals("UTC", appointment.getTimezoneFallbackUTC());
 
-
     }
 
+    @Test
     public void testAppAlarms() throws ConversionError {
         // Relative to Start (default)
 
@@ -584,8 +594,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         String icalText = fixtures.veventWithDisplayAlarm(start, end, "TRIGGER:-PT15M", "Description");
         Appointment appointment = parseAppointment(icalText, utc);
 
-
-        assertEquals(15 *MINUTES ,appointment.getAlarm());
+        assertEquals(15 * MINUTES, appointment.getAlarm());
         assertTrue(appointment.getAlarmFlag());
 
         // Relative to Start (explicit)
@@ -593,9 +602,8 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         icalText = fixtures.veventWithDisplayAlarm(start, end, "TRIGGER;RELATED=START:-PT20M", "Description");
         appointment = parseAppointment(icalText, utc);
 
-        assertEquals(20 *MINUTES ,appointment.getAlarm());
+        assertEquals(20 * MINUTES, appointment.getAlarm());
         assertTrue(appointment.getAlarmFlag());
-
 
         // Absolute Trigger
 
@@ -603,10 +611,11 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         appointment = parseAppointment(icalText, utc);
 
-        assertEquals(50 *MINUTES ,appointment.getAlarm());
+        assertEquals(50 * MINUTES, appointment.getAlarm());
         assertTrue(appointment.getAlarmFlag());
     }
 
+    @Test
     public void testAppFullTime() throws ConversionError {
         final String icalText = fixtures.veventWithWholeDayEvent(D("24/02/1990 12:00"));
         final Appointment appointment = parseAppointment(icalText);
@@ -624,7 +633,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(0, start.get(Calendar.MINUTE));
         assertEquals(0, start.get(Calendar.SECOND));
 
-
         Calendar end = Calendar.getInstance();
         end.setTimeZone(TimeZone.getTimeZone("UTC"));
         end.setTime(appointment.getEndDate());
@@ -636,7 +644,8 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(0, end.get(Calendar.MINUTE));
         assertEquals(0, end.get(Calendar.SECOND));
     }
-    
+
+    @Test
     public void testAppUid() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -648,7 +657,8 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         assertEquals("nrw3rn2983nxi", appointment.getUid());
     }
-    
+
+    @Test
     public void testAppRecurrenceID() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -661,7 +671,8 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         assertEquals(rdp.getTime(), appointment.getRecurrenceDatePosition().getTime());
     }
-    
+
+    @Test
     public void testAppOrganizer() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -676,6 +687,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     // Tasks
 
+    @Test
     public void testTskTitle() throws ConversionError {
         final String icalText = fixtures.vtodoWithSimpleProperties("SUMMARY", "A nice title");
         final Task task = parseTask(icalText, TimeZone.getTimeZone("UTC"));
@@ -683,7 +695,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals("A nice title", task.getTitle());
     }
 
-
+    @Test
     public void testTskCreated() throws ConversionError {
         final String icalText = fixtures.vtodoWithSimpleProperties("CREATED", "20081023T100000Z");
         final Task task = parseTask(icalText);
@@ -692,6 +704,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testTskLastModified() throws ConversionError {
         final String icalText = fixtures.vtodoWithSimpleProperties("LAST-MODIFIED", "20081023T100000Z");
         final Task task = parseTask(icalText);
@@ -700,6 +713,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testTskDTSTAMP() throws ConversionError {
         final String icalText = fixtures.vtodoWithSimpleProperties("DTSTAMP", "20081023T100000Z");
         final Task task = parseTask(icalText);
@@ -707,14 +721,16 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(D("23/10/2008 10:00"), task.getCreationDate());
     }
 
+    @Test
     public void testTskNote() throws ConversionError {
         final String icalText = fixtures.vtodoWithSimpleProperties("DESCRIPTION", "A nice description");
         final Task task = parseTask(icalText, TimeZone.getTimeZone("UTC"));
 
         assertEquals("A nice description", task.getNote());
-            
+
     }
 
+    @Test
     public void testTskStartToEnd() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -740,12 +756,12 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         // Known TZID
 
         final TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
-        assertFalse("Bad test TimeZone",timeZone.equals(TimeZone.getDefault()));
+        assertFalse("Bad test TimeZone", timeZone.equals(TimeZone.getDefault()));
 
         icalText = fixtures.vtodoWithDTStartAndDueInTimeZone(start, end, timeZone);
         task = parseTask(icalText);
 
-        assertEquals(recalculate(start, utc , timeZone), task.getStartDate());
+        assertEquals(recalculate(start, utc, timeZone), task.getStartDate());
         assertEquals(recalculate(end, utc, timeZone), task.getEndDate());
 
         // VTIMEZONE
@@ -757,6 +773,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(D("24/02/1981 03:00"), task.getEndDate());
     }
 
+    @Test
     public void testTskDuration() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
@@ -772,6 +789,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testTskDue() throws ConversionError {
         final Date due = D("24/03/1981 10:00");
 
@@ -782,7 +800,8 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         assertEquals(due, task.getEndDate());
     }
-    
+
+    @Test
     public void testTskDueWithoutTimeZone() throws ConversionError {
         final Date due = D("31/07/2007 10:00");
 
@@ -793,9 +812,8 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         assertEquals(D("31/07/2007 00:00"), task.getEndDate());
     }
-    
-    
 
+    @Test
     public void testTskPrivateFlag() throws ConversionError {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
@@ -812,6 +830,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertFalse(task.getPrivateFlag());
     }
 
+    @Test
     public void testTskDateCompleted() throws ConversionError {
         final Date dateCompleted = D("24/03/1981 10:00");
 
@@ -823,6 +842,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(dateCompleted, task.getDateCompleted());
     }
 
+    @Test
     public void testTskPercentComplete() throws ConversionError {
         final String icalText = fixtures.vtodoWithSimpleProperties("PERCENT-COMPLETE", "23");
         final Task task = parseTask(icalText);
@@ -830,6 +850,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(23, task.getPercentComplete());
     }
 
+    @Test
     public void testTskPriority() throws ConversionError {
         priorityTest(1, Task.HIGH);
         priorityTest(2, Task.HIGH);
@@ -850,10 +871,12 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
     }
 
     // Bug 10401
+    @Test
     public void testTskPriorityZero() throws ConversionError {
         priorityTest(0, Task.NORMAL);
     }
 
+    @Test
     public void testTskStatus() throws ConversionError {
         statusTest("NEEDS-ACTION", Task.NOT_STARTED);
         statusTest("IN-PROCESS", Task.IN_PROGRESS);
@@ -864,15 +887,16 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
     private void statusTest(final String status, final int expected) throws ConversionError {
         final String icalText = fixtures.vtodoWithSimpleProperties("STATUS", status);
         final Task task = parseTask(icalText);
-        assertEquals("Invalid interpretation for status "+status, expected, task.getStatus());
+        assertEquals("Invalid interpretation for status " + status, expected, task.getStatus());
     }
 
+    @Test
     public void testTskAttendees() throws ConversionError {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
         String[] mails = new String[3];
         int i = 0;
-        for(final User user : U(1,2,5)) {
+        for (final User user : U(1, 2, 5)) {
             mails[i++] = user.getMail();
         }
 
@@ -881,40 +905,39 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         String icalText = fixtures.vtodoWithAttendees(mails);
         Task appointment = parseTask(icalText, utc);
 
-        final Set<Integer> ids = new HashSet<Integer>(Arrays.asList(1,2,5));
+        final Set<Integer> ids = new HashSet<Integer>(Arrays.asList(1, 2, 5));
         assertNotNull(appointment.getParticipants());
-        for(final Participant p  : appointment.getParticipants()) {
+        for (final Participant p : appointment.getParticipants()) {
             assertTrue(UserParticipant.class.isAssignableFrom(p.getClass()));
             final UserParticipant participant = (UserParticipant) p;
             assertTrue(ids.remove(participant.getIdentifier()));
         }
         assertTrue(ids.isEmpty());
 
-
         // TODO: Status ?
 
         // External Users
 
-        mails = new String[]{"mickey@disney.invalid", "donald@disney.invalid", "goofy@disney.invalid"};
+        mails = new String[] { "mickey@disney.invalid", "donald@disney.invalid", "goofy@disney.invalid" };
         icalText = fixtures.vtodoWithAttendees(mails);
         appointment = parseTask(icalText, utc);
 
-
         final Set<String> mailSet = new HashSet<String>(Arrays.asList(mails));
         assertNotNull(appointment.getParticipants());
-        for(final Participant p  : appointment.getParticipants()) {
+        for (final Participant p : appointment.getParticipants()) {
             assertTrue(ExternalUserParticipant.class.isAssignableFrom(p.getClass()));
             final ExternalUserParticipant participant = (ExternalUserParticipant) p;
             assertTrue(mailSet.remove(participant.getEmailAddress()));
         }
         assertTrue(mailSet.isEmpty());
-        
+
     }
 
+    @Test
     public void testTskCategories() throws ConversionError {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-        final String[] categories = new String[]{"Toaster", "Deflector", "Subspace Anomaly"};
+        final String[] categories = new String[] { "Toaster", "Deflector", "Subspace Anomaly" };
         final String categoriesString = "Toaster,Deflector,Subspace Anomaly";
 
         final String icalText = fixtures.vtodoWithCategories(categories);
@@ -923,9 +946,10 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(categoriesString, task.getCategories());
     }
 
+    @Test
     public void testTskRecurrence() throws ConversionError {
         final Date start = D("24/02/1981 10:00");
-        final Date end =   D("24/02/1981 12:00");
+        final Date end = D("24/02/1981 12:00");
 
         // DAILY
 
@@ -951,7 +975,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertFalse(CalendarObject.THURSDAY == (CalendarObject.THURSDAY & days));
         assertFalse(CalendarObject.SATURDAY == (CalendarObject.SATURDAY & days));
         assertFalse(CalendarObject.SUNDAY == (CalendarObject.SUNDAY & days));
-
 
         // Default Day taken from DTSTART
 
@@ -981,7 +1004,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertTrue(CalendarObject.MONDAY == (CalendarObject.MONDAY & days));
         assertTrue(CalendarObject.TUESDAY == (CalendarObject.TUESDAY & days)); // Is this correct? Can an appintment recur on more than one day in MONTHLY series?
 
-
         // Second form : the last tuesday every 2 months
 
         task = taskWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYSETPOS=-1", start, end);
@@ -989,12 +1011,10 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(5, task.getDayInMonth());
         assertTrue(CalendarObject.TUESDAY == (CalendarObject.TUESDAY & days));
 
-
         // Default taken from start date
 
         task = taskWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3", start, end);
         assertEquals(24, task.getDayInMonth());
-
 
         // YEARLY
 
@@ -1015,7 +1035,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertTrue(CalendarObject.MONDAY == (CalendarObject.MONDAY & days));
         assertTrue(CalendarObject.WEDNESDAY == (CalendarObject.WEDNESDAY & days)); // Is this correct? Can an appintment recur on more than one day in YEARLY series?
 
-
         // Default
 
         task = taskWithRecurrence("FREQ=YEARLY;INTERVAL=2;COUNT=3", start, end);
@@ -1024,14 +1043,12 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(1, task.getMonth());
         assertEquals(24, task.getDayInMonth());
 
-
         // UNTIL
 
         task = taskWithRecurrence("FREQ=YEARLY;INTERVAL=2;UNTIL=19890423", start, end);
 
         assertEquals(D("23/04/1989 00:00"), task.getUntil());
     }
-    
 
     /**
      * Tasks do not have delete exceptions.
@@ -1043,7 +1060,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
         final String rrule = "FREQ=DAILY;INTERVAL=2;COUNT=5";
-        final Date[] exceptions = new Date[]{D("26/01/1981 12:00"), D("30/01/1981 12:00")};
+        final Date[] exceptions = new Date[] { D("26/01/1981 12:00"), D("30/01/1981 12:00") };
 
         String icalText = fixtures.vtodoWithDeleteExceptionsAsDateTime(start, end, rrule, exceptions);
         Task task = parseTask(icalText, utc);
@@ -1053,8 +1070,8 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         Set<Date> expectedExceptions = new HashSet<Date>(Arrays.asList(exceptions));
 
         assertNotNull(task.getDeleteException());
-        for(final Date exception  : task.getDeleteException()) {
-            assertTrue("Didn't expect: "+exception+ " Expected one of: "+expectedExceptions, expectedExceptions.remove(exception));
+        for (final Date exception : task.getDeleteException()) {
+            assertTrue("Didn't expect: " + exception + " Expected one of: " + expectedExceptions, expectedExceptions.remove(exception));
         }
         assertTrue(expectedExceptions.isEmpty());
 
@@ -1062,17 +1079,16 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         task = parseTask(icalText, utc);
 
-
         expectedExceptions = new HashSet<Date>(Arrays.asList(D("26/01/1981 00:00"), D("30/01/1981 00:00")));
 
-
         assertNotNull(task.getDeleteException());
-        for(final Date exception  : task.getDeleteException()) {
-            assertTrue("Didn't expect: "+exception+ " Expected one of: "+expectedExceptions, expectedExceptions.remove(exception));
+        for (final Date exception : task.getDeleteException()) {
+            assertTrue("Didn't expect: " + exception + " Expected one of: " + expectedExceptions, expectedExceptions.remove(exception));
         }
         assertTrue(expectedExceptions.isEmpty());
     }
 
+    @Test
     public void testTskAlarms() throws ConversionError {
         // Relative to Start (default)
 
@@ -1081,11 +1097,9 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-
         String icalText = fixtures.vtodoWithDisplayAlarm(start, end, "TRIGGER:-PT15M", "Description");
 
         Task task = parseTask(icalText, utc);
-
 
         assertEquals(D("24/02/1981 09:45"), task.getAlarm());
         assertTrue(task.getAlarmFlag());
@@ -1098,7 +1112,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(D("24/02/1981 09:40"), task.getAlarm());
         assertTrue(task.getAlarmFlag());
 
-
         // Absolute Trigger
 
         icalText = fixtures.vtodoWithDisplayAlarm(start, end, "TRIGGER;VALUE=DATE-TIME:19810224T091000", "Description");
@@ -1108,7 +1121,8 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals(D("24/02/1981 09:10"), task.getAlarm());
         assertTrue(task.getAlarmFlag());
     }
-    
+
+    @Test
     public void testTskUid() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -1120,7 +1134,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         assertEquals("nrw3rn2983nxi", task.getUid());
     }
-    
+
     public void no_testTskOrganizer() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -1133,24 +1147,26 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals("bla@example.invalid", task.getOrganizer());
     }
 
-
     // Errors and Warnings
 
+    @Test
     public void testAppShouldIncludeErrorOnMissingStartDate() throws ConversionError {
         final String icalText = fixtures.veventWithEnd(D("24/02/1981 10:00"));
         assertErrorWhenParsingAppointment(icalText, "Missing DTSTART");
     }
 
+    @Test
     public void testShouldThrowErrorOnNonICalFile() throws ConversionError {
         assertNothingHappensWhenParsingAppointment("I am not an iCal file.");
     }
 
-    
+    @Test
     public void testAppShouldIncludeWarningForAdditionalRecurrences() throws ConversionError {
         final String icalText = fixtures.veventWithTwoRecurrences(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
         assertWarningWhenParsingAppointment(icalText, "Only converting first recurrence rule, additional recurrence rules will be ignored.");
     }
 
+    @Test
     public void testAppShouldWarnOnUnsupportedRecurrenceIntervals() throws ConversionError {
         warningOnAppRecurrence("FREQ=SECONDLY;INTERVAL=1;COUNT=3", "Can only convert DAILY, WEEKLY, MONTHLY and YEARLY recurrences");
         warningOnAppRecurrence("FREQ=MINUTELY;INTERVAL=1;COUNT=3", "Can only convert DAILY, WEEKLY, MONTHLY and YEARLY recurrences");
@@ -1158,38 +1174,43 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     }
 
+    @Test
     public void testAppShouldInlcudeWarningOnUnkownClass() throws ConversionError {
         final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "CLASS", "SUPERCALIFRAGILISTICEXPLIALIDOCIOUS");
         assertWarningWhenParsingAppointment(icalText, "Unknown Class: SUPERCALIFRAGILISTICEXPLIALIDOCIOUS");
     }
 
+    @Test
     public void testAppShouldIncludeWarningOnUndisplayableAlarms() throws ConversionError {
         final String icalText = fixtures.veventWithAudioAlarm(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "TRIGGER:-PT15M", "alarm.wav");
         assertWarningWhenParsingAppointment(icalText, "Can only convert DISPLAY alarms with triggers");
     }
 
+    @Test
     public void testAppShouldIncludeErrorForUnknownDayInRRule() throws ConversionError {
-        final String icalText =  fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=WU,NI;BYSETPOS=3");
-        assertErrorWhenParsingAppointment(icalText, "Parsing error parsing ical: Error at line 6:Invalid day: WU");    
+        final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=WU,NI;BYSETPOS=3");
+        assertErrorWhenParsingAppointment(icalText, "Parsing error parsing ical: Error at line 6:Invalid day: WU");
     }
 
+    @Test
     public void testAppShouldWarnOnUnhandleableFields() throws ConversionError {
         //TODO        
     }
-    
+
+    @Test
     public void testShouldLimitAmountOfImports() throws Exception {
         final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
         final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
         try {
-	        parser.setLimit(10);
-	        
-	        List<CalendarDataObject> appointments = parser.parseAppointments(fixtures.severalVevents(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);	
-	        assertEquals("Ten appointments only", 10, appointments.size());
-	        
-	        List<Task> tasks = parser.parseTasks(fixtures.severalVtodos(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);	
-	        assertEquals("Ten tasks only", 10, tasks.size());
+            parser.setLimit(10);
+
+            List<CalendarDataObject> appointments = parser.parseAppointments(fixtures.severalVevents(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+            assertEquals("Ten appointments only", 10, appointments.size());
+
+            List<Task> tasks = parser.parseTasks(fixtures.severalVtodos(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+            assertEquals("Ten tasks only", 10, tasks.size());
         } finally {
-        	parser.setLimit(-1);
+            parser.setLimit(-1);
         }
     }
 }

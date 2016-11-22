@@ -49,7 +49,10 @@
 
 package com.openexchange.sessiond.impl;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.SimConfigurationService;
@@ -62,22 +65,11 @@ import com.openexchange.sessionstorage.SessionStorageService;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class Bug22838Test extends TestCase {
-
+public class Bug22838Test {
     private SessiondConfigInterface config;
 
-    /**
-     * Initializes a new {@link Bug22838Test}.
-     *
-     * @param name
-     */
-    public Bug22838Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         config = new SessiondConfigImpl(new SimConfigurationService());
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
@@ -90,12 +82,12 @@ public class Bug22838Test extends TestCase {
         SessionHandler.init(config);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         SessionHandler.close();
-        super.tearDown();
     }
 
+    @Test
     public void testMergeEmptyArrayWithNull() throws Exception {
         Session[] retval = SessionHandler.removeUserSessions(0, 0);
         assertEquals("Array length not 0", 0, retval.length);

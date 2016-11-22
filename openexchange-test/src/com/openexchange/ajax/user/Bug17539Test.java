@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.user;
 
+import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;

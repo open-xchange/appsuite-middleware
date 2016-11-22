@@ -49,11 +49,14 @@
 
 package com.openexchange.file.storage.webdav;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -81,7 +84,8 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
         super();
     }
 
-    public void testCreateFile() throws Exception {
+         @Test
+     public void testCreateFile() throws Exception {
         final WebDAVFileStorageAccountAccess accountAccess = getAccountAccess();
         accountAccess.connect();
         try {
@@ -104,7 +108,8 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
         }
     }
 
-    public void testTouchFile() throws Exception {
+         @Test
+     public void testTouchFile() throws Exception {
         final WebDAVFileStorageAccountAccess accountAccess = getAccountAccess();
         accountAccess.connect();
         try {
@@ -136,7 +141,8 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
         }
     }
 
-    public void testCopyFile() throws Exception {
+         @Test
+     public void testCopyFile() throws Exception {
         final WebDAVFileStorageAccountAccess accountAccess = getAccountAccess();
         accountAccess.connect();
         try {

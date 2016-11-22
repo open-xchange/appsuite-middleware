@@ -1,6 +1,8 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -15,10 +17,12 @@ public class PermissionTest extends AppointmentTest {
         super();
     }
 
+    @Test
     public void testDummy() {
 
     }
 
+    @Test
     public void testInsertAppointmentInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -51,6 +55,7 @@ public class PermissionTest extends AppointmentTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testInsertAppointmentInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());
@@ -83,6 +88,7 @@ public class PermissionTest extends AppointmentTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateAppointmentInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -118,6 +124,7 @@ public class PermissionTest extends AppointmentTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateAppointmentInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testUpdateAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());
@@ -153,6 +160,7 @@ public class PermissionTest extends AppointmentTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testDeleteAppointmentInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testDeleteAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -188,6 +196,7 @@ public class PermissionTest extends AppointmentTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testDeleteAppointmentInPublicFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testDeleteAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());

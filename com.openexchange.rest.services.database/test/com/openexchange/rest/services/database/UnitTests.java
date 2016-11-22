@@ -49,9 +49,9 @@
 
 package com.openexchange.rest.services.database;
 
+import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.junit.runner.RunWith;
 import com.openexchange.rest.services.database.migrations.VersionCheckerTest;
 import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeperTest;
 import com.openexchange.rest.services.database.transactions.TransactionTest;

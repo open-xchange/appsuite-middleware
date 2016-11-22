@@ -50,6 +50,8 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.container.Contact;
@@ -68,7 +70,7 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -84,7 +86,7 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
         folderID = folder.getObjectID();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         manager.cleanUp();
         folderManager.cleanUp();

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;

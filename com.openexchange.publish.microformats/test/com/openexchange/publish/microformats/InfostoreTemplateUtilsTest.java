@@ -49,12 +49,16 @@
 
 package com.openexchange.publish.microformats;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.infostore.DefaultDocumentMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.microformats.tools.InfostoreTemplateUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -63,11 +67,11 @@ import com.openexchange.publish.microformats.tools.InfostoreTemplateUtils;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class InfostoreTemplateUtilsTest extends TestCase {
+public class InfostoreTemplateUtilsTest {
 
 
-
-    public void testFileURL() {
+         @Test
+     public void testFileURL() {
         SimContext context = new SimContext(1337);
 
         Publication publication = new Publication();
@@ -81,7 +85,8 @@ public class InfostoreTemplateUtilsTest extends TestCase {
         assertEquals("/publications/files/1337/my/nice/site/23/current", url);
     }
 
-    public void testFileURLWithSecret() {
+         @Test
+     public void testFileURLWithSecret() {
 
         SimContext context = new SimContext(1337);
 

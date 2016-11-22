@@ -1,11 +1,17 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.attach.SimpleAttachmentTest;
 import com.openexchange.ajax.container.Response;
@@ -20,6 +26,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
         super();
     }
 
+    @Test
     public void testBasic() throws Exception {
         final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
         final String id = saveAs(getWebConversation(), getHostName(), sessionId, attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
@@ -54,6 +61,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
     }
 
     //Bug 4269
+    @Test
     public void testVirtualFolder() throws Exception {
         for (int folderId : virtualFolders) {
             virtualFolder(folderId);
@@ -82,6 +90,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
     }
 
     @Override
+    @After
     public void tearDown() throws Exception {
         attachmentTest.tearDown();
         super.tearDown();

@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
@@ -77,26 +81,32 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
         super();
     }
 
+    @Test
     public void testNone() throws Exception {
         testWithBOM();
     }
 
+    @Test
     public void testUTF8() throws Exception {
         testWithBOM(0xEF, 0xBB, 0xBF);
     }
 
+    @Test
     public void testUTF16LE() throws Exception {
         testWithBOM(0xFF, 0xFE);
     }
 
+    @Test
     public void testUTF16BE() throws Exception {
         testWithBOM(0xFE, 0xFF);
     }
 
+    @Test
     public void testUTF32LE() throws Exception {
         testWithBOM(0xFF, 0xFE, 0x00, 0x00);
     }
 
+    @Test
     public void testUTF32BE() throws Exception {
         testWithBOM(0x00, 0x00, 0xFE, 0xFF);
     }

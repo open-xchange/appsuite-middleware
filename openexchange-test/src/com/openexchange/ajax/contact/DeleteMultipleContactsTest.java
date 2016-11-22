@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertFalse;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -76,7 +79,7 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -126,7 +129,7 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         needCleanup = false;
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (needCleanup) {
             try {

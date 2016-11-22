@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.utilitytests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -61,45 +64,42 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class MailCharsetDetectorTest extends AbstractMailTest {
 
-	/**
-	 *
-	 */
-	public MailCharsetDetectorTest() {
-		super();
-	}
+    /**
+     *
+     */
+    public MailCharsetDetectorTest() {
+        super();
+    }
 
-	/**
-	 * @param name
-	 */
-	public MailCharsetDetectorTest(final String name) {
-		super();
-	}
+    /**
+     * @param name
+     */
+    public MailCharsetDetectorTest(final String name) {
+        super();
+    }
 
-	public void testCharsetDetection() {
-		try {
-			String charset = null;
-			String usedCharset = null;
+    @Test
+    public void testCharsetDetection() {
+        try {
+            String charset = null;
+            String usedCharset = null;
 
-			usedCharset = "US-ASCII";
-			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line"
-					.getBytes(usedCharset)));
-			assertTrue(usedCharset + " not detected" + charset,
-			    usedCharset.equalsIgnoreCase(charset) || "ISO-8859-1".equalsIgnoreCase(charset)); // "ISO-8859-1" is also okay as a superset of "US-ASCII"
+            usedCharset = "US-ASCII";
+            charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line".getBytes(usedCharset)));
+            assertTrue(usedCharset + " not detected" + charset, usedCharset.equalsIgnoreCase(charset) || "ISO-8859-1".equalsIgnoreCase(charset)); // "ISO-8859-1" is also okay as a superset of "US-ASCII"
 
-			usedCharset = "UTF-8";
-			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(
-					"A text line \u00f6 \u00e4 \u00fc \u00df".getBytes(usedCharset)));
-			assertTrue(usedCharset + " not detected" + charset, usedCharset.equalsIgnoreCase(charset));
+            usedCharset = "UTF-8";
+            charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line \u00f6 \u00e4 \u00fc \u00df".getBytes(usedCharset)));
+            assertTrue(usedCharset + " not detected" + charset, usedCharset.equalsIgnoreCase(charset));
 
-			usedCharset = "windows-1252";
-			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(
-					"A text line \u00f6 \u00e4 \u00fc \u00df".getBytes(usedCharset)));
-			assertTrue(usedCharset + " not detected: " + charset, usedCharset.equalsIgnoreCase(charset));
+            usedCharset = "windows-1252";
+            charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line \u00f6 \u00e4 \u00fc \u00df".getBytes(usedCharset)));
+            assertTrue(usedCharset + " not detected: " + charset, usedCharset.equalsIgnoreCase(charset));
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
 }

@@ -49,8 +49,9 @@
 
 package com.openexchange.ajax.user;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -83,12 +84,6 @@ public final class Bug26431Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         userId = client.getValues().getUserId();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

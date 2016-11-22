@@ -1,7 +1,9 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.fail;
 import java.util.Locale;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -12,10 +14,12 @@ public class Bug6455Test extends AppointmentTest {
         super();
     }
 
+    @Test
     public void testDummy() {
 
     }
 
+    @Test
     public void testBug6455() throws Exception {
         final StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("testBug6455");

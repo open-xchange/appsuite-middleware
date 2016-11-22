@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.ajax.framework.AbstractAJAXSession;

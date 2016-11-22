@@ -1,9 +1,12 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import org.junit.Before;
+import org.junit.Test;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -19,7 +22,7 @@ public class DocumentTest extends InfostoreAJAXTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -27,6 +30,7 @@ public class DocumentTest extends InfostoreAJAXTest {
         clean.add(id);
     }
 
+    @Test
     public void testCurrentVersion() throws Exception {
         InputStream is = null;
         InputStream is2 = null;
@@ -45,6 +49,7 @@ public class DocumentTest extends InfostoreAJAXTest {
         }
     }
 
+    @Test
     public void testContentType() throws Exception {
         GetMethodWebRequest req = documentRequest(sessionId, getHostName(), id, -1, "application/octet-stream");
         WebResponse resp = getWebConversation().getResource(req);

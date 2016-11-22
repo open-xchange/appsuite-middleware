@@ -59,8 +59,8 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug21042Test extends AbstractSanitizing {
 
-    @Test
-    public void testPrettyPrinter() {
+     @Test
+     public void testPrettyPrinter() {
         StringBuilder htmlContentBuilder = new StringBuilder();
         htmlContentBuilder.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
         htmlContentBuilder.append(" <head>\n");

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;

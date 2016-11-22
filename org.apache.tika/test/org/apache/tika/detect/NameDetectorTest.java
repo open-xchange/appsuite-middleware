@@ -20,17 +20,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
-
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the {@link NameDetector} class.
  */
-public class NameDetectorTest extends TestCase {
-
+public class NameDetectorTest {
     private Detector detector;
 
     protected void setUp() {
@@ -42,7 +43,8 @@ public class NameDetectorTest extends TestCase {
         detector = new NameDetector(patterns);
     }
 
-    public void testDetect() {
+         @Test
+     public void testDetect() {
         assertDetect(MediaType.TEXT_PLAIN, "text.txt");
         assertDetect(MediaType.TEXT_PLAIN, "text.txt ");    // trailing space
         assertDetect(MediaType.TEXT_PLAIN, "text.txt\n");   // trailing newline

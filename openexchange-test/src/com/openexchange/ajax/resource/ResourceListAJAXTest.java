@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.resource;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;

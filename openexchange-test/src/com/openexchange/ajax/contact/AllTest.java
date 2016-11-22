@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -69,15 +72,6 @@ import com.openexchange.tools.arrays.Arrays;
 
 public class AllTest extends AbstractManagedContactTest {
 
-    public AllTest() {
-        super();
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
     @Test
     public void testAll() throws Exception {
         int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID };
@@ -87,6 +81,7 @@ public class AllTest extends AbstractManagedContactTest {
     }
 
     // Node 2652    @Test
+    @Test
     public void testLastModifiedUTC() throws Exception {
         manager.newAction(generateContact("testLastModifiedUTC1"), generateContact("testLastModifiedUTC2"), generateContact("testLastModifiedUTC3"));
         int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };

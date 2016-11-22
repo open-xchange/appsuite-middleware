@@ -79,7 +79,6 @@ import org.junit.Test;
 import com.openexchange.database.DatabaseMocking.QueryStubBuilder;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.database.DatabaseRESTService;
 import com.openexchange.rest.services.database.internal.DatabaseEnvironment;
 import com.openexchange.rest.services.database.migrations.VersionChecker;
 import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeper;
@@ -572,8 +571,8 @@ public class DBRESTServiceTest {
         verify(txs).commit(tx.getID());
     }
 
-    @Test
-    public void testUnknownTransaction() throws Exception {
+     @Test
+     public void testUnknownTransaction() throws Exception {
         when(txs.getTransaction("unnknownTransaction")).thenReturn(null);
         try {
             service.queryTransaction("unknownTransaction", httpHeaders, uriInfo, new JSONObject());
@@ -597,8 +596,8 @@ public class DBRESTServiceTest {
         }
     }
 
-    @Test
-    public void testFailingStatement() throws Exception {
+     @Test
+     public void testFailingStatement() throws Exception {
         when(dbs.getWritable(ctxId)).thenReturn(con);
 
         String body = "UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
@@ -619,8 +618,8 @@ public class DBRESTServiceTest {
         verify(dbs).backWritable(ctxId, con);
     }
 
-    @Test
-    public void testFailingStatementRollsBackRunningTransaction() throws Exception {
+     @Test
+     public void testFailingStatementRollsBackRunningTransaction() throws Exception {
         Transaction tx = new Transaction(con, txs);
 
         when(txs.getTransaction(tx.getID())).thenReturn(tx);

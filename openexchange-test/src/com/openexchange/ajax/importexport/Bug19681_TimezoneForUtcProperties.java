@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;

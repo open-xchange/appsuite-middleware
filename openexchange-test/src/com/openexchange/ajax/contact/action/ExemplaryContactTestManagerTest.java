@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.contact.action;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
@@ -75,7 +80,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -103,17 +108,19 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         contactManager.newAction(contactObject2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         contactManager.cleanUp();
         folderManager.cleanUp();
     }
 
+    @Test
     public void testCreatedContactsAreReturnedByGetRequest() throws Exception {
         Contact co = contactManager.getAction(contactObject1.getParentFolderID(), contactObject1.getObjectID());
         assertEquals("The contact was not returned.", co.getDisplayName(), contactObject1.getDisplayName());
     }
 
+    @Test
     public void testCreatedContactsAppearInAllRequestForSameFolder() throws Exception {
         boolean found1 = false;
         boolean found2 = false;
@@ -131,6 +138,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         assertTrue("Second contact was not found.", found2);
     }
 
+    @Test
     public void testCreatedContactsAppearInListRequest() throws Exception {
         boolean found1 = false;
         boolean found2 = false;
@@ -150,6 +158,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         assertTrue("Second contact was not found.", found2);
     }
 
+    @Test
     public void testCreatedContactsAppearInSearchRequestOverAllFolders() throws Exception {
         boolean found1 = false;
         boolean found2 = false;
@@ -173,6 +182,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         assertTrue("Second contact was not found.", found2);
     }
 
+    @Test
     public void testCreatedContactsAppearAsUpdatedSinceYesterday() throws Exception {
         boolean found1 = false;
         boolean found2 = false;

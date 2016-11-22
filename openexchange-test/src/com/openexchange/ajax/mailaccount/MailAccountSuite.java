@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.mailaccount;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link MailAccountSuite}
@@ -58,15 +58,14 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MailAccountSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    MailAccountLifecycleTest.class,
+    MailAccountAllTest.class,
+    MailAccountValidateTest.class,
+    MailAccountStartTlsTest.class,
+    ChangePrimaryMailAccountNameTest.class,
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.mailaccount.MailAccountSuite");
-        tests.addTestSuite(MailAccountLifecycleTest.class);
-        tests.addTestSuite(MailAccountAllTest.class);
-        tests.addTestSuite(MailAccountValidateTest.class);
-        tests.addTestSuite(MailAccountStartTlsTest.class);
-        tests.addTestSuite(ChangePrimaryMailAccountNameTest.class);
-        return tests;
-    }
+})
+public class MailAccountSuite {
 }

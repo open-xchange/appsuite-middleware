@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Iterator;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -107,6 +109,7 @@ public final class Bug17225Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testSharedType() throws Throwable {
         ListResponse response = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SHARED_PREFIX + userId1, new int[] { 1, 20, 2, 3, 300, 301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316 }, false));
         Iterator<FolderObject> iter = response.getFolder();

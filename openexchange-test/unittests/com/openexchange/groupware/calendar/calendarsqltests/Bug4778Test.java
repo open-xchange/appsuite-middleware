@@ -49,18 +49,20 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
 import java.util.List;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 public class Bug4778Test extends CalendarSqlTest {
     // Bug 4778
 
+    @Test
     public void testFreebusyResultShouldContainTitleIfItIsReadableViaASharedFolder() throws OXException {
         final CalendarDataObject appointment = appointments.buildBasicAppointment(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
         appointments.save(appointment);
@@ -70,11 +72,7 @@ public class Bug4778Test extends CalendarSqlTest {
         try {
             appointments.switchUser(secondUser);
 
-            final SearchIterator<Appointment> freebusy = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
-                userId,
-                Participant.USER,
-                D("23/02/1981 00:00"),
-                D("25/02/1981 00:00"));
+            final SearchIterator<Appointment> freebusy = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(userId, Participant.USER, D("23/02/1981 00:00"), D("25/02/1981 00:00"));
 
             final List<Appointment> appointments = read(freebusy);
 

@@ -1,6 +1,8 @@
 
 package com.openexchange.webdav.xml.folder;
 
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -9,14 +11,7 @@ import com.openexchange.webdav.xml.GroupUserTest;
 
 public class PermissionTest extends FolderTest {
 
-    public PermissionTest() {
-        super();
-    }
-
-    public void testDummy() {
-
-    }
-
+    @Test
     public void testInsertPrivateFolderWithoutPermission() throws Exception {
         GroupUserTest.getUserId(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 
@@ -45,6 +40,7 @@ public class PermissionTest extends FolderTest {
         deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testInsertPublicFolderWithoutPermission() throws Exception {
         GroupUserTest.getUserId(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 

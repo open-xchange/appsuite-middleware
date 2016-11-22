@@ -50,9 +50,7 @@
 package com.openexchange.mail.mime.utils;
 
 import java.io.IOException;
-import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.ParameterList;
 import javax.mail.internet.ParseException;
@@ -66,9 +64,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link MimeMessageUtilityTest}
@@ -78,8 +78,7 @@ import junit.framework.TestCase;
  * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
-public class MimeMessageUtilityTest extends TestCase {
-    
+public class MimeMessageUtilityTest {    
     private static final String ATTACHMENT_WRONG_FOUND = "Attachment found where none should be";
     private static final String TESTFILE_RTF = "testfile; filename=randomfile.rtf";
     private static final String PLAIN_TEXT = "plain/text";
@@ -103,14 +102,16 @@ public class MimeMessageUtilityTest extends TestCase {
         super();
     }
 
-    public void testForBug33044_SubjectUnfolding() {
+         @Test
+     public void testForBug33044_SubjectUnfolding() {
         String s = "=?UTF-8?B?UG90d2llcmR6ZW5pZSB6YW3Ds3dp?=\r\n =?UTF-8?B?ZW5pYQ==?=";
         s = MimeMessageUtility.decodeEnvelopeSubject(s);
 
         assertEquals("Subject nor properly unfolded/decoded.", "Potwierdzenie zam\u00f3wienia", s);
     }
 
-    public void testForBug36072_AddressUnfolding() {
+         @Test
+     public void testForBug36072_AddressUnfolding() {
         String s = "=?UTF-8?Q?Wielkoszcz=C4=99ko=C5=9Bciskowiczkiewi?= =?UTF-8?Q?cz=C3=B3wnaOm=C3=B3jbo=C5=BCejestemno=C5=BCemwie?= " + "=?UTF-8?Q?leznacz=C4=85cychznak=C3=B3wsi=C4=99znaczyb?= =?UTF-8?Q?oprzecie=C5=BCniemo=C5=BCeby=C4=87zbyt=C5=82atwo!?= <foo@bar.tld>";
         s = MimeMessageUtility.decodeMultiEncodedHeader(s);
         assertEquals("Address nor properly unfolded/decoded.", "Wielkoszcz\u0119ko\u015bciskowiczkiewicz\u00f3wnaOm\u00f3jbo\u017cejestemno\u017cemwieleznacz\u0105cychznak\u00f3wsi\u0119znaczyboprzecie\u017cniemo\u017ceby\u0107zbyt\u0142atwo! " + "<foo@bar.tld>", s);
@@ -144,8 +145,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertEquals(NOT_PROPERLY_UNFOLDED_DECODED, "a b", s);
     }
 
-    @Test
-    public void testHasAttachment_MultipartDisposition() {
+     @Test
+     public void testHasAttachment_MultipartDisposition() {
         boolean result = false;
         try {
             Mockito.when(part.getContentType()).thenReturn("inline");
@@ -158,7 +159,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertTrue(ATTACHMENT_NOT_IDENTIFIED, result);
     }
 
-    public void testHasAttachment_MultipartFilename() {
+         @Test
+     public void testHasAttachment_MultipartFilename() {
         boolean result = false;
         try {
             Mockito.when(part.getContentType()).thenReturn("inline");
@@ -171,7 +173,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertTrue(ATTACHMENT_NOT_IDENTIFIED, result);
     }
 
-    public void testHasAttachment_MultipartSignature() {
+         @Test
+     public void testHasAttachment_MultipartSignature() {
         boolean result = true;
         try {
             Mockito.when(part.getContentType()).thenReturn("inline");
@@ -183,7 +186,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertFalse(ATTACHMENT_WRONG_FOUND, result);
     }
     
-    public void testHasAttachment_MailpartDisposition() {
+         @Test
+     public void testHasAttachment_MailpartDisposition() {
         boolean result = false;
         try {
             Mockito.when(mailpart.getEnclosedCount()).thenReturn(1);
@@ -199,7 +203,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertTrue(ATTACHMENT_NOT_IDENTIFIED, result);
     }
 
-    public void testHasAttachment_MailpartFilename() {
+         @Test
+     public void testHasAttachment_MailpartFilename() {
         boolean result = false;
         try {
             Mockito.when(mailpart.getEnclosedCount()).thenReturn(1);
@@ -215,7 +220,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertTrue(ATTACHMENT_NOT_IDENTIFIED, result);
     }
 
-    public void testHasAttachment_MailpartSignature() {
+         @Test
+     public void testHasAttachment_MailpartSignature() {
         boolean result = true;
         try {
             ContentType ct = new ContentType("Application");
@@ -227,7 +233,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertFalse(ATTACHMENT_WRONG_FOUND, result);
     }
 
-    public void testHasAttachment_BodystructureDisposition() {
+         @Test
+     public void testHasAttachment_BodystructureDisposition() {
         boolean result = false;
         setContentTypePlainText(bodystructure);
         bodystructure.disposition = "attachment";
@@ -235,7 +242,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertTrue(ATTACHMENT_NOT_IDENTIFIED, result);
     }
 
-    public void testHasAttachment_BodystructureFilename() throws ParseException {
+         @Test
+     public void testHasAttachment_BodystructureFilename() throws ParseException {
         boolean result = false;
         setContentTypePlainText(bodystructure);
         bodystructure.dParams = new ParameterList(";filename=randomfile.rtf");
@@ -243,7 +251,8 @@ public class MimeMessageUtilityTest extends TestCase {
         assertTrue(ATTACHMENT_NOT_IDENTIFIED, result);
     }
 
-    public void testHasAttachment_BodystructureSignature() {
+         @Test
+     public void testHasAttachment_BodystructureSignature() {
         boolean result = true;
         bodystructure.type = "APPLICATION";
         bodystructure.subtype = "Pkcs7-Signature";

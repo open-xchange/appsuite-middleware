@@ -1,6 +1,9 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -19,23 +22,23 @@ public class Bug4395Test extends AppointmentTest {
         super();
     }
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
         super.setUp();
         folderObj = null;
         parentFolderId = 0;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != folderObj) {
             if (0 != parentFolderId) {
                 FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
             }
         }
-        super.tearDown();
     }
 
+    @Test
     public void testBug4395() throws Exception {
         final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
         final int secondUserId = sharedFolderObject.getCreatedBy();

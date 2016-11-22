@@ -49,8 +49,14 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
@@ -73,7 +79,7 @@ public class DAVSyncProfileTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         StartSMTPRequest req = new StartSMTPRequest(true);
@@ -81,7 +87,7 @@ public class DAVSyncProfileTest extends AbstractAJAXSession {
         client.execute(req);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != client) {
             client.execute(new StopSMTPRequest());
@@ -112,7 +118,8 @@ public class DAVSyncProfileTest extends AbstractAJAXSession {
         assertTrue(json.hasAndNotNull("carddav_login"));
     }
 
-    //    public void testDAVSyncProfileViaDownload() throws Exception {
+    //         @Test
+    //     public void testDAVSyncProfileViaDownload() throws Exception {
     //        ExecuteRequest req = new ExecuteRequest("apple.mac/davsync", "download", null, false);
     //        OnboardingTestResponse resp = client.execute(req);
     //        assertFalse(resp.hasError());

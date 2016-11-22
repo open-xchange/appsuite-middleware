@@ -54,7 +54,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.impl.tools.OAuthClientIdHelper;
 
 /**
  * {@link OAuthClientIdHelperTest}
@@ -74,8 +73,8 @@ public class OAuthClientIdHelperTest {
 
     private final static String BROKEN_CLIENT_ID = "dGhpc1Nob3V/sZEJlTWF4aW/11bTMyQ2hhcmFjdGVyc3M/d48ce8ec590c461f992158508d9ac99b04b5988d5ff14586bfe34209c22b8a67";
 
-    @Test
-    public void testGenerateClientId_defaultGroup_validClientId() throws Exception {
+     @Test
+     public void testGenerateClientId_defaultGroup_validClientId() throws Exception {
         String generateClientId = OAuthClientIdHelper.getInstance().generateClientId(GROUP_ID);
 
         String encodedGroupId = generateClientId.split(OAuthClientIdHelper.SEPERATOR)[0];
@@ -84,8 +83,8 @@ public class OAuthClientIdHelperTest {
         Assert.assertEquals(GROUP_ID, decodedGroupId);
     }
 
-    @Test
-    public void testGenerateClientId_maximumCharacters_validClientId() throws Exception {
+     @Test
+     public void testGenerateClientId_maximumCharacters_validClientId() throws Exception {
         String generateClientId = OAuthClientIdHelper.getInstance().generateClientId(GROUP_ID_MAX_SIZE);
 
         String encodedGroupId = generateClientId.split(OAuthClientIdHelper.SEPERATOR)[0];
@@ -94,15 +93,15 @@ public class OAuthClientIdHelperTest {
         Assert.assertEquals(GROUP_ID_MAX_SIZE, decodedGroupId);
     }
 
-    @Test
-    public void testGenerateClientId_maximumCharacters_doNotExceed256AllowedColumnCharacters() throws Exception {
+     @Test
+     public void testGenerateClientId_maximumCharacters_doNotExceed256AllowedColumnCharacters() throws Exception {
         String generateClientId = OAuthClientIdHelper.getInstance().generateClientId(GROUP_ID_MAX_SIZE);
 
         Assert.assertTrue("Length of clientid exceeds maximum size of 256 characters", generateClientId.length() < 256);
     }
 
-    @Test
-    public void testExtractGroupId_curiousGroupId_fails() throws Exception {
+     @Test
+     public void testExtractGroupId_curiousGroupId_fails() throws Exception {
         boolean failed = false;
         try {
             OAuthClientIdHelper.getInstance().extractEncodedGroupId(BROKEN_CLIENT_ID);
@@ -114,36 +113,36 @@ public class OAuthClientIdHelperTest {
         Assert.assertTrue(failed);
     }
 
-    @Test
-    public void testExtractGroupId_validGroupId_correctExtracted() throws Exception {
+     @Test
+     public void testExtractGroupId_validGroupId_correctExtracted() throws Exception {
         String extractedGroupId = OAuthClientIdHelper.getInstance().extractEncodedGroupId(TYPICAL_CLIENT_ID);
 
         Assert.assertTrue("Extracted encoded group id not correct", TYPICAL_CLIENT_ID.substring(0, extractedGroupId.length()).equals(ENCODED_GROUP_ID));
     }
 
-    @Test
-    public void testDecode_ValidEncodedGroupId_correctDecoded() throws Exception {
+     @Test
+     public void testDecode_ValidEncodedGroupId_correctDecoded() throws Exception {
         String extractedGroupId = OAuthClientIdHelper.getInstance().decode(ENCODED_GROUP_ID);
 
         Assert.assertEquals("Extracted group id not correct", GROUP_ID_MAX_SIZE, extractedGroupId);
     }
 
-    @Test
-    public void testGetGroupIdFrom_validGroupId_correctExtracted() throws Exception {
+     @Test
+     public void testGetGroupIdFrom_validGroupId_correctExtracted() throws Exception {
         String extractedGroupId = OAuthClientIdHelper.getInstance().getGroupIdFrom(TYPICAL_CLIENT_ID);
 
         Assert.assertTrue("Extracted group id not correct", extractedGroupId.equals(GROUP_ID_MAX_SIZE));
     }
 
-    @Test
-    public void testGetClientFrom_valid_correctCodeExtracted() throws Exception {
+     @Test
+     public void testGetClientFrom_valid_correctCodeExtracted() throws Exception {
         String extractedClientCode = OAuthClientIdHelper.getInstance().getBaseTokenFrom(TYPICAL_CLIENT_ID);
 
         Assert.assertTrue("Extracted client code not correct", TYPICAL_CLIENT_ID.endsWith(extractedClientCode));
     }
 
-    @Test
-    public void testGetClientFrom_valid_noSeperatorIncluded() throws Exception {
+     @Test
+     public void testGetClientFrom_valid_noSeperatorIncluded() throws Exception {
         String extractedClientCode = OAuthClientIdHelper.getInstance().getBaseTokenFrom(TYPICAL_CLIENT_ID);
 
         Assert.assertFalse("Extracted client code not correct", extractedClientCode.contains(OAuthClientIdHelper.SEPERATOR));

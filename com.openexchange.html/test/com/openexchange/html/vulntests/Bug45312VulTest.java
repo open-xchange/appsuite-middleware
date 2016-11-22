@@ -64,8 +64,8 @@ public class Bug45312VulTest extends AbstractSanitizing {
         super();
     }
 
-    @Test
-    public void testScriptTagSanitizing() {
+     @Test
+     public void testScriptTagSanitizing() {
         String content = "\n" +
             "\n" +
             "13 - <SCRIPT SRC=//ha.ckers.org/.j>\n" +

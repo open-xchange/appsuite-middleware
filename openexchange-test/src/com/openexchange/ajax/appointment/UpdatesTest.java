@@ -1,7 +1,11 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
@@ -19,14 +23,17 @@ public class UpdatesTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesTest.class);
 
+    @Test
     public void testModified() throws Exception {
         AppointmentTest.listModifiedAppointment(getWebConversation(), appointmentFolderId, new Date(), new Date(), new Date(System.currentTimeMillis() - (dayInMillis * 7)), _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
     }
 
+    @Test
     public void testDeleted() throws Exception {
         AppointmentTest.listDeleteAppointment(getWebConversation(), appointmentFolderId, new Date(), new Date(), new Date(System.currentTimeMillis() - (dayInMillis * 7)), timeZone, PROTOCOL + getHostName(), getSessionId());
     }
 
+    @Test
     public void testModifiedWithoutFolderId() throws Exception {
         final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
         final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
@@ -54,6 +61,7 @@ public class UpdatesTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testModifiedWithoutFolderIdExtended() throws Exception {
         final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
         final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
@@ -104,6 +112,7 @@ public class UpdatesTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testModifiedWithoutFolderIdWithFutureTimestamp() throws Exception {
         final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
         final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
@@ -122,6 +131,7 @@ public class UpdatesTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testModifiedRecurrenceAppointment() throws Exception {
         final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
         final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));

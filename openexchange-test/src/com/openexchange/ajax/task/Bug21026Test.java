@@ -51,6 +51,9 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;

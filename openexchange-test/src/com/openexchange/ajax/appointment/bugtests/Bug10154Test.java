@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
+import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;

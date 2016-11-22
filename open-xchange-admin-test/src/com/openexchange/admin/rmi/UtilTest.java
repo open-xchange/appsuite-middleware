@@ -60,7 +60,6 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
-import junit.framework.JUnit4TestAdapter;
 
 /**
  *
@@ -70,10 +69,6 @@ public class UtilTest extends AbstractTest {
 
     private OXUtilInterface getUtilClient() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
-    }
-
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(UtilTest.class);
     }
 
     public static Database getTestDatabaseObject(String hostname, String name) {

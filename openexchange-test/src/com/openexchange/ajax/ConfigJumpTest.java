@@ -37,6 +37,9 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletResponse;
@@ -65,15 +68,6 @@ public class ConfigJumpTest extends AbstractAJAXTest {
      * URL of the AJAX config interface.
      */
     private static final String CONTROL_URL = "/ajax/control";
-
-    /**
-     * Default constructor.
-     * 
-     * @param name Name of this test.
-     */
-    public ConfigJumpTest() {
-        super();
-    }
 
     /**
      * Tests if the url can be read from the server.

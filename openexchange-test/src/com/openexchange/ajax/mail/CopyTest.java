@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
@@ -75,7 +79,7 @@ public class CopyTest extends AbstractMailTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         /*
@@ -92,7 +96,7 @@ public class CopyTest extends AbstractMailTest {
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         /*
          * Clean everything

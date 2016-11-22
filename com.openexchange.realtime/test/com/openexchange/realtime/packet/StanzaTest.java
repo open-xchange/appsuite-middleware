@@ -124,8 +124,8 @@ public class StanzaTest {
         stanza.addPayload(treeC);
     }
 
-    @Test
-    public void testFilterPayloadElementsFromAllTrees() {
+     @Test
+     public void testFilterPayloadElementsFromAllTrees() {
         Collection<PayloadElement> payloadElements = stanza.filterPayloadElements(
               new ElementPath("com.openexchange.realtime.testNameSpaceC", "testElement6")
             , new ElementPath("com.openexchange.realtime.testNameSpaceA", "testElement2")
@@ -145,8 +145,8 @@ public class StanzaTest {
         assertTrue(currentElement.getNamespace().equals("com.openexchange.realtime.testNameSpaceC") && currentElement.getElementName().equals("testElement6"));
     }
 
-    @Test
-    public void testFilterPayloadElementsFromSpecificTree() {
+     @Test
+     public void testFilterPayloadElementsFromSpecificTree() {
         //Filter treeA
         TreeSet<PayloadElement> results = new TreeSet<PayloadElement> (stanza.filterPayloadElementsFromTree(new ElementPath("treeA")
           , new ElementPath("com.openexchange.realtime.testNameSpaceC", "testElement6")

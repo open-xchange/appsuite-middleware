@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.customizer.folder;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
@@ -58,15 +63,13 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class AdditionalFolderFieldListTest extends TestCase {
-
+public class AdditionalFolderFieldListTest {
     private SimFolderField field;
     private SimFolderField field2;
     private AdditionalFolderFieldList fields;
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         field = new SimFolderField();
         field.setColumnId(12);
         field.setColumnName("someField");
@@ -85,7 +88,8 @@ public class AdditionalFolderFieldListTest extends TestCase {
 
     }
 
-    public void testLookup() {
+         @Test
+     public void testLookup() {
         assertEquals(field, fields.get(12));
         assertEquals(field2, fields.get(13));
         assertEquals(field, fields.get("someField"));
@@ -93,7 +97,8 @@ public class AdditionalFolderFieldListTest extends TestCase {
 
     }
 
-    public void testColumnIDCollision() {
+         @Test
+     public void testColumnIDCollision() {
         // First come first serve
         SimFolderField collision = new SimFolderField();
         collision.setColumnId(field.getColumnID());
@@ -102,7 +107,8 @@ public class AdditionalFolderFieldListTest extends TestCase {
         assertEquals(field, fields.get(12));
     }
 
-    public void testColumnNameCollision() {
+         @Test
+     public void testColumnNameCollision() {
         // First come first serve
         SimFolderField collision = new SimFolderField();
         collision.setColumnName(field.getColumnName());
@@ -111,19 +117,22 @@ public class AdditionalFolderFieldListTest extends TestCase {
         assertEquals(field, fields.get("someField"));
     }
 
-    public void testKnows() {
+         @Test
+     public void testKnows() {
         assertTrue(fields.knows(12));
         assertTrue(fields.knows("someField"));
         assertFalse(fields.knows(23));
         assertFalse(fields.knows("someUnknownField"));
     }
 
-    public void testRemove() {
+         @Test
+     public void testRemove() {
         fields.remove(12);
         assertFalse(fields.knows(12));
     }
 
-    public void testNullField() {
+         @Test
+     public void testNullField() {
         AdditionalFolderField field3 = fields.get(23);
         assertNotNull(field3);
         assertEquals(null, field3.getValue(null, null));

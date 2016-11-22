@@ -50,6 +50,7 @@
 package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.test.OXTestToolkit.assertSameStream;
+import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

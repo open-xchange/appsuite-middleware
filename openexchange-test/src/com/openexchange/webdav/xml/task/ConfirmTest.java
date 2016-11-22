@@ -1,6 +1,9 @@
 
 package com.openexchange.webdav.xml.task;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
@@ -9,14 +12,7 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class ConfirmTest extends TaskTest {
 
-    public ConfirmTest() {
-        super();
-    }
-
-    public void testDummy() {
-
-    }
-
+    @Test
     public void testConfirm() throws Exception {
         final FolderObject sharedFolderObject = FolderTest.getTaskDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
         final int secondUserId = sharedFolderObject.getCreatedBy();

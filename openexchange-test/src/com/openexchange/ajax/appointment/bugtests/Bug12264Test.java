@@ -1,6 +1,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -42,6 +46,7 @@ public class Bug12264Test extends AbstractAJAXSession {
     }
 
     //Tests    @Test
+    @Test
     public void testSetUntilToNullWithExistingOccurrences() throws Throwable {
         prepareWithOccurrences("bug 12264 test - set until to null with existing occurrences");
 

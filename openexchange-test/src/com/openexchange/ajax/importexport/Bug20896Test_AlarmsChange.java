@@ -1,8 +1,10 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -28,6 +30,7 @@ public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 
         "BEGIN:VEVENT\n" + "DTSTAMP:20111130T124433Z\n" + "SUMMARY:2 Wochen vorher\n" + "CLASS:PRIVATE\n" + "LAST-MODIFIED:20111130T124220Z\n" + "DTEND;TZID=Europe/Berlin:20300328T190000\n" + "CREATED:20111130T124220Z\n" + "DTSTART;TZID=Europe/Berlin:20300328T180000\n" + "BEGIN:VALARM\n" + "ACTION:DISPLAY\n" + "TRIGGER:-P2W\n" + "DESCRIPTION:2 Wochen vorher\n" + "END:VALARM\n" + "TRANSP:OPAQUE\n" + "END:VEVENT\n" + "END:VCALENDAR";
 
+    @Test
     public void testWhatever() throws Exception {
         int fid = folder.getObjectID();
         ICalImportResponse importResponse = getClient().execute(new ICalImportRequest(fid, ical));

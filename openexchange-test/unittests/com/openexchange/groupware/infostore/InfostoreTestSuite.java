@@ -49,77 +49,72 @@
 
 package com.openexchange.groupware.infostore;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link InfostoreTestSuite}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    com.openexchange.groupware.infostore.URLHelperTest.class,
+    com.openexchange.ajax.infostore.InfostoreParserTest.class,
+    com.openexchange.ajax.infostore.InfostoreWriterTest.class,
+    com.openexchange.ajax.infostore.JSONSimpleRequestTest.class,
+    com.openexchange.ajax.attach.AttachmentParserTest.class,
+    com.openexchange.ajax.attach.AttachmentWriterTest.class,
+    com.openexchange.webdav.protocol.WebdavPathTest.class,
+    com.openexchange.webdav.xml.writer.WriterSuite.class,
+    com.openexchange.webdav.action.IfHeaderParserTest.class,
+    com.openexchange.webdav.protocol.util.UtilsTest.class,
+    com.openexchange.groupware.results.AbstractTimedResultTest.class,
+
+    com.openexchange.tools.file.SaveFileActionTest.class,
+    com.openexchange.tools.update.IndexTest.class,
+
+    com.openexchange.groupware.attach.actions.CreateAttachmentsActionTest.class,
+    com.openexchange.groupware.attach.actions.UpdateAttachmentsActionTest.class,
+    com.openexchange.groupware.attach.actions.RemoveAttachmentsActionTest.class,
+    com.openexchange.groupware.attach.actions.FireAttachedEventActionTest.class,
+    com.openexchange.groupware.attach.actions.FireDetachedEventActionTest.class,
+
+    com.openexchange.groupware.infostore.URLHelperTest.class,
+    com.openexchange.groupware.infostore.InfostoreDeleteTest.class,
+    com.openexchange.groupware.infostore.PropertyStoreTest.class,
+    com.openexchange.groupware.infostore.EntityLockManagerTest.class,
+    com.openexchange.groupware.infostore.InfostoreFacadeTest.class,
+
+    com.openexchange.groupware.infostore.AbstractDocumentListActionTest.class,
+    com.openexchange.groupware.infostore.CreateDocumentActionTest.class,
+    com.openexchange.groupware.infostore.CreateVersionActionTest.class,
+    com.openexchange.groupware.infostore.UpdateDocumentActionTest.class,
+    com.openexchange.groupware.infostore.UpdateVersionActionTest.class,
+    com.openexchange.groupware.infostore.DeleteDocumentActionTest.class,
+    com.openexchange.groupware.infostore.DeleteVersionActionTest.class,
+
+    com.openexchange.groupware.infostore.validation.ValidationChainTest.class,
+    com.openexchange.groupware.infostore.validation.InfostoreInvalidCharactersCheckTest.class,
+    com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidatorTest.class,
+    com.openexchange.groupware.infostore.DelUserFolderDiscovererTest.class,
+    com.openexchange.groupware.infostore.InfostoreDowngradeTest.class,
+    com.openexchange.groupware.infostore.SearchEngineTest.class,
+
+    com.openexchange.groupware.infostore.WebdavFolderAliasesTest.class,
+
+    com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class,
+    com.openexchange.groupware.infostore.webdav.PermissionTest.class,
+
+    com.openexchange.groupware.attach.AttachmentBaseTest.class,
+
+    com.openexchange.groupware.infostore.PathResolverTest.class,
+    com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class,
+    com.openexchange.webdav.infostore.integration.LockExpiryTest.class,
+
+    com.openexchange.tools.file.QuotaFileStorageTest.class,
+    com.openexchange.tools.file.FileStorageTest.class,
+})
 public class InfostoreTestSuite {
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-
-        tests.addTestSuite(com.openexchange.groupware.infostore.URLHelperTest.class);
-        tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreParserTest.class);
-        tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreWriterTest.class);
-        tests.addTestSuite(com.openexchange.ajax.infostore.JSONSimpleRequestTest.class);
-        tests.addTestSuite(com.openexchange.ajax.attach.AttachmentParserTest.class);
-        tests.addTestSuite(com.openexchange.ajax.attach.AttachmentWriterTest.class);
-        tests.addTestSuite(com.openexchange.webdav.protocol.WebdavPathTest.class);
-        tests.addTest(com.openexchange.webdav.xml.writer.WriterSuite.suite());
-        tests.addTestSuite(com.openexchange.webdav.action.IfHeaderParserTest.class);
-        tests.addTestSuite(com.openexchange.webdav.protocol.util.UtilsTest.class);
-        tests.addTestSuite(com.openexchange.groupware.results.AbstractTimedResultTest.class);
-
-        tests.addTestSuite(com.openexchange.tools.file.SaveFileActionTest.class);
-        tests.addTestSuite(com.openexchange.tools.update.IndexTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.attach.actions.CreateAttachmentsActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.attach.actions.UpdateAttachmentsActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.attach.actions.RemoveAttachmentsActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.attach.actions.FireAttachedEventActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.attach.actions.FireDetachedEventActionTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.infostore.URLHelperTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreDeleteTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.EntityLockManagerTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreFacadeTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.infostore.AbstractDocumentListActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.CreateDocumentActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.CreateVersionActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.UpdateDocumentActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.UpdateVersionActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.DeleteDocumentActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.DeleteVersionActionTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.infostore.validation.ValidationChainTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.validation.InfostoreInvalidCharactersCheckTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidatorTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.DelUserFolderDiscovererTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreDowngradeTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.SearchEngineTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.infostore.WebdavFolderAliasesTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.webdav.PermissionTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
-        tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
-        tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
-
-        tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
-        tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
-
-        return tests;
-    }
 
 }

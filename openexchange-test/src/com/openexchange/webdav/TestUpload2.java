@@ -49,23 +49,24 @@
 
 package com.openexchange.webdav;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.junit.Before;
 import org.junit.Test;
 import com.meterware.httpunit.Base64;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
-import junit.framework.TestCase;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TestUpload2 extends TestCase {
+public class TestUpload2 {
 
     private Properties webdavProps;
 
@@ -76,19 +77,10 @@ public class TestUpload2 extends TestCase {
     private String hostname;
 
     /**
-     * @param name
-     */
-    public TestUpload2(final String name) {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
      * {@inheritDoc}
      */
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         webdavProps = WebdavInit.getWebdavProperties();
         login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
         password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");

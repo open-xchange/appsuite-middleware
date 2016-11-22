@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -75,13 +79,13 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         mailAccount = null;
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != mailAccount) {
             MailAccountDeleteRequest req = new MailAccountDeleteRequest(mailAccount.getId());
@@ -109,7 +113,8 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
         assertTrue(mailAccount.isTransportStartTls());
     }
 
-    //    public void testUpdateMailAccountWithStartTls() throws Exception {
+    //         @Test
+    //     public void testUpdateMailAccountWithStartTls() throws Exception {
     //        MailAccountDescription acc = createMailAccountObject();
     //        acc.setName(UUID.randomUUID().toString());
     //        MailAccountInsertRequest req = new MailAccountInsertRequest(acc, false);

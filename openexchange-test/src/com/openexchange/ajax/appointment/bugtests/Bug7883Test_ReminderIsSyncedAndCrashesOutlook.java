@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
@@ -64,6 +67,7 @@ public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends ManagedAppoin
         super();
     }
 
+    @Test
     public void testIt() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
 

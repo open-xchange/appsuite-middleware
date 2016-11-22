@@ -53,11 +53,15 @@ import java.io.ByteArrayInputStream;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.mail.MailcapInitialization;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.structure.handler.MIMEStructureHandler;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -66,8 +70,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.0
  */
-public class MimeStructureFixerTest extends TestCase {
-
+public class MimeStructureFixerTest {
     /**
      * Initializes a new {@link MimeStructureFixerTest}.
      */
@@ -75,7 +78,8 @@ public class MimeStructureFixerTest extends TestCase {
         super();
     }
 
-    public void testFixStructureHtml() {
+         @Test
+     public void testFixStructureHtml() {
         try {
             final String appleMessageSrc = ("From: foo.bar@open-xchange.com\n" +
                 "Content-Type: multipart/alternative; boundary=\"Apple-Mail=_EAB3B693-96C7-4394-B6F6-62036623DFEE\"\n" +
@@ -819,7 +823,8 @@ public class MimeStructureFixerTest extends TestCase {
         }
     }
 
-    public void testFixStructureHtml2() {
+         @Test
+     public void testFixStructureHtml2() {
         try {
             final String appleMessageSrc = ("From: foo.bar@open-xchange.com\n" +
                 "Content-Type: multipart/mixed; boundary=\"Apple-Mail=_C7079978-1A92-4920-AB41-BD49FAF31D8A\"\n" +
@@ -1539,7 +1544,8 @@ public class MimeStructureFixerTest extends TestCase {
         }
     }
 
-    public void testFixStructurePlain() {
+         @Test
+     public void testFixStructurePlain() {
         try {
             final String appleMessageSrc = ("From: foo.bar@open-xchange.com\n" +
                 "Content-Type: multipart/mixed;\n" +
@@ -2240,7 +2246,8 @@ public class MimeStructureFixerTest extends TestCase {
         }
     }
 
-    public void testFixStructureForStructuredResponse() {
+         @Test
+     public void testFixStructureForStructuredResponse() {
         try {
             final String appleMessageSrc = ("From: foo.bar@open-xchange.com\n" +
                 "Content-Type: multipart/alternative; boundary=\"Apple-Mail=_EAB3B693-96C7-4394-B6F6-62036623DFEE\"\n" +

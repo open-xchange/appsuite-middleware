@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -92,7 +97,7 @@ public class Bug15776Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = super.getClient();
@@ -151,7 +156,7 @@ public class Bug15776Test extends AbstractAJAXSession {
         assertFalse("Series in the past contains alarm.", app.containsAlarm());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         Appointment toDelete = client.execute(new GetRequest(appointment, false)).getAppointment(timezone);
         client.execute(new DeleteRequest(toDelete, false));

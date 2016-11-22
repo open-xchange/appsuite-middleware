@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -76,7 +78,6 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.AjaxInit;
-import junit.framework.TestCase;
 
 /**
  * This class implements inheritable methods for AJAX tests.
@@ -86,7 +87,7 @@ import junit.framework.TestCase;
  */
 @Deprecated
 @RunWith(ConcurrentTestRunner.class)
-public abstract class AbstractAJAXTest extends TestCase {
+public abstract class AbstractAJAXTest {
 
     public static final String PROTOCOL = "http://";
 
@@ -135,7 +136,6 @@ public abstract class AbstractAJAXTest extends TestCase {
     @After
     public void tearDown() throws Exception {
         logout();
-        super.tearDown();
     }
 
     protected String getAJAXProperty(final String key) {

@@ -1,7 +1,9 @@
 
 package com.openexchange.webdav.xml.task;
 
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
+import org.junit.Test;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -11,10 +13,7 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class Bug10991Test extends TaskTest {
 
-    public Bug10991Test() {
-        super();
-    }
-
+    @Test
     public void testBug10991() throws Exception {
         final Task taskObj = createTask("testBug10991");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);

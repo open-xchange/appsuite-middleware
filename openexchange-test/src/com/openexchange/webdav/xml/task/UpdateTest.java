@@ -1,8 +1,11 @@
 
 package com.openexchange.webdav.xml.task;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.Locale;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -18,6 +21,7 @@ public class UpdateTest extends TaskTest {
         super();
     }
 
+    @Test
     public void testUpdateTask() throws Exception {
         Task taskObj = createTask("testUpdateTask");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
@@ -29,6 +33,7 @@ public class UpdateTest extends TaskTest {
         deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateTaskRemoveAlarm() throws Exception {
         Task taskObj = createTask("testUpdateTaskRemoveAlarm");
         taskObj.setAlarm(new Date(startTime.getTime() - (2 * dayInMillis)));
@@ -44,6 +49,7 @@ public class UpdateTest extends TaskTest {
         deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateTaskWithParticipants() throws Exception {
         Task taskObj = createTask("testUpdateTask");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
@@ -69,6 +75,7 @@ public class UpdateTest extends TaskTest {
         deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testUpdateConcurentConflict() throws Exception {
         Task taskObj = createTask("testUpdateTaskConcurentConflict");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
@@ -86,6 +93,7 @@ public class UpdateTest extends TaskTest {
         deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testUpdateNotFound() throws Exception {
         Task taskObj = createTask("testUpdateTaskNotFound");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);

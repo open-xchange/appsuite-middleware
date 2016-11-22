@@ -49,6 +49,10 @@
 
 package com.openexchange.webdav.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -65,6 +69,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -121,10 +126,6 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
     @Deprecated
     private static final String APPOINTMENT_URL = AbstractAppointmentRequest.URL;
 
-    public AppointmentTest() {
-        super();
-    }
-
     /**
      * Gets a newly created {@link Date date} with its time set to {@link Date#getTime()} - <code>1</code> of specified {@link Date date}
      * instance.
@@ -136,7 +137,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         return new Date(date.getTime() - 1);
     }
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
         super.setUp();
 

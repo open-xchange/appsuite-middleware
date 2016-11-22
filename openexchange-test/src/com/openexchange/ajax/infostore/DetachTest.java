@@ -1,11 +1,16 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -17,7 +22,7 @@ public class DetachTest extends InfostoreAJAXTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -34,6 +39,7 @@ public class DetachTest extends InfostoreAJAXTest {
         assertNoError(res);
     }
 
+    @Test
     public void testBasic() throws Exception {
         final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[] { 1, 2, 3, 4, 5 });
         assertEquals(0, notDetached.length);
@@ -41,6 +47,7 @@ public class DetachTest extends InfostoreAJAXTest {
         checkNoVersions();
     }
 
+    @Test
     public void testRevert() throws Exception {
         final Response res = revert(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0));
         assertNoError(res);
@@ -77,6 +84,7 @@ public class DetachTest extends InfostoreAJAXTest {
         assertEquals(0, obj.get("file_size"));
     }
 
+    @Test
     public void testSpotted() throws Exception {
         final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[] { 1, 3, 5 });
         assertEquals(0, notDetached.length);
@@ -94,6 +102,7 @@ public class DetachTest extends InfostoreAJAXTest {
         assertEquals(4, obj.getInt("version"));
     }
 
+    @Test
     public void testDetachVersion0() throws Exception {
         final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[] { 0 });
         assertEquals(1, notDetached.length);
@@ -101,6 +110,7 @@ public class DetachTest extends InfostoreAJAXTest {
     }
 
     // Bug 3818
+    @Test
     public void testCopyComments() throws Exception {
         Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("description", "current_description"));
         assertNoError(res);
@@ -116,6 +126,7 @@ public class DetachTest extends InfostoreAJAXTest {
     }
 
     //	Bug 4120
+    @Test
     public void testUniqueFilenames() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 

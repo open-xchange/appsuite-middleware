@@ -59,8 +59,8 @@ import com.openexchange.html.AssertionHelper;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug28642VulTest extends AbstractSanitizing {
-    @Test
-    public void testInsecureHref() {
+     @Test
+     public void testInsecureHref() {
         String content = "<b>test</b>\n" +
             "\n" +
             "<script>alert(42)</script>\n" +

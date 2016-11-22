@@ -1,11 +1,14 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -52,6 +55,7 @@ public class CopyTest extends AppointmentTest {
         super.tearDown();
     }
 
+    @Test
     public void testCopy() throws Exception {
         final Appointment appointmentObj = new Appointment();
         final String date = String.valueOf(System.currentTimeMillis());

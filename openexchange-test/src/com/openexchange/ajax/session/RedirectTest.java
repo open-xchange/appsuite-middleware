@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

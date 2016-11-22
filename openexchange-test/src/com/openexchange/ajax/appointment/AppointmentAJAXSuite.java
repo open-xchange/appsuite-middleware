@@ -49,60 +49,55 @@
 
 package com.openexchange.ajax.appointment;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
 import com.openexchange.ajax.appointment.bugtests.FolderIdTestAjax;
 import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
-public class AppointmentAJAXSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    AllTest.class,
+    ConfirmTest.class,
+    ConfirmOccurrencesTest.class,
+    ConfirmOthers.class,
+    CopyTest.class,
+    DeleteTest.class,
+    GetTest.class,
+    FreeBusyTest.class,
+    HasTest.class,
+    ListTest.class,
+    MoveTest.class,
+    NewTest.class,
+    SearchTest.class,
+    UpdateTest.class,
+    UpdatesTest.class,
+    UpdatesForModifiedAndDeletedTest.class,
+    ConflictTest.class,
+    MultipleTest.class,
+    PortalSearchTest.class,
+    FunambolTest.class,
+    NewListTest.class,
+    UserStory2173Test.class,
+    CalendarTestManagerTest.class,
+    UserStory1085Test.class,
+    AppointmentAttachmentTests.class,
+    ConfirmationsTest.class,
+    SharedFoldersShowOwnersPrivateAppointmentsAsBlocks.class,
+    CreatedByTest.class,
+    AllAliasTest.class,
+    ListAliasTest.class,
+    DeleteMultipleAppointmentTest.class,
+    GetChangeExceptionsTest.class,
+    PrivateTests.class,
+    FolderIdTestAjax.class,
+    MoveTestNew.class,
+    CreateExceptionWithBadDate.class,
+    RecurrenceTestSuite.class,
+    AppointmentBugTestSuite.class,
+    NewAppointmentHttpApiTestSuite.class
 
-    private AppointmentAJAXSuite() {
-        super();
-    }
+})
+public class AppointmentAJAXSuite  {
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.appointment.AppointmentAJAXSuite");
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-        tests.addTestSuite(ConfirmOccurrencesTest.class);
-        tests.addTestSuite(ConfirmOthers.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(FreeBusyTest.class);
-        tests.addTestSuite(HasTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(UpdatesForModifiedAndDeletedTest.class);
-        tests.addTestSuite(ConflictTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(PortalSearchTest.class);
-        tests.addTestSuite(FunambolTest.class);
-        tests.addTestSuite(NewListTest.class);
-        tests.addTestSuite(UserStory2173Test.class);
-        tests.addTestSuite(CalendarTestManagerTest.class);
-        tests.addTestSuite(UserStory1085Test.class);
-        tests.addTestSuite(AppointmentAttachmentTests.class);
-        tests.addTestSuite(ConfirmationsTest.class);
-        tests.addTestSuite(SharedFoldersShowOwnersPrivateAppointmentsAsBlocks.class);
-        tests.addTestSuite(CreatedByTest.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(DeleteMultipleAppointmentTest.class);
-        tests.addTestSuite(GetChangeExceptionsTest.class);
-        tests.addTest(RecurrenceTestSuite.suite());
-        tests.addTest(AppointmentBugTestSuite.suite());
-        tests.addTest(NewAppointmentHttpApiTestSuite.suite());
-        tests.addTestSuite(PrivateTests.class);
-        tests.addTestSuite(FolderIdTestAjax.class);
-        tests.addTestSuite(MoveTestNew.class);
-        tests.addTestSuite(CreateExceptionWithBadDate.class);
-        // tests.addTestSuite(ChangeTimeZoneTest.class); Deactivated, because Feature is postponed.
-        return tests;
-    }
 }

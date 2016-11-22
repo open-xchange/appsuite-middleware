@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;

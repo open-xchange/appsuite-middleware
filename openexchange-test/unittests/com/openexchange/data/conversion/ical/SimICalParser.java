@@ -53,11 +53,9 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
-
 
 /**
  * {@link SimICalParser}
@@ -65,11 +63,10 @@ import com.openexchange.groupware.tasks.Task;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimICalParser implements ICalParser{
+public class SimICalParser implements ICalParser {
 
     private List<CalendarDataObject> appointments;
     private List<Task> tasks;
-
 
     @Override
     public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
@@ -104,20 +101,20 @@ public class SimICalParser implements ICalParser{
         return null;
     }
 
-	@Override
-	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return Collections.emptyList();
-	}
+    @Override
+    public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        return Collections.emptyList();
+    }
 
-	@Override
-	public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return Collections.emptyList();
-	}
+    @Override
+    public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        return Collections.emptyList();
+    }
 
-	@Override
-	public void setLimit(int amount) {
-		// Nothing to do
-		
-	}
+    @Override
+    public void setLimit(int amount) {
+        // Nothing to do
+
+    }
 
 }

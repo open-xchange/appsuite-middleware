@@ -50,6 +50,11 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -77,7 +82,7 @@ public class Bug29566Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -246,7 +251,7 @@ public class Bug29566Test extends AbstractAJAXSession {
         assertEquals("Wrong error.", shared ? OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber() : OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber(), updateResponse.getException().getCode());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
 

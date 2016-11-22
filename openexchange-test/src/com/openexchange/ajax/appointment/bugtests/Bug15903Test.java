@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.CalendarTestManagerTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -75,6 +79,7 @@ public class Bug15903Test extends CalendarTestManagerTest {
     }
 
     // Tests Bug 15903    @Test
+    @Test
     public void testUpdatedParticipants() throws Exception {
 
         // create appointment with 2 participants

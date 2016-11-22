@@ -51,6 +51,8 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -83,7 +85,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -151,7 +153,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         clientA.execute(appointmentGetRequest);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
         clientA.execute(appointmentDeleteRequest);

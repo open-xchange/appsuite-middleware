@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.Contact;
 
@@ -10,10 +12,12 @@ public class Bug18608Test_SpecialCharsInEmailTest extends AbstractManagedContact
         super();
     }
 
+    @Test
     public void testUmlaut() {
         testEMail("california\u00fcberalles@host.invalid");
     }
 
+    @Test
     public void testHanCharacter() {
         testEMail("\u6279@somewhere.invalid");
     }

@@ -1,8 +1,11 @@
 
 package com.openexchange.webdav.xml.contact;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.Locale;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
@@ -14,6 +17,7 @@ public class ListTest extends ContactTest {
         super();
     }
 
+    @Test
     public void testPropFindWithModified() throws Exception {
         final Contact contactObj = createContactObject("testPropFindWithModified");
         final int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
@@ -32,6 +36,7 @@ public class ListTest extends ContactTest {
         deleteContact(getWebConversation(), objectId2, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testPropFindWithDelete() throws Exception {
         final Contact contactObj = createContactObject("testPropFindWithModified");
         final int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
@@ -52,6 +57,7 @@ public class ListTest extends ContactTest {
         assertTrue("wrong response array length", appointmentArray.length >= 2);
     }
 
+    @Test
     public void testPropFindWithObjectId() throws Exception {
         final Contact contactObj = createContactObject("testPropFindWithObjectId");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
@@ -63,6 +69,7 @@ public class ListTest extends ContactTest {
         deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testObjectNotFound() throws Exception {
         final Contact contactObj = createContactObject("testObjectNotFound");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
@@ -78,6 +85,7 @@ public class ListTest extends ContactTest {
         deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testListWithAllFields() throws Exception {
         final Contact contactObj = createCompleteContactObject();
 
@@ -100,6 +108,7 @@ public class ListTest extends ContactTest {
         deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testList() throws Exception {
         final Contact contactObj = createContactObject("testObjectNotFound");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);

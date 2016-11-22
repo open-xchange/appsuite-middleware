@@ -50,6 +50,8 @@
 package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -61,6 +63,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.json.JSONException;
 import org.jsoup.nodes.Document;
+import org.junit.Before;
 import org.junit.Test;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
@@ -122,7 +125,7 @@ public class MailNotificationTest extends ShareTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         userValues = client.getValues();
@@ -150,7 +153,8 @@ public class MailNotificationTest extends ShareTest {
     //     * Invite a user and expect that he gets his personal link as email, together with the necessary credentials.
     //     * Afterwards share a second folder with the same guest and expect another email without password.
     //     */
-    //    public void testCreatedNotificationForGuestWithPassword() throws Exception {
+    //         @Test
+    //     public void testCreatedNotificationForGuestWithPassword() throws Exception {
     //        /*
     //         * First invitation
     //         */
@@ -222,7 +226,8 @@ public class MailNotificationTest extends ShareTest {
     //    /**
     //     * Get a password-secured link and distribute it via notify action
     //     */
-    //    public void testNotifyAnonymousWithPassword() throws Exception {
+    //         @Test
+    //     public void testNotifyAnonymousWithPassword() throws Exception {
     //        /*
     //         * get link
     //         */

@@ -50,7 +50,10 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -83,7 +86,7 @@ public class Bug41995Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(User.User2);
@@ -132,7 +135,7 @@ public class Bug41995Test extends AbstractAJAXSession {
         assertEquals("Wrong end date.", appointment.getEndDate(), loaded.getEndDate());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         SetRequest setRequest = new SetRequest(Tree.TimeZone, origtz1);
         client.execute(setRequest);

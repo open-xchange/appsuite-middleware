@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
@@ -74,13 +78,13 @@ public class MailAccountAllTest extends AbstractMailAccountTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         createMailAccount();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
             deleteMailAccount();

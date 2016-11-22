@@ -49,12 +49,15 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -107,6 +110,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
      * Creates an appointment series and modifies one appointment of the series
      * to be an exception.
      */
+    @Test
     public void testAppointmentException() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
@@ -184,6 +188,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testDeleteBadData() throws Throwable {
         AJAXClient client = null;
         int objectId = 0;

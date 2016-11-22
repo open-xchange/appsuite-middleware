@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
@@ -88,7 +93,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         super();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
             deleteMailAccount();

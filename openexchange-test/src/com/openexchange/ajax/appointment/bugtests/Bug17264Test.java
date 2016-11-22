@@ -51,8 +51,11 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -96,7 +99,7 @@ public class Bug17264Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
@@ -181,7 +184,7 @@ public class Bug17264Test extends AbstractAJAXSession {
         assertEquals("Wrong alarm value", alarm, app.getAlarm());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         //clientA.execute(new DeleteRequest(appointment));
         clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));

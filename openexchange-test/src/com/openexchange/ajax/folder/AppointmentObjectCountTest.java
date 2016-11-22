@@ -50,7 +50,9 @@
 package com.openexchange.ajax.folder;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.UUID;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -157,7 +159,7 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
         assertEquals("Wrong amount.", 6, getCount(client2, folder));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm1.cleanUp();
         ctm2.cleanUp();

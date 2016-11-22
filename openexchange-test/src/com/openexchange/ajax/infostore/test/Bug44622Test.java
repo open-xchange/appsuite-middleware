@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Date;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
@@ -82,7 +87,7 @@ public class Bug44622Test extends AbstractInfostoreTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -94,7 +99,7 @@ public class Bug44622Test extends AbstractInfostoreTest {
         fileID = resp.getID();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         DeleteInfostoreRequest req = new DeleteInfostoreRequest(fileID, String.valueOf(client.getValues().getPrivateInfostoreFolder()), new Date());
         client.execute(req);

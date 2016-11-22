@@ -76,6 +76,7 @@ public class WebDAVConfig extends AbstractConfig {
 
     /**
      * Reads the configuration.
+     * 
      * @throws OXException if reading configuration fails.
      */
     public static void init() throws OXException {
@@ -126,8 +127,9 @@ public class WebDAVConfig extends AbstractConfig {
 
         /**
          * Default constructor.
+         * 
          * @param propertyName Name of the property in the ajax.properties
-         * file.
+         *            file.
          */
         private Property(final String propertyName) {
             this.propertyName = propertyName;

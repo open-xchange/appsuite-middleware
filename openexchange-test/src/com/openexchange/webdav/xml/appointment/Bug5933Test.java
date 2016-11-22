@@ -1,6 +1,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -16,11 +17,7 @@ public class Bug5933Test extends AppointmentTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testBug5933() throws Exception {
         FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("Bug5933Test" + System.currentTimeMillis());

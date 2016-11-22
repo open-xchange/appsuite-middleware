@@ -1,16 +1,14 @@
 package liquibase.diff.output.changelog;
 
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertThat;
+import java.util.List;
+import org.junit.Test;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import org.junit.Test;
-
-import java.util.List;
-
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
 
 public class DiffToChangeLogTest {
 

@@ -50,6 +50,9 @@
 package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
@@ -131,9 +134,13 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
 
     /*
      * @Test
+     * 
+     * @Test
      * public void testUpdatingTargetShouldCallForNewConfiguration(){
      * fail("Implement me!");
      * }
+     * 
+     * @Test
      * 
      * @Test
      * public void testUpdatingWithActualChange(){
@@ -142,6 +149,8 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
      */
 
     /*
+     * @Test
+     * 
      * @Test
      * public void testUpdatingNonExistentPublicationShouldFail() throws OXException, IOException, SAXException, JSONException{
      * final Contact contact = createDefaultContactFolderWithOneContact();

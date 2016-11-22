@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -113,7 +116,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         assertEquals("Wrong occurrences value", 5, sequenceApp.getOccurrence());
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -163,7 +166,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         endSearch = new Date(1249257600000L); // 03.08.2009 00:00:00
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (appointment.getObjectID() > 0) {
             client.execute(new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));

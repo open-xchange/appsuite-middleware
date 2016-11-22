@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
@@ -74,14 +77,14 @@ public class MailSearchTest extends AbstractMailTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         folder = getInboxFolder();
         clearFolder(folder);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         clearFolder(folder);
         super.tearDown();

@@ -16,10 +16,14 @@
  */
 package org.apache.tika.parser.microsoft.ooxml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import org.apache.tika.Tika;
 import org.apache.tika.extractor.ContainerExtractor;
 import org.apache.tika.extractor.ParserContainerExtractor;
 import org.apache.tika.parser.microsoft.AbstractPOIContainerExtractionTest;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Tests that the various POI OOXML powered parsers are
@@ -28,8 +32,8 @@ import org.apache.tika.parser.microsoft.AbstractPOIContainerExtractionTest;
 public class OOXMLContainerExtractionTest extends AbstractPOIContainerExtractionTest {
     private ContainerExtractor extractor;
     
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Tika tika = new Tika();
         extractor = new ParserContainerExtractor(
                 tika.getParser(), tika.getDetector());
@@ -38,7 +42,8 @@ public class OOXMLContainerExtractionTest extends AbstractPOIContainerExtraction
    /**
      * For office files which don't have anything embedded in them
      */
-    public void testWithoutEmbedded() throws Exception {
+         @Test
+     public void testWithoutEmbedded() throws Exception {
        String[] files = new String[] {
              "testEXCEL.xlsx", "testWORD.docx", "testPPT.pptx",
        };
@@ -61,7 +66,8 @@ public class OOXMLContainerExtractionTest extends AbstractPOIContainerExtraction
      * Office files with embedded images, but no other
      *  office files in them
      */
-    public void testEmbeddedImages() throws Exception {
+         @Test
+     public void testEmbeddedImages() throws Exception {
        TrackingHandler handler;
        
        // Excel with 1 image
@@ -122,7 +128,8 @@ public class OOXMLContainerExtractionTest extends AbstractPOIContainerExtraction
      *       -> excel
      *           -> image
      */
-    public void testEmbeddedOfficeFiles() throws Exception {
+         @Test
+     public void testEmbeddedOfficeFiles() throws Exception {
        TrackingHandler handler;
        
        
@@ -256,7 +263,8 @@ public class OOXMLContainerExtractionTest extends AbstractPOIContainerExtraction
        assertEquals(TYPE_EMF, handler.mediaTypes.get(8));  // Icon of embedded office doc
     }
 
-    public void testEmbeddedOutlook() throws Exception {
+         @Test
+     public void testEmbeddedOutlook() throws Exception {
         TrackingHandler handler =
                 process("EmbeddedOutlook.docx", extractor, false);
 
@@ -270,7 +278,8 @@ public class OOXMLContainerExtractionTest extends AbstractPOIContainerExtraction
         assertEquals(TYPE_MSG, handler.mediaTypes.get(1));
     }
 
-    public void testEmbeddedPDF() throws Exception {
+         @Test
+     public void testEmbeddedPDF() throws Exception {
         TrackingHandler handler =
                 process("EmbeddedPDF.docx", extractor, false);
 

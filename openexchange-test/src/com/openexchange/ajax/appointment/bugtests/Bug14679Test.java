@@ -2,6 +2,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;

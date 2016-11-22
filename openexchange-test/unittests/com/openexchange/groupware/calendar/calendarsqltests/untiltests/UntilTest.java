@@ -49,14 +49,18 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests.untiltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Before;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest;
 import com.openexchange.groupware.container.Appointment;
@@ -88,7 +92,7 @@ public abstract class UntilTest extends CalendarSqlTest {
         }
     };
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -98,11 +102,6 @@ public abstract class UntilTest extends CalendarSqlTest {
         setOccurrences.setOccurrence(10);
         removeUntil = new CalendarDataObject();
         removeUntil.setUntil(null);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     protected CalendarDataObject createAppointment(int type, boolean occurrences, boolean until, boolean fulltime) throws Exception {
@@ -132,37 +131,37 @@ public abstract class UntilTest extends CalendarSqlTest {
         retval.setIgnoreConflicts(true);
 
         switch (type) {
-        case Appointment.DAILY:
-            retval.setTitle(retval.getTitle() + " - daily");
-            break;
-        case Appointment.WEEKLY:
-            retval.setDays(Appointment.MONDAY);
-            retval.setTitle(retval.getTitle() + " - weekly");
-            break;
-        case Appointment.MONTHLY:
-            retval.setDayInMonth(1);
-            retval.setTitle(retval.getTitle() + " - monthly");
-            break;
-        case MONTHLY2:
-            retval.setRecurrenceType(Appointment.MONTHLY);
-            retval.setDayInMonth(1);
-            retval.setDays(Appointment.MONDAY);
-            retval.setTitle(retval.getTitle() + " - monthly2");
-            break;
-        case Appointment.YEARLY:
-            retval.setDayInMonth(1);
-            retval.setMonth(Calendar.FEBRUARY);
-            retval.setTitle(retval.getTitle() + " - yearly");
-            break;
-        case YEARLY2:
-            retval.setRecurrenceType(Appointment.YEARLY);
-            retval.setDayInMonth(1);
-            retval.setDays(Appointment.MONDAY);
-            retval.setMonth(Calendar.FEBRUARY);
-            retval.setTitle(retval.getTitle() + " - yearly2");
-            break;
-        default:
-            throw new Exception("Bad recurrence type.");
+            case Appointment.DAILY:
+                retval.setTitle(retval.getTitle() + " - daily");
+                break;
+            case Appointment.WEEKLY:
+                retval.setDays(Appointment.MONDAY);
+                retval.setTitle(retval.getTitle() + " - weekly");
+                break;
+            case Appointment.MONTHLY:
+                retval.setDayInMonth(1);
+                retval.setTitle(retval.getTitle() + " - monthly");
+                break;
+            case MONTHLY2:
+                retval.setRecurrenceType(Appointment.MONTHLY);
+                retval.setDayInMonth(1);
+                retval.setDays(Appointment.MONDAY);
+                retval.setTitle(retval.getTitle() + " - monthly2");
+                break;
+            case Appointment.YEARLY:
+                retval.setDayInMonth(1);
+                retval.setMonth(Calendar.FEBRUARY);
+                retval.setTitle(retval.getTitle() + " - yearly");
+                break;
+            case YEARLY2:
+                retval.setRecurrenceType(Appointment.YEARLY);
+                retval.setDayInMonth(1);
+                retval.setDays(Appointment.MONDAY);
+                retval.setMonth(Calendar.FEBRUARY);
+                retval.setTitle(retval.getTitle() + " - yearly2");
+                break;
+            default:
+                throw new Exception("Bad recurrence type.");
         }
 
         insertAppointment(retval);

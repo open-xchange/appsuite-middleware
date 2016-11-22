@@ -50,6 +50,8 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.calendar.storage.ParticipantStorage.extractExternal;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;

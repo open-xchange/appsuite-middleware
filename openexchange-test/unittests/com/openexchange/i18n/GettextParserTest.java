@@ -50,11 +50,14 @@
 package com.openexchange.i18n;
 
 import static com.openexchange.java.Autoboxing.i;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.parsing.I18NExceptionCode;
 import com.openexchange.i18n.parsing.POParser;
@@ -63,77 +66,48 @@ import com.openexchange.i18n.parsing.Translations;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class GettextParserTest extends TestCase {
+public class GettextParserTest {
 
     public GettextParserTest() {
         super();
     }
 
-    @Override
-    public void setUp() {
-      }
-
+    @Test
     public void testShouldParseSingleLineEntries() throws OXException {
-        final String poText = "msgid \"I am a message.\"\n"
-            + "msgstr \"Ich bin eine Nachricht.\"\n"
-            + "msgid \"I am another message.\"\n"
-            + "msgstr \"Ich bin eine andere Nachricht.\"\n";
+        final String poText = "msgid \"I am a message.\"\n" + "msgstr \"Ich bin eine Nachricht.\"\n" + "msgid \"I am another message.\"\n" + "msgstr \"Ich bin eine andere Nachricht.\"\n";
 
         final Translations translations = parse(poText);
         assertNotNull(translations);
 
-        assertTranslation(translations, "I am a message.",
-            "Ich bin eine Nachricht.");
-        assertTranslation(translations, "I am another message.",
-            "Ich bin eine andere Nachricht.");
+        assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
+        assertTranslation(translations, "I am another message.", "Ich bin eine andere Nachricht.");
     }
 
+    @Test
     public void testShouldParseMultiLineEntries() throws OXException {
-        final String poText = "msgid \"\"\n"
-            + "\"This is part of a longer string\\n\"\n"
-            + "\"Typically multiline\"\n" + "msgstr \"\"\n"
-            + "\"Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\\n\"\n"
-            + "\"Typischerweise mehrzeilig\"\n" + "msgid \"\"\n"
-            + "\"This is another long string\\n\"\n"
-            + "\"Again multiline\\n\"\n" + "msgstr \"\"\n"
-            + "\"Dies ist ein weitere lange Zeichenkette\\n\"\n"
-            + "\"Ebenfalls mehrzeilig\\n\"\n";
+        final String poText = "msgid \"\"\n" + "\"This is part of a longer string\\n\"\n" + "\"Typically multiline\"\n" + "msgstr \"\"\n" + "\"Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\\n\"\n" + "\"Typischerweise mehrzeilig\"\n" + "msgid \"\"\n" + "\"This is another long string\\n\"\n" + "\"Again multiline\\n\"\n" + "msgstr \"\"\n" + "\"Dies ist ein weitere lange Zeichenkette\\n\"\n" + "\"Ebenfalls mehrzeilig\\n\"\n";
 
         final Translations translations = parse(poText);
         assertNotNull(translations);
 
-        assertTranslation(translations,
-            "This is part of a longer string\nTypically multiline",
-            "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\nTypischerweise mehrzeilig");
+        assertTranslation(translations, "This is part of a longer string\nTypically multiline", "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\nTypischerweise mehrzeilig");
     }
 
+    @Test
     public void testShouldBeRobustWithCarriageReturns() throws OXException {
-        final String poText = "msgid \"\"\r\n"
-                + "\"This is part of a longer string\\n\"\r\n"
-                + "\"Typically multiline\"\n" + "msgstr \"\"\r\n"
-                + "\"Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\\n\"\r\n"
-                + "\"Typischerweise mehrzeilig\"\n" + "msgid \"\"\r\n"
-                + "\"This is another long string\\n\"\r\n"
-                + "\"Again multiline\\n\"\n" + "msgstr \"\"\r\n"
-                + "\"Dies ist ein weitere lange Zeichenkette\\n\"\r\n"
-                + "\"Ebenfalls mehrzeilig\\n\"\r\n";
+        final String poText = "msgid \"\"\r\n" + "\"This is part of a longer string\\n\"\r\n" + "\"Typically multiline\"\n" + "msgstr \"\"\r\n" + "\"Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\\n\"\r\n" + "\"Typischerweise mehrzeilig\"\n" + "msgid \"\"\r\n" + "\"This is another long string\\n\"\r\n" + "\"Again multiline\\n\"\n" + "msgstr \"\"\r\n" + "\"Dies ist ein weitere lange Zeichenkette\\n\"\r\n" + "\"Ebenfalls mehrzeilig\\n\"\r\n";
 
         final Translations translations = parse(poText);
         assertNotNull(translations);
 
-        assertTranslation(translations,
-                "This is part of a longer string\nTypically multiline",
-                "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\nTypischerweise mehrzeilig");
+        assertTranslation(translations, "This is part of a longer string\nTypically multiline", "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\nTypischerweise mehrzeilig");
     }
 
-
+    @Test
     public void testShouldParsePluralForms() throws OXException {
         // Do no die on plurals, but until we need more complex handling
         // this will ignore every value but the first
-        final String poText = "msgid \"%d message\"\n"
-            + "msgid_plural \"%d messages\"\n" + "msgstr[0] \"%d Nachricht\"\n"
-            + "msgstr[1] \"%d Nachrichten\"\n" + "msgid \"Another message\"\n"
-            + "msgstr \"Andere Nachricht\"\n";
+        final String poText = "msgid \"%d message\"\n" + "msgid_plural \"%d messages\"\n" + "msgstr[0] \"%d Nachricht\"\n" + "msgstr[1] \"%d Nachrichten\"\n" + "msgid \"Another message\"\n" + "msgstr \"Andere Nachricht\"\n";
 
         final Translations translations = parse(poText);
 
@@ -143,110 +117,75 @@ public class GettextParserTest extends TestCase {
         assertTranslation(translations, "Another message", "Andere Nachricht");
     }
 
+    @Test
     public void testShouldParseMultilinePlurals() throws OXException {
         // Do no die on plurals, but until we need more complex handling
         // this will ignore every value but the first
-        final String poText = "msgid \"\"\n"
-            + "\"A multiline message about\\n\"\n" + "\"%d message\"\n"
-            + "msgid_plural \"\"\n" + "\"A multiline message about\\n\"\n"
-            + "\"%d messages\"\n" + "msgstr[0] \"\"\n"
-            + "\"Eine mehrzeilige Nachricht \u00fcber\\n\"\n"
-            + "\"%d Nachricht\"\n" + "msgstr[1] \"\"\n"
-            + "\"Eine mehrzeilige Nachricht \u00fcber\\n\"\n"
-            + "\"%d Nachrichten\"\n" + "msgid \"Another message\"\n"
-            + "msgstr \"Andere Nachricht\"\n";
+        final String poText = "msgid \"\"\n" + "\"A multiline message about\\n\"\n" + "\"%d message\"\n" + "msgid_plural \"\"\n" + "\"A multiline message about\\n\"\n" + "\"%d messages\"\n" + "msgstr[0] \"\"\n" + "\"Eine mehrzeilige Nachricht \u00fcber\\n\"\n" + "\"%d Nachricht\"\n" + "msgstr[1] \"\"\n" + "\"Eine mehrzeilige Nachricht \u00fcber\\n\"\n" + "\"%d Nachrichten\"\n" + "msgid \"Another message\"\n" + "msgstr \"Andere Nachricht\"\n";
 
         final Translations translations = parse(poText);
 
         assertNotNull(translations);
-        assertTranslation(translations,
-            "A multiline message about\n%d message",
-            "Eine mehrzeilige Nachricht \u00fcber\n%d Nachricht");
-        assertTranslation(translations,
-            "A multiline message about\n%d messages",
-            "Eine mehrzeilige Nachricht \u00fcber\n%d Nachricht");
+        assertTranslation(translations, "A multiline message about\n%d message", "Eine mehrzeilige Nachricht \u00fcber\n%d Nachricht");
+        assertTranslation(translations, "A multiline message about\n%d messages", "Eine mehrzeilige Nachricht \u00fcber\n%d Nachricht");
 
         assertTranslation(translations, "Another message", "Andere Nachricht");
 
     }
 
+    @Test
     public void testShouldIgnoreComments() throws OXException {
-        final String poText = "# This is a comment line.\n"
-            + "msgid \"I am a message.\"\n"
-            + "msgstr \"Ich bin eine Nachricht.\"\n"
-            + "# Comments are lines that start with #\n"
-            + "msgid \"I am another message.\"\n"
-            + "# Comments can appear practically everywhere\n"
-            + "msgstr \"Ich bin eine andere Nachricht.\"\n";
+        final String poText = "# This is a comment line.\n" + "msgid \"I am a message.\"\n" + "msgstr \"Ich bin eine Nachricht.\"\n" + "# Comments are lines that start with #\n" + "msgid \"I am another message.\"\n" + "# Comments can appear practically everywhere\n" + "msgstr \"Ich bin eine andere Nachricht.\"\n";
 
         final Translations translations = parse(poText);
         assertNotNull(translations);
 
-        assertTranslation(translations, "I am a message.",
-            "Ich bin eine Nachricht.");
-        assertTranslation(translations, "I am another message.",
-            "Ich bin eine andere Nachricht.");
+        assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
+        assertTranslation(translations, "I am another message.", "Ich bin eine andere Nachricht.");
     }
 
+    @Test
     public void testShouldIgnoreWhitespace() throws OXException {
-        final String poText = "msgid     \"I am a message.\"\n"
-            + "msgstr    \"Ich bin eine Nachricht.\"    \n"
-            + "msgid   \"I am another message.\"\n"
-            + "msgstr \"Ich bin eine andere Nachricht.\"";
+        final String poText = "msgid     \"I am a message.\"\n" + "msgstr    \"Ich bin eine Nachricht.\"    \n" + "msgid   \"I am another message.\"\n" + "msgstr \"Ich bin eine andere Nachricht.\"";
 
         final Translations translations = parse(poText);
         assertNotNull(translations);
 
-        assertTranslation(translations, "I am a message.",
-            "Ich bin eine Nachricht.");
-        assertTranslation(translations, "I am another message.",
-            "Ich bin eine andere Nachricht.");
+        assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
+        assertTranslation(translations, "I am another message.", "Ich bin eine andere Nachricht.");
     }
 
+    @Test
     public void testShouldIgnoreEmptyLines() throws OXException {
-        final String poText = "msgid \"I am a message.\"\n\n"
-            + "msgstr \"Ich bin eine Nachricht.\"\n\n\n"
-            + "msgid \"I am another message.\"\n\n  \n"
-            + "msgstr \"Ich bin eine andere Nachricht.\"\n";
+        final String poText = "msgid \"I am a message.\"\n\n" + "msgstr \"Ich bin eine Nachricht.\"\n\n\n" + "msgid \"I am another message.\"\n\n  \n" + "msgstr \"Ich bin eine andere Nachricht.\"\n";
 
         final Translations translations = parse(poText);
         assertNotNull(translations);
 
-        assertTranslation(translations, "I am a message.",
-            "Ich bin eine Nachricht.");
-        assertTranslation(translations, "I am another message.",
-            "Ich bin eine andere Nachricht.");
+        assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
+        assertTranslation(translations, "I am another message.", "Ich bin eine andere Nachricht.");
     }
 
+    @Test
     public void testShouldSurviveRunawayStrings() throws OXException {
-        final String poText = "msgid \"I am a message.\"\n"
-            + "msgstr \"Ich bin eine Nachricht.\n"
-            + "msgid \"I am another message.\"\n"
-            + "msgstr \"Ich bin eine andere Nachricht.";
+        final String poText = "msgid \"I am a message.\"\n" + "msgstr \"Ich bin eine Nachricht.\n" + "msgid \"I am another message.\"\n" + "msgstr \"Ich bin eine andere Nachricht.";
 
         final Translations translations = parse(poText);
         assertNotNull(translations);
 
-        assertTranslation(translations, "I am a message.",
-            "Ich bin eine Nachricht.");
-        assertTranslation(translations, "I am another message.",
-            "Ich bin eine andere Nachricht.");
+        assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
+        assertTranslation(translations, "I am another message.", "Ich bin eine andere Nachricht.");
     }
 
+    @Test
     public void testSyntaxError1() throws UnsupportedEncodingException {
-        final String poText = "msgid \"\"\n"
-            + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n"
-            + "msgid \"I am a message.\"\n"
-            + "msgstr \"Ich bin eine Nachricht.\n"
-            + "BLUPP! \"I am another message.\"\n"
-            + "msgstr \"Ich bin eine andere Nachricht.\"";
+        final String poText = "msgid \"\"\n" + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n" + "msgid \"I am a message.\"\n" + "msgstr \"Ich bin eine Nachricht.\n" + "BLUPP! \"I am another message.\"\n" + "msgstr \"Ich bin eine andere Nachricht.\"";
 
         try {
             parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
         } catch (final OXException x) {
-            assertEquals(I18NExceptionCode.UNEXPECTED_TOKEN.getNumber(), x
-                .getCode());
+            assertEquals(I18NExceptionCode.UNEXPECTED_TOKEN.getNumber(), x.getCode());
             final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
@@ -256,26 +195,19 @@ public class GettextParserTest extends TestCase {
             assertEquals("BLUPP! \"I am another message.\"", incorrectToken);
             assertEquals("test.po", filename);
             assertEquals(5, line);
-            assertEquals("[msgid, msgctxt, msgstr, string, comment, eof]",
-                expectedList);
+            assertEquals("[msgid, msgctxt, msgstr, string, comment, eof]", expectedList);
         }
 
     }
 
+    @Test
     public void testSyntaxError2() throws UnsupportedEncodingException {
-        final String poText = "msgid \"\"\n"
-            + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n"
-            + "msgid \"I am a message.\"\n"
-            + "msgid \"Ich bin eine Nachricht.\n"
-            + "msgid \"I am another message.\"\n"
-            + "msgstr \"Ich bin eine andere Nachricht.\"";
+        final String poText = "msgid \"\"\n" + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n" + "msgid \"I am a message.\"\n" + "msgid \"Ich bin eine Nachricht.\n" + "msgid \"I am another message.\"\n" + "msgstr \"Ich bin eine andere Nachricht.\"";
         try {
             parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
         } catch (final OXException x) {
-            assertEquals(
-                com.openexchange.i18n.parsing.I18NExceptionCode.UNEXPECTED_TOKEN_CONSUME
-                    .getNumber(), x.getCode());
+            assertEquals(com.openexchange.i18n.parsing.I18NExceptionCode.UNEXPECTED_TOKEN_CONSUME.getNumber(), x.getCode());
             final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
@@ -290,18 +222,15 @@ public class GettextParserTest extends TestCase {
 
     }
 
+    @Test
     public void testSyntaxError3() throws UnsupportedEncodingException {
-        final String poText = "msgid \"\"\n"
-            + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n"
-            + "msgid \"I am a message.\"\n"
-            + "msgstr[Blupp] \"Ich bin eine andere Nachricht.\"";
+        final String poText = "msgid \"\"\n" + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n" + "msgid \"I am a message.\"\n" + "msgstr[Blupp] \"Ich bin eine andere Nachricht.\"";
 
         try {
             parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
         } catch (final OXException x) {
-            assertEquals(I18NExceptionCode.EXPECTED_NUMBER.getNumber(), x
-                .getCode());
+            assertEquals(I18NExceptionCode.EXPECTED_NUMBER.getNumber(), x.getCode());
             final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
@@ -314,18 +243,15 @@ public class GettextParserTest extends TestCase {
 
     }
 
+    @Test
     public void testSyntaxError4() throws UnsupportedEncodingException {
-        final String poText = "msgid \"\"\n"
-            + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n"
-            + "msgid \"I am a message.\"\n"
-            + "msgstTUEDELUE \"Ich bin eine andere Nachricht.\"";
+        final String poText = "msgid \"\"\n" + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n" + "msgid \"I am a message.\"\n" + "msgstTUEDELUE \"Ich bin eine andere Nachricht.\"";
 
         try {
             parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
         } catch (final OXException x) {
-            assertEquals(I18NExceptionCode.MALFORMED_TOKEN.getNumber(), x
-                .getCode());
+            assertEquals(I18NExceptionCode.MALFORMED_TOKEN.getNumber(), x.getCode());
             final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String expected = (String) messageArgs[1];
@@ -340,21 +266,19 @@ public class GettextParserTest extends TestCase {
 
     }
 
+    @Test
     public void testIOException() {
         try {
             new POParser().parse(new ExceptionThrowingInputStream(), "test.po");
         } catch (final OXException e) {
-            assertEquals(I18NExceptionCode.IO_EXCEPTION.getNumber(), e
-                .getCode());
+            assertEquals(I18NExceptionCode.IO_EXCEPTION.getNumber(), e.getCode());
             assertEquals("test.po", e.getLogArgs()[0]);
             assertEquals("BUMM!", e.getCause().getMessage());
         }
     }
 
     protected Translations parse(final String poText) throws OXException {
-        final String withContentType = "msgid \"\"\n"
-            + "msgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\r\n"
-            + poText;
+        final String withContentType = "msgid \"\"\n" + "msgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\r\n" + poText;
         return parse(withContentType.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
@@ -362,11 +286,9 @@ public class GettextParserTest extends TestCase {
         return new POParser().parse(new ByteArrayInputStream(poText), "test.po");
     }
 
-    protected static void assertTranslation(final Translations translations,
-        final String original, final String expectedTranslation) {
+    protected static void assertTranslation(final Translations translations, final String original, final String expectedTranslation) {
         final String actualTranslation = translations.translate(original);
-        assertNotNull("Could not find \'" + original + "' in "
-            + translations.getKnownStrings(), actualTranslation);
+        assertNotNull("Could not find \'" + original + "' in " + translations.getKnownStrings(), actualTranslation);
         assertEquals(expectedTranslation, actualTranslation);
     }
 

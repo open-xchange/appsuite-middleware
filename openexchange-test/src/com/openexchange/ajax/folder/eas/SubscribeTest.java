@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.folder.eas;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;

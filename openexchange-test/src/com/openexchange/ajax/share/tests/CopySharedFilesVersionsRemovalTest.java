@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;

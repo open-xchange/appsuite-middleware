@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -76,7 +79,7 @@ public class Bug44895Test extends AbstractFolderTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         calendarFolder = new FolderObject();
@@ -88,7 +91,7 @@ public class Bug44895Test extends AbstractFolderTest {
         resp.fillObject(calendarFolder);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != calendarFolder) {
             DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, calendarFolder);

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Locale;
 import org.junit.After;
 import org.junit.Before;

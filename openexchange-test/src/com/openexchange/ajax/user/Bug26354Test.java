@@ -50,6 +50,9 @@
 package com.openexchange.ajax.user;
 
 import static com.openexchange.java.Autoboxing.B;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Random;
 import java.util.TimeZone;
 import org.junit.After;

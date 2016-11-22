@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.json.JSONArray;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -72,17 +72,6 @@ public class AllAliasTest extends AbstractMailTest {
      */
     public AllAliasTest() {
         super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Before
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

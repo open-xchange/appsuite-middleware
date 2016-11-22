@@ -1,8 +1,10 @@
 
 package com.openexchange.webdav.xml.contact;
 
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.Locale;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
@@ -14,6 +16,7 @@ public class DeleteTest extends ContactTest {
         super();
     }
 
+    @Test
     public void testDelete() throws Exception {
         final Contact contactObj = createContactObject("testDelete");
         final int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
@@ -24,6 +27,7 @@ public class DeleteTest extends ContactTest {
         deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testDeleteConcurentConflict() throws Exception {
         final Contact contactObj = createContactObject("testDeleteConcurentConflict");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
@@ -38,6 +42,7 @@ public class DeleteTest extends ContactTest {
         deleteContact(webCon, objectId, contactFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testDeleteNotFound() throws Exception {
         final Contact contactObj = createContactObject("testUpdateContactNotFound");
         final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);

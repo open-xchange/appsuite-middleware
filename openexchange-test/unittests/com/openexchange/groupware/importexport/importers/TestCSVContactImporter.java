@@ -67,7 +67,6 @@ import com.openexchange.java.Streams;
  */
 public class TestCSVContactImporter extends CSVContactImporter {
 
-
     public TestCSVContactImporter() throws Exception {
         super(null);
         final ConfigurationService conf = ImportExportServices.getConfigurationService();

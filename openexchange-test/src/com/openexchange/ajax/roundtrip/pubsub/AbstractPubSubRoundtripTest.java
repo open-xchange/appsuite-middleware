@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.publish.tests.AbstractPubSubTest;

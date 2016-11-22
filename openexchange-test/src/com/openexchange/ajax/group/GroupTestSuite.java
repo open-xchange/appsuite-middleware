@@ -49,27 +49,19 @@
 
 package com.openexchange.ajax.group;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * Combines all group tests.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    FunctionTest.class,
+    Bug11659Test.class,
+})
 public final class GroupTestSuite {
 
-    /**
-     * Prevent instantiation.
-     */
-    private GroupTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.group.GroupTestSuite");
-        tests.addTestSuite(FunctionTest.class);
-        tests.addTestSuite(Bug11659Test.class);
-        return tests;
-    }
 }

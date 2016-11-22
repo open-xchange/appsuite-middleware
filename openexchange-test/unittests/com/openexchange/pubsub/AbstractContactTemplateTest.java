@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -85,7 +84,7 @@ import freemarker.template.Configuration;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractContactTemplateTest extends TestCase {
+public abstract class AbstractContactTemplateTest {
 
     /**
      * Initializes a new {@link AbstractContactTemplateTest}.
@@ -160,7 +159,7 @@ public abstract class AbstractContactTemplateTest extends TestCase {
         service.setSource(source);
     }
 
-    protected OXTemplate getTemplate(String templateName) throws Exception{
+    protected OXTemplate getTemplate(String templateName) throws Exception {
         Init.startServer();
         ConfigurationService conf = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         File path = new File(conf.getProperty("com.openexchange.templating.path"));

@@ -1,6 +1,11 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -119,6 +124,7 @@ public class NewTest extends InfostoreAJAXTest {
 
     // Bug 3877
     /*
+     * @Test
      * public void testEnforceFolderType() throws Exception { final int folderId =
      * FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), sessionId).getObjectID(); try { final int id = createNew(
      * getWebConversation(), getHostName(), sessionId, m( "folder_id" , ((Integer)folderId).toString(), "title" , "Save to Calendar Folder",
@@ -127,6 +133,7 @@ public class NewTest extends InfostoreAJAXTest {
      */
 
     // Bug 3928    @Test
+    @Test
     public void testVersionCommentForNewDocument() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         final String id = createNew(getWebConversation(), getHostName(), sessionId, m("folder_id", ((Integer) folderId).toString(), "title", "test upload", "description", "test upload description", "version_comment", "Version Comment"), upload, "text/plain");
@@ -139,6 +146,7 @@ public class NewTest extends InfostoreAJAXTest {
     }
 
     // Bug 4120    @Test
+    @Test
     public void testUniqueFilenamesOnUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
@@ -158,6 +166,7 @@ public class NewTest extends InfostoreAJAXTest {
     }
 
     // Bug 4269 and Bug 7143    @Test
+    @Test
     public void testVirtualFolder() throws Exception {
         for (int folderId : virtualFolders) {
             virtualFolder(folderId);

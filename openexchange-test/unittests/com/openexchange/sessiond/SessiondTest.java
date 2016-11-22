@@ -52,6 +52,9 @@ package com.openexchange.sessiond;
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -63,9 +66,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
-import junit.framework.TestCase;
 
-public class SessiondTest extends TestCase {
+public class SessiondTest {
 
     protected static final String sessiondPropertiesFile = "sessiondPropertiesFile";
 
@@ -89,10 +91,8 @@ public class SessiondTest extends TestCase {
 
     private static boolean isInit = false;
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
-        
         if (isInit) {
             return;
         }
@@ -127,19 +127,20 @@ public class SessiondTest extends TestCase {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (isInit) {
             isInit = false;
             Init.stopServer();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testDummy() {
 
     }
 
+    @Test
     public void testAddSession() throws Exception {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
@@ -209,6 +210,7 @@ public class SessiondTest extends TestCase {
         });
     }
 
+    @Test
     public void testRefreshSession() throws Exception {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
@@ -279,6 +281,7 @@ public class SessiondTest extends TestCase {
         sessiondCon.getSession(session.getSessionID());
     }
 
+    @Test
     public void testDeleteSession() throws Exception {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
@@ -349,6 +352,7 @@ public class SessiondTest extends TestCase {
         sessiondCon.removeSession(session.getSessionID());
     }
 
+    @Test
     public void testGetSession() throws Exception {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);

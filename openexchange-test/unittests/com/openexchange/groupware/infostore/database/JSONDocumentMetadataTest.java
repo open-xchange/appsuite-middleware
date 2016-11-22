@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.infostore.database;
 
 import com.openexchange.ajax.parser.JSONDocumentMetadata;
@@ -55,8 +56,9 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class JSONDocumentMetadataTest extends DocumentMetadataTest {
+
     @Override
-	public DocumentMetadata getImplementation() {
+    public DocumentMetadata getImplementation() {
         return new JSONDocumentMetadata();
     }
 }

@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.drive.test;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.drive.action.DeleteLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkRequest;
@@ -86,7 +90,7 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         itm = new InfostoreTestManager(client);
@@ -133,7 +137,7 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         assertTrue("Permission was not deleted", objectPermissions.isEmpty());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         itm.cleanUp();
         super.tearDown();

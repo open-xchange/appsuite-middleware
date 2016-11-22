@@ -49,6 +49,8 @@
 
 package com.openexchange.mail;
 
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -70,8 +72,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public final class MailParserWriterTest extends AbstractMailTest {
 
     /**
-	 *
-	 */
+     *
+     */
     public MailParserWriterTest() {
         super();
     }
@@ -83,24 +85,16 @@ public final class MailParserWriterTest extends AbstractMailTest {
         super();
     }
 
-    private static final MailField[] COMMON_LIST_FIELDS =
-        {
-            MailField.ID, MailField.FOLDER_ID, MailField.SIZE, MailField.FROM, MailField.TO, MailField.RECEIVED_DATE, MailField.SENT_DATE,
-            MailField.SUBJECT, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.PRIORITY, MailField.COLOR_LABEL };
+    private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID, MailField.SIZE, MailField.FROM, MailField.TO, MailField.RECEIVED_DATE, MailField.SENT_DATE, MailField.SUBJECT, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.PRIORITY, MailField.COLOR_LABEL };
 
+    @Test
     public void testMessageWriter() {
         try {
             final SessionObject session = getSession();
             final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
             mailConnection.connect(/* mailConfig */);
             try {
-                final MailMessage[] mails =
-                    mailConnection.getMessageStorage().getAllMessages(
-                        "INBOX",
-                        null,
-                        null,
-                        null,
-                        new MailField[] { MailField.ID, MailField.CONTENT_TYPE });
+                final MailMessage[] mails = mailConnection.getMessageStorage().getAllMessages("INBOX", null, null, null, new MailField[] { MailField.ID, MailField.CONTENT_TYPE });
 
                 for (final MailMessage mail : mails) {
                     if (mail.getContentType().isMimeType("multipart/mixed")) {
@@ -134,6 +128,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
         }
     }
 
+    @Test
     public void testFolderWriter() {
         try {
             final SessionObject session = getSession();

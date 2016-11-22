@@ -71,79 +71,54 @@ import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.test.OXTestToolkit;
-import junit.framework.JUnit4TestAdapter;
-
 
 public class CSVContactExportTest extends AbstractContactTest {
 
-	public static Exporter exp = new CSVContactExporter();
-	public static String TEST1_RESULT =
-		"\"Object id\"," +
-		"\"Folder id\"," +
-		"\"Given name\"\n";
-	public static int[] TEST1_BASE = {
-		ContactField.OBJECT_ID.getNumber(),
-		ContactField.FOLDER_ID.getNumber(),
-		ContactField.GIVEN_NAME.getNumber(),
-		7000};
-	public static String TEST2_RESULT =
-		"Given name, " +
-		"Email 1\n" +
-		"Prinz, tobias.prinz@open-xchange.com\n" +
-		"Laguna, francisco.laguna@open-xchange.com";
-	public static int[] TEST2_BASE ={
-		ContactField.GIVEN_NAME.getNumber(),
-		ContactField.EMAIL1.getNumber()};
+    public static Exporter exp = new CSVContactExporter();
+    public static String TEST1_RESULT = "\"Object id\"," + "\"Folder id\"," + "\"Given name\"\n";
+    public static int[] TEST1_BASE = { ContactField.OBJECT_ID.getNumber(), ContactField.FOLDER_ID.getNumber(), ContactField.GIVEN_NAME.getNumber(), 7000 };
+    public static String TEST2_RESULT = "Given name, " + "Email 1\n" + "Prinz, tobias.prinz@open-xchange.com\n" + "Laguna, francisco.laguna@open-xchange.com";
+    public static int[] TEST2_BASE = { ContactField.GIVEN_NAME.getNumber(), ContactField.EMAIL1.getNumber() };
 
-	public static String TEST_EMPTY_RESULT =
-		"Given name, " +
-		"Email 1\n" +
-		",\n" +
-		",";
-	public static int[] TEST_EMPTY_BASE ={
-		ContactField.GIVEN_NAME.getNumber(),
-		ContactField.EMAIL1.getNumber()};
-
-
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(CSVContactExportTest.class);
-	}
+    public static String TEST_EMPTY_RESULT = "Given name, " + "Email 1\n" + ",\n" + ",";
+    public static int[] TEST_EMPTY_BASE = { ContactField.GIVEN_NAME.getNumber(), ContactField.EMAIL1.getNumber() };
 
     @Before
     public void TearUp() throws OXException {
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
 
-	@Test public void canExport() throws OXException, IOException{
-		assertTrue(
-			"Can export?" ,
-			exp.canExport(sessObj, Format.CSV, Integer.toString(folderId), null));
-	}
+    @Test
+    public void canExport() throws OXException, IOException {
+        assertTrue("Can export?", exp.canExport(sessObj, Format.CSV, Integer.toString(folderId), null));
+    }
 
-	@Test public void exportHead() throws OXException, IOException{
-		final InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), TEST1_BASE, null);
-		assertEquals("Head only", TEST1_RESULT, OXTestToolkit.readStreamAsString(is) );
-	}
+    @Test
+    public void exportHead() throws OXException, IOException {
+        final InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf(folderId), TEST1_BASE, null);
+        assertEquals("Head only", TEST1_RESULT, OXTestToolkit.readStreamAsString(is));
+    }
 
-	@Test public void exportData() throws NumberFormatException, Exception{
-		final CSVContactImporter imp = new TestCSVContactImporter();
-		InputStream is;
+    @Test
+    public void exportData() throws NumberFormatException, Exception {
+        final CSVContactImporter imp = new TestCSVContactImporter();
+        InputStream is;
 
-		//importing prior to export test
-		is = new ByteArrayInputStream( TEST2_RESULT.getBytes() );
-		final Map <String, Integer>folderMappings = new HashMap<String, Integer>();
-		folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT) );
-		final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>( folderMappings.keySet()), null);
+        //importing prior to export test
+        is = new ByteArrayInputStream(TEST2_RESULT.getBytes());
+        final Map<String, Integer> folderMappings = new HashMap<String, Integer>();
+        folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT));
+        final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>(folderMappings.keySet()), null);
 
-		//exporting and asserting
-		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST2_BASE, null);
-		final CSVParser parser = new CSVParser();
-		final String resStr = OXTestToolkit.readStreamAsString(is);
-		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
+        //exporting and asserting
+        is = exp.exportData(sessObj, Format.CSV, String.valueOf(folderId), TEST2_BASE, null);
+        final CSVParser parser = new CSVParser();
+        final String resStr = OXTestToolkit.readStreamAsString(is);
+        assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr));
 
-		//cleaning up
-		for(final ImportResult res : results){
-		    contactStorage.delete(sessObj, res.getFolder(), res.getObjectId(), res.getDate());
-		}
-	}
+        //cleaning up
+        for (final ImportResult res : results) {
+            contactStorage.delete(sessObj, res.getFolder(), res.getObjectId(), res.getDate());
+        }
+    }
 }

@@ -1,7 +1,10 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
 import java.rmi.server.UID;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 
@@ -18,7 +21,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -34,22 +37,20 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         manager.newAction(c1, c2);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testSearchByInitial() {
         Contact[] results = manager.searchFirstletterAction("B", folderID);
         assertEquals(1, results.length);
         assertEquals("Should find the right contact", BOB_LASTNAME, results[0].getSurName());
     }
 
+    @Test
     public void testAsteriskSearch() {
         Contact[] results = manager.searchAction("*", folderID);
         assertEquals("Should find two contacts", 2, results.length);
     }
 
+    @Test
     public void testSearchWorksOnlyOnDisplayNameByDefault() {
         Contact[] results = manager.searchAction("*" + BOB_LASTNAME + "*", folderID);
         assertEquals("Should find no contact when searching for last name", 0, results.length);
@@ -58,6 +59,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         assertEquals("Should find one contact when searching for display_name", 1, results.length);
     }
 
+    @Test
     public void testGuiLikeSearch() {
         ContactSearchObject search = new ContactSearchObject();
         search.setFolder(folderID);
@@ -75,6 +77,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         assertEquals("Should find the right contact", BOB_LASTNAME, results[0].getSurName());
     }
 
+    @Test
     public void testExactMatch() {
         ContactSearchObject search = new ContactSearchObject();
         search.setFolder(folderID);
@@ -105,6 +108,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
 
     }
 
+    @Test
     public void testDepartmentSearch() {
         ContactSearchObject search = new ContactSearchObject();
         search.addFolder(folderID);

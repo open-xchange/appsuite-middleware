@@ -51,7 +51,12 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -85,7 +90,7 @@ public class UserStory1085Test extends AppointmentTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -133,7 +138,7 @@ public class UserStory1085Test extends AppointmentTest {
         end = D("02.02.2009 00:00");
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         clientB.execute(new DeleteRequest(appointmenShare));
         clientC.execute(new DeleteRequest(appointmentPrivate));

@@ -69,7 +69,6 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.session.Session;
 
-
 /**
  * Unit tests for {@link InfostoreFileServlet}
  *
@@ -136,8 +135,7 @@ public class InfostoreFileServletTest {
 
     @Test(expected = OXException.class)
     public void testLoadMetadata_getFileMetadataThrowsOXException_ReturnOXException() throws OXException {
-        PowerMockito.when(idBasedFileAccess.getFileMetadata(Matchers.anyString(), Matchers.anyString())).thenThrow(
-            InfostoreExceptionCodes.DELETE_FAILED.create());
+        PowerMockito.when(idBasedFileAccess.getFileMetadata(Matchers.anyString(), Matchers.anyString())).thenThrow(InfostoreExceptionCodes.DELETE_FAILED.create());
 
         DocumentMetadata loadMetadata = this.infostoreFileServlet.loadMetadata(this.publication, 1);
 
@@ -146,8 +144,7 @@ public class InfostoreFileServletTest {
 
     @Test(expected = OXException.class)
     public void testLoadMetadata_getFileMetadataThrowsOXException_ReturnOXExceptionfd() throws OXException {
-        PowerMockito.when(idBasedFileAccess.getFileMetadata(Matchers.anyString(), Matchers.anyString())).thenThrow(
-            InfostoreExceptionCodes.NOT_EXIST.create());
+        PowerMockito.when(idBasedFileAccess.getFileMetadata(Matchers.anyString(), Matchers.anyString())).thenThrow(InfostoreExceptionCodes.NOT_EXIST.create());
 
         DocumentMetadata loadMetadata = this.infostoreFileServlet.loadMetadata(this.publication, 1);
 

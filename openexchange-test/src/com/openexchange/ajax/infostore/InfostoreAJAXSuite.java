@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.infostore;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.infostore.fileaccount.test.FilestorageAccountTest;
 import com.openexchange.ajax.infostore.test.AnotherCreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.infostore.test.AppendDocumentTest;
@@ -15,44 +17,41 @@ import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 import com.openexchange.ajax.infostore.test.TrashTest;
 import com.openexchange.ajax.infostore.test.TryAddVersionTest;
 import com.openexchange.ajax.infostore.test.ZipDocumentsTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
-public class InfostoreAJAXSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    AllTest.class,
+    DeleteTest.class,
+    GetTest.class,
+    ListTest.class,
+    NewTest.class,
+    UpdatesTest.class,
+    UpdateTest.class,
+    VersionsTest.class,
+    DetachTest.class,
+    DocumentTest.class,
+    CopyTest.class,
+    LockTest.class,
+    SaveAsTest.class,
+    SearchTest.class,
+    CreateAndDeleteInfostoreTest.class,
+    AnotherCreateAndDeleteInfostoreTest.class,
+    InfostoreObjectCountTest.class,
+    DeleteMultipleFilesTest.class,
+    ZipDocumentsTest.class,
+    Bug27722Test.class,
+    TrashTest.class,
+    Bug32004Test.class,
+    Bug40142Test.class,
+    CreateFileWithIllegalCharactersTest.class,
+    CheckNameActionTest.class,
+    FilestorageAccountTest.class,
+    AppendDocumentTest.class,
+    Bug44622Test.class,
+    Bug44891Test.class,
+    TryAddVersionTest.class,
 
-    public static Test suite() {
+})
+public class InfostoreAJAXSuite  {
 
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.infostore.InfostoreAJAXSuite");
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(VersionsTest.class);
-        tests.addTestSuite(DetachTest.class);
-        tests.addTestSuite(DocumentTest.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(LockTest.class);
-        tests.addTestSuite(SaveAsTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(CreateAndDeleteInfostoreTest.class);
-        tests.addTestSuite(AnotherCreateAndDeleteInfostoreTest.class);
-        tests.addTestSuite(InfostoreObjectCountTest.class);
-        tests.addTestSuite(DeleteMultipleFilesTest.class);
-        tests.addTestSuite(ZipDocumentsTest.class);
-        tests.addTestSuite(Bug27722Test.class);
-        tests.addTestSuite(TrashTest.class);
-        tests.addTestSuite(Bug32004Test.class);
-        tests.addTestSuite(Bug40142Test.class);
-        tests.addTestSuite(CreateFileWithIllegalCharactersTest.class);
-        tests.addTestSuite(CheckNameActionTest.class);
-        tests.addTestSuite(FilestorageAccountTest.class);
-        tests.addTestSuite(AppendDocumentTest.class);
-        tests.addTestSuite(Bug44622Test.class);
-        tests.addTestSuite(Bug44891Test.class);
-        tests.addTestSuite(TryAddVersionTest.class);
-        return tests;
-    }
 }

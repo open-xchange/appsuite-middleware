@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertNull;
 import java.util.Date;
 import org.junit.After;
 import org.junit.Before;

@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import org.junit.Test;

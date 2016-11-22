@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -254,7 +255,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
 
     protected FolderObject createDefaultInfostoreFolder(String folderName) throws OXException, IOException, SAXException, JSONException {
         if (folderName == null) {
-            folderName = "pubsub default infostore folder " + getName() + "-" + System.currentTimeMillis();
+            folderName = "pubsub default infostore folder " + this.getClass().getCanonicalName() + "-" + System.currentTimeMillis();
         }
         FolderObject folder = getFolderManager().generatePublicFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);

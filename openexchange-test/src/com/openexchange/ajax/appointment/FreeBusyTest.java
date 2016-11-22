@@ -1,9 +1,11 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
@@ -18,6 +20,7 @@ public class FreeBusyTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyTest.class);
 
+    @Test
     public void testUserParticipant() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testUserParticipant");
@@ -51,6 +54,7 @@ public class FreeBusyTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testFullTimeUserParticipant() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -92,6 +96,7 @@ public class FreeBusyTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testUserParticipantStatusFree() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testUserParticipantStatusFree");
@@ -125,6 +130,7 @@ public class FreeBusyTest extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
+    @Test
     public void testResourceParticipantStatusFree() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testResourceParticipantStatusFree");

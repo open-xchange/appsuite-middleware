@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertFalse;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -81,7 +84,7 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(User.User1);
@@ -109,7 +112,7 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
         insRes2.fillAppointment(appointment2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         GetRequest getReq1 = new GetRequest(appointment1, false);
         GetResponse getRes1 = client.execute(getReq1);

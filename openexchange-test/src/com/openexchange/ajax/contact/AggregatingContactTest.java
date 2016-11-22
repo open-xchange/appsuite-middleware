@@ -112,6 +112,8 @@ public class AggregatingContactTest extends AbstractAJAXSession {
      * }
      * 
      * @Test
+     * 
+     * @Test
      * public void testPerformTheUnknownGreenRedCycle() throws Exception{
      * ContactUnificationState state;
      * 
@@ -126,6 +128,8 @@ public class AggregatingContactTest extends AbstractAJAXSession {
      * state = contactMgr.getAssociationBetween(contributor,aggregator);
      * assertEquals(ContactUnificationState.RED, state);
      * }
+     * 
+     * @Test
      * 
      * @Test
      * public void testFindAssociatedContacts() throws Exception, IOException, SAXException, JSONException{
@@ -151,14 +155,20 @@ public class AggregatingContactTest extends AbstractAJAXSession {
      * }
      * 
      * @Test
+     * 
+     * @Test
      * public void testWorksWithUUIDsNotGivenByFinalContactModule() throws Exception {
      * //Karsten's case
      * }
      * 
      * @Test
+     * 
+     * @Test
      * public void testWorksWithMoreThanOneAssociatedPair() throws Exception {
      * 
      * }
+     * 
+     * @Test
      * 
      * @Test
      * public void testSecurity() throws Exception {

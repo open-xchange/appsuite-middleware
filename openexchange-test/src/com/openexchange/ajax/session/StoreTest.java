@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
 import org.junit.Test;

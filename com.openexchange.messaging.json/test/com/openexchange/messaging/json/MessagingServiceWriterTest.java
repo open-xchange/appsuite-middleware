@@ -52,9 +52,9 @@ package com.openexchange.messaging.json;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.LinkedList;
 import java.util.List;
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.i18n.Translator;
 import com.openexchange.json.JSONAssertion;
@@ -67,8 +67,9 @@ import com.openexchange.messaging.SimMessagingService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriterTest extends TestCase{
-    public void testSimpleWrite() throws JSONException {
+public class MessagingServiceWriterTest {
+         @Test
+     public void testSimpleWrite() throws JSONException {
         final SimMessagingService messagingService = new SimMessagingService();
 
         final List<MessagingAction> actions = new LinkedList<MessagingAction>();

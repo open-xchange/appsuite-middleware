@@ -1,16 +1,27 @@
 package liquibase.change.custom;
 
-import liquibase.database.Database;
-import liquibase.exception.*;
-import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 import java.net.URL;
 import java.net.URLClassLoader;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.Assert;
+import org.junit.Test;
+import liquibase.database.Database;
+import liquibase.exception.CustomChangeException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
+import liquibase.statement.SqlStatement;
 
 public class CustomChangeWrapperTest {
 
@@ -284,10 +295,6 @@ public class CustomChangeWrapperTest {
         }
 
         @Override
-        public void setUp() throws SetupException {
-        }
-
-        @Override
         public void setFileOpener(ResourceAccessor resourceAccessor) {
         }
 
@@ -304,6 +311,11 @@ public class CustomChangeWrapperTest {
         @Override
         public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException {
             return new SqlStatement[0];
+        }
+
+        @Override
+        public void setUp() throws SetupException {
+            
         }
     }
 }

@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.messagestorage;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -62,14 +65,15 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public final class MailFlagsTest extends MessageStorageTest {
 
     /**
-	 *
-	 */
+     *
+     */
     public MailFlagsTest() {
         super();
     }
 
     private static final MailField[] FIELDS_ID_AND_FLAGS = { MailField.ID, MailField.FLAGS };
 
+    @Test
     public void testMailFlagsNonExistingIds() throws OXException {
         try {
             final long currentTimeMillis = System.currentTimeMillis();
@@ -80,11 +84,12 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailFlagsNonExistingIdsMixed() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final long currentTimeMillis = System.currentTimeMillis();
-            final String[] fetchIds = new String[]{uids[0]};
+            final String[] fetchIds = new String[] { uids[0] };
             final String[] mixednonexistingids = new String[] { String.valueOf(currentTimeMillis), uids[0] };
             mailAccess.getMessageStorage().updateMessageFlags("INBOX", mixednonexistingids, MailMessage.FLAG_SEEN, true);
             MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", fetchIds, FIELDS_ID_AND_FLAGS);
@@ -100,6 +105,7 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailFlagsNotExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -119,6 +125,7 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailFlags() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -138,6 +145,7 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailFlagsUserFlags() throws OXException {
         if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
             System.err.println("User flags not supported. Skipping test for user flag $Forwarded...");
@@ -162,6 +170,7 @@ public final class MailFlagsTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailFlagsWith268() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {

@@ -59,8 +59,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Bug26611VulTest extends AbstractSanitizing {
-    @Test
-    public void testSanitize() {
+     @Test
+     public void testSanitize() {
         String content = "foo <object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"<!-- --></object//-->> bar";
         String test = getHtmlService().sanitize(content, null, false, null, null);
         Assert.assertFalse("Sanitized content still contains object tag.", test.contains("<object"));

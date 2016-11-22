@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;

@@ -49,10 +49,16 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -98,7 +104,7 @@ public class GetALinkTest extends ShareTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         itm = new InfostoreTestManager(client);
@@ -115,7 +121,7 @@ public class GetALinkTest extends ShareTest {
         itm.newAction(file);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (itm != null) {
             itm.cleanUp();

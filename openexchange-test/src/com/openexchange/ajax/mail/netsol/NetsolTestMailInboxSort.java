@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.mail.netsol;
 
+import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -79,6 +81,7 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 
     protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
 
+    @Test
     public void testMailInboxSort() throws Throwable {
         netsolClearFolder(getInboxFolder());
         netsolClearFolder(getSentFolder());

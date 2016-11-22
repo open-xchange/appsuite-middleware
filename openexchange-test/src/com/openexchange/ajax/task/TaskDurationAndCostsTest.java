@@ -50,9 +50,13 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.L;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -64,7 +68,6 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
-import junit.framework.AssertionFailedError;
 
 /**
  * {@link TaskDurationAndCostsTest}
@@ -87,7 +90,7 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -104,7 +107,7 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         response.fillTask(task);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         DeleteRequest req = new DeleteRequest(task);
         client.execute(req);
@@ -120,7 +123,7 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         try {
             UpdateResponse response = client.execute(req);
             task.setLastModified(response.getTimestamp());
-        } catch (AssertionFailedError e) {
+        } catch (Exception e) {
             fail("Setting costs and duration failed!");
         }
         GetRequest request = new GetRequest(task);

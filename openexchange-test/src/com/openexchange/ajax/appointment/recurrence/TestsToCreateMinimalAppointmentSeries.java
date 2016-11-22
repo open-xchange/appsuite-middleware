@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
@@ -147,6 +148,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
     }
 
     // first day every month    @Test
+    @Test
     public void testShouldCreateMonthlyIntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
@@ -160,6 +162,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
     }
 
     // first monday every month    @Test
+    @Test
     public void testShouldCreateMonthly2IntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);

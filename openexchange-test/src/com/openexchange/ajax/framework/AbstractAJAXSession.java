@@ -54,10 +54,9 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import junit.framework.TestCase;
 
 @RunWith(ConcurrentTestRunner.class)
-public abstract class AbstractAJAXSession extends TestCase {
+public abstract class AbstractAJAXSession {
 
     protected AJAXClient client;
 
@@ -81,7 +80,6 @@ public abstract class AbstractAJAXSession extends TestCase {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         String clientId = getClientId();
         client = null == clientId ? new AJAXClient(User.User1) : new AJAXClient(User.User1, clientId);
     }
@@ -93,7 +91,6 @@ public abstract class AbstractAJAXSession extends TestCase {
             client.logout();
             client = null;
         }
-        super.tearDown();
     }
 
     public AJAXSession getSession() {

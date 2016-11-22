@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.FileInputStream;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;

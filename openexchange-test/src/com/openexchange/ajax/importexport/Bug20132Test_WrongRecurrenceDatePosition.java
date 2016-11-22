@@ -1,7 +1,11 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -14,6 +18,7 @@ public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointment
         super();
     }
 
+    @Test
     public void testForCorrectRecurrenceDatePositionCalculation() throws Exception {
         String ical = "BEGIN:VCALENDAR\n" + "PRODID:-//Google Inc//Google Calendar 70.9054//EN\n" + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n" + "METHOD:PUBLISH\n" +
 
@@ -28,6 +33,7 @@ public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointment
         assertFalse(response.hasError());
     }
 
+    @Test
     public void testFieldTooLongException() throws Exception, Exception, Exception {
         String ical = "BEGIN:VCALENDAR\n" + "PRODID:-//Google Inc//Google Calendar 70.9054//EN\n" + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n" + "METHOD:PUBLISH\n" +
 

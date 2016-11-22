@@ -51,6 +51,7 @@ package com.openexchange.ajax.onboarding.tests;
 
 import static org.junit.Assert.assertNotNull;
 import java.rmi.server.UID;
+import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.user.actions.SetAttributeRequest;
 import com.openexchange.ajax.user.actions.SetAttributeResponse;
@@ -74,7 +75,7 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
      */
     protected AbstractPlistSMSTest() {}
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration(client, false);

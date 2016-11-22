@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Random;
 import org.junit.Test;
 import com.openexchange.folderstorage.Folder;

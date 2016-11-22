@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.quota;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Random;
 import java.util.Set;
 import org.json.JSONArray;

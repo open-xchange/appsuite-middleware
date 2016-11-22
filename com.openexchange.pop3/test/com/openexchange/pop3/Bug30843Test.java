@@ -100,8 +100,8 @@ public class Bug30843Test {
         PowerMockito.when(POP3ServiceRegistry.getServiceRegistry()).thenReturn(registry);
     }
 
-    @Test
-    public void testPOP3Properties_getSSLProtocols() throws Exception {
+     @Test
+     public void testPOP3Properties_getSSLProtocols() throws Exception {
         POP3Properties props = POP3Properties.getInstance();
         props.loadProperties();
         String sslProtocols = props.getSSLProtocols();

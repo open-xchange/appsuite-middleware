@@ -51,6 +51,7 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static com.openexchange.java.Autoboxing.I2i;
+import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;

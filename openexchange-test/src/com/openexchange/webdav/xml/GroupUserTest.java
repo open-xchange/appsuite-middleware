@@ -2,6 +2,11 @@
 package com.openexchange.webdav.xml;
 
 import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -14,6 +19,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
+import org.junit.Test;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -35,11 +41,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testSearchUser() throws Exception {
         final Contact[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password, context);
         for (int a = 0; a < contactObj.length; a++) {
@@ -48,6 +50,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
         }
     }
 
+    @Test
     public void testSearchGroup() throws Exception {
         final Group group[] = searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password, context);
         for (int a = 0; a < group.length; a++) {
@@ -55,6 +58,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
         }
     }
 
+    @Test
     public void testSearchResource() throws Exception {
         final Resource[] resource = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password, context);
         for (int a = 0; a < resource.length; a++) {
@@ -63,6 +67,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
         }
     }
 
+    @Test
     public void testSearchGroupWithLastModifed() throws Exception {
         Group group[] = searchGroup(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password, context);
         assertTrue("no group found in response (group array length == 0)", group.length > 0);
@@ -93,6 +98,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
         assertFalse("unexpected id found in response", found);
     }
 
+    @Test
     public void testSearchResourceWithLastModifed() throws Exception {
         Resource resource[] = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         assertTrue("no group found in response (group array length == 0)", resource.length > 0);
@@ -124,15 +130,18 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
         assertFalse("unexpected id found in response", found);
     }
 
+    @Test
     public void testSearchResourceGroup() throws Exception {
         searchResourcegroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
     }
 
+    @Test
     public void testGetUserId() throws Exception {
         final int userId = getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         assertTrue("user id for login user not found", userId != -1);
     }
 
+    @Test
     public void testGetContextId() throws Exception {
         final int contextId = getContextId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         assertTrue("context id for login user not found", contextId != -1);

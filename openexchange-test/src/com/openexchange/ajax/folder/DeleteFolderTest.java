@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -108,7 +110,7 @@ public class DeleteFolderTest extends AbstractAJAXSession {
         testFolder.setLastModified(secondClient.execute(new GetRequest(EnumAPI.OX_OLD, testFolder.getObjectID())).getTimestamp());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         // Delete testFolder
         if (testFolder != null) {

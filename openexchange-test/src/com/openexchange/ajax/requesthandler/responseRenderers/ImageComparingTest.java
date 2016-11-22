@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -60,6 +63,8 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -84,7 +89,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.image.WrappingImageTransformationService;
 import com.openexchange.tools.session.SimServerSession;
-import junit.framework.TestCase;
 
 /**
  * {@link ImageComparingTest}
@@ -95,7 +99,7 @@ import junit.framework.TestCase;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ com.openexchange.imagetransformation.java.osgi.Services.class })
 @PowerMockIgnore({ "javax.imageio.*" })
-public class ImageComparingTest extends TestCase {
+public class ImageComparingTest {
 
     @Mock
     private SimConfigurationService simConfigurationService;
@@ -108,9 +112,8 @@ public class ImageComparingTest extends TestCase {
 
     private final String TEST_DATA_DIR = "testconf/";
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(com.openexchange.imagetransformation.java.osgi.Services.class);
 
@@ -124,10 +127,9 @@ public class ImageComparingTest extends TestCase {
         PowerMockito.when(com.openexchange.imagetransformation.java.osgi.Services.getService(TimerService.class)).thenReturn(timerService);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         ServerServiceRegistry.getInstance().removeService(HtmlService.class);
-        super.tearDown();
     }
 
     @Test

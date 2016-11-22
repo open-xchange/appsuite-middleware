@@ -49,6 +49,10 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -63,6 +67,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
+import org.junit.Test;
 import com.meterware.httpunit.Base64;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -120,6 +125,7 @@ public class Bug19014Test_HugeCalendarsProvokeOOM extends ManagedAppointmentTest
         return response;
     }
 
+    @Test
     public void testHugeNumberOfAppointments() throws Exception {
         insertAppointments(MAX_NUM_APP, BATCH_SIZE);
         HttpResponse response = makeTheCall(folder.getObjectID());
@@ -156,6 +162,7 @@ public class Bug19014Test_HugeCalendarsProvokeOOM extends ManagedAppointmentTest
      *
      * @throws Exception
      */
+    @Test
     public void testSeriesExceptions() throws Exception {
         int fid = folder.getObjectID();
         Appointment series = generateDailyAppointment();

@@ -64,8 +64,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.database.migrations.DBVersionChecker;
-import com.openexchange.rest.services.database.migrations.VersionChecker;
 
 /**
  * {@link VersionCheckerTest}

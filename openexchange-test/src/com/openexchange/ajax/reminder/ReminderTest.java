@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;

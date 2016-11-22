@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import org.junit.Test;

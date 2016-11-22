@@ -49,12 +49,14 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.Collections;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link DeleteTest}
@@ -63,6 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public class DeleteTest extends FileActionTest {
 
+    @Test
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -72,6 +75,7 @@ public class DeleteTest extends FileActionTest {
         }
     }
 
+    @Test
     public void testAction() throws OXException, JSONException {
         request().param("timestamp", "1337").body(new JSONArray("[{ folder: 'folder', id: 'id1'}, {folder: 'folder', id: 'id2'}]"));
 

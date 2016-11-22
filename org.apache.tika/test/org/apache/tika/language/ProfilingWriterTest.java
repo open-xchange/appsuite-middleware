@@ -17,12 +17,15 @@
 package org.apache.tika.language;
 
 import java.io.IOException;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class ProfilingWriterTest extends TestCase {
-
-    public void testProfilingWriter() throws IOException {
+public class ProfilingWriterTest {
+         @Test
+     public void testProfilingWriter() throws IOException {
         ProfilingWriter writer = new ProfilingWriter();
         writer.write(" foo+BAR FooBar\n");
         writer.close();

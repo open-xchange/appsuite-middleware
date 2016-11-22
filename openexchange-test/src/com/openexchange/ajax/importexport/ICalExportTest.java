@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -56,6 +58,7 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class ICalExportTest extends AbstractICalTest {
 
+    @Test
     public void testExportICalAppointment() throws Exception {
         final String title = "testExportICalAppointment" + System.currentTimeMillis();
 
@@ -86,6 +89,7 @@ public class ICalExportTest extends AbstractICalTest {
         AppointmentTest.deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
     }
 
+    @Test
     public void testExportICalTask() throws Exception {
         final String title = "testExportICalTask" + System.currentTimeMillis();
         final Task taskObj = new Task();

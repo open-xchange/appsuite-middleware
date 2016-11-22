@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.spellcheck;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.spellcheck.actions.check.CheckRequest;
 import com.openexchange.ajax.spellcheck.actions.check.CheckResponse;
@@ -76,6 +79,7 @@ public final class CheckTest extends AbstractSpellCheckTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testCheck() throws Throwable {
 
         /*

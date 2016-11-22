@@ -191,13 +191,13 @@ public class DeduplicatorTest {
         distListContentFields = getDistListContentFields();
     }
 
-    @Test
-    public void testDetectEmptyDuplicates() throws Exception {
+     @Test
+     public void testDetectEmptyDuplicates() throws Exception {
         assertSameHash(contact1(), contact2());
     }
 
-    @Test
-    public void testDetectDuplicatesInTextualFields() throws Exception {
+     @Test
+     public void testDetectDuplicatesInTextualFields() throws Exception {
         for (ContactField field : TEXTUAL_FIELDS) {
             String value = randomString();
             VarCharMapping<Contact> mapping = (VarCharMapping<Contact>) Mappers.CONTACT.get(field);
@@ -209,8 +209,8 @@ public class DeduplicatorTest {
         }
     }
 
-    @Test
-    public void testDontDetectDifferencesInTextualFields() throws Exception {
+     @Test
+     public void testDontDetectDifferencesInTextualFields() throws Exception {
         for (ContactField field : TEXTUAL_FIELDS) {
             VarCharMapping<Contact> mapping = (VarCharMapping<Contact>) Mappers.CONTACT.get(field);
             Contact contact1 = contact1();
@@ -221,8 +221,8 @@ public class DeduplicatorTest {
         }
     }
 
-    @Test
-    public void testDetectDuplicatesInNumericalFields() throws Exception {
+     @Test
+     public void testDetectDuplicatesInNumericalFields() throws Exception {
         for (ContactField field : NUMERICAL_FIELDS) {
             Integer value = Integer.valueOf(randomNumber());
             IntegerMapping<Contact> mapping = (IntegerMapping<Contact>) Mappers.CONTACT.get(field);
@@ -234,8 +234,8 @@ public class DeduplicatorTest {
         }
     }
 
-    @Test
-    public void testDontDetectDifferencesInNumericalFields() throws Exception {
+     @Test
+     public void testDontDetectDifferencesInNumericalFields() throws Exception {
         for (ContactField field : NUMERICAL_FIELDS) {
             IntegerMapping<Contact> mapping = (IntegerMapping<Contact>) Mappers.CONTACT.get(field);
             Contact contact1 = contact1();
@@ -246,8 +246,8 @@ public class DeduplicatorTest {
         }
     }
 
-    @Test
-    public void testDontDetectSimilars() {
+     @Test
+     public void testDontDetectSimilars() {
         Contact contact1 = contact1();
         contact1.setEmail1("otto@example.com");
         Contact contact2 = contact2();
@@ -255,8 +255,8 @@ public class DeduplicatorTest {
         assertDifferentHash(contact1, contact2);
     }
 
-    @Test
-    public void testDontDetectDifferentImages() {
+     @Test
+     public void testDontDetectDifferentImages() {
         Contact contact1 = contact1();
         contact1.setImage1(UUIDs.toByteArray(UUID.randomUUID()));
         contact1.setNumberOfImages(1);
@@ -268,8 +268,8 @@ public class DeduplicatorTest {
         assertDifferentHash(contact1, contact2);
     }
 
-    @Test
-    public void testDetectDuplicateImages() {
+     @Test
+     public void testDetectDuplicateImages() {
         UUID uuid = UUID.randomUUID();
         Contact contact1 = contact1();
         contact1.setImage1(UUIDs.toByteArray(uuid));

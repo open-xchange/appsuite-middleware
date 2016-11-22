@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Iterator;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -79,7 +83,7 @@ public class ShowSharedFilesFolderTest extends ShareTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         perm = randomGuestObjectPermission();
@@ -99,7 +103,7 @@ public class ShowSharedFilesFolderTest extends ShareTest {
         checkGuestPermission(perm, guest);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         deleteFilesSilently(client, Collections.singletonList(file));
         super.tearDown();

@@ -49,12 +49,14 @@
 
 package com.openexchange.subscribe.microformats.objectparser;
 
+import static org.junit.Assert.assertEquals;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
@@ -62,8 +64,7 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class OXHCalendarParserTest extends TestCase {
-
+public class OXHCalendarParserTest {
     protected OXHCalendarParser parser;
 
     protected SimpleDateFormat sdf ;
@@ -90,14 +91,14 @@ public class OXHCalendarParserTest extends TestCase {
     		 "</p>" +
     	"</div>";
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         sdf = new SimpleDateFormat();
         this.parser = new OXHCalendarParser();
     }
 
-    public void testDateParsing(){
+         @Test
+     public void testDateParsing(){
         Calendar cal = Calendar.getInstance();
         for(String dateString : new String[]{"2005-06-20", "20.06.2005", "06/20/2005", "20.6.2005 0:0:0", "2005-06-20T00:00+00:0000"}){
             cal.setTime(OXHCalendarParser.parseDate(dateString));
@@ -110,7 +111,8 @@ public class OXHCalendarParserTest extends TestCase {
         }
     }
 
-    public void testShouldParseISO8601Date(){
+         @Test
+     public void testShouldParseISO8601Date(){
         Calendar cal = Calendar.getInstance();
         String dateString = "2005-06-20T13:14+02:0600";
             cal.setTime(OXHCalendarParser.parseDate(dateString));
@@ -122,7 +124,8 @@ public class OXHCalendarParserTest extends TestCase {
             assertEquals(dateString + ": Seconds should match", 6, cal.get(Calendar.SECOND));
     }
 
-    public void testShouldParseWhenStartingWithVCalendar(){
+         @Test
+     public void testShouldParseWhenStartingWithVCalendar(){
         String html =
         "<div id=\"hcalendar-event-title\" class=\"vevent\">" +
             "<abbr title=\"2010-02-01\" class=\"dtstart\">February 1th</abbr>, " +
@@ -133,7 +136,8 @@ public class OXHCalendarParserTest extends TestCase {
         "</div>";
     }
 
-    public void testShouldParseWhenStartingWithVEvent() throws OXException, ParseException{
+         @Test
+     public void testShouldParseWhenStartingWithVEvent() throws OXException, ParseException{
         String html = "<span class=\"vevent\">"+
             "<span class=\"summary\">The microformats.org site was launched</span>"+
             "on <span class=\"dtstart\">2005-06-20</span>"+
@@ -149,7 +153,8 @@ public class OXHCalendarParserTest extends TestCase {
         assertEquals("Date should match", OXHCalendarParser.parseDate("2005-06-20"), app.getStartDate());
     }
 
-    public void testShouldParseWhenHavingNestedVCalendarAndVEvent() throws OXException{
+         @Test
+     public void testShouldParseWhenHavingNestedVCalendarAndVEvent() throws OXException{
         String html = "<div class=\"vCalendar\">"
             +fullAppointment
             +fullAppointment.replaceFirst("hcalendar-My-hCalendar-event", "hcalendar-My-other-hCalendar-event")
@@ -158,11 +163,13 @@ public class OXHCalendarParserTest extends TestCase {
         assertEquals("Should find two entries", 2, entries.size());
     }
 
-    public void testShouldDealWithMalformedXML(){
+         @Test
+     public void testShouldDealWithMalformedXML(){
 
     }
 
-    public void testShouldDealWithHTML401Transitional(){
+         @Test
+     public void testShouldDealWithHTML401Transitional(){
 
     }
 

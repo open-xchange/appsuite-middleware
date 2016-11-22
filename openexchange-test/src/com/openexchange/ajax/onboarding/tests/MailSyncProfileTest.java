@@ -49,8 +49,14 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
@@ -73,7 +79,7 @@ public class MailSyncProfileTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         StartSMTPRequest req = new StartSMTPRequest(true);
@@ -81,7 +87,7 @@ public class MailSyncProfileTest extends AbstractAJAXSession {
         client.execute(req);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != client) {
             client.execute(new StopSMTPRequest());

@@ -50,12 +50,15 @@
 package com.openexchange.data.conversion.ical;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
@@ -73,7 +76,7 @@ import com.openexchange.resource.Resource;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public abstract class AbstractICalParserTest extends TestCase {
+public abstract class AbstractICalParserTest {
 
     protected ICALFixtures fixtures;
     protected ICalParser parser;
@@ -81,21 +84,21 @@ public abstract class AbstractICalParserTest extends TestCase {
     protected ResourceResolver oldResourceResolver;
     protected UserResolver oldUserResolver;
 
-
-    @Override
+    @Before
     protected void setUp() throws Exception {
         fixtures = new ICALFixtures();
         users = new MockUserLookup();
         parser = new ICal4JParser();
         oldUserResolver = Participants.userResolver;
-        Participants.userResolver = new UserResolver(){
+        Participants.userResolver = new UserResolver() {
+
             @Override
             public List<User> findUsers(final List<String> mails, final Context ctx) {
                 final List<User> found = new LinkedList<User>();
-                for(final String mail : mails) {
+                for (final String mail : mails) {
                     final User user = AbstractICalParserTest.this.users.getUserByMail(mail);
-                    if(user != null) {
-                        found.add( user );
+                    if (user != null) {
+                        found.add(user);
                     }
                 }
 
@@ -109,50 +112,52 @@ public abstract class AbstractICalParserTest extends TestCase {
         };
         oldResourceResolver = Participants.resourceResolver;
         Participants.resourceResolver = new ResourceResolver() {
-            private final List<Resource> resources = new ArrayList<Resource>() {{
-                final Resource toaster = new Resource();
-                toaster.setDisplayName("Toaster");
-                toaster.setIdentifier(1);
-                add(toaster);
 
-                final Resource deflector = new Resource();
-                deflector.setDisplayName("Deflector");
-                deflector.setIdentifier(2);
-                add(deflector);
+            private final List<Resource> resources = new ArrayList<Resource>() {
 
-                final Resource subspaceAnomaly = new Resource();
-                subspaceAnomaly.setDisplayName("Subspace Anomaly");
-                subspaceAnomaly.setIdentifier(3);
-                add(subspaceAnomaly);
-            }};
+                {
+                    final Resource toaster = new Resource();
+                    toaster.setDisplayName("Toaster");
+                    toaster.setIdentifier(1);
+                    add(toaster);
+
+                    final Resource deflector = new Resource();
+                    deflector.setDisplayName("Deflector");
+                    deflector.setIdentifier(2);
+                    add(deflector);
+
+                    final Resource subspaceAnomaly = new Resource();
+                    subspaceAnomaly.setDisplayName("Subspace Anomaly");
+                    subspaceAnomaly.setIdentifier(3);
+                    add(subspaceAnomaly);
+                }
+            };
 
             @Override
-            public List<Resource> find(final List<String> names, final Context ctx)
-                throws OXException, OXException {
+            public List<Resource> find(final List<String> names, final Context ctx) throws OXException, OXException {
                 final List<Resource> retval = new ArrayList<Resource>();
-                for(final String name : names) {
-                    for(final Resource resource : resources) {
-                        if(resource.getDisplayName().equals(name)) {
+                for (final String name : names) {
+                    for (final Resource resource : resources) {
+                        if (resource.getDisplayName().equals(name)) {
                             retval.add(resource);
                         }
                     }
                 }
                 return retval;
             }
+
             @Override
-            public Resource load(final int resourceId, final Context ctx)
-                throws OXException, OXException {
+            public Resource load(final int resourceId, final Context ctx) throws OXException, OXException {
                 return null;
             }
         };
     }
 
-
-    protected List<User> U(final int...ids) {
+    protected List<User> U(final int... ids) {
         final List<User> found = new LinkedList<User>();
-        for(final int i : ids) {
+        for (final int i : ids) {
             try {
-                found.add( users.getUser(i) );
+                found.add(users.getUser(i));
             } catch (final OXException e) {
                 //IGNORE
             }
@@ -160,20 +165,19 @@ public abstract class AbstractICalParserTest extends TestCase {
         return found;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Participants.userResolver = oldUserResolver;
         Participants.resourceResolver = oldResourceResolver;
-        super.tearDown();
     }
 
     // single appointment
     protected CalendarDataObject parseAppointment(final String icalText, final TimeZone defaultTZ) throws ConversionError {
-    	List<CalendarDataObject> appointments = parseAppointments(icalText, defaultTZ);
-    	if(appointments.size() == 0) {
+        List<CalendarDataObject> appointments = parseAppointments(icalText, defaultTZ);
+        if (appointments.size() == 0) {
             return null;
         }
-    	return appointments.get(0);
+        return appointments.get(0);
     }
 
     protected CalendarDataObject parseAppointment(final String icalText) throws ConversionError {
@@ -186,13 +190,12 @@ public abstract class AbstractICalParserTest extends TestCase {
     }
 
     protected List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ) throws ConversionError {
-        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() );
+        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
     }
 
-
     //single task
-    protected Task parseTask(final String icalText,  final TimeZone defaultTZ) throws ConversionError {
-        return parseTasks(icalText,defaultTZ).get(0);
+    protected Task parseTask(final String icalText, final TimeZone defaultTZ) throws ConversionError {
+        return parseTasks(icalText, defaultTZ).get(0);
     }
 
     protected Task parseTask(final String icalText) throws ConversionError {
@@ -200,15 +203,13 @@ public abstract class AbstractICalParserTest extends TestCase {
     }
 
     //multiple tasks
-    protected List<Task> parseTasks(final String icalText,  final TimeZone defaultTZ) throws ConversionError {
-        return parser.parseTasks(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>());
+    protected List<Task> parseTasks(final String icalText, final TimeZone defaultTZ) throws ConversionError {
+        return parser.parseTasks(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
     }
 
     protected List<Task> parseTasks(final String icalText) throws ConversionError {
         return parseTasks(icalText, TimeZone.getDefault());
     }
-
-
 
     protected Appointment appointmentWithRecurrence(final String recurrence, final Date start, final Date end) throws ConversionError {
 
@@ -256,7 +257,6 @@ public abstract class AbstractICalParserTest extends TestCase {
         assertEquals(0, errors.size());
         assertEquals(0, warnings.size());
     }
-
 
     protected void warningOnAppRecurrence(final String recurrence, final String warning) throws ConversionError {
         final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", recurrence);

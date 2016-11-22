@@ -49,11 +49,16 @@
 
 package com.openexchange.subscribe.microformats.objectparser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
@@ -62,8 +67,7 @@ import com.openexchange.tools.encoding.Base64;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class OXHCardParserTest extends TestCase {
-
+public class OXHCardParserTest {
     public static final String gifBase64 = "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
         +"AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
         +"AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAANAA0DASIA"
@@ -162,28 +166,29 @@ public class OXHCardParserTest extends TestCase {
 
     private OXHCardParser parser;
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         this.parser = new OXHCardParser();
     }
 
-
-    public void testShouldReadWellformedHtml() {
+         @Test
+     public void testShouldReadWellformedHtml() {
         final String html = "<html><head><title>OX hCard Parsing Test</title></head><body>" + HCARD_SNIPPET + "</body></html>";
         List<Contact> results = parser.parse(html);
         assertEquals("Should extract exactly one element", 1, results.size());
         EXPECTED_CONTENTS.verify(results.get(0));
     }
 
-    public void testShouldReadMinimalHtml() {
+         @Test
+     public void testShouldReadMinimalHtml() {
         final String html = "<html><body>" + HCARD_SNIPPET + "</body></html>";
         List<Contact> results = parser.parse(html);
         assertEquals("Should extract exactly one element", 1, results.size());
         EXPECTED_CONTENTS.verify(results.get(0));
     }
 
-    public void testShouldReadHtmlWithoutClosingElements() {
+         @Test
+     public void testShouldReadHtmlWithoutClosingElements() {
         final String html = "<html><head><body>" + HCARD_SNIPPET + "</html>";
         List<Contact> results = parser.parse(html);
         assertEquals("Should extract exactly one element", 1, results.size());
@@ -191,14 +196,16 @@ public class OXHCardParserTest extends TestCase {
 
     }
 
-    public void testShouldReadHtmlWithoutQuotedAttributeValues() {
+         @Test
+     public void testShouldReadHtmlWithoutQuotedAttributeValues() {
         final String html = "<html><head><title>OX hCard Parsing Test</title></head><body>" + HCARD_SNIPPET + "</body></html>".replace("\"", "");
         List<Contact> results = parser.parse(html);
         assertEquals("Should extract exactly one element", 1, results.size());
         EXPECTED_CONTENTS.verify(results.get(0));
     }
 
-    public void testShouldCreateTwoElementsEvenIfGivenTwoWithTheSameID(){
+         @Test
+     public void testShouldCreateTwoElementsEvenIfGivenTwoWithTheSameID(){
         final String html = "<html><head><title>OX hCard Parsing Test</title></head><body>"
             + HCARD_SNIPPET
             + HCARD_SNIPPET
@@ -208,7 +215,8 @@ public class OXHCardParserTest extends TestCase {
         EXPECTED_CONTENTS.verify(results.get(0));
     }
 
-    public void testShouldCreateTwoElementsIfGivenTwoSeparateElements() {
+         @Test
+     public void testShouldCreateTwoElementsIfGivenTwoSeparateElements() {
         final String html = "<html><head><title>OX hCard Parsing Test</title></head><body>"
             + "<div id=\"hcard-One-Tester\" class=\"vcard\">\n"
             + HCARD_CONTENT
@@ -221,7 +229,8 @@ public class OXHCardParserTest extends TestCase {
         EXPECTED_CONTENTS.verify(results.get(0));
     }
 
-    public void testShouldDealWithMoreThanOneValuePerAttribute(){
+         @Test
+     public void testShouldDealWithMoreThanOneValuePerAttribute(){
         String html = "<div class=\"vcard\"><span class=\"fn n\">\n" +
         "<span class=\"given-name bullshit value\">Terry</span>\n" +
         "<span class=\"bullshit-value additional-name\">Tiberius</span>\n" +
@@ -237,7 +246,8 @@ public class OXHCardParserTest extends TestCase {
         expectations.verify(parser.parse(html).get(0));
     }
 
-    public void testShouldDealWithMoreThanOneValueForAdditionalNames(){
+         @Test
+     public void testShouldDealWithMoreThanOneValueForAdditionalNames(){
         String html =
             "<div class=\"vcard\">" +
                 "<span class=\"fn n\">\n" +
@@ -254,7 +264,8 @@ public class OXHCardParserTest extends TestCase {
         expectations.verify(parser.parse(html).get(0));
     }
 
-    public void testShouldDealWithPhotoUrl(){
+         @Test
+     public void testShouldDealWithPhotoUrl(){
         String html =  "<div class=\"vcard\"><span class=\"fn n\">\n" +
         "<span class=\"given-name bullshit value\">Terry</span>\n" +
         "<span class=\"bullshit-value additional-name\">Tiberius</span>\n" +
@@ -279,7 +290,8 @@ public class OXHCardParserTest extends TestCase {
         assertTrue("Should contain an image but does not", contact.containsImage1());
     }
 
-    public void testShouldDealWithPhotoUrlToMissingImage(){
+         @Test
+     public void testShouldDealWithPhotoUrlToMissingImage(){
         String html =  "<div class=\"vcard\"><span class=\"fn n\">\n" +
         "<span class=\"given-name bullshit value\">William</span>\n" +
         "<span class=\"bullshit-value additional-name\">Tiberius</span>\n" +
@@ -292,7 +304,8 @@ public class OXHCardParserTest extends TestCase {
         assertFalse("Should not contain an image", contact.containsImage1());
     }
 
-    public void testShouldDealWithInlinedPhoto(){
+         @Test
+     public void testShouldDealWithInlinedPhoto(){
         String html = "<table class=\"vcard\">" +
             "<div class=\"fn n\">\n" +
                 "<td>Given name</td><td><span class=\"given-name bullshit value\">Terry</span></td>\n" +
@@ -307,7 +320,8 @@ public class OXHCardParserTest extends TestCase {
         assertEquals("Should have same contents", gifBase64, actual);
     }
 
-    public void testShouldDealWithTableLayouts(){
+         @Test
+     public void testShouldDealWithTableLayouts(){
         String html =
             "<table class=\"vcard\">" +
                 "<div class=\"fn n\">\n" +
@@ -326,7 +340,8 @@ public class OXHCardParserTest extends TestCase {
         expectations.verify(parser.parse(html).get(0));
     }
 
-    public void testShouldFindOXMFData(){
+         @Test
+     public void testShouldFindOXMFData(){
         String html = "<div class=\"vcard\" id=\"a\""+HCARD_CONTENT+"</div>"
         + "<div class=\"vcard\" id=\"b\""+HCARD_CONTENT+"</div>"
         + "<div class=\"vcard\" id=\"c\""+HCARD_CONTENT+"</div>";
@@ -349,7 +364,8 @@ public class OXHCardParserTest extends TestCase {
         }
     }
 
-    public void testShouldMergeDataProperlyIfUsingOXMFElementValue(){
+         @Test
+     public void testShouldMergeDataProperlyIfUsingOXMFElementValue(){
         String html =
             "<div class=\"vcard\" id=\"a\">" +
                 "<span class=\"fn n\">\n" +
@@ -378,7 +394,8 @@ public class OXHCardParserTest extends TestCase {
         }
     }
 
-    public void testShouldMergeDataProperlyIfUsingSeparateValueElement(){
+         @Test
+     public void testShouldMergeDataProperlyIfUsingSeparateValueElement(){
         String html =
             "<div class=\"vcard\" id=\"a\">" +
                 "<span class=\"fn n\">\n" +
@@ -408,7 +425,8 @@ public class OXHCardParserTest extends TestCase {
     }
 
 
-    public void testShouldPrioritizeSeparateValueOverElementValue(){
+         @Test
+     public void testShouldPrioritizeSeparateValueOverElementValue(){
         String html =
             "<div class=\"vcard\" id=\"a\">" +
                 "<span class=\"fn n\">\n" +
@@ -439,14 +457,16 @@ public class OXHCardParserTest extends TestCase {
         }
     }
 
-    public void testShouldNotMakeNullFieldsEmptyStringFields(){
+         @Test
+     public void testShouldNotMakeNullFieldsEmptyStringFields(){
         List<Contact> contacts = parser.parse(HCARD_SNIPPET);
         Contact actual = contacts.get(0);
 
         assertNull("Street (other) was not in the hcard, should be null", actual.getStreetOther());
     }
 
-    public void testShouldStripTrailingWhitespaces(){
+         @Test
+     public void testShouldStripTrailingWhitespaces(){
         String html =
             "<div class=\"vcard\" id=\"a\">" +
                 "<span class=\"fn n\">\n" +

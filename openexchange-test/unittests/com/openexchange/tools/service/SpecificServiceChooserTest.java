@@ -49,8 +49,10 @@
 
 package com.openexchange.tools.service;
 
-import junit.framework.TestCase;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * {@link SpecificServiceChooserTest}
@@ -58,15 +60,16 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SpecificServiceChooserTest extends TestCase {
+public class SpecificServiceChooserTest {
 
     private SpecificServiceChooser<TestService> specificServiceChooser;
 
-    @Override
+    @Before
     public void setUp() {
         specificServiceChooser = new SpecificServiceChooser<TestService>();
     }
 
+    @Test
     public void testChooseMostSpecificService() throws ServicePriorityConflictException {
         specificServiceChooser.registerForEverything(new TestServiceImpl(1), 1);
 
@@ -84,6 +87,7 @@ public class SpecificServiceChooserTest extends TestCase {
 
     }
 
+    @Test
     public void testChooseMostSpecificServiceWithStringIDs() throws ServicePriorityConflictException {
         specificServiceChooser.registerForEverything(new TestServiceImpl(1), 1);
         specificServiceChooser.registerForEverything(new TestServiceImpl(80), 0);
@@ -100,9 +104,9 @@ public class SpecificServiceChooserTest extends TestCase {
 
     }
 
-
     // Test removing services
 
+    @Test
     public void testRemovingServices() throws ServicePriorityConflictException {
         TestServiceImpl serviceInstance = new TestServiceImpl(1);
         specificServiceChooser.registerForEverything(serviceInstance, 1);
@@ -134,6 +138,7 @@ public class SpecificServiceChooserTest extends TestCase {
 
     }
 
+    @Test
     public void testConflictingServices() throws ServicePriorityConflictException {
         specificServiceChooser.registerForContext(new TestServiceImpl(2), 0, 1337);
         specificServiceChooser.registerForFolder(new TestServiceImpl(4), 0, 13);
@@ -152,22 +157,22 @@ public class SpecificServiceChooserTest extends TestCase {
             // Hooray!
         }
 
-
     }
 
     private void assertChooses(int expected, int cid, int folderId) throws ServicePriorityConflictException {
         TestService chosen = specificServiceChooser.choose(cid, folderId);
-        assertEquals("Wrong service chosen for "+cid+" : "+folderId, expected, chosen.getId());
+        assertEquals("Wrong service chosen for " + cid + " : " + folderId, expected, chosen.getId());
 
     }
 
     private void assertChooses(int expected, int cid, String folderId) throws ServicePriorityConflictException {
         TestService chosen = specificServiceChooser.choose(cid, folderId);
-        assertEquals("Wrong service chosen for "+cid+" : "+folderId, expected, chosen.getId());
+        assertEquals("Wrong service chosen for " + cid + " : " + folderId, expected, chosen.getId());
 
     }
 
     private static interface TestService {
+
         public int getId();
     }
 
@@ -191,10 +196,9 @@ public class SpecificServiceChooserTest extends TestCase {
 
         @Override
         public boolean equals(Object obj) {
-            return id == ((TestServiceImpl)obj).id;
+            return id == ((TestServiceImpl) obj).id;
         }
 
     }
 
 }
-

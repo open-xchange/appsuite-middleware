@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.ajax.task.TaskTools.valuesForUpdate;
+import static org.junit.Assert.assertFalse;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;

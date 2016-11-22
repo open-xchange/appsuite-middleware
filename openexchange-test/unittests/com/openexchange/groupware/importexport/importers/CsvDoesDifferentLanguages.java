@@ -66,42 +66,20 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.server.services.ServerServiceRegistry;
-import junit.framework.JUnit4TestAdapter;
-
 
 /**
  * Part of bugfix 15231
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CsvDoesDifferentLanguages extends AbstractContactTest {
-
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(CsvDoesDifferentLanguages.class);
-    }
 
     @Before
     public void TearUp() throws OXException {
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
 
-    private final String dutch =
-        "Voornaam,Achternaam,Weergavenaam,Bijnaam," +
-        "Eerste e-mail,Tweede e-mail,Telefoon werk,Telefoon thuis,Faxnummer,Piepernummer,Mobiel nummer," +
-        "Adres,Adres 2,Woonplaats,Provincie,Postcode,Land," +
-        "Werkadres,Werkadres 2,Werkplaats,Werkprovincie,Werkpostcode,Werkland," +
-        "Werktitel,Afdeling,Organisatie," +
-        "Webpagina 1,Webpagina 2," +
-        "Geboortejaar,Geboortemaand,Geboortedag," +
-        "Overig 1,Overig 2,Overig 3,Overig 4,Aantekeningen,\n"
-        +
-        "Vorname1,Nachname1,,," +
-        "email1@open-xchange.com,email2@open-xchange.com,phone_work1,phone_home1,fax,beeper,mobile," +
-        "home_street1,home_street2,home_city,home_state,555,home_country," +
-        "business_street1,business_street2,business_city,business_state,666,business_country," +
-        "job_title,department,company," +
-        "website1,website2," +
-        "1981,2,1," +
-        "add1,add2,add3,add4,notes,\n";
+    private final String dutch = "Voornaam,Achternaam,Weergavenaam,Bijnaam," + "Eerste e-mail,Tweede e-mail,Telefoon werk,Telefoon thuis,Faxnummer,Piepernummer,Mobiel nummer," + "Adres,Adres 2,Woonplaats,Provincie,Postcode,Land," + "Werkadres,Werkadres 2,Werkplaats,Werkprovincie,Werkpostcode,Werkland," + "Werktitel,Afdeling,Organisatie," + "Webpagina 1,Webpagina 2," + "Geboortejaar,Geboortemaand,Geboortedag," + "Overig 1,Overig 2,Overig 3,Overig 4,Aantekeningen,\n" + "Vorname1,Nachname1,,," + "email1@open-xchange.com,email2@open-xchange.com,phone_work1,phone_home1,fax,beeper,mobile," + "home_street1,home_street2,home_city,home_state,555,home_country," + "business_street1,business_street2,business_city,business_state,666,business_country," + "job_title,department,company," + "website1,website2," + "1981,2,1," + "add1,add2,add3,add4,notes,\n";
 
     private CalendarCollectionService oldInstance;
 
@@ -133,11 +111,10 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
     }
 
     @Test
-    public void testBug15231WithDutch() throws Throwable{
+    public void testBug15231WithDutch() throws Throwable {
         Contact c = makeContact(dutch);
         assertBasicFields("Dutch", c);
     }
-
 
     @Before
     public void setUp() throws Exception {
@@ -150,7 +127,7 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
 
     @After
     public void tearDown() throws Exception {
-        if(oldInstance != null) {
+        if (oldInstance != null) {
             ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, oldInstance);
         }
     }
@@ -158,19 +135,19 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
     private Contact makeContact(String csv) throws Throwable {
         CSVParser parser = new CSVParser();
         List<List<String>> list = parser.parse(csv);
-        assertEquals("Should have one header + one one data row",2, list.size());
+        assertEquals("Should have one header + one one data row", 2, list.size());
 
         List<String> header = list.get(0);
         List<String> data = list.get(1);
 
         CSVContactImporter importer = new TestCSVContactImporter();
 
-        boolean[] atLeastOneFieldInserted = new boolean[]{false};
+        boolean[] atLeastOneFieldInserted = new boolean[] { false };
         ContactSwitcher conSet = importer.getContactSwitcher();
         ImportResult result = new ImportResult();
 
         assertTrue("The importer should consider itself", importer.checkFields(header));
-        return importer.convertCsvToContact(header, data, conSet, 1, result , atLeastOneFieldInserted );
+        return importer.convertCsvToContact(header, data, conSet, 1, result, atLeastOneFieldInserted);
     }
 
 }

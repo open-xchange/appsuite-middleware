@@ -49,10 +49,14 @@
 
 package com.openexchange.mail.messagestorage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -72,8 +76,8 @@ import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 public final class MailSaveDraftTest extends AbstractMailTest {
 
     /**
-	 *
-	 */
+     *
+     */
     public MailSaveDraftTest() {
         super();
     }
@@ -85,6 +89,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
         super();
     }
 
+    @Test
     public void testMailDraft() {
         try {
             final SessionObject session = getSession();

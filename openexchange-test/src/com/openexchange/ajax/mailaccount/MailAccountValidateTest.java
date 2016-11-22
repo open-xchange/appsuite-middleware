@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -72,12 +76,7 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
         super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
             deleteMailAccount();

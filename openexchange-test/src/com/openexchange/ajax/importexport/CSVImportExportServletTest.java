@@ -49,11 +49,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.CSVExportRequest;
 import com.openexchange.ajax.importexport.actions.CSVExportResponse;
@@ -105,6 +107,7 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testUnknownFile() throws Exception {
         final String insertedCSV = "bla1\nbla2,bla3";
 
@@ -112,6 +115,7 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
         assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-0804", importResponse.getException().getErrorCode());
     }
 
+    @Test
     public void testEmptyFileUploaded() throws Exception {
         final InputStream is = new ByteArrayInputStream("Given name,Email 1, Display name".getBytes());
         CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, is, false));

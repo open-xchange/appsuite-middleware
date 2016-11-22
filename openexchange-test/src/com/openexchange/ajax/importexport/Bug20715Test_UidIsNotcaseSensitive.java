@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -14,6 +16,7 @@ public class Bug20715Test_UidIsNotcaseSensitive extends ManagedAppointmentTest {
 
     public static String uid = String.valueOf(Math.random());
 
+    @Test
     public void testUidShouldNotIgnoreCase() throws Exception {
         String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n" +
 

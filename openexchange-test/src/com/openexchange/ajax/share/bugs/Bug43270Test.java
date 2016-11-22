@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -98,14 +103,14 @@ public class Bug43270Test extends ShareTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         client2 = new AJAXClient(User.User2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         try {
             if (null != client2) {

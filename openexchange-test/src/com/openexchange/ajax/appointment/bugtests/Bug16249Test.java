@@ -50,6 +50,10 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -57,6 +61,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -101,7 +107,7 @@ public class Bug16249Test extends AttachmentTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -135,7 +141,7 @@ public class Bug16249Test extends AttachmentTest {
         assertTrue("Wrong last modified after detach", afterAttach.compareTo(afterDetach) < 0);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         deleteAppointment(getWebConversation(), appointmentId, folderId, getHostName(), getSessionId());
         super.tearDown();

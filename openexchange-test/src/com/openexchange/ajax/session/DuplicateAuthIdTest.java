@@ -51,6 +51,10 @@ package com.openexchange.ajax.session;
 
 import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static com.openexchange.ajax.framework.AJAXClient.User.User2;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -60,14 +64,13 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import junit.framework.TestCase;
 
 /**
  * Checks if the server detects correctly a duplicate used authId.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DuplicateAuthIdTest extends TestCase {
+public class DuplicateAuthIdTest {
 
     private String sameAuthId;
 
@@ -89,9 +92,8 @@ public class DuplicateAuthIdTest extends TestCase {
         super();
     }
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         AJAXConfig.init();
         sameAuthId = LoginTools.generateAuthId();
         final AJAXSession session1 = new AJAXSession();
@@ -109,10 +111,9 @@ public class DuplicateAuthIdTest extends TestCase {
         password2 = AJAXConfig.getProperty(User2.getPassword());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client1.logout();
-        super.tearDown();
     }
 
     @Test

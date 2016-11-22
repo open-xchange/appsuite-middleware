@@ -1,11 +1,11 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.change.core.DropSequenceChange}
@@ -20,14 +20,12 @@ public class DropSequenceChangeTest extends StandardChangeTest {
         change.setSequenceName("SEQ_NAME");
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropSequence", ChangeFactory.getInstance().getChangeMetaData(new DropSequenceChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
 
 //        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
@@ -51,8 +49,7 @@ public class DropSequenceChangeTest extends StandardChangeTest {
 //        });
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Sequence SEQ_NAME dropped", change.getConfirmationMessage());
     }

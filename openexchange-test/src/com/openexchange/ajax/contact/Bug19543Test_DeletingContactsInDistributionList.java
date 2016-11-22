@@ -1,7 +1,12 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.groupware.container.Contact;
@@ -15,18 +20,19 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         manager.setSleep(0);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         super.tearDown();
         manager.setSleep(500);
     }
 
+    @Test
     public void testWithExternalContacts() throws Exception {
         int type = DistributionListEntryObject.INDEPENDENT;
         DistributionListEntryObject[] members = new DistributionListEntryObject[] { new DistributionListEntryObject("Displayname 1", "user1@oxample.invalid", type), new DistributionListEntryObject("Displayname 2", "user2@oxample.invalid", type), new DistributionListEntryObject("Displayname 3", "user3@oxample.invalid", type), new DistributionListEntryObject("Displayname 4", "user4@oxample.invalid", type)
@@ -34,6 +40,7 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
         runTests(members);
     }
 
+    @Test
     public void testWithInternalContacts() throws Exception {
         String email1 = "abel@oxample.invalid";
         Contact c1 = generateContact("Abel");

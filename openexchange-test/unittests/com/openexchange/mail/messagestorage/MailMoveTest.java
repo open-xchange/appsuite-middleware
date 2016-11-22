@@ -49,9 +49,15 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import javax.mail.MessagingException;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -81,13 +87,11 @@ public final class MailMoveTest extends MessageStorageTest {
 
     private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
 
-    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM,
-        MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT,
-        MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC,
-        MailField.BCC, MailField.FOLDER_ID };
+    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };
 
     private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
+    @Test
     public void testMailMoveNotExistingMails() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -116,6 +120,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailMoveNotExistingMailsMixed() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -143,6 +148,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailMoveToNotExistingFolder() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -161,6 +167,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailMoveFromNotExistingFolder() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -183,6 +190,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailMoveAllOk() throws OXException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {

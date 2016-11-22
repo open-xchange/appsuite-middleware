@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -91,7 +94,7 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         final Task task = new Task();
@@ -103,7 +106,7 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
         lastModified = response.getTimestamp();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         final DeleteRequest deleteRequest = new DeleteRequest(getPrivateFolder(), getId(), lastModified);
         Executor.execute(getClient(), deleteRequest);

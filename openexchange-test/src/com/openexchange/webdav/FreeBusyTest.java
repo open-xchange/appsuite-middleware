@@ -1,7 +1,9 @@
 
 package com.openexchange.webdav;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import org.junit.Test;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -19,19 +21,7 @@ public class FreeBusyTest extends AbstractWebdavTest {
 
     private static final String FREEBUSY_URL = "/servlet/webdav.freebusy";
 
-    public FreeBusyTest() {
-        super();
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    public void testDummy() {
-
-    }
-
+    @Test
     public void testConnect() throws Exception {
         final int contextId = GroupUserTest.getContextId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 

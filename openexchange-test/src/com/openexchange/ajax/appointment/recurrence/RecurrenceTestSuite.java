@@ -49,30 +49,25 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class RecurrenceTestSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    DailyRecurrenceTest.class,
+    WeeklyRecurrenceTest.class,
+    ConfirmationsSeriesTest.class,
 
-    private RecurrenceTestSuite() {
-        super();
-    }
+    Bug9497Test.class,
+    Bug9742Test.class,
+    Bug10760Test.class,
+    Bug10859Test.class,
+    Bug12595Test.class,
+    Bug12614Test.class,
+    Bug14074Test.class,
+    DeleteExceptionTimestampTest.class,
+    UsmFailureDuringRecurrenceTest.class,
+})
+public class RecurrenceTestSuite {
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(DailyRecurrenceTest.class);
-        tests.addTestSuite(WeeklyRecurrenceTest.class);
-        tests.addTestSuite(ConfirmationsSeriesTest.class);
-
-        tests.addTestSuite(Bug9497Test.class);
-        tests.addTestSuite(Bug9742Test.class);
-        tests.addTestSuite(Bug10760Test.class);
-        tests.addTestSuite(Bug10859Test.class);
-        tests.addTestSuite(Bug12595Test.class);
-        tests.addTestSuite(Bug12614Test.class);
-        tests.addTestSuite(Bug14074Test.class);
-        tests.addTestSuite(DeleteExceptionTimestampTest.class);
-        tests.addTestSuite(UsmFailureDuringRecurrenceTest.class);
-        return tests;
-    }
 }

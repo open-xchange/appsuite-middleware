@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -59,6 +64,8 @@ import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
@@ -90,14 +97,13 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.SimServerSession;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.StringParser;
-import junit.framework.TestCase;
 
 /**
  * {@link FileResponseRendererTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileResponseRendererTest extends TestCase {
+public class FileResponseRendererTest {
 
     /**
      * Initializes a new {@link FileResponseRendererTest}.
@@ -106,19 +112,17 @@ public class FileResponseRendererTest extends TestCase {
         super();
     }
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
         final SimConfigurationService simConfigurationService = new SimConfigurationService();
         simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         ServerServiceRegistry.getInstance().removeService(HtmlService.class);
-        super.tearDown();
     }
 
     @Test

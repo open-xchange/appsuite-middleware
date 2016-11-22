@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail.netsol;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.netsol.actions.NetsolFolderRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolFolderResponse;
@@ -70,6 +72,7 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
         super();
     }
 
+    @Test
     public void testViewFolders() throws Throwable {
         netsolClearFolder(getInboxFolder());
         netsolClearFolder(getSentFolder());

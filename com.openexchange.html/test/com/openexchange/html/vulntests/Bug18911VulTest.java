@@ -60,8 +60,8 @@ import com.openexchange.html.AssertionHelper;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug18911VulTest extends AbstractSanitizing {
-    @Test
-    public void testJSSanitizing() {
+     @Test
+     public void testJSSanitizing() {
         String content = "<a href=3D\"jav\"><script>alert(1);</script>adsdas\">foooooooooooooooooo</a>";
         AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script>alert(1);</script>");
     }

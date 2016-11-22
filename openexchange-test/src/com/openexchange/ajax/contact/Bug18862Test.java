@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
 public class Bug18862Test extends AbstractManagedContactTest {
@@ -65,6 +68,7 @@ public class Bug18862Test extends AbstractManagedContactTest {
         super();
     }
 
+    @Test
     public void testUploadTooLargeImage() throws Exception {
         final Contact contact = super.generateContact();
         contact.setImage1(new byte[IMAGE_SIZE]);

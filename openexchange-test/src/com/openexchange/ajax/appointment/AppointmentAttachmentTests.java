@@ -49,11 +49,13 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -69,7 +71,6 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import junit.framework.AssertionFailedError;
 
 /**
  * Attachment tests for appointments.
@@ -140,9 +141,7 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
                 break;
             }
         }
-        if (null == test) {
-            throw new AssertionFailedError("Can not find the created appointment with an attachment.");
-        }
+        Assert.assertNotNull("Can not find the created appointment with an attachment.", test);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
@@ -160,9 +159,7 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
                 break;
             }
         }
-        if (null == test) {
-            throw new AssertionFailedError("Can not find the created appointment with an attachment.");
-        }
+        Assert.assertNotNull("Can not find the created appointment with an attachment.", test);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 }

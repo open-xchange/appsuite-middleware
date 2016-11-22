@@ -69,7 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class InMemoryFileStorage extends LocalFileStorage implements com.openexchange.filestore.QuotaFileStorage{
+public class InMemoryFileStorage extends LocalFileStorage implements com.openexchange.filestore.QuotaFileStorage {
 
     private final Map<Context, Map<String, byte[]>> data = new HashMap<Context, Map<String, byte[]>>();
 
@@ -84,13 +84,13 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
     @Override
     protected Set<String> delete(final String[] names) {
         for (String name : names) {
-            getCtxMap().put(name,null);
+            getCtxMap().put(name, null);
             deletions.get(ctx).add(name);
         }
         return Collections.emptySet();
     }
 
-   @Override
+    @Override
     protected void save(final String name, final InputStream input) throws OXException {
         final List<Byte> bytes = new ArrayList<Byte>();
         final byte[] buffer = new byte[1024];
@@ -203,7 +203,9 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
         return deletions.get(context);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.filestore.QuotaFileStorage#getUri()
      */
     @Override
@@ -212,7 +214,9 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.filestore.QuotaFileStorage#getQuota()
      */
     @Override
@@ -221,7 +225,9 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
         return 0;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.filestore.QuotaFileStorage#getUsage()
      */
     @Override
@@ -230,7 +236,9 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
         return 0;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.filestore.QuotaFileStorage#recalculateUsage()
      */
     @Override
@@ -239,7 +247,9 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.filestore.QuotaFileStorage#recalculateUsage(java.util.Set)
      */
     @Override
@@ -248,7 +258,9 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.filestore.QuotaFileStorage#saveNewFile(java.io.InputStream, long)
      */
     @Override
@@ -257,7 +269,9 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.filestore.QuotaFileStorage#appendToFile(java.io.InputStream, java.lang.String, long, long)
      */
     @Override

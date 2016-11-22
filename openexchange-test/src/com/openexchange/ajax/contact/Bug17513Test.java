@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.InsertRequest;
 

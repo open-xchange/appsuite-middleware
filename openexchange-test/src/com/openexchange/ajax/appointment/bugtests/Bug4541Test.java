@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -12,6 +13,7 @@ public class Bug4541Test extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4541Test.class);
 
+    @Test
     public void testBug4541() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testBug4541" + System.currentTimeMillis());

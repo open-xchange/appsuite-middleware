@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -70,7 +74,7 @@ public class Bug47012Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         ctm = new CalendarTestManager(client);
@@ -140,7 +144,7 @@ public class Bug47012Test extends AbstractAJAXSession {
         assertEquals("Wrong end date.", TimeTools.D("08.07.2016 00:00"), loadedException.getEndDate());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();

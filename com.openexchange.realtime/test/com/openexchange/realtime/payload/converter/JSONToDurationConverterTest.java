@@ -76,13 +76,13 @@ public class JSONToDurationConverterTest {
         simpleConverter = new SimpleConverterSim();
     }
 
-    @Test
-    public void testGetOutputFormat() {
+     @Test
+     public void testGetOutputFormat() {
         assertEquals(Duration.class.getName(), jsonToDurationConverter.getOutputFormat());
     }
 
-    @Test
-    public void testConvert() throws OXException, Exception {
+     @Test
+     public void testConvert() throws OXException, Exception {
         Duration tenSeconds = Duration.TEN_SECONDS;
         JSONObject durationObject = new JSONObject();
         durationObject.put("durationInSeconds", 15);
@@ -90,8 +90,8 @@ public class JSONToDurationConverterTest {
         assertEquals(tenSeconds, convert);
     }
 
-    @Test
-    public void testGetInputFormat() {
+     @Test
+     public void testGetInputFormat() {
         assertEquals("json", jsonToDurationConverter.getInputFormat());
     }
 

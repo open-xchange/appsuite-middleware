@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.find.common;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
@@ -60,7 +62,7 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         contact = ContactTestManager.generateContact(folderID);

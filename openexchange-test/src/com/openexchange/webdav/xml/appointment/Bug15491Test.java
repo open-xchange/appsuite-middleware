@@ -50,7 +50,13 @@
 package com.openexchange.webdav.xml.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -74,7 +80,7 @@ public class Bug15491Test extends AppointmentTest {
         super();
     }
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -86,12 +92,11 @@ public class Bug15491Test extends AppointmentTest {
         appointment.setIgnoreConflicts(true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (objectId != -1) {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         }
-        super.tearDown();
     }
 
     @Test

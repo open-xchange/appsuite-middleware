@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -79,7 +80,6 @@ public class Bug44002Test extends AbstractAJAXSession {
     }
 
     @Before
-    @Override
     public void setUp() throws Exception {
         super.setUp();
         ctm = new CalendarTestManager(client);
@@ -150,7 +150,6 @@ public class Bug44002Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
     public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();

@@ -49,6 +49,8 @@
 
 package com.openexchange.test.osgi;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;

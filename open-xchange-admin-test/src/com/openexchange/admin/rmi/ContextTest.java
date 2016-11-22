@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -80,9 +79,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class ContextTest extends AbstractTest {
 
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(ContextTest.class);
-    }
     @Test
     public void testGetAdminId() throws Exception {
         final Credentials cred = DummyMasterCredentials();
@@ -107,7 +103,6 @@ public class ContextTest extends AbstractTest {
         assertEquals("lemon", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
         assertEquals("squishy", srv_loaded.getUserAttribute("com.openexchange.test", "texture"));
 
-
         assertTrue("Expected same context ids", ctx.getId().intValue() == srv_loaded.getId().intValue());
 
         String add_mapping = srv_loaded.getId().intValue() + "_" + System.currentTimeMillis();
@@ -130,7 +125,6 @@ public class ContextTest extends AbstractTest {
         assertEquals("pistaccio", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
         assertEquals("green", srv_loaded.getUserAttribute("com.openexchange.test", "color"));
         assertEquals(null, srv_loaded.getUserAttribute("com.openexchange.test", "texture"));
-
 
         // ids must be correct again and the mapping should now exist
         assertTrue("Expected same context ids", edited_ctx.getId().intValue() == srv_loaded.getId().intValue());
@@ -205,7 +199,7 @@ public class ContextTest extends AbstractTest {
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*",cred);
+        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*", cred);
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
@@ -236,7 +230,7 @@ public class ContextTest extends AbstractTest {
 
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*",cred);
+        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*", cred);
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
@@ -276,7 +270,7 @@ public class ContextTest extends AbstractTest {
         addContext(ctxset, getRMIHostUrl(), cred);
     }
 
-    @Test(expected=InvalidDataException.class)
+    @Test(expected = InvalidDataException.class)
     public void testCreateContextNoQuota() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         Context ctxset = getTestContextObjectNoQuota(cred);
@@ -309,7 +303,7 @@ public class ContextTest extends AbstractTest {
             Context ctx2 = getTestContextObject(cred);
             ctx2.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
             addContext(ctx2, getRMIHostUrl(), cred);
-            clean.add( ctx2 );
+            clean.add(ctx2);
             fail("Could add Context");
         } catch (Exception x) {
             assertEquals("Cannot map 'foo' to the newly created context. This mapping is already in use.", x.getMessage());
@@ -349,7 +343,6 @@ public class ContextTest extends AbstractTest {
         assertTrue("context not found", foundctx);
     }
 
-
     private Context[] searchContextByDatabase(Database db, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         return xres.listByDatabase(db, cred);
@@ -369,7 +362,6 @@ public class ContextTest extends AbstractTest {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         xres.delete(ctx, cred);
     }
-
 
     private Context addSystemContext(Context ctx, String host, Credentials cred) throws Exception {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
@@ -401,14 +393,13 @@ public class ContextTest extends AbstractTest {
 
         OXContextInterface oxcontext = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
 
-        oxcontext.create(ctx,UserTest.getTestUserObject("admin","secret", ctx), cred);
+        oxcontext.create(ctx, UserTest.getTestUserObject("admin", "secret", ctx), cred);
         return ctx;
     }
 
     private int addContext(Context ctx, String host, Credentials cred) throws Exception {
-        return addSystemContext(ctx,host,cred).getId().intValue();
+        return addSystemContext(ctx, host, cred).getId().intValue();
     }
-
 
     private void disableContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
@@ -449,7 +440,7 @@ public class ContextTest extends AbstractTest {
     // Must be public static to override method
     public static Context getTestContextObject(int context_id) {
         Context ctx = new Context(context_id);
-        ctx.setName("Name-"+ctx.getId());
+        ctx.setName("Name-" + ctx.getId());
         return ctx;
     }
 

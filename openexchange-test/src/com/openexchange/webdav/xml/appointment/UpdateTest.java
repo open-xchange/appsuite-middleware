@@ -1,10 +1,14 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Appointment;
@@ -22,6 +26,7 @@ public class UpdateTest extends AppointmentTest {
         super();
     }
 
+    @Test
     public void testUpdate() throws Exception {
         Appointment appointmentObj = createAppointmentObject("testUpdateAppointment");
         appointmentObj.setIgnoreConflicts(true);
@@ -40,6 +45,7 @@ public class UpdateTest extends AppointmentTest {
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testUpdateAppointmentRemoveAlarm() throws Exception {
         Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentRemoveAlarm");
         appointmentObj.setIgnoreConflicts(true);
@@ -59,6 +65,7 @@ public class UpdateTest extends AppointmentTest {
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testUpdateConcurentConflict() throws Exception {
         Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
         appointmentObj.setIgnoreConflicts(true);
@@ -80,6 +87,7 @@ public class UpdateTest extends AppointmentTest {
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testUpdateNotFound() throws Exception {
         Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
         appointmentObj.setIgnoreConflicts(true);
@@ -101,6 +109,7 @@ public class UpdateTest extends AppointmentTest {
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testUpdateAppointmentWithParticipants() throws Exception {
         Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
         appointmentObj.setIgnoreConflicts(true);
@@ -135,6 +144,7 @@ public class UpdateTest extends AppointmentTest {
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testUpdateRecurrenceWithDatePosition() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -185,6 +195,7 @@ public class UpdateTest extends AppointmentTest {
     }
 
     // Bug 11124
+    @Test
     public void testShouldExtendSeriesFromLimitedToEndless() throws OXException, Exception {
         Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testUpdateRecurrence");

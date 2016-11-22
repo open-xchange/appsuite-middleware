@@ -1,6 +1,8 @@
 
 package com.openexchange.webdav;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -17,13 +19,14 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.webdav.lib.WebdavResources;
+import org.junit.After;
+import org.junit.Before;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebRequest;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
-import junit.framework.TestCase;
 
-public class WebdavClientTest extends TestCase {
+public class WebdavClientTest {
 
     protected Properties webdavProps;
     protected String login;
@@ -33,7 +36,7 @@ public class WebdavClientTest extends TestCase {
     protected List<String> clean = new ArrayList<String>();
     private String path;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         // Copied from AbstractWebdavTest
         webdavProps = WebdavInit.getWebdavProperties();
@@ -44,7 +47,7 @@ public class WebdavClientTest extends TestCase {
 
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         for (final String url : clean) {
             getResource(url).deleteMethod();

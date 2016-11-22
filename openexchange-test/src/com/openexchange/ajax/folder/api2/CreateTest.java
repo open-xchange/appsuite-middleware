@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;

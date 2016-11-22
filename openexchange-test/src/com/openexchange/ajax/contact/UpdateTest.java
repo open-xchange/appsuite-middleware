@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.fail;
 import java.util.Date;
 import org.json.JSONObject;
 import org.junit.Test;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.After;

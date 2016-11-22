@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.netsol;
 
+import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;

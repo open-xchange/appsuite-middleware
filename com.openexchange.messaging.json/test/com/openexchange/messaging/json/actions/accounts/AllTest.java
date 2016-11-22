@@ -49,8 +49,13 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.json.JSONArray;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -62,16 +67,16 @@ import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
 
-
 /**
  * {@link AllTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AllTest extends TestCase {
+public class AllTest {
+
     private SimMessagingServiceRegistry registry;
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
         registry = new SimMessagingServiceRegistry();
 
@@ -116,6 +121,7 @@ public class AllTest extends TestCase {
     }
 
     // Success Cases
+    @Test
     public void testListAllForACertainMessagingService() throws OXException {
 
         final AllAction action = new AllAction(registry);
@@ -138,6 +144,7 @@ public class AllTest extends TestCase {
 
     }
 
+    @Test
     public void testListAll() throws OXException {
         final AllAction action = new AllAction(registry);
 
@@ -159,6 +166,7 @@ public class AllTest extends TestCase {
     }
 
     // Error Cases
+    @Test
     public void testExceptionInMessagingRegistry() throws OXException {
         registry.setException(new OXException(-1));
         final AllAction action = new AllAction(registry);
@@ -174,9 +182,9 @@ public class AllTest extends TestCase {
             //SUCCESS
         }
 
-
     }
 
+    @Test
     public void testExceptionInMessagingAccountManager() throws OXException {
         ((SimAccountManager) registry.getAllServices(-1, -1).get(0).getAccountManager()).setException(new OXException(-1));
         final AllAction action = new AllAction(registry);

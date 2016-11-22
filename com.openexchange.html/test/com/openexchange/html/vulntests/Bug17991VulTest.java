@@ -60,8 +60,8 @@ import com.openexchange.html.AssertionHelper;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug17991VulTest extends AbstractSanitizing {
-    @Test
-    public void testSanitize() {
+     @Test
+     public void testSanitize() {
         String javaScript = "<script =" +
             "type=3D\"text/javascript\">//<!--" +
             "function isNodeText(A){return(A.nodeType=3D=3D3);}function object(B){var =" +

@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.find.drive;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,6 +60,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
@@ -125,7 +131,7 @@ public class BasicDriveTest extends AbstractFindTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(User.User1);
@@ -148,7 +154,7 @@ public class BasicDriveTest extends AbstractFindTest {
 
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         manager.cleanUp();
         super.tearDown();
@@ -480,7 +486,8 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     //    Takes half an hour do create and delete all those folders...
-    //    public void testFolderChunking() throws Exception {
+    //         @Test
+    //     public void testFolderChunking() throws Exception {
     //        FolderObject first = null;
     //        FolderObject middle = null;
     //        FolderObject last = null;

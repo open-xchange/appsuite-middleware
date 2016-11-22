@@ -60,10 +60,6 @@ public abstract class AbstractRMITest extends AbstractTest {
     }
 
     @After
-    public void tearDown() throws Exception {
-
-    }
-
     public Integer getContextID() {
         return new Integer(1);
     }

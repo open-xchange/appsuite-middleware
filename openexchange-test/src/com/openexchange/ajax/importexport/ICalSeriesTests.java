@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -73,6 +75,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         super();
     }
 
+    @Test
     public void testDeleteException() throws OXException, IOException, JSONException {
         String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100202T103000\n" + "DTEND;TZID=Europe/Rome:20100202T120000\n" + "RRULE:FREQ=DAILY;UNTIL=20100204T215959Z\n" + "EXDATE:20100203T103000\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:Exceptional Meeting #1\n" + "END:VEVENT\n";
 
@@ -90,6 +93,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         assertEquals(0, data.length);
     }
 
+    @Test
     public void testChangeExceptionWithExceptionFirst() throws Exception {
         String uid = "change-exception-" + new Date().getTime();
         String title = "Change to exceptional meeting #3: One hour later";
@@ -107,6 +111,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         testChangeException(ical, title, start, end);
     }
 
+    @Test
     public void testChangeExceptionWithMasterFirst() throws Exception {
         String uid = "change-exception-" + new Date().getTime();
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.netsol;
 
+import static org.junit.Assert.assertTrue;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -57,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
@@ -111,6 +113,7 @@ public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTes
         }
     }
 
+    @Test
     public void testMailSend() throws Throwable {
         netsolClearFolder(getInboxFolder());
         netsolClearFolder(getSentFolder());

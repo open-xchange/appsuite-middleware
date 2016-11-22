@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.List;
 import org.json.JSONArray;
 import org.junit.Test;
@@ -63,20 +65,6 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AutocompleteTest extends AbstractManagedContactTest {
-
-    /**
-     * Initializes a new {@link AutocompleteTest}.
-     *
-     * @param name The test name
-     */
-    public AutocompleteTest() {
-        super();
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
 
     @Test
     public void testAutocompleteFirstAndLastname() throws Exception {

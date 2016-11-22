@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -80,7 +83,7 @@ public class Bug48165Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -136,7 +139,7 @@ public class Bug48165Test extends AbstractAJAXSession {
         assertTrue("Expect conflict.", found);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ctm1.cleanUp();
         ctm2.cleanUp();

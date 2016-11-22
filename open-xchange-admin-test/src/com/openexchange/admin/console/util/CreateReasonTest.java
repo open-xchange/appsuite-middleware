@@ -50,9 +50,7 @@
 package com.openexchange.admin.console.util;
 
 import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
-
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.util.reason.CreateReason;
@@ -63,8 +61,8 @@ import com.openexchange.admin.console.util.reason.CreateReason;
  */
 public class CreateReasonTest extends AbstractTest {
 
-    @Test
-    public void testAddReason() {
+     @Test
+     public void testAddReason() {
         
         resetBuffers();
         new CreateReason(getAllOptionData()){
@@ -77,8 +75,8 @@ public class CreateReasonTest extends AbstractTest {
         assertTrue("Expected 0 as return code!",0==this.returnCode);
     }
     
-    @Test
-    public void testAddReasonWithInvalidCredentials() {
+     @Test
+     public void testAddReasonWithInvalidCredentials() {
         
         resetBuffers();
         new CreateReason(getAllOptionDataWithInvalidCredentials()){
@@ -91,8 +89,8 @@ public class CreateReasonTest extends AbstractTest {
         assertTrue("Expected invalid credentials as return code!",BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS==this.returnCode);
     }
     
-    @Test
-    public void testAddReasonWithMissingOption() {
+     @Test
+     public void testAddReasonWithMissingOption() {
         
         resetBuffers();
         new CreateReason(getMissingOptionData()){
@@ -105,8 +103,8 @@ public class CreateReasonTest extends AbstractTest {
         assertTrue("Expected missing option as return code!",BasicCommandlineOptions.SYSEXIT_MISSING_OPTION==this.returnCode);
     }
     
-    @Test
-    public void testAddReasonWithUnknownOption() {
+     @Test
+     public void testAddReasonWithUnknownOption() {
         
         resetBuffers();
         new CreateReason(getUnknownOptionData()){

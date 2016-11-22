@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -81,13 +86,13 @@ public class Bug6825Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         folderTestManager = new FolderTestManager(getClient());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (null != folderTestManager) {
             folderTestManager.cleanUp();
@@ -95,6 +100,7 @@ public class Bug6825Test extends AbstractAJAXSession {
         super.tearDown();
     }
 
+    @Test
     public void testImportVCard() throws Exception {
         /*
          * import vCard with too long field values

@@ -50,6 +50,9 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -246,6 +249,7 @@ public class UpdateTest extends AppointmentTest {
     }
 
     // Bug 12700    FIXME    @Test
+    @Test
     public void testMakeFullTime() throws Exception {
         final TimeZone utc = TimeZone.getTimeZone("urc");
 

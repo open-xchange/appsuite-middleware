@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.find;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.find.common.Bug32060Test;
 import com.openexchange.ajax.find.contacts.Bug33447Test;
 import com.openexchange.ajax.find.contacts.Bug33576Test;
@@ -63,9 +67,6 @@ import com.openexchange.ajax.find.tasks.FindTasksAutocompleteTests;
 import com.openexchange.ajax.find.tasks.FindTasksQueryTests;
 import com.openexchange.ajax.find.tasks.FindTasksTestEnvironment;
 import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * {@link FindTestSuite}
@@ -73,49 +74,42 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    com.openexchange.ajax.find.calendar.QueryTest.class,
+    //disable AutoCompleteTest for now
+    //com.openexchange.ajax.find.calendar.AutocompleteTest.class,
+    com.openexchange.ajax.find.contacts.QueryTest.class,
+    com.openexchange.ajax.find.contacts.AutocompleteTest.class,
+    BasicMailTest.class,
+    BasicDriveTest.class,
+    FindTasksTestsFilterCombinations.class,
+    FindTasksQueryTests.class,
+    FindTasksAutocompleteTests.class,
+    Bug32060Test.class,
+    ExcludeContextAdminTest.class,
+    Bug33447Test.class,
+    Bug33576Test.class,
+    Bug36522Test.class,
+    Bug35442Test.class,
+    Bug39105Test.class,
+    Bug42970Test.class,
+
+})
 public final class FindTestSuite {
 
-    /**
-     * Initializes a new {@link FindTestSuite}.
-     */
-    private FindTestSuite() {
-        super();
+    @BeforeClass
+    public static void setUp() {
+        FindTasksTestEnvironment.getInstance().init();
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
-        tests.addTestSuite(com.openexchange.ajax.find.calendar.QueryTest.class);
-        //disable AutoCompleteTest for now
-        //tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
-        tests.addTestSuite(BasicMailTest.class);
-        tests.addTestSuite(BasicDriveTest.class);
-        tests.addTestSuite(FindTasksTestsFilterCombinations.class);
-        tests.addTestSuite(FindTasksQueryTests.class);
-        tests.addTestSuite(FindTasksAutocompleteTests.class);
-        tests.addTestSuite(Bug32060Test.class);
-        tests.addTestSuite(ExcludeContextAdminTest.class);
-        tests.addTestSuite(Bug33447Test.class);
-        tests.addTestSuite(Bug33576Test.class);
-        tests.addTestSuite(Bug36522Test.class);
-        tests.addTestSuite(Bug35442Test.class);
-        tests.addTestSuite(Bug39105Test.class);
-        tests.addTestSuite(Bug42970Test.class);
-
-        TestSetup setup = new TestSetup(tests) {
-
-            @Override
-            protected void setUp() {
-                FindTasksTestEnvironment.getInstance().init();
-            }
-
-            @Override
-            protected void tearDown() throws Exception {
-                FindTasksTestEnvironment.getInstance().cleanup();
-            }
-        };
-
-        return setup;
+    @AfterClass
+    public static void tearDown() {
+        try {
+            FindTasksTestEnvironment.getInstance().cleanup();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

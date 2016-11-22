@@ -62,7 +62,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.guest.GuestService;
-import com.openexchange.guest.impl.internal.GuestDeleteListenerImpl;
 
 /**
  * {@link GuestDeleteListenerImplTest}
@@ -104,8 +103,8 @@ public class GuestDeleteListenerImplTest {
         this.guestDeleteListenerImpl = new GuestDeleteListenerImpl(guestService);
     }
 
-    @Test
-    public void testDeletePerformed_wrongType_doNotRemoveGuest() throws OXException {
+     @Test
+     public void testDeletePerformed_wrongType_doNotRemoveGuest() throws OXException {
         Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_GROUP);
 
         guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
@@ -113,8 +112,8 @@ public class GuestDeleteListenerImplTest {
         Mockito.verify(guestService, Mockito.never()).removeGuest(Matchers.anyInt(), Matchers.anyInt());
     }
 
-    @Test
-    public void testDeletePerformed_deleteCalledForUser_removeGuest() throws OXException {
+     @Test
+     public void testDeletePerformed_deleteCalledForUser_removeGuest() throws OXException {
         Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_USER);
 
         guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
@@ -122,8 +121,8 @@ public class GuestDeleteListenerImplTest {
         Mockito.verify(guestService, Mockito.times(1)).removeGuest(CONTEXT_ID, USER_ID);
     }
 
-    @Test
-    public void testDeletePerformed_wrongType_doNotRemoveGuests() throws OXException {
+     @Test
+     public void testDeletePerformed_wrongType_doNotRemoveGuests() throws OXException {
         Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_GROUP);
 
         guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
@@ -131,8 +130,8 @@ public class GuestDeleteListenerImplTest {
         Mockito.verify(guestService, Mockito.never()).removeGuests(Matchers.anyInt());
     }
 
-    @Test
-    public void testDeletePerformed_deleteCalledForContext_removeGuests() throws OXException {
+     @Test
+     public void testDeletePerformed_deleteCalledForContext_removeGuests() throws OXException {
         Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_CONTEXT);
 
         guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);

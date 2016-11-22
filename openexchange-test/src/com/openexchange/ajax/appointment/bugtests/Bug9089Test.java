@@ -1,7 +1,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -17,6 +20,7 @@ public class Bug9089Test extends AppointmentTest {
      * Creates a normal appointment in a public folder and then try to modify the private flag.
      * Expected result is that an error message is thrown
      */
+    @Test
     public void testBug9089() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testBug9089" + System.currentTimeMillis());

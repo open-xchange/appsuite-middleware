@@ -4,6 +4,7 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import org.junit.After;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -26,6 +27,7 @@ public class Bug9497Test extends AbstractRecurrenceTest {
     /**
      * This test case checks the calculation for appointments starting before 01.01.1970
      */
+    @Test
     public void testBug9497() throws Exception {
         final Date startDate = simpleDateFormatUTC.parse("1969-12-28 00:00:00");
         final Date endDate = simpleDateFormat.parse("1969-12-29 00:00:00");

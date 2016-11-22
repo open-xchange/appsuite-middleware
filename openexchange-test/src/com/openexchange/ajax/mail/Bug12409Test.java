@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.actions.GetRequest;
@@ -81,7 +85,7 @@ public class Bug12409Test extends AbstractMailTest {
 
     private String[] folderAndID;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         final AJAXClient client = getClient();
@@ -100,7 +104,7 @@ public class Bug12409Test extends AbstractMailTest {
 
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         // clean the drafts folder
         clearFolder(getDraftsFolder());
@@ -111,6 +115,7 @@ public class Bug12409Test extends AbstractMailTest {
         super();
     }
 
+    @Test
     public void testSavedDispositionNotificationReturnedWhenEditing() throws IOException, SAXException, JSONException, OXException {
         final AJAXClient client = getClient();
         // load the email to edit it again

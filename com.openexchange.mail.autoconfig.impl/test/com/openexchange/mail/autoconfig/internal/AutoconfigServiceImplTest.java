@@ -74,16 +74,16 @@ public class AutoconfigServiceImplTest {
         service = new AutoconfigServiceImpl(null);
     }
 
-    @Test
-    public void testGetDomain_containsUmlauts_returnsStillNonIDN() throws AddressException {
+     @Test
+     public void testGetDomain_containsUmlauts_returnsStillNonIDN() throws AddressException {
         QuotedInternetAddress quoatedAddress = new QuotedInternetAddress(umlautAddress);
         String domain = service.getDomain(quoatedAddress);
 
         assertEquals(umlautAddress.substring(umlautAddress.indexOf('@') + 1), domain);
     }
 
-    @Test
-    public void testGetDomain_containsNoUmlauts_returnAsItIs() throws AddressException {
+     @Test
+     public void testGetDomain_containsNoUmlauts_returnAsItIs() throws AddressException {
         QuotedInternetAddress quoatedAddress = new QuotedInternetAddress(address);
         String domain = service.getDomain(quoatedAddress);
 

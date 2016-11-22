@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav.xml.task;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.Locale;
 import org.junit.Test;
@@ -153,6 +155,7 @@ public class NewTest extends TaskTest {
     }
 
     // Bug 12011    @Test
+    @Test
     public void testBulkAdd() throws Exception {
         int[] objectIds = null;
 

@@ -1,10 +1,16 @@
+
 package com.openexchange.webdav.xml.writer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
-import junit.framework.TestCase;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -15,275 +21,276 @@ import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindPropNamesMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
 
-public class PropertiesWriterTest extends TestCase {
+public class PropertiesWriterTest {
 
-	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
-	private static final Namespace TEST_NS = Namespace.getNamespace("http://www.open-xchange.com/namespace/webdav-test");
+    private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
+    private static final Namespace TEST_NS = Namespace.getNamespace("http://www.open-xchange.com/namespace/webdav-test");
 
-	private String testCollection = null;
+    private String testCollection = null;
 
-	@Override
-	public void setUp() throws Exception {
-		Thread.sleep(1);
-		testCollection = "testCollection"+System.currentTimeMillis()+"/";
-		DummyResourceManager.getInstance().resolveCollection(testCollection).create();
-	}
+    @Before
+    public void setUp() throws Exception {
+        Thread.sleep(1);
+        testCollection = "testCollection" + System.currentTimeMillis() + "/";
+        DummyResourceManager.getInstance().resolveCollection(testCollection).create();
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		DummyResourceManager.getInstance().resolveCollection(testCollection).delete();
-	}
+    @After
+    public void tearDown() throws Exception {
+        DummyResourceManager.getInstance().resolveCollection(testCollection).delete();
+    }
 
-	public void testBasic() throws Exception {
-		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
-		resource.create();
+    @Test
+    public void testBasic() throws Exception {
+        final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection + "test.txt");
+        resource.create();
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
-		marshaller
-			.addProperty("DAV:","getlastmodified");
+        final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("", "UTF-8", false);
+        marshaller.addProperty("DAV:", "getlastmodified");
 
-		final Element response = marshaller.marshal(resource).get(0);
+        final Element response = marshaller.marshal(resource).get(0);
 
-		assertHref(response, "/"+testCollection+"test.txt");
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		int count = 0;
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			assertStatus(element, "HTTP/1.1 200 OK");
-			assertProp(element, DAV_NS, "getlastmodified", Utils.convert(resource.getLastModified()));
-			count++;
-		}
+        int count = 0;
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            assertStatus(element, "HTTP/1.1 200 OK");
+            assertProp(element, DAV_NS, "getlastmodified", Utils.convert(resource.getLastModified()));
+            count++;
+        }
 
-		assertEquals(1, count);
-	}
+        assertEquals(1, count);
+    }
 
-	public void testManyProperties() throws Exception {
-		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
-		resource.setDisplayName("myDisplayName");
-		resource.create();
+    @Test
+    public void testManyProperties() throws Exception {
+        final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection + "test.txt");
+        resource.setDisplayName("myDisplayName");
+        resource.create();
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
-		marshaller
-			.addProperty("DAV:","getlastmodified")
-			.addProperty("DAV:", "displayname");
-		final Element response = marshaller.marshal(resource).get(0);
+        final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("", "UTF-8", false);
+        marshaller.addProperty("DAV:", "getlastmodified").addProperty("DAV:", "displayname");
+        final Element response = marshaller.marshal(resource).get(0);
 
-		assertHref(response, "/"+testCollection+"test.txt");
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		int count = 0;
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			assertStatus(element, "HTTP/1.1 200 OK");
-			assertProp(element, DAV_NS, "getlastmodified", Utils.convert(resource.getLastModified()));
-			assertProp(element, DAV_NS, "displayname", "myDisplayName");
-			count++;
-		}
+        int count = 0;
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            assertStatus(element, "HTTP/1.1 200 OK");
+            assertProp(element, DAV_NS, "getlastmodified", Utils.convert(resource.getLastModified()));
+            assertProp(element, DAV_NS, "displayname", "myDisplayName");
+            count++;
+        }
 
-		assertEquals(1, count);
+        assertEquals(1, count);
 
-	}
+    }
 
-	public void testPropertyNames() throws Exception {
-		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
-		resource.create();
+    @Test
+    public void testPropertyNames() throws Exception {
+        final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection + "test.txt");
+        resource.create();
 
+        final PropfindPropNamesMarshaller marshaller = new PropfindPropNamesMarshaller("", "UTF-8");
+        final Element response = marshaller.marshal(resource).get(0);
 
-		final PropfindPropNamesMarshaller marshaller = new PropfindPropNamesMarshaller("","UTF-8");
-		final Element response = marshaller.marshal(resource).get(0);
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		assertHref(response, "/"+testCollection+"test.txt");
+        final Set<String> allProps = new HashSet<String>();
 
-		final Set<String> allProps = new HashSet<String>();
+        for (final Property p : new Protocol().getKnownProperties()) {
+            allProps.add(p.getName());
+        }
 
-		for(final Property p : new Protocol().getKnownProperties()) { allProps.add(p.getName()); }
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            assertStatus(element, "HTTP/1.1 200 OK");
+            final Element prop = element.getChild("prop", DAV_NS);
+            for (final Element child : prop.getChildren()) {
+                assertTrue("Didn't expect " + child.getName(), allProps.remove(child.getName()));
+            }
+        }
+        assertTrue(allProps.toString(), allProps.isEmpty());
+    }
 
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			assertStatus(element, "HTTP/1.1 200 OK");
-			final Element prop = element.getChild("prop", DAV_NS);
-			for(final Element child : prop.getChildren()) {
-				assertTrue("Didn't expect "+child.getName(), allProps.remove(child.getName()));
-			}
-		}
-		assertTrue(allProps.toString(), allProps.isEmpty());
-	}
+    @Test
+    public void testAllProperties() throws Exception {
+        final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection + "test.txt");
+        resource.create();
 
-	public void testAllProperties() throws Exception {
-		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
-		resource.create();
+        final PropfindAllPropsMarshaller marshaller = new PropfindAllPropsMarshaller("", "UTF-8");
+        final Element response = marshaller.marshal(resource).get(0);
 
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		final PropfindAllPropsMarshaller marshaller = new PropfindAllPropsMarshaller("","UTF-8");
-		final Element response = marshaller.marshal(resource).get(0);
+        final Set<String> allProps = new HashSet<String>();
 
-		assertHref(response, "/"+testCollection+"test.txt");
+        for (final Property p : new Protocol().getKnownProperties()) {
+            allProps.add(p.getName());
+        }
 
-		final Set<String> allProps = new HashSet<String>();
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            assertStatus(element, "HTTP/1.1 200 OK");
+            final Element prop = element.getChild("prop", DAV_NS);
+            for (final Element child : prop.getChildren()) {
+                assertTrue(allProps.remove(child.getName()));
+            }
+        }
+        assertTrue(allProps.toString(), allProps.isEmpty());
+    }
 
-		for(final Property p : new Protocol().getKnownProperties()) { allProps.add(p.getName()); }
+    @Test
+    public void testEmptyProperty() throws Exception {
+        final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection + "test.txt");
+        resource.create();
 
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			assertStatus(element, "HTTP/1.1 200 OK");
-			final Element prop = element.getChild("prop", DAV_NS);
-			for(final Element child : prop.getChildren()) {
-				assertTrue(allProps.remove(child.getName()));
-			}
-		}
-		assertTrue(allProps.toString(), allProps.isEmpty());
-	}
+        final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("", "UTF-8", false);
+        marshaller.addProperty("DAV:", "resourcetype");
 
-	public void testEmptyProperty() throws Exception {
-		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
-		resource.create();
+        final Element response = marshaller.marshal(resource).get(0);
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
-		marshaller
-			.addProperty("DAV:","resourcetype");
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		final Element response = marshaller.marshal(resource).get(0);
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            assertStatus(element, "HTTP/1.1 200 OK");
+            assertProp(element, DAV_NS, "resourcetype", "");
+        }
+    }
 
-		assertHref(response, "/"+testCollection+"test.txt");
+    @Test
+    public void testDangerousChars() throws Exception {
+        final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection + "test.txt");
+        resource.setDisplayName("<&>");
+        resource.create();
 
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			assertStatus(element, "HTTP/1.1 200 OK");
-			assertProp(element, DAV_NS, "resourcetype", "");
-		}
-	}
+        final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("", "UTF-8", false);
+        marshaller.addProperty("DAV:", "displayname");
 
-	public void testDangerousChars() throws Exception {
-		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
-		resource.setDisplayName("<&>");
-		resource.create();
+        final Element response = marshaller.marshal(resource).get(0);
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
-		marshaller
-			.addProperty("DAV:","displayname");
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		final Element response = marshaller.marshal(resource).get(0);
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            assertStatus(element, "HTTP/1.1 200 OK");
+            assertProp(element, DAV_NS, "displayname", "<&>");
+        }
+    }
 
-		assertHref(response, "/"+testCollection+"test.txt");
+    @Test
+    public void testXMLProperty() throws Exception {
+        final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection + "test.txt");
+        final WebdavProperty property = new WebdavProperty();
+        property.setNamespace(TEST_NS.getURI());
+        property.setName("test");
+        property.setValue("<quark xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!</quark>");
+        property.setXML(true);
+        resource.putProperty(property);
+        resource.create();
 
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			assertStatus(element, "HTTP/1.1 200 OK");
-			assertProp(element, DAV_NS, "displayname", "<&>");
-		}
-	}
+        final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("", "UTF-8", false);
+        marshaller.addProperty(TEST_NS.getURI(), "test");
 
-	public void testXMLProperty() throws Exception {
-		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
-		final WebdavProperty property = new WebdavProperty();
-		property.setNamespace(TEST_NS.getURI());
-		property.setName("test");
-		property.setValue("<quark xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!</quark>");
-		property.setXML(true);
-		resource.putProperty(property);
-		resource.create();
+        Element response = marshaller.marshal(resource).get(0);
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
-		marshaller
-			.addProperty(TEST_NS.getURI(),"test");
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		Element response = marshaller.marshal(resource).get(0);
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            assertStatus(element, "HTTP/1.1 200 OK");
+            final Element prop = element.getChild("prop", DAV_NS);
+            final Element child = prop.getChild("test", TEST_NS);
+            final Element quark = child.getChild("quark", TEST_NS);
+            assertEquals(" In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!", quark.getText());
+        }
 
-		assertHref(response, "/"+testCollection+"test.txt");
+        property.setValue("<quark xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!</quark><gnurk xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the right corner: The incredible other Tessssssst Vallllhhhhuuuuuueeeee!</gnurk>");
+        resource.putProperty(property);
+        resource.save();
 
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			assertStatus(element, "HTTP/1.1 200 OK");
-			final Element prop = element.getChild("prop", DAV_NS);
-			final Element child = prop.getChild("test", TEST_NS);
-			final Element quark = child.getChild("quark",TEST_NS);
-			assertEquals(" In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!", quark.getText());
-		}
+        response = marshaller.marshal(resource).get(0);
 
-		property.setValue("<quark xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!</quark><gnurk xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the right corner: The incredible other Tessssssst Vallllhhhhuuuuuueeeee!</gnurk>");
-		resource.putProperty(property);
-		resource.save();
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		response = marshaller.marshal(resource).get(0);
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            assertStatus(element, "HTTP/1.1 200 OK");
+            final Element prop = element.getChild("prop", DAV_NS);
+            final Element child = prop.getChild("test", TEST_NS);
+            final Element quark = child.getChild("quark", TEST_NS);
+            assertEquals(" In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!", quark.getText());
+            final Element gnurk = child.getChild("gnurk", TEST_NS);
+            assertEquals(" In the right corner: The incredible other Tessssssst Vallllhhhhuuuuuueeeee!", gnurk.getText());
+        }
+    }
 
-		assertHref(response, "/"+testCollection+"test.txt");
+    @Test
+    public void testNotExists() throws Exception {
+        final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection + "test.txt");
+        resource.setDisplayName("myDisplayName");
+        resource.create();
 
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			assertStatus(element, "HTTP/1.1 200 OK");
-			final Element prop = element.getChild("prop", DAV_NS);
-			final Element child = prop.getChild("test", TEST_NS);
-			final Element quark = child.getChild("quark",TEST_NS);
-			assertEquals(" In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!", quark.getText());
-			final Element gnurk = child.getChild("gnurk",TEST_NS);
-			assertEquals(" In the right corner: The incredible other Tessssssst Vallllhhhhuuuuuueeeee!", gnurk.getText());
-		}
-	}
+        final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("", "UTF-8", false);
+        marshaller.addProperty("DAV:", "getlastmodified").addProperty("DAV:", "displayname").addProperty("OX:", "notExist");
+        final Element response = marshaller.marshal(resource).get(0);
 
-	public void testNotExists() throws Exception {
-		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
-		resource.setDisplayName("myDisplayName");
-		resource.create();
+        assertHref(response, "/" + testCollection + "test.txt");
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
-		marshaller
-			.addProperty("DAV:","getlastmodified")
-			.addProperty("DAV:", "displayname")
-			.addProperty("OX:", "notExist");
-		final Element response = marshaller.marshal(resource).get(0);
+        int count = 0;
+        int status = 0;
+        for (final Element element : response.getChildren()) {
+            if (!element.getName().equals("propstat")) {
+                continue;
+            }
+            if (element.getChild("status", DAV_NS).getText().equals("HTTP/1.1 200 OK")) {
+                assertStatus(element, "HTTP/1.1 200 OK");
+                assertProp(element, DAV_NS, "getlastmodified", Utils.convert(resource.getLastModified()));
+                count++;
+                status += 2;
+            } else if (element.getChild("status", DAV_NS).getText().equals("HTTP/1.1 404 NOT FOUND")) {
+                count++;
+                status += 1;
+            }
+        }
+        assertEquals(2, count);
+        assertTrue(status == 3);
+    }
 
-		assertHref(response, "/"+testCollection+"test.txt");
+    private static final void assertHref(final Element element, final String uri) {
+        assertEquals(uri, element.getChild("href", DAV_NS).getText());
+    }
 
-		int count = 0;
-		int status = 0;
-		for(final Element element : response.getChildren()) {
-			if(!element.getName().equals("propstat")) {
-				continue;
-			}
-			if(element.getChild("status", DAV_NS).getText().equals("HTTP/1.1 200 OK")) {
-				assertStatus(element, "HTTP/1.1 200 OK");
-				assertProp(element, DAV_NS, "getlastmodified", Utils.convert(resource.getLastModified()));
-				count++;
-				status += 2;
-			} else if (element.getChild("status", DAV_NS).getText().equals("HTTP/1.1 404 NOT FOUND")) {
-				count++;
-				status += 1;
-			}
-		}
-		assertEquals(2, count);
-		assertTrue(status == 3);
-	}
+    private static final void assertStatus(final Element element, final String status) {
+        assertEquals(status, element.getChild("status", DAV_NS).getText());
+    }
 
-	private static final void assertHref(final Element element, final String uri) {
-		assertEquals(uri, element.getChild("href", DAV_NS).getText());
-	}
-
-	private static final void assertStatus(final Element element, final String status) {
-		assertEquals(status, element.getChild("status", DAV_NS).getText());
-	}
-
-	private static final void assertProp(final Element element, final Namespace namespace, final String name, final String content) {
-		final Element prop = element.getChild("prop", DAV_NS);
-		final Element child = prop.getChild(name, namespace);
-		if(null != child) {
-			assertEquals(content, child.getText());
-			return;
-		}
-		fail("Couldn't find prop: "+name+" in namespace "+namespace.getURI());
-	}
+    private static final void assertProp(final Element element, final Namespace namespace, final String name, final String content) {
+        final Element prop = element.getChild("prop", DAV_NS);
+        final Element child = prop.getChild(name, namespace);
+        if (null != child) {
+            assertEquals(content, child.getText());
+            return;
+        }
+        fail("Couldn't find prop: " + name + " in namespace " + namespace.getURI());
+    }
 }

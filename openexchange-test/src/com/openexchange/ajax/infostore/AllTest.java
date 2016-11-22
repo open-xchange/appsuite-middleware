@@ -1,6 +1,9 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,6 +24,7 @@ public class AllTest extends InfostoreAJAXTest {
         super();
     }
 
+    @Test
     public void testBasic() throws Exception {
 
         final Response res = this.all(getWebConversation(), getHostName(), sessionId, folderId, new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID });
@@ -48,6 +52,7 @@ public class AllTest extends InfostoreAJAXTest {
     }
 
     //Bug 4269
+    @Test
     public void testVirtualFolder() throws Exception {
 
         for (int folderId : virtualFolders) {
@@ -62,6 +67,7 @@ public class AllTest extends InfostoreAJAXTest {
     }
 
     // Node 2652    @Test
+    @Test
     public void testLastModifiedUTC() throws Exception {
         final Response res = all(getWebConversation(), getHostName(), sessionId, folderId, new int[] { Metadata.LAST_MODIFIED_UTC });
         assertNoError(res);

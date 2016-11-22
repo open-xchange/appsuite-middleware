@@ -1,37 +1,36 @@
+
 package com.openexchange.webdav.action;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.webdav.action.ifheader.IgnoreLocksIfHeaderApplyTest;
 import com.openexchange.webdav.action.ifheader.StandardIfHeaderApplyTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    GetTest.class,
+    HeadTest.class,
+    PutTest.class,
+    DeleteTest.class,
+    OptionsTest.class,
+    TraceTest.class,
+    MoveTest.class,
+    CopyTest.class,
+    MkcolTest.class,
+    PropfindTest.class,
+    ProppatchTest.class,
+    LockTest.class,
+    UnlockTest.class,
+    IfMatchTest.class,
+    IfTest.class,
+    DefaultHeaderTest.class,
+    NotExistTest.class,
+    MaxUploadSizeActionTest.class,
+    StandardIfHeaderApplyTest.class,
+    IgnoreLocksIfHeaderApplyTest.class,
+    Bug33505Test.class,
+    Bug34283Test.class,
+    Bug49057Test.class,
+})
 public class ActionTestSuite {
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(GetTest.class);
-		tests.addTestSuite(HeadTest.class);
-		tests.addTestSuite(PutTest.class);
-		tests.addTestSuite(DeleteTest.class);
-		tests.addTestSuite(OptionsTest.class);
-		tests.addTestSuite(TraceTest.class);
-		tests.addTestSuite(MoveTest.class);
-		tests.addTestSuite(CopyTest.class);
-		tests.addTestSuite(MkcolTest.class);
-		tests.addTestSuite(PropfindTest.class);
-		tests.addTestSuite(ProppatchTest.class);
-		tests.addTestSuite(LockTest.class);
-		tests.addTestSuite(UnlockTest.class);
-		tests.addTestSuite(IfMatchTest.class);
-		tests.addTestSuite(IfTest.class);
-		tests.addTestSuite(DefaultHeaderTest.class);
-		tests.addTestSuite(NotExistTest.class);
-		tests.addTestSuite(MaxUploadSizeActionTest.class);
-
-        tests.addTestSuite(StandardIfHeaderApplyTest.class);
-		tests.addTestSuite(IgnoreLocksIfHeaderApplyTest.class);
-        tests.addTestSuite(Bug33505Test.class);
-        tests.addTestSuite(Bug34283Test.class);
-        tests.addTestSuite(Bug49057Test.class);
-		return tests;
-	}
 }

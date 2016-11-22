@@ -60,7 +60,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -80,11 +79,6 @@ import com.openexchange.importexport.formats.Format;
 
 public class ICalImportTest extends AbstractICalImportTest {
 
-    // workaround for JUnit 3 runner
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(ICalImportTest.class);
-    }
-
     /**
      * Initially this tests if confidential is not imported at all as wanted in bug 7472. But bug 14337 state to import it as private.
      */
@@ -95,12 +89,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         assertTrue("Can import?", imp.canImport(sessObj, format, _folders(), null));
 
-        final List<ImportResult> results = imp.importData(
-            sessObj,
-            format,
-            new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)),
-            _folders(),
-            null);
+        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
         for (final ImportResult res : results) {
             assertTrue("Shouldn't have error", res.isCorrect());
         }
@@ -114,12 +103,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         assertTrue("Can import?", imp.canImport(sessObj, format, _folders(), null));
 
-        final List<ImportResult> results = imp.importData(
-            sessObj,
-            format,
-            new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)),
-            _folders(),
-            null);
+        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
         for (final ImportResult res : results) {
             assertTrue("Shouldn't have error", res.isCorrect());
         }
@@ -143,13 +127,9 @@ public class ICalImportTest extends AbstractICalImportTest {
         assertTrue("Has participants", appointmentObj.containsParticipants());
         final Participant[] participants = appointmentObj.getParticipants();
         assertEquals("Two participants", Integer.valueOf(2), Integer.valueOf(participants.length)); // ugly, but necessary to bridge
-                                                                                                    // JUNIT3/4
-        assertTrue(
-            "One user is " + testMailAddress + " (external user)",
-            testMailAddress.equals(participants[0].getEmailAddress()) || testMailAddress.equals(participants[1].getEmailAddress()));
-        assertTrue(
-            "One user is the user doing the import",
-            participants[0].getIdentifier() == userId || participants[1].getIdentifier() == userId);
+                                                                                                   // JUNIT3/4
+        assertTrue("One user is " + testMailAddress + " (external user)", testMailAddress.equals(participants[0].getEmailAddress()) || testMailAddress.equals(participants[1].getEmailAddress()));
+        assertTrue("One user is the user doing the import", participants[0].getIdentifier() == userId || participants[1].getIdentifier() == userId);
     }
 
     @Test
@@ -163,7 +143,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         assertTrue("Missing or unexpected number of warnigns: " + (null == warnings ? "no warnings" : Integer.toString(warnings.size())), null != warnings && 1 == warnings.size());
         final OXException warning = warnings.iterator().next();
-        
+
         assertEquals("Should be truncation error", Category.CATEGORY_TRUNCATED, warning.getCategory());
         warning.printStackTrace();
         // assertEquals("SUMMARY was too long",Integer.valueOf(CalendarField.TITLE.getAppointmentObjectID()), Integer.valueOf(((OXException.Truncated) warning.getProblematics()[0]).getId()));
@@ -197,10 +177,9 @@ public class ICalImportTest extends AbstractICalImportTest {
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7703", ctx, false);
 
         final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
-        final Appointment app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
-            res.getFolder()).intValue());
+        final Appointment app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(res.getFolder()).intValue());
         assertEquals("Comparing interval: ", Integer.valueOf(interval), Integer.valueOf(app.getInterval())); // ugly, but necessary to
-                                                                                                             // bridge JUnit 3/4
+                                                                                                            // bridge JUnit 3/4
     }
 
     @Test
@@ -244,7 +223,8 @@ public class ICalImportTest extends AbstractICalImportTest {
     // * Unexpected exception 25!
     // * Was related to the ATTENDEE property and it not differing between external and internal users
     // */
-    // @Test public void test6825_moreComplexAttendee() throws OXException, SQLException, OXException,
+    // @Test
+    //     public void test6825_moreComplexAttendee() throws OXException, SQLException, OXException,
     // NumberFormatException, OXException, UnsupportedEncodingException{
     // //setup
     // folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical6825Folder");
@@ -283,22 +263,7 @@ public class ICalImportTest extends AbstractICalImportTest {
         c.add(Calendar.HOUR, 1);
         c.add(Calendar.MINUTE, 30);
         final String end = Tools.formatForICal(c.getTime());
-        final String ical =
-            "BEGIN:VCALENDAR\n" +
-            "VERSION:2.0\n" +
-            "PRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\n" +
-            "BEGIN:VEVENT\n" +
-            "CLASS:PRIVATE\n" +
-            "DTSTART:" + start + "\n" +
-            "DTEND:" + end + "\n" +
-            "LOCATION:Olpe\n" +
-            "SUMMARY:Simple iCal Appointment\n" +
-            "DESCRIPTION:Notes here...\n" +
-            "BEGIN:VALARM\nTRIGGER:-PT" + alarm + "M\n" +
-            "ACTION:DISPLAY\n" +
-            "DESCRIPTION:Reminder\n" +
-            "END:VALARM\nEND:VEVENT\n" +
-            "END:VCALENDAR";
+        final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\n" + "BEGIN:VEVENT\n" + "CLASS:PRIVATE\n" + "DTSTART:" + start + "\n" + "DTEND:" + end + "\n" + "LOCATION:Olpe\n" + "SUMMARY:Simple iCal Appointment\n" + "DESCRIPTION:Notes here...\n" + "BEGIN:VALARM\nTRIGGER:-PT" + alarm + "M\n" + "ACTION:DISPLAY\n" + "DESCRIPTION:Reminder\n" + "END:VALARM\nEND:VEVENT\n" + "END:VCALENDAR";
 
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7473", ctx, false);
 
@@ -360,8 +325,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7470", ctx, false);
         final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
-        final Appointment app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(
-            res.getFolder()).intValue());
+        final Appointment app = appointments.getObjectById(Integer.valueOf(res.getObjectId()).intValue(), Integer.valueOf(res.getFolder()).intValue());
         final Participant[] participants = app.getParticipants();
         assertEquals("Two participants?", Integer.valueOf(2), Integer.valueOf(participants.length));
         boolean found = false;
@@ -374,51 +338,9 @@ public class ICalImportTest extends AbstractICalImportTest {
     }
 
     @Test
-    public void test16895() throws Exception{
-       	final String ical = "BEGIN:VCALENDAR\n"
-			+ "PRODID:Zimbra-Calendar-Provider\n"
-			+ "VERSION:2.0\n"
-			+ "CALSCALE:GREGORIAN\n"
-			+ "VERSION:2.0\n"
-			+ "METHOD:REQUEST\n"
-			+ "PRODID:-//Apple Inc.//iCal 4.0.3//EN\n"
-			+ "BEGIN:VTIMEZONE\n"
-			+ "TZID:Europe/Paris\n"
-			+ "BEGIN:DAYLIGHT\n"
-			+ "TZOFFSETFROM:+0100\n"
-			+ "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n"
-			+ "DTSTART:19810329T020000\n"
-			+ "TZNAME:GMT+02:00\n"
-			+ "TZOFFSETTO:+0200\n"
-			+ "END:DAYLIGHT\n"
-			+ "BEGIN:STANDARD\n"
-			+ "TZOFFSETFROM:+0200\n"
-			+ "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n"
-			+ "DTSTART:19961027T030000\n"
-			+ "TZNAME:GMT+01:00\n"
-			+ "TZOFFSETTO:+0100\n"
-			+ "END:STANDARD\n"
-			+ "END:VTIMEZONE\n"
-			+ "BEGIN:VEVENT\n"
-			+ "CREATED:20110916T122236Z\n"
-			+ "UID:32B3BF02-6736-4AF9-A6B0-68E290E7EFED\n"
-			+ "DTEND;TZID=\"Europe/Paris\":20110917T203000\n"
-			+ "ATTENDEE;CN=Frank Hoberg;CUTYPE=INDIVIDUAL;EMAIL=frank.hoberg@open-xchange.c\n"
-			+ " om;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:frank.hoberg@\n"
-			+ " open-xchange.com\n"
-			+ "ATTENDEE;CN=Douglas Randall (Randy) Parker;CUTYPE=INDIVIDUAL;EMAIL=randall.p\n"
-			+ " arker@scality.com;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailt\n"
-			+ " o:randall.parker@scality.com\n"
-			+ "ATTENDEE;CN=Marc Villemade;CUTYPE=INDIVIDUAL;PARTSTAT=ACCEPTED:mailto:m@scal\n"
-			+ " ity.com\n"
-			+ "TRANSP:OPAQUE\n"
-			+ "SUMMARY:Sync up with Frank@OX about meeting in DC\n"
-			+ "DTSTART;TZID=\"Europe/Paris\":20110917T193000\n"
-			+ "DTSTAMP:20110916T161511Z\n"
-			+ "ORGANIZER;CN=Marc Villemade:mailto:m@scality.com\n"
-			+ "SEQUENCE:15\n" //here's the culprit
-			+ "END:VEVENT\n"
-			+ "END:VCALENDAR";
+    public void test16895() throws Exception {
+        final String ical = "BEGIN:VCALENDAR\n" + "PRODID:Zimbra-Calendar-Provider\n" + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n" + "VERSION:2.0\n" + "METHOD:REQUEST\n" + "PRODID:-//Apple Inc.//iCal 4.0.3//EN\n" + "BEGIN:VTIMEZONE\n" + "TZID:Europe/Paris\n" + "BEGIN:DAYLIGHT\n" + "TZOFFSETFROM:+0100\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" + "DTSTART:19810329T020000\n" + "TZNAME:GMT+02:00\n" + "TZOFFSETTO:+0200\n" + "END:DAYLIGHT\n" + "BEGIN:STANDARD\n" + "TZOFFSETFROM:+0200\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" + "DTSTART:19961027T030000\n" + "TZNAME:GMT+01:00\n" + "TZOFFSETTO:+0100\n" + "END:STANDARD\n" + "END:VTIMEZONE\n" + "BEGIN:VEVENT\n" + "CREATED:20110916T122236Z\n" + "UID:32B3BF02-6736-4AF9-A6B0-68E290E7EFED\n" + "DTEND;TZID=\"Europe/Paris\":20110917T203000\n" + "ATTENDEE;CN=Frank Hoberg;CUTYPE=INDIVIDUAL;EMAIL=frank.hoberg@open-xchange.c\n" + " om;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:frank.hoberg@\n" + " open-xchange.com\n" + "ATTENDEE;CN=Douglas Randall (Randy) Parker;CUTYPE=INDIVIDUAL;EMAIL=randall.p\n" + " arker@scality.com;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailt\n" + " o:randall.parker@scality.com\n" + "ATTENDEE;CN=Marc Villemade;CUTYPE=INDIVIDUAL;PARTSTAT=ACCEPTED:mailto:m@scal\n" + " ity.com\n" + "TRANSP:OPAQUE\n" + "SUMMARY:Sync up with Frank@OX about meeting in DC\n" + "DTSTART;TZID=\"Europe/Paris\":20110917T193000\n" + "DTSTAMP:20110916T161511Z\n" + "ORGANIZER;CN=Marc Villemade:mailto:m@scality.com\n" + "SEQUENCE:15\n" //here's the culprit
+            + "END:VEVENT\n" + "END:VCALENDAR";
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "16895", ctx, false);
         assertFalse(res.hasError()); //simple test: this used to fail because a sequence number was set (implying it is an update) although the appointment does not exist on the ox yet
     }

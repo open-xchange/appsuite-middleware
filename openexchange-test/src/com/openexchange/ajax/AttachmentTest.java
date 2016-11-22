@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -82,14 +84,14 @@ public class AttachmentTest extends AbstractAJAXTest {
 
     protected List<AttachmentMetadata> clean = new ArrayList<AttachmentMetadata>();
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         sessionId = getSessionId();
         testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         testFile2 = new File(TestInit.getTestProperty("webdavPropertiesFile"));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         removeAttachments();
         super.tearDown();

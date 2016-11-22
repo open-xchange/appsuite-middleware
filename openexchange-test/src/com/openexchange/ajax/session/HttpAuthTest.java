@@ -49,12 +49,16 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -62,14 +66,13 @@ import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import junit.framework.TestCase;
 
 /**
  * Tests the HTTP authorization header on the login servlet.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class HttpAuthTest extends TestCase {
+public class HttpAuthTest {
 
     private String protocol;
     private String hostname;
@@ -80,7 +83,7 @@ public class HttpAuthTest extends TestCase {
         super();
     }
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
         AJAXConfig.init();
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);
@@ -89,11 +92,10 @@ public class HttpAuthTest extends TestCase {
         password = AJAXConfig.getProperty(Property.PASSWORD);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         login = null;
         password = null;
-        super.tearDown();
     }
 
     @Test

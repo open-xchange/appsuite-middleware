@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
@@ -69,7 +71,6 @@ import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
-import junit.framework.AssertionFailedError;
 
 /**
  * Attachment tests for tasks.
@@ -133,9 +134,7 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
                 break;
             }
         }
-        if (null == test) {
-            throw new AssertionFailedError("Can not find the created task with an attachment.");
-        }
+        Assert.assertNotNull("Can not find the created task with an attachment.", test);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
@@ -153,9 +152,7 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
                 break;
             }
         }
-        if (null == test) {
-            throw new AssertionFailedError("Can not find the created task with an attachment.");
-        }
+        Assert.assertNotNull("Can not find the created task with an attachment.", test);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 }

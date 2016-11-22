@@ -300,8 +300,8 @@ public class OAuthDispatcherServletTest {
         }
     }
 
-    @Test
-    public void testMissingToken() throws Exception {
+     @Test
+     public void testMissingToken() throws Exception {
         prepareRequest("read", null);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -309,8 +309,8 @@ public class OAuthDispatcherServletTest {
         assertEquals(0, responseStream.size());
     }
 
-    @Test
-    public void testMalformedToken() throws Exception {
+     @Test
+     public void testMalformedToken() throws Exception {
         prepareRequest("read", "?!$");
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -320,8 +320,8 @@ public class OAuthDispatcherServletTest {
         assertErrorResponse(expectedException);
     }
 
-    @Test
-    public void testUnknownToken() throws Exception {
+     @Test
+     public void testUnknownToken() throws Exception {
         prepareRequest("read", "idontexist");
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -331,8 +331,8 @@ public class OAuthDispatcherServletTest {
         assertErrorResponse(expectedException);
     }
 
-    @Test
-    public void testExpiredToken() throws Exception {
+     @Test
+     public void testExpiredToken() throws Exception {
         prepareRequest("read", expiredToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -342,8 +342,8 @@ public class OAuthDispatcherServletTest {
         assertErrorResponse(expectedException);
     }
 
-    @Test
-    public void testInsufficientScope1() throws Exception {
+     @Test
+     public void testInsufficientScope1() throws Exception {
         prepareRequest("write", readToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -351,8 +351,8 @@ public class OAuthDispatcherServletTest {
         assertErrorResponse(expectedException);
     }
 
-    @Test
-    public void testInsufficientScope2() throws Exception {
+     @Test
+     public void testInsufficientScope2() throws Exception {
         prepareRequest("readwrite", writeToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -360,8 +360,8 @@ public class OAuthDispatcherServletTest {
         assertErrorResponse(expectedException);
     }
 
-    @Test
-    public void testCustomScopeCheck2() throws Exception {
+     @Test
+     public void testCustomScopeCheck2() throws Exception {
         prepareRequest("readwrite", readToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -369,8 +369,8 @@ public class OAuthDispatcherServletTest {
         assertErrorResponse(expectedException);
     }
 
-    @Test
-    public void testCustomScopeCheck3() throws Exception {
+     @Test
+     public void testCustomScopeCheck3() throws Exception {
         prepareRequest("readwrite", writeToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -378,50 +378,50 @@ public class OAuthDispatcherServletTest {
         assertErrorResponse(expectedException);
     }
 
-    @Test
-    public void testCustomScopeCheck4() throws Exception {
+     @Test
+     public void testCustomScopeCheck4() throws Exception {
         prepareRequest("readwrite", readWriteToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);
     }
 
-    @Test
-    public void testGrantAllScope2() throws Exception {
+     @Test
+     public void testGrantAllScope2() throws Exception {
         prepareRequest("unprivileged", readToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);
     }
 
-    @Test
-    public void testScope1() throws Exception {
+     @Test
+     public void testScope1() throws Exception {
         prepareRequest("read", readToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);
     }
 
-    @Test
-    public void testScope2() throws Exception {
+     @Test
+     public void testScope2() throws Exception {
         prepareRequest("write", writeToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);
     }
 
-    @Test
-    public void testScope3() throws Exception {
+     @Test
+     public void testScope3() throws Exception {
         prepareRequest("readwrite", readWriteToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);
     }
 
-    @Test
-    public void testScope4() throws Exception {
+     @Test
+     public void testScope4() throws Exception {
         prepareRequest("read", readWriteToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);
     }
 
-    @Test
-    public void testScope5() throws Exception {
+     @Test
+     public void testScope5() throws Exception {
         prepareRequest("write", readWriteToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);

@@ -1,8 +1,10 @@
 
 package com.openexchange.webdav.xml.appointment.recurrence;
 
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.Locale;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -16,10 +18,7 @@ public class Bug8447Test extends AbstractRecurrenceTest {
         simpleDateFormatUTC.setTimeZone(timeZoneUTC);
     }
 
-    public void testDummy() {
-
-    }
-
+    @Test
     public void testBug8447() throws Exception {
         new Date();
 

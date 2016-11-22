@@ -17,11 +17,13 @@
 package org.apache.tika.mime;
 
 import java.util.List;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class PatternsTest extends TestCase {
-    private MimeTypes fullTypes = MimeTypes.getDefaultMimeTypes();
+public class PatternsTest {    private MimeTypes fullTypes = MimeTypes.getDefaultMimeTypes();
 
     private Patterns patterns;
     private MimeTypes types;
@@ -34,7 +36,8 @@ public class PatternsTest extends TestCase {
     }
 
     /** Test add() */
-    public void testAdd() throws MimeTypeException {
+         @Test
+     public void testAdd() throws MimeTypeException {
         try {
             patterns.add(null, text);
             fail("Expected IllegalArgumentException");
@@ -56,7 +59,8 @@ public class PatternsTest extends TestCase {
     }
 
     /** Test matches() */
-    public void testMatches() {
+         @Test
+     public void testMatches() {
         try {
             patterns.matches(null);
             fail("Expected IllegalArgumentException");
@@ -65,14 +69,16 @@ public class PatternsTest extends TestCase {
         }
     }
 
-    public void testExtension() throws MimeTypeException {
+         @Test
+     public void testExtension() throws MimeTypeException {
         MimeType doc = types.forName("application/vnd.ms-word");
         patterns.add("*.doc", doc);
 
         assertEquals(".doc", doc.getExtension());
     }
 
-    public void testExtensions() throws Exception{
+         @Test
+     public void testExtensions() throws Exception{
         MimeType jpeg = fullTypes.forName("image/jpeg");
 
         assertEquals(".jpg", jpeg.getExtension());

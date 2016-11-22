@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Before;
@@ -79,6 +81,7 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
     }
 
     //I think the message should be more like "Bullshit, you cannot make a change exception a series"    @Test
+    @Test
     public void testFailWhenTryingToMakeAChangeExceptionASeries() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 1);
@@ -90,6 +93,7 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
     }
 
     //I think it should be an exception like "Bullshit, you cannot make a change exception a series"    @Test
+    @Test
     public void testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 1);

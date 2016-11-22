@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -80,7 +83,7 @@ public class Bug40821Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         AJAXConfig.init();
@@ -93,7 +96,7 @@ public class Bug40821Test extends AbstractAJAXSession {
         language = getResponse.getString();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         SetRequest setRequest = new SetRequest(Tree.Language, language);
         client.execute(setRequest);

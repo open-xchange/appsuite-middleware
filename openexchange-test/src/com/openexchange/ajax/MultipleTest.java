@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -66,10 +68,6 @@ import com.openexchange.tools.URLParameter;
 
 @RunWith(ConcurrentTestRunner.class)
 public class MultipleTest extends AbstractAJAXTest {
-
-    public MultipleTest() {
-        super();
-    }
 
     private static final String MULTIPLE_URL = "/ajax/multiple";
 

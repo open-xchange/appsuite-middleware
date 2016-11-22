@@ -49,55 +49,51 @@
 
 package com.openexchange.calendar.printing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Calendar;
-import junit.framework.TestCase;
+import org.junit.Before;
 import org.junit.Test;
-
 
 /**
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CPCalendarTest extends TestCase {
+public class CPCalendarTest {
+
     private CPCalendar calendar;
 
-
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         calendar = new CPCalendar();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
-    public void testShouldWrapAroundProperlyForLastDayOfTheWeek(){
-        int[] days = new int[]{Calendar.SATURDAY, Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY};
+    public void testShouldWrapAroundProperlyForLastDayOfTheWeek() {
+        int[] days = new int[] { Calendar.SATURDAY, Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY };
 
-        for(int i = 1; i < days.length; i++){
+        for (int i = 1; i < days.length; i++) {
             calendar.setFirstDayOfWeek(days[i]);
-            assertEquals("Should find the day before", days[i-1], calendar.getLastDayOfWeek());
+            assertEquals("Should find the day before", days[i - 1], calendar.getLastDayOfWeek());
         }
     }
 
     @Test
-    public void testShouldListAllWorkDays(){
-        int[] workDays = new int[]{Calendar.SATURDAY, Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY};
+    public void testShouldListAllWorkDays() {
+        int[] workDays = new int[] { Calendar.SATURDAY, Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY };
         calendar.setWorkWeekStartingDay(Calendar.SATURDAY);
         calendar.setWorkWeekDurationInDays(workDays.length);
 
-        for(int workDay: workDays){
-            assertTrue("Should be a work day: "+workDay, calendar.getWorkWeekDays().contains(Integer.valueOf(workDay)));
+        for (int workDay : workDays) {
+            assertTrue("Should be a work day: " + workDay, calendar.getWorkWeekDays().contains(Integer.valueOf(workDay)));
         }
-        assertEquals("Should contain only the given days, not more: "+Arrays.toString(workDays), workDays.length , calendar.getWorkWeekDurationInDays());
+        assertEquals("Should contain only the given days, not more: " + Arrays.toString(workDays), workDays.length, calendar.getWorkWeekDurationInDays());
     }
 
     @Test
-    public void testShouldKnowFirstAndLastDayOfTheWeek(){
+    public void testShouldKnowFirstAndLastDayOfTheWeek() {
         calendar.setFirstDayOfWeek(Calendar.WEDNESDAY);
         assertEquals("First week day", Calendar.WEDNESDAY, calendar.getFirstDayOfWeek());
         assertEquals("Last week day", Calendar.TUESDAY, calendar.getLastDayOfWeek());
@@ -113,7 +109,7 @@ public class CPCalendarTest extends TestCase {
     }
 
     @Test
-    public void testShouldKnowFirstAndLastWorkingDayOfTheWeek(){
+    public void testShouldKnowFirstAndLastWorkingDayOfTheWeek() {
         calendar.setWorkWeekStartingDay(Calendar.WEDNESDAY);
         calendar.setWorkWeekDurationInDays(5);
         assertEquals("First work week day", Calendar.WEDNESDAY, calendar.getFirstDayOfWorkWeek());

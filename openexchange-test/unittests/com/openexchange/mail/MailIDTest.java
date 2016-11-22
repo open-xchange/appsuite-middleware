@@ -49,8 +49,11 @@
 
 package com.openexchange.mail;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import javax.mail.MessagingException;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.api.MailAccess;
@@ -82,6 +85,7 @@ public final class MailIDTest extends AbstractMailTest {
         super();
     }
 
+    @Test
     public void testMailID() throws OXException, MessagingException, IOException {
         final SessionObject session = getSession();
         final MailMessage[] mails = getMessages(getTestMailDir(), -1);
@@ -97,8 +101,7 @@ public final class MailIDTest extends AbstractMailTest {
             {
                 final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
                 if (inbox.isHoldsFolders()) {
-                    fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-                            TEMP_FOLDER).toString();
+                    fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(TEMP_FOLDER).toString();
                     parentFullname = INBOX;
                 } else {
                     fullname = TEMP_FOLDER;
@@ -112,11 +115,9 @@ public final class MailIDTest extends AbstractMailTest {
                 mfd.setSubscribed(false);
                 mfd.setName(TEMP_FOLDER);
 
-                final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-                        .createNewMailPermission(session, MailAccount.DEFAULT_ID);
+                final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
                 p.setEntity(getUser());
-                p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 p.setFolderAdmin(true);
                 p.setGroupPermission(false);
                 mfd.addPermission(p);
@@ -154,8 +155,7 @@ public final class MailIDTest extends AbstractMailTest {
                     assertTrue("Missing unread message count", mf.containsUnreadMessageCount());
                     if (fullname.equals(mf.getFullname())) {
                         found = true;
-                        assertFalse("Subscribed, but shouldn't be", MailProperties.getInstance().isSupportSubscription() ? mf
-                                .isSubscribed() : false);
+                        assertFalse("Subscribed, but shouldn't be", MailProperties.getInstance().isSupportSubscription() ? mf.isSubscribed() : false);
                     }
                 }
                 assertTrue("Newly created subfolder not found!", found);
@@ -170,8 +170,7 @@ public final class MailIDTest extends AbstractMailTest {
                     for (int i = 0; i < uids.length; i++) {
                         for (int j = 0; j < uids.length; j++) {
                             if (j != i) {
-                                assertTrue("ID of appended mail #" + (i + 1) + " is equal to ID of appended mail #"
-                                        + (j + 1), uids[i] != uids[j]);
+                                assertTrue("ID of appended mail #" + (i + 1) + " is equal to ID of appended mail #" + (j + 1), uids[i] != uids[j]);
                             }
                         }
                     }
@@ -192,8 +191,7 @@ public final class MailIDTest extends AbstractMailTest {
                     for (int i = 0; i < uids2.length; i++) {
                         for (int j = 0; j < uids2.length; j++) {
                             if (j != i) {
-                                assertTrue("ID of appended mail #" + (i + 1) + " is equal to ID of appended mail #"
-                                        + (j + 1), uids2[i] != uids2[j]);
+                                assertTrue("ID of appended mail #" + (i + 1) + " is equal to ID of appended mail #" + (j + 1), uids2[i] != uids2[j]);
                             }
                         }
                     }

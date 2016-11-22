@@ -49,12 +49,15 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.junit.After;
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -88,7 +91,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         adminClient = new AJAXClient(User.OXAdmin);
@@ -108,7 +111,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, cap, emptySet, emptySet, userCreds);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         try {
             Context ctx = new Context(adminClient.getValues().getContextId());

@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -76,7 +80,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -112,7 +116,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         manager.insertFolderOnServer(folderObject2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         manager.cleanUp();
     }

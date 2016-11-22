@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertTrue;
 import java.util.List;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -103,7 +105,7 @@ public class ShareFolderTest extends AbstractAJAXSession {
         testFolder.setLastModified(client.execute(new GetRequest(EnumAPI.OX_OLD, testFolder.getObjectID())).getTimestamp());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (secondClient != null) {
             secondClient.logout();

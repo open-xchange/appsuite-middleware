@@ -1,6 +1,8 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;

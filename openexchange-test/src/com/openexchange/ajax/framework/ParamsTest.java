@@ -49,22 +49,22 @@
 
 package com.openexchange.ajax.framework;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-import junit.framework.TestCase;
 
 /**
  * Tests for the {@link Params} class.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ParamsTest extends TestCase {
+public class ParamsTest {
 
     protected Params defaultParams;
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         defaultParams = new Params();
         defaultParams.add("key1", "value1");
         defaultParams.add(new Parameter("key2", "value2"));

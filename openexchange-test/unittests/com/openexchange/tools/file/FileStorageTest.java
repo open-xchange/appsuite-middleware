@@ -49,38 +49,29 @@
 
 package com.openexchange.tools.file;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.impl.LocalFileStorage;
 import com.openexchange.tools.RandomString;
 
 /**
  * Test for the file storage.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class FileStorageTest extends TestCase {
+public class FileStorageTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStorageTest.class);
 
-
-
-    @Override
-	protected void setUp() throws Exception {
-		// Nothing to do
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		// Nothing to do
-		super.tearDown();
-	}
-
-	/**
+    /**
      * Test method for
      * 'com.openexchange.tools.file.FileStorage.getInstance(Object...)'.
+     * 
      * @throws Throwable if an error occurs.
      */
     public final void testGetInstance() throws Throwable {
@@ -95,20 +86,19 @@ public class FileStorageTest extends TestCase {
     /**
      * Test method for
      * 'com.openexchange.tools.file.FileStorage.saveNewFile(InputStream)'.
+     * 
      * @throws Throwable if an error occurs.
      */
     public final void testSaveNewFile() throws Throwable {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         final String fileContent = RandomString.generateLetter(100);
-        final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
-            .getBytes(com.openexchange.java.Charsets.UTF_8));
+        final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
         final com.openexchange.filestore.FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
         assertNotNull("Can't create new file in file storage.", identifier);
     }
-
 
     /**
      * Test for bug 3978.
@@ -140,7 +130,7 @@ public class FileStorageTest extends TestCase {
      * Test for bug 3978.
      */
     public final void testExceptionOnUnknown() throws Throwable {
-        File tempFile =  File.createTempFile("filestorage", ".tmp");
+        File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         final com.openexchange.filestore.FileStorage storage = new LocalFileStorage(tempFile.toURI());
         try {
@@ -157,19 +147,16 @@ public class FileStorageTest extends TestCase {
      * when checking for their existence (using the root user, not the open-xchange user).
      */
     public final void testDeleteFile() throws Throwable {
-        final ByteArrayInputStream baos = new ByteArrayInputStream(
-        		RandomString.generateLetter(100).getBytes(com.openexchange.java.Charsets.UTF_8));
+        final ByteArrayInputStream baos = new ByteArrayInputStream(RandomString.generateLetter(100).getBytes(com.openexchange.java.Charsets.UTF_8));
 
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         final com.openexchange.filestore.FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
 
-        assertTrue( storage.deleteFile(identifier));
+        assertTrue(storage.deleteFile(identifier));
         assertFalse(storage.deleteFile(identifier));
     }
-
-
 
     private static void rmdir(final File tempFile) {
         if (tempFile.isDirectory()) {

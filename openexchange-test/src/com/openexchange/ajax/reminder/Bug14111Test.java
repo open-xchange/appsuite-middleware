@@ -49,11 +49,16 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -91,7 +96,7 @@ public class Bug14111Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -137,7 +142,7 @@ public class Bug14111Test extends AbstractAJAXSession {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         // Delete the exception.
         final com.openexchange.ajax.appointment.action.DeleteRequest delReq1 = new com.openexchange.ajax.appointment.action.DeleteRequest(exception, false);

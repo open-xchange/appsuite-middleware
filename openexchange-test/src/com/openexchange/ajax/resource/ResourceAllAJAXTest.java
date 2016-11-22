@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.resource;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceAllRequest;
@@ -79,6 +81,7 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
     /**
      * Tests the <code>action=all</code>
      */
+    @Test
     public void testAll() throws OXException, JSONException, IOException, SAXException {
         int id = -1;
         try {

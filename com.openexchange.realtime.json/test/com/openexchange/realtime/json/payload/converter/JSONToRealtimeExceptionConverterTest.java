@@ -55,9 +55,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.json.payload.converter.JSONToRealtimeExceptionConverter;
-import com.openexchange.realtime.json.payload.converter.JSONToStackTraceElementConverter;
-import com.openexchange.realtime.json.payload.converter.JSONToThrowableConverter;
 import com.openexchange.realtime.payload.converter.sim.SimpleConverterSim;
 
 
@@ -83,13 +80,13 @@ public class JSONToRealtimeExceptionConverterTest {
         simpleConverter.registerConverter(new JSONToThrowableConverter());
     }
 
-    @Test
-    public void testGetOutputFormat() {
+     @Test
+     public void testGetOutputFormat() {
         assertEquals(RealtimeException.class.getSimpleName(), jsonToRealtimeExceptionConverter.getOutputFormat());
     }
 
-    @Test
-    public void testConvert() throws OXException {
+     @Test
+     public void testConvert() throws OXException {
         RealtimeException realtimeException = RealtimeException.class.cast(jsonToRealtimeExceptionConverter.convert(
             realtimeExceptionJSON,
             null,
@@ -129,8 +126,8 @@ public class JSONToRealtimeExceptionConverterTest {
         
     }
 
-    @Test
-    public void testGetInputFormat() {
+     @Test
+     public void testGetInputFormat() {
         assertEquals("json", jsonToRealtimeExceptionConverter.getInputFormat());
     }
 
