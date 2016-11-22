@@ -96,6 +96,7 @@ import com.openexchange.mail.json.compose.ComposeContext;
 import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -326,16 +327,22 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * @return The resulting <code>File</code> instance
      */
     protected File prepareMetadata(MailPart attachment, Item folder, Date expiry, Locale locale) {
-        // Determine attachment file name
-        String name = sanitizeName(attachment.getFileName(), StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE));
+        // Determine & (possibly) decode attachment file name
+        String fileName = attachment.getFileName();
+        if (Strings.isEmpty(fileName)) {
+            fileName = StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE);
+        } else {
+            fileName = MimeMessageUtility.decodeMultiEncodedHeader(fileName);
+            fileName = sanitizeName(fileName, StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE));
+        }
 
         // Create a file instance for it
         File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folder.getId());
-        file.setFileName(name);
+        file.setFileName(fileName);
         file.setFileMIMEType(attachment.getContentType().getBaseType());
-        file.setTitle(name);
+        file.setTitle(fileName);
         file.setFileSize(attachment.getSize());
         if (null != expiry) {
             file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
@@ -355,6 +362,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             toSanitize = defaultName;
         } else {
             toSanitize = toSanitize.trim();
+
             boolean sanitize = true;
             while (sanitize) {
                 sanitize = false;

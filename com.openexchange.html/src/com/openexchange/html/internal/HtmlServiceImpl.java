@@ -540,7 +540,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
-            html = dropExtraLt(html);
+            html = dropExtraChar(html);
 
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
@@ -620,13 +620,20 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_EXTRA_LT = Pattern.compile("(<[a-zA-Z_0-9-]+)<");
+    private static final Pattern PATTERN_EXTRA_CHAR = Pattern.compile("(<[a-zA-Z_0-9-]++)(/\\s[^>]|[^\\s>/])");
 
-    private static String dropExtraLt(String html) {
+    /**
+     * Attempts to drop any illegal, extraneous character that is trailing a valid tag start sequence;<br>
+     * e.g. "&lt;a&lt; href=..." or "&lt;a~ href=..."
+     *
+     * @param html The HTML content to process
+     * @return The processed HTML content
+     */
+    private static String dropExtraChar(String html) {
         if (null == html) {
             return html;
         }
-        Matcher m = PATTERN_EXTRA_LT.matcher(html);
+        Matcher m = PATTERN_EXTRA_CHAR.matcher(html);
         if (!m.find()) {
             /*
              * No extra LT found
@@ -634,8 +641,14 @@ public final class HtmlServiceImpl implements HtmlService {
             return html;
         }
         StringBuffer sb = new StringBuffer(html.length());
+        String extraneous;
         do {
-            m.appendReplacement(sb, "$1");
+            extraneous = m.group(2);
+            if (extraneous.length() == 1) {
+                m.appendReplacement(sb, "$1");
+            } else {
+                m.appendReplacement(sb, "$1" + extraneous.substring(1));
+            }
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();

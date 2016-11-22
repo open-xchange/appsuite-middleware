@@ -62,6 +62,7 @@ import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.json.compose.ComposeHandler;
@@ -159,7 +160,7 @@ public class ShareComposeActivator extends HousekeepingActivator {
                                 return false;
                             }
 
-                            return Utilities.hasCapabilities(capabilitySet, "drive", "share_links");
+                            return Utilities.hasCapabilities(capabilitySet, Permission.INFOSTORE.getCapabilityName(), "share_links");
                         }
 
                         return true;

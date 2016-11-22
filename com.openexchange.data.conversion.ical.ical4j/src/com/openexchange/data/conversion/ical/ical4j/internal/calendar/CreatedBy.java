@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.java.Strings;
@@ -136,6 +137,8 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
             if (null != userSettingMail) {
                 mail = userSettingMail.getSendAddr();
             }
+        } else {
+            mail = UserStorage.getInstance().getUser(userID, context).getMail();
         }
         if (null == mail) {
             mail = user.getDisplayName();

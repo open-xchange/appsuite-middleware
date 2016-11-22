@@ -71,6 +71,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
@@ -84,6 +85,11 @@ import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.notification.service.CommonNotificationVariables;
 import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -363,14 +369,39 @@ public class DefaultMessageGenerator implements MessageGenerator {
 
         // Alter text content to include share reference
         TextBodyMailPart textPart = composeContext.getTextPart().copy();
-        textPart.setPlainText(null);
 
-        {
+        if (composeContext.isPlainText()) {
+            String plainText = textPart.getPlainText();
+            if (null == plainText) {
+                String text = (String) textPart.getContent();
+                StringBuilder textBuilder = new StringBuilder(text.length() + 512);
+
+                // Append the prefix that notifies about to access the message's attachment via provided share link
+                textBuilder.append(generatePrefix(locale, info, shareReference, false, false));
+
+                // Append actual text
+                textBuilder.append(text);
+
+                // Replace text with composed one
+                textPart.setText(textBuilder.toString());
+                composedMessage.setBodyPart(textPart);
+            } else {
+                StringBuilder plainTextBuilder = new StringBuilder(plainText.length() + 512);
+
+                // Append the prefix that notifies about to access the message's attachment via provided share link
+                plainTextBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), true));
+
+                plainTextBuilder.append(plainText);
+
+                textPart.setPlainText(plainTextBuilder.toString());
+                composedMessage.setBodyPart(textPart);
+            }
+        } else {
             String text = (String) textPart.getContent();
             StringBuilder textBuilder = new StringBuilder(text.length() + 512);
 
             // Append the prefix that notifies about to access the message's attachment via provided share link
-            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate()));
+            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), false));
 
             // Append actual text
             textBuilder.append(text);
@@ -423,7 +454,11 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The generated prefix
      * @throws OXException If generating prefix from template fails
      */
-    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate) throws OXException {
+    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate, boolean isPlainText) throws OXException {
+        if (isPlainText) {
+            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+            return htmlService.html2text(generatePrefixPlain(locale, info, shareReference), true);
+        }
         return fromTemplate ? loadPrefixFromTemplate(locale, info, shareReference) : generatePrefixPlain(locale, info, shareReference);
     }
 
@@ -450,8 +485,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Intro
         {
             String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
-            FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
-            String fullName = fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator);
+            String fullName = getFullName(info, shareReference, translator);
             translated = String.format(translated, fullName);
             textBuilder.append(htmlFormat(translated)).append("<br>");
         }
@@ -459,11 +493,10 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Files
         {
             textBuilder.append("<ul>");
-            List<String> fileNames = new ArrayList<String>(items.size());
             for (Item item : items) {
                 textBuilder.append("<li>");
                 String fileName = item.getName();
-                fileNames.add(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : htmlFormat(fileName));
+                textBuilder.append(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : htmlFormat(fileName));
                 textBuilder.append("</li>");
             }
             textBuilder.append("</ul>").append("<br>");
@@ -541,8 +574,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Intro
         {
             String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
-            FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
-            String fullName = StringEscapeUtils.escapeHtml(fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator));
+            String fullName = getFullName(info, shareReference, translator);
             translated = String.format(translated, fullName);
             vars.put(VARIABLE_INTRO, translated);
         }
@@ -590,6 +622,63 @@ public class DefaultMessageGenerator implements MessageGenerator {
         }
 
         return compileTemplate(getTemplateName(), vars, templateService);
+    }
+
+    /**
+     * Gets the full name to use
+     *
+     * @param info The message info
+     * @param shareReference The share reference
+     * @param translator The translator
+     * @return The full name to use
+     * @throws OXException If full name cannot be determined
+     */
+    protected String getFullName(ShareComposeMessageInfo info, ShareReference shareReference, Translator translator) throws OXException {
+        // Check by "From" address
+        InternetAddress[] from = info.getSource().getFrom();
+        if (null != from) {
+            for (InternetAddress fromAddr : from) {
+                String personal = fromAddr.getPersonal();
+                if (false == Strings.isEmpty(personal)) {
+                    return StringEscapeUtils.escapeHtml(personal);
+                }
+            }
+        }
+
+        // Try to determine by account
+        int accountId = info.getSource().getAccountId();
+        if (accountId > 0) {
+            // Ensure account identifier does not point to Unified Mail account
+            ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+            UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+            if ((null == management) || (accountId != management.getUnifiedINBOXAccountID(info.getComposeContext().getSession()))) {
+                MailAccountStorageService storageService = registry.getService(MailAccountStorageService.class);
+
+                String personal;
+                String address;
+                try {
+                    MailAccount mailAccount = storageService.getMailAccount(accountId, shareReference.getUserId(), shareReference.getContextId());
+                    personal = mailAccount.getPersonal();
+                    address = mailAccount.getPrimaryAddress();
+                } catch (OXException e) {
+                    if (false == MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+                        throw e;
+
+                    }
+
+                    // Retry with transport account
+                    TransportAccount transportAccount = storageService.getTransportAccount(accountId, shareReference.getUserId(), shareReference.getContextId());
+                    personal = transportAccount.getPersonal();
+                    address = transportAccount.getPrimaryAddress();
+                }
+
+                return StringEscapeUtils.escapeHtml(Strings.isEmpty(personal) ? address : personal);
+            }
+        }
+
+        // Last but not least, build the full name from associated user
+        FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
+        return StringEscapeUtils.escapeHtml(fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator));
     }
 
     /**

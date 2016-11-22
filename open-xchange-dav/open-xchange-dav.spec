@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 15
+%define        ox_release 16
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -90,6 +90,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Sat Nov 12 2016 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2016-11-21 (3731)
 * Tue Nov 08 2016 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2016-11-07 (3678)
 * Wed Oct 26 2016 Steffen Templin <marcus.klein@open-xchange.com>
