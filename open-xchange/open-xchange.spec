@@ -33,8 +33,6 @@ Requires:         open-xchange-authorization
 Requires:         open-xchange-mailstore
 Requires:         open-xchange-httpservice
 Requires:         open-xchange-smtp >= @OXVERSION@
-Conflicts:        open-xchange-linkedin
-Obsoletes:        open-xchange-linkedin
 %if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 Requires(pre):    systemd
 Requires(post):   systemd
