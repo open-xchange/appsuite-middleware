@@ -101,7 +101,6 @@ import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ShareLink;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
-import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.exception.OXException;
@@ -171,7 +170,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         if (null != client) {
-            client.execute(new StopSMTPRequest());
+//            client.execute(new StopSMTPRequest());
             deleteFoldersSilently(client, foldersToDelete);
             deleteFilesSilently(client, filesToDelete.values());
         }

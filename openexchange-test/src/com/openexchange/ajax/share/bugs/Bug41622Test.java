@@ -71,7 +71,6 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
-import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.impl.OCLPermission;
@@ -114,7 +113,7 @@ public class Bug41622Test extends ShareTest {
             for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
                 deleteFoldersSilently(entry.getKey(), entry.getValue());
                 if (false == entry.getKey().equals(client)) {
-                    entry.getKey().execute(new StopSMTPRequest());
+//                    entry.getKey().execute(new StopSMTPRequest());
                     entry.getKey().logout();
                 }
             }

@@ -62,7 +62,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.ajax.onboarding.actions.StartSMTPRequest;
-import com.openexchange.ajax.onboarding.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
@@ -90,7 +89,7 @@ public class DAVSyncProfileTest extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         if (null != client) {
-            client.execute(new StopSMTPRequest());
+//            client.execute(new StopSMTPRequest());
         }
         super.tearDown();
     }

@@ -78,7 +78,6 @@ import com.google.common.io.ByteStreams;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.provider.actions.StartSMTPRequest;
-import com.openexchange.ajax.oauth.provider.actions.StopSMTPRequest;
 import com.openexchange.ajax.oauth.provider.protocol.GETRequest;
 import com.openexchange.ajax.oauth.provider.protocol.GETResponse;
 import com.openexchange.ajax.oauth.provider.protocol.HttpTools;
@@ -318,7 +317,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
             assertSignatureText(message.requireHtml(), "");
             assertSignatureImage(message);
         } finally {
-            ajaxClient.execute(new StopSMTPRequest());
+//            ajaxClient.execute(new StopSMTPRequest());
         }
     }
 
