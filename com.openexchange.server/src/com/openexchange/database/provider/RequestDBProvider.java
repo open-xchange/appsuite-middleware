@@ -55,6 +55,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
 
@@ -222,7 +223,7 @@ public class RequestDBProvider implements DBProvider {
                 tx.writeConnection.setAutoCommit(!tx.transactional);
             }
         } catch (final SQLException e) {
-            return null;
+            throw new OXException(OXExceptionConstants.CODE_DEFAULT, e.getMessage(), e);
         }
         if(tx != null && tx.ctx == null) {
             tx.ctx = ctx;
