@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.subscribe.linkedin.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -70,11 +70,14 @@ public class DropLinkedInSubscriptionsUpdateTask extends UpdateTaskAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DropLinkedInSubscriptionsUpdateTask.class);
 
+    private final DatabaseService databaseService;
+
     /**
      * Initialises a new {@link DropLinkedInSubscriptionsUpdateTask}.
      */
-    public DropLinkedInSubscriptionsUpdateTask() {
+    public DropLinkedInSubscriptionsUpdateTask(DatabaseService databaseService) {
         super();
+        this.databaseService = databaseService;
     }
 
     /*
@@ -88,7 +91,7 @@ public class DropLinkedInSubscriptionsUpdateTask extends UpdateTaskAdapter {
         // Get the writeable connection
         Connection writeConnection = null;
         try {
-            writeConnection = Database.getNoTimeout(contextId, true);
+            writeConnection = databaseService.getForUpdateTask(contextId);
         } catch (OXException e) {
             throw e;
         }
@@ -108,7 +111,7 @@ public class DropLinkedInSubscriptionsUpdateTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(statement);
-            Database.backNoTimeout(contextId, true, writeConnection);
+            databaseService.backForUpdateTask(writeConnection);
         }
     }
 

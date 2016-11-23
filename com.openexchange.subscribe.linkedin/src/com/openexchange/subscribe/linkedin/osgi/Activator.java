@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.linkedin.osgi;
 
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
@@ -79,6 +80,9 @@ public class Activator extends HousekeepingActivator {
 
         // react dynamically to the appearance/disappearance of ContextService
         track(ContextService.class, new ContextServiceRegisterer(context, this));
+
+        // Track the update task tracker
+        track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
 
         openTrackers();
     }
