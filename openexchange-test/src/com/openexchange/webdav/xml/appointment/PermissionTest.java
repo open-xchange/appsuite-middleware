@@ -13,15 +13,6 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class PermissionTest extends AppointmentTest {
 
-    public PermissionTest() {
-        super();
-    }
-
-    @Test
-    public void testDummy() {
-
-    }
-
     @Test
     public void testInsertAppointmentInPrivateFolderWithoutPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();

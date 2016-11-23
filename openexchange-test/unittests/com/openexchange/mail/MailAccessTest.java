@@ -66,20 +66,6 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public final class MailAccessTest extends AbstractMailTest {
 
-    /**
-     *
-     */
-    public MailAccessTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailAccessTest(final String name) {
-        super();
-    }
-
     @Test
     public void testMailAccess() throws OXException, InterruptedException {
         final SessionObject session = getSession();

@@ -12,15 +12,6 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class ConfirmTest extends AppointmentTest {
 
-    public ConfirmTest() {
-        super();
-    }
-
-    @Test
-    public void testDummy() {
-
-    }
-
     @Test
     public void testConfirm() throws Exception {
         final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);

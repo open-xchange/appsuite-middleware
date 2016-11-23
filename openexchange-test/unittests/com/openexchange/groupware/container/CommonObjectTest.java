@@ -12,7 +12,6 @@ import org.junit.Test;
 
 public class CommonObjectTest extends FolderChildObjectTest {
 
-    @Override
     @Test
     public void testAttrAccessors() {
 

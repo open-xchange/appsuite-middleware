@@ -7,10 +7,6 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class NewTest extends FolderTest {
 
-    public NewTest() {
-        super();
-    }
-
     @Test
     public void testInsertPrivateFolderCalendar() throws Exception {
         final FolderObject folderObj = createFolderObject(userId, "testInsertPrivateFolderCalendar", FolderObject.CALENDAR, false);

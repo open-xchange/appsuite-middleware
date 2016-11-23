@@ -78,23 +78,6 @@ public final class MailBugfixTest extends AbstractMailTest {
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
     /**
-     * Initializes a new {@link MailBugfixTest}
-     */
-    public MailBugfixTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link MailBugfixTest}
-     *
-     * @param name
-     *            The name
-     */
-    public MailBugfixTest(final String name) {
-        super();
-    }
-
-    /**
      * Test for <a href=
      * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12357">bug
      * #12357</a>:<br>

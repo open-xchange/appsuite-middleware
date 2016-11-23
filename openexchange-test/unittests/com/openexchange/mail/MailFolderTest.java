@@ -65,20 +65,6 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public class MailFolderTest extends AbstractMailTest {
 
-    /**
-     * Default constructor
-     */
-    public MailFolderTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailFolderTest(final String name) {
-        super();
-    }
-
     @Test
     public void testGetINBOXFolder() {
         try {

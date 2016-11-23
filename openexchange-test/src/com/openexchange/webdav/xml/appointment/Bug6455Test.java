@@ -10,15 +10,6 @@ import com.openexchange.webdav.xml.AppointmentTest;
 
 public class Bug6455Test extends AppointmentTest {
 
-    public Bug6455Test() {
-        super();
-    }
-
-    @Test
-    public void testDummy() {
-
-    }
-
     @Test
     public void testBug6455() throws Exception {
         final StringBuffer stringBuffer = new StringBuffer();

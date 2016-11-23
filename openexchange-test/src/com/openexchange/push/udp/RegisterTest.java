@@ -5,7 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import org.junit.Before;
 import org.junit.Test;
+import com.meterware.httpunit.WebConversation;
+import com.openexchange.webdav.xml.GroupUserTest;
 
 public class RegisterTest {
 
@@ -29,15 +32,17 @@ public class RegisterTest {
 
     private int contextId = 0;
 
-    public RegisterTest(final String name) {
-        super();
-    }
+    protected static final String localAddress = "localhost";
 
-    public RegisterTest(final String name, final DatagramSocket datagramSocket, final int userId, final int contextId) {
-        super();
-        this.datagramSocket = datagramSocket;
-        this.userId = userId;
-        this.contextId = contextId;
+    protected static final int localPort = 33890;
+    
+    @Before
+    public void setUp() throws Exception {
+        final WebConversation webConversation = new WebConversation();
+
+        this.datagramSocket = new DatagramSocket(localPort, InetAddress.getByName(localAddress));
+        this.userId = GroupUserTest.getUserId(webConversation, "localhost", "offspring", "netline", "defaultcontext");;
+        this.contextId = GroupUserTest.getContextId(webConversation, "localhost", "offspring", "netline", "defaultcontext");;
     }
 
     @Test
@@ -49,7 +54,7 @@ public class RegisterTest {
         register(datagramSocket, userId, contextId, host, port);
     }
 
-    public static void register(final DatagramSocket datagramSocket, final int userId, final int contextId, final String host, final int port) throws Exception {
+    private static void register(final DatagramSocket datagramSocket, final int userId, final int contextId, final String host, final int port) throws Exception {
         final StringBuffer body = new StringBuffer();
         body.append(REGISTER);
         body.append('\1');

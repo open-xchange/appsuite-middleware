@@ -62,10 +62,6 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class ListTest extends FolderTest {
 
-    public ListTest() {
-        super();
-    }
-
     @Test
     public void testPropFindWithModified() throws Exception {
         FolderObject folderObj = createFolderObject(userId, "testPropFindWithModified1", FolderObject.CONTACT, false);

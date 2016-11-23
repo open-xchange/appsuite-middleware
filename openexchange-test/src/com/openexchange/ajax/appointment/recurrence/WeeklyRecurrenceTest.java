@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
 public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
@@ -15,11 +14,6 @@ public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
     public WeeklyRecurrenceTest() {
         super();
         simpleDateFormatUTC.setTimeZone(timeZoneUTC);
-    }
-
-    @Test
-    public void testDummy() {
-
     }
 
     public void _notestWeeklyRecurrenceFromWinter2SummerTime() throws Exception {

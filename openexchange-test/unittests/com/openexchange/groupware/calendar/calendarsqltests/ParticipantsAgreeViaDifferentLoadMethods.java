@@ -51,6 +51,7 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 
 import java.util.Arrays;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -58,6 +59,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
 
+    @Test
     public void testParticipantsAgreeViaDifferentLoadMethods() throws Exception {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1);
         appointments.save(appointment);

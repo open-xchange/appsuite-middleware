@@ -75,10 +75,6 @@ public final class Bug12338Test extends AbstractWebDAVSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug12338Test.class);
 
-    public Bug12338Test() {
-        super();
-    }
-
     @Test
     public void testStrangeExternal() throws Throwable {
         final WebDAVClient client = getClient();

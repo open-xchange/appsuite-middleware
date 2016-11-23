@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.impl.LocalFileStorage;
 import com.openexchange.tools.RandomString;
@@ -74,6 +75,7 @@ public class FileStorageTest {
      * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public final void testGetInstance() throws Throwable {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
@@ -89,6 +91,7 @@ public class FileStorageTest {
      * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public final void testSaveNewFile() throws Throwable {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
@@ -103,6 +106,7 @@ public class FileStorageTest {
     /**
      * Test for bug 3978.
      */
+    @Test
     public final void testExceptionOnUnavailableFilestore() throws Throwable {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
@@ -129,6 +133,7 @@ public class FileStorageTest {
     /**
      * Test for bug 3978.
      */
+    @Test
     public final void testExceptionOnUnknown() throws Throwable {
         File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
@@ -146,6 +151,7 @@ public class FileStorageTest {
      * Test for changes related to bug 19600, which was caused by creating directories
      * when checking for their existence (using the root user, not the open-xchange user).
      */
+    @Test
     public final void testDeleteFile() throws Throwable {
         final ByteArrayInputStream baos = new ByteArrayInputStream(RandomString.generateLetter(100).getBytes(com.openexchange.java.Charsets.UTF_8));
 

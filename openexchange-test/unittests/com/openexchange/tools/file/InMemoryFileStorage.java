@@ -77,10 +77,6 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     private Context ctx;
 
-    public InMemoryFileStorage() {
-        super();
-    }
-
     @Override
     protected Set<String> delete(final String[] names) {
         for (String name : names) {

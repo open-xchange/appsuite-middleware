@@ -136,11 +136,6 @@ public class SessiondTest {
     }
 
     @Test
-    public void testDummy() {
-
-    }
-
-    @Test
     public void testAddSession() throws Exception {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);

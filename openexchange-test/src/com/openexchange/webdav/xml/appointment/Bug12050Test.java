@@ -69,10 +69,6 @@ public class Bug12050Test extends AppointmentTest {
     private Appointment exception;
     private Appointment exceptionUpdate;
 
-    public Bug12050Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

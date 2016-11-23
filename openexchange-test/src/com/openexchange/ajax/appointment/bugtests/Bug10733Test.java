@@ -17,15 +17,6 @@ public class Bug10733Test extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug10733Test.class);
 
-    public Bug10733Test() {
-        super();
-    }
-
-    @Test
-    public void testDummy() {
-
-    }
-
     @Test
     public void testBug10733() throws Exception {
         final StringBuffer stringBuffer = new StringBuffer();

@@ -77,14 +77,6 @@ public final class MailIDTest extends AbstractMailTest {
 
     private static final String TEMP_FOLDER = "TempFolder";
 
-    public MailIDTest() {
-        super();
-    }
-
-    public MailIDTest(final String name) {
-        super();
-    }
-
     @Test
     public void testMailID() throws OXException, MessagingException, IOException {
         final SessionObject session = getSession();

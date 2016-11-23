@@ -63,8 +63,6 @@ import com.openexchange.java.SimpleTokenizer;
  */
 public class AutoCompleteAdapterTest {
 
-    public AutoCompleteAdapterTest() {}
-
     @Test
     public void testDetectWildcard() throws Exception {
         String query = "hund wu?st hallo* ot*to d?d?* * hier";

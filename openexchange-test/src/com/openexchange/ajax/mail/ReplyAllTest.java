@@ -74,10 +74,6 @@ import com.openexchange.groupware.search.ContactSearchObject;
  */
 public class ReplyAllTest extends AbstractReplyTest {
 
-    public ReplyAllTest() {
-        super();
-    }
-
     public List<Contact> extract(final int amount, final Contact[] source, final List<String> excludedEmail) {
         final List<Contact> returnees = new LinkedList<Contact>();
         int used = 0;

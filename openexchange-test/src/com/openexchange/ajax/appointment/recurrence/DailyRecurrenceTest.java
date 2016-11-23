@@ -19,11 +19,6 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
     }
 
     @Test
-    public void testDummy() {
-
-    }
-
-    @Test
     public void testDailyRecurrenceFromWinter2SummerTime() throws Exception {
         final Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
 

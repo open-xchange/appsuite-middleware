@@ -46,17 +46,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     protected MailMessage[] testmessages = null;
 
-    /**
-     *
-     */
-    protected MessageStorageTest() {
-        super();
-    }
-
-    protected MessageStorageTest(final String name) {
-        super();
-    }
-
     protected static MailField[][] generateVariations() {
         final MailField[] values = MailField.values();
         final int number = 1 << values.length;

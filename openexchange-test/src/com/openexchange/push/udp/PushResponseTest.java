@@ -4,7 +4,15 @@ package com.openexchange.push.udp;
 import static org.junit.Assert.assertEquals;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.Date;
+import org.junit.Before;
 import org.junit.Test;
+import com.meterware.httpunit.WebConversation;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.FolderTest;
+import com.openexchange.webdav.xml.GroupUserTest;
 
 public class PushResponseTest {
 
@@ -18,14 +26,29 @@ public class PushResponseTest {
 
     private int contextId = 0;
 
-    public PushResponseTest(final String name) {
-        super();
-    }
+    protected static final String localAddress = "localhost";
 
-    public PushResponseTest(final String name, final DatagramSocket datagramSocket, final int folderId, final int contextId) {
-        super();
-        this.datagramSocket = datagramSocket;
-        this.folderId = folderId;
+    protected static final int localPort = 33890;
+
+    @Before
+    public void setUp() throws Exception {
+        final WebConversation webConversation = new WebConversation();
+        final int contextId = GroupUserTest.getContextId(webConversation, "localhost", "offspring", "netline", "defaultcontext");
+
+        final int appointmentFolderId = FolderTest.getAppointmentDefaultFolder(webConversation, "localhost", "offspring", "netline", "defaultcontext").getObjectID();
+
+        this.datagramSocket = new DatagramSocket(localPort, InetAddress.getByName(localAddress));
+
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle("pushTestSuite");
+        appointmentObj.setStartDate(new Date());
+        appointmentObj.setEndDate(new Date());
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setShownAs(Appointment.ABSENT);
+
+        AppointmentTest.insertAppointment(webConversation, appointmentObj, "localhost", "offspring", "netline", "defaultcontext");
+
+        this.folderId = appointmentFolderId;
         this.contextId = contextId;
     }
 
@@ -38,7 +61,7 @@ public class PushResponseTest {
         getResponse(datagramSocket, folderId, contextId);
     }
 
-    public static void getResponse(final DatagramSocket datagramSocket, final int folderId, final int contextId) throws Exception {
+    private static void getResponse(final DatagramSocket datagramSocket, final int folderId, final int contextId) throws Exception {
         byte[] responseByte = new byte[1024];
 
         final DatagramPacket datagramPacket = new DatagramPacket(responseByte, responseByte.length);

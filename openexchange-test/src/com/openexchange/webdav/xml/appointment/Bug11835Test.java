@@ -62,10 +62,6 @@ import com.openexchange.webdav.xml.AppointmentTest;
  */
 public class Bug11835Test extends AppointmentTest {
 
-    public Bug11835Test() {
-        super();
-    }
-
     @Test
     public void testBug() throws Throwable {
         int objectId = -1;

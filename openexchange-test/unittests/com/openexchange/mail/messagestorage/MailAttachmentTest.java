@@ -191,6 +191,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			+ "	filename*=utf-8''%EC%84%9C%EC%98%81%EC%A7%84%2Etxt\n" + "\n" + "7ISc7JiB7KeE\n" + "\n"
 			+ "--Boundary-00=_mtJhHd7H54sG6XG--\n";
 
+    @Test
 	public void testMailAttachment() {
 		try {
 			final MailAccess<?, ?> mailAccess = getMailAccess();

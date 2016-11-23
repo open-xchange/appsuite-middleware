@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -68,10 +67,6 @@ public class AggregatingContactTest extends AbstractAJAXSession {
     private FolderObject folder;
 
     // FIXME: Reactivate me, when the update task is ready.
-
-    public AggregatingContactTest() throws Exception {
-        super();
-    }
 
     /*
      * @Override
@@ -190,8 +185,4 @@ public class AggregatingContactTest extends AbstractAJAXSession {
      * assertEquals("Should prohibit access", "CON-0104", exception.getErrorCode());
      * }
      */
-    @Test
-    public void testDummy() {
-
-    }
 }

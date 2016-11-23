@@ -71,20 +71,6 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public final class MailMessageTest extends AbstractMailTest {
 
-    /**
-     *
-     */
-    public MailMessageTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailMessageTest(final String name) {
-        super();
-    }
-
     private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID, MailField.FROM, MailField.TO, MailField.RECEIVED_DATE, MailField.SENT_DATE, MailField.SUBJECT, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.PRIORITY, MailField.COLOR_LABEL };
 
     @Test

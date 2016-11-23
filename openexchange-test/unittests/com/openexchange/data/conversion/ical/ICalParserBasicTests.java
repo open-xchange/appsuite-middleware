@@ -79,11 +79,9 @@ import com.openexchange.groupware.tasks.Task;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ICalParserBasicTests extends AbstractICalParserTest {
-    // Appointments
 
     @Test
     public void testAppStartToEndWithUTC() throws ConversionError {
-
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
@@ -116,7 +114,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     @Test
     public void testAppStartToEndWithKnownTZID() throws ConversionError {
-
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
         final TimeZone utc = TimeZone.getTimeZone("UTC");
@@ -135,7 +132,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     @Test
     public void testAppStartToEndWithVTimeZone() throws ConversionError {
-
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");
 
@@ -252,7 +248,6 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         assertEquals("A fine description", appointment.getNote());
 
         // TODO Test encodings
-
     }
 
     @Test

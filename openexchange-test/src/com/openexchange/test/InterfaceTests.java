@@ -135,7 +135,8 @@ import com.openexchange.ajax.share.ShareAJAXSuite;
     OnboardingAJAXSuite.class,
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     AdvertisementTestSuite.class,
-
+    com.openexchange.push.udp.PushRegisterTestSuite.class,
+    com.openexchange.push.udp.PushTestSuite.class
 
 })
 public final class InterfaceTests {
