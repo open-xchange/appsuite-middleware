@@ -13,10 +13,6 @@ import com.openexchange.ajax.task.actions.GetResponse;
 
 public class Bug20405Test_TaskWithoutDueDate extends ManagedTaskTest {
 
-    public Bug20405Test_TaskWithoutDueDate(String name) {
-        super();
-    }
-
     public String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//ABC Corporation//NONSGML My Product//EN\n" + "BEGIN:VTODO\n" + "DTSTAMP:20110919T120516Z\n" + "SUMMARY:2 Beginn heute\\, F\u00e4llig offen\n" + "CLASS:PRIVATE\n" + "LAST-MODIFIED:20110919T115459Z\n" + "STATUS:IN-PROCESS\n" + "CREATED:20110919T115459Z\n" + "DTSTART;VALUE=DATE:20110919\n" + "PRIORITY:5\n" + "TRANSP:OPAQUE\n" + "END:VTODO\n" + "END:VCALENDAR";
 
     @Test

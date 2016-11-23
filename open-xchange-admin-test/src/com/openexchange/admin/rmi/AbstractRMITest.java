@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -59,7 +58,6 @@ public abstract class AbstractRMITest extends AbstractTest {
         superAdminContext = getTestContextObject(superAdminCredentials);
     }
 
-    @After
     public Integer getContextID() {
         return new Integer(1);
     }

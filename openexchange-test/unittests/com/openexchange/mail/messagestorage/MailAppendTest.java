@@ -52,7 +52,6 @@ package com.openexchange.mail.messagestorage;
 import static org.junit.Assert.assertTrue;
 import java.util.Random;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
@@ -84,14 +83,6 @@ public final class MailAppendTest extends MessageStorageTest {
         variations = generateVariations();
     }
 
-    /**
-     *
-     */
-    public MailAppendTest() {
-        super();
-    }
-
-    @Before
     // First the basic tests so that a mail can be appended and deleted
     @Test
     public void testMailAppendAndDeleteMails() throws OXException {

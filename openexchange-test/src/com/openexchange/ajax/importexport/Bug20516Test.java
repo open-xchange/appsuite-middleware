@@ -12,10 +12,6 @@ import com.openexchange.ajax.importexport.actions.CSVImportResponse;
 
 public class Bug20516Test extends AbstractManagedContactTest {
 
-    public Bug20516Test() {
-        super();
-    }
-
     @Test
     public void testEmail() throws Exception {
         String ical = "Sur name,Given name,Email 1\nBroken,E-Mail,notanaddress\n";

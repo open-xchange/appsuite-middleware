@@ -91,15 +91,6 @@ public final class Bug12470Test extends AbstractAJAXSession {
     private Date lastModified = null;
 
     /**
-     * Default constructor.
-     * 
-     * @param name test name.
-     */
-    public Bug12470Test() {
-        super();
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Before

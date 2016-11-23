@@ -75,15 +75,6 @@ import com.openexchange.java.Charsets;
  */
 public class Bug25701Test extends AbstractManagedContactTest {
 
-    /**
-     * Initializes a new {@link Bug25701Test}.
-     *
-     * @param name The test name
-     */
-    public Bug25701Test() {
-        super();
-    }
-
     @Test
     public void testCombinedTypes() throws Exception {
         /*

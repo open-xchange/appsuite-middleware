@@ -72,20 +72,6 @@ import com.openexchange.mail.mime.MimeTypes;
  */
 public final class MailMessageSerializationTest extends AbstractMailTest {
 
-    /**
-     *
-     */
-    public MailMessageSerializationTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailMessageSerializationTest(final String name) {
-        super();
-    }
-
     @Test
     public void testMailSerialization() {
         try {

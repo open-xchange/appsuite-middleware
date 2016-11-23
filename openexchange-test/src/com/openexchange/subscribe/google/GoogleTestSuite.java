@@ -66,12 +66,12 @@ import org.junit.runners.Suite;
 public class GoogleTestSuite {
 
     @BeforeClass
-    public void setUp() {
+    public static void setUp() {
         GoogleSubscribeTestEnvironment.getInstance().init();
     }
 
     @AfterClass
-    public void tearDown() throws Exception {
+    public static void tearDown() throws Exception {
         GoogleSubscribeTestEnvironment.getInstance().cleanup();
     }
 }

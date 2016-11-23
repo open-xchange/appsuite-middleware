@@ -89,10 +89,6 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
 
     private Date creationDate;
 
-    public TaskAttachmentTests(String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

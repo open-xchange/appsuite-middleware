@@ -44,10 +44,6 @@ public class Bug17392Test extends ManagedAppointmentTest {
     protected String start = "20101015T" + startHour + "0000";
     protected String end = "20101015T" + (startHour + 1) + "0000";
 
-    public Bug17392Test() {
-        super();
-    }
-
     public Appointment importAndGet(String ical) throws Exception {
         ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical);
         ICalImportResponse response = getClient().execute(request);

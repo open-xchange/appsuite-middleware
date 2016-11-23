@@ -14,10 +14,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointmentTest {
 
-    public Bug20132Test_WrongRecurrenceDatePosition() {
-        super();
-    }
-
     @Test
     public void testForCorrectRecurrenceDatePositionCalculation() throws Exception {
         String ical = "BEGIN:VCALENDAR\n" + "PRODID:-//Google Inc//Google Calendar 70.9054//EN\n" + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n" + "METHOD:PUBLISH\n" +

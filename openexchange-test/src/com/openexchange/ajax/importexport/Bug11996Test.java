@@ -67,15 +67,6 @@ import com.openexchange.groupware.importexport.ImportResult;
  */
 public final class Bug11996Test extends AbstractAJAXSession {
 
-    /**
-     * Default constructor.
-     * 
-     * @param name test name
-     */
-    public Bug11996Test() {
-        super();
-    }
-
     @Test
     public void testNotMatchingStatusAndPercentComplete() throws Throwable {
         final AJAXClient client = getClient();

@@ -105,20 +105,6 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public final class MailSearchTest extends AbstractMailTest {
 
-    /**
-     *
-     */
-    public MailSearchTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailSearchTest(final String name) {
-        super();
-    }
-
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
     private static final MailField[] FIELDS_ID_AND_HEADER = { MailField.ID, MailField.HEADERS };

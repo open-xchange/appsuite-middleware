@@ -67,15 +67,6 @@ import com.openexchange.groupware.importexport.ImportResult;
  */
 public final class Bug11920Test extends AbstractAJAXSession {
 
-    /**
-     * Default constructor.
-     * 
-     * @param name test name.
-     */
-    public Bug11920Test() {
-        super();
-    }
-
     @Test
     public void testVEventWithOnlyDTSTART() throws Throwable {
         final AJAXClient client = getClient();

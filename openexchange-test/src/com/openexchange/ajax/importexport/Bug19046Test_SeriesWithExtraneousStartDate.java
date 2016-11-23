@@ -11,10 +11,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug19046Test_SeriesWithExtraneousStartDate extends ManagedAppointmentTest {
 
-    public Bug19046Test_SeriesWithExtraneousStartDate() {
-        super();
-    }
-
     /*
      * Behaviour: Only shows series, not exception
      */

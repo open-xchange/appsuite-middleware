@@ -10,10 +10,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20715Test_UidIsNotcaseSensitive extends ManagedAppointmentTest {
 
-    public Bug20715Test_UidIsNotcaseSensitive() {
-        super();
-    }
-
     public static String uid = String.valueOf(Math.random());
 
     @Test

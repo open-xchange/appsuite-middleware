@@ -28,6 +28,7 @@ public class ResourceTest extends AbstractResourceTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         try {
             TestWebdavFactoryBuilder.setUp();
         } catch (final Throwable t) {

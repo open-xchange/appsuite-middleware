@@ -64,20 +64,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class MailCharsetDetectorTest extends AbstractMailTest {
 
-    /**
-     *
-     */
-    public MailCharsetDetectorTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailCharsetDetectorTest(final String name) {
-        super();
-    }
-
     @Test
     public void testCharsetDetection() {
         try {

@@ -75,15 +75,6 @@ import com.openexchange.groupware.container.FolderObject;
 public final class Bug11871Test extends AbstractAJAXSession {
 
     /**
-     * Default constructor.
-     * 
-     * @param name test name
-     */
-    public Bug11871Test() {
-        super();
-    }
-
-    /**
      * Creates a daily appointment over several days and checks if the DTEND
      * contains the end of the first occurrence and not the end of the series.
      */

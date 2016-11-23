@@ -57,11 +57,6 @@ import com.openexchange.groupware.tasks.TestTask;
  * {@link TaskRecurrenceTest}
  */
 public class TaskRecurrenceTest extends AbstractTaskTestForAJAXClient {
-
-    public TaskRecurrenceTest(String name) {
-        super();
-    }
-
     /* unlimited recurrences */
     //daily
     @Test

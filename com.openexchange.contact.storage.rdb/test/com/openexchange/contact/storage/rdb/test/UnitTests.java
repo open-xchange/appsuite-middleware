@@ -55,7 +55,6 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorageTest;
 import com.openexchange.contact.storage.rdb.search.AutoCompleteAdapterTest;
-import com.openexchange.contact.storage.rdb.search.AutocompleteAdapter;
 
 /**
  * {@link UnitTests}
@@ -66,7 +65,6 @@ import com.openexchange.contact.storage.rdb.search.AutocompleteAdapter;
 @SuiteClasses({
     DeduplicatorTest.class,
     RdbContactStorageTest.class,
-    AutocompleteAdapter.class,
     AutoCompleteAdapterTest.class
 })
 public class UnitTests {

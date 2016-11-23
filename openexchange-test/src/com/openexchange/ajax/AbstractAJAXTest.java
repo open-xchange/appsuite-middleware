@@ -62,9 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -86,7 +84,7 @@ import com.openexchange.test.AjaxInit;
  * @deprecated use {@link AbstractAJAXSession}.
  */
 @Deprecated
-@RunWith(ConcurrentTestRunner.class)
+//@RunWith(ConcurrentTestRunner.class)
 public abstract class AbstractAJAXTest {
 
     public static final String PROTOCOL = "http://";

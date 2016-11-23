@@ -68,22 +68,6 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
  */
 public class MailPlainTextStructureTest extends AbstractMailTest {
 
-    /**
-     * Initializes a new {@link MailPlainTextStructureTest}.
-     */
-    public MailPlainTextStructureTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link MailPlainTextStructureTest}.
-     *
-     * @param name The test name
-     */
-    public MailPlainTextStructureTest(final String name) {
-        super();
-    }
-
     private static final byte[] SIMPLE = ("Return-Path: <user4@ox.microdoc.de>\n" + "Received: from ox.microdoc.de ([unix socket])\n" + "                 by ox-p5 (Cyrus v2.2.13-Debian-2.2.13-10+etch2) with LMTPA;\n" + "                 Sat, 14 Nov 2009 17:03:09 +0100\n" + "Received: from ox-p5 (localhost [127.0.0.1])\n" + "                 by ox.microdoc.de (Postfix) with ESMTP id CD65A64F41\n" + "                 for <user3@ox.microdoc.de>; Sat, 14 Nov 2009 17:03:09 +0100 (CET)\n" + "Date: Sat, 14 Nov 2009 17:03:09 +0100 (CET)\n" + "From: user5@ox.microdoc.de\n" + "To: user5@ox.microdoc.de\n" + "Message-ID: <1837640730.5.1258214590077.JavaMail.foobar@foobar>\n" + "Subject: The mail subject\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "X-Sieve: CMU Sieve 2.2\n" + "X-Priority: 3\n" + "X-Mailer: Open-Xchange Mailer v6.12.0-Rev3\n" + "X-OX-Marker: 4936b5b2-d634-4c5a-b4e8-23f516a6f95e\n" + "\n" + "SOME-BASE64-DATA").getBytes();
 
     @Test

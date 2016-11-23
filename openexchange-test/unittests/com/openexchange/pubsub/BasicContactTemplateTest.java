@@ -70,22 +70,6 @@ import com.openexchange.templating.OXTemplate;
  */
 public abstract class BasicContactTemplateTest extends AbstractContactTemplateTest {
 
-    /**
-     * Initializes a new {@link BasicContactTemplateTest}.
-     */
-    public BasicContactTemplateTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link BasicContactTemplateTest}.
-     * 
-     * @param name
-     */
-    public BasicContactTemplateTest(String name) {
-        super();
-    }
-
     protected abstract OXTemplate getTemplate() throws Exception;
 
     /**

@@ -67,10 +67,6 @@ public class Bug20360Test_UmlautBreaksImport extends AbstractManagedContactTest 
 
     private final String vcard = "BEGIN:VCARD\n" + "VERSION:3.0\n" + "N;CHARSET=UTF-8:T\u00e4st;\u00dcser\n" + "FN;CHARSET=UTF-8:Str\u00e4to\n" + "EMAIL;TYPE=PREF,INTERNET:schneider@str\u00e4to.de\n" + "EMAIL:schneider@strato.de\n" + "END:VCARD\n";
 
-    public Bug20360Test_UmlautBreaksImport(String name) {
-        super();
-    }
-
     @Test
     public void testUmlaut() throws IOException, JSONException, OXException {
         VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vcard.getBytes("UTF-8")));

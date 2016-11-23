@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
@@ -65,6 +66,7 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
         contact.removeFileAs();
     }
 
+    @Test
     public void testFileAsViaCreate() {
         contact.setFileAs("filed as");
         manager.newAction(contact);
@@ -74,6 +76,7 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
         assertEquals("filed as", actual.getFileAs());
     }
 
+    @Test
     public void testFileAsViaUpdate() {
         manager.newAction(contact);
 
@@ -89,6 +92,7 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
         assertEquals("filed as", actual.getFileAs());
     }
 
+    @Test
     public void testFileAsViaUpdate2() {
         contact.setFileAs("filed as something else");
         manager.newAction(contact);

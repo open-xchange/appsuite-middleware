@@ -67,22 +67,6 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
  */
 public class Bug18981StructureTest extends AbstractMailTest {
 
-    /**
-     * Initializes a new {@link Bug18981StructureTest}.
-     */
-    public Bug18981StructureTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link Bug18981StructureTest}.
-     *
-     * @param name The test name
-     */
-    public Bug18981StructureTest(final String name) {
-        super();
-    }
-
     private static final byte[] SOURCE = ("Reply-To: <orderstatus_notification@barfoo.com>\n" + "From: <orderstatus_notification@barfoo.com>\n" + "To: <foobar@dotcom.de>, \n" + "    <>, \n" + "    <>, \n" + "Cc: <>, \n" + "    <blubber@barfoo.com>, \n" + "Subject: Ihre Bestellung bei Foobar - Voraussichtliches Lieferdatum \n" + "Date: Sat, 16 Apr 2011 06:16:43 +0100\n" + "Message-ID: 129474046034864895@E3BUSOPSDB\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/related;\n" + "    boundary=\"----=_NextPart_000_0001_0ce908fe.cc7a5096\"\n" + "X-Priority: 3 (Normal)\n" + "X-MSMail-Priority: Normal\n" + "X-Mailer: SuperMailer V1.0\n" + "Importance: Normal\n" + "\n" + "This is a multi-partmessage in MIME  format.\n" + "\n" + "------=_NextPart_000_0001_0ce908fe.cc7a5096\n" + "Content-Type: multipart/alternative;\n" + "    boundary=\"----=_NextPart_001_0002_0ce908fe.cc7a5096\"\n" + "\n" + "\n" + "------=_NextPart_001_0002_0ce908fe.cc7a5096\n" + "Content-Type: text/plain;\n" + "    charset=\"ISO-8859-1\"\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Some text\n" + "\n" + "\n" + "------=_NextPart_001_0002_0ce908fe.cc7a5096\n" + "Content-Type: text/html;\n" + "    charset=\"ISO-8859-1\"\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<html><body>Some text<br><br></body></html>\n" + "\n" + "------=_NextPart_001_0002_0ce908fe.cc7a5096--\n" + "\n" + "------=_NextPart_000_0001_0ce908fe.cc7a5096--").getBytes();
 
     @Test

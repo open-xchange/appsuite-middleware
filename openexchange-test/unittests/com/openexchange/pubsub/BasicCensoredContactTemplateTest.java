@@ -74,22 +74,6 @@ public abstract class BasicCensoredContactTemplateTest extends BasicContactTempl
     public static final int[] CENSORED_COLUMNS = new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.BIRTHDAY, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER, Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER };
 
     /**
-     * Initializes a new {@link BasicCensoredContactTemplateTest}.
-     */
-    public BasicCensoredContactTemplateTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link BasicCensoredContactTemplateTest}.
-     * 
-     * @param name
-     */
-    public BasicCensoredContactTemplateTest(String name) {
-        super();
-    }
-
-    /**
      * Override this to contain only the elements that are not censored.
      */
     @Override

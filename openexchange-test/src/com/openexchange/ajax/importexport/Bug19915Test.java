@@ -9,10 +9,6 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 
 public class Bug19915Test extends ManagedAppointmentTest {
 
-    public Bug19915Test() {
-        super();
-    }
-
     @Test
     public void testParsing() throws Exception {
         ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), getIcal(), false);

@@ -77,10 +77,6 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
 
     String csv = ContactTestData.IMPORT_MULTIPLE;
 
-    public Bug18482Test_ByteOrderMarkOnUtf8(String name) {
-        super();
-    }
-
     @Test
     public void testNone() throws Exception {
         testWithBOM();

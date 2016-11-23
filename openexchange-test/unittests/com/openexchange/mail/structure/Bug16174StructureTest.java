@@ -66,22 +66,6 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
  */
 public class Bug16174StructureTest extends AbstractMailTest {
 
-    /**
-     * Initializes a new {@link Bug16174StructureTest}.
-     */
-    public Bug16174StructureTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link Bug16174StructureTest}.
-     *
-     * @param name The test name
-     */
-    public Bug16174StructureTest(final String name) {
-        super();
-    }
-
     private static final byte[] SIMPLE = ("From: postmaster@integralis.com\n" + "To: martin.kauss@open-xchange.com\n" + "Date: May 21, 2010 12:11:08 PM CEST\n" + "MIME-Version: 1.0\n" + "Subject: Test\n" + "Content-Type: text/plain; charset=UTF-8\n" + "\n" + "This is a text message.\n" + "\n").getBytes();
 
     @Test

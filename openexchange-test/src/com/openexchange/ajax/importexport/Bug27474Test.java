@@ -70,10 +70,6 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
  */
 public class Bug27474Test extends ManagedAppointmentTest {
 
-    public Bug27474Test() {
-        super();
-    }
-
     @Test
     public void testRepeatedImportOfASeriesWithChangeException() throws Exception {
         String ical = prepareICal();

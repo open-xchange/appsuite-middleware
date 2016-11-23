@@ -75,20 +75,6 @@ import com.openexchange.smtp.dataobjects.SMTPMailMessage;
  */
 public final class MailSaveDraftTest extends AbstractMailTest {
 
-    /**
-     *
-     */
-    public MailSaveDraftTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailSaveDraftTest(final String name) {
-        super();
-    }
-
     @Test
     public void testMailDraft() {
         try {

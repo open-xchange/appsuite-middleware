@@ -12,10 +12,6 @@ import com.openexchange.exception.OXException;
 
 public class Bug20453Test_emptyDTEND extends ManagedAppointmentTest {
 
-    public Bug20453Test_emptyDTEND() {
-        super();
-    }
-
     @Test
     public void testWhatever() throws IOException, JSONException, OXException {
         final ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));

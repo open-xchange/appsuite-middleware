@@ -72,22 +72,6 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
  */
 public class Bug29484_StructureTest extends AbstractMailTest {
 
-    /**
-     * Initializes a new {@link Bug29484_StructureTest}.
-     */
-    public Bug29484_StructureTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link Bug29484_StructureTest}.
-     *
-     * @param name The test name
-     */
-    public Bug29484_StructureTest(final String name) {
-        super();
-    }
-
     @Test
     public void testMIMEStructure() {
         try {

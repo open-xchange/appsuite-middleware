@@ -115,7 +115,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     }
 
     @After
-    public final void tearDownContexts() throws Exception {
+    public void tearDown() throws Exception {
         try {
             if (ui != null && context != null) {
                 ui.delete(context, user, null, getCredentials());

@@ -77,15 +77,6 @@ public final class Bug12414Test extends AbstractAJAXSession {
     int folderId;
 
     /**
-     * Default constructor.
-     * 
-     * @param name test name.
-     */
-    public Bug12414Test() {
-        super();
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Before

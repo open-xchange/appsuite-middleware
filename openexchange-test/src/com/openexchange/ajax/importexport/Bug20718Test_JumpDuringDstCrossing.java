@@ -13,10 +13,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20718Test_JumpDuringDstCrossing extends ManagedAppointmentTest {
 
-    public Bug20718Test_JumpDuringDstCrossing() {
-        super();
-    }
-
     private String ical(String tzid) {
         return "BEGIN:VCALENDAR\n" + "PRODID:-//Microsoft Corporation//Outlook 14.0 MIMEDIR//EN\n" + "VERSION:2.0\n" + "METHOD:PUBLISH\n" + "BEGIN:VTIMEZONE\n" + "TZID:Amsterdam\\, Berlin\\, Bern\\, Rom\\, Stockholm\\, Wien\n" + "BEGIN:STANDARD\n" + "DTSTART:16011028T030000\n" + "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\n" + "TZOFFSETFROM:+0200\n" + "TZOFFSETTO:+0100\n" + "END:STANDARD\n" + "BEGIN:DAYLIGHT\n" + "DTSTART:16010325T020000\n" + "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\n" + "TZOFFSETFROM:+0100\n" + "TZOFFSETTO:+0200\n" + "END:DAYLIGHT\n" + "END:VTIMEZONE\n" + "\n" + "BEGIN:VEVENT\n" + "CLASS:PUBLIC\n" + "DTEND;TZID=\"" + tzid + "\":20081009T170000\n" + "DTSTART;TZID=\"Amsterdam, Berlin, Bern, Rom, Stockholm, Wien\":20081009T130000\n" + "RRULE:FREQ=WEEKLY;BYDAY=TH\n" + "SUMMARY:geblockt f\u00fcr Prof. Bruce-Boye - keine Termine\n" + "UID:AAAAAGQnWJsQLItElPc+mdUPXr/kSyMA\n" + "END:VEVENT\n" + "END:VCALENDAR";
     }

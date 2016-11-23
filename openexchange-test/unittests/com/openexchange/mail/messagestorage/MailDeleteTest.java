@@ -71,13 +71,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class MailDeleteTest extends MessageStorageTest {
 
-    /**
-     *
-     */
-    public MailDeleteTest() {
-        super();
-    }
-
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
     private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };

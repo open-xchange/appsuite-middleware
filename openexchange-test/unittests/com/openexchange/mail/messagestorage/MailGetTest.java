@@ -148,13 +148,6 @@ public final class MailGetTest extends MessageStorageTest {
     private static char linebreak = '\n';
     private final String brokenContentTypeMail = "Return-Path: <schweigi@open-xchange.com>" + linebreak + "Date: Thu, 20 Sep 2007 11:01:25 +0200" + linebreak + "From: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak + "To: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak + "Subject: test PGP signed mail" + linebreak + "Message-ID: <20070920090125.GA12567@open-xchange.com>" + linebreak + "Mime-Version: 1.0" + linebreak + "Content-Type: multipart/signed; micalg=pgp-sha1; protocol=\"application/pgp-signature\" boundary=\"mP3DRpeJDSE+ciuQ\"" + linebreak + "Content-Disposition: inline" + linebreak + "X-Operating-System: SUSE LINUX" + linebreak + "X-Mailer: Open-Xchange v6.0 Console Mailer" + linebreak + "X-PGP-Key: 1024D/D532F2E8" + linebreak + "X-PGP-Fingerprint: 815B 2A54 E23A FEF9 1AED 6CF9 2603 813F D532 F2E8" + linebreak + "X-Message-Flag: \"Es ist Wahnsinn, das Leben so zu sehen wie es ist, anstatt es zu sehen wie es sein sollte.\"" + linebreak + "X-Private-URL1: http://www.schweigisito.de" + linebreak + "X-Private-URL2: http://www.straight-live.de" + linebreak + linebreak + linebreak + "--mP3DRpeJDSE+ciuQ" + linebreak + "Content-Type: text/plain; charset=us-ascii" + linebreak + "Content-Disposition: inline" + linebreak + +linebreak + "This mail contains a PGP signature." + linebreak + linebreak + linebreak + "--mP3DRpeJDSE+ciuQ" + linebreak + "Content-Type: application/pgp-signature" + linebreak + "Content-Disposition: inline" + linebreak + linebreak + "-----BEGIN PGP SIGNATURE-----" + linebreak + "Version: GnuPG v1.4.2 (GNU/Linux)" + linebreak + linebreak + "iD8DBQFG8jblJgOBP9Uy8ugRAp4+AJ9iAZcBh6ke0zrqkrtLMWH+QKfTGgCffF+5" + linebreak + "F2P9TrHERgiiyRTA6x6BR2U=" + linebreak + "=Wk8C" + linebreak + "-----END PGP SIGNATURE-----" + linebreak + linebreak + "--mP3DRpeJDSE+ciuQ--" + linebreak;
 
-    /**
-     *
-     */
-    public MailGetTest() {
-        super();
-    }
-
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
     private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };

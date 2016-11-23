@@ -66,22 +66,6 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
  */
 public class SMIMEStructureTest extends AbstractMailTest {
 
-    /**
-     * Initializes a new {@link SMIMEStructureTest}.
-     */
-    public SMIMEStructureTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link SMIMEStructureTest}.
-     *
-     * @param name The test name
-     */
-    public SMIMEStructureTest(final String name) {
-        super();
-    }
-
     @Test
     public void testAnotherMIMEStructure() {
         try {

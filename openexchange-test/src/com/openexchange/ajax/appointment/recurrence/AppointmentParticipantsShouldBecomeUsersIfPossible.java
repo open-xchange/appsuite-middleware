@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetContactForUserRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -16,10 +17,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedAppointmentTest {
 
-    public AppointmentParticipantsShouldBecomeUsersIfPossible() {
-        super();
-    }
-
+    @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         int user2id = client2.getValues().getUserId();
@@ -52,6 +50,7 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
         assertTrue("Should find user listed as internal participant", foundAsInternal);
     }
 
+    @Test
     public void testExternalParticipantIsRemovedIfAddressMatchesUserParticipant() throws Exception {
         GetResponse response = getClient().execute(new GetContactForUserRequest(userId, true, TimeZone.getDefault()));
         String user1email = response.getContact().getEmail1();
@@ -82,6 +81,7 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
         assertEquals("Should find creator listed as internal participant once and only once", 1, foundAsInternal);
     }
 
+    @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatchesAfterUpdateToo() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         int user2id = client2.getValues().getUserId();

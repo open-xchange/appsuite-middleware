@@ -86,22 +86,6 @@ import freemarker.template.Configuration;
  */
 public abstract class AbstractContactTemplateTest {
 
-    /**
-     * Initializes a new {@link AbstractContactTemplateTest}.
-     */
-    public AbstractContactTemplateTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link AbstractContactTemplateTest}.
-     *
-     * @param name
-     */
-    public AbstractContactTemplateTest(String name) {
-        super();
-    }
-
     public Contact generateContact(String identifier) {
         Contact contact = new Contact();
         contact.setGivenName("givenname" + identifier);

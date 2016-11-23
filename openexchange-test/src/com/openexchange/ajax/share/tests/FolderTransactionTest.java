@@ -73,15 +73,6 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class FolderTransactionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link FolderTransactionTest}.
-     *
-     * @param name
-     */
-    public FolderTransactionTest() {
-        super();
-    }
-
     @Test
     public void testDontCreateShareOnFailingFolderCreate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
@@ -91,8 +82,7 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
-    @Test
-    public void testDontCreateShareOnFailingFolderCreate(EnumAPI api, int module) throws Exception {
+    private void testDontCreateShareOnFailingFolderCreate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         FolderObject folder = insertPrivateFolder(api, module, parent.getObjectID());
         List<FolderShare> oldShares = getFolderShares(api, module);
@@ -120,8 +110,7 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
-    @Test
-    public void testDontCreateShareOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
+    private void testDontCreateShareOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         FolderObject sharedFolder = insertPrivateFolder(api, module, parent.getObjectID());
         List<FolderShare> oldShares = getFolderShares(api, module);
@@ -156,8 +145,7 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
-    @Test
-    public void testDontRemoveSharesOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
+    private void testDontRemoveSharesOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         FolderObject sharedFolder = insertSharedFolder(api, module, parent.getObjectID(), guestPermission);

@@ -12,10 +12,6 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
 
-    public Bug20896Test_AlarmsChange() {
-        super();
-    }
-
     public String ical = "BEGIN:VCALENDAR\n" + "PRODID:Strato Communicator 3.5\n" + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n" + "BEGIN:VTIMEZONE\n" + "TZID:Europe/Berlin\n" + "X-LIC-LOCATION:Europe/Berlin\n" + "BEGIN:DAYLIGHT\n" + "TZOFFSETFROM:+0100\n" + "TZOFFSETTO:+0200\n" + "TZNAME:CEST\n" + "DTSTART:19700329T020000\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" + "END:DAYLIGHT\n" + "BEGIN:STANDARD\n" + "TZOFFSETFROM:+0200\n" + "TZOFFSETTO:+0100\n" + "TZNAME:CET\n" + "DTSTART:19701025T030000\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" + "END:STANDARD\n" + "END:VTIMEZONE\n" +
 
         "BEGIN:VEVENT\n" + "DTSTAMP:20111130T124433Z\n" + "SUMMARY:2 Tage vorher\n" + "CLASS:PRIVATE\n" + "LAST-MODIFIED:20111130T124235Z\n" + "DTEND;TZID=Europe/Berlin:20300328T180000\n" + "CREATED:20111130T124235Z\n" + "DTSTART;TZID=Europe/Berlin:20300328T170000\n" + "BEGIN:VALARM\n" + "ACTION:DISPLAY\n" + "TRIGGER:-P2D\n" + "DESCRIPTION:2 Tage vorher\n" + "END:VALARM\n" + "TRANSP:OPAQUE\n" + "END:VEVENT\n" +

@@ -64,13 +64,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class MailFlagsTest extends MessageStorageTest {
 
-    /**
-     *
-     */
-    public MailFlagsTest() {
-        super();
-    }
-
     private static final MailField[] FIELDS_ID_AND_FLAGS = { MailField.ID, MailField.FLAGS };
 
     @Test

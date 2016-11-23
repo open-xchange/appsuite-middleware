@@ -72,20 +72,6 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 
     private static final String INBOX = "INBOX";
 
-    /**
-     *
-     */
-    public MailFolderSpecialCharsTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailFolderSpecialCharsTest(final String name) {
-        super();
-    }
-
     @Test
     public void testFolderCreateAndSubfolders() throws OXException {
         final SessionObject session = getSession();

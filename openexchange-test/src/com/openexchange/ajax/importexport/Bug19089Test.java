@@ -68,10 +68,6 @@ public class Bug19089Test extends ManagedAppointmentTest {
 
     private final String tzid = "Europe/Berlin";
 
-    public Bug19089Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

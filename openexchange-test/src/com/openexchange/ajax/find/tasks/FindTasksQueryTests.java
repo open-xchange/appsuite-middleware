@@ -91,13 +91,6 @@ import com.openexchange.test.TaskTestManager;
 public class FindTasksQueryTests extends AbstractFindTasksTest {
 
     /**
-     * Initializes a new {@link FindTasksQueryTests}.
-     */
-    public FindTasksQueryTests(String name) {
-        super();
-    }
-
-    /**
      * Test with simple query with no filters
      * Should find 30 tasks.
      *

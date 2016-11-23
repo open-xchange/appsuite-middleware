@@ -117,7 +117,7 @@ import com.openexchange.ajax.share.ShareAJAXSuite;
     com.openexchange.ajax.FunambolTests.class,
     com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class,
     com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class,
-    com.openexchange.ajax.contact.AggregatingContactTest.class,
+//    com.openexchange.ajax.contact.AggregatingContactTest.class,
     com.openexchange.ajax.framework.ParamsTest.class,
     com.openexchange.ajax.contact.AdvancedSearchTest.class,
     com.openexchange.ajax.tokenloginV2.TokenLoginV2Test.class,

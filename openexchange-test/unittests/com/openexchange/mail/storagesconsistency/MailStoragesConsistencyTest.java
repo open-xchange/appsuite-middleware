@@ -87,20 +87,6 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
-    /**
-     *
-     */
-    public MailStoragesConsistencyTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailStoragesConsistencyTest(final String name) {
-        super();
-    }
-
     @Test
     public void testMailStoragesConsistency1() {
         try {

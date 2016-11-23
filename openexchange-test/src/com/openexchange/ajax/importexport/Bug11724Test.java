@@ -68,13 +68,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 public final class Bug11724Test extends AbstractAJAXSession {
 
     /**
-     * @param name
-     */
-    public Bug11724Test() {
-        super();
-    }
-
-    /**
      * Checks if a whole day appointment is imported properly.
      */
     @Test

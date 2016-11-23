@@ -89,15 +89,6 @@ import com.openexchange.find.tasks.TasksFacetType;
 public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
-     * Initializes a new {@link FindTasksTestsFilterCombinations}.
-     * 
-     * @param name
-     */
-    public FindTasksTestsFilterCombinations(String name) {
-        super();
-    }
-
-    /**
      * Get all relevant filters for the given combination
      * 
      * @param combination as char array

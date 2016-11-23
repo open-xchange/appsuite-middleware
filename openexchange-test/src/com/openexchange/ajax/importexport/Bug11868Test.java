@@ -78,13 +78,6 @@ import com.openexchange.resource.Resource;
 public final class Bug11868Test extends AbstractAJAXSession {
 
     /**
-     * @param name
-     */
-    public Bug11868Test() {
-        super();
-    }
-
-    /**
      * Checks if a whole day appointment is imported properly.
      */
     @Test

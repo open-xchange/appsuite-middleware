@@ -84,10 +84,6 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 
     private Contact contact;
 
-    public Bug18094Test_VCardRoundtrip(String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

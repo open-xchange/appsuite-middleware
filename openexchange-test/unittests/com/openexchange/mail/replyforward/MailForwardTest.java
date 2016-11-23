@@ -83,20 +83,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class MailForwardTest extends AbstractMailTest {
 
-    /**
-     *
-     */
-    public MailForwardTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailForwardTest(final String name) {
-        super();
-    }
-
     private static final String RFC822_SRC = "Date: Wed, 2 Apr 2008 07:41:24 +0200 (CEST)\n" + "From: \"Kraft, Manuel\" <manuel.kraft@open-xchange.com>\n" + "To: \"Betten, Thorben\" <thorben.betten@open-xchange.com>\n" + "Message-ID: <32481287.4641207114884399.JavaMail.open-xchange@oxee>\n" + "Subject: Hello\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/mixed; \n" + "	boundary=\"----=_Part_298_27959028.1207114884271\"\n" + "X-Priority: 3\n" + "X-Mailer: OX Software GmbH;Development\n" + "\n" + "------=_Part_298_27959028.1207114884271\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Hello... This is the first message\n" + "------=_Part_298_27959028.1207114884271\n" + "MIME-Version: 1.0\n" + "Content-Type: text/vcard; charset=UTF-8; name=my.vcf\n" + "Content-Transfer-Encoding: quoted-printable\n" + "Content-Disposition: attachment; filename=my.vcf\n" + "\n" + "BEGIN:VCARD\n" + "VERSION:3.0\n" + "EMAIL;TYPE=3Dwork,pref:thorben.betten@open-xchange.com\n" + "FN:Thorben Betten\n" + "IMPP;TYPE=3Dwork,pref:x-apple:th0rb3nb\n" + "ORG:Open-Xchange GmbH;Engineering\n" + "PRODID:-//Open-Xchange//7.8.1-Rev5//EN\n" + "X-OX-ROOM-NUMBER:Development 3\n" + "REV:20160307T151919Z\n" + "ROLE:Software-Entwickler\n" + "N:Betten;Thorben;;;\n" + "TITLE:Leader Engineering\n" + "END:VCARD\n" + "\n" + "------=_Part_298_27959028.1207114884271--\n" + "\n";
 
     private static final String RFC822_FORWARD = "Date: Mon, 31 Mar 2008 22:39:25 +0200\n" + "To: \"dream-team@open-xchange.com\" <dream-team@open-xchange.com>\n" + "From: jane.doe@open-xchange.com\n" + "Organization: http://open-xchange.com/\n" + "Content-Type: text/plain; charset=utf-8\n" + "MIME-Version: 1.0\n" + "Message-ID: <op.t8webzmnraenw4@edna>\n" + "User-Agent: Opera Mail/9.26 (Linux)\n" + "Subject: [dream-team] Good bye und macht's gut\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Hallo Dream-Team,\n" + "\n" + "This is the second message\n";
