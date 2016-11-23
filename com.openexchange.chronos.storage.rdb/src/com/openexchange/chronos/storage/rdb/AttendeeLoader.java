@@ -254,7 +254,7 @@ public class AttendeeLoader {
     private Map<Integer, List<Attendee>> selectExternalAttendeeData(int objectIDs[]) throws SQLException, OXException {
         Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
         String sql = new StringBuilder()
-            .append("SELECT objectId,mailAddress,displayName,confirm,reason FROM dateexternal ")
+            .append("SELECT objectId,mailAddress,displayName,confirm,reason FROM dateExternal ")
             .append("WHERE cid=? AND objectId IN (").append(getParameters(objectIDs.length)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {

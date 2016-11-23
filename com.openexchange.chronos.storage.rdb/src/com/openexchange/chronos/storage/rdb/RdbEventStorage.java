@@ -390,7 +390,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 .append("ON d.cid=m.cid AND d.intfield01=m.object_id ");
         }
         if (adapter.usesExternalAttendees()) {
-            stringBuilder.append("LEFT JOIN ").append(deleted ? "deldateexternal" : "dateexternal").append(" AS e ")
+            stringBuilder.append("LEFT JOIN ").append(deleted ? "delDateExternal" : "dateExternal").append(" AS e ")
                 .append("ON d.cid=e.cid AND d.intfield01=e.objectId ");
         }
         stringBuilder.append("WHERE d.cid=? AND ").append(adapter.getClause()).append(getSortOptions(sortOptions, "d.")).append(';');

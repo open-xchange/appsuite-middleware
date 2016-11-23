@@ -211,7 +211,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 /*
                  * delete records in dateExternal and prg_date_rights for external users
                  */
-                try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM dateexternal WHERE cid=? AND objectId=? AND mailAddress=?;")) {
+                try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM dateExternal WHERE cid=? AND objectId=? AND mailAddress=?;")) {
                     stmt.setInt(1, contextID);
                     stmt.setInt(2, objectID);
                     stmt.setString(3, Event2Appointment.getEMailAddress(attendee.getUri()));
@@ -297,7 +297,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     private static int deleteAttendees(Connection connection, int contextID, int objectID) throws SQLException {
         int updated = 0;
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM dateexternal WHERE cid=? AND objectId=?;")) {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM dateExternal WHERE cid=? AND objectId=?;")) {
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
             updated += logExecuteUpdate(stmt);
@@ -386,7 +386,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 /*
                  * insert additional record into dateExternal for external users
                  */
-                updated += insertOrReplaceDateExternal(connection, deleted ? "deldateexternal" : "dateexternal", replace, contextID, objectID, attendee);
+                updated += insertOrReplaceDateExternal(connection, deleted ? "delDateExternal" : "dateExternal", replace, contextID, objectID, attendee);
             } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
                 /*
                  * insert additional record into prg_dates_members for each internal user
