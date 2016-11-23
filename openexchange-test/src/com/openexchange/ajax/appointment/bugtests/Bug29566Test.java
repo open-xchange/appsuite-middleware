@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -125,13 +125,17 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.setUsers(new UserParticipant[] { user, user2 });
         
         ctm2.update(clone);
-
-        assertFalse("No error expected.", ctm2.getLastResponse().hasError());
-
-        Appointment loaded = ctm.get(appointment);
-        assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
-        assertEquals("Expected two users.", 2, loaded.getUsers().length);
-
+        
+        if (shared) {
+            assertTrue("Error expected.", ctm2.getLastResponse().hasError());
+            assertEquals("Wrong error.", OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber(), ctm2.getLastResponse().getException().getCode());
+        } else {
+            assertFalse("No error expected.", ctm2.getLastResponse().hasError());
+            
+            Appointment loaded = ctm.get(appointment);
+            assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
+            assertEquals("Expected two users.", 2, loaded.getUsers().length);
+        }
     }
     
     public void testAddParticipantWithoutInfoShared() throws Exception {
