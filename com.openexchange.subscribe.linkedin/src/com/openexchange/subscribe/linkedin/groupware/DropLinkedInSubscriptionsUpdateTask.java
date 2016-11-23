@@ -99,14 +99,15 @@ public class DropLinkedInSubscriptionsUpdateTask extends UpdateTaskAdapter {
         // Perform the task
         PreparedStatement statement = null;
         try {
-            String dropTokensSQL = "DELETE FROM subscriptions WHERE source_id = ?";
+            String dropTokensSQL = "DELETE FROM subscriptions WHERE source_id = ? AND cid = ?";
             statement = writeConnection.prepareStatement(dropTokensSQL);
 
             int parameterIndex = 1;
             statement.setString(parameterIndex++, "com.openexchange.subscribe.socialplugin.linkedin");
+            statement.setInt(parameterIndex++, contextId);
 
             int rows = statement.executeUpdate();
-            LOGGER.debug("{} subscription entries were removed from the 'subscriptions' table", rows);
+            LOGGER.debug("{} subscription entries were removed from the 'subscriptions' table for context '{}'", rows, contextId);
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
