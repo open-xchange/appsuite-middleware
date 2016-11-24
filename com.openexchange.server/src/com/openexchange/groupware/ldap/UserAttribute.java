@@ -72,10 +72,20 @@ public final class UserAttribute {
         hash = result;
     }
 
+    /**
+     * Gets the attribute's name
+     *
+     * @return The name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the attribute's value
+     *
+     * @return The value
+     */
     public String getValue() {
         return value;
     }
