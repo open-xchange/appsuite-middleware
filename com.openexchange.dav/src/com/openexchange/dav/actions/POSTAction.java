@@ -57,8 +57,8 @@ import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.attachments.AttachmentUtils;
 import com.openexchange.dav.internal.ShareHelper;
-import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.dav.resources.CommonResource;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.java.Streams;
@@ -99,7 +99,7 @@ public class POSTAction extends DAVAction {
      * Tries to handle a common <code>POST</code> request. This includes:
      * <ul>
      * <li>attachment-related actions on {@link CommonResource}s</li>
-     * <li>sharing-related actions on {@link CommonFolderCollection}s</li>
+     * <li>sharing-related actions on {@link FolderCollection}s</li>
      * </ul>
      *
      * @param request The WebDAV request
@@ -117,26 +117,26 @@ public class POSTAction extends DAVAction {
                 return handleAction(request, response);
             }
             String contentType = getContentType(request);
-            if (("application/davsharing+xml".equals(contentType)) && CommonFolderCollection.class.isInstance(resource)) {
+            if (("application/davsharing+xml".equals(contentType)) && FolderCollection.class.isInstance(resource)) {
                 request = new ReplayWebdavRequest(request);
                 Element rootElement = optRootElement(request, DAVProtocol.DAV_NS, "share-resource");
                 if (null != rootElement) {
                     /*
                      * handle WebDAV share request
                      */
-                    ShareHelper.shareResource((CommonFolderCollection<?>) resource, rootElement);
+                    ShareHelper.shareResource((FolderCollection<?>) resource, rootElement);
                     response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     return true;
                 }
             }
-            if ("text/xml".equals(contentType) && CommonFolderCollection.class.isInstance(resource)) {
+            if ("text/xml".equals(contentType) && FolderCollection.class.isInstance(resource)) {
                 request = new ReplayWebdavRequest(request);
                 Element rootElement = optRootElement(request, DAVProtocol.CALENDARSERVER_NS, "share");
                 if (null != rootElement) {
                     /*
                      * handle calendarserver share request
                      */
-                    ShareHelper.share((CommonFolderCollection<?>) resource, rootElement);
+                    ShareHelper.share((FolderCollection<?>) resource, rootElement);
                     response.setStatus(HttpServletResponse.SC_OK);
                     return true;
                 }

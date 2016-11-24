@@ -63,7 +63,7 @@ import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.ResourceId;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
@@ -94,7 +94,7 @@ public class ShareHelper {
      * @param folderCollection The folder collection to share
      * @param shareResourceElement The <code>DAV:share-resource</code> element to use
      */
-    public static void share(CommonFolderCollection<?> folderCollection, Element shareElement) throws WebdavProtocolException {
+    public static void share(FolderCollection<?> folderCollection, Element shareElement) throws WebdavProtocolException {
         share(folderCollection, parseShare(folderCollection.getFactory(), folderCollection.getPermissions(), shareElement));
     }
 
@@ -104,18 +104,18 @@ public class ShareHelper {
      * @param folderCollection The folder collection to share
      * @param shareResourceElement The <code>http://calendarserver.org/ns/:share</code> element to use
      */
-    public static void shareResource(CommonFolderCollection<?> folderCollection, Element shareResourceElement) throws WebdavProtocolException {
+    public static void shareResource(FolderCollection<?> folderCollection, Element shareResourceElement) throws WebdavProtocolException {
         share(folderCollection, parseShareResource(folderCollection.getFactory(), folderCollection.getPermissions(), shareResourceElement));
     }
 
-    private static void share(CommonFolderCollection<?> folderCollection, List<Permission> updatedPermissions) throws WebdavProtocolException {
+    private static void share(FolderCollection<?> folderCollection, List<Permission> updatedPermissions) throws WebdavProtocolException {
         DAVFactory factory = folderCollection.getFactory();
         UserizedFolder folder = folderCollection.getFolder();
         if (null != updatedPermissions) {
             if (false == folder.getOwnPermission().isAdmin()) {
                 throw WebdavProtocolException.generalError(folderCollection.getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
-            AbstractFolder updatableFolder = CommonFolderCollection.prepareUpdatableFolder(folder);
+            AbstractFolder updatableFolder = FolderCollection.prepareUpdatableFolder(folder);
             updatableFolder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
             try {
                 factory.requireService(FolderService.class).updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);

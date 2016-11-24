@@ -54,7 +54,7 @@ import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.actions.PROPFINDAction;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
@@ -98,7 +98,7 @@ public class SyncCollection extends PROPFINDAction {
         /*
          * query sync status from targeted folder collection
          */
-        CommonFolderCollection<?> folderCollection = requireResource(request, CommonFolderCollection.class);
+        FolderCollection<?> folderCollection = requireResource(request, FolderCollection.class);
         SyncStatus<WebdavResource> syncStatus = folderCollection.getSyncStatus(syncToken);
         /*
          * marshal multistatus response

@@ -60,7 +60,7 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.Privilege;
 import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.FolderService;
@@ -94,10 +94,10 @@ public class ACLAction extends DAVAction {
          * check if applicable for resource
          */
         WebdavResource resource = request.getResource();
-        if (null == resource || false == resource.isCollection() || false == CommonFolderCollection.class.isInstance(resource)) {
+        if (null == resource || false == resource.isCollection() || false == FolderCollection.class.isInstance(resource)) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "no-ace-conflict", request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
-        CommonFolderCollection<?> folderCollection = (CommonFolderCollection<?>) resource;
+        FolderCollection<?> folderCollection = (FolderCollection<?>) resource;
         UserizedFolder folder = folderCollection.getFolder();
         if (false == folder.getOwnPermission().isAdmin()) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "no-ace-conflict", request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
