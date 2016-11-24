@@ -26,6 +26,8 @@ URL:              http://www.open-xchange.com/
 Source:           %{name}_%{version}.orig.tar.bz2
 Source1:          open-xchange.init
 Source2:          open-xchange.service
+%define           dropin_dir /etc/systemd/system/open-xchange.service.d
+%define           dropin_example limits.conf
 Summary:          The Open-Xchange backend
 Requires:         open-xchange-core >= @OXVERSION@
 Requires:         open-xchange-authentication
@@ -75,6 +77,18 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %service_add_post open-xchange.service
 %endif
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700)
+if [ ! -f %{dropin_dir}/%{dropin_example} ]
+then
+  install -D -m 644 %{_defaultdocdir}/%{name}-%{version}/%{dropin_example} %{dropin_dir}/%{dropin_example}
+fi
+%endif
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+if [ ! -f %{dropin_dir}/%{dropin_example} ]
+then
+  install -D -m 644 %{_defaultdocdir}/%{name}/%{dropin_example} %{dropin_dir}/%{dropin_example}
+fi
+%endif
 
 %preun
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
@@ -98,6 +112,11 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 /etc/init.d/open-xchange
 /usr/sbin/rcopen-xchange
 %endif
+
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%doc docs/%{dropin_example}
+%endif
+
 
 %changelog
 * Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>

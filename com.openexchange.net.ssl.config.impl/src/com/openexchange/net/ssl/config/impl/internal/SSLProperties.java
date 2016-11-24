@@ -49,11 +49,12 @@
 
 package com.openexchange.net.ssl.config.impl.internal;
 
+import static com.openexchange.net.ssl.config.impl.internal.CipherSuiteName.nameFor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
@@ -187,20 +188,30 @@ public enum SSLProperties {
         return tmp;
     }
 
-    static final List<String> CIPHERS_DEFAULT_DESIRED = ImmutableList.<String> builder().add("TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_EMPTY_RENEGOTIATION_INFO_SCSV").build();
+    static final List<String> CIPHERS_DEFAULT_DESIRED = ImmutableList.<String> builder().add(
+        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
+        "TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+        ).build();
 
     private static String[] getJvmApplicableCipherSuites(List<String> desiredCipherSuites, boolean allowDefaultOnes) {
         // Get the cipher suites actually supported by running JVM
         String[] jvmDefaults = DEFAULT_CIPHER_SUITES_REFERENCE.get();
-        Set<String> supportedCipherSuites = new HashSet<>(jvmDefaults.length);
+        Map<CipherSuiteName, String> supportedCipherSuites = new HashMap<>(jvmDefaults.length);
         for (String jvmDefaultCipherSuite : jvmDefaults) {
-            supportedCipherSuites.add(Strings.toUpperCase(jvmDefaultCipherSuite));
+            supportedCipherSuites.put(nameFor(jvmDefaultCipherSuite), jvmDefaultCipherSuite);
         }
 
         // Grab the desired ones from JVM's default cipher suites
         List<String> defaultCipherSuites = new ArrayList<>(desiredCipherSuites.size());
         for (String desiredCipherSuite : desiredCipherSuites) {
-            if (supportedCipherSuites.contains(desiredCipherSuite)) {
+            String supportedCipherSuite = supportedCipherSuites.get(nameFor(desiredCipherSuite));
+            if (null != supportedCipherSuite) {
                 defaultCipherSuites.add(desiredCipherSuite);
             }
         }
