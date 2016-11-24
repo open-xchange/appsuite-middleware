@@ -69,7 +69,6 @@ import com.openexchange.chronos.impl.performer.MovePerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
-import com.openexchange.chronos.impl.performer.UpdateAlarmsPerformer;
 import com.openexchange.chronos.impl.performer.UpdateAttendeePerformer;
 import com.openexchange.chronos.impl.performer.UpdatePerformer;
 import com.openexchange.chronos.impl.performer.UpdatesPerformer;
@@ -232,7 +231,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new CreatePerformer(storage, session, getFolder(session, event.getFolderId())).perform(event.getEvent(), event.getAlarms());
+                return new CreatePerformer(storage, session, getFolder(session, event.getFolderId())).perform(event.getEvent());
             }
         }.executeUpdate());
     }
@@ -274,17 +273,18 @@ public class CalendarServiceImpl implements CalendarService {
                     if (null != updateResult.getTimestamp()) {
                         clientTimestamp = updateResult.getTimestamp().getTime();
                     }
+
                 }
                 /*
                  * update the alarms
                  */
-                if (event.containsAlarms()) {
-                    CalendarResult alarmResult = new UpdateAlarmsPerformer(storage, session, folder).perform(eventID.getObjectID(), event.getAlarms(), clientTimestamp);
-                    result.merge(alarmResult);
-                    if (null != alarmResult.getTimestamp()) {
-                        clientTimestamp = alarmResult.getTimestamp().getTime();
-                    }
-                }
+                //                if (event.containsAlarms()) {
+                //                    CalendarResult alarmResult = new UpdateAlarmsPerformer(storage, session, folder).perform(eventID.getObjectID(), event.getAlarms(), clientTimestamp);
+                //                    result.merge(alarmResult);
+                //                    if (null != alarmResult.getTimestamp()) {
+                //                        clientTimestamp = alarmResult.getTimestamp().getTime();
+                //                    }
+                //                }
                 return result;
             }
 

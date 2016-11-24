@@ -101,6 +101,8 @@ public class Event {
     private List<Attendee> attendees;
 
     private List<Attachment> attachments;
+    private List<Alarm> alarms;
+
     //    private String filename;
     //    private String iCalId;
 
@@ -1133,9 +1135,9 @@ public class Event {
     }
 
     /**
-     * Gets a value indicating whether the attendees of the event has been set or not.
+     * Gets a value indicating whether the attendees of the event have been set or not.
      *
-     * @return <code>true</code> if the attendees is set, <code>false</code>, otherwise
+     * @return <code>true</code> if the attendees are set, <code>false</code>, otherwise
      */
     public boolean containsAttendees() {
         return setFields.contains(EventField.ATTENDEES);
@@ -1169,12 +1171,48 @@ public class Event {
     }
 
     /**
-     * Gets a value indicating whether the attachments of the event has been set or not.
+     * Gets a value indicating whether the attachments of the event have been set or not.
      *
-     * @return <code>true</code> if the attachments is set, <code>false</code>, otherwise
+     * @return <code>true</code> if the attachments are set, <code>false</code>, otherwise
      */
     public boolean containsAttachments() {
         return setFields.contains(EventField.ATTACHMENTS);
+    }
+
+    /**
+     * Gets the alarms of the event.
+     *
+     * @return The alarms
+     */
+    public List<Alarm> getAlarms() {
+        return alarms;
+    }
+
+    /**
+     * Sets the alarms of the event.
+     *
+     * @param value The alarms to set
+     */
+    public void setAlarms(List<Alarm> value) {
+        alarms = value;
+        setFields.add(EventField.ALARMS);
+    }
+
+    /**
+     * Removes the alarms of the event.
+     */
+    public void removeAlarms() {
+        alarms = null;
+        setFields.remove(EventField.ALARMS);
+    }
+
+    /**
+     * Gets a value indicating whether the alarms of the event have been set or not.
+     *
+     * @return <code>true</code> if the alarms are set, <code>false</code>, otherwise
+     */
+    public boolean containsAlarms() {
+        return setFields.contains(EventField.ALARMS);
     }
 
     /**
@@ -1251,6 +1289,9 @@ public class Event {
         }
         if (containsAttendees()) {
             clone.setAttendees(cloneList(getAttendees()));
+        }
+        if (containsAlarms()) {
+            clone.setAlarms(cloneList(getAlarms()));
         }
         if (containsCategories()) {
             clone.setCategories(cloneList(getCategories()));

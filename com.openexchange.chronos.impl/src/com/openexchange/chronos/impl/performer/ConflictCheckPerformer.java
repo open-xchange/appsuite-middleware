@@ -378,7 +378,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();
         }
-        return loadAdditionalEventData(storage, eventsInPeriod, new EventField[] { EventField.ATTENDEES });
+        return loadAdditionalEventData(storage, -1, eventsInPeriod, new EventField[] { EventField.ATTENDEES });
     }
 
     /**

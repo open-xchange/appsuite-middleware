@@ -173,5 +173,9 @@ public enum EventField {
      * The attachments of the event.
      */
     ATTACHMENTS,
+    /**
+     * The alarms of the event.
+     */
+    ALARMS,
 
 }

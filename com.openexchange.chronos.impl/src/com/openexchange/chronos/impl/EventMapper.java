@@ -56,6 +56,7 @@ import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
@@ -822,6 +823,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeAttachments();
+            }
+        });
+        mappings.put(EventField.ALARMS, new DefaultMapping<List<Alarm>, Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsAlarms();
+            }
+
+            @Override
+            public void set(Event object, List<Alarm> value) throws OXException {
+                object.setAlarms(value);
+            }
+
+            @Override
+            public List<Alarm> get(Event object) {
+                return object.getAlarms();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeAlarms();
             }
         });
         return mappings;

@@ -115,7 +115,7 @@ public class HasPerformer extends AbstractQueryPerformer {
         EventField[] fields = Utils.getFields(Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]), EventField.ATTENDEES);
         List<Attendee> attendees = Collections.singletonList(session.getEntityResolver().applyEntityData(new Attendee(), userID));
         List<Event> events = storage.getEventStorage().searchOverlappingEvents(rangeStart, rangeEnd, attendees, true, null, fields);
-        readAdditionalEventData(events, new EventField[] { EventField.ATTENDEES });
+        readAdditionalEventData(events, -1, new EventField[] { EventField.ATTENDEES });
         /*
          * step through events day-wise & check for present events
          */

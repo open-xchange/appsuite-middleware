@@ -166,9 +166,6 @@ public final class CopyAction extends ChronosAction {
         originalEvent.getEvent().removeUid();
         originalEvent.getEvent().removePublicFolderId();
         UserizedEvent event = new UserizedEvent(request.getSession(), originalEvent.getEvent());
-        if (originalEvent.containsAlarms()) {
-            event.setAlarms(originalEvent.getAlarms());
-        }
         event.setFolderId(targetFolderID);
         CalendarResult result = session.getCalendarService().createEvent(session, event);
         if (null != result.getCreations() && 0 < result.getCreations().size()) {

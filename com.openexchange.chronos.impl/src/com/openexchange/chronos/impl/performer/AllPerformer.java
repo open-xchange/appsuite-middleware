@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.appendCommonTerms;
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getFrom;
@@ -110,7 +111,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         EventField[] fields = getFields(session, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
-        readAdditionalEventData(events, fields);
+        readAdditionalEventData(events, session.getUser().getId(), fields);
         return userize(events, session.getUser().getId(), isIncludePrivate(session));
     }
 
@@ -131,7 +132,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          * perform search & userize the results
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
-        readAdditionalEventData(events, getFields(session));
+        readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
         return userize(events, folder, true);
     }
 

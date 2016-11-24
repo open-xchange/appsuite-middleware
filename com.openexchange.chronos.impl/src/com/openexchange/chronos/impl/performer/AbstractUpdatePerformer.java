@@ -225,7 +225,7 @@ public abstract class AbstractUpdatePerformer {
     }
 
     /**
-     * Loads all data for a specific event, including attendees and attachments.
+     * Loads all data for a specific event, including attendees, attachments and alarms.
      *
      * @param id The identifier of the event to load
      * @return The event data
@@ -238,6 +238,7 @@ public abstract class AbstractUpdatePerformer {
         }
         event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
         event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
+        event.setAlarms(storage.getAlarmStorage().loadAlarms(event.getId(), calendarUser.getId()));
         return event;
     }
 
@@ -258,6 +259,7 @@ public abstract class AbstractUpdatePerformer {
         }
         excpetion.setAttendees(storage.getAttendeeStorage().loadAttendees(excpetion.getId()));
         excpetion.setAttachments(storage.getAttachmentStorage().loadAttachments(excpetion.getId()));
+        excpetion.setAlarms(storage.getAlarmStorage().loadAlarms(excpetion.getId(), calendarUser.getId()));
         return excpetion;
     }
 

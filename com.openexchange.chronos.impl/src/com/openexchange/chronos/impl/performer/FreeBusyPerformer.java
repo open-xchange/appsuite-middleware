@@ -135,7 +135,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyMap();
         }
-        readAdditionalEventData(eventsInPeriod, new EventField[] { EventField.ATTENDEES });
+        readAdditionalEventData(eventsInPeriod, -1, new EventField[] { EventField.ATTENDEES });
         List<UserizedFolder> visibleFolders = getVisibleFolders(session);
         /*
          * step through events & build free/busy per requested attendee
@@ -196,7 +196,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
         Event resultingEvent = new Event();
         if (0 < folderID) {
             EventMapper.getInstance().copy(event, resultingEvent, FREEBUSY_FIELDS);
-            return anonymizeIfNeeded(new UserizedEvent(session.getSession(), resultingEvent, folderID, null));
+            return anonymizeIfNeeded(new UserizedEvent(session.getSession(), resultingEvent, folderID));
         } else {
             EventMapper.getInstance().copy(event, resultingEvent, RESTRICTED_FREEBUSY_FIELDS);
             return new UserizedEvent(session.getSession(), resultingEvent);

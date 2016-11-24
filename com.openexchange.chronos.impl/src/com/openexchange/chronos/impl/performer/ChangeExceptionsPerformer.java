@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
@@ -108,7 +109,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
          * perform search & userize the results
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
-        readAdditionalEventData(events, getFields(session));
+        readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
         return userize(events, folder, true);
     }
 

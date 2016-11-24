@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.appendCommonTerms;
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getFrom;
@@ -117,13 +118,13 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         List<UserizedEvent> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
-            readAdditionalEventData(events, fields);
+            readAdditionalEventData(events, session.getUser().getId(), fields);
             newAndModifiedEvents = userize(events, session.getUser().getId(), isIncludePrivate(session));
         }
         List<UserizedEvent> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), fields);
-            readAdditionalEventData(events, fields);
+            readAdditionalEventData(events, session.getUser().getId(), fields);
             deletedEvents = userize(events, session.getUser().getId(), isIncludePrivate(session));
         }
         return getResult(newAndModifiedEvents, deletedEvents);
@@ -151,13 +152,13 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         List<UserizedEvent> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
-            readAdditionalEventData(events, fields);
+            readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
             newAndModifiedEvents = userize(events, folder, true);
         }
         List<UserizedEvent> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), fields);
-            readAdditionalEventData(events, fields);
+            readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
             deletedEvents = userize(events, folder, true);
         }
         return getResult(newAndModifiedEvents, deletedEvents);

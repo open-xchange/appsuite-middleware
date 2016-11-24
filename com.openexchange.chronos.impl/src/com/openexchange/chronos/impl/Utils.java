@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -365,7 +366,7 @@ public class Utils {
             }
         }
         anonymizedEvent.setSummary("Private"); // TODO i18n?
-        return new UserizedEvent(userizedEvent.getSession(), anonymizedEvent, userizedEvent.getFolderId(), null);
+        return new UserizedEvent(userizedEvent.getSession(), anonymizedEvent, userizedEvent.getFolderId());
     }
 
     /**
@@ -604,15 +605,17 @@ public class Utils {
      * <ul>
      * <li>{@link EventField#ATTENDEES}</li>
      * <li>{@link EventField#ATTACHMENTS}</li>
+     * <li>{@link EventField#ALARMS}</li> (of the calendar user)
      * </ul>
      *
      * @param storage A reference to the calendar storage to use
      * @param events The events to load additional data for
+     * @param userID The identifier of the calendar user to load additional data for, or <code>-1</code> to not load user-sensitive data
      * @param fields The requested fields, or <code>null</code> to assume all fields are requested
      * @return The events, enriched by the additionally loaded data
      */
-    public static List<Event> loadAdditionalEventData(CalendarStorage storage, List<Event> events, EventField[] fields) throws OXException {
-        if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS))) {
+    public static List<Event> loadAdditionalEventData(CalendarStorage storage, int userID, List<Event> events, EventField[] fields) throws OXException {
+        if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS) || contains(fields, EventField.ALARMS))) {
             int[] objectIDs = getObjectIDs(events);
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
                 Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
@@ -626,6 +629,12 @@ public class Utils {
                     event.setAttachments(attachmentsById.get(I(event.getId())));
                 }
             }
+            if (0 < userID && (null == fields || contains(fields, EventField.ALARMS))) {
+                Map<Integer, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(objectIDs, userID);
+                for (Event event : events) {
+                    event.setAlarms(alarmsById.get(I(event.getId())));
+                }
+            }
         }
         return events;
     }
@@ -635,19 +644,24 @@ public class Utils {
      * <ul>
      * <li>{@link EventField#ATTENDEES}</li>
      * <li>{@link EventField#ATTACHMENTS}</li>
+     * <li>{@link EventField#ALARMS}</li> (of the calendar user)
      * </ul>
      *
      * @param storage A reference to the calendar storage to use
      * @param event The event to load additional data for
+     * @param userID The identifier of the calendar user to load additional data for, or <code>-1</code> to not load user-sensitive data
      * @param fields The requested fields, or <code>null</code> to assume all fields are requested
      * @return The event, enriched by the additionally loaded data
      */
-    public static Event loadAdditionalEventData(CalendarStorage storage, Event event, EventField[] fields) throws OXException {
+    public static Event loadAdditionalEventData(CalendarStorage storage, int userID, Event event, EventField[] fields) throws OXException {
         if (null != event && (null == fields || contains(fields, EventField.ATTENDEES))) {
             event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
         }
         if (null != event && (null == fields || contains(fields, EventField.ATTACHMENTS))) {
             event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
+        }
+        if (null != event && 0 < userID && (null == fields || contains(fields, EventField.ALARMS))) {
+            event.setAlarms(storage.getAlarmStorage().loadAlarms(event.getId(), userID));
         }
         return event;
     }

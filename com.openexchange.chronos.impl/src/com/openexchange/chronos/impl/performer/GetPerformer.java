@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
@@ -102,7 +103,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         }
-        readAdditionalEventData(Collections.singletonList(event), getFields(session, EventField.ATTENDEES));
+        readAdditionalEventData(Collections.singletonList(event), getCalendarUser(folder).getId(), getFields(session, EventField.ATTENDEES));
         Check.eventIsInFolder(event, folder);
         return userize(Collections.singletonList(event), folder, true).get(0);
     }

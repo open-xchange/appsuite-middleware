@@ -69,6 +69,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
@@ -79,6 +80,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.AlarmMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
@@ -89,11 +91,13 @@ import com.openexchange.chronos.impl.DefaultItemUpdate;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UpdatePerformer}
@@ -245,6 +249,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         } else if (null != eventUpdate && needsParticipationStatusReset(eventUpdate)) {
             wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
+        /*
+         * process any alarm updates for the calendar user
+         */
+        if (updatedEvent.containsAlarms()) {
+            CollectionUpdate<Alarm, AlarmField> alarmUpdate = updateAlarms(originalEvent.getId(), calendarUser, updatedEvent.getAlarms());
+            wasUpdated |= false == alarmUpdate.isEmpty();
+        }
         if (wasUpdated) {
             result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), loadEventData(originalEvent.getId())));
         }
@@ -352,6 +363,29 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             //TODO: any checks prior removal? user a must not add user b if not organizer?
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeHelper.getAttendeesToInsert());
         }
+    }
+
+    /**
+     * Updates a calendar user's alarms for a specific event.
+     *
+     * @param objectID The identifier of the event to update the alarms in
+     * @param calendarUser The calendar user whose alarms are updated
+     * @param updatedAlarms The updated alarms
+     * @return A corresponding collection update
+     */
+    private CollectionUpdate<Alarm, AlarmField> updateAlarms(int objectID, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
+        List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, updatedAlarms);
+        if (false == alarmUpdates.isEmpty()) {
+            // TODO distinct alarm update
+            storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
+            if (null != updatedAlarms) {
+                storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), updatedAlarms);
+            }
+            List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
+            return AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, newAlarms);
+        }
+        return alarmUpdates;
     }
 
     /**

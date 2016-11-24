@@ -56,7 +56,6 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.List;
 import java.util.UUID;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -105,10 +104,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * Performs the creation of an event.
      *
      * @param event The event to create
-     * @param alarms The alarms to insert for the current calendar user
      * @return The result
      */
-    public CalendarResultImpl perform(Event event, List<Alarm> alarms) throws OXException {
+    public CalendarResultImpl perform(Event event) throws OXException {
         /*
          * check current session user's permissions
          */
@@ -133,8 +131,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          */
         storage.getEventStorage().insertEvent(newEvent);
         storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
-        if (null != alarms && 0 < alarms.size()) {
-            storage.getAlarmStorage().insertAlarms(newEvent.getId(), calendarUser.getId(), alarms);
+        if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
+            storage.getAlarmStorage().insertAlarms(newEvent.getId(), calendarUser.getId(), event.getAlarms());
         }
         result.addCreation(new CreateResultImpl(loadEventData(newEvent.getId())));
         return result;

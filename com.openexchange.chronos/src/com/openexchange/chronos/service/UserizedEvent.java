@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.List;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.tools.session.ServerSession;
 
@@ -65,8 +63,6 @@ public class UserizedEvent {
     private final Event event;
     private final ServerSession session;
 
-    private List<Alarm> alarms;
-    private boolean alarmsSet;
     private int folderId;
     private boolean folderIdSet;
 
@@ -90,10 +86,9 @@ public class UserizedEvent {
      * @param folderId The folder identifier representing the view on the event.
      * @param alarms The attendee's alarms of the event.
      */
-    public UserizedEvent(ServerSession session, Event event, int folderId, List<Alarm> alarms) {
+    public UserizedEvent(ServerSession session, Event event, int folderId) {
         this(session, event);
         setFolderId(folderId);
-        setAlarms(alarms);
     }
 
     /**
@@ -112,42 +107,6 @@ public class UserizedEvent {
      */
     public ServerSession getSession() {
         return session;
-    }
-
-    /**
-     * Gets the attendee's alarms for the event.
-     *
-     * @return The alarms
-     */
-    public List<Alarm> getAlarms() {
-        return alarms;
-    }
-
-    /**
-     * Gets the attendee's alarms for the event.
-     *
-     * @param alarms The alarms to set
-     */
-    public void setAlarms(List<Alarm> alarms) {
-        this.alarms = alarms;
-        alarmsSet = true;
-    }
-
-    /**
-     * Gets a value indicating whether attendee's alarms for the event have been set or not.
-     *
-     * @return <code>true</code> if the attendee's alarms are set, <code>false</code>, otherwise
-     */
-    public boolean containsAlarms() {
-        return alarmsSet;
-    }
-
-    /**
-     * Removes the attendee's alarms of the event.
-     */
-    public void removeAlarms() {
-        alarms = null;
-        alarmsSet = false;
     }
 
     /**

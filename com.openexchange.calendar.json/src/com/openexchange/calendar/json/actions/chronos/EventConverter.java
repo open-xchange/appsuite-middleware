@@ -227,8 +227,9 @@ public class EventConverter {
             case CalendarObject.PARTICIPANTS:
             case CalendarObject.CONFIRMATIONS:
             case CalendarObject.USERS:
-            case CalendarObject.ALARM:
                 return EventField.ATTENDEES;
+            case CalendarObject.ALARM:
+                return EventField.ALARMS;
             case CalendarObject.ORGANIZER:
             case CalendarObject.ORGANIZER_ID:
                 return EventField.ORGANIZER;
@@ -419,15 +420,15 @@ public class EventConverter {
         if (appointment.containsTimezone()) {
             event.setStartTimeZone(appointment.getTimezone());
         }
-
-        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
         if (appointment.containsAlarm()) {
             if (-1 == appointment.getAlarm()) {
-                userizedEvent.setAlarms(null); // "-1" means alarm removal
+                event.setAlarms(null); // "-1" means alarm removal
             } else {
-                userizedEvent.setAlarms(Collections.singletonList(Appointment2Event.getAlarm(appointment.getAlarm())));
+                event.setAlarms(Collections.singletonList(Appointment2Event.getAlarm(appointment.getAlarm())));
             }
         }
+
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
         if (appointment.containsParentFolderID()) {
             userizedEvent.setFolderId(appointment.getParentFolderID());
         }
@@ -505,8 +506,8 @@ public class EventConverter {
         if (event.containsDescription()) {
             appointment.setNote(event.getDescription());
         }
-        if (userizedEvent.containsAlarms()) {
-            Integer reminder = Event2Appointment.getReminder(userizedEvent.getAlarms());
+        if (event.containsAlarms()) {
+            Integer reminder = Event2Appointment.getReminder(event.getAlarms());
             if (null == reminder) {
                 // don't apply "-1" reminder minutes when converting to appointment
             } else {

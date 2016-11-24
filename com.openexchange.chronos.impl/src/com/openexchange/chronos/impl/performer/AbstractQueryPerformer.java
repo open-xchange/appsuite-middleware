@@ -51,7 +51,6 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
-import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -71,18 +70,13 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -99,7 +93,6 @@ import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -129,7 +122,6 @@ public abstract class AbstractQueryPerformer {
 
     protected List<UserizedEvent> userize(List<Event> events, int forUser, boolean includePrivate) throws OXException {
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
-        Map<Integer, List<Alarm>> alarmsById = readAlarms(events, forUser);
         for (Event event : events) {
             if (isExcluded(event, session, includePrivate)) {
                 continue;
@@ -143,7 +135,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 throw OXException.general("No suitable parent folder for event " + event); //TODO shouldn't happen at all?
             }
-            UserizedEvent userizedEvent = getUserizedEvent(event, folderID, alarmsById.get(I(event.getId())));
+            UserizedEvent userizedEvent = getUserizedEvent(event, folderID);
             if (isSeriesMaster(event) && isResolveOccurrences(session)) {
                 userizedEvents.addAll(resolveOccurrences(userizedEvent));
             } else {
@@ -182,15 +174,15 @@ public abstract class AbstractQueryPerformer {
         } else {
             events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
         }
-        return readAdditionalEventData(events, getFields(session));
+        return readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
     }
 
-    protected List<Event> readAdditionalEventData(List<Event> events, EventField[] fields) throws OXException {
-        return Utils.loadAdditionalEventData(storage, events, fields);
+    protected List<Event> readAdditionalEventData(List<Event> events, int userID, EventField[] fields) throws OXException {
+        return Utils.loadAdditionalEventData(storage, userID, events, fields);
     }
 
-    protected Event readAdditionalEventData(Event event, EventField[] fields) throws OXException {
-        return Utils.loadAdditionalEventData(storage, event, fields);
+    protected Event readAdditionalEventData(Event event, int userID, EventField[] fields) throws OXException {
+        return Utils.loadAdditionalEventData(storage, userID, event, fields);
     }
 
     protected Iterator<Event> resolveOccurrences(Event masterEvent, Date from, Date until) throws OXException {
@@ -218,15 +210,13 @@ public abstract class AbstractQueryPerformer {
     }
 
     protected List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder, boolean includePrivate) throws OXException {
-        User calendarUser = getCalendarUser(inFolder);
         int folderID = i(inFolder);
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
-        Map<Integer, List<Alarm>> alarmsById = readAlarms(events, calendarUser.getId());
         for (Event event : events) {
             if (isExcluded(event, session, includePrivate)) {
                 continue;
             }
-            UserizedEvent userizedEvent = getUserizedEvent(event, folderID, alarmsById.get(I(event.getId())));
+            UserizedEvent userizedEvent = getUserizedEvent(event, folderID);
             if (isSeriesMaster(event) && isResolveOccurrences(session)) {
                 userizedEvents.addAll(resolveOccurrences(userizedEvent));
             } else {
@@ -246,24 +236,14 @@ public abstract class AbstractQueryPerformer {
                 continue;
             }
             occurrence.setRecurrenceId(new DataAwareRecurrenceId(recurrenceData, occurrence.getRecurrenceId().getValue()));
-            events.add(getUserizedEvent(occurrence, master.getFolderId(), master.getAlarms()));
+            events.add(getUserizedEvent(occurrence, master.getFolderId()));
         }
         return events;
     }
 
-    protected UserizedEvent getUserizedEvent(Event event, int folderID, List<Alarm> alarms) throws OXException {
-        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event, folderID, alarms);
+    protected UserizedEvent getUserizedEvent(Event event, int folderID) throws OXException {
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event, folderID);
         return anonymizeIfNeeded(userizedEvent);
-    }
-
-    private Map<Integer, List<Alarm>> readAlarms(List<Event> events, int userID) throws OXException {
-        Set<Integer> objectIDs = new HashSet<Integer>(events.size());
-        for (Event event : events) {
-            if (isAttendee(event, userID)) {
-                objectIDs.add(I(event.getId()));
-            }
-        }
-        return 0 < objectIDs.size() ? storage.getAlarmStorage().loadAlarms(I2i(objectIDs), userID) : Collections.<Integer, List<Alarm>> emptyMap();
     }
 
 }
