@@ -35,8 +35,6 @@ Requires:         open-xchange-authorization
 Requires:         open-xchange-mailstore
 Requires:         open-xchange-httpservice
 Requires:         open-xchange-smtp >= @OXVERSION@
-Conflicts:        open-xchange-linkedin
-Obsoletes:        open-xchange-linkedin
 %if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 Requires(pre):    systemd
 Requires(post):   systemd
@@ -79,10 +77,16 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %service_add_post open-xchange.service
 %endif
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700)
 if [ ! -f %{dropin_dir}/%{dropin_example} ]
 then
   install -D -m 644 %{_defaultdocdir}/%{name}-%{version}/%{dropin_example} %{dropin_dir}/%{dropin_example}
+fi
+%endif
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+if [ ! -f %{dropin_dir}/%{dropin_example} ]
+then
+  install -D -m 644 %{_defaultdocdir}/%{name}/%{dropin_example} %{dropin_dir}/%{dropin_example}
 fi
 %endif
 
