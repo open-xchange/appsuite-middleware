@@ -79,10 +79,16 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %service_add_post open-xchange.service
 %endif
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700)
 if [ ! -f %{dropin_dir}/%{dropin_example} ]
 then
   install -D -m 644 %{_defaultdocdir}/%{name}-%{version}/%{dropin_example} %{dropin_dir}/%{dropin_example}
+fi
+%endif
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+if [ ! -f %{dropin_dir}/%{dropin_example} ]
+then
+  install -D -m 644 %{_defaultdocdir}/%{name}/%{dropin_example} %{dropin_dir}/%{dropin_example}
 fi
 %endif
 
