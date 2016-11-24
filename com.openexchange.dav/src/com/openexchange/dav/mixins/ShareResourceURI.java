@@ -50,7 +50,7 @@
 package com.openexchange.dav.mixins;
 
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -61,14 +61,14 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class ShareResourceURI extends SingleXMLPropertyMixin {
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link Invite}.
      *
      * @param collection The collection
      */
-    public ShareResourceURI(CommonFolderCollection<?> collection) {
+    public ShareResourceURI(FolderCollection<?> collection) {
         super(DAVProtocol.DAV_NS.getURI(), "share-resource-uri");
         this.collection = collection;
     }

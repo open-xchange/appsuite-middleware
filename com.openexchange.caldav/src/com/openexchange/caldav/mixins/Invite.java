@@ -52,7 +52,7 @@ package com.openexchange.caldav.mixins;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
@@ -70,7 +70,7 @@ public class Invite extends SingleXMLPropertyMixin {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Invite.class);
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
     private final GroupwareCaldavFactory factory;
 
     /**
@@ -79,7 +79,7 @@ public class Invite extends SingleXMLPropertyMixin {
      * @param factory The CalDAV factory
      * @param collection The collection
      */
-    public Invite(GroupwareCaldavFactory factory, CommonFolderCollection<?> collection) {
+    public Invite(GroupwareCaldavFactory factory, FolderCollection<?> collection) {
         super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "invite");
         this.factory = factory;
         this.collection = collection;

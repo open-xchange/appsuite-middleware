@@ -55,7 +55,7 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.Strings;
@@ -73,14 +73,14 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     public static final Namespace NAMESPACE = DAVProtocol.APPLE_NS;
     public static final String SYMBOLIC_COLOR = "symbolic-color";
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link CalendarColor}.
      *
      * @param collection The underlying collection
      */
-    public CalendarColor(CommonFolderCollection<?> collection) {
+    public CalendarColor(FolderCollection<?> collection) {
         super(NAMESPACE.getURI(), NAME);
         this.collection = collection;
     }

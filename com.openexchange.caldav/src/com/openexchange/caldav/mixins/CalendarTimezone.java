@@ -60,7 +60,7 @@ import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
@@ -76,7 +76,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class CalendarTimezone extends SingleXMLPropertyMixin {
 
     private final GroupwareCaldavFactory factory;
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link CalendarTimezone}.
@@ -84,7 +84,7 @@ public class CalendarTimezone extends SingleXMLPropertyMixin {
      * @param factory The CalDAV factory
      * @param collection The collection
      */
-    public CalendarTimezone(GroupwareCaldavFactory factory, CommonFolderCollection<?> collection) {
+    public CalendarTimezone(GroupwareCaldavFactory factory, FolderCollection<?> collection) {
         super(DAVProtocol.CAL_NS.getURI(), "calendar-timezone");
         this.factory = factory;
         this.collection = collection;

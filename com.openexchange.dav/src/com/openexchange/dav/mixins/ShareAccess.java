@@ -50,7 +50,7 @@
 package com.openexchange.dav.mixins;
 
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -83,14 +83,14 @@ public class ShareAccess extends SingleXMLPropertyMixin {
      */
     public static final String READ = "read";
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link ShareAccess}.
      *
      * @param collection The collection
      */
-    public ShareAccess(CommonFolderCollection<?> collection) {
+    public ShareAccess(FolderCollection<?> collection) {
         super(DAVProtocol.DAV_NS.getURI(), "share-access");
         this.collection = collection;
     }

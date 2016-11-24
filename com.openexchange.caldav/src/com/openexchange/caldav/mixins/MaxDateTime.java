@@ -49,11 +49,13 @@
 
 package com.openexchange.caldav.mixins;
 
+import java.util.Calendar;
 import java.util.Date;
 import org.jdom2.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
-import com.openexchange.caldav.resources.CalDAVFolderCollection;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -72,17 +74,50 @@ public class MaxDateTime extends SingleXMLPropertyMixin {
     public static final String PROPERTY_NAME = "max-date-time";
     public static final Namespace NAMESPACE = CaldavProtocol.CAL_NS;
 
-    private final CalDAVFolderCollection<?> collection;
+    private final GroupwareCaldavFactory factory;
 
-    public MaxDateTime(CalDAVFolderCollection<?> collection) {
+    private Date maxDateTime;
+
+    /**
+     * Initializes a new {@link MaxDateTime}.
+     *
+     * @param factory The underlying CalDAV factory
+     */
+    public MaxDateTime(GroupwareCaldavFactory factory) {
         super(NAMESPACE.getURI(), PROPERTY_NAME);
-        this.collection = collection;
+        this.factory = factory;
     }
 
     @Override
     protected String getValue() {
-        Date maxDateTime = collection.getIntervalEnd();
+        Date maxDateTime = getMaxDateTime();
         return null != maxDateTime ? Tools.formatAsUTC(maxDateTime) : null;
+    }
+
+    /**
+     * Gets the end time of the configured synchronization timeframe for CalDAV.
+     *
+     * @return The end of the configured synchronization interval
+     */
+    public Date getMaxDateTime() {
+        if (null == maxDateTime) {
+            String value = null;
+            try {
+                value = factory.getConfigValue("com.openexchange.caldav.interval.end", "one_year");
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(MaxDateTime.class).warn("falling back to 'one_year' as interval end", e);
+                value = "one_year";
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, "two_years".equals(value) ? 3 : 2);
+            calendar.set(Calendar.DAY_OF_YEAR, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            maxDateTime = calendar.getTime();
+        }
+        return maxDateTime;
     }
 
 }

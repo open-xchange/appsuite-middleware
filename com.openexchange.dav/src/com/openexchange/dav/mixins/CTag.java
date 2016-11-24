@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -69,7 +69,7 @@ public class CTag extends SingleXMLPropertyMixin {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CTag.class);
 
-	private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
     private String value = null;
 
     /**
@@ -77,7 +77,7 @@ public class CTag extends SingleXMLPropertyMixin {
      *
      * @param collection The parent collection
      */
-    public CTag(CommonFolderCollection<?> collection) {
+    public CTag(FolderCollection<?> collection) {
         super("http://calendarserver.org/ns/", "getctag");
         this.collection = collection;
     }
