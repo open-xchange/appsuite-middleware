@@ -49,10 +49,8 @@
 
 package com.openexchange.share.core.tools;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
@@ -83,14 +81,14 @@ public class ShareToken {
      * @param user The user to assign the base token for
      */
     public static void assignBaseToken(UserImpl user) {
-        Map<String, Set<String>> existingAttributes = user.getAttributes();
-        Map<String, Set<String>> attributes;
+        Map<String, String> existingAttributes = user.getAttributes();
+        Map<String, String> attributes;
         if (null != existingAttributes) {
-            attributes = new HashMap<String, Set<String>>(existingAttributes);
+            attributes = new HashMap<String, String>(existingAttributes);
         } else {
-            attributes = new HashMap<String, Set<String>>();
+            attributes = new HashMap<String, String>();
         }
-        attributes.put(SHARE_BASE_TOKEN_ATTRIBUTE, Collections.singleton(UUIDs.getUnformattedString(UUID.randomUUID())));
+        attributes.put(SHARE_BASE_TOKEN_ATTRIBUTE, UUIDs.getUnformattedString(UUID.randomUUID()));
         user.setAttributes(attributes);
     }
 

@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -244,29 +243,28 @@ public class GroupwareCarddavFactory extends DAVFactory {
     public String getOverrideNextSyncToken() {
         User user = getUser();
         String attributeName = getOverrideNextSyncTokenAttributeName();
-        Map<String, Set<String>> attributes = user.getAttributes();
+        Map<String, String> attributes = user.getAttributes();
         if (null != attributes) {
             /*
              * pick up & correct any legacy user attribute first
              */
-            Set<String> matchingAttributes = attributes.get("attr_" + attributeName);
-            if (null != matchingAttributes && 0 < matchingAttributes.size()) {
-                String value = matchingAttributes.iterator().next();
+            String matchingAttribute = attributes.get("attr_" + attributeName);
+            if (null != matchingAttribute) {
                 try {
                     UserService userService = getService(UserService.class);
-                    userService.setAttribute(attributeName, value, user.getId(), getContext());
+                    userService.setAttribute(attributeName, matchingAttribute, user.getId(), getContext());
                     userService.setAttribute("attr_" + attributeName, null, user.getId(), getContext());
                 } catch (OXException e) {
                     LOG.error("", e);
                 }
-                return value;
+                return matchingAttribute;
             }
             /*
              * get matching attribute value
              */
-            matchingAttributes = attributes.get(attributeName);
-            if (null != matchingAttributes && 0 < matchingAttributes.size()) {
-                return matchingAttributes.iterator().next();
+            matchingAttribute = attributes.get(attributeName);
+            if (null != matchingAttribute) {
+                return matchingAttribute;
             }
         }
         return null;

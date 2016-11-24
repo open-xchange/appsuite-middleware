@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -64,6 +63,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.RdbUserStorage.ValuePair;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.lock.LockService;
 import com.openexchange.passwordmechs.IPasswordMech;
@@ -378,11 +378,11 @@ public class CachingUserStorage extends UserStorage {
                 doUpdate = new UserMapper().getAssignedFields(differences).length != 0;
                 // All attributes the same? Then check for changed user attributes.
                 if (!doUpdate && null != user.getAttributes()) {
-                    final Map<String, UserAttribute> oldAttributes = UserImpl.toInternal(oldUser.getAttributes());
-                    final Map<String, UserAttribute> attributes = UserImpl.toInternal(user.getAttributes());
-                    final Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
-                    final Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
-                    final Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
+                    final Map<String, String> oldAttributes = oldUser.getAttributes();
+                    final Map<String, String> attributes = user.getAttributes();
+                    final Map<String, String> added = new HashMap<String, String>();
+                    final Map<String, String> removed = new HashMap<String, String>();
+                    final Map<String, ValuePair> changed = new HashMap<String, ValuePair>();
                     RdbUserStorage.calculateDifferences(oldAttributes, attributes, added, removed, changed);
                     doUpdate = !added.isEmpty() || !removed.isEmpty() || !changed.isEmpty();
                 }
@@ -413,8 +413,7 @@ public class CachingUserStorage extends UserStorage {
         if (cacheService == null) {
             return delegate.getUserAttribute(name, userId, context);
         }
-        final Set<String> set = getUser(userId, context).getAttributes().get(new StringBuilder("attr_").append(name).toString());
-        return null == set ? null : (set.isEmpty() ? null : set.iterator().next());
+        return getUser(userId, context).getAttributes().get(new StringBuilder("attr_").append(name).toString());
     }
 
     @Override
@@ -433,6 +432,7 @@ public class CachingUserStorage extends UserStorage {
         setAttribute(con, name, value, userId, context, true);
     }
 
+    @Override
     public void setAttribute(Connection con, String name, String value, int userId, Context context, boolean invalidate) throws OXException {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");

@@ -211,7 +211,7 @@ public class OXContextMySQLStorageCommon {
     }
 
     /**
-     * Parses a dynamic attribute from the user_attribute table
+     * Parses a dynamic attribute from the contextAttribute table
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
      * @throws StorageException
      */

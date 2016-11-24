@@ -52,7 +52,6 @@ package com.openexchange.groupware.ldap;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.*;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -60,12 +59,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.config.ConfigurationService;
@@ -96,6 +92,7 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.internal.mapping.UserField;
 import com.openexchange.user.internal.mapping.UserMapper;
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -111,8 +108,6 @@ public class RdbUserStorage extends UserStorage {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbUserStorage.class);
 
-    private static final String SELECT_ATTRS = "SELECT id,uuid,name,value FROM user_attribute WHERE cid=? AND id IN (";
-
     private static final String SELECT_CONTACT = "SELECT intfield01,field03,field02,field01 FROM prg_contacts WHERE cid=? AND intfield01 IN (";
 
     private static final String SELECT_ID = "SELECT id FROM login2user WHERE cid=? AND uid=?";
@@ -122,8 +117,6 @@ public class RdbUserStorage extends UserStorage {
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
     private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, homeDirectory, loginShell, guestCreatedBy, filestore_id, filestore_owner, filestore_name, filestore_login, filestore_passwd, quota_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)";
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
 
@@ -334,7 +327,7 @@ public class RdbUserStorage extends UserStorage {
              * insert tombstone record into del_user table
              */
             try {
-                stmt = con.prepareStatement("INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?);");
+                stmt = con.prepareStatement("INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?)");
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, userId);
                 stmt.setInt(3, contactId);
@@ -350,7 +343,7 @@ public class RdbUserStorage extends UserStorage {
              */
             if (0 < guestCreatedBy) {
                 try {
-                    stmt = con.prepareStatement("DELETE FROM login2user WHERE cid=? AND id=?;");
+                    stmt = con.prepareStatement("DELETE FROM login2user WHERE cid=? AND id=?");
                     stmt.setInt(1, context.getContextId());
                     stmt.setInt(2, userId);
                     stmt.executeUpdate();
@@ -362,7 +355,7 @@ public class RdbUserStorage extends UserStorage {
              * remove all user attributes
              */
             try {
-                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=?;");
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=?");
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
@@ -373,7 +366,7 @@ public class RdbUserStorage extends UserStorage {
              * delete user from user table
              */
             try {
-                stmt = con.prepareStatement("DELETE FROM user WHERE cid=? AND id=?;");
+                stmt = con.prepareStatement("DELETE FROM user WHERE cid=? AND id=?");
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
@@ -386,7 +379,7 @@ public class RdbUserStorage extends UserStorage {
             if (0 >= guestCreatedBy) {
                 List<Integer> guestUserIDs = new ArrayList<Integer>();
                 try {
-                    stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND guestCreatedBy=?;");
+                    stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND guestCreatedBy=?");
                     stmt.setInt(1, context.getContextId());
                     stmt.setInt(2, userId);
                     result = stmt.executeQuery();
@@ -399,7 +392,7 @@ public class RdbUserStorage extends UserStorage {
                 for (Integer guestUserID : guestUserIDs) {
                     int newGuestCreatedBy;
                     try {
-                        stmt = con.prepareStatement("SELECT created_by FROM share WHERE cid=? AND guest=? AND created_by<>? ORDER BY created ASC LIMIT 1;");
+                        stmt = con.prepareStatement("SELECT created_by FROM share WHERE cid=? AND guest=? AND created_by<>? ORDER BY created ASC LIMIT 1");
                         stmt.setInt(1, context.getContextId());
                         stmt.setInt(2, guestUserID.intValue());
                         stmt.setInt(3, userId);
@@ -409,7 +402,7 @@ public class RdbUserStorage extends UserStorage {
                         closeSQLStuff(result, stmt);
                     }
                     try {
-                        stmt = con.prepareStatement("UPDATE user SET guestCreatedBy=? WHERE cid=? AND id=?;");
+                        stmt = con.prepareStatement("UPDATE user SET guestCreatedBy=? WHERE cid=? AND id=?");
                         stmt.setInt(1, newGuestCreatedBy);
                         stmt.setInt(2, context.getContextId());
                         stmt.setInt(3, guestUserID.intValue());
@@ -441,25 +434,21 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static void writeUserAttributes(Connection con, Map<String, Set<String>> attributes, Context context, int userId) throws SQLException {
+    private static void writeUserAttributes(Connection con, Map<String, String> attributes, Context context, int userId) throws SQLException {
         if (attributes == null || attributes.isEmpty()) {
             return;
         }
 
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(INSERT_ATTRIBUTES);
-            for (final Entry<String, Set<String>> entry : attributes.entrySet()) {
-                final Set<String> valueSet = entry.getValue();
-                for (final String value : valueSet) {
-                    stmt.setInt(1, context.getContextId());
-                    stmt.setInt(2, userId);
-                    stmt.setString(3, entry.getKey());
-                    stmt.setString(4, value);
-                    stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
-
-                    stmt.addBatch();
-                }
+            stmt = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
+            for (Map.Entry<String, String> entry : attributes.entrySet()) {
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, userId);
+                stmt.setString(3, entry.getKey());
+                stmt.setString(4, entry.getValue());
+                stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+                stmt.addBatch();
             }
 
             stmt.executeBatch();
@@ -761,18 +750,19 @@ public class RdbUserStorage extends UserStorage {
     }
 
     private static void loadAttributes(int contextId, Connection con, TIntObjectMap<UserImpl> users, boolean lockRows) throws OXException {
-        if (lockRows && users.size() != 1) {
-            throw UserExceptionCode.LOCKING_NOT_ALLOWED.create(I(users.size()));
+        int numUsers = users.size();
+        if (lockRows && numUsers != 1) {
+            throw UserExceptionCode.LOCKING_NOT_ALLOWED.create(I(numUsers));
         }
-        final TIntObjectMap<Map<String, UserAttribute>> usersAttrs = new TIntObjectHashMap<Map<String, UserAttribute>>();
+        TIntObjectMap<Map<String, String>> usersAttrs = new TIntObjectHashMap<Map<String, String>>(numUsers);
         try {
-            final TIntIterator iter = users.keySet().iterator();
-            for (int i = 0; i < users.size(); i += IN_LIMIT) {
+            TIntObjectIterator<UserImpl> iter = users.iterator();
+            for (int i = 0; i < numUsers; i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
                 try {
-                    final int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
-                    String sql = getIN(SELECT_ATTRS, length);
+                    final int length = Arrays.determineRealSize(numUsers, i, IN_LIMIT);
+                    String sql = getIN("SELECT id, name, value FROM user_attribute WHERE cid=? AND id IN (", length);
                     if (lockRows) {
                         sql += " FOR UPDATE";
                     }
@@ -780,28 +770,20 @@ public class RdbUserStorage extends UserStorage {
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     for (int j = 0; j < length; j++) {
-                        final int userId = iter.next();
+                        iter.advance();
+                        int userId = iter.key();
                         stmt.setInt(pos++, userId);
-                        usersAttrs.put(userId, new HashMap<String, UserAttribute>());
+                        Map<String, String> attributes = new HashMap<String, String>();
+                        usersAttrs.put(userId, attributes);
+                        // Apply attributes
+                        iter.value().setAttributes(attributes);
                     }
                     result = stmt.executeQuery();
+
                     // Gather attributes
                     while (result.next()) {
-                        Map<String, UserAttribute> attrs = usersAttrs.get(result.getInt(1));
-                        String name = result.getString(3);
-                        UserAttribute attribute = attrs.get(name);
-                        if (null == attribute) {
-                            attribute = new UserAttribute(name);
-                            attrs.put(name, attribute);
-                        }
-                        final UUID uuid;
-                        byte[] bytes = result.getBytes(2);
-                        if (result.wasNull()) {
-                            uuid = null;
-                        } else {
-                            uuid = UUIDs.toUUID(bytes);
-                        }
-                        attribute.addValue(new AttributeValue(result.getString(4), uuid));
+                        Map<String, String> attrs = usersAttrs.get(result.getInt(1));
+                        attrs.put(result.getString(2), result.getString(3));
                     }
                 } finally {
                     closeSQLStuff(result, stmt);
@@ -811,28 +793,27 @@ public class RdbUserStorage extends UserStorage {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
 
-        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
         // Proceed iterating users
-        for (final UserImpl user : users.valueCollection()) {
-            final Map<String, UserAttribute> attrs = usersAttrs.get(user.getId());
-            {
-                Set<String> aliases = userAlias.getAliases(contextId, user.getId());
-                final List<String> tmp = new ArrayList<String>(aliases.size());
-                if (aliases != null && false == aliases.isEmpty()) {
-                    for (final String alias : aliases) {
-                        try {
-                            tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
-                        } catch (Exception e) {
-                            tmp.add(alias);
-                        }
+        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
+        int[] userIds = users.keys();
+        List<Set<String>> aliasList = userAlias.getAliases(contextId, userIds);
+        int i = 0;
+        for (Set<String> aliases : aliasList) {
+            int userId = userIds[i++];
+            UserImpl user = users.get(userId);
+            if (aliases == null || aliases.isEmpty()) {
+                user.setAliases(new String[0]);
+            } else {
+                List<String> tmp = new ArrayList<String>(aliases.size());
+                for (String alias : aliases) {
+                    try {
+                        tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
+                    } catch (Exception e) {
+                        tmp.add(alias);
                     }
-                    user.setAliases(tmp.toArray(new String[tmp.size()]));
-                } else {
-                    user.setAliases(new String[0]);
                 }
+                user.setAliases(tmp.toArray(new String[tmp.size()]));
             }
-            // Apply attributes
-            user.setAttributesInternal(attrs);
         }
     }
 
@@ -1071,48 +1052,15 @@ public class RdbUserStorage extends UserStorage {
     private static void insertOrUpdateAttribute(String name, String value, int userId, Context context, Connection con) throws OXException {
         int contextId = context.getContextId();
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid=? AND id=? AND name=?");
+            stmt = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE value=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, name);
-            rs = stmt.executeQuery();
-            List<UUID> toUpdate = new LinkedList<UUID>();
-            while (rs.next()) {
-                toUpdate.add(UUIDs.toUUID(rs.getBytes(1)));
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            stmt = null;
-            rs = null;
-            if (toUpdate.isEmpty()) {
-                stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, name);
-                stmt.setString(4, value);
-                stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
-                stmt.executeUpdate();
-            } else {
-                stmt = con.prepareStatement("UPDATE user_attribute SET value=?,uuid=? WHERE cid=? AND id=? AND name=? AND uuid=?");
-                for (UUID uuid : toUpdate) {
-                    stmt.setString(1, value);
-                    stmt.setBytes(2, UUIDs.toByteArray(UUID.randomUUID()));
-                    stmt.setInt(3, contextId);
-                    stmt.setInt(4, userId);
-                    stmt.setString(5, name);
-                    stmt.setBytes(6, UUIDs.toByteArray(uuid));
-                    stmt.addBatch();
-                }
-                int[] updateCounts = stmt.executeBatch();
-                for (int updateCount : updateCounts) {
-                    // Concurrent modification of at least one attribute. We lost the race...
-                    if (updateCount != 1) {
-                        LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, I(userId), I(contextId), value);
-                        throw UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.create(I(contextId), I(userId));
-                    }
-                }
-            }
+            stmt.setString(4, value);
+            stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+            stmt.setString(6, value);
+            stmt.executeUpdate();
         } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -1161,19 +1109,20 @@ public class RdbUserStorage extends UserStorage {
         final int userId = user.getId();
         final TIntObjectMap<UserImpl> loadMap = createSingleUserMap(userId);
         loadAttributes(ctx.getContextId(), con, loadMap, true);
-        final Map<String, UserAttribute> oldAttributes = loadMap.get(userId).getAttributesInternal();
-        final Map<String, UserAttribute> attributes = UserImpl.toInternal(user.getAttributes());
+        final Map<String, String> oldAttributes = loadMap.get(userId).getAttributesInternal();
+        final Map<String, String> attributes = user.getAttributes();
         updateAttributes(contextId, userId, con, oldAttributes, attributes);
     }
 
-    private static boolean updateAttributes(int contextId, int userId, Connection con, Map<String, UserAttribute> oldAttributes, Map<String, UserAttribute> attributes) throws SQLException, OXException {
+    private static boolean updateAttributes(int contextId, int userId, Connection con, Map<String, String> oldAttributes, Map<String, String> attributes) throws SQLException, OXException {
         boolean retval = false;
-        final Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
-        final Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
-        final Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
+        Map<String, String> added = new HashMap<String, String>();
+        Map<String, String> removed = new HashMap<String, String>();
+        Map<String, ValuePair> changed = new HashMap<String, ValuePair>();
         calculateDifferences(oldAttributes, attributes, added, removed, changed);
+
         PreparedStatement stmt = null;
-        PreparedStatement stmt2 = null;
+
         // Add new attributes
         if (!added.isEmpty()) {
             try {
@@ -1181,19 +1130,15 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 int size = 0;
-                for (Entry<String, UserAttribute> entry : added.entrySet()) {
-                    UserAttribute userAttribute = entry.getValue();
-                    for (AttributeValue value : userAttribute.getValues()) {
-                        stmt.setString(3, userAttribute.getName());
-                        stmt.setString(4, value.getValue());
-                        final UUID uuid = value.getUuid();
-                        stmt.setBytes(5, UUIDs.toByteArray(null == uuid ? UUID.randomUUID() : uuid));
-                        stmt.addBatch();
-                        size++;
-                    }
+                for (Map.Entry<String, String> entry : added.entrySet()) {
+                    stmt.setString(3, entry.getKey());
+                    stmt.setString(4, entry.getValue());
+                    stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+                    stmt.addBatch();
+                    size++;
                 }
                 int lines = 0;
-                for (final int mLine : stmt.executeBatch()) {
+                for (int mLine : stmt.executeBatch()) {
                     lines += mLine;
                 }
                 if (size != lines) {
@@ -1204,40 +1149,24 @@ public class RdbUserStorage extends UserStorage {
                 retval = true;
             } finally {
                 closeSQLStuff(stmt);
+                stmt = null;
             }
         }
-
-        // Check if table 'user_attribute' has a primary key
-        final boolean hasPrimaryKey = hasPrimaryKey("user_attribute", con);
 
         // Remove attributes
         if (!removed.isEmpty()) {
             try {
-                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value=?");
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                stmt2 = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND uuid=?");
-                stmt2.setInt(1, contextId);
                 int size = 0;
-                for (UserAttribute attribute : removed.values()) {
-                    for (AttributeValue value : attribute.getValues()) {
-                        final UUID uuid = value.getUuid();
-                        if (hasPrimaryKey && null != uuid) {
-                            stmt2.setBytes(2, UUIDs.toByteArray(uuid));
-                            stmt2.addBatch();
-                        } else {
-                            stmt.setString(3, attribute.getName());
-                            stmt.setString(4, value.getValue());
-                            stmt.addBatch();
-                        }
-                        size++;
-                    }
+                for (String name : removed.keySet()) {
+                    stmt.setString(3, name);
+                    stmt.addBatch();
+                    size++;
                 }
                 int lines = 0;
                 for (final int mLine : stmt.executeBatch()) {
-                    lines += mLine;
-                }
-                for (final int mLine : stmt2.executeBatch()) {
                     lines += mLine;
                 }
                 if (size != lines) {
@@ -1248,7 +1177,7 @@ public class RdbUserStorage extends UserStorage {
                 retval = true;
             } finally {
                 closeSQLStuff(stmt);
-                closeSQLStuff(stmt2);
+                stmt = null;
             }
         }
         // Update attributes
@@ -1257,42 +1186,25 @@ public class RdbUserStorage extends UserStorage {
                 stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=? AND value=?");
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
-                stmt2 = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND uuid=?");
-                stmt2.setInt(2, contextId);
                 int size1 = 0;
-                int size2 = 0;
-                for (UserAttribute attribute : changed.values()) {
-                    for (AttributeValue value : attribute.getValues()) {
-                        UUID uuid = value.getUuid();
-                        if (hasPrimaryKey && null != uuid) {
-                            stmt2.setString(1, value.getNewValue());
-                            stmt2.setBytes(3, UUIDs.toByteArray(uuid));
-                            stmt2.addBatch();
-                            size2++;
-                        } else {
-                            stmt.setString(1, value.getNewValue());
-                            stmt.setString(4, attribute.getName());
-                            stmt.setString(5, value.getValue());
-                            stmt.addBatch();
-                            size1++;
-                        }
-                    }
+                for (Map.Entry<String, ValuePair> attribute : changed.entrySet()) {
+                    ValuePair pair = attribute.getValue();
+                    stmt.setString(1, pair.newValue);
+                    stmt.setString(4, attribute.getKey());
+                    stmt.setString(5, pair.oldValue);
+                    stmt.addBatch();
+                    size1++;
                 }
                 int lines1 = 0;
                 int[] mLines1 = stmt.executeBatch();
                 for (final int mLine : mLines1) {
                     lines1 += mLine;
                 }
-                int lines2 = 0;
-                int[] mLines2 = stmt2.executeBatch();
-                for (final int mLine : mLines2) {
-                    lines2 += mLine;
-                }
                 if (size1 != lines1) {
                     // Ignoring the failed update of a clients login time stamp. This only happens if a concurrent login with the same client took place.
                     boolean onlyLoginsFailed = true;
                     int j = 0;
-                    for (Entry<String, UserAttribute> entry : changed.entrySet()) {
+                    for (Map.Entry<String, ValuePair> entry : changed.entrySet()) {
                         if (!entry.getKey().startsWith("client:") && mLines1[j] != 1) {
                             onlyLoginsFailed = false;
                             break;
@@ -1311,48 +1223,14 @@ public class RdbUserStorage extends UserStorage {
                         throw e;
                     }
                 }
-                if (size2 != lines2) {
-                    // Ignoring the failed update of a clients login time stamp. This only happens if a concurrent login with the same client took place.
-                    boolean onlyLoginsFailed = true;
-                    int j = 0;
-                    for (Entry<String, UserAttribute> entry : changed.entrySet()) {
-                        if (!entry.getKey().startsWith("client:") && mLines2[j] != 1) {
-                            onlyLoginsFailed = false;
-                            break;
-                        }
-                        j++;
-                    }
-                    if (!onlyLoginsFailed) {
-                        final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                        LOG.error("Old: {}, New: {}, Added: {}, Removed: {}, Changed: {}.", oldAttributes, attributes, added, removed, changed, e);
-                        LOG.error("Expected lines: {} Updated lines: {}", size2, lines2);
-                        final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
-                        loadAttributes(contextId, con, map, false);
-                        for (int i : map.keys()) {
-                            LOG.error("User {}: {}", i, map.get(i).getAttributes());
-                        }
-                        throw e;
-                    }
-                }
                 retval = true;
             } finally {
                 closeSQLStuff(stmt);
-                closeSQLStuff(stmt2);
+                stmt = null;
             }
         }
         // Signal if any modification has been performed
         return retval;
-    }
-
-    private static boolean hasPrimaryKey(final String table, final Connection con) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
-        // Get primary keys
-        final ResultSet primaryKeys = metaData.getPrimaryKeys(null, null, table);
-        try {
-            return primaryKeys.next();
-        } finally {
-            closeSQLStuff(primaryKeys);
-        }
     }
 
     private static TIntObjectMap<UserImpl> createSingleUserMap(int userId) {
@@ -1363,7 +1241,7 @@ public class RdbUserStorage extends UserStorage {
         return loadMap;
     }
 
-    static void calculateDifferences(Map<String, UserAttribute> oldAttributes, Map<String, UserAttribute> newAttributes, Map<String, UserAttribute> added, Map<String, UserAttribute> removed, Map<String, UserAttribute> changed) {
+    static void calculateDifferences(Map<String, String> oldAttributes, Map<String, String> newAttributes, Map<String, String> added, Map<String, String> removed, Map<String, ValuePair> changed) {
         // Find added keys
         added.putAll(newAttributes);
         for (final String key : oldAttributes.keySet()) {
@@ -1375,53 +1253,14 @@ public class RdbUserStorage extends UserStorage {
             removed.remove(key);
         }
         // Now the keys that are contained in old and new attributes.
-        for (final Entry<String, UserAttribute> entry : newAttributes.entrySet()) {
-            String key = entry.getKey();
-            if (oldAttributes.containsKey(key)) {
-                compareValues(key, oldAttributes.get(key), entry.getValue(), added, removed, changed);
+        for (Map.Entry<String, String> entry : newAttributes.entrySet()) {
+            String name = entry.getKey();
+            String newValue = entry.getValue();
+            String oldValue = oldAttributes.get(name);
+            if (null != oldValue && !newValue.equals(oldValue)) {
+                changed.put(name, new ValuePair(newValue, oldValue));
             }
         }
-    }
-
-    private static void compareValues(String name, UserAttribute oldSet, UserAttribute newSet, Map<String, UserAttribute> added, Map<String, UserAttribute> removed, Map<String, UserAttribute> changed) {
-        // Comparison must be made based only on attribute value because newSet mostly does not contain any UUIDs and hashCode() and
-        // equals() methods would not match the AttributeValue.
-        final Set<String> addedValues = new HashSet<String>(newSet.getStringValues());
-        final Set<String> removedValues = new HashSet<String>(oldSet.getStringValues());
-        // Find added values for a key.
-        addedValues.removeAll(oldSet.getStringValues());
-        // Find removed values for a key.
-        removedValues.removeAll(newSet.getStringValues());
-        // Try to replace as much attribute values as possible instead of deleting old one and inserting new ones causing more deadlocks on
-        // the database.
-        final Iterator<String> addedIter = addedValues.iterator();
-        final Iterator<String> removedIter = removedValues.iterator();
-        while (addedIter.hasNext() && removedIter.hasNext()) {
-            UserAttribute attribute = changed.get(name);
-            if (null == attribute) {
-                attribute = new UserAttribute(name);
-                changed.put(name, attribute);
-            }
-            AttributeValue value = oldSet.getValue(removedIter.next());
-            // Null can not be returned for value because removedIter is based on attributes given through oldSet.
-            attribute.addValue(new AttributeValue(value, addedIter.next()));
-        }
-        while (addedIter.hasNext()) {
-            add(added, name, new AttributeValue(addedIter.next()));
-        }
-        while (removedIter.hasNext()) {
-            add(removed, name, oldSet.getValue(removedIter.next()));
-            // Null can not be returned for value because removedIter is based on attributes given through oldSet.
-        }
-    }
-
-    private static void add(Map<String, UserAttribute> attributes, String name, AttributeValue value) {
-        UserAttribute values = attributes.get(name);
-        if (null == values) {
-            values = new UserAttribute(name);
-            attributes.put(name, values);
-        }
-        values.addValue(value);
     }
 
     @Override
@@ -1733,5 +1572,18 @@ public class RdbUserStorage extends UserStorage {
     @Override
     protected void stopInternal() {
         // Nothing to tear down.
+    }
+
+    // -----------------------------------------------------------------------------------------
+
+    public static final class ValuePair {
+        public final String newValue;
+        public final String oldValue;
+
+        ValuePair(String newValue, String oldValue) {
+            super();
+            this.newValue = newValue;
+            this.oldValue = oldValue;
+        }
     }
 }

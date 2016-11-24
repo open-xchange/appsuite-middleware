@@ -49,10 +49,6 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Represents a user attribute with possible multiple values and their unique identifiers in form of a UUID.
  *
@@ -61,75 +57,32 @@ import java.util.Set;
 public final class UserAttribute {
 
     private final String name;
-    private final Set<AttributeValue> values;
+    private final String value;
+    private final int hash;
 
-    public UserAttribute(String name) {
+    public UserAttribute(String name, String value) {
         super();
         this.name = name;
-        values = new HashSet<AttributeValue>();
-    }
+        this.value = value;
 
-    public UserAttribute(String name, Set<String> values) {
-        this(name);
-        for (String value : values) {
-            addValue(value);
-        }
+        int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        hash = result;
     }
 
     public String getName() {
         return name;
     }
 
-    public Set<AttributeValue> getValues() {
-        return values;
-    }
-
-    public Set<String> getStringValues() {
-        Set<String> retval = new HashSet<String>();
-        for (AttributeValue value : values) {
-            retval.add(value.getValue());
-        }
-        return Collections.unmodifiableSet(retval);
-    }
-
-    AttributeValue getValue(String value) {
-        for (AttributeValue tmp : values) {
-            if (tmp.getValue().equals(value)) {
-                return tmp;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Adds specified value aside with its unique identifier.
-     * @param value the value
-     * @param uuid the associated UUID
-     * @return <code>true</code> if successfully added; otherwise <code>false</code> if already present
-     */
-    public boolean addValue(AttributeValue value) {
-        return values.add(value);
-    }
-
-    void addValue(String value) {
-        values.add(new AttributeValue(value));
-    }
-
-    /**
-     * Gets the number of attribute values.
-     * @return the number of values.
-     */
-    public int size() {
-        return values.size();
+    public String getValue() {
+        return value;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((values == null) ? 0 : values.hashCode());
-        return result;
+        return hash;
     }
 
     @Override
@@ -148,7 +101,11 @@ public final class UserAttribute {
         } else if (!name.equals(other.name)) {
             return false;
         }
-        if (!values.equals(other.values)) {
+        if (value == null) {
+            if (other.value != null) {
+                return false;
+            }
+        } else if (!value.equals(other.value)) {
             return false;
         }
         return true;
@@ -156,16 +113,8 @@ public final class UserAttribute {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(256);
-        builder.append(name).append("=").append("[");
-        for (AttributeValue value : values) {
-            builder.append(value.toString()).append(',');
-        }
-        if (values.size() > 0) {
-            builder.setCharAt(builder.length() - 1, ']');
-        } else {
-            builder.append("]");
-        }
+        final StringBuilder builder = new StringBuilder(96);
+        builder.append(name).append("=").append(value);
         return builder.toString();
     }
 }

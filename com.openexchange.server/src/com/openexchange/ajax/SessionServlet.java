@@ -53,7 +53,6 @@ import static com.openexchange.tools.servlet.http.Tools.getWriterFrom;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -518,8 +517,9 @@ public abstract class SessionServlet extends AJAXServlet {
         if (session == null) {
             return 0;
         }
-        final Set<String> set = session.getUser().getAttributes().get("ajax.maxCount");
-        if (null == set || set.isEmpty()) {
+
+        String set = session.getUser().getAttributes().get("ajax.maxCount");
+        if (null == set) {
             try {
                 return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
             } catch (final OXException e) {
@@ -527,7 +527,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         try {
-            return Integer.parseInt(set.iterator().next());
+            return Integer.parseInt(set);
         } catch (final NumberFormatException e) {
             try {
                 return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);

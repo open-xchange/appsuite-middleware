@@ -50,7 +50,6 @@
 package com.openexchange.groupware.settings.tree;
 
 import static com.openexchange.java.Autoboxing.B;
-import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -90,13 +89,13 @@ public final class BetaFeatures implements PreferencesItemService {
         return new AbstractUserFuncs() {
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                Set<String> set = user.getAttributes().get(NAME);
-                if (null == set || set.isEmpty()) {
+                String set = user.getAttributes().get(NAME);
+                if (null == set) {
                     // Return global configuration setting for beta features
                     setting.setSingleValue(B(getBooleanProperty(PROP_BETA, true)));
                 } else {
                     // Return user's individual setting for beta features
-                    setting.setSingleValue(Boolean.valueOf(set.iterator().next()));
+                    setting.setSingleValue(Boolean.valueOf(set));
                 }
             }
             @Override
@@ -115,10 +114,10 @@ public final class BetaFeatures implements PreferencesItemService {
                 }
 
                 // Only update if different
-                Set<String> set = user.getAttributes().get(NAME);
-                if (null == set || set.isEmpty()) {
+                String set = user.getAttributes().get(NAME);
+                if (null == set) {
                     UserStorage.getInstance().setAttribute(NAME, value, user.getId(), ctx);
-                } else if (Boolean.parseBoolean(set.iterator().next()) != Boolean.parseBoolean(value)) {
+                } else if (Boolean.parseBoolean(set) != Boolean.parseBoolean(value)) {
                     UserStorage.getInstance().setAttribute(NAME, value, user.getId(), ctx);
                 }
 

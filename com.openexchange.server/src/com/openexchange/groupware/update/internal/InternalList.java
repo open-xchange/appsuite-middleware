@@ -628,9 +628,13 @@ public final class InternalList {
 
         // Removes inconsistent locks (See Bug #47929)
         list.add(new RemoveInconsistentLocksUpdateTasks());
-        
+
         // Removes the LinkedIn entries from the 'subscriptions' table
         list.add(new DropLinkedInSubscriptionsUpdateTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.8.4 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new com.openexchange.groupware.update.tasks.ChangePrimaryKeyForUserAttribute());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

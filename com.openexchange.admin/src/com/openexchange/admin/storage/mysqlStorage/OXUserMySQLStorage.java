@@ -1929,15 +1929,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     std_mail_folder_confirmed_ham = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
                 }
 
-                // insert all multi valued attribs to the user_attribute table,
-                // here we fill the alias attribute in it
-                UserAliasStorage userAlias = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                // Insert aliases
                 if (usrdata.getAliases() != null && usrdata.getAliases().size() > 0) {
-                    final Iterator<String> itr = usrdata.getAliases().iterator();
-                    while (itr.hasNext()) {
-                        final String tmp_mail = itr.next().toString().trim();
+                    UserAliasStorage userAlias = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                    for (Iterator<String> itr = usrdata.getAliases().iterator(); itr.hasNext();) {
+                        String tmp_mail = itr.next().toString().trim();
                         if (tmp_mail.length() > 0) {
-                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail);
+                            userAlias.createAlias(con, ctx.getId().intValue(), userId, tmp_mail);
                         }
                     }
                 }
@@ -2117,11 +2115,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
             stmt.setInt(1, cid);
             stmt.setInt(2, userId);
-            for(final Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
-                final String namespace = namespaced.getKey();
-                for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
-                    final String name = namespace + "/" + pair.getKey();
-                    final String value = pair.getValue();
+            for (Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
+                String namespace = namespaced.getKey();
+                StringBuilder nameBuilder = null;
+                for (Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                    if (null == nameBuilder) {
+                        nameBuilder = new StringBuilder(48);
+                    } else {
+                        nameBuilder.setLength(0);
+                    }
+                    String name = nameBuilder.append(namespace).append('/').append(pair.getKey()).toString();
+                    String value = pair.getValue();
                     stmt.setString(3, name);
                     stmt.setString(4, value);
                     UUID uuid = UUID.randomUUID();

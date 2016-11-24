@@ -130,13 +130,14 @@ public final class LastLoginUpdater implements EventHandler {
         // Determine client
         String client = session.getClient();
         if (!com.openexchange.java.Strings.isEmpty(client) && acceptedClients.contains(client)) {
-            final Context context = contextService.getContext(session.getContextId());
-            final User user = userService.getUser(session.getUserId(), context);
+            Context context = contextService.getContext(session.getContextId());
+            User user = userService.getUser(session.getUserId(), context);
+
             // Check last-accessed time stamp for client
-            final Set<String> values = user.getAttributes().get("client:" + client);
-            if (null != values && !values.isEmpty()) {
+            String value = user.getAttributes().get("client:" + client);
+            if (null != value) {
                 try {
-                    final long lastAccessed = Long.parseLong(values.iterator().next());
+                    final long lastAccessed = Long.parseLong(value);
                     final long now = System.currentTimeMillis();
                     if ((now - lastAccessed) >= MILLIS_DAY) {
                         // Need to update
