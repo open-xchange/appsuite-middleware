@@ -49,15 +49,26 @@
 
 package com.openexchange.test;
 
+import java.io.IOException;
+import org.json.JSONException;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.advertisement.AdvertisementTestSuite;
 import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
 import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
 import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
+import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
+import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
+import com.openexchange.ajax.smtptest.actions.StopSMTPRequest;
+import com.openexchange.exception.OXException;
+import junit.framework.Assert;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -140,6 +151,31 @@ import com.openexchange.ajax.share.ShareAJAXSuite;
 
 })
 public final class InterfaceTests {
+    private static AJAXClient client;
 
+    @BeforeClass
+    public static void setUp() {
+        try {
+            client = new AJAXClient(User.User1);
+            StartSMTPRequest request = new StartSMTPRequest(true);
+            request.setUpdateNoReplyForContext(client.getValues().getContextId());
 
+            SMTPInitResponse response = client.execute(request);
+            Assert.assertTrue(response.ok());
+        } catch (IOException | JSONException | OXException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @AfterClass
+    public static void tearDown() {
+        try {
+            if (client != null) {
+                client.execute(new StopSMTPRequest());
+            }
+        } catch (IOException | JSONException | OXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 }

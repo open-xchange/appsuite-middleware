@@ -47,33 +47,83 @@
  *
  */
 
-package com.openexchange.test.smtp;
+package com.openexchange.ajax.smtptest.actions;
 
+import java.io.IOException;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
 
 /**
  * 
- * {@link SMTPInitResponse}
+ * {@link StartSMTPRequest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SMTPInitResponse extends AbstractAJAXResponse {
+public class StartSMTPRequest implements AJAXRequest<SMTPInitResponse> {
 
-    /**
-     * Initializes a new {@link SMTPInitResponse}.
-     * 
-     * @param response
-     */
-    protected SMTPInitResponse(Response response) {
-        super(response);
+    private final boolean updateAccount;
+
+    private int updateNoReplyForContext = -1;
+
+    private boolean failOnError = true;
+
+    public StartSMTPRequest() {
+        this(true);
     }
 
-    public boolean ok() throws JSONException {
-        return ResponseWriter.getJSON(getResponse()).getBoolean("ok");
+    public StartSMTPRequest(boolean updateAccount) {
+        super();
+        this.updateAccount = updateAccount;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public void setUpdateNoReplyForContext(int updateNoReplyForContext) {
+        this.updateNoReplyForContext = updateNoReplyForContext;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public String getServletPath() {
+        return "/ajax/smtpserver/test";
+    }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Params(AJAXServlet.PARAMETER_ACTION, "startSMTP", "updateAccount", Boolean.toString(updateAccount), "updateNoReplyForContext", Integer.toString(updateNoReplyForContext)).toArray();
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends SMTPInitResponse> getParser() {
+        return new AbstractAJAXParser<SMTPInitResponse>(failOnError) {
+
+            @Override
+            protected SMTPInitResponse createResponse(Response response) throws JSONException {
+                return new SMTPInitResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
 }

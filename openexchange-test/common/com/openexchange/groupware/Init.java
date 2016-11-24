@@ -197,7 +197,6 @@ import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
-import com.openexchange.test.SMTPMockInit;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.DelegateExecutorService;
@@ -318,7 +317,6 @@ public final class Init {
 
         new GroupInit(),
     
-        new SMTPMockInit(),
     };
 
     private static boolean databaseUpdateinitialized = false;

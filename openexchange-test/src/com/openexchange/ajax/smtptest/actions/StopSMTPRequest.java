@@ -47,51 +47,77 @@
  *
  */
 
-package com.openexchange.test;
+package com.openexchange.ajax.smtptest.actions;
 
 import java.io.IOException;
 import org.json.JSONException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.test.smtp.StartSMTPRequest;
-import com.openexchange.test.smtp.StopSMTPRequest;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
 
 /**
- * {@link SMTPMockInit}
+ * 
+ * {@link StopSMTPRequest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SMTPMockInit implements Initialization {
+public class StopSMTPRequest implements AJAXRequest<SMTPInitResponse> {
 
-    private AJAXClient client;
+    private final boolean restoreTransports;
 
-    @Override
-    public void start() throws OXException {
-        try {
-            client = new AJAXClient(User.User1);
-            StartSMTPRequest request = new StartSMTPRequest(true);
-            request.setUpdateNoReplyForContext(client.getValues().getContextId());
+    private boolean failOnError = true;
 
-            client.execute(request);
+    public StopSMTPRequest() {
+        this(true);
+    }
 
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
+    public StopSMTPRequest(boolean restoreTransports) {
+        super();
+        this.restoreTransports = restoreTransports;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
     @Override
-    public void stop() throws OXException {
-        try {
-            if (client != null) {
-                client.execute(new StopSMTPRequest());
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public String getServletPath() {
+        return "/ajax/smtpserver/test";
+    }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Params(AJAXServlet.PARAMETER_ACTION, "stopSMTP", "restoreTransports", Boolean.toString(restoreTransports)).toArray();
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends SMTPInitResponse> getParser() {
+        return new AbstractAJAXParser<SMTPInitResponse>(failOnError) {
+
+            @Override
+            protected SMTPInitResponse createResponse(Response response) throws JSONException {
+                return new SMTPInitResponse(response);
             }
-        } catch (IOException | JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
 }
