@@ -52,6 +52,7 @@ package com.openexchange.chronos.ical;
 import java.io.InputStream;
 import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,7 +63,13 @@ import com.openexchange.exception.OXException;
  */
 public interface CalendarExport {
 
-    CalendarExport add(EventData event) throws OXException;
+    /**
+     * Adds a new event component to this VCALENDAR component.
+     *
+     * @param event The event component to add
+     * @return A self reference
+     */
+    CalendarExport add(Event event) throws OXException;
 
     /**
      * Sets the method to be declared in the VCALENDAR component.

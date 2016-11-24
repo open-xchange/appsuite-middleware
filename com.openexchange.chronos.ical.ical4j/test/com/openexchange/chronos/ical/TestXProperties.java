@@ -52,7 +52,6 @@ package com.openexchange.chronos.ical;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import com.openexchange.chronos.Event;
 import com.openexchange.java.Streams;
 
 /**
@@ -120,8 +119,7 @@ public class TestXProperties extends ICalTest {
                 "END:VALARM\r\n" +
                 "END:VEVENT\r\n" +
                 "END:VCALENDAR\r\n";
-        EventData eventData = importEvent(iCal);
-        Event event = eventData.getEvent();
+        EventComponent event = importEvent(iCal);
         //        assertEquals(D("1996-07-04 12:00:00"), event.getCreated());
         assertEquals("040000008200E00074C5B7101A82E00800000000D0AA8057A561CC01000000000000000010000000B4762DB1A2E3C24BA17F2D09C0F0189F", event.getUid());
         assertEquals("mailto:otto@example.com", event.getOrganizer().getUri());
@@ -130,7 +128,7 @@ public class TestXProperties extends ICalTest {
         assertEquals("CET", event.getStartTimeZone());
         assertEquals("CET", event.getEndTimeZone());
 
-        String originalICal = Streams.stream2string(eventData.getComponent().getStream(), "UTF-8");
+        String originalICal = Streams.stream2string(event.getComponent().getStream(), "UTF-8");
         assertTrue(originalICal.contains("X-MICROSOFT-CDO-APPT-SEQUENCE:1"));
         assertTrue(originalICal.contains("X-MICROSOFT-CDO-OWNERAPPTID:1016563675"));
         assertTrue(originalICal.contains("X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE"));
@@ -144,7 +142,7 @@ public class TestXProperties extends ICalTest {
         //        assertEquals("Networld+Interop Conference", event.getSummary());
         //        assertEquals("Networld+Interop Conference and Exhibit\r\nAtlanta World Congress Center\r\nAtlanta, Georgia", event.getDescription());
 
-        String exportedICal = exportEvent(eventData);
+        String exportedICal = exportEvent(event);
         assertTrue(exportedICal.contains("X-MICROSOFT-CDO-APPT-SEQUENCE:1"));
         assertTrue(exportedICal.contains("X-MICROSOFT-CDO-OWNERAPPTID:1016563675"));
         assertTrue(exportedICal.contains("X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE"));

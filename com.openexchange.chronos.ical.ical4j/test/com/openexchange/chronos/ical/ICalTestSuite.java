@@ -62,7 +62,9 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    BasicTest.class
+    BasicTest.class,
+    PreserveOriginalTest.class,
+    TestXProperties.class
 })
 public final class ICalTestSuite {
 

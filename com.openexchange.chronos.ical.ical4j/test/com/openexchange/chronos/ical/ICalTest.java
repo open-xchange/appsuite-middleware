@@ -105,12 +105,12 @@ public abstract class ICalTest {
         return iCalService.importICal(inputStream, null);
     }
 
-    protected EventData importEvent(String iCal) throws Exception {
+    protected EventComponent importEvent(String iCal) throws Exception {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
-        return iCalService.importICal(inputStream, null).getEvents().get(0);
+        return (EventComponent) iCalService.importICal(inputStream, null).getEvents().get(0);
     }
 
-    protected String exportEvent(EventData event) throws Exception {
+    protected String exportEvent(EventComponent event) throws Exception {
         ICalParametersImpl parameters = new ICalParametersImpl();
         CalendarExport calendarExport = iCalService.exportICal(parameters);
         calendarExport.add(event);

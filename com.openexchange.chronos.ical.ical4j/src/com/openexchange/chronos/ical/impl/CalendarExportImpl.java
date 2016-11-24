@@ -53,9 +53,10 @@ import java.io.InputStream;
 import java.util.List;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.ical.AlarmData;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.EventData;
+import com.openexchange.chronos.ical.ComponentData;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
@@ -121,7 +122,7 @@ public class CalendarExportImpl implements CalendarExport {
     }
 
     @Override
-    public CalendarExport add(EventData event) throws OXException {
+    public CalendarExport add(Event event) throws OXException {
         calendar.getComponents().add(exportEvent(event));
         return this;
     }
@@ -143,25 +144,29 @@ public class CalendarExportImpl implements CalendarExport {
         }
     }
 
-    private VAlarm exportAlarm(AlarmData alarm) throws OXException {
+    private VAlarm exportAlarm(Alarm alarm) throws OXException {
         VAlarm originalVAlarm = null;
-        IFileHolder originalComponent = alarm.getComponent();
-        if (null != originalComponent) {
-            originalVAlarm = ICalUtils.parseVAlarmComponent(originalComponent, parameters, warnings);
+        if (ComponentData.class.isInstance(alarm)) {
+            IFileHolder originalComponent = ((ComponentData) alarm).getComponent();
+            if (null != originalComponent) {
+                originalVAlarm = ICalUtils.parseVAlarmComponent(originalComponent, parameters, warnings);
+            }
         }
-        return mapper.exportAlarm(alarm.getAlarm(), originalVAlarm, parameters, warnings);
+        return mapper.exportAlarm(alarm, originalVAlarm, parameters, warnings);
     }
 
-    private VEvent exportEvent(EventData event) throws OXException {
+    private VEvent exportEvent(Event event) throws OXException {
         VEvent originalVEvent = null;
-        IFileHolder originalComponent = event.getComponent();
-        if (null != originalComponent) {
-            originalVEvent = ICalUtils.parseVEventComponent(originalComponent, parameters, warnings);
+        if (ComponentData.class.isInstance(event)) {
+            IFileHolder originalComponent = ((ComponentData) event).getComponent();
+            if (null != originalComponent) {
+                originalVEvent = ICalUtils.parseVEventComponent(originalComponent, parameters, warnings);
+            }
         }
-        VEvent vEvent = mapper.exportEvent(event.getEvent(), originalVEvent, parameters, warnings);
-        List<AlarmData> alarms = event.getAlarms();
+        VEvent vEvent = mapper.exportEvent(event, originalVEvent, parameters, warnings);
+        List<Alarm> alarms = event.getAlarms();
         if (null != alarms && 0 < alarms.size()) {
-            for (AlarmData alarm : alarms) {
+            for (Alarm alarm : alarms) {
                 vEvent.getAlarms().add(exportAlarm(alarm));
             }
         }

@@ -50,15 +50,13 @@
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
 import java.util.List;
-
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Sequence;
-
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.Sequence;
 
 /**
  * {@link SequenceMapping}
@@ -70,8 +68,8 @@ public class SequenceMapping extends AbstractICalMapping<VEvent, Event> {
 
 	@Override
 	public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
-		Integer value = object.getSequence();
-		if (null == value) {
+        int value = object.getSequence();
+        if (0 > value) {
 			removeProperties(component, Property.SEQUENCE);
 		} else {
 			Sequence property = component.getSequence();
@@ -79,14 +77,14 @@ public class SequenceMapping extends AbstractICalMapping<VEvent, Event> {
 				property = new Sequence();
 				component.getProperties().add(property);
 			}
-			property.setValue(value.toString());
+            property.setValue(String.valueOf(value));
 		}
 	}
 
 	@Override
 	public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
 		Sequence property = component.getSequence();
-		object.setSequence(null == property ? null : Integer.valueOf(property.getSequenceNo()));
+        object.setSequence(null == property ? 0 : property.getSequenceNo());
 	}
 
 }

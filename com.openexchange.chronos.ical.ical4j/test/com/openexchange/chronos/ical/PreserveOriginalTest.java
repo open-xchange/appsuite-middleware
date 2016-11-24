@@ -54,7 +54,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.chronos.Event;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.java.Streams;
 
 /**
@@ -97,17 +97,16 @@ public class PreserveOriginalTest extends ICalTest {
                 "END:VALARM\r\n" +
                 "END:VEVENT\r\n" +
                 "END:VCALENDAR\r\n";
-        EventData eventData = importEvent(iCal);
+        EventComponent event = importEvent(iCal);
 
-        Event event = eventData.getEvent();
         assertEquals("uid1@example.com", event.getUid());
 
-        String originalICal = Streams.stream2string(eventData.getComponent().getStream(), "UTF-8");
+        String originalICal = Streams.stream2string(event.getComponent().getStream(), "UTF-8");
         assertTrue(originalICal.contains("X-UNKNOWN1:abc"));
 
-        List<AlarmData> alarms = eventData.getAlarms();
+        List<Alarm> alarms = event.getAlarms();
         assertEquals(2, alarms.size());
-        AlarmData alarmData = alarms.get(0);
+        AlarmComponent alarmData = (AlarmComponent) alarms.get(0);
         originalICal = Streams.stream2string(alarmData.getComponent().getStream(), "UTF-8");
         assertTrue(originalICal.contains("X-UNKNOWN1:abc"));
     }
@@ -134,19 +133,19 @@ public class PreserveOriginalTest extends ICalTest {
                 " DIR=\"ldap://host.com:66/horst\":mailto:horst@example.org\r\n" +
                 "END:VEVENT\r\n" +
                 "END:VCALENDAR";
-        EventData eventData = importEvent(iCal);
+        EventComponent event = importEvent(iCal);
 
-        Event event = eventData.getEvent();
         assertEquals("461092315540@example.com", event.getUid());
         assertEquals("Somewhere", event.getLocation());
 
-        String originalICal = Streams.stream2string(eventData.getComponent().getStream(), "UTF-8");
+        String originalICal = Streams.stream2string(event.getComponent().getStream(), "UTF-8");
         assertTrue(originalICal.replaceAll("\\s+", "").contains("DIR=\"ldap://host.com:66/horst\""));
 
         event.setLocation("Somewhere else");
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         fileHolder.write(originalICal.getBytes("UTF-8"));
-        String exportedICal = exportEvent(new DefaultEventData(event, null, fileHolder));
+        event.setComponent(fileHolder);
+        String exportedICal = exportEvent(event);
         assertTrue(exportedICal.replaceAll("\\s+", "").contains("DIR=\"ldap://host.com:66/horst\""));
         assertTrue(exportedICal.contains("LOCATION:Somewhere else"));
     }

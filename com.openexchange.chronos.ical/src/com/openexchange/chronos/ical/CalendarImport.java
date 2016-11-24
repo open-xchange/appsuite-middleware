@@ -51,7 +51,7 @@ package com.openexchange.chronos.ical;
 
 import java.io.Closeable;
 import java.util.List;
-
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 
 /**
@@ -70,18 +70,18 @@ public interface CalendarImport extends Closeable {
     String getMethod();
 
     /**
-     * Gets the imported calendar's name based on the <code>X-WR-CALNAME</code> property of the underlying <code>VCALENDAR</code> component.  
-     * 
+     * Gets the imported calendar's name based on the <code>X-WR-CALNAME</code> property of the underlying <code>VCALENDAR</code> component.
+     *
      * @return The calendar name, or <code>null</code> if not defined
      */
     String getName();
-    
+
     /**
      * Gets the events imported from the contained VEVENT components.
      *
      * @return The imported events, or <code>null</code> if there are none
      */
-	List<EventData> getEvents();
+    List<Event> getEvents();
 
 	/**
      * Gets a list of parser- and conversion warnings.

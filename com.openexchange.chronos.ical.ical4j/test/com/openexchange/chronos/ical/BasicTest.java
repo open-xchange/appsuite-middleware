@@ -52,17 +52,14 @@ package com.openexchange.chronos.ical;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import org.junit.Test;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventStatus;
-import com.openexchange.java.Streams;
 
 /**
  * {@link BasicTest}
@@ -91,8 +88,7 @@ public class BasicTest extends ICalTest {
                 " Atlanta\\, Georgia\r\n" +
                 "END:VEVENT\r\n" +
                 "END:VCALENDAR\r\n";
-        EventData eventData = importEvent(iCal);
-        Event event = eventData.getEvent();
+        Event event = importEvent(iCal);
         //        assertEquals(D("1996-07-04 12:00:00"), event.getCreated());
         assertEquals("uid1@example.com", event.getUid());
         assertEquals("mailto:jsmith@example.com", event.getOrganizer().getUri());
@@ -141,8 +137,7 @@ public class BasicTest extends ICalTest {
                 "LOCATION:1CP Conference Room 4350\r\n" +
                 "END:VEVENT\r\n" +
                 "END:VCALENDAR\r\n";
-        EventData eventData = importEvent(iCal);
-        Event event = eventData.getEvent();
+        Event event = importEvent(iCal);
         //        assertEquals(D("1996-07-04 12:00:00"), event.getCreated());
         assertEquals("guid-1.example.com", event.getUid());
         assertEquals("mailto:mrbig@example.com", event.getOrganizer().getUri());
@@ -191,8 +186,7 @@ public class BasicTest extends ICalTest {
                 "END:VCALENDAR\r\n";
         CalendarImport vCalendarImport = importICal(iCal);
         assertEquals("xyz", vCalendarImport.getMethod());
-        EventData eventData = importEvent(iCal);
-        Event event = eventData.getEvent();
+        Event event = importEvent(iCal);
         assertEquals(0, event.getSequence());
         assertEquals("uid3@example.com", event.getUid());
         assertEquals("mailto:jdoe@example.com", event.getOrganizer().getUri());
@@ -338,11 +332,7 @@ public class BasicTest extends ICalTest {
                 "END:VEVENT\n" +
                 "END:VCALENDAR";
 
-        ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
-        List<EventData> events = iCalService.importICal(inputStream, null).getEvents();
-
-        EventData eventData = events.get(0);
-        Event event = eventData.getEvent();
+        Event event = importEvent(iCal);
 
         assertEquals("2 Tage vorher", event.getSummary());
         assertEquals(D("2030-06-28 17:00:00", "Europe/Berlin"), event.getStartDate());
@@ -388,8 +378,7 @@ public class BasicTest extends ICalTest {
                 "END:STANDARD\r\n" +
                 "END:VTIMEZONE\r\n" +
                 "END:VCALENDAR\r\n";
-        EventData eventData = importEvent(iCal);
-        Event event = eventData.getEvent();
+        Event event = importEvent(iCal);
 
         assertEquals("NewYork Event", event.getSummary());
         assertEquals(D("2012-08-08 02:00:00", "America/New_York"), event.getStartDate());

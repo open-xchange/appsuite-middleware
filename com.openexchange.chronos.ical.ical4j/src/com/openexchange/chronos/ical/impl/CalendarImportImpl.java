@@ -49,27 +49,26 @@
 
 package com.openexchange.chronos.ical.impl;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.AlarmComponent;
+import com.openexchange.chronos.ical.CalendarImport;
+import com.openexchange.chronos.ical.EventComponent;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.AlarmData;
-import com.openexchange.chronos.ical.CalendarImport;
-import com.openexchange.chronos.ical.DefaultAlarmData;
-import com.openexchange.chronos.ical.DefaultEventData;
-import com.openexchange.chronos.ical.EventData;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 
 /**
  * {@link CalendarImportImpl}
@@ -83,7 +82,7 @@ public class CalendarImportImpl implements CalendarImport {
     private final List<OXException> warnings;
     private final ICalMapper mapper;
 
-    private List<EventData> events;
+    private List<Event> events;
     private String method;
     private String name;
 
@@ -99,7 +98,13 @@ public class CalendarImportImpl implements CalendarImport {
 
     @Override
     public void close() throws IOException {
-        Streams.close(events);
+        if (null != events && 0 < events.size()) {
+            for (Event event : events) {
+                if (Closeable.class.isInstance(event)) {
+                    Streams.close((Closeable) event);
+                }
+            }
+        }
     }
 
     @Override
@@ -113,7 +118,7 @@ public class CalendarImportImpl implements CalendarImport {
     }
 
     @Override
-    public List<EventData> getEvents() {
+    public List<Event> getEvents() {
         return events;
     }
 
@@ -122,37 +127,37 @@ public class CalendarImportImpl implements CalendarImport {
         return warnings;
     }
 
-    private List<EventData> importEvents(ComponentList eventComponents) throws OXException {
+    private List<Event> importEvents(ComponentList eventComponents) throws OXException {
         if (null == eventComponents) {
             return null;
         }
-        List<EventData> events = new ArrayList<EventData>(eventComponents.size());
+        List<Event> events = new ArrayList<Event>(eventComponents.size());
         for (Iterator<?> iterator = eventComponents.iterator(); iterator.hasNext();) {
             VEvent vEvent = (VEvent) iterator.next();
-            List<AlarmData> alarms = importAlarms(vEvent.getAlarms());
-            Event event = mapper.importVEvent(vEvent, null, parameters, warnings);
+            EventComponent event = new EventComponent();
+            event.setAlarms(importAlarms(vEvent.getAlarms()));
+            mapper.importVEvent(vEvent, event, parameters, warnings);
             if (Boolean.TRUE.equals(parameters.get(ICalParameters.KEEP_COMPONENTS, Boolean.class))) {
-                events.add(new DefaultEventData(event, alarms, ICalUtils.exportComponent(vEvent, parameters)));
-            } else {
-                events.add(new DefaultEventData(event, alarms, null));
+                event.setComponent(ICalUtils.exportComponent(vEvent, parameters));
             }
+            events.add(event);
         }
         return events;
     }
 
-    private List<AlarmData> importAlarms(ComponentList alarmComponents) throws OXException {
+    private List<Alarm> importAlarms(ComponentList alarmComponents) throws OXException {
         if (null == alarmComponents) {
             return null;
         }
-        List<AlarmData> alarms = new ArrayList<AlarmData>(alarmComponents.size());
+        List<Alarm> alarms = new ArrayList<Alarm>(alarmComponents.size());
         for (Iterator<?> iterator = alarmComponents.iterator(); iterator.hasNext();) {
             VAlarm vAlarm = (VAlarm) iterator.next();
-            Alarm alarm = mapper.importVAlarm(vAlarm, null, parameters, warnings);
+            AlarmComponent alarm = new AlarmComponent();
+            mapper.importVAlarm(vAlarm, alarm, parameters, warnings);
             if (Boolean.TRUE.equals(parameters.get(ICalParameters.KEEP_COMPONENTS, Boolean.class))) {
-                alarms.add(new DefaultAlarmData(alarm, ICalUtils.exportComponent(vAlarm, parameters)));
-            } else {
-                alarms.add(new DefaultAlarmData(alarm, null));
+                alarm.setComponent(ICalUtils.exportComponent(vAlarm, parameters));
             }
+            alarms.add(alarm);
         }
         return alarms;
     }
