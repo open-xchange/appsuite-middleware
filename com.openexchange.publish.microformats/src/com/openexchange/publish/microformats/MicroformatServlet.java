@@ -52,9 +52,6 @@ package com.openexchange.publish.microformats;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -177,6 +174,12 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         try {
             resp.setContentType("text/html; charset=UTF-8");
             final Map<String, String> args = getPublicationArguments(req);
+            if(args==null){
+                final PrintWriter writer = resp.getWriter();
+                writer.println("The publication request is missing some or all parameters.");
+                writer.flush();
+                return;
+            }
             final String module = args.get(MODULE);
 
             final OXMFPublicationService publisher = PUBLISHERS.get(module);
@@ -207,7 +210,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
             Collection<? extends Object> loaded = dataLoader.load(publication, EscapeMode.HTML);
             User user = getUser(publication);
-            Contact userContact = getContact(new PublicationSession(publication), publication.getContext());
+            Contact userContact = getContact(new PublicationSession(publication));
 
             // Sanitize publication
             sanitizePublication(publication);
@@ -288,7 +291,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         }
     }
 
-    private Contact getContact(final PublicationSession publicationSession, final Context context) throws OXException {
+    private Contact getContact(final PublicationSession publicationSession) throws OXException {
         return contacts.getUser(publicationSession, publicationSession.getUserId());
     }
 
@@ -316,6 +319,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             }
         }
 
+        if(normalized.size()<2){
+            return null;
+        }
         final String site = Strings.join(HelperClass.decode(normalized.size() > 2 ? normalized.subList(2, normalized.size()) : normalized, req, SPLIT2), "/");
         final Map<String, String> args = new HashMap<String, String>();
         args.put(MODULE, normalized.get(0));
@@ -341,25 +347,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             return site;
         }
         return AJAXUtility.encodeUrl(site, true, false);
-    }
-
-    private static <T> T getProxy(Class<? extends T> intf, final T obj) {
-        return (T) Proxy.newProxyInstance(obj.getClass().getClassLoader(), new Class[] { intf }, new InvocationHandler() {
-
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                String meth = method.getName();
-                if (!meth.startsWith("get")) {
-                    return method.invoke(obj, args);
-                }
-
-                Object retval = method.invoke(obj, args);
-                if (!(retval instanceof String)) {
-                    return retval;
-                }
-                return Publications.escape(retval.toString(), EscapeMode.HTML);
-            }
-        });
     }
 
 }
