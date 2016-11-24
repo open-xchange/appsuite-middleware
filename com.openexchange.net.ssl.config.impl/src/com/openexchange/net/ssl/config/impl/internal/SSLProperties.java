@@ -49,11 +49,12 @@
 
 package com.openexchange.net.ssl.config.impl.internal;
 
+import static com.openexchange.net.ssl.config.impl.internal.CipherSuiteName.nameFor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
@@ -192,15 +193,16 @@ public enum SSLProperties {
     private static String[] getJvmApplicableCipherSuites(List<String> desiredCipherSuites, boolean allowDefaultOnes) {
         // Get the cipher suites actually supported by running JVM
         String[] jvmDefaults = DEFAULT_CIPHER_SUITES_REFERENCE.get();
-        Set<String> supportedCipherSuites = new HashSet<>(jvmDefaults.length);
+        Map<CipherSuiteName, String> supportedCipherSuites = new HashMap<>(jvmDefaults.length);
         for (String jvmDefaultCipherSuite : jvmDefaults) {
-            supportedCipherSuites.add(Strings.toUpperCase(jvmDefaultCipherSuite));
+            supportedCipherSuites.put(nameFor(jvmDefaultCipherSuite), jvmDefaultCipherSuite);
         }
 
         // Grab the desired ones from JVM's default cipher suites
         List<String> defaultCipherSuites = new ArrayList<>(desiredCipherSuites.size());
         for (String desiredCipherSuite : desiredCipherSuites) {
-            if (supportedCipherSuites.contains(desiredCipherSuite)) {
+            String supportedCipherSuite = supportedCipherSuites.get(nameFor(desiredCipherSuite));
+            if (null != supportedCipherSuite) {
                 defaultCipherSuites.add(desiredCipherSuite);
             }
         }
