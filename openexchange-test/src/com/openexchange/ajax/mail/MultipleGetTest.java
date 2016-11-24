@@ -98,7 +98,6 @@ public class MultipleGetTest extends AbstractMailTest {
         values = getClient().getValues();
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         for (String[][] fmid : fmids) {

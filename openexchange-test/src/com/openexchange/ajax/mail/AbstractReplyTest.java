@@ -88,7 +88,6 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         this.contactManager = new ContactTestManager(client);
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         clearFolder(getInboxFolder());

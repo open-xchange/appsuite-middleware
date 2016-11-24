@@ -91,7 +91,6 @@ public final class Bug28913Test extends AbstractMailTest {
         ids = response.getIds()[0];
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         client.executeSafe(new DeleteRequest(ids, true));

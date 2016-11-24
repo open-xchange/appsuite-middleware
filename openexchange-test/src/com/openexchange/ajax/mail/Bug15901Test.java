@@ -104,7 +104,6 @@ public class Bug15901Test extends AbstractAJAXSession {
         ids = response.getIds();
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         final DeleteRequest del = new DeleteRequest(ids);

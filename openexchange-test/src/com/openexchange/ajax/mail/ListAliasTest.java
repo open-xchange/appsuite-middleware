@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -83,8 +82,6 @@ public class ListAliasTest extends AbstractMailTest {
         client = getClient();
     }
 
-    @Before
-    @After
     @Test
     public void testListAlias() throws Exception {
         final String[][] folderAndIds = getFolderAndIDs(client.getValues().getInboxFolder());

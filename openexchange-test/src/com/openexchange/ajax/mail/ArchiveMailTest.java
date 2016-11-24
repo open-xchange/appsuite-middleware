@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -77,8 +76,6 @@ public class ArchiveMailTest extends AbstractMailTest {
         values = getClient().getValues();
     }
 
-    @Before
-    @After
     @Test
     public void testShouldArchive() throws OXException, IOException, SAXException, JSONException {
         MailTestManager manager = new MailTestManager(client, false);

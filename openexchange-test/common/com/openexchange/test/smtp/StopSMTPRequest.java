@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.oauth.provider.actions;
+package com.openexchange.test.smtp;
 
 import java.io.IOException;
 import org.json.JSONException;
@@ -59,34 +59,29 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
 /**
- * {@link StartSMTPRequest}
+ * 
+ * {@link StopSMTPRequest}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.3
  */
-public class StartSMTPRequest implements AJAXRequest<OAuthTestResponse> {
+public class StopSMTPRequest implements AJAXRequest<SMTPInitResponse> {
 
-    private final boolean updateAccount;
-
-    private int updateNoReplyForContext = -1;
+    private final boolean restoreTransports;
 
     private boolean failOnError = true;
 
-    public StartSMTPRequest() {
+    public StopSMTPRequest() {
         this(true);
     }
 
-    public StartSMTPRequest(boolean updateAccount) {
+    public StopSMTPRequest(boolean restoreTransports) {
         super();
-        this.updateAccount = updateAccount;
+        this.restoreTransports = restoreTransports;
     }
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
-    }
-
-    public void setUpdateNoReplyForContext(int updateNoReplyForContext) {
-        this.updateNoReplyForContext = updateNoReplyForContext;
     }
 
     @Override
@@ -101,16 +96,16 @@ public class StartSMTPRequest implements AJAXRequest<OAuthTestResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "startSMTP", "updateAccount", Boolean.toString(updateAccount), "updateNoReplyForContext", Integer.toString(updateNoReplyForContext)).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "stopSMTP", "restoreTransports", Boolean.toString(restoreTransports)).toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends OAuthTestResponse> getParser() {
-        return new AbstractAJAXParser<OAuthTestResponse>(failOnError) {
+    public AbstractAJAXParser<? extends SMTPInitResponse> getParser() {
+        return new AbstractAJAXParser<SMTPInitResponse>(failOnError) {
 
             @Override
-            protected OAuthTestResponse createResponse(Response response) throws JSONException {
-                return new OAuthTestResponse(response);
+            protected SMTPInitResponse createResponse(Response response) throws JSONException {
+                return new SMTPInitResponse(response);
             }
         };
     }

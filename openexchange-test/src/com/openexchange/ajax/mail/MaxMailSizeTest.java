@@ -89,7 +89,6 @@ public class MaxMailSizeTest extends AbstractMailTest {
         manager = new MailTestManager(client, true);
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         manager.cleanUp();

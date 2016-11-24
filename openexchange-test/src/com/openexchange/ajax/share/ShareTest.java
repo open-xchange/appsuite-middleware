@@ -100,7 +100,6 @@ import com.openexchange.ajax.share.actions.FolderSharesRequest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ShareLink;
-import com.openexchange.ajax.share.actions.StartSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.exception.OXException;
@@ -148,29 +147,16 @@ public abstract class ShareTest extends AbstractAJAXSession {
     private Map<Integer, FolderObject> foldersToDelete;
     private Map<String, File> filesToDelete;
 
-    /**
-     * Initializes a new {@link ShareTest}.
-     *
-     * @param name The test name
-     */
-    protected ShareTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         filesToDelete = new HashMap<String, File>();
-        StartSMTPRequest startSMTPRequest = new StartSMTPRequest();
-        startSMTPRequest.setUpdateNoReplyForContext(client.getValues().getContextId());
-        client.execute(startSMTPRequest);
     }
 
     @After
     public void tearDown() throws Exception {
         if (null != client) {
-//            client.execute(new StopSMTPRequest());
             deleteFoldersSilently(client, foldersToDelete);
             deleteFilesSilently(client, filesToDelete.values());
         }

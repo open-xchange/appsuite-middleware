@@ -79,7 +79,6 @@ public class ForwardMailTest extends AbstractReplyTest {
         manager = new MailTestManager(getClient());
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         manager.cleanUp();

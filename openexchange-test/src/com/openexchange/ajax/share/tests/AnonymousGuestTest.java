@@ -84,15 +84,6 @@ public class AnonymousGuestTest extends ShareTest {
 
     private File file;
 
-    /**
-     * Initializes a new {@link AnonymousGuestTest}.
-     * 
-     * @param name
-     */
-    public AnonymousGuestTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

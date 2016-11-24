@@ -77,7 +77,6 @@ import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.oauth.provider.actions.StartSMTPRequest;
 import com.openexchange.ajax.oauth.provider.protocol.GETRequest;
 import com.openexchange.ajax.oauth.provider.protocol.GETResponse;
 import com.openexchange.ajax.oauth.provider.protocol.HttpTools;
@@ -293,12 +292,6 @@ public class AuthorizationEndpointTest extends EndpointTest {
     @Test
     public void testPOSTTriggersMail() throws Exception {
         ajaxClient = new AJAXClient(User.User1);
-        try {
-            // start dummy smtp to catch password-reset mail
-            StartSMTPRequest startSMTPReqeuest = new StartSMTPRequest(false);
-            startSMTPReqeuest.setUpdateNoReplyForContext(ajaxClient.getValues().getContextId());
-            ajaxClient.execute(startSMTPReqeuest);
-
             // Obtain access
             new OAuthSession(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScope());
 
@@ -316,9 +309,6 @@ public class AuthorizationEndpointTest extends EndpointTest {
             assertTrue("External application name expected in subject.", subject.contains(oauthClient.getName()));
             assertSignatureText(message.requireHtml(), "");
             assertSignatureImage(message);
-        } finally {
-//            ajaxClient.execute(new StopSMTPRequest());
-        }
     }
 
     private void testGETWithMissingParameter(String param, String error) throws Exception {

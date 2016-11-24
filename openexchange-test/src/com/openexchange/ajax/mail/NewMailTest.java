@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail;
 import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -82,8 +81,6 @@ public class NewMailTest extends AbstractMailTest {
         values = getClient().getValues();
     }
 
-    @Before
-    @After
     @Test
     public void testTransportNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException {
         // System.out.println(values.getDraftsFolder());

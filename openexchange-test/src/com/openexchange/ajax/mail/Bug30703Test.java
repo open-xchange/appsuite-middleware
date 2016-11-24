@@ -55,7 +55,6 @@ import static org.junit.Assert.assertTrue;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -80,7 +79,6 @@ public class Bug30703Test extends AbstractAJAXSession {
 
     private MailAccountDescription mailAccountDescription;
 
-    @Before
     @After
     public void tearDown() throws Exception {
         try {

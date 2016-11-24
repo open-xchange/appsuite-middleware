@@ -96,7 +96,6 @@ public class Bug31855Test extends AbstractMailTest {
         values = getClient().getValues();
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         if (null != fmid) {

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.test.smtp;
 
 import java.io.IOException;
 import org.json.JSONException;
@@ -59,12 +59,13 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
 /**
+ * 
  * {@link StartSMTPRequest}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.3
  */
-public class StartSMTPRequest implements AJAXRequest<ShareTestResponse> {
+public class StartSMTPRequest implements AJAXRequest<SMTPInitResponse> {
 
     private final boolean updateAccount;
 
@@ -105,12 +106,12 @@ public class StartSMTPRequest implements AJAXRequest<ShareTestResponse> {
     }
 
     @Override
-    public AbstractAJAXParser<? extends ShareTestResponse> getParser() {
-        return new AbstractAJAXParser<ShareTestResponse>(failOnError) {
+    public AbstractAJAXParser<? extends SMTPInitResponse> getParser() {
+        return new AbstractAJAXParser<SMTPInitResponse>(failOnError) {
 
             @Override
-            protected ShareTestResponse createResponse(Response response) throws JSONException {
-                return new ShareTestResponse(response);
+            protected SMTPInitResponse createResponse(Response response) throws JSONException {
+                return new SMTPInitResponse(response);
             }
         };
     }

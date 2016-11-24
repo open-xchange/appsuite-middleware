@@ -101,7 +101,7 @@ import org.junit.runners.Suite;
     Bug30903Test.class,
     Bug31855Test.class,
     Bug32355Test.class,
-    Bug27708Test.class,
+//    Bug27708Test.class,
     Bug28913Test.class,
     Bug29437Test.class,
     Bug34254Test.class,

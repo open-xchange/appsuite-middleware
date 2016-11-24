@@ -107,7 +107,6 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
         values = getClient().getValues();
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         if (null != fmid) {

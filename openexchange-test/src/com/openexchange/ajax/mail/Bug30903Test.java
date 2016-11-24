@@ -56,7 +56,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -92,7 +91,6 @@ public class Bug30903Test extends AbstractMailTest {
         super();
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         DeleteRequest delReq = new DeleteRequest(fmids, true);

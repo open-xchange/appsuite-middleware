@@ -82,7 +82,6 @@ public class MoveMailTest extends AbstractMailTest {
         values = getClient().getValues();
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         clearFolder(values.getSentFolder());

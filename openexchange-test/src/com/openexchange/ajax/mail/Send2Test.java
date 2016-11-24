@@ -85,7 +85,6 @@ public final class Send2Test extends AbstractMailTest {
         manager = new MailTestManager(client, false);
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         manager.cleanUp();

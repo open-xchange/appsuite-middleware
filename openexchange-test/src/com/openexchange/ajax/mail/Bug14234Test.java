@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertNotNull;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
@@ -82,8 +81,6 @@ public class Bug14234Test extends AbstractMailTest {
         values = getClient().getValues();
     }
 
-    @Before
-    @After
     @Test
     public void testTransportNewRFC822MailWithoutFrom() throws Exception {
         NewMailRequest newMailRequest = null;

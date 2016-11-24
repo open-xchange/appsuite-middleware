@@ -57,7 +57,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
@@ -96,8 +95,6 @@ public class Base64Test extends AbstractMailTest {
         values = getClient().getValues();
     }
 
-    @Before
-    @After
     @Test
     public void testGetBase64() throws OXException, IOException, JSONException {
 

@@ -55,14 +55,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
-import com.openexchange.ajax.onboarding.actions.StartSMTPRequest;
-import com.openexchange.ajax.onboarding.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
@@ -74,26 +70,6 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
  * @since v7.8.1
  */
 public class EASSyncProfileTest extends AbstractAJAXSession {
-
-    public EASSyncProfileTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        StartSMTPRequest req = new StartSMTPRequest(true);
-        req.setUpdateNoReplyForContext(client.getValues().getContextId());
-        client.execute(req);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (null != client) {
-            client.execute(new StopSMTPRequest());
-        }
-        super.tearDown();
-    }
 
     @Test
     public void testEASSyncProfileViaEmail() throws Exception {

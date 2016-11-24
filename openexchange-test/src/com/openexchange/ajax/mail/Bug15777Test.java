@@ -81,7 +81,6 @@ public class Bug15777Test extends AbstractAJAXSession {
         assertTrue("Flag 'answered' is missing", MailFlag.transform(getMovedMailResp.getMail(TimeZone.getDefault()).getFlags()).contains(MailFlag.ANSWERED));
     }
 
-    @Before
     @After
     public void tearDown() throws Exception {
         // Delete Mail
