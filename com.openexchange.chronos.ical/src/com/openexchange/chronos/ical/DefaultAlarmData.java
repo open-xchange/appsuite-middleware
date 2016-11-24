@@ -47,41 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical;
 
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.ical.ComponentData;
-import com.openexchange.java.Streams;
+import com.openexchange.chronos.Alarm;
 
 /**
- * {@link AbstractComponentData}
+ * {@link DefaultAlarmData}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AbstractComponentData implements ComponentData {
+public class DefaultAlarmData extends AbstractComponentData implements AlarmData {
 
-    private final ThresholdFileHolder iCalHolder;
+    private final Alarm alarm;
 
     /**
-     * Initializes a new {@link AbstractComponentData}.
+     * Initializes a new {@link DefaultAlarmData}.
      *
-     * @param iCalHolder A file holder storing the original iCal component, or <code>null</code> if not available
+     * @param alarm The alarm
+     * @param iCalHolder A file holder storing the associated iCal file, or <code>null</code> if not available
      */
-    protected AbstractComponentData(ThresholdFileHolder iCalHolder) {
-        super();
-        this.iCalHolder = iCalHolder;
+    public DefaultAlarmData(Alarm alarm, ThresholdFileHolder iCalHolder) {
+        super(iCalHolder);
+        this.alarm = alarm;
     }
 
     @Override
-    public IFileHolder getComponent() {
-        return iCalHolder;
-    }
-
-    @Override
-    public void close() {
-        Streams.close(iCalHolder);
+    public Alarm getAlarm() {
+        return alarm;
     }
 
 }

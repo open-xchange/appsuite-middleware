@@ -51,13 +51,6 @@ package com.openexchange.chronos.ical.impl;
 
 import java.io.InputStream;
 import java.util.List;
-import net.fortuna.ical4j.extensions.property.WrCalName;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.PropertyFactoryImpl;
-import net.fortuna.ical4j.model.component.VAlarm;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Method;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.ical.AlarmData;
@@ -66,6 +59,13 @@ import com.openexchange.chronos.ical.EventData;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.extensions.property.WrCalName;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyFactoryImpl;
+import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.Method;
 
 /**
  * {@link CalendarExportImpl}
@@ -82,7 +82,7 @@ public class CalendarExportImpl implements CalendarExport {
 
     /**
      * Initializes a new {@link CalendarExportImpl}.
-     * 
+     *
      * @param mapper The iCal mapper to use
      * @param parameters The iCal parameters
      * @param warnings The warnings
@@ -95,6 +95,7 @@ public class CalendarExportImpl implements CalendarExport {
         this.mapper = mapper;
     }
 
+    @Override
     public void setName(String name) {
         WrCalName property = (WrCalName) calendar.getProperty(WrCalName.PROPERTY_NAME);
         if (null == property) {
@@ -104,6 +105,7 @@ public class CalendarExportImpl implements CalendarExport {
         property.setValue(name);
     }
 
+    @Override
     public void setMethod(String method) {
         Method property = (Method) calendar.getProperty(Property.METHOD);
         if (null == property) {
@@ -119,8 +121,9 @@ public class CalendarExportImpl implements CalendarExport {
     }
 
     @Override
-    public void add(EventData event) throws OXException {
+    public CalendarExport add(EventData event) throws OXException {
         calendar.getComponents().add(exportEvent(event));
+        return this;
     }
 
     @Override

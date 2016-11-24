@@ -47,54 +47,54 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical.ical4j.osgi;
 
-import java.util.List;
-
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.AlarmData;
-import com.openexchange.chronos.ical.EventData;
-import com.openexchange.java.Streams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.impl.ICalServiceImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link DefaultEventData}
+ * {@link ICal4jActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultEventData extends AbstractComponentData implements EventData {
+public class ICal4jActivator extends HousekeepingActivator {
 
-    private final Event event;
-    private final List<AlarmData> alarms;
+    private static final Logger LOG = LoggerFactory.getLogger(ICal4jActivator.class);
 
     /**
-     * Initializes a new {@link DefaultEventData}.
-     *
-     * @param event The event
-     * @param alarms The subsidiary alarm data of the event
-     * @param iCalHolder A file holder storing the associated iCal file, or <code>null</code> if not available
+     * Initializes a new {@link ICal4jActivator}.
      */
-    public DefaultEventData(Event event, List<AlarmData> alarms, ThresholdFileHolder iCalHolder) {
-        super(iCalHolder);
-        this.event = event;
-        this.alarms = alarms;
+    public ICal4jActivator() {
+        super();
     }
 
     @Override
-    public Event getEvent() {
-        return event;
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {};
     }
 
-	@Override
-	public List<AlarmData> getAlarms() {
-		return alarms;
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle {}", context.getBundle());
+            /*
+             * register services
+             */
+            registerService(ICalService.class, new ICalServiceImpl());
+        } catch (Exception e) {
+            LOG.error("error starting {}", context.getBundle(), e);
+            throw e;
+        }
+    }
 
     @Override
-    public void close() {
-		Streams.close(alarms);
-    	super.close();
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle {}", context.getBundle());
+        super.stopBundle();
     }
 
 }

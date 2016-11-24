@@ -63,6 +63,8 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.AlarmData;
 import com.openexchange.chronos.ical.CalendarImport;
+import com.openexchange.chronos.ical.DefaultAlarmData;
+import com.openexchange.chronos.ical.DefaultEventData;
 import com.openexchange.chronos.ical.EventData;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;

@@ -55,7 +55,6 @@ import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.impl.DefaultEventData;
 import com.openexchange.java.Streams;
 
 /**

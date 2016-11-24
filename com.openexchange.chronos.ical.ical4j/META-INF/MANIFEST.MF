@@ -34,3 +34,4 @@ Import-Package: com.openexchange.ajax.container,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j
+Bundle-Activator: com.openexchange.chronos.ical.ical4j.osgi.ICal4jActivator
