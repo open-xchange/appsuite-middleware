@@ -1,3 +1,9 @@
+open-xchange-linkedin (7.8.3-3) stable; urgency=medium
+
+  * Version alignment for first release candidate
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Sat, 24 Nov 2016 20:42:00 +0100
+
 open-xchange-linkedin (7.8.3-2) stable; urgency=medium
 
   * Second preview for 7.8.3 release

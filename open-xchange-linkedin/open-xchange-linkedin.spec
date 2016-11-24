@@ -16,7 +16,7 @@ BuildRequires:  ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-halo
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
