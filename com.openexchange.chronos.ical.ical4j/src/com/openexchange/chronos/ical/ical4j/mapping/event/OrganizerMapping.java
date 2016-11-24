@@ -81,7 +81,7 @@ public class OrganizerMapping extends AbstractICalMapping<VEvent, Event> {
             net.fortuna.ical4j.model.property.Organizer property = component.getOrganizer();
             if (null == property) {
                 property = new net.fortuna.ical4j.model.property.Organizer();
-                component.getProperties().add(organizer);
+                component.getProperties().add(property);
             }
             try {
                 exportOrganizer(organizer, property);
