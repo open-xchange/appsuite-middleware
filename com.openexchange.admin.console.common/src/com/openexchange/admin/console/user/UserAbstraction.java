@@ -372,6 +372,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         gui_spam_filter_capabilities_enabled(OPT_GUI_LONG, false),
         add_config(OPT_CONFIG_LONG, false),
         remove_config(OPT_REMOVE_CONFIG_LONG, false),
+        primary_account_name(OPT_PRIMARY_ACCOUNT_NAME, false),
         ;
 
         private final String string;
@@ -676,6 +677,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption removeConfigOption_NO_READ = null;
     protected static final String OPT_CONFIG_LONG = "config";
     protected static final String OPT_REMOVE_CONFIG_LONG = "remove-config";
+    protected static final String OPT_PRIMARY_ACCOUNT_NAME = "primary-account-name";
 
     // For right error output
     protected String username = null;

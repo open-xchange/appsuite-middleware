@@ -154,19 +154,26 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
                     final User adminuser = getUser(nextLine, idarray);
                     final Credentials auth = getCreds(nextLine, idarray);
                     final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
+                    final int primNameIndex = idarray[Constants.primary_account_name.getIndex()];
+                    final String primaryMailName;
+                    if(primNameIndex!=-1){
+                        primaryMailName = nextLine[i];
+                    } else {
+                        primaryMailName = null;
+                    }
                     try {
                         final User create;
                         if (-1 != i) {
                             // create call
-                            create = oxuser.create(context, adminuser, nextLine[i], auth);
+                            create = oxuser.create(context, adminuser, nextLine[i], auth, primaryMailName);
                         } else {
                             final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
                             if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
                                 // with module access
-                                create = oxuser.create(context, adminuser, moduleacess, auth);
+                                create = oxuser.create(context, adminuser, moduleacess, auth, primaryMailName);
                             } else {
                                 // without module access
-                                create = oxuser.create(context, adminuser, auth);
+                                create = oxuser.create(context, adminuser, auth, primaryMailName);
                             }
                         }
                         System.out.println("User " + create.getId() + " successfully created in context " + context.getId());

@@ -127,12 +127,12 @@ public class TestBug41727 {
             oxuser = (OXUserInterface) Naming.lookup(RMI_HOST + OXUserInterface.RMI_NAME);
             // Create user A
             long start = System.currentTimeMillis();
-            someUser = oxuser.create(context, createUser(), getContextAdminCredentials());
+            someUser = oxuser.create(context, createUser(), getContextAdminCredentials(), null);
             System.out.println("User A '" + someUser.getImapLogin() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
 
             // Create user B
             start = System.currentTimeMillis();
-            masterUser = oxuser.create(context, createUser(), getContextAdminCredentials());
+            masterUser = oxuser.create(context, createUser(), getContextAdminCredentials(), null);
             System.out.println("Master user '" + masterUser.getImapLogin() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();

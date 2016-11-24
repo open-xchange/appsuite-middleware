@@ -582,10 +582,10 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccess(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess access,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccess(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess access,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth, String primaryAccountName) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXUserInterface iface = getUserInterface();
         try {
-            final User user = iface.create(soap2Context(ctx), soap2User(usrdata), soap2ModuleAccess(access), soap2Credentials(auth));
+            final User user = iface.create(soap2Context(ctx), soap2User(usrdata), soap2ModuleAccess(access), soap2Credentials(auth), primaryAccountName);
             return null == user ? null : user2Soap(user);
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException();
@@ -667,10 +667,10 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User create(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User create(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth, String primaryAccountName) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXUserInterface iface = getUserInterface();
         try {
-            final User user = iface.create(soap2Context(ctx), soap2User(usrdata), soap2Credentials(auth));
+            final User user = iface.create(soap2Context(ctx), soap2User(usrdata), soap2Credentials(auth), primaryAccountName);
             return user2Soap(user);
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException();
@@ -1128,10 +1128,10 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccessName(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final java.lang.String accessCombinationName,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccessName(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final java.lang.String accessCombinationName,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth, final String primaryAccountName) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXUserInterface iface = getUserInterface();
         try {
-            final User create = iface.create(soap2Context(ctx), soap2User(usrdata), accessCombinationName, soap2Credentials(auth));
+            final User create = iface.create(soap2Context(ctx), soap2User(usrdata), accessCombinationName, soap2Credentials(auth), primaryAccountName);
             return user2Soap(create);
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException();

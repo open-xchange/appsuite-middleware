@@ -26,6 +26,7 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAcce
  *         &lt;element name="usrdata" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
  *         &lt;element name="access" type="{http://dataobjects.soap.admin.openexchange.com/xsd}UserModuleAccess" minOccurs="0"/>
  *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ *         &lt;element name="primaryAccountName" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}String" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -39,7 +40,8 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAcce
     "ctx",
     "usrdata",
     "access",
-    "auth"
+    "auth",
+    "primaryAccountName"
 })
 @XmlRootElement(name = "createByModuleAccess")
 public class CreateByModuleAccess {
@@ -52,6 +54,8 @@ public class CreateByModuleAccess {
     protected UserModuleAccess access;
     @XmlElement(nillable = true)
     protected Credentials auth;
+    @XmlElement(nillable = true)
+    private String primaryAccountName;
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
@@ -147,6 +151,24 @@ public class CreateByModuleAccess {
      */
     public void setAuth(Credentials value) {
         this.auth = value;
+    }
+
+    /**
+     * Gets the primaryAccountName
+     *
+     * @return The primaryAccountName
+     */
+    public String getPrimaryAccountName() {
+        return primaryAccountName;
+    }
+
+    /**
+     * Sets the primaryAccountName
+     *
+     * @param primaryAccountName The primaryAccountName to set
+     */
+    public void setPrimaryAccountName(String primaryAccountName) {
+        this.primaryAccountName = primaryAccountName;
     }
 
 }

@@ -132,13 +132,13 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         srcUser.setImapServer("example.com");
         srcUser.setImapLogin("oxuser");
         srcUser.setSmtpServer("example.com");
-        srcUser = ui.create(srcCtx, srcUser, getCredentials());
+        srcUser = ui.create(srcCtx, srcUser, getCredentials(), null);
 
         User dummy = newUser("dummy", "secret", "Dummy User", "Dummy", "User", "oxuser2@example.com");
         dummy.setImapServer("example.com");
         dummy.setImapLogin("oxuser");
         dummy.setSmtpServer("example.com");
-        dummy = ui.create(dstCtx, dummy, getCredentials());
+        dummy = ui.create(dstCtx, dummy, getCredentials(), null);
 
         AJAXSession dummySession = performLogin(dummy.getName() + '@' + dstCtx.getName(), "secret");
         AJAXClient dummyClient = new AJAXClient(dummySession, false);

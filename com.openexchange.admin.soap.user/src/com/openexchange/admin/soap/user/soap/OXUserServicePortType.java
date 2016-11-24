@@ -34,7 +34,8 @@ public interface OXUserServicePortType {
         @WebParam(name = "access", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.user.dataobjects.UserModuleAccess access,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth,
+        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.admin.openexchange.com") String primaryAccountName
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
@@ -88,7 +89,8 @@ public interface OXUserServicePortType {
         @WebParam(name = "access_combination_name", targetNamespace = "http://soap.admin.openexchange.com")
         java.lang.String accessCombinationName,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth,
+        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.admin.openexchange.com") String primaryAccountName
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
@@ -115,7 +117,7 @@ public interface OXUserServicePortType {
         com.openexchange.admin.soap.user.dataobjects.Context ctx,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.user.dataobjects.Credentials auth,
-        @WebParam(name = "includeGuests", targetNamespace = "http://soap.admin.openexchange.com") Boolean includeGuests, 
+        @WebParam(name = "includeGuests", targetNamespace = "http://soap.admin.openexchange.com") Boolean includeGuests,
         @WebParam(name = "excludeUsers", targetNamespace = "http://soap.admin.openexchange.com") Boolean excludeUsers
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
@@ -202,7 +204,8 @@ public interface OXUserServicePortType {
         @WebParam(name = "usrdata", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.user.dataobjects.User usrdata,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth,
+        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.admin.openexchange.com") String primaryAccountName
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
@@ -307,10 +310,10 @@ public interface OXUserServicePortType {
     @WebMethod(action = "urn:list")
     @ResponseWrapper(localName = "listResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.ListResponse")
     public java.util.List<com.openexchange.admin.soap.user.dataobjects.User> list(
-        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.user.dataobjects.Context ctx, 
-        @WebParam(name = "search_pattern", targetNamespace = "http://soap.admin.openexchange.com") java.lang.String searchPattern, 
-        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.user.dataobjects.Credentials auth, 
-        @WebParam(name = "include_guests", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Boolean includeGuests, 
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "search_pattern", targetNamespace = "http://soap.admin.openexchange.com") java.lang.String searchPattern,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.user.dataobjects.Credentials auth,
+        @WebParam(name = "include_guests", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Boolean includeGuests,
         @WebParam(name = "exclude_users", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Boolean excludeUsers
         ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
