@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -91,6 +91,8 @@ fi
 %defattr(-,root,root)
 
 %changelog
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.3 release
 * Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
