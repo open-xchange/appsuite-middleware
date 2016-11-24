@@ -303,7 +303,12 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
-        final String[] path = SPLIT.split(req.getPathInfo(), 0);
+        final String[] path;
+        if(req.getPathInfo()==null){
+            path = new String[0];
+        } else {
+            path = SPLIT.split(req.getPathInfo(), 0);
+        }
         final List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
             if (!path[i].equals("")) {
