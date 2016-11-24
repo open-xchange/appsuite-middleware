@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange ImageServer Implementation
 Bundle-SymbolicName: com.openexchange.imageserver
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.4
 Bundle-Vendor: OPENEXCHANGE
 Bundle-Activator: com.openexchange.imageserver.osgi.ImageServerActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

@@ -1,3 +1,9 @@
+open-xchange-admin-oauth-provider (7.8.4-0) unstable; urgency=medium
+
+  * prepare for 7.8.4 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 24 Nov 2016 11:04:45 +0100
+
 open-xchange-admin-oauth-provider (7.8.3-3) stable; urgency=medium
 
   * Third preview for 7.8.3 release
