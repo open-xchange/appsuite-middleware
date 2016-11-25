@@ -77,7 +77,7 @@ public class TranspMapping extends ICalTextMapping<VEvent, Event> {
 
 	@Override
 	protected String getValue(Event object) {
-		return null != object.getTransp() ? object.getTransp().toString() : null;
+        return null != object.getTransp() ? object.getTransp().getValue() : null;
 	}
 
 	@Override
