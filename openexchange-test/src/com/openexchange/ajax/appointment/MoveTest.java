@@ -5,15 +5,12 @@ import java.util.Date;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 
-@RunWith(ConcurrentTestRunner.class)
 public class MoveTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MoveTest.class);

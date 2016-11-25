@@ -17,8 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -33,7 +31,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.URLParameter;
 
-@RunWith(ConcurrentTestRunner.class)
 public class ConflictTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConflictTest.class);

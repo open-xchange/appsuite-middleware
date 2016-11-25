@@ -60,8 +60,6 @@ import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
@@ -82,7 +80,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
 
-@RunWith(ConcurrentTestRunner.class)
 public class ListTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListTest.class);

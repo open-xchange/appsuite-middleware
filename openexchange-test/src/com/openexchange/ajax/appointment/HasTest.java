@@ -55,8 +55,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.HasRequest;
@@ -66,7 +64,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 
-@RunWith(ConcurrentTestRunner.class)
 public class HasTest extends AbstractAJAXSession {
 
     private AJAXClient client;

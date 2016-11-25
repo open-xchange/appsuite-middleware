@@ -58,8 +58,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
@@ -76,7 +74,6 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 
-@RunWith(ConcurrentTestRunner.class)
 public class UpdateTest extends AppointmentTest {
 
     private final static int[] _appointmentFields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.INTERVAL, CalendarObject.RECURRENCE_COUNT, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.RECURRENCE_START

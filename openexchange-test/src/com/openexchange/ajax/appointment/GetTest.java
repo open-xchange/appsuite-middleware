@@ -56,8 +56,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
@@ -75,7 +73,6 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 
-@RunWith(ConcurrentTestRunner.class)
 public class GetTest extends AppointmentTest {
 
     @Test

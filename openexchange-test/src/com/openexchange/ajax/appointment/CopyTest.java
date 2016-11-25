@@ -9,8 +9,6 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -25,7 +23,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.URLParameter;
 
-@RunWith(ConcurrentTestRunner.class)
 public class CopyTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyTest.class);

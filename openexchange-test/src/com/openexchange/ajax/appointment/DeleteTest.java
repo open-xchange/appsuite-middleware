@@ -8,13 +8,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 
-@RunWith(ConcurrentTestRunner.class)
 public class DeleteTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteTest.class);

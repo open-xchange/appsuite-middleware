@@ -51,9 +51,11 @@ package com.openexchange.ajax.framework;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient.User;
 
-//@RunWith(ConcurrentTestRunner.class)
+@RunWith(ConcurrentTestRunner.class)
 public abstract class AbstractAJAXSession {
 
     protected AJAXClient client;

@@ -54,8 +54,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
@@ -64,7 +62,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Appointment;
 
-@RunWith(ConcurrentTestRunner.class)
 public class SearchTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchTest.class);

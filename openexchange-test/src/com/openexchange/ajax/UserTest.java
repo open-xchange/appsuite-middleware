@@ -59,9 +59,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -78,7 +76,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.URLParameter;
 
-@RunWith(ConcurrentTestRunner.class)
 public class UserTest extends AbstractAJAXTest {
 
     public final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, Contact.INTERNAL_USERID, Contact.EMAIL1, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.DISPLAY_NAME

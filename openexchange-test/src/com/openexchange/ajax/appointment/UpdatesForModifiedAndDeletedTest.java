@@ -54,8 +54,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.groupware.container.Appointment;
@@ -65,7 +63,6 @@ import com.openexchange.groupware.container.Appointment;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-@RunWith(ConcurrentTestRunner.class)
 public class UpdatesForModifiedAndDeletedTest extends AbstractAppointmentTest {
 
     /**

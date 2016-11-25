@@ -59,8 +59,6 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
@@ -77,7 +75,6 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 
-@RunWith(ConcurrentTestRunner.class)
 public class NewTest extends AppointmentTest {
 
     private int targetFolder;

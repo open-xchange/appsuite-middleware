@@ -4,15 +4,12 @@ package com.openexchange.ajax.appointment;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 
-@RunWith(ConcurrentTestRunner.class)
 public class ConfirmTest extends AppointmentTest {
 
     @Test

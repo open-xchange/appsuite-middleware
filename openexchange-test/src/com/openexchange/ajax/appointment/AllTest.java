@@ -17,9 +17,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -30,7 +28,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
 
-@RunWith(ConcurrentTestRunner.class)
 public class AllTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
