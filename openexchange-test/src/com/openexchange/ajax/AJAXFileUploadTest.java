@@ -88,29 +88,11 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 
     private String sessionId;
 
-    /**
-     * @param name
-     *            The name
-     */
-    public AJAXFileUploadTest() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#setUp()
-     */
     @Before
     public void setUp() throws Exception {
         sessionId = getSessionId();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#tearDown()
-     */
     @After
     public void tearDown() throws Exception {
         logout();

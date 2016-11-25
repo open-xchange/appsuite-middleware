@@ -52,6 +52,7 @@ package com.openexchange.test;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -68,7 +69,6 @@ import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
 import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.StopSMTPRequest;
 import com.openexchange.exception.OXException;
-import junit.framework.Assert;
 
 /**
  * Test suite for all AJAX interface tests.

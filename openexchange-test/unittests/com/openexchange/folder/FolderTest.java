@@ -77,11 +77,6 @@ public class FolderTest {
 
     private int userId;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#setUp()
-     */
     @Before
     public void setUp() throws Exception {
         if (!init) {
@@ -96,11 +91,6 @@ public class FolderTest {
         session = SessionObjectWrapper.createSessionObject(userId, CONTEXT_ID, "thorben_session_id");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#tearDown()
-     */
     @After
     public void tearDown() throws Exception {
         if (init) {
