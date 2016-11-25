@@ -61,10 +61,10 @@ import com.openexchange.userconf.UserPermissionService;
  *
  */
 public final class ImapIdleDeleteListener implements DeleteListener {
-    
-    
-    private UserPermissionService userPermissionService = null; 
-    
+
+
+    private volatile UserPermissionService userPermissionService;
+
     public ImapIdleDeleteListener() {
         super();
     }
@@ -74,6 +74,7 @@ public final class ImapIdleDeleteListener implements DeleteListener {
         int userId = event.getId();
         Context context = event.getContext();
 
+        UserPermissionService userPermissionService = this.userPermissionService;
         boolean hasWebMail = userPermissionService == null ? false : userPermissionService.getUserPermissionBits(readCon, userId, context).hasWebMail();
 
         if (hasWebMail && (DeleteEvent.TYPE_USER == event.getType())) {
