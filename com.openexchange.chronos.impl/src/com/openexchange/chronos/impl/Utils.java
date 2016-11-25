@@ -76,6 +76,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -370,6 +371,27 @@ public class Utils {
     }
 
     /**
+     * "Anonymizes" an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
+     * attendee of the event.
+     * <p/>
+     * After anonymization, the event will only contain those properties defined in {@link #NON_CLASSIFIED_FIELDS}, as well as the
+     * generic summary "Private".
+     *
+     * @param event The event to anonymize
+     * @param userID The identifier of the user requesting the event data
+     * @return The potentially anonymized event
+     */
+    public static Event anonymizeIfNeeded(Event event, int userID) throws OXException {
+        if (false == isClassifiedFor(event, userID)) {
+            return event;
+        }
+        Event anonymizedEvent = new Event();
+        EventMapper.getInstance().copy(event, anonymizedEvent, NON_CLASSIFIED_FIELDS);
+        anonymizedEvent.setSummary("Private"); // TODO i18n?
+        return anonymizedEvent;
+    }
+
+    /**
      * Gets an event comparator based on the supplied sort order of event fields.
      *
      * @param sortOrders The sort orders to get the comparator for
@@ -502,6 +524,27 @@ public class Utils {
     }
 
     /**
+     * Finds a specific event identified by its object-identifier and an optional recurrence identifier in a collection.
+     *
+     * @param events The events to search in
+     * @param objectID The object identifier of the event to search
+     * @param recurrenceID The rcurrence identifier of the event to search
+     * @return The event, or <code>null</code> if not found
+     */
+    public static Event find(Collection<Event> events, int objectID, RecurrenceId recurrenceID) {
+        if (null != events) {
+            for (Event event : events) {
+                if (event.getId() == objectID) {
+                    if (null == recurrenceID || recurrenceID.equals(event.getRecurrenceId())) {
+                        return event;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Sorts a list of events.
      *
      * @param events The events to sort
@@ -521,6 +564,21 @@ public class Utils {
                 return eventComparator.compare(userizedEvent1.getEvent(), userizedEvent2.getEvent());
             }
         });
+        return events;
+    }
+
+    /**
+     * Sorts a list of events.
+     *
+     * @param events The events to sort
+     * @param sortOptions The sort options to use
+     * @return The sorted events
+     */
+    public static List<Event> sortEvents(List<Event> events, SortOptions sortOptions) {
+        if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) || null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
+            return events;
+        }
+        Collections.sort(events, getComparator(sortOptions.getSortOrders()));
         return events;
     }
 

@@ -66,6 +66,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -359,13 +360,13 @@ public final class AllAction extends ChronosAction {
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
         }
         int folderID = request.getFolderId();
-        List<UserizedEvent> events;
         if (0 < folderID) {
-            events = session.getCalendarService().getEventsInFolder(session, folderID);
+            List<Event> events = session.getCalendarService().getEventsInFolder(session, folderID);
+            return getAppointmentResultWithTimestamp(session, events, folderID);
         } else {
-            events = session.getCalendarService().getEventsOfUser(session);
+            List<UserizedEvent> events = session.getCalendarService().getEventsOfUser(session);
+            return getAppointmentResultWithTimestamp(session, events);
         }
-        return getAppointmentResultWithTimestamp(session, events);
     }
 
 }

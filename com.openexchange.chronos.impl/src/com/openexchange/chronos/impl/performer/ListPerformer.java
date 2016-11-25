@@ -63,7 +63,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -72,7 +71,6 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -101,21 +99,19 @@ public class ListPerformer extends AbstractQueryPerformer {
      * @param eventIDs The identifiers of the events to get
      * @return The loaded events
      */
-    public List<UserizedEvent> perform(List<EventID> eventIDs) throws OXException {
-        List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
+    public List<Event> perform(List<EventID> eventIDs) throws OXException {
         Map<UserizedFolder, List<EventID>> idsPerFolder = getIdsPerFolder(eventIDs);
-        if (1 == idsPerFolder.size()) {
-            Entry<UserizedFolder, List<EventID>> entry = idsPerFolder.entrySet().iterator().next();
-            return userize(readEventsInFolder(entry.getKey(), entry.getValue()), entry.getKey(), true);
-        }
+        Map<Integer, List<Event>> eventsPerFolderId = new HashMap<Integer, List<Event>>(idsPerFolder.size());
         for (Map.Entry<UserizedFolder, List<EventID>> entry : idsPerFolder.entrySet()) {
             List<Event> eventsInFolder = readEventsInFolder(entry.getKey(), entry.getValue());
-            events.addAll(userize(eventsInFolder, entry.getKey(), true));
+            eventsPerFolderId.put(I(i(entry.getKey())), postProcess(eventsInFolder, entry.getKey(), true));
         }
-        List<UserizedEvent> orderedEvents = new ArrayList<UserizedEvent>(eventIDs.size());
+        List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
-            UserizedEvent event = find(events, eventID);
+            List<Event> eventsInFolder = eventsPerFolderId.get(I(eventID.getFolderID()));
+            Event event = find(eventsInFolder, eventID.getObjectID(), eventID.getRecurrenceID());
             if (null == event) {
+                orderedEvents.add(null);
                 continue; //TODO check; see com.openexchange.ajax.appointment.NewListTest.testRemovedObjectHandling()
                 //                throw OXException.notFound(eventID.toString()); //TODO
             }

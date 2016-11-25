@@ -65,10 +65,10 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -173,9 +173,9 @@ public final class NewAction extends ChronosAction {
             session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
-        UserizedEvent event = getEventConverter().getEvent(session, appointment, null);
-        CalendarResult result = session.getCalendarService().createEvent(session, event);
-
+        Event event = getEventConverter().getEvent(session, appointment, null);
+        int folderID = appointment.getParentFolderID();
+        CalendarResult result = session.getCalendarService().createEvent(session, folderID, event);
         if (false == result.getConflicts().isEmpty()) {
             return getAppointmentConflictResult(session, result.getConflicts());
         }

@@ -121,7 +121,7 @@ public class AllPerformer extends AbstractQueryPerformer {
      * @param folder The parent folder to get all events from
      * @return The loaded events
      */
-    public List<UserizedEvent> perform(UserizedFolder folder) throws OXException {
+    public List<Event> perform(UserizedFolder folder) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
@@ -133,7 +133,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
         readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
-        return userize(events, folder, true);
+        return postProcess(events, folder, true);
     }
 
 }

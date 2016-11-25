@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -63,7 +64,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -93,7 +93,7 @@ public class GetPerformer extends AbstractQueryPerformer {
      * @param objectID The identifier if the event to get
      * @return The loaded event
      */
-    public UserizedEvent perform(UserizedFolder folder, int objectID) throws OXException {
+    public Event perform(UserizedFolder folder, int objectID) throws OXException {
         Event event = storage.getEventStorage().loadEvent(objectID, getFields(session));
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(I(objectID));
@@ -105,7 +105,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         }
         readAdditionalEventData(Collections.singletonList(event), getCalendarUser(folder).getId(), getFields(session, EventField.ATTENDEES));
         Check.eventIsInFolder(event, folder);
-        return userize(Collections.singletonList(event), folder, true).get(0);
+        return anonymizeIfNeeded(event, session.getUser().getId());
     }
 
 }

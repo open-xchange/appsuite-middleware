@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFolder;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
@@ -59,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
@@ -83,7 +82,6 @@ import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.session.Session;
 
@@ -113,11 +111,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> getChangeExceptions(CalendarSession session, final int folderID, final int objectID) throws OXException {
-        return new StorageOperation<List<UserizedEvent>>(session) {
+    public List<Event> getChangeExceptions(CalendarSession session, final int folderID, final int objectID) throws OXException {
+        return new StorageOperation<List<Event>>(session) {
 
             @Override
-            protected List<UserizedEvent> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new ChangeExceptionsPerformer(session, storage).perform(getFolder(session, folderID), objectID);
             }
         }.executeQuery();
@@ -157,33 +155,33 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UserizedEvent getEvent(CalendarSession session, final int folderID, final int objectID) throws OXException {
-        return new StorageOperation<UserizedEvent>(session) {
+    public Event getEvent(CalendarSession session, final int folderID, final int objectID) throws OXException {
+        return new StorageOperation<Event>(session) {
 
             @Override
-            protected UserizedEvent execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new GetPerformer(session, storage).perform(getFolder(session, folderID), objectID);
             }
         }.executeQuery();
     }
 
     @Override
-    public List<UserizedEvent> getEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
-        return new StorageOperation<List<UserizedEvent>>(session) {
+    public List<Event> getEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
+        return new StorageOperation<List<Event>>(session) {
 
             @Override
-            protected List<UserizedEvent> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new ListPerformer(session, storage).perform(eventIDs);
             }
         }.executeQuery();
     }
 
     @Override
-    public List<UserizedEvent> getEventsInFolder(CalendarSession session, final int folderID) throws OXException {
-        return new StorageOperation<List<UserizedEvent>>(session) {
+    public List<Event> getEventsInFolder(CalendarSession session, final int folderID) throws OXException {
+        return new StorageOperation<List<Event>>(session) {
 
             @Override
-            protected List<UserizedEvent> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new AllPerformer(session, storage).perform(getFolder(session, folderID));
             }
         }.executeQuery();
@@ -223,7 +221,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult createEvent(CalendarSession session, final UserizedEvent event) throws OXException {
+    public CalendarResult createEvent(CalendarSession session, final int folderId, final Event event) throws OXException {
         /*
          * insert event & notify handlers
          */
@@ -231,13 +229,13 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new CreatePerformer(storage, session, getFolder(session, event.getFolderId())).perform(event.getEvent());
+                return new CreatePerformer(storage, session, getFolder(session, folderId)).perform(event);
             }
         }.executeUpdate());
     }
 
     @Override
-    public CalendarResult updateEvent(CalendarSession session, final EventID eventID, final UserizedEvent event) throws OXException {
+    public CalendarResult updateEvent(CalendarSession session, final EventID eventID, final Event event) throws OXException {
         /*
          * update event & notify handlers
          */
@@ -245,49 +243,29 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                /*
-                 * prepare a shared calendar result for the update
-                 */
                 Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-                UserizedFolder folder = getFolder(session, eventID.getFolderID());
-                CalendarResultImpl result = new CalendarResultImpl(session, getCalendarUser(folder), i(folder));
-                /*
-                 * perform a possible move operation beforehand & take over new parent folder
-                 */
-                if (event.containsFolderId() && event.getFolderId() != eventID.getFolderID()) {
-                    UserizedFolder targetFolder = getFolder(session, event.getFolderId());
-                    CalendarResult moveResult = new MovePerformer(storage, session, folder).perform(eventID.getObjectID(), targetFolder, clientTimestamp);
-                    result.merge(moveResult);
-                    folder = targetFolder;
-                    if (null != moveResult.getTimestamp()) {
-                        clientTimestamp = moveResult.getTimestamp().getTime();
-                    }
-                }
-                /*
-                 * perform the event update
-                 */
-                if (null != event.getEvent()) {
-                    CalendarResult updateResult = new UpdatePerformer(storage, session, folder).perform(eventID.getObjectID(), event.getEvent(), clientTimestamp);
-                    result.merge(updateResult);
-                    if (null != updateResult.getTimestamp()) {
-                        clientTimestamp = updateResult.getTimestamp().getTime();
-                    }
-
-                }
-                /*
-                 * update the alarms
-                 */
-                //                if (event.containsAlarms()) {
-                //                    CalendarResult alarmResult = new UpdateAlarmsPerformer(storage, session, folder).perform(eventID.getObjectID(), event.getAlarms(), clientTimestamp);
-                //                    result.merge(alarmResult);
-                //                    if (null != alarmResult.getTimestamp()) {
-                //                        clientTimestamp = alarmResult.getTimestamp().getTime();
-                //                    }
-                //                }
-                return result;
+                return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID()))
+                    .perform(eventID.getObjectID(), event, clientTimestamp);
             }
 
+        }.executeUpdate());
+    }
+
+    @Override
+    public CalendarResult moveEvent(CalendarSession session, final EventID eventID, final int folderId) throws OXException {
+        /*
+         * move event & notify handlers
+         */
+        return notifyHandlers(new StorageOperation<CalendarResult>(session) {
+
+            @Override
+            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
+                long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
+                return new MovePerformer(storage, session, getFolder(session, eventID.getFolderID()))
+                    .perform(eventID.getObjectID(), getFolder(session, folderId), clientTimestamp);
+            }
         }.executeUpdate());
     }
 
@@ -301,7 +279,8 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 Long clientTimestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
-                return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, clientTimestamp);
+                return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID()))
+                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, clientTimestamp);
 
             }
         }.executeUpdate());

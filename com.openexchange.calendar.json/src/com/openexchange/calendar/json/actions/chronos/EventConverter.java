@@ -295,7 +295,23 @@ public class EventConverter {
      * @param originalEventID The identifier of the original event in case of update operations, or <code>null</code> if unknwon
      * @return The userized event
      */
-    public UserizedEvent getEvent(CalendarSession session, Appointment appointment, EventID originalEventID) throws OXException {
+    public UserizedEvent getUserizedEvent(CalendarSession session, Appointment appointment, EventID originalEventID) throws OXException {
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), getEvent(session, appointment, originalEventID));
+        if (appointment.containsParentFolderID()) {
+            userizedEvent.setFolderId(appointment.getParentFolderID());
+        }
+        return userizedEvent;
+    }
+
+    /**
+     * Converts the supplied appointment into a corresponding event.
+     *
+     * @param session The calendar session
+     * @param appointment The appointment to convert
+     * @param originalEventID The identifier of the original event in case of update operations, or <code>null</code> if unknwon
+     * @return The event
+     */
+    public Event getEvent(CalendarSession session, Appointment appointment, EventID originalEventID) throws OXException {
         Event event = new Event();
         RecurrenceData recurrenceData = null;
         if (appointment.containsObjectID()) {
@@ -427,12 +443,7 @@ public class EventConverter {
                 event.setAlarms(Collections.singletonList(Appointment2Event.getAlarm(appointment.getAlarm())));
             }
         }
-
-        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
-        if (appointment.containsParentFolderID()) {
-            userizedEvent.setFolderId(appointment.getParentFolderID());
-        }
-        return userizedEvent;
+        return event;
     }
 
     /**
@@ -443,7 +454,18 @@ public class EventConverter {
      * @return The appointment
      */
     public CalendarDataObject getAppointment(CalendarSession session, UserizedEvent userizedEvent) throws OXException {
-        Event event = userizedEvent.getEvent();
+        return getAppointment(session, userizedEvent.getEvent(), userizedEvent.containsFolderId() ? userizedEvent.getFolderId() : -1);
+    }
+
+    /**
+     * Converts the supplied event into a corresponding appointment.
+     *
+     * @param session The calendar session
+     * @param event The event to convert
+     * @param folderId The folder identifier to apply representing the view on the event, or <code>-1</code> if not set
+     * @return The appointment
+     */
+    public CalendarDataObject getAppointment(CalendarSession session, Event event, int folderId) throws OXException {
         CalendarDataObject appointment = new CalendarDataObject();
         RecurrenceData recurrenceData = null;
         if (event.containsId()) {
@@ -461,8 +483,8 @@ public class EventConverter {
         if (event.containsLastModified()) {
             appointment.setLastModified(event.getLastModified());
         }
-        if (userizedEvent.containsFolderId()) {
-            appointment.setParentFolderID(userizedEvent.getFolderId());
+        if (-1 != folderId) {
+            appointment.setParentFolderID(folderId);
         }
         //        appointment.setParentFolderID(event.getPublicFolderId());
         //        appointment.setPersonalFolderID(event.getFolderId());
@@ -531,7 +553,7 @@ public class EventConverter {
                         if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
                             recurrenceData = (RecurrenceData) event.getRecurrenceId();
                         } else {
-                            recurrenceData = loadRecurrenceData(session, new EventID(userizedEvent.getFolderId(), event.getSeriesId()));
+                            recurrenceData = loadRecurrenceData(session, new EventID(folderId, event.getSeriesId()));
                         }
                     }
                     appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
@@ -549,7 +571,7 @@ public class EventConverter {
                 } else if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
                     recurrenceData = (RecurrenceData) event.getRecurrenceId();
                 } else {
-                    recurrenceData = loadRecurrenceData(session, new EventID(userizedEvent.getFolderId(), event.getSeriesId()));
+                    recurrenceData = loadRecurrenceData(session, new EventID(folderId, event.getSeriesId()));
                 }
             }
             SeriesPattern pattern = Event2Appointment.getSeriesPattern(recurrenceData);
@@ -924,8 +946,7 @@ public class EventConverter {
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
             session.set(CalendarParameters.PARAMETER_RANGE_START, null);
             session.set(CalendarParameters.PARAMETER_RANGE_END, null);
-            UserizedEvent event = session.getCalendarService().getEvent(session, eventID.getFolderID(), eventID.getObjectID());
-            return null != event ? event.getEvent() : null;
+            return session.getCalendarService().getEvent(session, eventID.getFolderID(), eventID.getObjectID());
         } finally {
             session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, oldRecurrenceMaster);

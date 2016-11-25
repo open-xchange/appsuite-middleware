@@ -226,6 +226,22 @@ public abstract class AbstractQueryPerformer {
         return sort(userizedEvents, new SortOptions(session));
     }
 
+    protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includePrivate) throws OXException {
+        List<Event> processedEvents = new ArrayList<Event>(events.size());
+        for (Event event : events) {
+            if (isExcluded(event, session, includePrivate)) {
+                continue;
+            }
+            event = anonymizeIfNeeded(event, session.getUser().getId());
+            if (isSeriesMaster(event) && isResolveOccurrences(session)) {
+                processedEvents.addAll(resolveOccurrences(event));
+            } else {
+                processedEvents.add(event);
+            }
+        }
+        return Utils.sortEvents(processedEvents, new SortOptions(session));
+    }
+
     private List<UserizedEvent> resolveOccurrences(UserizedEvent master) throws OXException {
         RecurrenceData recurrenceData = new DefaultRecurrenceData(master.getEvent());
         List<UserizedEvent> events = new ArrayList<UserizedEvent>();
@@ -239,6 +255,10 @@ public abstract class AbstractQueryPerformer {
             events.add(getUserizedEvent(occurrence, master.getFolderId()));
         }
         return events;
+    }
+
+    private List<Event> resolveOccurrences(Event master) throws OXException {
+        return Utils.asList(resolveOccurrences(master, getFrom(session), getUntil(session)));
     }
 
     protected UserizedEvent getUserizedEvent(Event event, int folderID) throws OXException {

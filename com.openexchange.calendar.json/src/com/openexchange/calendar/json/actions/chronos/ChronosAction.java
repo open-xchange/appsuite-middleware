@@ -73,6 +73,7 @@ import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -216,6 +217,34 @@ public abstract class ChronosAction extends AppointmentAction {
         return new AJAXRequestResult(appointments, timestamp, "appointment");
     }
 
+    protected AJAXRequestResult getAppointmentResultWithTimestamp(CalendarSession session, List<Event> events, int folderId) throws OXException {
+        Date timestamp = new Date(0L);
+        List<Appointment> appointments = new ArrayList<Appointment>(events.size());
+        for (Event event : events) {
+            appointments.add(getEventConverter().getAppointment(session, event, folderId));
+            timestamp = getLatestModified(timestamp, event);
+        }
+        return new AJAXRequestResult(appointments, timestamp, "appointment");
+    }
+
+    protected AJAXRequestResult getAppointmentResultWithTimestamp(CalendarSession session, List<Event> events, List<EventID> requestedIDs) throws OXException {
+        Date timestamp = new Date(0L);
+
+        if (requestedIDs.size() != events.size()) {
+            throw new IllegalStateException("requestedIDs.size() != events.size()");
+        }
+        List<Appointment> appointments = new ArrayList<Appointment>(requestedIDs.size());
+        for (int i = 0; i < requestedIDs.size(); i++) {
+            Event event = events.get(i);
+            if (null == event) {
+                continue; //TODO check
+            }
+            appointments.add(getEventConverter().getAppointment(session, event, requestedIDs.get(i).getFolderID()));
+            timestamp = getLatestModified(timestamp, event);
+        }
+        return new AJAXRequestResult(appointments, timestamp, "appointment");
+    }
+
     protected AJAXRequestResult getAppointmentConflictResult(CalendarSession session, List<EventConflict> conflicts) throws OXException, JSONException {
         TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
         AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(session.getSession());
@@ -248,7 +277,11 @@ public abstract class ChronosAction extends AppointmentAction {
     }
 
     protected static Date getLatestModified(Date lastModified, UserizedEvent event) {
-        return getLatestModified(lastModified, event.getEvent().getLastModified());
+        return getLatestModified(lastModified, event.getEvent());
+    }
+
+    protected static Date getLatestModified(Date lastModified, Event event) {
+        return getLatestModified(lastModified, event.getLastModified());
     }
 
     protected static Date getLatestModified(Date lastModified1, Date lastModified2) {

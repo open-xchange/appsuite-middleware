@@ -57,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -65,11 +66,11 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -176,9 +177,26 @@ public final class UpdateAction extends ChronosAction {
         }
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
-        UserizedEvent event = getEventConverter().getEvent(session, appointment, eventID);
+        Event event = getEventConverter().getEvent(session, appointment, eventID);
+        if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID() && eventID.getFolderID() != appointment.getParentFolderID()) {
+            /*
+             * move event first
+             */
+            CalendarResult result = session.getCalendarService().moveEvent(session, eventID, appointment.getParentFolderID());
+            if (1 == jsonObject.length() && CalendarFields.FOLDER_ID.equals(jsonObject.keys().next())) {
+                JSONObject resultObject = new JSONObject(1);
+                if (0 < result.getUpdates().size()) {
+                    resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
+                }
+                return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
+            }
+            session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
+            eventID = new EventID(appointment.getParentFolderID(), eventID.getObjectID(), eventID.getRecurrenceID());
+        }
+        /*
+         * update event
+         */
         CalendarResult result = session.getCalendarService().updateEvent(session, eventID, event);
-
         if (false == result.getConflicts().isEmpty()) {
             return getAppointmentConflictResult(session, result.getConflicts());
         }

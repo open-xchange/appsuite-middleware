@@ -64,10 +64,10 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -309,8 +309,8 @@ public final class ListAction extends ChronosAction {
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
         }
         List<EventID> requestedIDs = parseRequestedIDs(session, request);
-        List<UserizedEvent> events = session.getCalendarService().getEvents(session, requestedIDs);
-        return getAppointmentResultWithTimestamp(session, events);
+        List<Event> events = session.getCalendarService().getEvents(session, requestedIDs);
+        return getAppointmentResultWithTimestamp(session, events, requestedIDs);
     }
 
 }

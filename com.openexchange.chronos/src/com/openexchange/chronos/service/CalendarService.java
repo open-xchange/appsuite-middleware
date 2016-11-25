@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -129,7 +130,7 @@ public interface CalendarService {
      * @param seriesID The identifier of the series to get the change exceptions for
      * @return The change exceptions, or an empty list if there are none
      */
-    List<UserizedEvent> getChangeExceptions(CalendarSession session, int folderID, int seriesID) throws OXException;
+    List<Event> getChangeExceptions(CalendarSession session, int folderID, int seriesID) throws OXException;
 
     /**
      * Gets a specific event.
@@ -144,7 +145,7 @@ public interface CalendarService {
      * @param objectID The identifier of the event to get
      * @return The event
      */
-    UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
+    Event getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
 
     /**
      * Gets a list of events.
@@ -159,7 +160,7 @@ public interface CalendarService {
      * @param eventIDs A list of the identifiers of the events to get
      * @return The events
      */
-    List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
+    List<Event> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
 
     /**
      * Gets all events in a specific calendar folder.
@@ -178,7 +179,7 @@ public interface CalendarService {
      * @param folderID The identifier of the folder to get the events from
      * @return The events
      */
-    List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException;
+    List<Event> getEventsInFolder(CalendarSession session, int folderID) throws OXException;
 
     /**
      * Gets all events of the session's user.
@@ -243,10 +244,11 @@ public interface CalendarService {
      * </ul>
      *
      * @param session The calendar session
+     * @param folderId The identifier of the folder to create the event in
      * @param event The event data to create
      * @return The create result
      */
-    CalendarResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;
+    CalendarResult createEvent(CalendarSession session, int folderId, Event event) throws OXException;
 
     /**
      * Updates an existing event.
@@ -263,7 +265,24 @@ public interface CalendarService {
      * @param event The event data to update
      * @return The update result
      */
-    CalendarResult updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
+    CalendarResult updateEvent(CalendarSession session, EventID eventID, Event event) throws OXException;
+
+    /**
+     * Moves an existing event into another folder.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to update
+     * @param folderId The identifier of the folder to move the event to
+     * @return The move result
+     */
+    CalendarResult moveEvent(CalendarSession session, EventID eventID, int folderId) throws OXException;
 
     /**
      * Updates a specific attendee of an existing event.

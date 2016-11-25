@@ -327,7 +327,7 @@ public class ReminderHandler implements ReminderService {
             if (0 == stmt.executeUpdate()) {
                 throw ReminderExceptionCode.NOT_FOUND.create(I(targetId), I(contextId));
             }
-            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId, userId);
+            //            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId, userId);
         } catch (final SQLException e) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(e);
         } catch (final OXException e) {

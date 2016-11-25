@@ -62,7 +62,6 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -95,7 +94,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
      * @param seriesID The series identifier to get the change exceptions for
      * @return The change exceptions
      */
-    public List<UserizedEvent> perform(UserizedFolder folder, int seriesID) throws OXException {
+    public List<Event> perform(UserizedFolder folder, int seriesID) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
@@ -110,7 +109,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
         readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
-        return userize(events, folder, true);
+        return postProcess(events, folder, true);
     }
 
 }
