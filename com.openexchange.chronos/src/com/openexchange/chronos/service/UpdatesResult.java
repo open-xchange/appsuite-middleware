@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import com.openexchange.chronos.Event;
 
 /**
  * {@link UpdatesResult}
@@ -64,13 +65,13 @@ public interface UpdatesResult {
      *
      * @return A list of new and modified events, or an empty list if there were none, or <code>null</code> if not evaluated
      */
-    List<UserizedEvent> getNewAndModifiedEvents();
+    List<Event> getNewAndModifiedEvents();
 
     /**
      * Gets a list of events that have been deleted since the supplied client timestamp.
      *
      * @return A list of deleted events, or an empty list if there were none, or <code>null</code> if not evaluated
      */
-    List<UserizedEvent> getDeletedEvents();
+    List<Event> getDeletedEvents();
 
 }

@@ -51,8 +51,8 @@ package com.openexchange.chronos.impl;
 
 import java.util.List;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.EventConflict;
-import com.openexchange.chronos.service.UserizedEvent;
 
 /**
  * {@link EventConflictImpl}
@@ -62,7 +62,7 @@ import com.openexchange.chronos.service.UserizedEvent;
  */
 public class EventConflictImpl implements EventConflict {
 
-    private final UserizedEvent conflictingEvent;
+    private final Event conflictingEvent;
     private final List<Attendee> conflictingAttendees;
     private final boolean hardConflict;
 
@@ -73,7 +73,7 @@ public class EventConflictImpl implements EventConflict {
      * @param conflictingAttendees The conflicting attendees
      * @param hardConflict <code>true</code> for a <i>hard</i>, i.e. non-ignorable conflict, <code>false</code>, otherwise
      */
-    public EventConflictImpl(UserizedEvent conflictingEvent, List<Attendee> conflictingAttendees, boolean hardConflict) {
+    public EventConflictImpl(Event conflictingEvent, List<Attendee> conflictingAttendees, boolean hardConflict) {
         super();
         this.conflictingEvent = conflictingEvent;
         this.conflictingAttendees = conflictingAttendees;
@@ -81,7 +81,7 @@ public class EventConflictImpl implements EventConflict {
     }
 
     @Override
-    public UserizedEvent getConflictingEvent() {
+    public Event getConflictingEvent() {
         return conflictingEvent;
     }
 

@@ -85,7 +85,7 @@ public interface FreeBusyService {
      * @param until The end of the requested time range
      * @return The free/busy data for the attendees, which are stripped down event objects based on the current session user's access permissions for the events
      */
-    Map<Attendee, List<UserizedEvent>> getFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
+    Map<Attendee, List<Event>> getFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
      * Checks for potential conflicting events of the attendees with another event, typically prior event creation or update.

@@ -57,7 +57,7 @@ import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getVisibleFolders;
 import static com.openexchange.chronos.impl.Utils.isIncludePrivate;
-import static com.openexchange.chronos.impl.Utils.sort;
+import static com.openexchange.chronos.impl.Utils.sortEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
@@ -68,7 +68,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -100,7 +99,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
      * @param folderIDs The identifiers of the folders to perform the search in, or <code>null</code> to search all visible folders
      * @return The found events
      */
-    public List<UserizedEvent> perform(int[] folderIDs, String pattern) throws OXException {
+    public List<Event> perform(int[] folderIDs, String pattern) throws OXException {
         List<UserizedFolder> folders;
         if (null == folderIDs || 0 == folderIDs.length) {
             folders = getVisibleFolders(session);
@@ -110,14 +109,16 @@ public class SearchPerformer extends AbstractQueryPerformer {
                 folders.add(getFolder(session, folderID));
             }
         }
-        List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>();
+        EventField[] fields = getFields(session);
+        List<Event> events = new ArrayList<Event>();
         for (UserizedFolder folder : folders) {
-            userizedEvents.addAll(searchEvents(folder, pattern));
+            List<Event> eventsInFolder = readAdditionalEventData(searchEvents(folder, pattern, fields), getCalendarUser(folder).getId(), fields);
+            events.addAll(postProcess(eventsInFolder, folder, isIncludePrivate(session)));
         }
-        return sort(userizedEvents, new SortOptions(session));
+        return sortEvents(events, new SortOptions(session));
     }
 
-    private List<UserizedEvent> searchEvents(UserizedFolder folder, String pattern) throws OXException {
+    private List<Event> searchEvents(UserizedFolder folder, String pattern, EventField[] fields) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         Check.requireMinimumSearchPatternLength(pattern);
         String wildcardPattern = pattern.startsWith("*") ? pattern : '*' + pattern;
@@ -130,10 +131,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
                 .addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, wildcardPattern))
             )
         ;
-        EventField[] fields = getFields(session);
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
-        readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
-        return userize(events, folder, isIncludePrivate(session));
+        return storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
     }
 
 }

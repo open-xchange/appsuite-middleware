@@ -68,7 +68,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -99,7 +98,7 @@ public class AllPerformer extends AbstractQueryPerformer {
      *
      * @return The loaded events
      */
-    public List<UserizedEvent> perform() throws OXException {
+    public List<Event> perform() throws OXException {
         /*
          * construct search term
          */
@@ -112,7 +111,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFields(session, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
         readAdditionalEventData(events, session.getUser().getId(), fields);
-        return userize(events, session.getUser().getId(), isIncludePrivate(session));
+        return postProcess(events, session.getUser().getId(), isIncludePrivate(session));
     }
 
     /**

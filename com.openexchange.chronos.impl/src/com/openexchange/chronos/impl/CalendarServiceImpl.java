@@ -79,7 +79,6 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceSet;
@@ -144,11 +143,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> searchEvents(CalendarSession session, final int[] folderIDs, final String pattern) throws OXException {
-        return new StorageOperation<List<UserizedEvent>>(session) {
+    public List<Event> searchEvents(CalendarSession session, final int[] folderIDs, final String pattern) throws OXException {
+        return new StorageOperation<List<Event>>(session) {
 
             @Override
-            protected List<UserizedEvent> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new SearchPerformer(session, storage).perform(folderIDs, pattern);
             }
         }.executeQuery();
@@ -188,11 +187,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> getEventsOfUser(final CalendarSession session) throws OXException {
-        return new StorageOperation<List<UserizedEvent>>(session) {
+    public List<Event> getEventsOfUser(final CalendarSession session) throws OXException {
+        return new StorageOperation<List<Event>>(session) {
 
             @Override
-            protected List<UserizedEvent> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new AllPerformer(session, storage).perform();
             }
         }.executeQuery();

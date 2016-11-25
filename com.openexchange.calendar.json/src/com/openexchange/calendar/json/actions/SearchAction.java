@@ -65,8 +65,8 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -218,7 +218,7 @@ public final class SearchAction extends ChronosAction {
         JSONObject jsonObject = request.getData();
         int[] folderIDs = jsonObject.has(AJAXServlet.PARAMETER_INFOLDER) ? new int[] { jsonObject.getInt(AJAXServlet.PARAMETER_INFOLDER) } : null;
         String pattern = jsonObject.optString(SearchFields.PATTERN);
-        List<UserizedEvent> events = session.getCalendarService().searchEvents(session, folderIDs, pattern);
+        List<Event> events = session.getCalendarService().searchEvents(session, folderIDs, pattern);
         return getAppointmentResultWithTimestamp(session, events);
     }
 

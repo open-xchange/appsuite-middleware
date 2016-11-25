@@ -127,7 +127,7 @@ public final class GetAction extends ChronosAction {
         int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
         session.set(RECURRENCE_MASTER, Boolean.TRUE);
         Event event = session.getCalendarService().getEvent(session, folderID, objectID);
-        Appointment appointment = getEventConverter().getAppointment(session, event, folderID);
+        Appointment appointment = getEventConverter().getAppointment(session, event);
         return new AJAXRequestResult(appointment, event.getLastModified(), "appointment");
     }
 

@@ -115,7 +115,7 @@ public interface CalendarService {
      * @param pattern The pattern to search for
      * @return The found events, or an empty list if there are none
      */
-    List<UserizedEvent> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException;
+    List<Event> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException;
 
     /**
      * Gets all change exceptions of a recurring event series.
@@ -196,7 +196,7 @@ public interface CalendarService {
      * @param session The calendar session
      * @return The events
      */
-    List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException;
+    List<Event> getEventsOfUser(CalendarSession session) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.

@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import java.util.List;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
 
 /**
  * {@link EventConflict}
@@ -65,7 +66,7 @@ public interface EventConflict {
      *
      * @return The underlying conflicting event
      */
-    UserizedEvent getConflictingEvent();
+    Event getConflictingEvent();
 
     /**
      * Gets a list of conflicting attendees.

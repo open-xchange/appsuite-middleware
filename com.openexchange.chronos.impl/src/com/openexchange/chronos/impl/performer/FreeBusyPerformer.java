@@ -72,7 +72,6 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -118,7 +117,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
      * @param until The end date of the period to consider
      * @return The free/busy result
      */
-    public Map<Attendee, List<UserizedEvent>> perform(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public Map<Attendee, List<Event>> perform(List<Attendee> attendees, Date from, Date until) throws OXException {
         /*
          * prepare & filter internal attendees for lookup
          */
@@ -140,7 +139,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
         /*
          * step through events & build free/busy per requested attendee
          */
-        Map<Attendee, List<UserizedEvent>> eventsPerAttendee = new HashMap<Attendee, List<UserizedEvent>>(attendees.size());
+        Map<Attendee, List<Event>> eventsPerAttendee = new HashMap<Attendee, List<Event>>(attendees.size());
         for (Event eventInPeriod : eventsInPeriod) {
             for (Attendee attendee : attendees) {
                 Attendee eventAttendee = find(eventInPeriod.getAttendees(), attendee);
@@ -173,15 +172,15 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
      * @param folderID The folder identifier representing the user's view on the event, or <code>-1</code> if not accessible in any folder
      * @return The resulting event occurrence representing the free/busy slot
      */
-    private UserizedEvent getResultingOccurrence(Event masterEvent, RecurrenceId recurrenceId, int folderID) throws OXException {
-        UserizedEvent userizedEvent = getResultingEvent(masterEvent, folderID);
-        userizedEvent.getEvent().setRecurrenceRule(null);
-        userizedEvent.getEvent().removeSeriesId();
-        userizedEvent.getEvent().removeClassification();
-        userizedEvent.getEvent().setRecurrenceId(recurrenceId);
-        userizedEvent.getEvent().setStartDate(new Date(recurrenceId.getValue()));
-        userizedEvent.getEvent().setEndDate(new Date(recurrenceId.getValue() + (masterEvent.getStartDate().getTime() - masterEvent.getEndDate().getTime())));
-        return userizedEvent;
+    private Event getResultingOccurrence(Event masterEvent, RecurrenceId recurrenceId, int folderID) throws OXException {
+        Event resultingOccurrence = getResultingEvent(masterEvent, folderID);
+        resultingOccurrence.setRecurrenceRule(null);
+        resultingOccurrence.removeSeriesId();
+        resultingOccurrence.removeClassification();
+        resultingOccurrence.setRecurrenceId(recurrenceId);
+        resultingOccurrence.setStartDate(new Date(recurrenceId.getValue()));
+        resultingOccurrence.setEndDate(new Date(recurrenceId.getValue() + (masterEvent.getStartDate().getTime() - masterEvent.getEndDate().getTime())));
+        return resultingOccurrence;
     }
 
     /**
@@ -192,14 +191,15 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
      * @param folderID The folder identifier representing the user's view on the event, or <code>-1</code> if not accessible in any folder
      * @return The resulting event representing the free/busy slot
      */
-    private UserizedEvent getResultingEvent(Event event, int folderID) throws OXException {
+    private Event getResultingEvent(Event event, int folderID) throws OXException {
         Event resultingEvent = new Event();
         if (0 < folderID) {
             EventMapper.getInstance().copy(event, resultingEvent, FREEBUSY_FIELDS);
-            return anonymizeIfNeeded(new UserizedEvent(session.getSession(), resultingEvent, folderID));
+            resultingEvent.setFolderId(folderID);
+            return anonymizeIfNeeded(resultingEvent, session.getUser().getId());
         } else {
             EventMapper.getInstance().copy(event, resultingEvent, RESTRICTED_FREEBUSY_FIELDS);
-            return new UserizedEvent(session.getSession(), resultingEvent);
+            return resultingEvent;
         }
     }
 

@@ -71,7 +71,6 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.UpdatesResult;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -115,17 +114,17 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
          */
         String[] ignore = session.get(CalendarParameters.PARAMETER_IGNORE, String[].class);
         EventField[] fields = getFields(session, EventField.ATTENDEES);
-        List<UserizedEvent> newAndModifiedEvents = null;
+        List<Event> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
             readAdditionalEventData(events, session.getUser().getId(), fields);
-            newAndModifiedEvents = userize(events, session.getUser().getId(), isIncludePrivate(session));
+            newAndModifiedEvents = postProcess(events, session.getUser().getId(), isIncludePrivate(session));
         }
-        List<UserizedEvent> deletedEvents = null;
+        List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), fields);
             readAdditionalEventData(events, session.getUser().getId(), fields);
-            deletedEvents = userize(events, session.getUser().getId(), isIncludePrivate(session));
+            deletedEvents = postProcess(events, session.getUser().getId(), isIncludePrivate(session));
         }
         return getResult(newAndModifiedEvents, deletedEvents);
     }
@@ -149,31 +148,31 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
          */
         String[] ignore = session.get(CalendarParameters.PARAMETER_IGNORE, String[].class);
         EventField[] fields = getFields(session);
-        List<UserizedEvent> newAndModifiedEvents = null;
+        List<Event> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
             readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
-            newAndModifiedEvents = userize(events, folder, true);
+            newAndModifiedEvents = postProcess(events, folder, true);
         }
-        List<UserizedEvent> deletedEvents = null;
+        List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), fields);
             readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
-            deletedEvents = userize(events, folder, true);
+            deletedEvents = postProcess(events, folder, true);
         }
         return getResult(newAndModifiedEvents, deletedEvents);
     }
 
-    private static UpdatesResult getResult(final List<UserizedEvent> newAndModifiedEvents, final List<UserizedEvent> deletedEvents) {
+    private static UpdatesResult getResult(final List<Event> newAndModifiedEvents, final List<Event> deletedEvents) {
         return new UpdatesResult() {
 
             @Override
-            public List<UserizedEvent> getNewAndModifiedEvents() {
+            public List<Event> getNewAndModifiedEvents() {
                 return newAndModifiedEvents;
             }
 
             @Override
-            public List<UserizedEvent> getDeletedEvents() {
+            public List<Event> getDeletedEvents() {
                 return deletedEvents;
             }
         };

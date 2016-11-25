@@ -65,8 +65,8 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -230,7 +230,7 @@ public final class NewAppointmentsSearchAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        List<UserizedEvent> events = session.getCalendarService().getEventsOfUser(session);
+        List<Event> events = session.getCalendarService().getEventsOfUser(session);
         return getAppointmentResultWithTimestamp(session, events);
     }
 

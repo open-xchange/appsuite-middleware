@@ -209,6 +209,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeId();
             }
         });
+        mappings.put(EventField.FOLDER_ID, new DefaultMapping<Integer, Event>() {
+
+            @Override
+            public void set(Event event, Integer value) {
+                event.setFolderId(null == value ? 0 : i(value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsFolderId();
+            }
+
+            @Override
+            public Integer get(Event event) {
+                return I(event.getFolderId());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeFolderId();
+            }
+        });
         mappings.put(EventField.PUBLIC_FOLDER_ID, new DefaultMapping<Integer, Event>() {
 
             @Override

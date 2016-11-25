@@ -67,6 +67,7 @@ import java.util.TimeZone;
 public class Event {
 
     private int id;
+    private int folderId;
     private int publicFolderId;
     private String uid;
 
@@ -160,6 +161,42 @@ public class Event {
      */
     public boolean containsId() {
         return isSet(EventField.ID);
+    }
+
+    /**
+     * Gets the folder identifier of the event.
+     *
+     * @return The folder identifier
+     */
+    public int getFolderId() {
+        return folderId;
+    }
+
+    /**
+     * Sets the folder identifier of the event.
+     *
+     * @param value The folder identifier to set
+     */
+    public void setFolderId(int value) {
+        folderId = value;
+        setFields.add(EventField.FOLDER_ID);
+    }
+
+    /**
+     * Removes the folder identifier of the event.
+     */
+    public void removeFolderId() {
+        folderId = 0;
+        setFields.remove(EventField.FOLDER_ID);
+    }
+
+    /**
+     * Gets a value indicating whether the folder identifier of the event has been set or not.
+     *
+     * @return <code>true</code> if the folder identifier is set, <code>false</code>, otherwise
+     */
+    public boolean containsFolderId() {
+        return isSet(EventField.FOLDER_ID);
     }
 
     /**
@@ -1322,6 +1359,9 @@ public class Event {
         }
         if (containsEndTimeZone()) {
             clone.setEndTimeZone(getEndTimeZone());
+        }
+        if (containsFolderId()) {
+            clone.setFolderId(getFolderId());
         }
         if (containsId()) {
             clone.setId(getId());

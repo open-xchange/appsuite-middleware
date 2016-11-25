@@ -83,10 +83,8 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
@@ -101,7 +99,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -123,7 +120,7 @@ public class Utils {
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.PUBLIC_FOLDER_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY,
-        EventField.CLASSIFICATION, EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE,
+        EventField.CLASSIFICATION, EventField.FOLDER_ID, EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE,
         EventField.START_TIMEZONE, EventField.RECURRENCE_RULE, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
     );
 
@@ -131,8 +128,8 @@ public class Utils {
     public static final EventField[] NON_CLASSIFIED_FIELDS = {
         EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
         EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
-        EventField.MODIFIED_BY, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE,
-        EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP, EventField.UID
+        EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
+        EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP, EventField.UID
     };
 
     /**
@@ -349,34 +346,6 @@ public class Utils {
      * After anonymization, the event will only contain those properties defined in {@link #NON_CLASSIFIED_FIELDS}, as well as the
      * generic summary "Private".
      *
-     * @param userizedEvent The event to anonymize
-     * @param userID The identifier of the user requesting the event data
-     * @return The potentially anonymized event
-     */
-    public static UserizedEvent anonymizeIfNeeded(UserizedEvent userizedEvent) throws OXException {
-        Event event = userizedEvent.getEvent();
-        int userID = userizedEvent.getSession().getUserId();
-        if (false == isClassifiedFor(event, userID)) {
-            return userizedEvent;
-        }
-        Event anonymizedEvent = new Event();
-        for (EventField field : NON_CLASSIFIED_FIELDS) {
-            Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(field);
-            if (null != mapping && mapping.isSet(event)) {
-                mapping.copy(event, anonymizedEvent);
-            }
-        }
-        anonymizedEvent.setSummary("Private"); // TODO i18n?
-        return new UserizedEvent(userizedEvent.getSession(), anonymizedEvent, userizedEvent.getFolderId());
-    }
-
-    /**
-     * "Anonymizes" an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
-     * attendee of the event.
-     * <p/>
-     * After anonymization, the event will only contain those properties defined in {@link #NON_CLASSIFIED_FIELDS}, as well as the
-     * generic summary "Private".
-     *
      * @param event The event to anonymize
      * @param userID The identifier of the user requesting the event data
      * @return The potentially anonymized event
@@ -486,26 +455,6 @@ public class Utils {
     }
 
     /**
-     * Finds a specific event identified by its event identifier in a collection.
-     *
-     * @param events The events to search in
-     * @param eventID The identifier of the event to search
-     * @return The event, or <code>null</code> if not found
-     */
-    public static UserizedEvent find(Collection<UserizedEvent> events, EventID eventID) {
-        if (null != events) {
-            for (UserizedEvent event : events) {
-                if (event.getFolderId() == eventID.getFolderID() && event.getEvent().getId() == eventID.getObjectID()) {
-                    if (null == eventID.getRecurrenceID() || eventID.getRecurrenceID().equals(event.getEvent().getRecurrenceId())) {
-                        return event;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Finds a specific event identified by its object-identifier in a collection.
      *
      * @param events The events to search in
@@ -542,29 +491,6 @@ public class Utils {
             }
         }
         return null;
-    }
-
-    /**
-     * Sorts a list of events.
-     *
-     * @param events The events to sort
-     * @param sortOptions The sort options to use
-     * @return The sorted events
-     */
-    public static List<UserizedEvent> sort(List<UserizedEvent> events, SortOptions sortOptions) {
-        if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) ||
-            null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
-            return events;
-        }
-        final Comparator<Event> eventComparator = getComparator(sortOptions.getSortOrders());
-        Collections.sort(events, new Comparator<UserizedEvent>() {
-
-            @Override
-            public int compare(UserizedEvent userizedEvent1, UserizedEvent userizedEvent2) {
-                return eventComparator.compare(userizedEvent1.getEvent(), userizedEvent2.getEvent());
-            }
-        });
-        return events;
     }
 
     /**

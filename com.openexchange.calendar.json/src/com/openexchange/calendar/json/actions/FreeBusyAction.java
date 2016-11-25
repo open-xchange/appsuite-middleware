@@ -65,11 +65,11 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeBusyService;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
@@ -165,9 +165,9 @@ public final class FreeBusyAction extends ChronosAction {
         if (null == freeBusyService) {
             throw ServiceExceptionCode.absentService(FreeBusyService.class);
         }
-        Map<Attendee, List<UserizedEvent>> eventsPerAttendee = freeBusyService.getFreeBusy(session, Collections.singletonList(attendee), from, until);
-        List<UserizedEvent> events = eventsPerAttendee.get(attendee);
-        return getAppointmentResultWithTimestamp(session, null == events ? Collections.<UserizedEvent> emptyList() : events);
+        Map<Attendee, List<Event>> eventsPerAttendee = freeBusyService.getFreeBusy(session, Collections.singletonList(attendee), from, until);
+        List<Event> events = eventsPerAttendee.get(attendee);
+        return getAppointmentResultWithTimestamp(session, null == events ? Collections.<Event> emptyList() : events);
     }
 
 }

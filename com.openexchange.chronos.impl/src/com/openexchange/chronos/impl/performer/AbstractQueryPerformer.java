@@ -65,7 +65,7 @@ import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.chronos.impl.Utils.isExcluded;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
-import static com.openexchange.chronos.impl.Utils.sort;
+import static com.openexchange.chronos.impl.Utils.sortEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
@@ -81,15 +81,11 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.DataAwareRecurrenceId;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SortOptions;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -118,31 +114,6 @@ public abstract class AbstractQueryPerformer {
         super();
         this.session = session;
         this.storage = storage;
-    }
-
-    protected List<UserizedEvent> userize(List<Event> events, int forUser, boolean includePrivate) throws OXException {
-        List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
-        for (Event event : events) {
-            if (isExcluded(event, session, includePrivate)) {
-                continue;
-            }
-            Attendee userAttendee = find(event.getAttendees(), forUser);
-            int folderID;
-            if (null != userAttendee && 0 < userAttendee.getFolderID()) {
-                folderID = userAttendee.getFolderID();
-            } else if (0 < event.getPublicFolderId()) {
-                folderID = event.getPublicFolderId();
-            } else {
-                throw OXException.general("No suitable parent folder for event " + event); //TODO shouldn't happen at all?
-            }
-            UserizedEvent userizedEvent = getUserizedEvent(event, folderID);
-            if (isSeriesMaster(event) && isResolveOccurrences(session)) {
-                userizedEvents.addAll(resolveOccurrences(userizedEvent));
-            } else {
-                userizedEvents.add(userizedEvent);
-            }
-        }
-        return sort(userizedEvents, new SortOptions(session));
     }
 
     protected List<Event> readEventsInFolder(UserizedFolder folder, int[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
@@ -209,21 +180,9 @@ public abstract class AbstractQueryPerformer {
         return Services.getService(RecurrenceService.class).getRecurrenceIterator(masterEvent, fromCalendar, untilCalendar, true);
     }
 
-    protected List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder, boolean includePrivate) throws OXException {
-        int folderID = i(inFolder);
-        List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
-        for (Event event : events) {
-            if (isExcluded(event, session, includePrivate)) {
-                continue;
-            }
-            UserizedEvent userizedEvent = getUserizedEvent(event, folderID);
-            if (isSeriesMaster(event) && isResolveOccurrences(session)) {
-                userizedEvents.addAll(resolveOccurrences(userizedEvent));
-            } else {
-                userizedEvents.add(userizedEvent);
-            }
-        }
-        return sort(userizedEvents, new SortOptions(session));
+    protected Event postProcess(Event event, UserizedFolder inFolder, boolean includePrivate) throws OXException {
+        event.setFolderId(i(inFolder));
+        return anonymizeIfNeeded(event, session.getUser().getId());
     }
 
     protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includePrivate) throws OXException {
@@ -232,38 +191,61 @@ public abstract class AbstractQueryPerformer {
             if (isExcluded(event, session, includePrivate)) {
                 continue;
             }
-            event = anonymizeIfNeeded(event, session.getUser().getId());
             if (isSeriesMaster(event) && isResolveOccurrences(session)) {
-                processedEvents.addAll(resolveOccurrences(event));
+                processedEvents.addAll(resolveOccurrences(postProcess(event, inFolder, includePrivate)));
             } else {
-                processedEvents.add(event);
+                processedEvents.add(postProcess(event, inFolder, includePrivate));
             }
         }
-        return Utils.sortEvents(processedEvents, new SortOptions(session));
+        return sortEvents(processedEvents, new SortOptions(session));
     }
 
-    private List<UserizedEvent> resolveOccurrences(UserizedEvent master) throws OXException {
-        RecurrenceData recurrenceData = new DefaultRecurrenceData(master.getEvent());
-        List<UserizedEvent> events = new ArrayList<UserizedEvent>();
-        Iterator<Event> occurrences = resolveOccurrences(master.getEvent(), getFrom(session), getUntil(session));
-        while (occurrences.hasNext()) {
-            Event occurrence = occurrences.next();
-            if (isExcluded(occurrence, session, true)) {
+    protected Event postProcess(Event event, int forUser, boolean includePrivate) throws OXException {
+        if (0 < event.getPublicFolderId()) {
+            event.setFolderId(event.getPublicFolderId());
+        } else {
+            Attendee userAttendee = find(event.getAttendees(), forUser);
+            if (null != userAttendee && 0 < userAttendee.getFolderID()) {
+                event.setFolderId(userAttendee.getFolderID());
+            } else {
+                throw OXException.general("No suitable parent folder for event " + event); //TODO shouldn't happen at all?
+            }
+        }
+        return anonymizeIfNeeded(event, session.getUser().getId());
+    }
+
+    /**
+     * Post-processes a list of events prior returning it to the client. This includes
+     * <ul>
+     * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
+     * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>sorting the resulting event list based on the requested sort options</li>
+     * </ul>
+     *
+     * @param events The events to post-process
+     * @param forUser The identifier of the user to apply the parent folder identifier for
+     * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
+     * @return The processed events
+     */
+    protected List<Event> postProcess(List<Event> events, int forUser, boolean includePrivate) throws OXException {
+        List<Event> processedEvents = new ArrayList<Event>(events.size());
+        for (Event event : events) {
+            if (isExcluded(event, session, includePrivate)) {
                 continue;
             }
-            occurrence.setRecurrenceId(new DataAwareRecurrenceId(recurrenceData, occurrence.getRecurrenceId().getValue()));
-            events.add(getUserizedEvent(occurrence, master.getFolderId()));
+            if (isSeriesMaster(event) && isResolveOccurrences(session)) {
+                processedEvents.addAll(resolveOccurrences(postProcess(event, forUser, includePrivate)));
+            } else {
+                processedEvents.add(postProcess(event, forUser, includePrivate));
+            }
         }
-        return events;
+        return sortEvents(processedEvents, new SortOptions(session));
     }
+
 
     private List<Event> resolveOccurrences(Event master) throws OXException {
         return Utils.asList(resolveOccurrences(master, getFrom(session), getUntil(session)));
-    }
-
-    protected UserizedEvent getUserizedEvent(Event event, int folderID) throws OXException {
-        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event, folderID);
-        return anonymizeIfNeeded(userizedEvent);
     }
 
 }

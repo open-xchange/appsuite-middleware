@@ -60,7 +60,6 @@ import com.openexchange.chronos.impl.performer.HasPerformer;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.FreeBusyService;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 
@@ -91,11 +90,11 @@ public class FreeBusyServiceImpl implements FreeBusyService {
     }
 
     @Override
-    public Map<Attendee, List<UserizedEvent>> getFreeBusy(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new StorageOperation<Map<Attendee, List<UserizedEvent>>>(session) {
+    public Map<Attendee, List<Event>> getFreeBusy(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
+        return new StorageOperation<Map<Attendee, List<Event>>>(session) {
 
             @Override
-            protected Map<Attendee, List<UserizedEvent>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected Map<Attendee, List<Event>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new FreeBusyPerformer(session, storage).perform(attendees, from, until);
             }
         }.executeQuery();

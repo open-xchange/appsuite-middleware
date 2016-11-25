@@ -62,7 +62,11 @@ public enum EventField {
      */
     ID,
     /**
-     * The public folder identifier of the event.
+     * The parent folder identifier representing the view on the event.
+     */
+    FOLDER_ID,
+    /**
+     * The common public folder identifier of the event.
      */
     PUBLIC_FOLDER_ID,
     /**

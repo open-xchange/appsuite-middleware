@@ -88,7 +88,6 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -336,7 +335,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             eventData.setSummary(event.getSummary());
             eventData.setLocation(event.getLocation());
         }
-        return new EventConflictImpl(new UserizedEvent(session.getSession(), eventData), conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
+        return new EventConflictImpl(eventData, conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
     }
 
     /**
@@ -361,7 +360,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             eventData.setSummary(seriesMaster.getSummary());
             eventData.setLocation(seriesMaster.getLocation());
         }
-        return new EventConflictImpl(new UserizedEvent(session.getSession(), eventData), conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
+        return new EventConflictImpl(eventData, conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
     }
 
     /**
@@ -524,7 +523,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             if (false == conflict1.isHardConflict() && conflict2.isHardConflict()) {
                 return 1;
             }
-            return conflict1.getConflictingEvent().getEvent().getStartDate().compareTo(conflict2.getConflictingEvent().getEvent().getStartDate());
+            return conflict1.getConflictingEvent().getStartDate().compareTo(conflict2.getConflictingEvent().getStartDate());
         }
     };
 
