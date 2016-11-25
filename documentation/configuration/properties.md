@@ -462,7 +462,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.net.ssl.ciphersuites</span> |
 |:----------------|:--------|
-| __Description__ |         Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.<br> |
+| __Description__ |         Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.<br>        The named cipher suites refer to the identifiers of OpenJDK. Although an attempt is in place to find the matching ones on other vendors' JREs, it might be a good<br>        idea to name the desired cipher suites to use according to vendor-specific identifiers.<br> |
 | __Default__ | TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV  |
 | __Version__ | 7.8.3  |
 | __Reloadable__ | true  |
