@@ -9,3 +9,5 @@ Bundle-ClassPath: lib/cassandra-driver-core-3.1.2.jar,
  lib/cassandra-driver-extras-3.1.2.jar,
  lib/cassandra-driver-mapping-3.1.2.jar,
  .
+Import-Package: com.openexchange.config,
+ com.openexchange.exception
