@@ -130,7 +130,7 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         } else {
-            boolean usePersonalEmailAddress = getBoolValue("com.openexchange.share.notification.mail.usePersonalEmailAddress", false, casted.getSession());
+            boolean usePersonalEmailAddress = getBoolValue("com.openexchange.share.notification.usePersonalEmailAddress", false, casted.getSession());
             if (usePersonalEmailAddress) {
                 sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID(), false), mail);
             } else {
