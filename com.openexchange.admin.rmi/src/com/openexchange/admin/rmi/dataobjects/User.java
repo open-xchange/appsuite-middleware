@@ -581,6 +581,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean userAttribtuesset;
 
+    // -----------------------------------------------------------------------
+
+    private String primaryAccountName;
+
+    private boolean primaryAccountNameSet = false;
+
     /**
      * Instantiates a new empty user object
      */
@@ -4002,6 +4008,30 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
+     * Return the name of the primary mail account
+     * @return A {@link String} containing the name of the primary mail account
+     */
+    final public String getPrimaryAccountName(){
+        return primaryAccountName;
+    }
+
+    /**
+     * Sets the name of the primary mail account for this user object
+     *
+     * @param primaryAccountName A {@link String} containing the name of the primary mail account
+     */
+    final public void setPrimaryAccountName(final String primaryAccountName) {
+        if (null == this.primaryAccountName) {
+            this.primaryAccountNameSet = true;
+        }
+        this.primaryAccountName = primaryAccountName;
+    }
+
+    final public boolean isPrimaryAccountNameSet() {
+        return primaryAccountNameSet;
+    }
+
+    /**
      * Sets the E-Mail aliases for this user object
      *
      * @param aliases A {@link HashSet} containing the E-Mail aliases
@@ -4396,6 +4426,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         folderTree = null;
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
+        this.primaryAccountName = null;
     }
 
     /**
@@ -5043,6 +5074,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (userfield19set ? 1231 : 1237);
         result = prime * result + ((userfield20 == null) ? 0 : userfield20.hashCode());
         result = prime * result + (userfield20set ? 1231 : 1237);
+        result = prime * result + ((primaryAccountName == null) ? 0 : primaryAccountName.hashCode());
+        result = prime * result + (primaryAccountNameSet ? 1231 : 1237);
         return result;
     }
 
@@ -6222,6 +6255,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         }
         if (userfield20set != other.userfield20set) {
+            return false;
+        }
+        if(!primaryAccountName.equals(other.primaryAccountName)){
+            return false;
+        }
+        if(primaryAccountNameSet!=other.primaryAccountNameSet){
             return false;
         }
         return true;

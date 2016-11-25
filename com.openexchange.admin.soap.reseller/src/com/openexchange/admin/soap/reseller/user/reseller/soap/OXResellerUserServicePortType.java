@@ -131,8 +131,7 @@ public interface OXResellerUserServicePortType {
         @WebParam(name = "access", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess access,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth,
-        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.reseller.admin.openexchange.com") String primaryAccountName
+        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
@@ -160,8 +159,7 @@ public interface OXResellerUserServicePortType {
         @WebParam(name = "usrdata", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth,
-        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.reseller.admin.openexchange.com") String primaryAccountName
+        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
@@ -293,8 +291,7 @@ public interface OXResellerUserServicePortType {
         @WebParam(name = "access_combination_name", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         java.lang.String accessCombinationName,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth,
-        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.reseller.admin.openexchange.com") String primaryAccountName
+        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)

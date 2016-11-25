@@ -321,10 +321,10 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
-    public User createByModuleAccess(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth, final String primaryAccountName) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
+    public User createByModuleAccess(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            return user2Soap(userInterface.create(soap2Context(ctx), soap2User(usrdata), soap2ModuleAccess(access), soap2Credentials(auth), primaryAccountName));
+            return user2Soap(userInterface.create(soap2Context(ctx), soap2User(usrdata), soap2ModuleAccess(access), soap2Credentials(auth)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -588,10 +588,10 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
-    public User createByModuleAccessName(final Context ctx, final User usrdata, final java.lang.String accessCombinationName, final Credentials auth, final String primaryAccountName) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
+    public User createByModuleAccessName(final Context ctx, final User usrdata, final java.lang.String accessCombinationName, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            return user2Soap(userInterface.create(soap2Context(ctx), soap2User(usrdata), accessCombinationName, soap2Credentials(auth), primaryAccountName));
+            return user2Soap(userInterface.create(soap2Context(ctx), soap2User(usrdata), accessCombinationName, soap2Credentials(auth)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -1058,10 +1058,10 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
-    public User create(final Context ctx, final User usrdata, final Credentials auth, final String primaryAccountName) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
+    public User create(final Context ctx, final User usrdata, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            return user2Soap(userInterface.create(soap2Context(ctx), soap2User(usrdata), soap2Credentials(auth), primaryAccountName));
+            return user2Soap(userInterface.create(soap2Context(ctx), soap2User(usrdata), soap2Credentials(auth)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -2096,6 +2096,11 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setUserfield20(tmp);
         }
 
+        tmp = soapUser.getPrimaryAccountName();
+        if (tmp != null) {
+            user.setPrimaryAccountName(tmp);
+        }
+
         SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
         if (null != userAttributes) {
             user.setUserAttributes(soap2MapMap(userAttributes));
@@ -2264,6 +2269,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setUserfield18(user.getUserfield18());
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
+        soapUser.setPrimaryAccountName(user.getPrimaryAccountName());
         return soapUser;
     }
 

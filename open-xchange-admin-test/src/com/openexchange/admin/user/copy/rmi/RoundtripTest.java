@@ -188,7 +188,7 @@ public class RoundtripTest extends AbstractRMITest {
         test.setImapServer("devel-mail.netline.de");
         test.setImapLogin("steffen.templin424242669");
         test.setSmtpServer("devel-mail.netline.de");
-        srcUser = ui.create(srcCtx, test, getCredentials(), null);
+        srcUser = ui.create(srcCtx, test, getCredentials());
 
         userSession = performLogin("user@" + srcCtx.getName(), "secret");
         userClient = new AJAXClient(userSession, false);

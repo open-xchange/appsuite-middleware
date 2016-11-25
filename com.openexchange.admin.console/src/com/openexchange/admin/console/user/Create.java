@@ -51,7 +51,6 @@ package com.openexchange.admin.console.user;
 
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -62,12 +61,8 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.java.Strings;
 
 public class Create extends CreateCore {
-
-    private CLIOption primaryAccountNameOption;
-    private static final String OPT_PRIMARY_ACCOUNT_NAME_OPTION = "primary-account-name";
 
     public static void main(String[] args) {
         new Create(args);
@@ -85,11 +80,10 @@ public class Create extends CreateCore {
         parseAndSetUserQuota(parser, usr);
         parseAndSetFilestoreId(parser, usr);
         parseAndSetFilestoreOwner(parser, usr);
-        final String primaryAccountName = parseAndGetPrimaryAccountName(parser);
         String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Create user with access rights combination name
-            Integer id = oxusr.create(ctx, usr, accesscombinationname, auth, primaryAccountName).getId();
+            Integer id = oxusr.create(ctx, usr, accesscombinationname, auth).getId();
             displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
         } else {
             // get the context-admins module access rights as baseline
@@ -104,21 +98,9 @@ public class Create extends CreateCore {
             setModuleAccessOptions(parser, access);
 
             // create the user with the adjusted module access rights
-            Integer id = oxusr.create(ctx, usr, access, auth, primaryAccountName).getId();
+            Integer id = oxusr.create(ctx, usr, access, auth).getId();
             displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
         }
-    }
-
-    private String parseAndGetPrimaryAccountName(AdminParser parser) {
-        CLIOption option = primaryAccountNameOption;
-        if (null == option) {
-            return null;
-        }
-        String primAccountName = (String) parser.getOptionValue(option);
-        if (Strings.isEmpty(primAccountName)) {
-            return null;
-        }
-        return primAccountName;
     }
 
     @Override
@@ -127,7 +109,6 @@ public class Create extends CreateCore {
         setFilestoreIdOption(parser, false);
         setFilestoreOwnerOption(parser, false);
         setUserQuotaOption(parser, false);
-        this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME_OPTION, "The name of the primary mail account.", true, false);
     }
 
 }

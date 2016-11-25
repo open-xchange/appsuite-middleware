@@ -145,6 +145,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="userfield18" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield19" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -284,7 +285,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield17",
     "userfield18",
     "userfield19",
-    "userfield20"
+    "userfield20",
+    "primaryAccountName"
 })
 public class User {
 
@@ -547,6 +549,8 @@ public class User {
     protected String userfield19;
     @XmlElement(nillable = true)
     protected String userfield20;
+    @XmlElement(nillable = true)
+    private String primaryAccountName;
 
     /**
      * Gets the value of the aliases property.
@@ -3678,6 +3682,24 @@ public class User {
      */
     public void setUserfield20(String value) {
         this.userfield20 = value;
+    }
+
+    /**
+     * Gets the primaryAccountName
+     *
+     * @return The primaryAccountName
+     */
+    public String getPrimaryAccountName() {
+        return primaryAccountName;
+    }
+
+    /**
+     * Sets the primaryAccountName
+     *
+     * @param primaryAccountName The primaryAccountName to set
+     */
+    public void setPrimaryAccountName(String primaryAccountName) {
+        this.primaryAccountName = primaryAccountName;
     }
 
 }
