@@ -50,7 +50,7 @@
 package com.openexchange.groupware.ldap;
 
 /**
- * Represents a user attribute with possible multiple values and their unique identifiers in form of a UUID.
+ * Represents a user attribute.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -60,6 +60,12 @@ public final class UserAttribute {
     private final String value;
     private final int hash;
 
+    /**
+     * Initializes a new {@link UserAttribute}.
+     *
+     * @param name The attribute's name
+     * @param value The attribute's value
+     */
     public UserAttribute(String name, String value) {
         super();
         this.name = name;
