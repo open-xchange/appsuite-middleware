@@ -119,7 +119,7 @@ public class DefaultEntityResolver implements EntityResolver {
 
     @Override
     public Attendee prepare(Attendee attendee) throws OXException {
-        return prepare(attendee, attendee.getCuType());
+        return prepare(attendee, null != attendee.getCuType() ? attendee.getCuType() : CalendarUserType.INDIVIDUAL);
     }
 
     @Override
