@@ -67,6 +67,8 @@ ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xc
 %changelog
 * Thu Nov 24 2016 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.8.4 release
+* Thu Nov 24 2016 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 7.8.3 release
 * Tue Nov 15 2016 Carsten Hoeger <choeger@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Carsten Hoeger <choeger@open-xchange.com>

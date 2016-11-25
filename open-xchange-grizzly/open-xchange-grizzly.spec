@@ -88,6 +88,8 @@ fi
 %changelog
 * Thu Nov 24 2016 Marc Arens <marc.arens@open-xchange.com>
 prepare for 7.8.4 release
+* Thu Nov 24 2016 Marc Arens <marc.arens@open-xchange.com>
+First release candidate for 7.8.3 release
 * Tue Nov 15 2016 Marc Arens <marc.arens@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marc Arens <marc.arens@open-xchange.com>

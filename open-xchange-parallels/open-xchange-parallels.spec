@@ -89,6 +89,8 @@ ox_add_property com.openexchange.custom.parallels.branding.guestfallbackhost "" 
 %changelog
 * Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.8.4 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.3 release
 * Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>

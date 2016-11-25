@@ -78,6 +78,8 @@ fi
 %changelog
 * Thu Nov 24 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 prepare for 7.8.4 release
+* Thu Nov 24 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First release candidate for 7.8.3 release
 * Tue Nov 15 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
