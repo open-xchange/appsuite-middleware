@@ -154,7 +154,7 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
             property.getParameters().removeAll(Parameter.SENT_BY);
         }
         if (null != attendee.getPartStat()) {
-            property.getParameters().replace(new PartStat(attendee.getPartStat().toString()));
+            property.getParameters().replace(getPartStat(attendee.getPartStat()));
         } else {
             property.getParameters().removeAll(Parameter.PARTSTAT);
         }
@@ -241,6 +241,26 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
             }
         }
         return null;
+    }
+
+    private static PartStat getPartStat(ParticipationStatus participationStatus) {
+        if (null == participationStatus) {
+            return null;
+        }
+        switch (participationStatus) {
+            case ACCEPTED:
+                return PartStat.ACCEPTED;
+            case DECLINED:
+                return PartStat.DECLINED;
+            case DELEGATED:
+                return PartStat.DELEGATED;
+            case NEEDS_ACTION:
+                return PartStat.NEEDS_ACTION;
+            case TENTATIVE:
+                return PartStat.TENTATIVE;
+            default:
+                return null;
+        }
     }
 
 }

@@ -9,6 +9,7 @@ Bundle-ClassPath: .
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.chronos,
+ com.openexchange.chronos.common,
  com.openexchange.chronos.ical,
  com.openexchange.exception,
  com.openexchange.i18n,

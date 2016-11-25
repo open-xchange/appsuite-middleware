@@ -50,19 +50,17 @@
 package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 
 import java.util.List;
-
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Dur;
-import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VAlarm;
-
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Dur;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VAlarm;
 
 /**
  * {@link TriggerMapping}
@@ -134,7 +132,7 @@ public class TriggerMapping extends AbstractICalMapping<VAlarm, Alarm> {
 				if (null != parameter) {
 					if (net.fortuna.ical4j.model.parameter.Related.END.equals(parameter)) {
 						value.setRelated(Related.END);
-					} else if (net.fortuna.ical4j.model.parameter.Related.END.equals(parameter)) {
+                    } else if (net.fortuna.ical4j.model.parameter.Related.START.equals(parameter)) {
 						value.setRelated(Related.START);
 					} else {
 						addConversionWarning(warnings, "TRIGGER", "Invalid \"RELATED\" parameter:" + parameter);

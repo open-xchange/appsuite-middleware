@@ -47,56 +47,56 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.alarm;
+package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.text.ParseException;
 import java.util.Date;
-import java.util.List;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
-import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.extensions.caldav.property.Acknowledged;
-import net.fortuna.ical4j.model.DateTime;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateMapping;
 import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.RecurrenceId;
 
 /**
- * {@link AcknowledgedMapping}
+ * {@link RecurrenceIdMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AcknowledgedMapping extends AbstractICalMapping<VAlarm, Alarm> {
+public class RecurrenceIdMapping extends ICalDateMapping<VEvent, Event> {
 
     /**
-     * Initializes a new {@link AcknowledgedMapping}.
+     * Initializes a new {@link RecurrenceIdMapping}.
      */
-	public AcknowledgedMapping() {
-        super();
+	public RecurrenceIdMapping() {
+        super(Property.RECURRENCE_ID);
 	}
 
-    @Override
-    public void export(Alarm object, VAlarm component, ICalParameters parameters, List<OXException> warnings) {
-        removeProperties(component, Acknowledged.PROPERTY_NAME);
-        Date value = object.getAcknowledged();
-        if (null != value) {
-            component.getProperties().add(new Acknowledged(new DateTime(value)));
-        }
-    }
+	@Override
+	protected Date getValue(Event object) {
+        com.openexchange.chronos.RecurrenceId value = object.getRecurrenceId();
+        return null != value ? new Date(value.getValue()) : null;
+	}
 
-    @Override
-    public void importICal(VAlarm component, Alarm object, ICalParameters parameters, List<OXException> warnings) {
-        Property property = component.getProperty(Acknowledged.PROPERTY_NAME);
-        if (null == property || null == property.getValue()) {
-            object.setAcknowledged(null);
-        } else {
-            try {
-                object.setAcknowledged(new DateTime(property.getValue()));
-            } catch (ParseException e) {
-                addConversionWarning(warnings, e, Acknowledged.PROPERTY_NAME, e.getMessage());
-            }
-        }
-    }
+	@Override
+	protected String getTimezone(Event object) {
+		return object.getStartTimeZone();
+	}
+
+	@Override
+	protected boolean hasTime(Event object) {
+		return false == object.isAllDay();
+	}
+
+	@Override
+	protected void setValue(Event object, Date value, String timezone, boolean hasTime) {
+        object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value) : null);
+	}
+
+	@Override
+	protected DateProperty createProperty() {
+        return new RecurrenceId();
+	}
 
 }

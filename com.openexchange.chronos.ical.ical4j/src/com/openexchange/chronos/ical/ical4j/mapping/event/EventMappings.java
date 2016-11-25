@@ -80,6 +80,7 @@ public class EventMappings {
 		new LastModifiedMapping(),
 		new LocationMapping(),
 		new OrganizerMapping(),
+        new RecurrenceIdMapping(),
         new RRuleMapping(),
 		new SequenceMapping(),
 		new StatusMapping(),

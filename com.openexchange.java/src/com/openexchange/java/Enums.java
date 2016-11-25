@@ -79,7 +79,7 @@ public class Enums {
     }
 
     /**
-     * Parses the supplied value to an enumeration constant, ignore-case.
+     * Parses the supplied value to an enumeration constant, ignoring case, and assuming '<code>_</code>' for '<code>-</code>' characters.
      *
      * @param enumeration The enumeration class from which to return a constant
      * @param name The name of the constant to return
@@ -89,7 +89,7 @@ public class Enums {
      */
     public static <T extends Enum<T>> T parse(Class<T> enumeration, String name, T defaultValue) {
         for (T value : enumeration.getEnumConstants()) {
-            if (value.name().equalsIgnoreCase(name)) {
+            if (value.name().replace('-', '_').equalsIgnoreCase(name)) {
                 return value;
             }
         }
