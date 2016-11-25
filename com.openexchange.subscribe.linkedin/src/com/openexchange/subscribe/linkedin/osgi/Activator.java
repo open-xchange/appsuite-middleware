@@ -81,9 +81,6 @@ public class Activator extends HousekeepingActivator {
         // react dynamically to the appearance/disappearance of ContextService
         track(ContextService.class, new ContextServiceRegisterer(context, this));
 
-        // Track the update task tracker
-        track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
-
         openTrackers();
     }
 
