@@ -49,35 +49,39 @@
 
 package com.openexchange.monitoring.internal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.monitoring.services.MonitoringServiceRegistry;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class MonitoringInit implements Initialization {
 
-    private static final AtomicBoolean started = new AtomicBoolean();
-
-    private static final MonitoringInit singleton = new MonitoringInit();
-
-    private ObjectName objectName;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringInit.class);
 
     /**
-     * Logger.
+     * @return the singleton instance.
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringInit.class);
+    public static MonitoringInit newInstance(ServiceLookup services) {
+        return new MonitoringInit(services);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------
+
+    private final ServiceLookup services;
+    private ObjectName objectName; // only accessed synchronized
+    private volatile boolean started;
 
     /**
      * Prevent instantiation.
      */
-    private MonitoringInit() {
+    private MonitoringInit(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     private ObjectName getObjectName() throws MalformedObjectNameException, NullPointerException {
@@ -88,26 +92,20 @@ public final class MonitoringInit implements Initialization {
     }
 
     /**
-     * @return the singleton instance.
-     */
-    public static MonitoringInit getInstance() {
-        return singleton;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
-    public void start() throws OXException {
-        if (started.get()) {
+    public synchronized void start() throws OXException {
+        if (started) {
             LOG.error("{} already started", MonitoringInit.class.getName());
             return;
         }
+
         /*
          * Create Beans and register them
          */
-        final ManagementService managementAgent = MonitoringServiceRegistry.getServiceRegistry().getService(ManagementService.class);
-        final GeneralMonitor generalMonitorBean = new GeneralMonitor();
+        ManagementService managementAgent = services.getService(ManagementService.class);
+        GeneralMonitor generalMonitorBean = new GeneralMonitor(services);
         try {
             managementAgent.registerMBean(getObjectName(), generalMonitorBean);
         } catch (final MalformedObjectNameException exc) {
@@ -119,19 +117,20 @@ public final class MonitoringInit implements Initialization {
         }
         LOG.info("JMX Monitor applied");
 
-        started.set(true);
+        started = true;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void stop() throws OXException {
-        if (!started.get()) {
+    public synchronized void stop() throws OXException {
+        if (!started) {
             LOG.error("{} has not been started", MonitoringInit.class.getName());
             return;
         }
-        final ManagementService managementAgent = MonitoringServiceRegistry.getServiceRegistry().getService(ManagementService.class);
+
+        ManagementService managementAgent = services.getService(ManagementService.class);
         if (managementAgent != null) {
             try {
                 managementAgent.unregisterMBean(getObjectName());
@@ -144,13 +143,13 @@ public final class MonitoringInit implements Initialization {
             }
             LOG.info("JMX Monitor removed");
         }
-        started.set(false);
+        started = false;
     }
 
     /**
      * @return <code>true</code> if monitoring has been started; otherwise <code>false</code>
      */
     public boolean isStarted() {
-        return started.get();
+        return started;
     }
 }

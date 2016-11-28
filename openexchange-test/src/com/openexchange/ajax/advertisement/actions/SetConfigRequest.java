@@ -58,10 +58,10 @@ import org.apache.http.ParseException;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.CustomizedParser;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.PortAwareAjaxRequest;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -70,7 +70,7 @@ import com.openexchange.tools.encoding.Base64;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class SetConfigRequest implements PortAwareAjaxRequest<SetConfigResponse> {
+public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
 
     private final String userId;
     private final String userName;
@@ -232,11 +232,6 @@ public class SetConfigRequest implements PortAwareAjaxRequest<SetConfigResponse>
         public SetConfigResponse parse(String body) throws JSONException {
             return new SetConfigResponse(new Response());
         }
-    }
-
-    @Override
-    public String getPort() {
-        return "8009";
     }
 
 }

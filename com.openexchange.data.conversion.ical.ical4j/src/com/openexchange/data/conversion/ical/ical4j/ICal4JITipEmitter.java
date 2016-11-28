@@ -50,10 +50,6 @@
 package com.openexchange.data.conversion.ical.ical4j;
 
 import java.util.List;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Comment;
-import net.fortuna.ical4j.model.property.Method;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
@@ -66,6 +62,10 @@ import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.Comment;
+import net.fortuna.ical4j.model.property.Method;
 
 /**
  * {@link ICal4JITipEmitter}
@@ -77,8 +77,8 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
     @Override
     public String writeMessage(ITipMessage message, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         Calendar calendar = new Calendar();
-        initCalendar(calendar);
-        Mode mode = new SimpleMode(ZoneInfo.OUTLOOK);
+        Mode mode = new SimpleMode(ZoneInfo.OUTLOOK, ITipMethod.REQUEST); // default to REQUEST for iTIP
+        initCalendar(calendar, mode.getMethod());
         boolean consumedComment = false;
 
         Appointment appt = null;
@@ -117,36 +117,6 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
         replaceMethod(calendar, method);
 
         return calendar.toString();
-    }
-
-    public Method getICalMethod(ITipMethod m) {
-        switch (m) {
-        case ADD:
-            return Method.ADD;
-        case CANCEL:
-            return Method.CANCEL;
-        case COUNTER:
-            return Method.COUNTER;
-        case DECLINECOUNTER:
-            return Method.DECLINE_COUNTER;
-        case PUBLISH:
-            return Method.PUBLISH;
-        case REFRESH:
-            return Method.REFRESH;
-        case REPLY:
-            return Method.REPLY;
-        case REQUEST:
-            return Method.REQUEST;
-        case NO_METHOD:
-        default:
-            return null;
-        }
-    }
-
-    @Override
-    protected void initCalendar(final Calendar calendar) {
-        super.initCalendar(calendar);
-        replaceMethod(calendar, Method.REQUEST); // default to REQUEST for iTIP
     }
 
 }

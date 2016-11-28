@@ -36,7 +36,7 @@ import com.openexchange.admin.soap.user.dataobjects.User;
 @XmlType(name = "", propOrder = {
     "ctx",
     "usrdata",
-    "auth"
+    "auth",
 })
 @XmlRootElement(name = "create")
 public class Create {
@@ -47,6 +47,7 @@ public class Create {
     protected User usrdata;
     @XmlElement(nillable = true)
     protected Credentials auth;
+
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.

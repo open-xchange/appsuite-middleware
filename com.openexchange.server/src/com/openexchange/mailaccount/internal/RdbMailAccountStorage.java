@@ -1539,6 +1539,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * Contains attributes which are allowed to be edited for primary mail account.
      */
     private static final EnumSet<Attribute> PRIMARY_EDITABLE = EnumSet.of(
+        Attribute.NAME_LITERAL,
         Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
         Attribute.PERSONAL_LITERAL,
         Attribute.REPLY_TO_LITERAL,

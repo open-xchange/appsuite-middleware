@@ -7,7 +7,7 @@ Bundle-Vendor: Hazelcast Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
- lib/hazelcast-3.7.1.jar
+ lib/hazelcast-3.7.2.jar
 Import-Package: com.openexchange.config,
  edu.umd.cs.findbugs.annotations,
  javax.annotation,

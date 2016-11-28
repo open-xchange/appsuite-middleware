@@ -1,3 +1,21 @@
+open-xchange-appsuite-backend (7.8.4-0) unstable; urgency=medium
+
+  * prepare for 7.8.4 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 24 Nov 2016 11:04:49 +0100
+
+open-xchange-appsuite-backend (7.8.3-4) stable; urgency=medium
+
+  * First release candidate for 7.8.3 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 24 Nov 2016 20:46:53 +0100
+
+open-xchange-appsuite-backend (7.8.3-3) stable; urgency=medium
+
+  * Third preview for 7.8.3 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 15 Nov 2016 15:44:09 +0100
+
 open-xchange-appsuite-backend (7.8.3-2) stable; urgency=medium
 
   * Second preview for 7.8.3 release

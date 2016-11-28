@@ -113,6 +113,15 @@ public interface GrantManagement {
      * @throws OXException If redeem operation fails
      */
     Grant redeemRefreshToken(Client client, String refreshToken) throws OXException;
+    
+    /**
+     * Gets the grant associated with specified access token
+     *
+     * @param accessToken The access token to look-up by
+     * @return The associated grant
+     * @throws OXException If such a grant cannot be returned
+     */
+    Grant getGrantByAccessToken(String accessToken) throws OXException;
 
     /**
      * Revokes a grant by its refresh token.

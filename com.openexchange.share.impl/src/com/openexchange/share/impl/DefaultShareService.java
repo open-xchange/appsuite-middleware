@@ -320,15 +320,19 @@ public class DefaultShareService implements ShareService {
             if (false == guest.isGuest() || false == ShareTool.isAnonymousGuest(guest)) {
                 throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guest.getId()));
             }
+
             boolean guestUserUpdated = false;
-            if (linkUpdate.containsPassword()) {
-                guestUserUpdated |= updatePassword(connectionHelper, context, guest, linkUpdate.getPassword());
-            }
             if (linkUpdate.containsExpiryDate()) {
                 String expiryDateValue = null != linkUpdate.getExpiryDate() ? String.valueOf(linkUpdate.getExpiryDate().getTime()) : null;
                 userService.setAttribute(connectionHelper.getConnection(), ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, guest.getId(), context);
                 guestUserUpdated = true;
             }
+            if (linkUpdate.containsPassword()) {
+                if(updatePassword(connectionHelper, context, guest, linkUpdate.getPassword())){
+                    guestUserUpdated=true;
+                }
+            }
+
             if (guestUserUpdated) {
                 targetProxy.touch();
                 targetUpdate.run();

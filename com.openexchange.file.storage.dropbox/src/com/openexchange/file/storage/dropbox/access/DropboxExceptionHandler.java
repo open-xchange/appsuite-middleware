@@ -186,6 +186,7 @@ final class DropboxExceptionHandler {
             case CANT_NEST_SHARED_FOLDER:
             case OTHER:
             case TO:
+                return mapWriteError(e.errorValue.getToValue(), fileId, e);
             case TOO_MANY_FILES:
             default:
                 // Everything else falls through to 'unexpected error' 
@@ -376,20 +377,20 @@ final class DropboxExceptionHandler {
      * Maps the specified {@link WriteError} to a valid {@link FileStorageExceptionCodes}
      * 
      * @param error The {@link WriteError}
-     * @param folderId The folder identifier used to trigger the error
+     * @param id The object's identifier used to trigger the error
      * @param e The next {@link Exception}
      * @return An {@link OXException}
      */
-    private static final OXException mapWriteError(WriteError error, String folderId, Exception e) {
+    private static final OXException mapWriteError(WriteError error, String id, Exception e) {
         switch (error.tag()) {
             case DISALLOWED_NAME:
-                return FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(e, folderId);
+                return FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(e, id);
             case INSUFFICIENT_SPACE:
                 return FileStorageExceptionCodes.QUOTA_REACHED.create(e);
             case NO_WRITE_PERMISSION:
-                return FileStorageExceptionCodes.NO_CREATE_ACCESS.create(e, folderId);
+                return FileStorageExceptionCodes.NO_CREATE_ACCESS.create(e, id);
             case CONFLICT:
-                // Fall through to 'unexpected error'
+                return FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create(e, id);
             default:
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

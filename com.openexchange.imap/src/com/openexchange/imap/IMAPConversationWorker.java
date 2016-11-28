@@ -50,7 +50,9 @@
 package com.openexchange.imap;
 
 import static com.openexchange.imap.threader.Threadables.applyThreaderTo;
+import static com.openexchange.imap.threadsort.ThreadSortUtil.toUnifiedThreadResponse;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,6 +67,7 @@ import java.util.Set;
 import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.search.SearchException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -81,6 +84,7 @@ import com.openexchange.imap.threader.Threadables;
 import com.openexchange.imap.threader.references.Conversation;
 import com.openexchange.imap.threader.references.ConversationCache;
 import com.openexchange.imap.threader.references.Conversations;
+import com.openexchange.imap.threadsort.MailThreadParser;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
@@ -95,6 +99,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailThread;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.search.SearchTerm;
@@ -103,8 +108,15 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.IMAPResponse;
+import com.sun.mail.imap.protocol.SearchSequence;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -833,6 +845,224 @@ public final class IMAPConversationWorker {
 
     // -----------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Performs the IMAP THREAD REFERENCE command.
+     *
+     * @param fullName The full name
+     * @param size The number of recent/latest messages
+     * @param sortField The sort field (for root elements)
+     * @param order The sort order
+     * @param searchTerm The optional search term to apply
+     * @param mailFields The mail fields to query
+     * @param headerNames The optional header names to query
+     * @return The mail threads
+     * @throws OXException If mail threads cannot be returned
+     */
+    public List<MailThread> getThreadReferences(String fullName, int size, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
+        if (0 == size) {
+            return Collections.emptyList();
+        }
+
+        try {
+            imapMessageStorage.openReadOnly(fullName);
+            int messageCount = imapMessageStorage.getImapFolder().getMessageCount();
+            if (0 >= messageCount) {
+                return Collections.emptyList();
+            }
+
+            // Build-up effective fields
+            MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+            MailFields usedFields = new MailFields();
+            IMAPMessageStorage.prepareMailFieldsForVirtualFolder(usedFields, fullName, imapMessageStorage.getSession());
+            usedFields.addAll(mailFields);
+            usedFields.add(MailField.toField(effectiveSortField.getListField()));
+
+            // Deny body
+            boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
+            if (body) {
+                throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+            }
+
+            // Compose search term
+            javax.mail.search.SearchTerm jmsSearchTerm;
+            if (searchTerm == null) {
+                jmsSearchTerm = null;
+            } else {
+                if (searchTerm.containsWildcard()) {
+                    jmsSearchTerm = searchTerm.getNonWildcardJavaMailSearchTerm();
+                } else {
+                    jmsSearchTerm = searchTerm.getJavaMailSearchTerm();
+                }
+            }
+
+            // Define heading search keys
+            int numMsgs;
+            String[] searchKeys;
+            if (size < 0 || size >= messageCount) {
+                searchKeys = null;
+                numMsgs = messageCount;
+            } else {
+                int start = messageCount - size + 1;
+                searchKeys = new String[] { new StringBuilder(16).append(start).append(':').append(messageCount).toString() };
+                numMsgs = size;
+            }
+
+            // Issue command
+            String threadList = (String) imapMessageStorage.getImapFolder().doCommand(new ThreadReferencesProtocolCommand(true, searchKeys, jmsSearchTerm));
+            if (null == threadList) {
+                return Collections.emptyList();
+            }
+
+            // Parse unified THREAD response
+            return parseThreadList(toUnifiedThreadResponse(threadList), fullName, numMsgs, sortField, order, usedFields, headerNames);
+        } catch (final MessagingException e) {
+            throw imapMessageStorage.handleMessagingException(fullName, e);
+        } catch (final RuntimeException e) {
+            throw imapMessageStorage.handleRuntimeException(e);
+        } finally {
+            IMAPFolderWorker.clearCache(imapMessageStorage.getImapFolder());
+        }
+    }
+
+    private static final class ThreadReferencesProtocolCommand implements IMAPFolder.ProtocolCommand {
+
+        private final String[] searchKeys;
+        private final Argument searchSequence;
+        private final boolean uid;
+
+        /**
+         * Initializes a new {@link IMAPConversationWorker.ThreadReferencesProtocolCommand}.
+         *
+         * @throws MessagingException If initialization fails
+         */
+        ThreadReferencesProtocolCommand(boolean uid, String[] searchKeys, javax.mail.search.SearchTerm searchTerm) throws MessagingException {
+            super();
+            this.uid = uid;
+            this.searchKeys = (searchKeys == null || searchKeys.length == 0) ? new String[] {"ALL"} : searchKeys;
+            if (null == searchTerm) {
+                this.searchSequence = null;
+            } else {
+                try {
+                    searchSequence = new SearchSequence().generateSequence(searchTerm, "UTF-8");
+                } catch (IOException ioex) {
+                    // should never happen
+                    throw new SearchException(ioex.toString(), ioex);
+                }
+            }
+        }
+
+        @Override
+        public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+            if (!protocol.hasCapability("THREAD=REFERENCES")) {
+                throw new BadCommandException("THREAD=REFERENCES not supported");
+            }
+            if (searchKeys == null || searchKeys.length == 0) {
+                throw new BadCommandException("Must have at least one sort term");
+            }
+
+            // UID THREAD REFERENCES UTF-8 1:1000 BODY "Hello"
+
+            Argument args = new Argument();
+
+            args.writeAtom("REFERENCES");    // charset specification
+            args.writeAtom("UTF-8");    // charset specification
+
+            // Add (sort) terms
+            {
+                Argument sargs = new Argument();
+                for (int i = 0; i < searchKeys.length; i++) {
+                    sargs.writeAtom(searchKeys[i]);
+                }
+                args.writeArgument(sargs);  // sort criteria
+            }
+
+            if (searchSequence != null) {
+                args.append(searchSequence);
+            }
+
+            Response[] r = protocol.command(uid ? "UID THREAD" : "THREAD", args);
+            Response response = r[r.length - 1];
+            String result = null;
+
+            // Grab all THREAD responses
+            if (response.isOK()) { // command successful
+                String threadStr = "THREAD";
+                for (int i = 0, len = r.length - 1; i < len; i++) {
+                    if (!(r[i] instanceof IMAPResponse)) {
+                        continue;
+                    }
+                    IMAPResponse ir = (IMAPResponse) r[i];
+                    if (ir.keyEquals(threadStr)) {
+                        result = ir.getRest();
+                        r[i] = null;
+                    }
+                }
+
+                // dispatch remaining untagged responses
+                protocol.notifyResponseHandlers(r);
+            } else {
+                // dispatch remaining untagged responses
+                protocol.notifyResponseHandlers(r);
+                protocol.handleResult(response);
+            }
+
+            return result;
+        }
+    }
+
+    private List<MailThread> parseThreadList(String unifiedThreadList, String fullName, int numMsgs, MailSortField sortField, OrderDirection order, MailFields usedFields, String[] headerNames) throws OXException, MessagingException {
+        // Parse the unified THREAD=REFERENCES response
+        MailThreadParser.ParseResult parseResult = MailThreadParser.getInstance().parseUnifiedResponse(unifiedThreadList, fullName, numMsgs);
+
+        // Fill requested fields/headers
+        {
+            FetchProfile fetchProfile = IMAPMessageStorage.checkFetchProfile(getFetchProfile(usedFields.toArray(), headerNames, null, null, true));
+            boolean isRev1 = imapMessageStorage.getImapConfig().getImapCapabilities().hasIMAP4rev1();
+            TLongObjectMap<MailMessage> messages = parseResult.getMessages();
+            new MailMessageFillerIMAPCommand(messages.valueCollection(), isRev1, fetchProfile, imapMessageStorage.getImapServerInfo(), imapMessageStorage.getImapFolder()).doCommand();
+            imapMessageStorage.setAccountInfo(messages.values(new MailMessage[messages.size()]));
+        }
+
+        // Sort & return
+        List<MailThread> mailThreads = parseResult.getMailThreads();
+        {
+            final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+            final Comparator<MailThread> threadComparator = getThreadComparator(effectiveSortField, order, imapMessageStorage.getLocale());
+            Collections.sort(mailThreads, threadComparator);
+        }
+        return mailThreads;
+    }
+
+    private Comparator<MailThread> getThreadComparator(final MailSortField sortField, final OrderDirection order, Locale locale) {
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+        Comparator<MailThread> threadComparator = new Comparator<MailThread>() {
+
+            @Override
+            public int compare(MailThread o1, MailThread o2) {
+                MailMessage msg1 = o1.getParent();
+                MailMessage msg2 = o2.getParent();
+
+                int result = comparator.compare(msg1, msg2);
+                if ((0 != result) || (MailSortField.RECEIVED_DATE != sortField)) {
+                    return result;
+                }
+
+                // Zero as comparison result AND primarily sorted by received-date
+                String inReplyTo1 = msg1.getInReplyTo();
+                String inReplyTo2 = msg2.getInReplyTo();
+                if (null == inReplyTo1) {
+                    result = null == inReplyTo2 ? 0 : -1;
+                } else {
+                    result = null == inReplyTo2 ? 1 : 0;
+                }
+                return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(msg1, msg2) : result;
+            }
+        };
+        return threadComparator;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
     public MailMessage[] getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
             imapMessageStorage.openReadOnly(fullName);
@@ -937,13 +1167,31 @@ public final class IMAPConversationWorker {
                 /*
                  * Output as flat list
                  */
-                final List<MailMessage> flatList = new LinkedList<>();
+                List<MailMessage> flatList = new LinkedList<>();
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     for (final MailMessage mail : flatList) {
                         imapMessageStorage.setAccountInfo(mail);
                     }
                 }
                 ThreadSortUtil.toFlatList(structuredList, flatList);
+                /*
+                 * Apply index range (if any)
+                 */
+                if (indexRange != null) {
+                    int fromIndex = indexRange.start;
+                    int toIndex = indexRange.end;
+                    int size = flatList.size();
+                    if (size == 0 || fromIndex >= size) {
+                        return IMailMessageStorage.EMPTY_RETVAL;
+                    }
+                    /*
+                     * Reset end index if out of range
+                     */
+                    if (toIndex >= size) {
+                        toIndex = size;
+                    }
+                    flatList = flatList.subList(fromIndex, toIndex);
+                }
                 return flatList.toArray(new MailMessage[flatList.size()]);
             }
             /*

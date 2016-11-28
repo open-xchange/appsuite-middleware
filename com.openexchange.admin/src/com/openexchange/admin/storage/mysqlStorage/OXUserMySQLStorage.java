@@ -1408,7 +1408,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final Set<Attribute> changed = new HashSet<>();
         account.setDefaultFlag(true);
         account.setId(0);
-        account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        if(user.isPrimaryAccountNameSet()){
+            account.setName(Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.DEFAULT_FOLDER_NAME : user.getPrimaryAccountName());
+            changed.add(Attribute.NAME_LITERAL);
+        } else {
+            account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        }
         if (user.isImapServerset() || null != user.getImapServerString()) {
             changed.add(Attribute.MAIL_URL_LITERAL);
             String imapServer = user.getImapServerString();
@@ -1929,15 +1934,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     std_mail_folder_confirmed_ham = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
                 }
 
-                // insert all multi valued attribs to the user_attribute table,
-                // here we fill the alias attribute in it
-                UserAliasStorage userAlias = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                // Insert aliases
                 if (usrdata.getAliases() != null && usrdata.getAliases().size() > 0) {
-                    final Iterator<String> itr = usrdata.getAliases().iterator();
-                    while (itr.hasNext()) {
-                        final String tmp_mail = itr.next().toString().trim();
+                    UserAliasStorage userAlias = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                    for (Iterator<String> itr = usrdata.getAliases().iterator(); itr.hasNext();) {
+                        String tmp_mail = itr.next().toString().trim();
                         if (tmp_mail.length() > 0) {
-                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail);
+                            userAlias.createAlias(con, ctx.getId().intValue(), userId, tmp_mail);
                         }
                     }
                 }
@@ -2117,11 +2120,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
             stmt.setInt(1, cid);
             stmt.setInt(2, userId);
-            for(final Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
-                final String namespace = namespaced.getKey();
-                for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
-                    final String name = namespace + "/" + pair.getKey();
-                    final String value = pair.getValue();
+            for (Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
+                String namespace = namespaced.getKey();
+                StringBuilder nameBuilder = null;
+                for (Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                    if (null == nameBuilder) {
+                        nameBuilder = new StringBuilder(48);
+                    } else {
+                        nameBuilder.setLength(0);
+                    }
+                    String name = nameBuilder.append(namespace).append('/').append(pair.getKey()).toString();
+                    String value = pair.getValue();
                     stmt.setString(3, name);
                     stmt.setString(4, value);
                     UUID uuid = UUID.randomUUID();
@@ -2142,7 +2151,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
-        account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        account.setName( (!user.isPrimaryAccountNameSet()) || Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.DEFAULT_FOLDER_NAME : user.getPrimaryAccountName());
         String imapServer = user.getImapServerString();
         if (null == imapServer) {
             imapServer = DEFAULT_IMAP_SERVER_CREATE;
@@ -2652,7 +2661,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmtuserattributes.setInt(1, contextId);
             stmtusm = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
             stmtusm.setInt(1, contextId);
-            stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname FROM user_mail_account WHERE cid = ? and id = "+MailAccount.DEFAULT_ID+" and user = ?");
+            stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname, name FROM user_mail_account WHERE cid = ? and id = "+MailAccount.DEFAULT_ID+" and user = ?");
             stmtacc.setInt(1, contextId);
             ResultSet rs = null;
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
@@ -2789,6 +2798,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     newuser.setMail_folder_archive_full_name(rs.getString("archive_fullname"));
                     newuser.setMail_folder_confirmed_ham_name(rs.getString("confirmed_ham"));
                     newuser.setMail_folder_confirmed_spam_name(rs.getString("confirmed_spam"));
+                    newuser.setPrimaryAccountName(rs.getString("name"));
                 }
                 rs.close();
 

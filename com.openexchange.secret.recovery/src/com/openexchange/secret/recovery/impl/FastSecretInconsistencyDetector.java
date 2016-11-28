@@ -49,7 +49,6 @@
 
 package com.openexchange.secret.recovery.impl;
 
-import java.util.Set;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -109,13 +108,13 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
             return null;
         }
 
-        Set<String> token = session.getUser().getAttributes().get(PROPERTY_TOKEN);
-        if (token == null || token.isEmpty()) {
+        String token = session.getUser().getAttributes().get(PROPERTY_TOKEN);
+        if (token == null) {
             saveNewToken(session);
             return null;
         }
 
-        if (canDecrypt(token.iterator().next(), session)) {
+        if (canDecrypt(token, session)) {
             return null;
         }
 

@@ -141,7 +141,7 @@ public class UserAdapter implements User {
     }
 
     @Override
-    public Map<String, Set<String>> getAttributes() {
+    public Map<String, String> getAttributes() {
         return Collections.emptyMap();
     }
 

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-10-31 20:31+0900\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2016-11-08 20:50+0100\n"
+"Last-Translator: nicolas <nicolas@bureau-cornavin.com>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_CA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 2.0\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -59,8 +59,8 @@ msgid ""
 "The server configuration cannot be retrieved due to an internal server "
 "error. Please try again later."
 msgstr ""
-"La configuration du serveur ne peut pas être récupérée du fait d'une "
-"erreur interne au serveur. Veuillez réessayer ultérieurement."
+"La configuration du serveur ne peut pas être récupérée du fait d'une erreur "
+"interne au serveur. Veuillez réessayer ultérieurement."
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -1060,8 +1060,8 @@ msgstr "Configuration de votre périphérique"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
 msgstr ""
-"Un autre nœud est en train de réaliser la même tâche. Veuillez "
-"réessayer ultérieurement."
+"Un autre nœud est en train de réaliser la même tâche. Veuillez réessayer "
+"ultérieurement."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
@@ -4211,6 +4211,11 @@ msgstr ""
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
 msgstr "Vous devez explicitement autoriser %1$s à s'abonner à %2$s"
 
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr "La portée « %1$s » n'est pas gérée par le fournisseur"
+
 #. *
 #. * New password too short.
 #.
@@ -5798,9 +5803,9 @@ msgid ""
 "An E-Mail address is mandatory for external distribution list members. "
 "Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
-"Une adresse électronique est obligatoire pour les membres externes "
-"de la liste de diffusion. Veuillez fournir une adresse électronique valide "
-"pour le contact  \"%1$s\"."
+"Une adresse électronique est obligatoire pour les membres externes de la "
+"liste de diffusion. Veuillez fournir une adresse électronique valide pour le "
+"contact  \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -8717,7 +8722,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
 msgid "The selected authentication type is not supported by server %2$s"
 msgstr ""
-"Le type d'authentification choisi n'est pas pris en charge par le serveur %2$s"
+"Le type d'authentification choisi n'est pas pris en charge par le serveur "
+"%2$s"
 
 #. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
@@ -8728,8 +8734,8 @@ msgstr "Veuillez vérifier votre compte de courriel : %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
 msgid "Invalid name specified. Information from mail server: %1$s"
 msgstr ""
-"Le nom spécifié n'est pas valide. Informations en provenance "
-"du serveur de courriel : %1$s"
+"Le nom spécifié n'est pas valide. Informations en provenance du serveur de "
+"courriel : %1$s"
 
 #. Insufficient permissions to perform the operation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
@@ -8758,8 +8764,7 @@ msgid ""
 "Please try again later."
 msgstr ""
 "Erreur temporaire du fait qu'un sous-système n'est pas en service (peut-être "
-"à "
-"cause d'une opération de maintenance). Veuillez réessayer ultérieurement."
+"à cause d'une opération de maintenance). Veuillez réessayer ultérieurement."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8819,8 +8824,8 @@ msgid ""
 "Send RFC822 data using primary account's transport. This requires master "
 "authentication to be active."
 msgstr ""
-"Envoyer les données RFC822 au moyen du transport du compte principal. "
-"Cela nécessite que l'authentification maîtresse soit activée."
+"Envoyer les données RFC822 au moyen du transport du compte principal. Cela "
+"nécessite que l'authentification maîtresse soit activée."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -9085,8 +9090,8 @@ msgid ""
 "longer accepted by provider. Please change them."
 msgstr ""
 "Les informations d'identification ou d'authentification saisies ne "
-"fonctionnent "
-"pas ou ne sont plus acceptées par le fournisseur. Veuillez les modifier."
+"fonctionnent pas ou ne sont plus acceptées par le fournisseur. Veuillez les "
+"modifier."
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62

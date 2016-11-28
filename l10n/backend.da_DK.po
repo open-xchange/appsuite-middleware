@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-10-31 23:02+0100\n"
+"PO-Revision-Date: 2016-11-09 08:57+0100\n"
 "Last-Translator: Jacob Sparre Andersen <jacob@bureau-cornavin.com>\n"
 "Language-Team: Danish <da@bureau-cornavin.com>\n"
 "Language: da\n"
@@ -4061,6 +4061,11 @@ msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
 msgstr ""
 "Du bliver nødt til eksplicit at autorisere %1$s til at abonnere på %2$s."
 
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr "Gyldighedsområdet %1$s understøttes ikke af udbyderen."
+
 #. *
 #. * New password too short.
 #.
@@ -5572,8 +5577,8 @@ msgid ""
 "Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
 "En e-mail-adresse er påkrævet for eksterne medlemmer af en "
-"distributionsliste.  Tilføj venligst en gyldig e-mail-adresse for kontakten »%"
-"1$s«."
+"distributionsliste.  Tilføj venligst en gyldig e-mail-adresse for kontakten "
+"»%1$s«."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -8753,8 +8758,8 @@ msgid ""
 "The entered credential or authentication information does not work or are no "
 "longer accepted by provider. Please change them."
 msgstr ""
-"Den indtastede autentificeringskode virker ikke eller accepteres ikke længere "
-"af udbyderen.  Ændr den venligst."
+"Den indtastede autentificeringskode virker ikke eller accepteres ikke "
+"længere af udbyderen.  Ændr den venligst."
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62

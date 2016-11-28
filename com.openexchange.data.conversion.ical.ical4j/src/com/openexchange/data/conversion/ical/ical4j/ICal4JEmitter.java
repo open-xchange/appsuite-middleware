@@ -55,20 +55,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.regex.Pattern;
-import net.fortuna.ical4j.data.CalendarOutputter;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.TimeZone;
-import net.fortuna.ical4j.model.ValidationException;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VFreeBusy;
-import net.fortuna.ical4j.model.component.VTimeZone;
-import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.CalScale;
-import net.fortuna.ical4j.model.property.Method;
-import net.fortuna.ical4j.model.property.ProdId;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -85,10 +71,25 @@ import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.FreeBusyConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.data.conversion.ical.itip.ITipContainer;
+import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Strings;
+import net.fortuna.ical4j.data.CalendarOutputter;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.TimeZone;
+import net.fortuna.ical4j.model.ValidationException;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VFreeBusy;
+import net.fortuna.ical4j.model.component.VTimeZone;
+import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.CalScale;
+import net.fortuna.ical4j.model.property.Method;
+import net.fortuna.ical4j.model.property.ProdId;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -97,10 +98,10 @@ public class ICal4JEmitter implements ICalEmitter {
 
     @Override
     public String writeAppointments(final List<Appointment> appointmentObjects, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
-        final Calendar calendar = new Calendar();
-        initCalendar(calendar);
-        int i = 0;
         final Mode mode = new SimpleMode(ZoneInfo.FULL);
+        final Calendar calendar = new Calendar();
+        initCalendar(calendar, mode.getMethod());
+        int i = 0;
         for(final Appointment appointment : appointmentObjects) {
             final VEvent event = createEvent(mode, i++, appointment, ctx, errors, warnings);
             calendar.getComponents().add(event);
@@ -135,8 +136,8 @@ public class ICal4JEmitter implements ICalEmitter {
         final List<ConversionError> errors,
         final List<ConversionWarning> warnings, final Context ctx) {
         final Calendar calendar = new Calendar();
-        initCalendar(calendar);
         final Mode mode = new SimpleMode(ZoneInfo.FULL);
+        initCalendar(calendar, mode.getMethod());
         int i = 0;
         for (final Task task : tasks) {
             final VToDo vtodo;
@@ -193,15 +194,13 @@ public class ICal4JEmitter implements ICalEmitter {
     @Override
     public ICalSession createSession(final Mode mode) {
         final ICal4jSession retval = new ICal4jSession(mode);
-        initCalendar(retval.getCalendar());
+        initCalendar(retval.getCalendar(), mode.getMethod());
         return retval;
     }
 
     @Override
     public ICalSession createSession() {
-        final ICal4jSession retval = new ICal4jSession(new SimpleMode(ZoneInfo.FULL));
-        initCalendar(retval.getCalendar());
-        return retval;
+        return createSession(new SimpleMode(ZoneInfo.FULL));
     }
 
     @Override
@@ -325,14 +324,17 @@ public class ICal4JEmitter implements ICalEmitter {
         return new ICal4jItem(vToDo);
     }
 
-    protected void initCalendar(final Calendar calendar) {
-        final PropertyList properties = calendar.getProperties();
-        final ProdId prodId = new ProdId();
+    protected void initCalendar(Calendar calendar, ITipMethod method) {
+        PropertyList properties = calendar.getProperties();
+        ProdId prodId = new ProdId();
         prodId.setValue(com.openexchange.version.Version.NAME);
         properties.add(prodId);
         properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
         properties.add(CalScale.GREGORIAN);
-        properties.add(Method.PUBLISH);
+        Method iCalMethod = null != method ? getICalMethod(method) : null;
+        if (null != iCalMethod) {
+            replaceMethod(calendar, iCalMethod);
+        }
     }
 
     private Calendar getCalendar(final ICalSession session) throws ConversionError {
@@ -348,6 +350,30 @@ public class ICal4JEmitter implements ICalEmitter {
             throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
         }
         return ((ICal4jSession) session).getAndIncreaseIndex();
+    }
+
+    protected Method getICalMethod(ITipMethod m) {
+        switch (m) {
+        case ADD:
+            return Method.ADD;
+        case CANCEL:
+            return Method.CANCEL;
+        case COUNTER:
+            return Method.COUNTER;
+        case DECLINECOUNTER:
+            return Method.DECLINE_COUNTER;
+        case PUBLISH:
+            return Method.PUBLISH;
+        case REFRESH:
+            return Method.REFRESH;
+        case REPLY:
+            return Method.REPLY;
+        case REQUEST:
+            return Method.REQUEST;
+        case NO_METHOD:
+        default:
+            return null;
+        }
     }
 
     protected void replaceMethod(Calendar calendar, Method newMethod) {

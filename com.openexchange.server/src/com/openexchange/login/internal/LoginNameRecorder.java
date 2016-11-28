@@ -50,7 +50,6 @@
 package com.openexchange.login.internal;
 
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -112,10 +111,9 @@ public class LoginNameRecorder implements LoginHandlerService, NonTransient {
      * @param user The user to extract the stored login name for
      * @return The login name, or <code>null</code> if not set at all
      */
-    private static String getStoredUserLogin(User user) throws OXException {
-        Map<String, Set<String>> attributes = user.getAttributes();
-        Set<String> values = attributes.get(LOGIN_ATTRIBUTE_NAME);
-        return null != values && 0 < values.size() ? values.iterator().next() : null;
+    private static String getStoredUserLogin(User user) {
+        Map<String, String> attributes = user.getAttributes();
+        return attributes.get(LOGIN_ATTRIBUTE_NAME);
     }
 
 }

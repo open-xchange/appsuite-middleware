@@ -54,11 +54,13 @@ import static com.openexchange.java.Strings.isWhitespace;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
@@ -403,6 +405,21 @@ public final class HtmlServices {
         }
 
         return c == null ? s : new String(c);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------ //
+
+    private static Set<String> ALLOWED_IN_HEAD = ImmutableSet.<String> builder().add("head", "title", "style", "base", "link", "meta", "script", "noscript").build();
+
+    /**
+     * Gets a (read-only) set containing those HTML elements that are allowed to occur inside &lt;head&gt; tag.
+     * <p>
+     * Currently: "head", "title", "style", "base", "link", "meta", "script", and "noscript"
+     *
+     * @return HTML elements that are allowed to occur inside &lt;head&gt; tag
+     */
+    public static Set<String> getElementsAllowedInHead() {
+        return ALLOWED_IN_HEAD;
     }
 
 }

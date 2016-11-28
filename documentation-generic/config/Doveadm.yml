@@ -1,5 +1,15 @@
 array:
   - data:
+      Key: com.openexchange.dovecot.doveadm.enabled
+      Description: >
+Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not
+      Default: false
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: 
+      File: doveadm.properties
+  - data:
       Key: com.openexchange.dovecot.doveadm.endpoints
       Description: >
 Specifies the URIs to the Dovecot DoveAdm REST interface end-points. 

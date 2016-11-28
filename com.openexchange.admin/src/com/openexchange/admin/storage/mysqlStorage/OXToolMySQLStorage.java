@@ -2182,7 +2182,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             final HashSet<Integer> usr_ids = new HashSet<Integer>();
             // fetch from alias table
-            prep_check = oxcon.prepareStatement("SELECT id FROM user_attribute WHERE cid = ? AND name = 'alias' AND VALUE like ?");
+            prep_check = oxcon.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND alias LIKE ?");
             prep_check.setInt(1, ctx.getId().intValue());
             prep_check.setString(2, "%@" + domain);
             rs = prep_check.executeQuery();

@@ -713,7 +713,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private ServerSession fakeSession() {
         UserImpl user = new UserImpl();
-        user.setAttributes(new HashMap<String, Set<String>>(1));
+        user.setAttributes(new HashMap<String, String>(1));
         return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
     }
 

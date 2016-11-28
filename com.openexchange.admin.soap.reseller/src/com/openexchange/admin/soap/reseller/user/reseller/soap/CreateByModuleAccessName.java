@@ -25,6 +25,7 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.User;
  *         &lt;element name="usrdata" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
  *         &lt;element name="access_combination_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ *         &lt;element name="primaryAccountName" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}String" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -38,7 +39,7 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.User;
     "ctx",
     "usrdata",
     "accessCombinationName",
-    "auth"
+    "auth",
 })
 @XmlRootElement(name = "createByModuleAccessName")
 public class CreateByModuleAccessName {

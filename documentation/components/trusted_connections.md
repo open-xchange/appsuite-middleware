@@ -41,6 +41,8 @@ If supported cipher suites should be specified, the following property has to be
     # Defines the cipher suites that will become supported for SSL communication
     com.openexchange.net.ssl.ciphersuites=TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV
 
+**Note**: The named cipher suites refer to the identifiers of OpenJDK. Although an attempt is in place to find the matching ones on other vendors' JREs, it might be a good idea to name the desired cipher suites to use according to vendor-specific identifiers. For instance, the identifier is ``TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA`` for OpenJDK, but ``SSL_ECDHE_ECDSA_WITH_AES_128_CBC_SHA`` on IBM Java.
+
 ## Disable hostname verification
 Hostname verification can be disabled by setting following property 
 

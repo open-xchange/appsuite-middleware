@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.json;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.Password;
 import com.openexchange.session.Session;
 
 /**
@@ -77,5 +78,15 @@ public interface MailAccountActionProvider {
      * @return The associated action or <code>null</code>
      */
     AJAXActionService getAction(String action);
+
+    /**
+     * Gets the password from specified account.
+     *
+     * @param id The account identifier
+     * @param session The associated session
+     * @return The password
+     * @throws OXException If such a password cannot be returned
+     */
+    Password getPassword(String id, Session session) throws OXException;
 
 }

@@ -52,7 +52,6 @@ package com.openexchange.groupware.ldap;
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.groupware.contexts.FileStorageInfo;
 
 /**
@@ -157,7 +156,7 @@ public interface User extends FileStorageInfo, Serializable {
      *
      * @return user attributes
      */
-    Map<String, Set<String>> getAttributes();
+    Map<String, String> getAttributes();
 
     /**
      * Getter for displayName.

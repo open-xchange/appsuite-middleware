@@ -82,7 +82,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -90,6 +89,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -460,8 +460,6 @@ public final class HtmlProcessing {
         return outputDocument.toString().trim();
     }
 
-    private static Set<String> ALLOWED_IN_HEAD = ImmutableSet.<String> builder().add("head", "title", "style", "base", "link", "meta", "script", "noscript").build();
-
     private static void lookUpHeadAndReplaceBody(Source source, OutputDocument outputDocument, Segment toLookIn, String cssPrefix) {
         Element headElement = toLookIn.getFirstElement(HTMLElementName.HEAD);
 
@@ -474,8 +472,9 @@ public final class HtmlProcessing {
             // Check for other content that should not reside in <head>
             List<Element> allElements = headElement.getChildElements();
             if (null != allElements) {
+                Set<String> elementsAllowedInHead = HtmlServices.getElementsAllowedInHead();
                 for (Element element : allElements) {
-                    if (false == ALLOWED_IN_HEAD.contains(Strings.asciiLowerCase(element.getName()))) {
+                    if (false == elementsAllowedInHead.contains(Strings.asciiLowerCase(element.getName()))) {
                         if (null == other) {
                             other = new ArrayList<>(allElements.size());
                         }

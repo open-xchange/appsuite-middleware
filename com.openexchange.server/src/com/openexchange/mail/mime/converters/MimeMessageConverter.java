@@ -1469,7 +1469,7 @@ public final class MimeMessageConverter {
                         mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
                     } else {
                         try {
-                            mailMessage.setHasAttachment(ct.startsWith(multipart) && hasAttachments((Multipart) msg.getContent(), ct.getSubType()));
+                            mailMessage.setHasAttachment(ct.startsWith(multipart) && hasAttachments((Part) msg.getContent()));
                         } catch (final ClassCastException e) {
                             // Cast to javax.mail.Multipart failed
                             LOG1.debug(new StringBuilder(256).append(
@@ -1913,12 +1913,7 @@ public final class MimeMessageConverter {
             }
            {
                 ContentType ct = mail.getContentType();
-                if (ct.startsWith(MULTI_PRIMTYPE)) {
-                   examineAttachmentPresence(mail, ct);
-                } else {
-                    // No multipart/* at all
-                    mail.setHasAttachment(false);
-                }
+                examineAttachmentPresence(mail, ct);
             }
             {
                 final String[] tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_ID);

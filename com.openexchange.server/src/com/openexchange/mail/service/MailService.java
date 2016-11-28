@@ -162,4 +162,15 @@ public interface MailService {
      */
     public TransportConfig getTransportConfig(Session session, int accountId) throws OXException;
 
+    /**
+     * Gets the mail login for the given account of specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param accountId The account identifier
+     * @return The mail login
+     * @throws OXException If mail login cannot be returned
+     */
+    public String getMailLoginFor(int userId, int contextId, int accountId) throws OXException;
+
 }

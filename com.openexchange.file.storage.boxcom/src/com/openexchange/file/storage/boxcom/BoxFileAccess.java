@@ -357,12 +357,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 try {
                     BoxAPIConnection apiConnection = getAPIConnection();
                     com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
-                    //TODO: Check if the user has premium features and fetch the asked 'version'. If not fall back to latest version
                     Info fileInfo = boxFile.getInfo("trashed_at", "name", "size");
                     checkFileValidity(fileInfo);
-
-                    //BoxDefaultRequestObject versionRequest = new BoxDefaultRequestObject();
-                    //versionRequest.getRequestExtras().addQueryParam("version", version);
 
                     // FIXME: Memory intensive?
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -790,7 +786,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         URL(Field.URL, "shared_link"),
         FOLDER_ID(Field.FOLDER_ID, "parent"),
         //item_status,
-        VERSION(Field.VERSION, "version_number"),
+        //VERSION(Field.VERSION, "version_number"),
         //comment_count,
         OBJECT_PERMISSIONS(Field.OBJECT_PERMISSIONS, "permissions"),
         //tags,

@@ -82,13 +82,25 @@ public abstract class JDBC4StatementWrapper implements Statement {
      * @param con The associated connection
      */
     protected static void logSyntaxError(java.sql.SQLSyntaxErrorException syntaxError, Statement delegate, Connection con) {
+        logSyntaxError(syntaxError, delegate, null, con);
+    }
+
+    /**
+     * Logs the given syntax error (if appropriate)
+     *
+     * @param syntaxError The syntax error to log
+     * @param delegate The statement leading to the syntax error
+     * @param query The optional known query, which caused the read timeout (otherwise deduced from given statement)
+     * @param con The associated connection
+     */
+    protected static void logSyntaxError(java.sql.SQLSyntaxErrorException syntaxError, Statement delegate, String query, Connection con) {
         String sqlState = syntaxError.getSQLState();
         if ((null == sqlState) || (false == IGNORABLE_SQL_STATES.contains(sqlState))) {
             String catalog = getCatalogSafe(con);
             if (null == catalog) {
-                LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
+                LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, null == query ? "<unknown>" : query), syntaxError);
             } else {
-                LOG.error("Error in SQL syntax in the following statement on schema {}: {}", catalog, Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
+                LOG.error("Error in SQL syntax in the following statement on schema {}: {}", catalog, Databases.getSqlStatement(delegate, null == query ? "<unknown>" : query), syntaxError);
             }
         }
     }
@@ -101,12 +113,24 @@ public abstract class JDBC4StatementWrapper implements Statement {
      * @param con The associated connection
      */
     protected static void logReadTimeoutError(java.sql.SQLException sqlException, Statement delegate, Connection con) {
+        logReadTimeoutError(sqlException, delegate, null, con);
+    }
+
+    /**
+     * Logs the given read timeout error (if appropriate)
+     *
+     * @param sqlException The possible read timeout error to log
+     * @param delegate The statement that encountered the read timeout error
+     * @param query The optional known query, which caused the read timeout (otherwise deduced from given statement)
+     * @param con The associated connection
+     */
+    protected static void logReadTimeoutError(java.sql.SQLException sqlException, Statement delegate, String query, Connection con) {
         if (sqlException.getCause() instanceof java.net.SocketTimeoutException) {
             String catalog = getCatalogSafe(con);
             if (null == catalog) {
-                LOG.error("Read timeout encountered for the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"));
+                LOG.error("Read timeout encountered for the following statement: {}", Databases.getSqlStatement(delegate, null == query ? "<unknown>" : query));
             } else {
-                LOG.error("Read timeout encountered for the following statement on schema {}: {}", catalog, Databases.getSqlStatement(delegate, "<unknown>"));
+                LOG.error("Read timeout encountered for the following statement on schema {}: {}", catalog, Databases.getSqlStatement(delegate, null == query ? "<unknown>" : query));
             }
         }
     }
@@ -177,14 +201,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }
@@ -196,14 +220,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }
@@ -215,14 +239,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }
@@ -234,14 +258,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }
@@ -270,14 +294,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
         try {
             return new JDBC41ResultSetWrapper(delegate.executeQuery(sql), this);
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }
@@ -289,14 +313,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }
@@ -308,14 +332,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }
@@ -327,14 +351,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }
@@ -346,14 +370,14 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
         }
     }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange OAuth Provider Servlet Bundle
 Bundle-SymbolicName: com.openexchange.oauth.provider.impl
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.base,
@@ -55,6 +55,7 @@ Import-Package: com.google.common.base,
  com.openexchange.mail.dataobjects.compose,
  com.openexchange.mail.mime,
  com.openexchange.mail.mime.datasource,
+ com.openexchange.mail.service,
  com.openexchange.mail.transport,
  com.openexchange.mail.utils,
  com.openexchange.multiple,

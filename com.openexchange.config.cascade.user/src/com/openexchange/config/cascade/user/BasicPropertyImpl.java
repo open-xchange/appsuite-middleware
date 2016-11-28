@@ -51,7 +51,6 @@ package com.openexchange.config.cascade.user;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.context.ContextService;
@@ -83,13 +82,12 @@ final class BasicPropertyImpl implements BasicProperty {
      */
     BasicPropertyImpl(final String property, final int userId, final int contextId, final ServiceLookup services) throws OXException {
         super();
+        // Preload value
+        User user = services.getService(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(contextId));
+        value = user.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
+        // Assign rest
         this.contextId = contextId;
         this.userId = userId;
-        // Preload value
-        final User user = services.getService(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(contextId));
-        final Set<String> set = user.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
-        value = set == null || set.isEmpty() ? null : set.iterator().next();
-        // Assign rest
         this.property = property;
         this.services = services;
     }

@@ -6,14 +6,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-10-19 11:18-0200\n"
+"PO-Revision-Date: 2016-11-09 17:11-0200\n"
 "Last-Translator: Luiz Fernando Ranghetti <elchevive@opensuse.org>\n"
 "Language-Team: Portuguese <kde-i18n-pt_BR@kde.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.10\n"
+"X-Generator: Poedit 1.8.11\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -4057,7 +4057,7 @@ msgstr "O processo de autenticação OAuth foi cancelado."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "Could not get a valid response from the associated OAuth provider."
 msgstr ""
-"Não foi possível obter uma resposta válida do provedor OAuth associado."
+"Não foi possível obter uma resposta válida do fornecedor OAuth associado."
 
 #. There was a problem while creating a connection to the remote service.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
@@ -4104,6 +4104,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
 msgstr "Você precisa autorizar explicitamente '%1$s' para inscrever em  '%2$s'"
+
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr "O escopo %1$s não é suportado pelo fornecedor"
 
 #. *
 #. * New password too short.
@@ -8858,7 +8863,7 @@ msgid ""
 "longer accepted by provider. Please change them."
 msgstr ""
 "A credencial digitada ou informação de autenticação não funciona ou não é "
-"mais aceita pelo fornecedor. Altere-a."
+"mais aceita pelo provedor. Altere-a."
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62

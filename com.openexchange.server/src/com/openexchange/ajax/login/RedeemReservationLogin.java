@@ -53,11 +53,10 @@ import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 import static com.openexchange.tools.servlet.http.Tools.filter;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
@@ -93,7 +92,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class RedeemReservationLogin implements LoginRequestHandler {
 
-    private final List<Enhancer> enhancers = Collections.synchronizedList(new LinkedList<Enhancer>());
+    /** The registered instances of {@code Enhancer} */
+    final Queue<Enhancer> enhancers = new ConcurrentLinkedQueue<>();
 
     /**
      * Initializes a new {@link RedeemReservationLogin}.
@@ -113,12 +113,30 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         }
     }
 
-    public void addEnhancer(Enhancer enhancer) {
-        enhancers.add(enhancer);
+    /**
+     * Adds specified instance of {@code Enhancer}
+     *
+     * @param enhancer The instance to add
+     * @return <code>true</code> if successfully added; otherwise <code>false</code>
+     */
+    public boolean addEnhancer(Enhancer enhancer) {
+        if (null == enhancer) {
+            return false;
+        }
+        return enhancers.offer(enhancer);
     }
 
-    public void removeEnhancer(Enhancer enhancer) {
-        enhancers.remove(enhancer);
+    /**
+     * Removes specified instance of {@code Enhancer}
+     *
+     * @param enhancer The instance to remove
+     * @return <code>true</code> if removed; otherwise <code>false</code>
+     */
+    public boolean removeEnhancer(Enhancer enhancer) {
+        if (null == enhancer) {
+            return false;
+        }
+        return enhancers.remove(enhancer);
     }
 
     private void doSsoLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
@@ -178,9 +196,16 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         final Map<String, Object> props = optState == null ? new HashMap<String, Object>(4) : new HashMap<String, Object>(optState);
 
         // The login request
-        String login = user.getLoginInfo() + '@' + context.getLoginInfo()[0];
+        String login;
+        if (null == optState) {
+            login = generateDefaultLogin(user, context);
+        } else {
+            String tmp = optState.get("login");
+            login = Strings.isEmpty(tmp) ? generateDefaultLogin(user, context) : tmp;
+        }
+        String password = null == optState ? null : optState.get("password");
         String defaultClient = loginConfiguration.getDefaultClient();
-        final LoginRequestImpl loginRequest = LoginTools.parseLogin(httpRequest, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
+        final LoginRequestImpl loginRequest = LoginTools.parseLogin(httpRequest, login, password, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
 
         // Do the login
         return LoginPerformer.getInstance().doLogin(loginRequest, props, new LoginMethodClosure() {
@@ -193,6 +218,20 @@ public class RedeemReservationLogin implements LoginRequestHandler {
                 return authenticated;
             }
         });
+    }
+
+    /**
+     * Generates the default login string from specified user and context:
+     * <pre>
+     *  user.getLoginInfo() + "@" + context.getLoginInfo()[0]
+     * </pre>
+     *
+     * @param user The user
+     * @param context The context
+     * @return The generated default login string
+     */
+    private String generateDefaultLogin(User user, Context context) {
+        return user.getLoginInfo() + '@' + context.getLoginInfo()[0];
     }
 
     private static String generateRedirectURL(Session session, String uiWebPath, String shouldStore) {

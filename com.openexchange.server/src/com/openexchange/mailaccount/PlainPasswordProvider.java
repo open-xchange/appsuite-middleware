@@ -106,7 +106,7 @@ public class PlainPasswordProvider implements AutoCloseable {
     }
 
     private char[] getChars() {
-        ByteBuffer byteBuffer = plainPasswordRef.get();
+        ByteBuffer byteBuffer = null == plainPasswordRef ? null : plainPasswordRef.get();
         if (null == byteBuffer) {
             return clone(this.plainPassword);
         }

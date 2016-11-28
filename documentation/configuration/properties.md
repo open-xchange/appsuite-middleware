@@ -108,6 +108,16 @@ If you would like to add a reference to another property use the following appro
 
 ## Doveadm 
 
+| Key | <span style="font-weight:normal">com.openexchange.dovecot.doveadm.enabled</span> |
+|:----------------|:--------|
+| __Description__ | Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.3  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | doveadm.properties  |
+
+---
 | Key | <span style="font-weight:normal">com.openexchange.dovecot.doveadm.endpoints</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the URIs to the Dovecot DoveAdm REST interface end-points. <br>e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"<br><br>Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of total connections held in HTTP connection pool<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds<br><br>Full example :<br>com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections=100<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout=2500<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout=1500<br><br>The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.<br> |
@@ -374,6 +384,20 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
+## Share 
+
+| Key | <span style="font-weight:normal">com.openexchange.share.notification.usePersonalEmailAddress</span> |
+|:----------------|:--------|
+| __Description__ | Specifies whether the user's personal E-Mail address (true) or the configured no-reply address (false) is supposed to be used in case a user<br>without mail permission sends out a sharing invitation<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | share.properties  |
+
+---
+
+
 ## SSL 
 
 | Key | <span style="font-weight:normal">com.openexchange.net.ssl.default.truststore.enabled</span> |
@@ -452,7 +476,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.net.ssl.ciphersuites</span> |
 |:----------------|:--------|
-| __Description__ |         Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.<br> |
+| __Description__ |         Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.<br>        The named cipher suites refer to the identifiers of OpenJDK. Although an attempt is in place to find the matching ones on other vendors' JREs, it might be a good<br>        idea to name the desired cipher suites to use according to vendor-specific identifiers.<br> |
 | __Default__ | TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV  |
 | __Version__ | 7.8.3  |
 | __Reloadable__ | true  |

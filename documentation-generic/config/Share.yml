@@ -1,0 +1,13 @@
+array:
+  - data:
+      Key: com.openexchange.share.notification.usePersonalEmailAddress
+      Description: >
+Specifies whether the user's personal E-Mail address (true) or the configured no-reply address (false) is supposed to be used in case a user
+without mail permission sends out a sharing invitation
+      Default: false
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: 
+      File: share.properties
+  		

@@ -372,6 +372,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         gui_spam_filter_capabilities_enabled(OPT_GUI_LONG, false),
         add_config(OPT_CONFIG_LONG, false),
         remove_config(OPT_REMOVE_CONFIG_LONG, false),
+        primary_account_name(OPT_PRIMARY_ACCOUNT_NAME, false),
         ;
 
         private final String string;
@@ -582,8 +583,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_TITLE_LONG = "title";
     protected static final String OPT_POSITION_LONG = "position";
 
-
-
     protected static final String JAVA_UTIL_TIME_ZONE = "java.util.TimeZone";
     protected static final String PASSWORDMECH_CLASS = "com.openexchange.admin.rmi.dataobjects.User$PASSWORDMECH";
     protected static final String JAVA_UTIL_HASH_SET = "java.util.HashSet";
@@ -676,6 +675,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption removeConfigOption_NO_READ = null;
     protected static final String OPT_CONFIG_LONG = "config";
     protected static final String OPT_REMOVE_CONFIG_LONG = "remove-config";
+    protected static final String OPT_PRIMARY_ACCOUNT_NAME = "primary-account-name";
 
     // For right error output
     protected String username = null;
@@ -784,6 +784,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption foldertreeOption;
     private CLIOption titleOption;
     private CLIOption positionOption;
+    private CLIOption primaryAccountNameOption;
 
     protected HashMap<String, CSVConstants> constantsMap;
 
@@ -1699,6 +1700,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 user.setGui_spam_filter_enabled(Boolean.valueOf(stringToBool(value)));
             }
         });
+        setValue(nextLine, idarray, Constants.primary_account_name, new MethodStringClosure() {
+            @Override
+            public void callMethod(final String value) {
+                user.setPrimaryAccountName(value);
+            }
+        });
         final int m2 = idarray[Constants.MAILALIAS.getIndex()];
         if (m2 >= 0) {
             String mailAlias = nextLine[m2];
@@ -2483,7 +2490,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.mail_folder_confirmed_spam_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, "stringvalue", "Mail_folder_confirmed_spam_name", true, false, true);
         this.defaultsenderaddressOption = setLongOpt(parser, OPT_DEFAULTSENDERADDRESS_LONG, "stringvalue", "DefaultSenderAddress", true, false, true);
         this.foldertreeOption = setIntegerLongOpt(parser, OPT_FOLDERTREE_LONG, "intvalue", "FolderTree", true, false, true);
-
+        this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
     }
@@ -3365,6 +3372,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 // On the command line an empty string can be used to clear that specific attribute.
                 if ("".equals(value)) { value = null; }
                 usr.setPosition(value);
+            }
+        }
+        {
+            final String value = (String)parser.getOptionValue(primaryAccountNameOption);
+            if (null != value) {
+                usr.setPrimaryAccountName(value);
             }
         }
 

@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1406,6 +1406,14 @@ if [ "30" = "$VALUE" ]; then
     ox_set_property com.openexchange.connector.maxRequestParameters 1000 /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-3773
+sed -i '/^# Maximum number of open Files for the groupware$/{i\
+# Maximum number of open Files for the groupware. This value will only be\
+# applied when using sysv init. For systemd have a look at the drop-in configs\
+# at /etc/systemd/system/open-xchange.service.d
+d
+}' /opt/open-xchange/etc/ox-scriptconf.sh
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1447,6 +1455,12 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.4 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.3 release
+* Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second preview for 7.8.3 release
 * Fri Oct 14 2016 Marcus Klein <marcus.klein@open-xchange.com>

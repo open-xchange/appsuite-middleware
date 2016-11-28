@@ -50,16 +50,10 @@
 package com.openexchange.ajax.mail.actions;
 
 import java.io.IOException;
-
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 
 /**
  * {@link ExamineRequest}
@@ -70,12 +64,10 @@ import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 public class ExamineRequest extends AbstractMailRequest<ExamineResponse> {
 	
 	String folder;
-	
 	boolean failOnError;
 
 	public ExamineRequest(String folder, boolean failOnError) {
 		this.folder = folder;
-		
 		this.failOnError = failOnError;
 	}
 
