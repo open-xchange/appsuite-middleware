@@ -1414,6 +1414,12 @@ sed -i '/^# Maximum number of open Files for the groupware$/{i\
 d
 }' /opt/open-xchange/etc/ox-scriptconf.sh
 
+# SoftwareChange_Request-3784
+VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
+if [ "\"open-xchange-mailapp\"" = "$VALUE" ]; then
+    ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\", \"open-xchange-mobile-api-facade\"" /opt/open-xchange/etc/server.properties
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
