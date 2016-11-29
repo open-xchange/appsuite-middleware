@@ -96,6 +96,8 @@ import com.openexchange.timer.TimerService;
  */
 public class GrizzlyActivator extends HousekeepingActivator {
 
+    private OXSessionManager sessionManager;
+
     /**
      * Initializes a new {@link GrizzlyActivator}.
      */
@@ -136,7 +138,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws OXException {
+    protected synchronized void startBundle() throws OXException {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
         try {
             Services.setServiceLookup(this);
@@ -154,7 +156,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
 
             // Initialize HTTP session manager
-            OXSessionManager.initInstance(grizzlyConfig, getService(TimerService.class));
+            OXSessionManager sessionManager = new OXSessionManager(grizzlyConfig, getService(TimerService.class));
+            this.sessionManager = sessionManager;
 
             // Create, configure and start server
             final OXHttpServer grizzly = new OXHttpServer(grizzlyConfig);
@@ -172,7 +175,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             networkListener.setMaxFormPostSize(maxBodySize);
             networkListener.setMaxBufferedPostSize(maxBodySize);
             networkListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
-            networkListener.setSessionManager(OXSessionManager.getInstance());
+            networkListener.setSessionManager(sessionManager);
 
             // Set the transport
             {
@@ -215,7 +218,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 networkSslListener.setMaxFormPostSize(maxBodySize);
                 networkSslListener.setMaxBufferedPostSize(maxBodySize);
                 networkSslListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
-                networkSslListener.setSessionManager(OXSessionManager.getInstance());
+                networkSslListener.setSessionManager(sessionManager);
                 networkSslListener.setSSLEngineConfig(createSslConfiguration(grizzlyConfig));
                 networkSslListener.setSecure(true);
                 TCPNIOTransport configuredTcpNioTransportSsl = buildTcpNioTransport(configurationService);
@@ -273,11 +276,15 @@ public class GrizzlyActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class).info("Unregistering services.");
         super.stopBundle();
 
-        OXSessionManager.dropInstance();
+        OXSessionManager sessionManager = this.sessionManager;
+        if (null != sessionManager) {
+            this.sessionManager = null;
+            sessionManager.destroy();
+        }
 
         Services.setServiceLookup(null);
     }

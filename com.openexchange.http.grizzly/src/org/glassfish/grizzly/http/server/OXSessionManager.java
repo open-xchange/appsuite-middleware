@@ -76,42 +76,6 @@ public class OXSessionManager implements SessionManager {
 
     private static final int MIN_PERIOD_SECONDS = 5;
 
-    private static volatile OXSessionManager instance;
-
-    /**
-     * Initializes the instance using given arguments.
-     *
-     * @param grizzlyConfig The Grizzly configuration
-     * @param timerService The timer service
-     */
-    public static synchronized void initInstance(GrizzlyConfig grizzlyConfig, TimerService timerService) {
-        OXSessionManager tmp = instance;
-        if (null == tmp) {
-            tmp = new OXSessionManager(grizzlyConfig, timerService);
-            instance = tmp;
-        }
-    }
-
-    /**
-     * Drops the instance.
-     */
-    public static synchronized void dropInstance() {
-        OXSessionManager tmp = instance;
-        if (null != tmp) {
-            instance = null;
-            tmp.destroy();
-        }
-    }
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static OXSessionManager getInstance() {
-        return instance;
-    }
-
     // -----------------------------------------------------------------------------------------------
 
     /** The Grizzly configuration */
@@ -124,7 +88,7 @@ public class OXSessionManager implements SessionManager {
     /**
      * Initializes a new {@link OXSessionManager}.
      */
-    private OXSessionManager(GrizzlyConfig grizzlyConfig, TimerService timerService) {
+    public OXSessionManager(GrizzlyConfig grizzlyConfig, TimerService timerService) {
         super();
         this.grizzlyConfig = grizzlyConfig;
 
@@ -161,7 +125,7 @@ public class OXSessionManager implements SessionManager {
     /**
      * Disposes this instance
      */
-    private void destroy() {
+    public void destroy() {
         sessionExpirer.cancel();
         sessions.clear();
     }
