@@ -111,6 +111,7 @@ public class GrizzlyConfig {
         private boolean isSessionAutologin = false;
         private List<String> enabledCiphers = null;
         private long wsTimeoutMillis;
+        private int sessionExpiryCheckInterval = 60;
 
         /**
          * Initializes a new {@link GrizzlyConfig.Builder}.
@@ -135,7 +136,7 @@ public class GrizzlyConfig {
             this.isSslEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasSSLEnabled", false);
             this.keystorePath = configService.getProperty("com.openexchange.http.grizzly.keystorePath", "");
             this.keystorePassword = configService.getProperty("com.openexchange.http.grizzly.keystorePassword", "");
-
+            this.sessionExpiryCheckInterval = configService.getIntProperty("com.openexchange.http.grizzly.sessionExpiryCheckInterval", 60);
 
             // server properties
             this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
@@ -366,8 +367,13 @@ public class GrizzlyConfig {
             return this;
         }
 
+        public Builder setSessionExpiryCheckInterval(int sessionExpiryCheckInterval) {
+            this.sessionExpiryCheckInterval = sessionExpiryCheckInterval;
+            return this;
+        }
+
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
         }
     }
 
@@ -482,7 +488,10 @@ public class GrizzlyConfig {
     /** The Web Socket timeout in milliseconds */
     private final long wsTimeoutMillis;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
+    /** The interval in seconds when to check for expired/invalid HTTP sessions */
+    private final int sessionExpiryCheckInterval;
+
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
@@ -499,6 +508,7 @@ public class GrizzlyConfig {
         this.isSslEnabled = isSslEnabled;
         this.keystorePath = keystorePath;
         this.keystorePassword = keystorePassword;
+        this.sessionExpiryCheckInterval = sessionExpiryCheckInterval;
         this.cookieMaxAge = cookieMaxAge;
         this.cookieMaxInactivityInterval = cookieMaxInactivityInterval;
         this.isForceHttps = isForceHttps;
@@ -518,6 +528,15 @@ public class GrizzlyConfig {
         this.isSessionAutologin = isSessionAutologin;
         this.enabledCiphers = enabledCiphers;
         this.wsTimeoutMillis = wsTimeoutMillis;
+    }
+
+    /**
+     * Gets the interval in seconds when to check for expired/invalid HTTP sessions
+     *
+     * @return The interval in seconds when to check for expired/invalid HTTP sessions
+     */
+    public int getSessionExpiryCheckInterval() {
+        return sessionExpiryCheckInterval;
     }
 
     /**

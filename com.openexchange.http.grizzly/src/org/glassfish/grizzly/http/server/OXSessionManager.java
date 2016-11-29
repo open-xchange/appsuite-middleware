@@ -93,7 +93,10 @@ public class OXSessionManager implements SessionManager {
         this.grizzlyConfig = grizzlyConfig;
 
         int configuredSessionTimeout = grizzlyConfig.getCookieMaxInactivityInterval();
-        int periodSeconds = configuredSessionTimeout >> 2;
+        int periodSeconds = grizzlyConfig.getSessionExpiryCheckInterval();
+        if (periodSeconds > configuredSessionTimeout) {
+            periodSeconds = configuredSessionTimeout >> 2;
+        }
         if (periodSeconds < MIN_PERIOD_SECONDS) {
             periodSeconds = MIN_PERIOD_SECONDS;
         }
@@ -119,7 +122,7 @@ public class OXSessionManager implements SessionManager {
                     }
                 } while (iterator.hasNext());
             }
-        }, periodSeconds, periodSeconds, TimeUnit.SECONDS);
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
     /**
