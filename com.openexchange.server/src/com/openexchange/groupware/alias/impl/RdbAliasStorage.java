@@ -185,7 +185,7 @@ public class RdbAliasStorage implements UserAliasStorage {
                 ResultSet rs = null;
                 try {
                     int clen = Arrays.determineRealSize(length, i, IN_LIMIT);
-                    stmt = con.prepareStatement(getIN("SELECT id, alias FROM user_alias WHERE cid=? AND user IN (", clen));
+                    stmt = con.prepareStatement(getIN("SELECT user, alias FROM user_alias WHERE cid=? AND user IN (", clen));
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     for (int j = 0; j < clen; j++) {
