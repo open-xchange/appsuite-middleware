@@ -233,14 +233,6 @@ public abstract class AbstractResource implements WebdavResource {
     }
 
     protected WebdavProperty getFromMixin(final String namespace, final String name) throws WebdavProtocolException {
-
-        if (getUrl().toString().contains("ontac")) {
-            System.out.println();
-        }
-
-        System.out.println(this + " getFromMixin " + name);
-
-
         for (final PropertyMixin mixin : mixins) {
             WebdavProperty property;
             try {
