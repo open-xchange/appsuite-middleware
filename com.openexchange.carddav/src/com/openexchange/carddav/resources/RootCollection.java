@@ -224,7 +224,7 @@ public class RootCollection extends DAVRootCollection {
 
     private CardDAVCollection createFolderCollection(UserizedFolder folder) throws WebdavProtocolException {
         try {
-            return new CardDAVCollection(factory, constructPathForChildResource(folder.getID()), folder);
+            return factory.mixin(new CardDAVCollection(factory, constructPathForChildResource(folder.getID()), folder));
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
@@ -232,7 +232,7 @@ public class RootCollection extends DAVRootCollection {
 
     private CardDAVCollection createAggregatedCollection() throws WebdavProtocolException {
         try {
-            return new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+            return factory.mixin(new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
@@ -240,7 +240,7 @@ public class RootCollection extends DAVRootCollection {
 
     private CardDAVCollection createReducedAggregatedCollection() throws WebdavProtocolException {
         try {
-            return new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+            return factory.mixin(new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }

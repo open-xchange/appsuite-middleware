@@ -156,9 +156,9 @@ public class CalDAVRootCollection extends DAVRootCollection {
 
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
-            return new TaskCollection(factory, constructPathForChildResource(folder), folder);
+            return factory.mixin(new TaskCollection(factory, constructPathForChildResource(folder), folder));
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder);
+            return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder));
         } else {
             throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
         }
@@ -166,9 +166,9 @@ public class CalDAVRootCollection extends DAVRootCollection {
 
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder, int order) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
-            return new TaskCollection(factory, constructPathForChildResource(folder), folder, order);
+            return factory.mixin(new TaskCollection(factory, constructPathForChildResource(folder), folder, order));
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order);
+            return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order));
         } else {
             throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
         }

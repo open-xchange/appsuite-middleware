@@ -56,15 +56,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
+import com.openexchange.webdav.protocol.helpers.ResourcePropertyMixin;
 
 /**
  * {@link OSGiPropertyMixin}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OSGiPropertyMixin implements PropertyMixin {
+public class OSGiPropertyMixin implements PropertyMixin, ResourcePropertyMixin {
 
     private final NearRegistryServiceTracker<PropertyMixin> mixinTracker;
     private final NearRegistryServiceTracker<PropertyMixinFactory> factoryTracker;
@@ -87,12 +89,21 @@ public class OSGiPropertyMixin implements PropertyMixin {
 
     @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
+        return getAllProperties(null);
+    }
+
+    @Override
+    public List<WebdavProperty> getAllProperties(WebdavResource resource) throws OXException {
         List<WebdavProperty> allProperties = new ArrayList<WebdavProperty>();
 
         List<PropertyMixin> mixins = mixinTracker.getServiceList();
         if (mixins != null && !mixins.isEmpty()) {
             for (PropertyMixin mixin : mixins) {
-                allProperties.addAll(mixin.getAllProperties());
+                if (ResourcePropertyMixin.class.isInstance(mixin)) {
+                    allProperties.addAll(((ResourcePropertyMixin) mixin).getAllProperties(resource));
+                } else {
+                    allProperties.addAll(mixin.getAllProperties());
+                }
             }
         }
 
@@ -100,7 +111,11 @@ public class OSGiPropertyMixin implements PropertyMixin {
         if (factories != null && !factories.isEmpty()) {
             for (PropertyMixinFactory factory : factories) {
                 PropertyMixin mixin = factory.create(sessionHolder);
-                allProperties.addAll(mixin.getAllProperties());
+                if (ResourcePropertyMixin.class.isInstance(mixin)) {
+                    allProperties.addAll(((ResourcePropertyMixin) mixin).getAllProperties(resource));
+                } else {
+                    allProperties.addAll(mixin.getAllProperties());
+                }
             }
         }
 
@@ -109,10 +124,20 @@ public class OSGiPropertyMixin implements PropertyMixin {
 
     @Override
     public WebdavProperty getProperty(String namespace, String name) throws OXException {
+        return getProperty(null, namespace, name);
+    }
+
+    @Override
+    public WebdavProperty getProperty(WebdavResource resource, String namespace, String name) throws OXException {
         List<PropertyMixin> mixins = mixinTracker.getServiceList();
         if (mixins != null && !mixins.isEmpty()) {
             for (PropertyMixin mixin : mixins) {
-                WebdavProperty property = mixin.getProperty(namespace, name);
+                WebdavProperty property;
+                if (ResourcePropertyMixin.class.isInstance(mixin)) {
+                    property = ((ResourcePropertyMixin) mixin).getProperty(resource, namespace, name);
+                } else {
+                    property = mixin.getProperty(namespace, name);
+                }
                 if (property != null) {
                     return property;
                 }
@@ -123,7 +148,12 @@ public class OSGiPropertyMixin implements PropertyMixin {
         if (factories != null && !factories.isEmpty()) {
             for (PropertyMixinFactory factory : factories) {
                 PropertyMixin mixin = factory.create(sessionHolder);
-                WebdavProperty property = mixin.getProperty(namespace, name);
+                WebdavProperty property;
+                if (ResourcePropertyMixin.class.isInstance(mixin)) {
+                    property = ((ResourcePropertyMixin) mixin).getProperty(resource, namespace, name);
+                } else {
+                    property = mixin.getProperty(namespace, name);
+                }
                 if (property != null) {
                     return property;
                 }
