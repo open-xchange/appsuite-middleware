@@ -65,7 +65,7 @@ import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 /**
  * The {@link TCPNIOTransport}'s transport {@link Filter} implementation by Alexey Stashok.
  * <p>
- * Extended by the possiblity to set read/write timeouts.
+ * Extended by the possibility to set read/write timeouts.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -95,6 +95,13 @@ public final class OXTCPNIOTransportFilter extends BaseFilter {
     private final TCPNIOTransport transport;
     private final ConnectionPreparer connectionPreparer;
 
+    /**
+     * Initializes a new {@link OXTCPNIOTransportFilter}.
+     *
+     * @param transport The transport to delegate to
+     * @param readTimeoutMillis The read timeout in milliseconds to apply
+     * @param writeTimeoutMillis The write timeout in milliseconds to apply
+     */
     public OXTCPNIOTransportFilter(final TCPNIOTransport transport, final long readTimeoutMillis, final long writeTimeoutMillis) {
         super();
         this.transport = transport;

@@ -58,7 +58,6 @@ import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.utils.DataStructures;
 import org.slf4j.Logger;
 import com.openexchange.http.grizzly.GrizzlyConfig;
-import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.log.LogProperties;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -66,10 +65,10 @@ import com.openexchange.tools.servlet.http.Cookies;
 
 
 /**
- * {@link OXSessionManager}
+ * {@link OXSessionManager} - Open-Xchange HTTP session manager.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.8.4
  */
 public class OXSessionManager implements SessionManager {
 
@@ -77,7 +76,32 @@ public class OXSessionManager implements SessionManager {
 
     private static final int MIN_PERIOD_SECONDS = 5;
 
-    private static final OXSessionManager INSTANCE = new OXSessionManager();
+    private static volatile OXSessionManager instance;
+
+    /**
+     * Initializes the instance using given arguments.
+     *
+     * @param grizzlyConfig The Grizzly configuration
+     * @param timerService The timer service
+     */
+    public static synchronized void initInstance(GrizzlyConfig grizzlyConfig, TimerService timerService) {
+        OXSessionManager tmp = instance;
+        if (null == tmp) {
+            tmp = new OXSessionManager(grizzlyConfig, timerService);
+            instance = tmp;
+        }
+    }
+
+    /**
+     * Drops the instance.
+     */
+    public static synchronized void dropInstance() {
+        OXSessionManager tmp = instance;
+        if (null != tmp) {
+            instance = null;
+            tmp.destroy();
+        }
+    }
 
     /**
      * Gets the instance
@@ -85,13 +109,13 @@ public class OXSessionManager implements SessionManager {
      * @return The instance
      */
     public static OXSessionManager getInstance() {
-        return INSTANCE;
+        return instance;
     }
 
     // -----------------------------------------------------------------------------------------------
 
     /** The Grizzly configuration */
-    private final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
+    private final GrizzlyConfig grizzlyConfig;
 
     final ConcurrentMap<String, Session> sessions = DataStructures.getConcurrentMap();
     private final Random rnd = new Random();
@@ -100,9 +124,9 @@ public class OXSessionManager implements SessionManager {
     /**
      * Initializes a new {@link OXSessionManager}.
      */
-    private OXSessionManager() {
+    private OXSessionManager(GrizzlyConfig grizzlyConfig, TimerService timerService) {
         super();
-        TimerService timerService = Services.getService(TimerService.class);
+        this.grizzlyConfig = grizzlyConfig;
 
         int configuredSessionTimeout = grizzlyConfig.getCookieMaxInactivityInterval();
         int periodSeconds = configuredSessionTimeout >> 2;
@@ -137,7 +161,7 @@ public class OXSessionManager implements SessionManager {
     /**
      * Disposes this instance
      */
-    public void destroy() {
+    private void destroy() {
         sessionExpirer.cancel();
         sessions.clear();
     }

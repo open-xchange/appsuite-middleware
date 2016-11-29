@@ -110,8 +110,6 @@ public class OXHttpServer extends HttpServer {
 
     private static final Logger LOGGER = Grizzly.logger(HttpServer.class);
 
-    private static final GrizzlyConfig GRIZZLY_CONFIG = GrizzlyConfig.getInstance();
-
     /**
      * Flag indicating whether or not this server instance has been started.
      */
@@ -138,7 +136,19 @@ public class OXHttpServer extends HttpServer {
 
     volatile DelayedExecutor delayedExecutor;
 
+    private final GrizzlyConfig grizzlyConfig;
+
     // ---------------------------------------------------------- Public Methods
+
+    /**
+     * Initializes a new {@link OXHttpServer}.
+     *
+     * @param grizzlyConfig The Grizzly configuration
+     */
+    public OXHttpServer(GrizzlyConfig grizzlyConfig) {
+        super();
+        this.grizzlyConfig = grizzlyConfig;
+    }
 
     /**
      * <p>
@@ -709,11 +719,9 @@ public class OXHttpServer extends HttpServer {
             config.setMaxFormPostSize(listener.getMaxFormPostSize());
             config.setMaxBufferedPostSize(listener.getMaxBufferedPostSize());
 
-            config.setSessionTimeoutSeconds(GRIZZLY_CONFIG.getCookieMaxInactivityInterval());
+            config.setSessionTimeoutSeconds(grizzlyConfig.getCookieMaxInactivityInterval());
 
-            final HttpServerFilter httpServerFilter = new OXHttpServerFilter(
-                    config,
-                    delayedExecutor);
+            final HttpServerFilter httpServerFilter = new OXHttpServerFilter(grizzlyConfig, config, delayedExecutor);
             httpServerFilter.setHttpHandler(httpHandlerChain);
 
             httpServerFilter.getMonitoringConfig().addProbes(

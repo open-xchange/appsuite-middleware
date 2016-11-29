@@ -77,6 +77,7 @@ import org.glassfish.grizzly.monitoring.DefaultMonitoringConfig;
 import org.glassfish.grizzly.monitoring.MonitoringConfig;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.marker.OXThreadMarker;
 
 
@@ -151,11 +152,14 @@ public class OXHttpServerFilter extends HttpServerFilter {
 
             };
 
+    private final GrizzlyConfig grizzlyConfig;
+
 
     // ------------------------------------------------------------ Constructors
 
-    public OXHttpServerFilter(final ServerFilterConfiguration config, final DelayedExecutor delayedExecutor) {
+    public OXHttpServerFilter(GrizzlyConfig grizzlyConfig, final ServerFilterConfiguration config, final DelayedExecutor delayedExecutor) {
         super(config, delayedExecutor);
+        this.grizzlyConfig = grizzlyConfig;
         suspendedResponseQueue = Response.createDelayQueue(delayedExecutor);
         httpRequestInProgress = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.
                         createAttribute("HttpServerFilter.Request");
@@ -202,7 +206,7 @@ public class OXHttpServerFilter extends HttpServerFilter {
                     final HttpResponsePacket response = request.getResponse();
                     ServerFilterConfiguration config = getConfiguration();
 
-                    handlerRequest = OXRequest.create();
+                    handlerRequest = OXRequest.create(grizzlyConfig);
                     handlerRequest.parameters.setLimit(config.getMaxRequestParameters());
                     httpRequestInProgress.set(context, handlerRequest);
                     final Response handlerResponse = handlerRequest.getResponse();

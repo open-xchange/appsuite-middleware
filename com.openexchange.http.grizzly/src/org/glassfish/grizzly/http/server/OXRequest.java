@@ -74,40 +74,47 @@ public class OXRequest extends Request {
 
     private static final Logger LOGGER = Grizzly.logger(Request.class);
 
-    private static final GrizzlyConfig GRIZZLY_CONFIG = GrizzlyConfig.getInstance();
-
     private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX = ThreadCache.obtainIndex(Request.class, 16);
 
     /**
      * Creates a new request instance
      *
+     * @param The effective Grizzly configuration
      * @return The new request instance
      */
-    public static Request create() {
+    public static Request create(GrizzlyConfig grizzlyConfig) {
         final Request request = ThreadCache.takeFromCache(CACHE_IDX);
         if (request != null) {
             return request;
         }
 
-        return new OXRequest(new OXResponse());
+        return new OXRequest(grizzlyConfig, new OXResponse(grizzlyConfig));
     }
 
     // ----------------------------------------------------------------------------------------------
 
     private String xForwardProto = null;
     private int xForwardPort = 0;
-    private boolean isConsiderXForwards = GRIZZLY_CONFIG.isConsiderXForwards();
+    private boolean isConsiderXForwards;
     private boolean isForcedSecurity = false;
+    private final GrizzlyConfig grizzlyConfig;
 
-    protected OXRequest(Response response) {
+    /**
+     * Initializes a new {@link OXRequest}.
+     *
+     * @param response The associated response instance
+     */
+    protected OXRequest(GrizzlyConfig grizzlyConfig, Response response) {
         super(response);
+        this.grizzlyConfig = grizzlyConfig;
+        isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
     }
 
     @Override
     protected void recycle() {
         xForwardProto = null;
         xForwardPort = 0;
-        isConsiderXForwards = GRIZZLY_CONFIG.isConsiderXForwards();
+        isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
         isForcedSecurity = false;
         super.recycle();
     }
@@ -270,7 +277,7 @@ public class OXRequest extends Request {
                 charset = Charsets.lookupCharset(enc);
             } catch (Exception e) {
                 try {
-                    String defaultEncoding = GrizzlyConfig.getInstance().getDefaultEncoding();
+                    String defaultEncoding = grizzlyConfig.getDefaultEncoding();
                     charset = Charsets.lookupCharset(defaultEncoding);
                 } catch (Exception ex) {
                     charset = Charsets.UTF8_CHARSET;
@@ -278,7 +285,7 @@ public class OXRequest extends Request {
             }
         } else {
             try {
-                String defaultEncoding = GrizzlyConfig.getInstance().getDefaultEncoding();
+                String defaultEncoding = grizzlyConfig.getDefaultEncoding();
                 charset = Charsets.lookupCharset(defaultEncoding);
             } catch (Exception ex) {
                 charset = Charsets.UTF8_CHARSET;

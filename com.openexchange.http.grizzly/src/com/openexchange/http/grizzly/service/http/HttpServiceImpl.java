@@ -92,6 +92,7 @@
 package com.openexchange.http.grizzly.service.http;
 
 import java.util.Dictionary;
+import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -113,7 +114,8 @@ public class HttpServiceImpl implements HttpServiceExtension {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceImpl.class);
 
     private final Bundle bundle;
-    final OSGiMainHandler mainHttpHandler;
+    private final OSGiMainHandler mainHttpHandler;
+    private final List<Filter> initialFilters;
 
 
     // ------------------------------------------------------------ Constructors
@@ -122,11 +124,14 @@ public class HttpServiceImpl implements HttpServiceExtension {
     /**
      * {@link HttpService} constructor.
      *
+     * @param initialFilters The initial Servlet filters to apply
      * @param bundle {@link org.osgi.framework.Bundle} that got this instance of {@link org.osgi.service.http.HttpService}.
      */
-    public HttpServiceImpl(final Bundle bundle) {
+    public HttpServiceImpl(List<Filter> initialFilters, Bundle bundle) {
+        super();
+        this.initialFilters = initialFilters;
         this.bundle = bundle;
-        mainHttpHandler = new OSGiMainHandler(bundle);
+        mainHttpHandler = new OSGiMainHandler(initialFilters, bundle);
     }
 
 

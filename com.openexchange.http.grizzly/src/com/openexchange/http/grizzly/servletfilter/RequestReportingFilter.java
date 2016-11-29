@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly.servletfilter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -61,17 +60,17 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.grizzly.GrizzlyExceptionCode;
-import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.RequestTools;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 
 /**
  * {@link RequestReportingFilter} - Add incoming requests to the RequestWatcherService so we can track and interrupt long running requests.
+ * <p>
  * EAS Requests aren't tracked as they are long running requests simulating server side message pushing.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -79,30 +78,38 @@ import com.openexchange.log.LogProperties;
  */
 public class RequestReportingFilter implements Filter {
 
-    private final boolean isFilterEnabled;
-    private final String serviceName;
     private final Set<String> ignoredEasCommands;
     private final Set<String> ignoredUsmCommands;
+    private final RequestWatcherService requestWatcher;
 
     /**
      * Initializes a new {@link RequestReportingFilter}.
-     *
-     * @throws OXException If initialization fails
      */
-    public RequestReportingFilter() throws OXException {
-        final ConfigurationService configService = Services.optService(ConfigurationService.class);
-        if (configService == null) {
-            throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
+    public RequestReportingFilter(RequestWatcherService requestWatcher, ConfigurationService configService) {
+        super();
+        this.requestWatcher = requestWatcher;
+
+        {
+            List<String> ignoreEas = configService.getProperty("com.openexchange.requestwatcher.eas.ignore.cmd", "ping,sync", ",");
+            ImmutableSet.Builder<String> ignoredEasCommands = ImmutableSet.builder();
+            for (String command : ignoreEas) {
+                if (false == Strings.isEmpty(command)) {
+                    ignoredEasCommands.add(Strings.asciiLowerCase(command));
+                }
+            }
+            this.ignoredEasCommands = ignoredEasCommands.build();
         }
-        this.isFilterEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
 
-        List<String> ignoreEas = configService.getProperty("com.openexchange.requestwatcher.eas.ignore.cmd", "ping,sync", ",");
-        this.ignoredEasCommands = new CopyOnWriteArraySet<String>(ignoreEas);
-
-        List<String> ignoreUsm = configService.getProperty("com.openexchange.requestwatcher.usm.ignore.path", "/syncupdate", ",");
-        this.ignoredUsmCommands = new CopyOnWriteArraySet<String>(ignoreUsm);
-
-        serviceName = RequestWatcherService.class.getSimpleName();
+        {
+            List<String> ignoreUsm = configService.getProperty("com.openexchange.requestwatcher.usm.ignore.path", "/syncupdate", ",");
+            ImmutableSet.Builder<String> ignoredUsmCommands = ImmutableSet.builder();
+            for (String command : ignoreUsm) {
+                if (false == Strings.isEmpty(command)) {
+                    ignoredUsmCommands.add(Strings.asciiLowerCase(command));
+                }
+            }
+            this.ignoredUsmCommands = ignoredUsmCommands.build();
+        }
     }
 
     @Override
@@ -112,38 +119,25 @@ public class RequestReportingFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (isFilterEnabled) {
-            RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
-            if (requestWatcher == null) {
-                // Request watcher is enabled but service is missing, bundle not started etc ..
-                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
-                logger.debug("{} is not available. Unable to watch this request.", serviceName);
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        try {
+            if (isLongRunning(httpRequest) || isIgnored(httpRequest)) {
+                // Do not track long running requests
                 chain.doFilter(request, response);
             } else {
-                HttpServletRequest httpRequest = (HttpServletRequest) request;
+                HttpServletResponse httpResponse = (HttpServletResponse) response;
+                RequestRegistryEntry entry = requestWatcher.registerRequest(httpRequest, httpResponse, Thread.currentThread(), LogProperties.getPropertyMap());
                 try {
-                    if (isLongRunning(httpRequest) || isIgnored(httpRequest)) {
-                        // Do not track long running requests
-                        chain.doFilter(request, response);
-                    } else {
-                        HttpServletResponse httpResponse = (HttpServletResponse) response;
-                        RequestRegistryEntry entry = requestWatcher.registerRequest(httpRequest, httpResponse, Thread.currentThread(), LogProperties.getPropertyMap());
-                        try {
-                            // Proceed processing
-                            chain.doFilter(request, response);
-                        } finally {
-                            // Remove request from watcher after processing finished
-                            requestWatcher.unregisterRequest(entry);
-                        }
-                    }
-                } catch (Exception exception) {
-                    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
-                    logger.error("RequestWatcher is not able to check requests to be ignored and/or to register for watching. Move forward with filter chain processing.", exception);
+                    // Proceed processing
                     chain.doFilter(request, response);
+                } finally {
+                    // Remove request from watcher after processing finished
+                    requestWatcher.unregisterRequest(entry);
                 }
             }
-        } else {
-            // Filter is not enabled
+        } catch (Exception exception) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
+            logger.error("RequestWatcher is not able to check requests to be ignored and/or to register for watching. Move forward with filter chain processing.", exception);
             chain.doFilter(request, response);
         }
     }

@@ -91,6 +91,8 @@
 
 package com.openexchange.http.grizzly.service.http;
 
+import java.util.List;
+import javax.servlet.Filter;
 import org.glassfish.grizzly.http.server.OXHttpServer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
@@ -110,9 +112,12 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceFactory.class);
 
     private final OSGiMainHandler mainHttpHandler;
+    private final List<Filter> initialFilters;
 
-    public HttpServiceFactory(final OXHttpServer httpServer, final Bundle bundle) {
-        mainHttpHandler = new OSGiMainHandler(bundle);
+    public HttpServiceFactory(OXHttpServer httpServer, List<Filter> initialFilters, Bundle bundle) {
+        super();
+        this.initialFilters = initialFilters;
+        mainHttpHandler = new OSGiMainHandler(initialFilters, bundle);
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
     }
 
@@ -129,7 +134,7 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     public HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
         LOG.debug("Bundle: {}, is getting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
 
-        return new HttpServiceImpl(bundle);
+        return new HttpServiceImpl(initialFilters, bundle);
     }
 
     @Override

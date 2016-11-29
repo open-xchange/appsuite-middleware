@@ -71,19 +71,20 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 public class OXResponse extends Response {
 
     /** The Grizzly configuration */
-    private final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
+    private final GrizzlyConfig grizzlyConfig;
 
     /**
      * Initializes a new {@link OXResponse}.
      */
-    public OXResponse() {
+    public OXResponse(GrizzlyConfig grizzlyConfig) {
         super();
+        this.grizzlyConfig = grizzlyConfig;
     }
 
     @Override
     public void addCookie(Cookie cookie) {
         // Prevent unwanted access to cookies by only allowing access via HTTP methods
-        cookie.setHttpOnly(GrizzlyConfig.getInstance().isCookieHttpOnly());
+        cookie.setHttpOnly(grizzlyConfig.isCookieHttpOnly());
 
         super.addCookie(cookie);
     }

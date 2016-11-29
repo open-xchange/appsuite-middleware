@@ -51,8 +51,6 @@ package com.openexchange.http.grizzly.servletfilter;
 
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -93,50 +91,40 @@ public class WrappingFilter implements Filter {
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
-    IPTools remoteIPFinder;
-    private String forHeader;
-    private List<String> knownProxies;
-    private String protocolHeader;
-    private boolean isConsiderXForwards = false;
-    private String echoHeaderName;
-    private String contentSecurityPolicy = null;
+    private final String forHeader;
+    private final List<String> knownProxies;
+    private final String protocolHeader;
+    private final boolean isConsiderXForwards;
+    private final String echoHeaderName;
+    private final boolean considerEchoHeader;
+    private final String contentSecurityPolicy;
 
     /**
      * Initializes a new {@link WrappingFilter}.
      */
-    public WrappingFilter() {
+    public WrappingFilter(GrizzlyConfig config) {
         super();
-    }
-
-    @Override
-    public void init(FilterConfig filterConfig) {
-        final GrizzlyConfig config = GrizzlyConfig.getInstance();
         this.forHeader = config.getForHeader();
         this.knownProxies = config.getKnownProxies();
         this.protocolHeader = config.getProtocolHeader();
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeaderName = config.getEchoHeader();
+        this.considerEchoHeader = !Strings.isEmpty(echoHeaderName);
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
+    }
 
-        // register listener for changed known proxies configuration
-        config.addPropertyListener(new PropertyChangeListener() {
-
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                knownProxies = config.getKnownProxies();
-            }
-        });
+    @Override
+    public void init(FilterConfig filterConfig) {
+        // Nothing
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-        HttpServletRequestWrapper httpRequestWrapper = null;
-        HttpServletResponseWrapper httpResponseWrapper = null;
 
         // Inspect echoHeader and when present copy it to Response
-        String echoHeaderValue = httpRequest.getHeader(echoHeaderName);
+        String echoHeaderValue = considerEchoHeader ? httpRequest.getHeader(echoHeaderName) : null;
         if (echoHeaderValue != null) {
             echoHeaderValue = dropLinebreaks(echoHeaderValue);
             httpResponse.setHeader(echoHeaderName, echoHeaderValue);
@@ -144,7 +132,7 @@ public class WrappingFilter implements Filter {
 
         // Set Content-Security-Policy header
         {
-            final String contentSecurityPolicy = this.contentSecurityPolicy;
+            String contentSecurityPolicy = this.contentSecurityPolicy;
             if (!Strings.isEmpty(contentSecurityPolicy)) {
                 httpResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
                 httpResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
@@ -153,27 +141,10 @@ public class WrappingFilter implements Filter {
         }
 
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly
-        if (isConsiderXForwards) {
-            String forHeaderValue = httpRequest.getHeader(forHeader);
-            String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
-            String protocol = httpRequest.getHeader(protocolHeader);
+        HttpServletRequestWrapper httpRequestWrapper = buildHttpServletRequestWrapper(httpRequest);
 
-            if (!isValidProtocol(protocol)) {
-                LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
-                protocol = httpRequest.getScheme();
-            }
-
-            if (remoteIP.isEmpty()) {
-                LOG.debug("Could not detect a valid remote IP address in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
-                remoteIP = httpRequest.getRemoteAddr();
-            }
-
-            httpRequestWrapper = new HttpServletRequestWrapper(protocol, remoteIP, httpRequest.getServerPort(), httpRequest);
-
-        } else {
-            httpRequestWrapper = new HttpServletRequestWrapper(httpRequest);
-        }
-        httpResponseWrapper = new HttpServletResponseWrapper(httpResponse, echoHeaderName, echoHeaderValue);
+        // Build the HttpServletResponseWrapper instance
+        HttpServletResponseWrapper httpResponseWrapper = new HttpServletResponseWrapper(httpResponse, echoHeaderName, echoHeaderValue);
 
         // Set LogProperties
         {
@@ -211,6 +182,28 @@ public class WrappingFilter implements Filter {
         }
 
         chain.doFilter(httpRequestWrapper, httpResponseWrapper);
+    }
+
+    private HttpServletRequestWrapper buildHttpServletRequestWrapper(HttpServletRequest httpRequest) {
+        if (!isConsiderXForwards) {
+            return new HttpServletRequestWrapper(httpRequest);
+        }
+
+        String forHeaderValue = httpRequest.getHeader(forHeader);
+        String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
+        String protocol = httpRequest.getHeader(protocolHeader);
+
+        if (!isValidProtocol(protocol)) {
+            LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
+            protocol = httpRequest.getScheme();
+        }
+
+        if (remoteIP.isEmpty()) {
+            LOG.debug("Could not detect a valid remote IP address in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
+            remoteIP = httpRequest.getRemoteAddr();
+        }
+
+        return new HttpServletRequestWrapper(protocol, remoteIP, httpRequest.getServerPort(), httpRequest);
     }
 
     private boolean isValidProtocol(String protocolHeaderValue) {

@@ -97,9 +97,6 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.exception.ExceptionUtils;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
-import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 import com.openexchange.log.LogProperties;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -159,15 +156,20 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final Bundle bundle;
+    private final List<Filter> initialFilters;
     private final OSGiCleanMapper mapper;
     private final HttpStatus shutDownStatus;
     private final ErrorPageGenerator errorPageGenerator;
 
     /**
      * Constructor.
+     *
+     * @param initialFilters The initial Servlet filter to apply
      * @param bundle Bundle that we create if for, for local data reference.
      */
-    public OSGiMainHandler(Bundle bundle) {
+    public OSGiMainHandler(List<Filter> initialFilters, Bundle bundle) {
+        super();
+        this.initialFilters = initialFilters;
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
         this.shutDownStatus = HttpStatus.newHttpStatus(HttpStatus.SERVICE_UNAVAILABLE_503.getStatusCode(), "Server shutting down...");
@@ -307,7 +309,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             OSGiServletHandler servletHandler =
                     findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
-            addServletFilters(context);
+            addInitialServletFilters(context);
 
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate
@@ -329,15 +331,9 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * @param context The associated HTTP context
      * @throws ServletException
      */
-    private void addServletFilters(HttpContext context) throws ServletException {
-        // wrap it
-        registerFilter(new WrappingFilter(), "/*", null, context, null);
-
-        // watch it
-        try {
-            registerFilter(new RequestReportingFilter(), "/*", null, context, null);
-        } catch (OXException e) {
-            throw new ServletException(e);
+    private void addInitialServletFilters(HttpContext context) throws ServletException {
+        for (Filter initialFilter : initialFilters) {
+            registerFilter(initialFilter, "/*", null, context, null);
         }
     }
 
