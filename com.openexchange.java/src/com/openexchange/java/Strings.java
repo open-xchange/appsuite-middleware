@@ -1047,16 +1047,17 @@ public class Strings {
         if (Strings.isEmpty(separator)) {
             throw new IllegalArgumentException("Missing separator");
         }
-        ArrayList<String> trimmedSplits = new ArrayList<String>();
+
         try {
             String[] splits = input.split(separator);
+            ArrayList<String> trimmedSplits = new ArrayList<String>(splits.length);
             for (String string : splits) {
                 trimmedSplits.add(string.trim());
             }
+            return trimmedSplits;
         } catch (PatternSyntaxException pse) {
-            throw new IllegalArgumentException("Illegal pattern syntax");
+            throw new IllegalArgumentException("Illegal pattern syntax", pse);
         }
-        return trimmedSplits;
     }
 
     /**
@@ -1364,7 +1365,7 @@ public class Strings {
     }
 
     /**
-     * 
+     *
      * @param array
      * @return
      */
@@ -1380,7 +1381,7 @@ public class Strings {
     }
 
     /**
-     * 
+     *
      * @param array
      * @return
      */
