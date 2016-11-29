@@ -96,7 +96,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
     /**
      * Initializes a new {@link StartUpTracker}.
      */
-    public StartUpTracker(OXHttpServer grizzly, GrizzlyConfig grizzlyConfig, BundleContext context) {
+    public StartUpTracker(HttpServiceFactory httpServiceFactory, OXHttpServer grizzly, GrizzlyConfig grizzlyConfig, BundleContext context) {
         super();
         OSGiMainHandler.unmarkShutdownRequested();
         this.grizzly = grizzly;
@@ -114,7 +114,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
              * step when performing a shut-down of the server. Thus we ensure currently running requests are completed prior to dropping any
              * services; see com.openexchange.http.grizzly.service.http.OSGiCleanMapper.doUnregister(String, boolean).
              */
-            httpServiceRegistration = context.registerService(HttpService.class, new HttpServiceFactory(grizzly, context.getBundle()), null);
+            httpServiceRegistration = context.registerService(HttpService.class, httpServiceFactory, null);
             LOGGER.info("Registered OSGi HttpService for Grizzly server.");
         }
     }

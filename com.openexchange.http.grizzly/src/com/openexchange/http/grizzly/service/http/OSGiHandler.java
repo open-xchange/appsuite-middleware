@@ -108,7 +108,7 @@ public interface OSGiHandler {
      *
      * @return Processing lock.
      */
-    public ReentrantReadWriteLock.ReadLock getProcessingLock();
+    ReentrantReadWriteLock.ReadLock getProcessingLock();
 
     /**
      * Removal lock.
@@ -119,5 +119,5 @@ public interface OSGiHandler {
      * @see #getProcessingLock()
      * @see ReentrantReadWriteLock.WriteLock
      */
-    public ReentrantReadWriteLock.WriteLock getRemovalLock();
+    ReentrantReadWriteLock.WriteLock getRemovalLock();
 }

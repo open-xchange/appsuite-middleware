@@ -56,8 +56,9 @@ import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
-import org.glassfish.grizzly.http.server.OXServerConfiguration;
+import org.glassfish.grizzly.http.server.OXSessionManager;
 import org.glassfish.grizzly.http.server.OXTCPNIOTransportFilter;
+import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
@@ -73,9 +74,7 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.service.comet.CometContextService;
 import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
-import com.openexchange.http.grizzly.service.http.FilterProxy;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
-import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
@@ -129,11 +128,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
             trackService(DispatcherPrefixService.class);
 
             log.info("Starting Grizzly server.");
-            ServletFilterRegistration.initInstance();
-            {
-                ServiceTracker<Filter, FilterProxy> tracker = new ServiceTracker<Filter, FilterProxy>(context, Filter.class, new ServletFilterTracker(context));
-                rememberTracker(tracker);
-            }
+
+            OXSessionManager.getInstance();
 
             final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
             grizzlyConfig.start();
@@ -143,10 +139,9 @@ public class GrizzlyActivator extends HousekeepingActivator {
              */
             final OXHttpServer grizzly = new OXHttpServer();
 
-            OXServerConfiguration serverConfiguration = (OXServerConfiguration) grizzly.getServerConfiguration();
+            ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
             serverConfiguration.setAllowPayloadForUndefinedHttpMethods(true);
-            serverConfiguration.setWsTimeoutMillis(grizzlyConfig.getWsTimeoutMillis());
 
             final NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
 
@@ -157,6 +152,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             networkListener.setMaxFormPostSize(maxBodySize);
             networkListener.setMaxBufferedPostSize(maxBodySize);
             networkListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
+            networkListener.setSessionManager(OXSessionManager.getInstance());
 
             // Set the transport
             {
@@ -199,6 +195,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 networkSslListener.setMaxFormPostSize(maxBodySize);
                 networkSslListener.setMaxBufferedPostSize(maxBodySize);
                 networkSslListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
+                networkSslListener.setSessionManager(OXSessionManager.getInstance());
                 networkSslListener.setSSLEngineConfig(createSslConfiguration(grizzlyConfig));
                 networkSslListener.setSecure(true);
                 TCPNIOTransport configuredTcpNioTransportSsl = buildTcpNioTransport(getService(ConfigurationService.class));
@@ -218,12 +215,20 @@ public class GrizzlyActivator extends HousekeepingActivator {
             log.info("Prepared Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
             grizzly.start();
 
+            // The HttpService factory
+            HttpServiceFactory httpServiceFactory = new HttpServiceFactory(grizzly, context.getBundle());
+
+            {
+                ServiceTracker<Filter, Filter> tracker = new ServiceTracker<Filter, Filter>(context, Filter.class, new ServletFilterTracker(httpServiceFactory.getMainHttpHandler(), context));
+                rememberTracker(tracker);
+            }
+
             if (grizzlyConfig.isShutdownFast()) {
                 /*-
                  * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
                  * getService() will get its own instance of HttpServiceImpl
                  */
-                registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
+                registerService(HttpService.class.getName(), httpServiceFactory);
                 log.info("Registered OSGi HttpService for Grizzly server.");
             }
 
@@ -233,7 +238,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             track(ThreadControlService.class, new ThreadControlTracker(context));
 
             // Finally start listeners if server start-up is completed
-            track(SignalStartedService.class, new StartUpTracker(grizzly, grizzlyConfig, context));
+            track(SignalStartedService.class, new StartUpTracker(httpServiceFactory, grizzly, grizzlyConfig, context));
             openTrackers();
         } catch (Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
@@ -245,8 +250,9 @@ public class GrizzlyActivator extends HousekeepingActivator {
         org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class).info("Unregistering services.");
         super.stopBundle();
 
+        OXSessionManager.getInstance().destroy();
+
         Services.setServiceLookup(null);
-        ServletFilterRegistration.dropInstance();
     }
 
     /**

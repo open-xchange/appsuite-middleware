@@ -56,7 +56,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Filter;
 import org.glassfish.grizzly.*;
 import org.glassfish.grizzly.asyncqueue.MessageCloner;
-import org.glassfish.grizzly.asyncqueue.PushBackHandler;
 import org.glassfish.grizzly.asyncqueue.WritableMessage;
 import org.glassfish.grizzly.filterchain.*;
 import org.glassfish.grizzly.memory.Buffers;
@@ -149,13 +148,15 @@ public final class OXTCPNIOTransportFilter extends BaseFilter {
 
         final boolean isBlocking = ctx.getTransportContext().isBlocking();
 
+        final Buffer inBuffer = ctx.getMessage();
+
         final Buffer buffer;
         if (!isBlocking) {
-            buffer = transport.read(connection, null);
+            buffer = transport.read(connection, inBuffer);
         } else {
             GrizzlyFuture<ReadResult<Buffer, SocketAddress>> future =
                     transport.getTemporarySelectorIO().getReader().read(
-                    connection, null);
+                    connection, inBuffer);
             try {
                 ReadResult<Buffer, SocketAddress> result = future.get();
                 buffer = result.getMessage();
@@ -197,18 +198,16 @@ public final class OXTCPNIOTransportFilter extends BaseFilter {
 
             final CompletionHandler completionHandler = transportContext.getCompletionHandler();
             final MessageCloner cloner = transportContext.getMessageCloner();
-            final PushBackHandler pushBackHandler = transportContext.getPushBackHandler();
 
             transportContext.setCompletionHandler(null);
             transportContext.setMessageCloner(null);
-            transportContext.setPushBackHandler(null);
 
             if (!transportContext.isBlocking()) {
                 transport.getAsyncQueueIO().getWriter().write(connection, null,
-                        message, completionHandler, pushBackHandler, cloner);
+                        message, completionHandler, cloner);
             } else {
                 transport.getTemporarySelectorIO().getWriter().write(connection,
-                        null, message, completionHandler, pushBackHandler);
+                        null, message, completionHandler);
             }
         }
 

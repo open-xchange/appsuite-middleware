@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.glassfish.grizzly.CompletionHandler;
 import org.glassfish.grizzly.GrizzlyFuture;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.util.Parameters;
@@ -72,7 +73,6 @@ import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
 import com.openexchange.websockets.WebSocketSession;
 import com.openexchange.websockets.grizzly.SessionBoundWebSocket;
-import com.openexchange.websockets.grizzly.SessionInfo;
 
 /**
  * {@link DefaultSessionBoundWebSocket} - The Web Socket bound to a certain session.
@@ -90,8 +90,8 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
     /**
      * Initializes a new {@link DefaultSessionBoundWebSocket}.
      */
-    public DefaultSessionBoundWebSocket(SessionInfo sessionInfo, ConnectionId connectionId, String path, Parameters parameters, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
-        super(sessionInfo, connectionId, path, protocolHandler, request, listeners);
+    public DefaultSessionBoundWebSocket(ConnectionId connectionId, String path, Parameters parameters, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
+        super(connectionId, path, protocolHandler, request, listeners);
         this.parameters = parameters;
         webSocketSession = new WebSocketSessionImpl();
     }
@@ -318,6 +318,11 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
 
         @Override
         public void recycle(boolean recycleResult) {
+            // Nothing
+        }
+
+        @Override
+        public void addCompletionHandler(CompletionHandler<V> completionHandler) {
             // Nothing
         }
     }

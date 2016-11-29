@@ -101,6 +101,13 @@ public class WrappingFilter implements Filter {
     private String echoHeaderName;
     private String contentSecurityPolicy = null;
 
+    /**
+     * Initializes a new {@link WrappingFilter}.
+     */
+    public WrappingFilter() {
+        super();
+    }
+
     @Override
     public void init(FilterConfig filterConfig) {
         final GrizzlyConfig config = GrizzlyConfig.getInstance();

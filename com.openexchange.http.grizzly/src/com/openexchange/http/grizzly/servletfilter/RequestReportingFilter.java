@@ -81,9 +81,7 @@ public class RequestReportingFilter implements Filter {
 
     private final boolean isFilterEnabled;
     private final String serviceName;
-
     private final Set<String> ignoredEasCommands;
-
     private final Set<String> ignoredUsmCommands;
 
     /**

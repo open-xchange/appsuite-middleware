@@ -116,7 +116,9 @@ public class HttpContextImpl implements HttpContext {
     }
 
     @Override
-    public boolean handleSecurity(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+    public boolean handleSecurity(
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) throws IOException {
         // By default we allow all :)
         return true;
     }

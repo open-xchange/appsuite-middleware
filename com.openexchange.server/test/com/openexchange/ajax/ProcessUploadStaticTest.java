@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import junit.framework.TestCase;
@@ -103,6 +104,21 @@ public class ProcessUploadStaticTest extends TestCase {
                                 @Override
                                 public int read() throws IOException {
                                     return bin.read();
+                                }
+
+                                @Override
+                                public boolean isFinished() {
+                                    return bin.available() <= 0;
+                                }
+
+                                @Override
+                                public boolean isReady() {
+                                    return true;
+                                }
+
+                                @Override
+                                public void setReadListener(ReadListener readListener) {
+                                    // Ignore
                                 }
                             };
                             PowerMockito.when(mockRequest.getInputStream()).thenReturn(in);
@@ -163,6 +179,21 @@ public class ProcessUploadStaticTest extends TestCase {
                 @Override
                 public int read() throws IOException {
                     return bin.read();
+                }
+
+                @Override
+                public boolean isFinished() {
+                    return bin.available() <= 0;
+                }
+
+                @Override
+                public boolean isReady() {
+                    return true;
+                }
+
+                @Override
+                public void setReadListener(ReadListener readListener) {
+                    // Ignore
                 }
             };
             PowerMockito.when(mockRequest.getInputStream()).thenReturn(in);

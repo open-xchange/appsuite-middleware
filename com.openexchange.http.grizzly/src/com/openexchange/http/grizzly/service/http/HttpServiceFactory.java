@@ -116,6 +116,15 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
     }
 
+    /**
+     * Gets the main HTTP handler
+     *
+     * @return The main HTTP handler
+     */
+    public OSGiMainHandler getMainHttpHandler() {
+        return mainHttpHandler;
+    }
+
     @Override
     public HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
         LOG.debug("Bundle: {}, is getting HttpService with serviceRegistration: {}", bundle, serviceRegistration);

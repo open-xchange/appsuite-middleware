@@ -65,7 +65,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.http.grizzly.eas.EASCommandCodes.EASCommands;
+import com.openexchange.http.grizzly.eas.EASCommandCodes;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -193,11 +193,11 @@ public final class RequestTools {
              */
             byte[] bytes = getBase64Bytes(request.getQueryString());
             if (null != bytes && bytes.length > 2) {
-                Set<EASCommands> set = EASCommands.get(lIgnoredEasCommands);
+                Set<EASCommandCodes> set = EASCommandCodes.get(lIgnoredEasCommands);
 
                 byte code = bytes[1];
 
-                for (EASCommands command : set) {
+                for (EASCommandCodes command : set) {
                     if (command.getByte() == code) {
                         return true;
                     }

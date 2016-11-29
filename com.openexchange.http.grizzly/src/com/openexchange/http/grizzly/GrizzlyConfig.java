@@ -74,13 +74,20 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyConfig.class);
 
-    private static final GrizzlyConfig instance = new GrizzlyConfig();
+    private static final GrizzlyConfig INSTANCE = new GrizzlyConfig();
+
+    /**
+     * Gets the configuration instance.
+     *
+     * @return The instance
+     */
+    public static GrizzlyConfig getInstance() {
+        return INSTANCE;
+    }
+
+    // ----------------------------------------------------------------------------------------------------
 
     private final PropertyChangeSupport changes = new PropertyChangeSupport(this);
-
-    public static GrizzlyConfig getInstance() {
-        return instance;
-    }
 
     private final AtomicBoolean started = new AtomicBoolean();
 
@@ -297,7 +304,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The httpHost
      */
     public String getHttpHost() {
-        return instance.httpHost;
+        return INSTANCE.httpHost;
     }
 
     /**
@@ -306,7 +313,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The httpPort
      */
     public int getHttpPort() {
-        return instance.httpPort;
+        return INSTANCE.httpPort;
     }
 
     /**
@@ -315,7 +322,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The httpsPort
      */
     public int getHttpsPort() {
-        return instance.httpsPort;
+        return INSTANCE.httpsPort;
     }
 
     /**
@@ -324,7 +331,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The hasJMXEnabled
      */
     public boolean isJMXEnabled() {
-        return instance.isJMXEnabled;
+        return INSTANCE.isJMXEnabled;
     }
 
     /**
@@ -333,7 +340,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The hasWebsocketsEnabled
      */
     public boolean isWebsocketsEnabled() {
-        return instance.isWebsocketsEnabled;
+        return INSTANCE.isWebsocketsEnabled;
     }
 
     /**
@@ -342,7 +349,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The hasCometEnabled
      */
     public boolean isCometEnabled() {
-        return instance.isCometEnabled;
+        return INSTANCE.isCometEnabled;
     }
 
     /**
@@ -351,7 +358,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The maxRequestParameters
      */
     public int getMaxRequestParameters() {
-        return instance.maxRequestParameters;
+        return INSTANCE.maxRequestParameters;
     }
 
     /**
@@ -360,7 +367,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The backendRoute
      */
     public String getBackendRoute() {
-        return instance.backendRoute;
+        return INSTANCE.backendRoute;
     }
 
     /**
@@ -369,16 +376,16 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The cookieMaxAge
      */
     public int getCookieMaxAge() {
-        return instance.cookieMaxAge;
+        return INSTANCE.cookieMaxAge;
     }
 
     /**
-     * Gets the cookieMaxInactivityInterval
+     * Gets the cookieMaxInactivityInterval in seconds
      *
-     * @return The cookieMaxInactivityInterval
+     * @return The cookieMaxInactivityInterval in seconds
      */
     public int getCookieMaxInactivityInterval() {
-        return instance.cookieMaxInactivityInterval;
+        return INSTANCE.cookieMaxInactivityInterval;
     }
 
     /**
@@ -387,7 +394,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The isForceHttps
      */
     public boolean isForceHttps() {
-        return instance.isForceHttps;
+        return INSTANCE.isForceHttps;
     }
 
     /**
@@ -396,7 +403,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The isCookieHttpOnly
      */
     public boolean isCookieHttpOnly() {
-        return instance.isCookieHttpOnly;
+        return INSTANCE.isCookieHttpOnly;
     }
 
     /**
@@ -407,7 +414,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The <code>Content-Security-Policy</code> header; default value is <code>null</code>/empty string.
      */
     public String getContentSecurityPolicy() {
-        return instance.contentSecurityPolicy;
+        return INSTANCE.contentSecurityPolicy;
     }
 
     /**
@@ -416,7 +423,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The isSessionAutologin
      */
     public boolean isSessionAutologin() {
-        return instance.isSessionAutologin;
+        return INSTANCE.isSessionAutologin;
     }
 
 

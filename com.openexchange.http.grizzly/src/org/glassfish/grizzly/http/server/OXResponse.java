@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,13 +50,11 @@
 package org.glassfish.grizzly.http.server;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Locale;
 import org.glassfish.grizzly.http.Cookie;
-import org.glassfish.grizzly.http.server.io.NIOOutputStream;
 import org.glassfish.grizzly.http.util.CharChunk;
 import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.http.util.HttpRequestURIDecoder;
@@ -64,20 +62,16 @@ import org.glassfish.grizzly.http.util.HttpStatus;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 
 /**
- * {@link OXResponse} OX specific additions to the Grizzly Response like altered cookie handling and absolute/relative redirects respecting
- * forced https.
+ * {@link OXResponse} - Open-Xchange specific additions to the Grizzly Response like
+ * altered cookie handling and absolute/relative redirects respecting forced https.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
 public class OXResponse extends Response {
 
     /** The Grizzly configuration */
-    GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
-
-    /**
-     * The associated output stream.
-     */
-    private final StampingNIOOutputStreamImpl stampingOutputStream = new StampingNIOOutputStreamImpl();
+    private final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
 
     /**
      * Initializes a new {@link OXResponse}.
@@ -87,87 +81,15 @@ public class OXResponse extends Response {
     }
 
     @Override
-    protected void recycle() {
-        super.recycle();
-        stampingOutputStream.recycle();
-    }
-
-    /**
-     * Create and return a ServletOutputStream to write the content
-     * associated with this Response.
-     */
-    @Override
-    public NIOOutputStream createOutputStream() {
-        StampingNIOOutputStreamImpl tmp = stampingOutputStream;
-        tmp.setOutputBuffer(outputBuffer);
-        return tmp;
-    }
-
-    /**
-     * <p>
-     * Return the {@link NIOOutputStream} associated with this {@link Response}.
-     * This {@link NIOOutputStream} will write content in a non-blocking manner.
-     * </p>
-     *
-    * @throws IllegalStateException if {@link #getWriter()} or {@link #getNIOWriter()}
-     *  were already invoked.
-     */
-    @Override
-    public NIOOutputStream getNIOOutputStream() {
-        return getStampedOutputStream0(false);
-    }
-
-    /**
-     * <p>
-     * Return the {@link OutputStream} associated with this {@link Response}.
-     * This {@link OutputStream} will write content in a blocking manner.
-     * </p>
-     *
-     * @return the {@link NIOOutputStream} associated with this {@link Response}.
-     *
-     * @throws IllegalStateException if {@link #getWriter()} or {@link #getNIOWriter()}
-     *  were already invoked.
-     */
-    @Override
-    public OutputStream getOutputStream() {
-        return getStampedOutputStream0(true);
-    }
-
-    private NIOOutputStream getStampedOutputStream0(final boolean blocking) {
-        if (usingWriter) {
-            throw new IllegalStateException("Illegal attempt to call getOutputStream() after getWriter() has already been called.");
-        }
-
-        usingOutputStream = true;
-        outputBuffer.setAsyncEnabled(!blocking);
-        stampingOutputStream.setOutputBuffer(outputBuffer);
-        return stampingOutputStream;
-
-    }
-
-    /**
-     * Do OX specific cookie handling before adding the cookie via {@link Response#addCookie(Cookie)}.
-     *
-     * @param cookie The cookie to configure and add to the Response
-     */
-    @Override
     public void addCookie(Cookie cookie) {
-        // Prevent unwanted access to cookies by only allowing access via http methods
+        // Prevent unwanted access to cookies by only allowing access via HTTP methods
         cookie.setHttpOnly(GrizzlyConfig.getInstance().isCookieHttpOnly());
 
         super.addCookie(cookie);
     }
 
-    /**
-     * Send a temporary redirect to the specified redirect location URL.
-     *
-     * @param location Location URL to redirect to
-     * @exception IllegalStateException if this response has already been committed
-     * @exception java.io.IOException if an input/output error occurs
-     */
     @Override
     public void sendRedirect(String location) throws IOException {
-
         if (isCommitted()) {
             throw new IllegalStateException("Illegal attempt to redirect the response as the response has been committed.");
         }
@@ -181,6 +103,7 @@ public class OXResponse extends Response {
             if (grizzlyConfig.isAbsoluteRedirect()) {
                 redirectLocation = toAbsolute(location, true);
             }
+
             // END RIMOD 4642650
             setStatus(HttpStatus.FOUND_302);
             setHeader(Header.Location, redirectLocation);
@@ -208,42 +131,29 @@ public class OXResponse extends Response {
                 getWriter().flush();
             } catch (IllegalStateException ise1) {
                 try {
-                    getOutputStream().write(sb.toString().getBytes());
+                   getOutputStream().write(sb.toString().getBytes(
+                           org.glassfish.grizzly.http.util.Constants.DEFAULT_HTTP_CHARSET));
                 } catch (IllegalStateException ise2) {
-                    // ignore; the RFC says "SHOULD" so it is acceptable
-                    // to omit the body in case of an error
+                   // ignore; the RFC says "SHOULD" so it is acceptable
+                   // to omit the body in case of an error
                 }
             }
         } catch (IllegalArgumentException e) {
-            setStatus(HttpStatus.NOT_FOUND_404);
+            sendError(404);
         }
 
         finish();
-        // Cause the response to be finished (from the application perspective)
-        // setSuspended(true);
-
     }
 
-    /**
-     * Convert (if necessary) and return the absolute URL that represents the resource referenced by this possibly relative URL. If this URL
-     * is already absolute, return it unchanged.
-     *
-     * @param location URL to be (possibly) converted and then returned
-     * @exception IllegalArgumentException if a MalformedURLException is thrown when converting the relative URL to an absolute one
-     */
-    @SuppressWarnings({ "unchecked" })
     @Override
     protected String toAbsolute(String location, boolean normalize) {
-
         if (location == null) {
-            return (location);
+            return location;
         }
 
-        boolean leadingSlash = location.startsWith("/");
+        final boolean leadingSlash = location.startsWith("/");
 
-        if (leadingSlash || (!leadingSlash && (location.indexOf("://") == -1))) {
-
-            redirectURLCC.recycle();
+        if (leadingSlash || (!location.contains("://"))) {
 
             String scheme = request.getScheme();
 
@@ -253,33 +163,36 @@ public class OXResponse extends Response {
                 scheme = "https";
                 port = grizzlyConfig.getHttpsProtoPort();
             }
-            CharChunk cc = redirectURLCC.getCharChunk();
+
+            redirectURLCC.recycle();
+            final CharChunk cc = redirectURLCC;
+
             try {
                 cc.append(scheme, 0, scheme.length());
                 cc.append("://", 0, 3);
                 cc.append(name, 0, name.length());
-                if ((scheme.equals("http") && port != 80) || (scheme.equals("https") && port != 443)) {
+                if ((scheme.equals("http") && port != 80)
+                        || (scheme.equals("https") && port != 443)) {
                     cc.append(':');
-                    String portS = Integer.toString(port);
+                    String portS = port + "";
                     cc.append(portS, 0, portS.length());
                 }
                 if (!leadingSlash) {
                     String relativePath = request.getDecodedRequestURI();
-                    int pos = relativePath.lastIndexOf('/');
+                    final int pos = relativePath.lastIndexOf('/');
                     relativePath = relativePath.substring(0, pos);
 
-                    String encodedURI;
-                    final String frelativePath = relativePath;
-
+                    final String encodedURI;
                     if (System.getSecurityManager() != null) {
                         try {
-                            encodedURI = AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
-
-                                @Override
-                                public String run() throws IOException {
-                                    return urlEncoder.encodeURL(frelativePath);
-                                }
-                            });
+                            final String frelativePath = relativePath;
+                            encodedURI = AccessController.doPrivileged(
+                                    new PrivilegedExceptionAction<String>() {
+                                        @Override
+                                        public String run() throws IOException {
+                                            return urlEncoder.encodeURL(frelativePath);
+                                        }
+                                    });
                         } catch (PrivilegedActionException pae) {
                             throw new IllegalArgumentException(location, pae.getCause());
                         }
@@ -295,18 +208,15 @@ public class OXResponse extends Response {
                 throw new IllegalArgumentException(location, e);
             }
 
-            if (normalize) {
-                HttpRequestURIDecoder.normalize(redirectURLCC);
+            if (normalize){
+                HttpRequestURIDecoder.normalizeChars(cc);
             }
 
             return cc.toString();
 
         } else {
-
-            return (location);
-
+            return location;
         }
-
     }
 
 }

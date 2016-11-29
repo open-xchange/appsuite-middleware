@@ -61,8 +61,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
@@ -252,6 +254,16 @@ public class OAuthDispatcherServletTest {
             public void write(int b) throws IOException {
                 responseStream.write(b);
             }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public void setWriteListener(WriteListener writeListener) {
+                // Ignore
+            }
         });
     }
 
@@ -266,6 +278,21 @@ public class OAuthDispatcherServletTest {
             @Override
             public int read() throws IOException {
                 return -1;
+            }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public boolean isFinished() {
+                return true;
+            }
+
+            @Override
+            public void setReadListener(ReadListener readListener) {
+                // Ignore
             }
         });
         if (accessToken != null) {

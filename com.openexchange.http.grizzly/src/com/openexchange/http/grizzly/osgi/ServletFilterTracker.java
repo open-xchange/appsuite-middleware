@@ -58,9 +58,8 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import com.openexchange.http.grizzly.service.http.FilterProxy;
+import com.openexchange.http.grizzly.service.http.HttpContextImpl;
 import com.openexchange.http.grizzly.service.http.OSGiMainHandler;
-import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
 
 /**
  * {@link ServletFilterTracker} - Tracks services with the type {@link Filter} and updates the central {@link OSGiMainHandler}
@@ -138,7 +137,7 @@ import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.6.1
  */
-public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, FilterProxy> {
+public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Filter> {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletFilterTracker.class);
 
@@ -159,40 +158,47 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
     private final BundleContext context;
+    private final OSGiMainHandler mainHttpHandler;
 
     /**
      * Initializes a new {@link ServletFilterTracker}.
      */
-    public ServletFilterTracker(BundleContext context) {
+    public ServletFilterTracker(OSGiMainHandler mainHttpHandler, BundleContext context) {
         super();
+        this.mainHttpHandler = mainHttpHandler;
         this.context = context;
     }
 
     @Override
-    public FilterProxy addingService(ServiceReference<Filter> reference) {
+    public Filter addingService(ServiceReference<Filter> reference) {
         try {
             Filter filter = context.getService(reference);
             String[] paths = getPathsFrom(reference);
 
-            FilterProxy proxy = new FilterProxy(filter, paths, getRanking(reference));
-            ServletFilterRegistration.getInstance().put(proxy);
+            for (String path : paths) {
+                mainHttpHandler.registerFilter(filter, path, null, new HttpContextImpl(context.getBundle()), null);
+            }
 
-            return proxy;
+            return filter;
         } catch (InvalidFilterPathsException e) {
             LOG.error("Not adding servlet filter because of malformed path.info", e);
+            context.ungetService(reference);
+            return null;
+        } catch (Exception e) {
+            LOG.error("Failed to register filter", e);
             context.ungetService(reference);
             return null;
         }
     }
 
     @Override
-    public void modifiedService(ServiceReference<Filter> reference, FilterProxy proxy) {
+    public void modifiedService(ServiceReference<Filter> reference, Filter filter) {
         // Nothing
     }
 
     @Override
-    public void removedService(ServiceReference<Filter> reference, FilterProxy proxy) {
-        ServletFilterRegistration.getInstance().remove(proxy);
+    public void removedService(ServiceReference<Filter> reference, Filter filter) {
+        mainHttpHandler.unregisterFilter(filter);
         context.ungetService(reference);
     }
 
