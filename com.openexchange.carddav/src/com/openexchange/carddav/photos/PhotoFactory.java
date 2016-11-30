@@ -103,7 +103,7 @@ public class PhotoFactory extends DAVFactory {
     }
 
     @Override
-    protected String getURLPrefix() {
+    public String getURLPrefix() {
         return "/photos/";
     }
 
