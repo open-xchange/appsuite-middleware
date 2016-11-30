@@ -79,6 +79,8 @@ ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 6
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Nov 25 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 prepare for 7.8.4 release
 * Thu Nov 24 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
