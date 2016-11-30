@@ -106,6 +106,140 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
+## CalDAV 
+
+| Key | <span style="font-weight:normal">com.openexchange.caldav.push.apsd.enabled</span> |
+|:----------------|:--------|
+| __Description__ |         Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __File__ | caldav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.caldav.push.apsd.bundleId</span> |
+|:----------------|:--------|
+| __Description__ |         Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.calendar.XServer.934668ca-125e-4246-afee-8cf2df37aab8". <br>        Required if com.openexchange.caldav.push.apsd.enabled is "true".<br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled  |
+| __File__ | caldav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.caldav.push.apsd.keystore</span> |
+|:----------------|:--------|
+| __Description__ |         Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.calendar.p12". <br>        Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled  |
+| __File__ | caldav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.caldav.push.apsd.password</span> |
+|:----------------|:--------|
+| __Description__ |         Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>        Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled  |
+| __File__ | caldav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.caldav.push.apsd.production</span> |
+|:----------------|:--------|
+| __Description__ |         Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. <br> |
+| __Default__ | true  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __File__ | caldav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.caldav.push.apsd.refreshInterval</span> |
+|:----------------|:--------|
+| __Description__ |         Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. <br> |
+| __Default__ | 172800  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __File__ | caldav.properties  |
+
+---
+
+
+## CardDAV 
+
+| Key | <span style="font-weight:normal">com.openexchange.carddav.push.apsd.enabled</span> |
+|:----------------|:--------|
+| __Description__ |         Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Contacts client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __File__ | carddav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.carddav.push.apsd.bundleId</span> |
+|:----------------|:--------|
+| __Description__ |         Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.contact.XServer.a5243d3e-b635-11e6-80f5-76304dec7eb7". <br>        Required if com.openexchange.carddav.push.apsd.enabled is "true".<br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled  |
+| __File__ | carddav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.carddav.push.apsd.keystore</span> |
+|:----------------|:--------|
+| __Description__ |         Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.contact.p12". <br>        Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled  |
+| __File__ | carddav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.carddav.push.apsd.password</span> |
+|:----------------|:--------|
+| __Description__ |         Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>        Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled  |
+| __File__ | carddav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.carddav.push.apsd.production</span> |
+|:----------------|:--------|
+| __Description__ |         Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. <br> |
+| __Default__ | true  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __File__ | carddav.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.carddav.push.apsd.refreshInterval</span> |
+|:----------------|:--------|
+| __Description__ |         Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. <br> |
+| __Default__ | 172800  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | false  |
+| __File__ | carddav.properties  |
+
+---
+
+
 ## Doveadm 
 
 | Key | <span style="font-weight:normal">com.openexchange.dovecot.doveadm.enabled</span> |
