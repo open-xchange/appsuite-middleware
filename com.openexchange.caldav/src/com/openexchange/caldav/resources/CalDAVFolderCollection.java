@@ -92,6 +92,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.login.Interface;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -146,6 +147,11 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
+    }
+
+    @Override
+    public String getPushTopic() {
+        return null != folder ? "ox:" + Interface.CALDAV.toString().toLowerCase() + ":" + folder.getID() : null;
     }
 
     protected abstract boolean isSupported(T object) throws OXException;

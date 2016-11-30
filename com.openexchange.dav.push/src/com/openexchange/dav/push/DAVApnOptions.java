@@ -47,33 +47,43 @@
  *
  */
 
-package com.openexchange.dav.mixins;
+package com.openexchange.dav.push;
 
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import com.openexchange.pns.transport.apn.ApnOptions;
 
 /**
- * {@link AddressbookHomeSet}
- *
- * Identifies the URL of any WebDAV collections that contain address book collections owned by the associated principal resource.
+ * {@link DAVApnOptions}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.4
  */
-public class AddressbookHomeSet extends SingleXMLPropertyMixin {
+public class DAVApnOptions extends ApnOptions {
 
-    /** The static path to a user's addressbook home */
-    public static final WebdavPath ADDRESSBOOK_HOME = new WebdavPath("carddav");
+    private final String bundleId;
+    private final int refreshInterval;
 
-    /**
-     * Initializes a new {@link AddressbookHomeSet}.
-     */
-    public AddressbookHomeSet() {
-        super("urn:ietf:params:xml:ns:carddav", "addressbook-home-set");
+    public DAVApnOptions(String bundleId, Object keystore, String password, boolean production, int refreshInterval) {
+        super(keystore, password, production);
+        this.bundleId = bundleId;
+        this.refreshInterval = refreshInterval;
     }
 
-    @Override
-    protected String getValue() {
-        return "<D:href>" + ADDRESSBOOK_HOME + "/</D:href>";
+    /**
+     * Gets the bundleId
+     *
+     * @return The bundleId
+     */
+    public String getBundleId() {
+        return bundleId;
+    }
+
+    /**
+     * Gets the refreshInterval
+     *
+     * @return The refreshInterval
+     */
+    public int getRefreshInterval() {
+        return refreshInterval;
     }
 
 }

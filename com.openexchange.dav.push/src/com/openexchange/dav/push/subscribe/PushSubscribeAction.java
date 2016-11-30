@@ -47,33 +47,59 @@
  *
  */
 
-package com.openexchange.dav.mixins;
+package com.openexchange.dav.push.subscribe;
 
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import java.util.Collections;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.actions.POSTAction;
+import com.openexchange.dav.push.DAVPushUtility;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.webdav.action.WebdavRequest;
+import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
- * {@link AddressbookHomeSet}
- *
- * Identifies the URL of any WebDAV collections that contain address book collections owned by the associated principal resource.
+ * {@link PushSubscribeAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.4
  */
-public class AddressbookHomeSet extends SingleXMLPropertyMixin {
+public class PushSubscribeAction extends POSTAction {
 
-    /** The static path to a user's addressbook home */
-    public static final WebdavPath ADDRESSBOOK_HOME = new WebdavPath("carddav");
+    private final PushSubscribeFactory factory;
 
     /**
-     * Initializes a new {@link AddressbookHomeSet}.
+     * Initializes a new {@link PushSubscribeAction}.
+     *
+     * @param factory The factory
      */
-    public AddressbookHomeSet() {
-        super("urn:ietf:params:xml:ns:carddav", "addressbook-home-set");
-    }
+    public PushSubscribeAction(PushSubscribeFactory factory) {
+        super(factory.getProtocol());
+        this.factory = factory;
+	}
 
-    @Override
-    protected String getValue() {
-        return "<D:href>" + ADDRESSBOOK_HOME + "/</D:href>";
-    }
-
+	@Override
+	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        if (Strings.isNotEmpty(request.getParameter("token")) && Strings.isNotEmpty(request.getParameter("key"))) {
+            /*
+             * handle push subscribe action
+             */
+            PushSubscribeResource resource = requireResource(request, PushSubscribeResource.class);
+            String topic;
+            try {
+                topic = DAVPushUtility.extractTopic(request.getParameter("key"), factory.getContext().getContextId(), factory.getUser().getId());
+            } catch (OXException e) {
+                throw DAVProtocol.protocolException(request.getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+            }
+            resource.subscribe(request.getParameter("token"), Collections.singletonList(topic));
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+	    /*
+	     * bad request, otherwise
+	     */
+	    throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+	}
 }

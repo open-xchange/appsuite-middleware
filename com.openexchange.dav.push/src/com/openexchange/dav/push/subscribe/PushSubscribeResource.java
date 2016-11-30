@@ -47,67 +47,68 @@
  *
  */
 
-package com.openexchange.dav.principals;
+package com.openexchange.dav.push.subscribe;
 
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.resources.DAVResource;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link PrincipalFactory}
+ * {@link PushSubscribeResource}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public class PrincipalFactory extends DAVFactory {
+public class PushSubscribeResource extends DAVResource {
+
+    private final String transportId;
+    private final String clientId;
 
     /**
-     * Initializes a new {@link PrincipalFactory}.
+     * Initializes a new {@link PushSubscribeResource}.
      *
-     * @param protocol The protocol
-     * @param services A service lookup reference
-     * @param sessionHolder The session holder to use
+     * @param factory The factory
+     * @param transportId The transport identifier to use
+     * @param clientId The client identifier to use
+     * @param url The WebDAV path of the resource
      */
-    public PrincipalFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
-        super(protocol, services, sessionHolder);
+    public PushSubscribeResource(DAVFactory factory, String transportId, String clientId, WebdavPath url) {
+        super(factory, url);
+        this.transportId = transportId;
+        this.clientId = clientId;
+    }
+
+    public void subscribe(String token, List<String> topics) throws WebdavProtocolException {
+        PushSubscriptionRegistry subscriptionRegistry = factory.getOptionalService(PushSubscriptionRegistry.class);
+        if (null == subscriptionRegistry) {
+            DAVProtocol.protocolException(getUrl(), ServiceExceptionCode.absentService(PushSubscriptionRegistry.class), HttpServletResponse.SC_BAD_REQUEST);
+        }
+        DefaultPushSubscription subscription = DefaultPushSubscription.builder()
+            .client(clientId)
+            .topics(topics)
+            .contextId(factory.getContext().getContextId())
+            .token(token)
+            .transportId(transportId)
+            .userId(factory.getUser().getId())
+        .build();
+        try {
+            subscriptionRegistry.registerSubscription(subscription);
+        } catch (OXException e) {
+            DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+        }
     }
 
     @Override
-    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
-        WebdavPath path = sanitize(url);
-        if (isRoot(path)) {
-            return mixin(new RootPrincipalCollection(this));
-        }
-        if (1 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.name()));
-        }
-        if (2 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.parent().name()).getChild(url.name()));
-        }
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    @Override
-    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
-        WebdavPath path = sanitize(url);
-        if (isRoot(path)) {
-            return mixin(new RootPrincipalCollection(this));
-        }
-        if (1 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.name()));
-        }
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    @Override
-    public String getURLPrefix() {
-        return "/principals/";
+    public String getDisplayName() throws WebdavProtocolException {
+        return url.name();
     }
 
 }

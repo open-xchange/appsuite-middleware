@@ -47,33 +47,72 @@
  *
  */
 
-package com.openexchange.dav.mixins;
+package com.openexchange.webdav.protocol.helpers;
 
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link AddressbookHomeSet}
- *
- * Identifies the URL of any WebDAV collections that contain address book collections owned by the associated principal resource.
+ * {@link SingleResourcePropertyMixin}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.4
  */
-public class AddressbookHomeSet extends SingleXMLPropertyMixin {
+public abstract class SingleResourcePropertyMixin extends SinglePropertyMixin implements ResourcePropertyMixin {
 
-    /** The static path to a user's addressbook home */
-    public static final WebdavPath ADDRESSBOOK_HOME = new WebdavPath("carddav");
+    protected final String namespace;
+    protected final String name;
 
     /**
-     * Initializes a new {@link AddressbookHomeSet}.
+     * Initializes a new {@link SingleResourcePropertyMixin}.
+     *
+     * @param namespace The namespace of the property
+     * @param name The name of the property
      */
-    public AddressbookHomeSet() {
-        super("urn:ietf:params:xml:ns:carddav", "addressbook-home-set");
+    public SingleResourcePropertyMixin(String namespace, String name) {
+        super(namespace, name);
+        this.namespace = namespace;
+        this.name = name;
     }
 
     @Override
-    protected String getValue() {
-        return "<D:href>" + ADDRESSBOOK_HOME + "/</D:href>";
+    public List<WebdavProperty> getAllProperties(WebdavResource resource) throws OXException {
+        return super.getAllProperties();
     }
+
+    @Override
+    public WebdavProperty getProperty(WebdavResource resource, String namespace, String name) throws OXException {
+        if (this.namespace.equals(namespace) && this.name.equals(name)) {
+            return getProperty(resource);
+        }
+        return null;
+    }
+
+    @Override
+    protected void configureProperty(WebdavProperty property) {
+        throw new UnsupportedOperationException("unable to configure '" + namespace + '.' + name + "' without underlying WebDAV resource");
+    }
+
+    /**
+     * Prepares a new, empty property with the target namespace and name.
+     *
+     * @param xml <code>true</code> to mark the property as xml content, <code>false</code>, otherwise
+     * @return The prepared property
+     */
+    protected WebdavProperty prepareProperty(boolean xml) {
+        WebdavProperty property = new WebdavProperty(namespace, name);
+        property.setXML(xml);
+        return property;
+    }
+
+    /**
+     * Gets the WebdAV property.
+     *
+     * @param resource The WebDAV resource to get the property for
+     * @return The property, or <code>null</code> if not available
+     */
+    protected abstract WebdavProperty getProperty(WebdavResource resource) throws OXException;
 
 }

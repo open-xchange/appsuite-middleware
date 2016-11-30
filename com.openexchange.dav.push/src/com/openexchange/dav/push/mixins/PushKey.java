@@ -47,67 +47,39 @@
  *
  */
 
-package com.openexchange.dav.principals;
+package com.openexchange.dav.push.mixins;
 
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.dav.DAVFactory;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.push.DAVPushUtility;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.helpers.SingleResourcePropertyMixin;
 
 /**
- * {@link PrincipalFactory}
+ * {@link PushKey}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public class PrincipalFactory extends DAVFactory {
+public class PushKey extends SingleResourcePropertyMixin {
 
     /**
-     * Initializes a new {@link PrincipalFactory}.
-     *
-     * @param protocol The protocol
-     * @param services A service lookup reference
-     * @param sessionHolder The session holder to use
+     * Initializes a new {@link PushKey}.
      */
-    public PrincipalFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
-        super(protocol, services, sessionHolder);
+    public PushKey() {
+        super(DAVProtocol.CALENDARSERVER_NS.getURI(), "pushkey");
     }
 
     @Override
-    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
-        WebdavPath path = sanitize(url);
-        if (isRoot(path)) {
-            return mixin(new RootPrincipalCollection(this));
+    protected WebdavProperty getProperty(WebdavResource resource) throws OXException {
+        String value = DAVPushUtility.getPushKey(resource);
+        if (null != value) {
+            WebdavProperty property = prepareProperty(true);
+            property.setValue(value);
+            return property;
         }
-        if (1 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.name()));
-        }
-        if (2 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.parent().name()).getChild(url.name()));
-        }
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    @Override
-    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
-        WebdavPath path = sanitize(url);
-        if (isRoot(path)) {
-            return mixin(new RootPrincipalCollection(this));
-        }
-        if (1 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.name()));
-        }
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    @Override
-    public String getURLPrefix() {
-        return "/principals/";
+        return null;
     }
 
 }

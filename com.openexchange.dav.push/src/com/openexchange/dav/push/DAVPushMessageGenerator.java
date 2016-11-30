@@ -47,33 +47,53 @@
  *
  */
 
-package com.openexchange.dav.mixins;
+package com.openexchange.dav.push;
 
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.KnownTransport;
+import com.openexchange.pns.Message;
+import com.openexchange.pns.PushExceptionCodes;
+import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.PushNotification;
 
 /**
- * {@link AddressbookHomeSet}
- *
- * Identifies the URL of any WebDAV collections that contain address book collections owned by the associated principal resource.
+ * {@link DAVPushMessageGenerator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.4
  */
-public class AddressbookHomeSet extends SingleXMLPropertyMixin {
+public class DAVPushMessageGenerator implements PushMessageGenerator {
 
-    /** The static path to a user's addressbook home */
-    public static final WebdavPath ADDRESSBOOK_HOME = new WebdavPath("carddav");
+    private final String client;
 
     /**
-     * Initializes a new {@link AddressbookHomeSet}.
+     * Initializes a new {@link DAVPushMessageGenerator}.
+     *
+     * @param client The client identifier
      */
-    public AddressbookHomeSet() {
-        super("urn:ietf:params:xml:ns:carddav", "addressbook-home-set");
+    public DAVPushMessageGenerator(String client) {
+        super();
+        this.client = client;
     }
 
     @Override
-    protected String getValue() {
-        return "<D:href>" + ADDRESSBOOK_HOME + "/</D:href>";
+    public String getClient() {
+        return client;
+    }
+
+    @Override
+    public Message<?> generateMessageFor(String transportId, final PushNotification notification) throws OXException {
+        if (KnownTransport.APNS.getTransportId().equals(transportId)) {
+            return new Message<Map<String, Object>>() {
+
+                @Override
+                public Map<String, Object> getMessage() {
+                    return notification.getMessageData();
+                }
+            };
+        }
+        throw PushExceptionCodes.NO_SUCH_TRANSPORT.create(transportId);
     }
 
 }

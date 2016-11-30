@@ -47,63 +47,71 @@
  *
  */
 
-package com.openexchange.carddav.resources;
+package com.openexchange.dav.push.subscribe;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.login.Interface;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import java.util.EnumMap;
+import java.util.Map;
+import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVPerformer;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.webdav.action.WebdavAction;
+import com.openexchange.webdav.action.WebdavExistsAction;
+import com.openexchange.webdav.action.WebdavHeadAction;
+import com.openexchange.webdav.action.WebdavIfAction;
+import com.openexchange.webdav.action.WebdavIfMatchAction;
+import com.openexchange.webdav.action.WebdavOptionsAction;
+import com.openexchange.webdav.action.WebdavTraceAction;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavMethod;
 
 /**
- * {@link AggregatedCollection} - CardDAV collection aggregating the contents
- * of all visible folders.
+ * {@link PushSubscribePerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.4
  */
-public class AggregatedCollection extends CardDAVCollection {
+public class PushSubscribePerformer extends DAVPerformer {
 
-    private final String displayName;
+    private static final Protocol PROTOCOL = new Protocol();
+
+    private final PushSubscribeFactory factory;
+    private final Map<WebdavMethod, WebdavAction> actions;
 
     /**
-     * Initializes a new {@link AggregatedCollection}.
+     * Initializes a new {@link PushSubscribePerformer}.
      *
-     * @param factory The factory
-     * @param url The WebDAV path
-     * @param displayName The displayname to use
+     * @param services A service lookup reference
      */
-    public AggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws OXException {
-        super(factory, url, factory.getState().getDefaultFolder());
-        this.displayName = displayName;
+    public PushSubscribePerformer(ServiceLookup services) {
+        super();
+        this.factory = new PushSubscribeFactory(PROTOCOL, services, this);
+        this.actions = initActions();
+    }
+
+    private EnumMap<WebdavMethod, WebdavAction> initActions() {
+        EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
+        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.POST, prepare(new PushSubscribeAction(factory), true, true, new WebdavIfMatchAction()));
+        actions.put(WebdavMethod.GET, prepare(new PushSubscribeAction(factory), true, true, false, null, new WebdavExistsAction()));
+        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, null, new WebdavExistsAction()));
+        actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
+        makeLockNullTolerant(actions);
+        return actions;
     }
 
     @Override
-    public String getPushTopic() {
-        return "ox:" + Interface.CARDDAV.toString().toLowerCase();
+    protected String getURLPrefix() {
+        return factory.getURLPrefix();
     }
 
     @Override
-    protected Collection<Contact> getDeletedObjects(Date since) throws OXException {
-        Collection<Contact> contacts = super.getDeletedObjects(since);
-        for (UserizedFolder folder : factory.getState().getDeletedFolders(since)) {
-            contacts.addAll(getDeletedContacts(since, folder.getID()));
-        }
-        return contacts;
+    public DAVFactory getFactory() {
+        return factory;
     }
 
     @Override
-    protected List<UserizedFolder> getFolders() throws OXException {
-        return factory.getState().getFolders();
+    protected WebdavAction getAction(WebdavMethod method) {
+        return actions.get(method);
     }
-
-	@Override
-	public String getDisplayName() throws WebdavProtocolException {
-		return displayName;
-	}
 
 }

@@ -80,6 +80,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.login.Interface;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -116,6 +117,11 @@ public class CalDAVRootCollection extends DAVRootCollection {
             new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedReportSet(),
             new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND)
         );
+    }
+
+    @Override
+    public String getPushTopic() {
+        return "ox:" + Interface.CALDAV.toString().toLowerCase();
     }
 
     protected FolderService getFolderService() {
@@ -156,9 +162,9 @@ public class CalDAVRootCollection extends DAVRootCollection {
 
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
-            return new TaskCollection(factory, constructPathForChildResource(folder), folder);
+            return factory.mixin(new TaskCollection(factory, constructPathForChildResource(folder), folder));
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder);
+            return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder));
         } else {
             throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
         }
@@ -166,9 +172,9 @@ public class CalDAVRootCollection extends DAVRootCollection {
 
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder, int order) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
-            return new TaskCollection(factory, constructPathForChildResource(folder), folder, order);
+            return factory.mixin(new TaskCollection(factory, constructPathForChildResource(folder), folder, order));
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order);
+            return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order));
         } else {
             throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
         }

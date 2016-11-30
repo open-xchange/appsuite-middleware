@@ -47,67 +47,53 @@
  *
  */
 
-package com.openexchange.dav.principals;
+package com.openexchange.dav.push.subscribe;
 
+import java.util.Collections;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.dav.DAVFactory;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.mixins.AddressbookHomeSet;
+import com.openexchange.dav.mixins.CalendarHomeSet;
+import com.openexchange.dav.mixins.CurrentUserPrincipal;
+import com.openexchange.dav.mixins.PrincipalCollectionSet;
+import com.openexchange.dav.push.DAVPushUtility;
+import com.openexchange.dav.resources.DAVResource;
+import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link PrincipalFactory}
+ * {@link RootPushSubscribeCollection}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public class PrincipalFactory extends DAVFactory {
+public class RootPushSubscribeCollection extends DAVRootCollection {
 
     /**
-     * Initializes a new {@link PrincipalFactory}.
+     * Initializes a new {@link RootPushSubscribeCollection}.
      *
-     * @param protocol The protocol
-     * @param services A service lookup reference
-     * @param sessionHolder The session holder to use
+     * @param factory The factory
      */
-    public PrincipalFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
-        super(protocol, services, sessionHolder);
+    public RootPushSubscribeCollection(PushSubscribeFactory factory) {
+        super(factory, "Push Subscribe");
+        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(), new CalendarHomeSet(), new AddressbookHomeSet());
     }
 
     @Override
-    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
-        WebdavPath path = sanitize(url);
-        if (isRoot(path)) {
-            return mixin(new RootPrincipalCollection(this));
-        }
-        if (1 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.name()));
-        }
-        if (2 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.parent().name()).getChild(url.name()));
-        }
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
+    public List<WebdavResource> getChildren() throws WebdavProtocolException {
+        return Collections.emptyList();
     }
 
     @Override
-    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
-        WebdavPath path = sanitize(url);
-        if (isRoot(path)) {
-            return mixin(new RootPrincipalCollection(this));
+    public DAVResource getChild(String name) throws WebdavProtocolException {
+        String clientId = DAVPushUtility.getClientId(name);
+        String transportId = DAVPushUtility.getTransportId(name);
+        if (null != clientId && null != transportId) {
+            return new PushSubscribeResource(getFactory(), transportId, clientId, constructPathForChildResource(name));
         }
-        if (1 == path.size()) {
-            return mixin(new RootPrincipalCollection(this).getChild(url.name()));
-        }
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    @Override
-    public String getURLPrefix() {
-        return "/principals/";
+        throw DAVProtocol.protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
     }
 
 }
