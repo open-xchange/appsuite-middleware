@@ -51,7 +51,6 @@ package com.openexchange.http.grizzly.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
@@ -125,21 +124,7 @@ public class IPTools {
      * @throws PatternSyntaxException - if the regular expression's syntax of seperator is invalid
      */
     public static List<String> splitAndTrim(String input, String separator) {
-        if (input == null) {
-            throw new IllegalArgumentException("Missing input");
-        }
-        if (input.isEmpty()) {
-            return Collections.emptyList();
-        }
-        if (separator == null || separator.isEmpty()) {
-            throw new IllegalArgumentException("Missing separator");
-        }
-        ArrayList<String> trimmedSplits = new ArrayList<String>();
-        String[] splits = input.split(separator);
-        for (String string : splits) {
-            trimmedSplits.add(string.trim());
-        }
-        return trimmedSplits;
+        return Strings.splitAndTrim(input, separator);
     }
 
     /**
@@ -148,7 +133,7 @@ public class IPTools {
      * @return the list of erroneous IPs or the empty list meaning that all IPs are valid
      */
     public static List<String> filterErroneousIPs(List<String> ipList) {
-        List<String> erroneousIPs = new ArrayList<String>();
+        List<String> erroneousIPs = new ArrayList<String>(ipList.size());
         for (String ip : ipList) {
             if(!InetAddresses.isInetAddress(ip)) {
                 erroneousIPs.add(ip);
