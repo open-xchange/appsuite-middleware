@@ -77,8 +77,8 @@ public class IPTools {
 
     /**
      * Detects the first IP that isn't one of our known proxies and represents our new remoteIP. This is done by removing all known proxies
-     * from the list of forwarded-for header beginning frome the right side of the list. The rightmost leftover ip is then seen as our new
-     * remote ip as it represents the first IP not known to us. <h4>Example:</h4>
+     * from the list of forwarded-for header beginning from the right side of the list. The rightmost leftover IP is then seen as our new
+     * remote IP as it represents the first IP not known to us. <h4>Example:</h4>
      *
      * <pre>
      * remotes  = 192.168.32.50, 192.168.33.225, 192.168.33.224
@@ -88,7 +88,7 @@ public class IPTools {
      *
      * @param forwardedIPs A String containing the forwarded ips separated by comma
      * @param knownProxies A List of Strings containing the known proxies
-     * @return the first ip that isn't a known proxy iow. the remote IP or an empty String if no valid remote IP could be found
+     * @return The first IP that isn't a known proxy address. The remote IP or <code>null</code> if no valid remote IP could be found
      */
     public static String getRemoteIP(String forwardedIPs, Collection<String> knownProxies) {
         if (Strings.isEmpty(forwardedIPs)) {
