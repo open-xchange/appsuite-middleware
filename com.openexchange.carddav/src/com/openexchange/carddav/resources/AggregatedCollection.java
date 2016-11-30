@@ -56,6 +56,7 @@ import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.login.Interface;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -79,6 +80,11 @@ public class AggregatedCollection extends CardDAVCollection {
     public AggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws OXException {
         super(factory, url, factory.getState().getDefaultFolder());
         this.displayName = displayName;
+    }
+
+    @Override
+    public String getPushTopic() {
+        return "ox:" + Interface.CARDDAV.toString().toLowerCase();
     }
 
     @Override

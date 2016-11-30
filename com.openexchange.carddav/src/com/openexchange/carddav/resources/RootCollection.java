@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.login.Interface;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -95,6 +96,11 @@ public class RootCollection extends DAVRootCollection {
     	super(factory, "Addressbooks");
     	this.factory = factory;
     	includeProperties(new SyncToken(this));
+    }
+
+    @Override
+    public String getPushTopic() {
+        return isUseAggregatedCollection() ? null : "ox:" + Interface.CARDDAV.toString().toLowerCase();
     }
 
 	@Override
