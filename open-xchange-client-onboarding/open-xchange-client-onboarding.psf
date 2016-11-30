@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.app"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.caldav"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.carddav"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.clt"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.driveapp"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.eas"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.mail"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.mailapp"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.plist"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.emclient"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.client.onboarding.syncapp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.app"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.caldav"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.carddav"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.clt"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.driveapp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.eas"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.mailapp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.plist"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.emclient"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.client.onboarding.syncapp"/>
 </provider>
 </psf>

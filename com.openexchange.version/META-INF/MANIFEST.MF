@@ -4,7 +4,7 @@ Bundle-Name: Central version component
 Bundle-SymbolicName: com.openexchange.version
 Bundle-Version: 7.8.3
 OXVersion: 7.8.3
-OXBuildDate: develop
+OXBuildDate: master
 OXRevision: 5
 Bundle-Activator: com.openexchange.version.osgi.VersionActivator
 Bundle-Vendor: OX Software GmbH
