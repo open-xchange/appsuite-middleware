@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.microformats"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.2,com.openexchange.publish.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.2,com.openexchange.publish.microformats"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.2,com.openexchange.templating.json"/>
 </provider>
 </psf>
