@@ -69,6 +69,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResultPostProcessor;
 import com.openexchange.ajax.requesthandler.AJAXState;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
@@ -380,6 +381,16 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     /**
+     * Check whether the given request is made via OAuth.
+     *
+     * @param request The request
+     * @return <code>true</code> if so
+     */
+    protected boolean isOAuthRequest(AJAXRequestData request) {
+        return request.containsProperty(OAuthConstants.PARAM_OAUTH_ACCESS);
+    }
+
+    /**
      * Resolves specified "from" address to associated account identifier
      *
      * @param session The session
@@ -490,6 +501,21 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @return The checked columns in its mail field representation
      */
     protected static int[] prepareColumns(int[] columns) {
+        return prepareColumns(columns, new int[0]);
+    }
+
+    /**
+     * Checks given columns.
+     * <ul>
+     * <li>Add MailField.ID if MailField.ORIGINAL_ID is contained
+     * <li>Add MailField.FOLDER_ID if MailField.ORIGINAL_FOLDER_ID is contained
+     * </ul>
+     *
+     * @param columns The columns to check
+     * @param forcedColumns Optional enforced columns to contain
+     * @return The checked columns in its mail field representation
+     */
+    protected static int[] prepareColumns(int[] columns, int... forcedColumns) {
         int[] fields = columns;
 
         EnumSet<MailField> set = EnumSet.copyOf(Arrays.asList(MailField.getMatchingFields(fields)));
@@ -504,6 +530,17 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             fields = new int[tmp.length + 1];
             fields[0] = MailListField.ID.getField();
             System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+        if (null != forcedColumns && forcedColumns.length > 0) {
+            for (int forcedColumn : forcedColumns) {
+                MailField extraField = MailField.getField(forcedColumn);
+                if (null != extraField && !set.contains(extraField)) {
+                    int[] tmp = fields;
+                    fields = new int[tmp.length + 1];
+                    System.arraycopy(tmp, 0, fields, 0, tmp.length);
+                    fields[tmp.length] = forcedColumn;
+                }
+            }
         }
 
         return fields;

@@ -58,10 +58,13 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.dropbox.access.DropboxEventHandler;
+import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -83,8 +86,8 @@ public final class DropboxActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class,
-            MimeTypeMap.class, TimerService.class, OAuthService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class,
+            OAuthAccessRegistryService.class, SSLConfigurationService.class };
     }
 
     @Override
@@ -106,7 +109,7 @@ public final class DropboxActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, new DropboxEventHandler(), serviceProperties);
+            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, API.DROPBOX), serviceProperties);
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(DropboxActivator.class).error("", e);
             throw e;

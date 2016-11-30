@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.update.SchemaUpdateState;
@@ -65,6 +66,8 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
     private final Set<String> executedTasks = new HashSet<String>();
 
     private boolean backgroundUpdatesRunning;
+    private Date backgroundUpdatesRunningSince;
+    private Date lockedSince;
 
     SchemaUpdateStateImpl() {
         super();
@@ -93,6 +96,10 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
         return executedTasks.toArray(new String[executedTasks.size()]);
     }
 
+    void setBlockingUpdatesRunningSince(Date date) {
+        this.lockedSince = date;
+    }
+
     @Override
     public boolean backgroundUpdatesRunning() {
         return backgroundUpdatesRunning;
@@ -100,5 +107,21 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
 
     void setBackgroundUpdatesRunning(boolean backgroundUpdatesRunning) {
         this.backgroundUpdatesRunning = backgroundUpdatesRunning;
+    }
+
+    @Override
+    public Date blockingUpdatesRunningSince() {
+        Date lockedSince = this.lockedSince;
+        return null == lockedSince ? null : new Date(lockedSince.getTime());
+    }
+
+    @Override
+    public Date backgroundUpdatesRunningSince() {
+        Date backgroundUpdatesRunningSince = this.backgroundUpdatesRunningSince;
+        return null == backgroundUpdatesRunningSince ? null : new Date(backgroundUpdatesRunningSince.getTime());
+    }
+
+    void setBackgroundUpdatesRunningSince(Date date) {
+        this.backgroundUpdatesRunningSince = date;
     }
 }

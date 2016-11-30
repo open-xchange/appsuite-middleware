@@ -271,16 +271,35 @@ public class IMAPProtocol extends Protocol {
      * @return <code>true</code> if response contained <code>"[CAPABILITY"</code>; otherwise <code>false</code>
      */
     protected boolean setCapabilities(final Response r, final boolean reparse) {
-	byte b;
-	while ((b = r.readByte()) > 0 && b != (byte)'[') {
+    if (r instanceof IMAPResponse) {
+        IMAPResponse ir = (IMAPResponse) r;
+        if (ir.keyEquals("CAPABILITY")) {
+            if (reparse) {
+                capabilities = new HashMap<String, String>(10);
+                authmechs = new ArrayList<String>(5);
+            } else {
+                if (null == capabilities) {
+                    capabilities = new HashMap<String, String>(10);
+                }
+                if (null == authmechs) {
+                    authmechs = new ArrayList<String>(5);
+                }
+            }
+            parseCapabilities(r);
+            return true;
+        }
+    } 
+
+    byte b;
+    while ((b = r.readByte()) > 0 && b != (byte)'[') {
         ;
     }
-	if (b == 0) {
+    if (b == 0) {
         return false;
     }
-	String s;
-	s = r.readAtom();
-	if (!s.equalsIgnoreCase("CAPABILITY")) {
+    String s;
+    s = r.readAtom();
+    if (!s.equalsIgnoreCase("CAPABILITY")) {
         return false;
     }
 	if (reparse) {
@@ -582,6 +601,17 @@ public class IMAPProtocol extends Protocol {
         boolean hasCaps = setCapabilities(r[r.length - 1]);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
+        } else {
+            // Check for any unsolicited response that might provide capabilities
+            if (r.length > 0) {
+                for (int i = r.length-1; !hasCaps && i-- > 0;) {
+                    Response unsolicited = r[i];
+                    hasCaps = setCapabilities(unsolicited);
+                    if (hasCaps) {
+                        capabilities.remove("__PRELOGIN__");
+                    }
+                }
+            }
         }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
@@ -702,6 +732,17 @@ public class IMAPProtocol extends Protocol {
         boolean hasCaps = setCapabilities(r, false);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
+        } else {
+            // Check for any unsolicited response that might provide capabilities
+            if (responses.length > 0) {
+                for (int i = responses.length; !hasCaps && i-- > 0;) {
+                    Response unsolicited = responses[i];
+                    hasCaps = setCapabilities(unsolicited);
+                    if (hasCaps) {
+                        capabilities.remove("__PRELOGIN__");
+                    }
+                }
+            }
         }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
@@ -851,6 +892,17 @@ public class IMAPProtocol extends Protocol {
         boolean hasCaps = setCapabilities(r, false);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
+        } else {
+            // Check for any unsolicited response that might provide capabilities
+            if (responses.length > 0) {
+                for (int i = responses.length; !hasCaps && i-- > 0;) {
+                    Response unsolicited = responses[i];
+                    hasCaps = setCapabilities(unsolicited);
+                    if (hasCaps) {
+                        capabilities.remove("__PRELOGIN__");
+                    }
+                }
+            }
         }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
@@ -954,6 +1006,17 @@ public class IMAPProtocol extends Protocol {
         boolean hasCaps = setCapabilities(r, false);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
+        } else {
+            // Check for any unsolicited response that might provide capabilities
+            if (responses.length > 0) {
+                for (int i = responses.length; !hasCaps && i-- > 0;) {
+                    Response unsolicited = responses[i];
+                    hasCaps = setCapabilities(unsolicited);
+                    if (hasCaps) {
+                        capabilities.remove("__PRELOGIN__");
+                    }
+                }
+            }
         }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
@@ -1057,9 +1120,135 @@ public class IMAPProtocol extends Protocol {
 	boolean hasCaps = setCapabilities(r);
     if (hasCaps) {
         capabilities.remove("__PRELOGIN__");
+    } else {
+        // Check for any unsolicited response that might provide capabilities
+        if (responses.length > 0) {
+            for (int i = responses.length; !hasCaps && i-- > 0;) {
+                Response unsolicited = responses[i];
+                hasCaps = setCapabilities(unsolicited);
+                if (hasCaps) {
+                    capabilities.remove("__PRELOGIN__");
+                }
+            }
+        }
     }
 	// if we get this far without an exception, we're authenticated
 	authenticated = true;
+    } finally {
+        if (!authenticated) {
+            authenticatedStatusChanging0(false, u, p);
+        }
+    }
+    }
+
+    /**
+     * The AUTHENTICATE command with AUTH=OAUTHBEARER authentication scheme.
+     * This is based heavily on the {@link #authlogin} method.
+     *
+     * @param  u        the username
+     * @param  p        the password
+     * @throws ProtocolException as thrown by {@link Protocol#handleResult}.
+     * @see "RFC7628"
+     * @since  JavaMail 1.5.6
+     */
+    public synchronized void authoauthbearer(String u, String p)
+                throws ProtocolException {
+    authenticatedStatusChanging0(true, u, p);
+    try {
+    List<Response> v = new ArrayList<Response>();
+    String tag = null;
+    Response r = null;
+    boolean done = false;
+
+    try {
+
+    if (noauthdebug && isTracing()) {
+        logger.fine("AUTHENTICATE OAUTHBEARER command trace suppressed");
+        suspendTracing();
+    }
+
+    try {
+        Argument args = new Argument();
+        args.writeAtom("OAUTHBEARER");
+        if (hasCapability("SASL-IR")) {
+        // From https://tools.ietf.org/html/rfc7628#section-4.1
+        // n,a=user@example.com,^Ahost=server.example.com^Aport=143^A
+        // auth=Bearer vF9dft4qmTc2Nvb3RlckBhbHRhdmlzdGEuY29tCg==^A^A
+        String resp = "n,a=" + u + ",\001host=" + host + "\001port=" + port + "\001auth=Bearer " + p + "\001\001";
+        byte[] ba = BASE64EncoderStream.encode(
+                        ASCIIUtility.getBytes(resp));
+        String irs = ASCIIUtility.toString(ba, 0, ba.length);
+        args.writeAtom(irs);
+        }
+        tag = writeCommand("AUTHENTICATE", args);
+    } catch (Exception ex) {
+        // Convert this into a BYE response
+        r = Response.byeResponse(ex);
+        done = true;
+    }
+
+    OutputStream os = getOutputStream(); // stream to IMAP server
+
+    while (!done) { // loop till we are done
+        try {
+        r = readResponse();
+        if (r.isContinuation()) {
+            // Server challenge ..
+            String resp = "n,a=" + u + ",\001host=" + host + "\001port=" + port + "\001auth=Bearer " + p + "\001\001";
+            byte[] b = BASE64EncoderStream.encode(
+                        ASCIIUtility.getBytes(resp));
+            os.write(b);    // write out response
+            os.write(CRLF);     // CRLF termination
+            os.flush();     // flush the stream
+        } else if (r.isTagged() && r.getTag().equals(tag))
+            // Ah, our tagged response
+            done = true;
+        else if (r.isBYE()) // outta here
+            done = true;
+        else // hmm .. unsolicited response here ?!
+            v.add(r);
+        } catch (Exception ioex) {
+        // convert this into a BYE response
+        r = Response.byeResponse(ioex);
+        done = true;
+        }
+    }
+
+    } finally {
+        resumeTracing();
+    }
+
+    /* Dispatch untagged responses.
+     * NOTE: in our current upper level IMAP classes, we add the
+     * responseHandler to the Protocol object only *after* the
+     * connection has been authenticated. So, for now, the below
+     * code really ends up being just a no-op.
+     */
+    Response[] responses = v.toArray(new Response[v.size()]);
+    notifyResponseHandlers(responses);
+
+    // Handle the final OK, NO, BAD or BYE response
+    if (noauthdebug && isTracing())
+        logger.fine("AUTHENTICATE XOAUTH2 command result: " + r);
+    handleLoginResult(r);
+    // If the response includes a CAPABILITY response code, process it
+    boolean hasCaps = setCapabilities(r);
+    if (hasCaps) {
+        capabilities.remove("__PRELOGIN__");
+    } else {
+        // Check for any unsolicited response that might provide capabilities
+        if (responses.length > 0) {
+            for (int i = responses.length; !hasCaps && i-- > 0;) {
+                Response unsolicited = responses[i];
+                hasCaps = setCapabilities(unsolicited);
+                if (hasCaps) {
+                    capabilities.remove("__PRELOGIN__");
+                }
+            }
+        }
+    }
+    // if we get this far without an exception, we're authenticated
+    authenticated = true;
     } finally {
         if (!authenticated) {
             authenticatedStatusChanging0(false, u, p);
@@ -1082,9 +1271,9 @@ public class IMAPProtocol extends Protocol {
 	    serviceHost = host;
     if (saslAuthenticator == null) {
 	    try {
-		final Class sac = Class.forName(
+		Class<?> sac = Class.forName(
 		    "com.sun.mail.imap.protocol.IMAPSaslAuthenticator");
-		final Constructor c = sac.getConstructor(new Class[] {
+		Constructor<?> c = sac.getConstructor(new Class<?>[] {
 					IMAPProtocol.class,
 					String.class,
 					Properties.class,
@@ -1155,11 +1344,11 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @since	JavaMail 1.5.5
      */
-    void handleLoginResult(Response r) throws ProtocolException {
+    protected void handleLoginResult(Response r) throws ProtocolException {
 	if (hasCapability("LOGIN-REFERRALS") &&
 		(!r.isOK() || referralException))
 	    checkReferral(r);
-	super.handleResult(r);
+	handleResult(r);
     }
 
     /**
@@ -1351,7 +1540,7 @@ public class IMAPProtocol extends Protocol {
     /**
      * EXAMINE Command with QRESYNC data.
      *
-     * @param	mbox	the mailbox name
+     * @param	mbox1	the mailbox name
      * @param	rd	the ResyncData
      * @return		MailboxInfo if successful
      * @exception	ProtocolException	for protocol failures
@@ -1517,7 +1706,7 @@ public class IMAPProtocol extends Protocol {
     /**
      * CREATE Command.
      *
-     * @param	mbox	the mailbox to create
+     * @param	mbox1	the mailbox to create
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.3"
      */
@@ -2273,6 +2462,7 @@ public class IMAPProtocol extends Protocol {
      * @param	msgno	the message number
      * @return		the MODSEQ
      * @exception	ProtocolException	for protocol failures
+     * @since	JavaMail 1.5.1
      */
     public MODSEQ fetchMODSEQ(int msgno) throws ProtocolException {
 	Response[] r = fetch(msgno, "MODSEQ");
@@ -3678,16 +3868,32 @@ public class IMAPProtocol extends Protocol {
     }
 
     /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
+    private static String toUpperCase(String chars) {
         if (null == chars) {
             return null;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+
+        int i = chars.length();
+        char[] c = null;
+
+        // look for first conversion
+        while (i-- > 0) {
+            char c1 = chars.charAt(i);
+            if ((c1 >= 'a') && (c1 <= 'z')) {
+                c1 = (char) (c1 & 0x5f);
+                c = chars.toCharArray();
+                c[i] = c1;
+                break;
+            }
         }
-        return builder.toString();
+
+        while (i-- > 0) {
+            char c1 = c[i];
+            if ((c1 >= 'a') && (c1 <= 'z')) {
+                c[i] = (char) (c1 & 0x5f);
+            }
+        }
+
+        return c == null ? chars : new String(c);
     }
 }

@@ -56,6 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link CapabilitySet} - A capability set.
@@ -76,13 +77,13 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      */
     public CapabilitySet(final int capacity) {
         super();
-        capabilities = new LinkedHashMap<String, Capability>(capacity);
+        capabilities = new ConcurrentHashMap<String, Capability>(capacity);
     }
 
     private CapabilitySet(CapabilitySet source) {
         super();
         Map<String, Capability> m = source.capabilities;
-        capabilities = null == m ? null : new LinkedHashMap<String, Capability>(m);
+        capabilities = null == m ? null : new ConcurrentHashMap<String, Capability>(m);
     }
 
     @Override

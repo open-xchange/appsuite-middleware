@@ -71,6 +71,7 @@ public class UpdateProcess implements Runnable {
     private final int contextId;
     private final SchemaStore schemaStore = SchemaStore.getInstance();
     private final Queue<TaskInfo> failures;
+    private final boolean throwExceptionOnFailure;
 
     /**
      * Initializes a new {@link UpdateProcess} w/o tracing failures.
@@ -78,7 +79,7 @@ public class UpdateProcess implements Runnable {
      * @param contextId The context identifier
      */
     public UpdateProcess(int contextId) {
-        this(contextId, false);
+        this(contextId, false, false);
     }
 
     /**
@@ -86,11 +87,13 @@ public class UpdateProcess implements Runnable {
      *
      * @param contextId The context identifier
      * @param traceFailures <code>true</code> to trace failures available via {@link #getFailures()}; otherwise <code>false</code>
+     * @param throwExceptionOnFailure Whether to throw an exception if a task failed
      */
-    public UpdateProcess(int contextId, boolean traceFailures) {
+    public UpdateProcess(int contextId, boolean traceFailures, boolean throwExceptionOnFailure) {
         super();
         this.contextId = contextId;
         this.failures = traceFailures ? new ConcurrentLinkedQueue<TaskInfo>() : null;
+        this.throwExceptionOnFailure = throwExceptionOnFailure;
     }
 
     /**
@@ -109,18 +112,29 @@ public class UpdateProcess implements Runnable {
     @Override
     public void run() {
         try {
-            // Load schema
-            SchemaUpdateState state = schemaStore.getSchema(contextId);
-            if (!UpdateTaskCollection.getInstance().needsUpdate(state)) {
-                // Already been updated before by previous thread
-                return;
-            }
-            new UpdateExecutor(state, contextId, null).execute(failures);
+            runUpdate();
         } catch (OXException e) {
             LOG.error("", e);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             LOG.error("", t);
         }
+    }
+
+    /**
+     * Triggers an update run.
+     *
+     * @return <code>true</code> if context-associated schema was successfully updated; otherwise <code>false</code> if already up-to-date
+     * @throws OXException If update attempt fails
+     */
+    public boolean runUpdate() throws OXException {
+        // Load schema
+        SchemaUpdateState state = schemaStore.getSchema(contextId);
+        if (!UpdateTaskCollection.getInstance().needsUpdate(state)) {
+            // Already been updated before by previous thread
+            return false;
+        }
+        new UpdateExecutor(state, contextId, null).execute(failures, throwExceptionOnFailure);
+        return true;
     }
 }

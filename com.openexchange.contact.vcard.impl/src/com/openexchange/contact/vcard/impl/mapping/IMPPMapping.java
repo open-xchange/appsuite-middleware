@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.encoding.URLCoder;
@@ -72,7 +73,7 @@ public class IMPPMapping extends AbstractMapping {
      * Initializes a new {@link IMPPMapping}.
      */
     public IMPPMapping() {
-        super("IMPP");
+        super("IMPP", ContactField.INSTANT_MESSENGER1, ContactField.INSTANT_MESSENGER2);
     }
 
     @Override
@@ -85,8 +86,8 @@ public class IMPPMapping extends AbstractMapping {
         if (contact.containsInstantMessenger1() && isValid(contact.getInstantMessenger1())) {
             if (null == businessImpp) {
                 businessImpp = new Impp(getURI(contact.getInstantMessenger1()));
-                businessImpp.addType(ImppType.WORK);
-                businessImpp.addType(ImppType.PREF);
+                businessImpp.getTypes().add(ImppType.WORK);
+                businessImpp.getTypes().add(ImppType.PREF);
                 vCard.addImpp(businessImpp);
             } else {
                 businessImpp.setUri(getURI(contact.getInstantMessenger1()));
@@ -102,7 +103,7 @@ public class IMPPMapping extends AbstractMapping {
         if (contact.containsInstantMessenger2() && isValid(contact.getInstantMessenger2())) {
             if (null == homeImpp) {
                 homeImpp = new Impp(getURI(contact.getInstantMessenger2()));
-                homeImpp.addType(ImppType.HOME);
+                homeImpp.getTypes().add(ImppType.HOME);
                 vCard.addImpp(homeImpp);
             } else {
                 homeImpp.setUri(getURI(contact.getInstantMessenger2()));

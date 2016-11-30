@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,6 +41,7 @@
 package com.sun.mail.pop3;
 
 import java.util.Properties;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.lang.reflect.*;
 
@@ -56,6 +57,8 @@ import java.util.Map;
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.MailLogger;
 import com.sun.mail.util.SocketConnectException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.util.MailConnectException;
 
 /**
@@ -95,6 +98,7 @@ public class POP3Store extends Store {
     volatile boolean useFileCache = false;
     volatile File fileCacheDir = null;
     volatile boolean keepMessageContent = false;
+    volatile boolean finalizeCleanClose = false;
 
     public POP3Store(Session session, URLName url) {
 	this(session, url, "pop3", false);
@@ -135,6 +139,9 @@ public class POP3Store extends Store {
 
 	// mail.pop3.starttls.required requires use of STLS command
 	requireStartTLS = getBoolProp("starttls.required");
+
+	// mail.pop3.finalizecleanclose requires clean close when finalizing
+	finalizeCleanClose = getBoolProp("finalizecleanclose");
 
 	String s = session.getProperty("mail." + name + ".message.class");
 	if (s != null) {
@@ -341,9 +348,17 @@ public class POP3Store extends Store {
     }
 
     public synchronized void close() throws MessagingException {
+	close(false);
+    }
+
+    synchronized void close(boolean force) throws MessagingException {
 	try {
-	    if (port != null)
-		port.quit();
+	    if (port != null) {
+		if (force)
+		    port.close();
+		else
+		    port.quit();
+	    }
 	} catch (IOException ioex) {
 	} finally {
 	    port = null;
@@ -438,7 +453,7 @@ public class POP3Store extends Store {
     protected void finalize() throws Throwable {
 	try {
 	    if (port != null)	// don't force a connection attempt
-		close();
+		close(!finalizeCleanClose);
 	} finally {
 	    super.finalize();
 	}
@@ -447,5 +462,23 @@ public class POP3Store extends Store {
     private void checkConnected() throws MessagingException {
 	if (!super.isConnected())
 	    throw new MessagingException("Not connected");
+    }
+
+    @Override
+    public boolean isSetAndGetReadTimeoutSupported() {
+        return true;
+    }
+
+    @Override
+    public synchronized int setAndGetReadTimeout(int readTimeout) throws MessagingException {
+        if (port != null) {
+            try {
+                return port.setAndGetReadTimeout(readTimeout);
+            } catch (IOException ioex) {
+                throw new MessagingException("Setting SO_TIMEOUT failed", ioex);
+            }
+        }
+
+        return -1;
     }
 }

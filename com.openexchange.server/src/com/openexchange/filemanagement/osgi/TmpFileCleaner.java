@@ -88,11 +88,13 @@ public final class TmpFileCleaner implements ServiceTrackerCustomizer<Configurat
                 });
 
                 // Delete those remnants
-                for (File file : tmpFiles) {
-                    try {
-                        file.delete();
-                    } catch (final Exception x) {
-                        // Ignore
+                if (null != tmpFiles) {
+                    for (File file : tmpFiles) {
+                        try {
+                            file.delete();
+                        } catch (final Exception x) {
+                            // Ignore
+                        }
                     }
                 }
             }

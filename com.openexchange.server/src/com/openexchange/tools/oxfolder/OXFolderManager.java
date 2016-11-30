@@ -263,4 +263,13 @@ public abstract class OXFolderManager {
      * This routine is called through AJAX' folder tests!
      */
     public abstract void cleanUpTestFolders(int[] fuids, Context ctx);
+
+    /**
+     * Removes all file locks within this folder for the given users.
+     *
+     * @param folder The folder object at least containing the ID of the folder.
+     * @param userIds The ids of the users holding the locks
+     * @throws OXException
+     */
+    public abstract void cleanLocksForFolder(FolderObject folder, int userIds[]) throws OXException;
 }

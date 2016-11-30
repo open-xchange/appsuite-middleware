@@ -98,12 +98,28 @@ public enum MailSortField {
     /**
      * Account name
      */
-    ACCOUNT_NAME(MailListField.ACCOUNT_NAME);
+    ACCOUNT_NAME(MailListField.ACCOUNT_NAME),
+    /**
+     * Flag \ANSWERED (657)
+     */
+    FLAG_ANSWERED(MailListField.FLAG_ANSWERED),
+    /**
+     * Flag \FORWARDED (658)
+     */
+    FLAG_FORWARDED(MailListField.FLAG_FORWARDED),
+    /**
+     * Flag \DRAFT (659)
+     */
+    FLAG_DRAFT(MailListField.FLAG_DRAFT),
+    /**
+     * Flag \FLAGGED (660)
+     */
+    FLAG_FLAGGED(MailListField.FLAG_FLAGGED),
+
+    ;
 
     private final int field;
-
     private final String key;
-
     private final MailListField listField;
 
     private MailSortField(final MailListField listField) {
@@ -131,6 +147,23 @@ public enum MailSortField {
      */
     public MailListField getListField() {
         return listField;
+    }
+
+    /**
+     * Checks if specified sort field is one of flag-based sort fields:
+     * <ul>
+     * <li>{@link #FLAG_SEEN}</li>
+     * <li>{@link #FLAG_ANSWERED}</li>
+     * <li>{@link #FLAG_FORWARDED}</li>
+     * <li>{@link #FLAG_DRAFT}</li>
+     * <li>{@link #FLAG_FLAGGED}</li>
+     * </ul>
+     *
+     * @param sortField The sort field to check
+     * @return <code>true</code> if given sort field is one of special flag sort fields; otherwise <code>false</code>
+     */
+    public static boolean isFlagSortField(MailSortField sortField) {
+        return FLAG_SEEN == sortField || FLAG_ANSWERED == sortField || FLAG_FORWARDED == sortField || FLAG_DRAFT == sortField || FLAG_FLAGGED == sortField;
     }
 
     private static final MailSortField[] EMPTY_FIELDS = new MailSortField[0];

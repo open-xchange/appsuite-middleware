@@ -55,6 +55,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -67,16 +68,25 @@ import com.openexchange.server.ServiceLookup;
  */
 public class Tools {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
+
     /**
      * Generates an OR filter matching the services given in the classes varargs.
+     *
+     * @param context The bundle context to use for creating the filter from comiled expression
+     * @param classes The classes of the services for which to yield the filter
      * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
      */
     public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
+        if (null == classes) {
+            throw new IllegalArgumentException("classes is null.");
+        }
         if (classes.length < 2) {
             throw new IllegalArgumentException("At least the classes of 2 services must be given.");
         }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
+
+        StringBuilder sb = new StringBuilder(16 << classes.length).append("(|(");
+        for (Class<?> clazz : classes) {
             sb.append(Constants.OBJECTCLASS);
             sb.append('=');
             sb.append(clazz.getName());
@@ -113,6 +123,22 @@ public class Tools {
         }
 
         return service;
+    }
+
+    /**
+     * Safely ungets the service associated with specified service reference using given bundle context.
+     *
+     * @param reference The service reference to unget
+     * @param context The bundle context to use
+     */
+    public static <S> void ungetServiceSafe(ServiceReference<S> reference, BundleContext context) {
+        if (null != reference && null != context) {
+            try {
+                context.ungetService(reference);
+            } catch (Exception e) {
+                LOG.debug("Failed to unget service.", e);
+            }
+        }
     }
 
     private Tools() {

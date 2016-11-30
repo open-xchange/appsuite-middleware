@@ -49,11 +49,6 @@
 
 package com.openexchange.folder.json.writer;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,7 +72,6 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -88,11 +82,17 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.Tools;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link FolderWriter} - Write methods for folder module.
@@ -139,7 +139,7 @@ public final class FolderWriter {
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-            FolderObject fo = turnIntoFolderObjects(new UserizedFolder[] { folder }).iterator().next();
+            FolderObject fo = turnIntoFolderObject(folder);
             Object value = aff.getValue(fo, requestData.getSession());
             jsonPutter.put(jsonPutter.withKey() ? aff.getColumnName() : null, aff.renderJSON(requestData, value));
         }
@@ -461,7 +461,7 @@ public final class FolderWriter {
                     } else {
                         ja = new JSONArray();
                         for (final Permission permission : obj) {
-                            final JSONObject jo = new JSONObject();
+                            final JSONObject jo = new JSONObject(4);
                             jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
                             jo.put(FolderField.ENTITY.getName(), permission.getEntity());
                             jo.put(FolderField.GROUP.getName(), permission.isGroup());
@@ -588,24 +588,28 @@ public final class FolderWriter {
         System.arraycopy(allFields, 0, ALL_FIELDS, 0, j);
     }
 
-    private static List<FolderObject> turnIntoFolderObjects(final UserizedFolder[] folders) {
-        final List<FolderObject> retval = new ArrayList<FolderObject>(folders.length);
-        for (final UserizedFolder folder : folders) {
-            final FolderObject fo = new FolderObject();
-            final int numFolderId = getUnsignedInteger(folder.getID());
-            if (numFolderId < 0) {
-                fo.setFullName(folder.getID());
-            } else {
-                fo.setObjectID(numFolderId);
-            }
-            fo.setFolderName(folder.getName());
-            fo.setModule(folder.getContentType().getModule());
-            if (null != folder.getType()) {
-                fo.setType(folder.getType().getType());
-            }
-            fo.setCreatedBy(folder.getCreatedBy());
-            fo.setPermissions(turnIntoOCLPermissions(numFolderId, folder.getPermissions()));
-            retval.add(fo);
+    static FolderObject turnIntoFolderObject(UserizedFolder folder) {
+        FolderObject fo = new FolderObject();
+        final int numFolderId = Tools.getUnsignedInteger(folder.getID());
+        if (numFolderId < 0) {
+            fo.setFullName(folder.getID());
+        } else {
+            fo.setObjectID(numFolderId);
+        }
+        fo.setFolderName(folder.getName());
+        fo.setModule(folder.getContentType().getModule());
+        if (null != folder.getType()) {
+            fo.setType(folder.getType().getType());
+        }
+        fo.setCreatedBy(folder.getCreatedBy());
+        fo.setPermissions(turnIntoOCLPermissions(numFolderId, folder.getPermissions()));
+        return fo;
+    }
+
+    static List<FolderObject> turnIntoFolderObjects(final UserizedFolder[] folders) {
+        List<FolderObject> retval = new ArrayList<FolderObject>(folders.length);
+        for (UserizedFolder folder : folders) {
+            retval.add(turnIntoFolderObject(folder));
         }
         return retval;
     }
@@ -651,8 +655,9 @@ public final class FolderWriter {
             final int curCol = cols[i];
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
             if (null == ffw) {
-                if (additionalFolderFieldList.knows(curCol)) {
-                    final AdditionalFolderField aff = new BulkFolderField(additionalFolderFieldList.get(curCol));
+                AdditionalFolderField aff = additionalFolderFieldList.opt(curCol);
+                if (null != aff) {
+                    aff = new BulkFolderField(aff, folders.length);
                     aff.getValues(turnIntoFolderObjects(folders), requestData.getSession());
                     ffw = new AdditionalFolderFieldWriter(requestData, aff);
                 } else {
@@ -711,8 +716,8 @@ public final class FolderWriter {
             final int curCol = cols[i];
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
             if (null == ffw) {
-                if (additionalFolderFieldList.knows(curCol)) {
-                    final AdditionalFolderField aff = additionalFolderFieldList.get(curCol);
+                AdditionalFolderField aff = additionalFolderFieldList.opt(curCol);
+                if (null != aff) {
                     ffw = new AdditionalFolderFieldWriter(requestData, aff);
                 } else {
                     ffw = getPropertyByField(curCol, fieldSet);
@@ -794,17 +799,6 @@ public final class FolderWriter {
             }
         }
         return pw;
-    }
-
-
-    /**
-     * Parses a positive <code>int</code> value from passed {@link String} instance.
-     *
-     * @param s The string to parse
-     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
-     */
-    static final int getUnsignedInteger(final String s) {
-        return Tools.getUnsignedInteger(s);
     }
 
     /**

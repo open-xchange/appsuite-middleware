@@ -51,11 +51,10 @@ package com.openexchange.continuation.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.continuation.json.actions.GetAction;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -65,7 +64,6 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-@Module(name = "continuation", description = "Provides access to Continuation module.")
 public class ContinuationActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
@@ -77,8 +75,9 @@ public class ContinuationActionFactory implements AJAXActionServiceFactory {
      */
     public ContinuationActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("get", new GetAction(services));
+        this.actions = actions.build();
     }
 
     @Override

@@ -1,0 +1,2 @@
+# relax gitignore to include bats bin directory
+!test/bats/bin

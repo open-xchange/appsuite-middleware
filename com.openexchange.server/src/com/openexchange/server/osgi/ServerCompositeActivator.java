@@ -71,6 +71,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.groupware.reminder.osgi.ReminderActivator(),
         new com.openexchange.systemname.osgi.SystemNameActivator(),
         new com.openexchange.groupware.notify.hostname.osgi.HostDataActivator(),
+        new com.openexchange.ajax.version.osgi.VersionActionActivator(),
         new com.openexchange.filemanagement.osgi.ManagedFileManagementActivator(),
         new com.openexchange.server.osgi.ServerActivator(),
         new com.openexchange.ajax.requesthandler.osgi.DispatcherActivator(),
@@ -107,7 +108,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.passwordchange.osgi.PasswordChangeActivator(),
         new com.openexchange.ajax.anonymizer.osgi.AnonymizerActivator(),
         new com.openexchange.server.osgi.inspector.SessionInspectorChainActivator(),
-        new com.openexchange.groupware.upload.osgi.UploadActivator()
+        new com.openexchange.groupware.upload.osgi.UploadActivator(),
     };
 
     public ServerCompositeActivator() {

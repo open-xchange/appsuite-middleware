@@ -243,9 +243,8 @@ public class DefaultMailMappingService implements MultipleMailResolver {
             }
 
             Databases.closeSQLStuff(result, stmt);
-            stmt = con.prepareStatement("SELECT cid, id FROM user_attribute WHERE name=? AND value LIKE ?");
-            stmt.setString(1, "alias");
-            stmt.setString(2, mail);
+            stmt = con.prepareStatement("SELECT cid, user FROM user_alias WHERE alias LIKE ?");
+            stmt.setString(1, mail);
             result = stmt.executeQuery();
             if (result.next()) {
                 return ResolvedMail.ACCEPT(result.getInt(2), result.getInt(1));

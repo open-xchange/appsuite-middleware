@@ -1,0 +1,41 @@
+open-xchange-pns-impl (7.8.3-5) stable; urgency=medium
+
+  * Second release candidate for 7.8.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 25 Nov 2016 17:54:37 +0100
+
+open-xchange-pns-impl (7.8.3-4) stable; urgency=medium
+
+  * First release candidate for 7.8.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 24 Nov 2016 20:47:46 +0100
+
+open-xchange-pns-impl (7.8.3-3) stable; urgency=medium
+
+  * Third preview for 7.8.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 15 Nov 2016 15:45:01 +0100
+
+open-xchange-pns-impl (7.8.3-2) stable; urgency=medium
+
+  * Second preview for 7.8.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Sat, 29 Oct 2016 09:47:16 +0200
+
+open-xchange-pns-impl (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 14 Oct 2016 15:22:18 +0200
+
+open-xchange-pns-impl (7.8.3-0) unstable; urgency=medium
+
+  * prepare for 7.8.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 06 Sep 2016 11:26:51 +0200
+
+open-xchange-pns-impl (7.8.2-0) unstable; urgency=medium
+
+  * Initial release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 15 Aug 2016 10:26:09 +0200

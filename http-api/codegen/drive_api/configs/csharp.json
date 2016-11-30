@@ -1,9 +1,0 @@
-{
-	"modelPackage": "OpenExchange.ClientApi.Drive.Models",
-	"apiPackage": "OpenExchange.ClientApi.Drive",
-	"invokerPackage": "OpenExchange.ClientApi.Drive.Invoker",
-	"packageName": "OpenExchange.ClientApi.Drive",
-	"packageVersion": "0.0.1",
-	"artifactId": "OXDriveApi",
-	"optionalAssemblyInfo": false
-}

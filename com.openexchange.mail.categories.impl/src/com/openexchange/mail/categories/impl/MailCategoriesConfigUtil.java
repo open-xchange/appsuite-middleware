@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.categories.impl;
 
-import java.util.Collections;
-import java.util.Map;
 import org.apache.commons.lang.Validate;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -73,13 +73,18 @@ import com.openexchange.session.Session;
  */
 public final class MailCategoriesConfigUtil implements Reloadable {
 
-    private static final String CONFIG_FILE_NAME = "mail-categories.properties";
-    private final static String[] PROPERTIES = new String[] { "all properties in file" };
     private static final MailCategoriesConfigUtil INSTANCE = new MailCategoriesConfigUtil();
 
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
     public static MailCategoriesConfigUtil getInstance() {
         return INSTANCE;
     }
+
+    // --------------------------------------------------------------------------------------------
 
     /**
      * Prevent initialization.
@@ -285,8 +290,8 @@ public final class MailCategoriesConfigUtil implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return Collections.singletonMap(CONFIG_FILE_NAME, PROPERTIES);
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("mail-categories.properties");
     }
 
 }

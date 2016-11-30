@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Build bundle">
+
+    <description>
+        This build script creates the OSGi stack under the standalone ImageServer.
+    </description>
+
+    <!-- service name -->
+    <property name="serviceName" value="imageserver"/>
+
+    <!-- customizable values -->
+    <property name="destDir" value=""/><!-- Necessary to build the bundles into a distro package -->
+    <property name="prefix" value="/opt/open-xchange"/><!-- Installation path on destination system -->
+    <property name="logInstallDir" value="/var/log/open-xchange/${serviceName}"/>
+    <property name="servicePrefix" value="${prefix}/${serviceName}"/>
+
+    <!-- Constants -->
+    <property name="confDir" value="conf"/>
+    <property name="libDir" value="lib"/>
+    <property name="osgiDir" value="osgi"/>
+    <property name="sbinDir" value="sbin"/>
+    <property name="tmpDir" value="tmp"/>
+
+    <!-- Install Constants -->
+    <property name="parentBundlesDir" value="${prefix}/bundles"/>
+    <property name="bundle.dDir" value="${servicePrefix}/osgi/bundle.d"/>
+    <property name="confInstallDir" value="${servicePrefix}/etc"/>
+
+    <target name="setVersion"/>
+
+    <target name="makeIni" description="Creates the .ini file to include this bundle when starting the OSGi framework.">
+        <propertyregex property="bundleName" input="${bundleFileOrDir}" regexp="^.*/(.*?)(\.jar)?$" select="\1"/>
+        <propertyregex property="fileOrDir" input="${bundleFileOrDir}" regexp="^.*/(.*?(\.jar)?)$" select="\1"/>
+        <isFragment propertyName="isFragment" bundle="${bundleFileOrDir}"/>
+        <if>
+            <equals arg1="false" arg2="${isFragment}"/>
+            <then>
+                <echo file="${destDir}/${bundle.dDir}/${bundleName}.ini" message="${parentBundlesDir}/${fileOrDir}@start${line.separator}"/>
+            </then>
+            <else>
+                <echo file="${destDir}/${bundle.dDir}/${bundleName}.ini" message="${parentBundlesDir}/${fileOrDir}${line.separator}"/>
+            </else>
+        </if>
+    </target>
+
+    <target name="installIni">
+        <mkdir dir="${destDir}/${bundle.dDir}"/>
+        <foreach target="makeIni" param="bundleFileOrDir" inheritAll="true">
+            <path>
+                <launcherBundles launcher="${serviceName}.launch">
+                    <classpath>
+                        <fileset dir="${parentBundlesDir}" includes="*.jar" erroronmissingdir="false"/>
+                        <dirset dir="${parentBundlesDir}" includes="*" erroronmissingdir="false"/>
+                        <fileset dir="${destDir}/${parentBundlesDir}" includes="*.jar" erroronmissingdir="false"/>
+                        <dirset dir="${destDir}/${parentBundlesDir}" includes="*" erroronmissingdir="false"/>
+                    </classpath>
+                </launcherBundles>
+            </path>
+        </foreach>
+    </target>
+
+    <target name="patchAndInstallConfigIniTemplate" description="Patches and installs config.ini.template file.">
+        <mkdir dir="${tmpDir}/${osgiDir}"/>
+        <copy todir="${tmpDir}/${osgiDir}" overwrite="true">
+            <fileset dir="${osgiDir}"/>
+        </copy>
+        <move tofile="${tmpDir}/${osgiDir}/config.ini.template" file="${tmpDir}/${osgiDir}/config.ini.template.in" overwrite="true"/>
+        <replace file="${tmpDir}/${osgiDir}/config.ini.template">
+            <replacefilter token="@bundlesparentdir@" value="${parentBundlesDir}"/>
+            <replacefilter token="@logfile@" value="${logInstallDir}/osgi.log"/>
+        </replace>
+        <copy todir="${destDir}/${servicePrefix}/${osgiDir}">
+            <fileset dir="${tmpDir}/${osgiDir}"/>
+        </copy>
+    </target>
+
+    <target name="patchAndInstallScripts" depends="patchScripts">
+        <property name="sbinInstallDir" value="${destDir}/${servicePrefix}/${sbinDir}"/>
+        <copy todir="${sbinInstallDir}" overwrite="true">
+            <fileset dir="${patchSbinDir}"/>
+        </copy>
+        <chmod perm="755" file="${sbinInstallDir}/open-xchange-${serviceName}"/>
+    </target>
+
+    <target name="patchScripts">
+        <property name="patchSbinDir" value="${tmpDir}/${sbinDir}"/>
+        <mkdir dir="${patchSbinDir}"/>
+        <antcall target="moveAndPatchScripts"/>
+    </target>
+
+    <target name="moveAndPatchScripts">
+        <copy todir="${patchSbinDir}" overwrite="true">
+            <fileset dir="${sbinDir}"/>
+            <mapper type="glob" from="*.in" to="*"/>
+        </copy>
+        <replace dir="${patchSbinDir}" includes="open-xchange-${serviceName}">
+            <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
+            <replacefilter token="@consolelogfile@" value="${logInstallDir}/console.log"/>
+            <replacefilter token="@configini@" value="${servicePrefix}/osgi/config.ini"/>
+            <replacefilter token="@bundle.d@" value="${bundle.dDir}"/>
+        </replace>
+    </target>
+
+    <target name="installConf" description="Install all configuration files for a bundle.">
+        <if>
+            <available file="${confDir}" type="dir"/>
+            <then>
+                <copy todir="${destDir}/${confInstallDir}">
+                    <fileset dir="${confDir}"/>
+                </copy>
+            </then>
+        </if>
+    </target>
+
+    <target name="build" depends="installIni,patchAndInstallConfigIniTemplate,patchAndInstallScripts,installConf"/>
+
+    <target name="dist">
+        <property name="destinationDir" value="${packageDir}/${projectName}"/>
+        <mkdir dir="${destinationDir}"/>
+        <copy todir="${destinationDir}">
+            <fileset dir="${basedir}">
+                <exclude name="${tmpDir}"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="clean">
+        <delete dir="${tmpDir}"/>
+    </target>
+
+</project>

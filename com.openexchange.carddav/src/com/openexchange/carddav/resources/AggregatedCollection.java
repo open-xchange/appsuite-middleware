@@ -85,7 +85,7 @@ public class AggregatedCollection extends CardDAVCollection {
     protected Collection<Contact> getDeletedObjects(Date since) throws OXException {
         Collection<Contact> contacts = super.getDeletedObjects(since);
         for (UserizedFolder folder : factory.getState().getDeletedFolders(since)) {
-            contacts.addAll(factory.getState().getDeletedContacts(since, folder.getID()));
+            contacts.addAll(getDeletedContacts(since, folder.getID()));
         }
         return contacts;
     }

@@ -53,7 +53,6 @@ import com.openexchange.ajax.mail.filter.tests.api.AdminListTest;
 import com.openexchange.ajax.mail.filter.tests.api.AuxiliaryAPITest;
 import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
 import com.openexchange.ajax.mail.filter.tests.api.NewTest;
-import com.openexchange.ajax.mail.filter.tests.api.PGPTest;
 import com.openexchange.ajax.mail.filter.tests.api.ReorderTest;
 import com.openexchange.ajax.mail.filter.tests.api.UpdateTest;
 import com.openexchange.ajax.mail.filter.tests.api.VacationTest;
@@ -97,7 +96,8 @@ public final class MailFilterTestSuite {
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(UpdateTest.class);
         suite.addTestSuite(VacationTest.class);
-        suite.addTestSuite(PGPTest.class);
+        // Deactivated the PGPTest because the email server of the test environment does not support the custom pgp plugin
+        // suite.addTestSuite(PGPTest.class);
         suite.addTestSuite(ReorderTest.class);
         suite.addTestSuite(AuxiliaryAPITest.class);
         return suite;

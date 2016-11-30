@@ -92,6 +92,7 @@ import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.formats.csv.CSVLibrary;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.CharsetDetector;
@@ -326,22 +327,32 @@ public class CSVContactImporter extends AbstractImporter {
         return new ImportIntention(result);
     }
 
-    public Contact convertCsvToContact(final List<String> fields, final List<String> entry, final ContactSwitcher conSet, final int lineNumber, final ImportResult result, final boolean[] atLeastOneFieldInserted) throws OXException {
+    public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted) throws OXException {
         final Contact contactObj = new Contact();
         final Collection<OXException> warnings = new LinkedList<OXException>();
         final List<String> wrongFields = new LinkedList<String>();
+
         boolean atLeastOneFieldWithWrongName = false;
-        for (int i = 0; i < fields.size(); i++) {
+        boolean markAsDistributionlist = false;
+        for (int i = 0, k = fields.size(); k -- > 0; i++) {
             final String fieldName = fields.get(i);
             final String currEntry = entry.get(i);
+
+            boolean isMarkAsDistributionList = CSVLibrary.READABLE_TITLE_MARK_AS_DISTRIBUTION_LIST.equals(fieldName);
+            if (isMarkAsDistributionList && "true".equalsIgnoreCase(currEntry)) {
+                markAsDistributionlist = true;
+            }
+
             final ContactField currField = getRelevantField(fieldName);
             if (currField == null) {
                 final boolean worked = conSet._unknownfield(contactObj, fieldName, currEntry);
                 if (worked) {
                     continue;
                 }
-                atLeastOneFieldWithWrongName = true;
-                wrongFields.add(fieldName);
+                if (!isMarkAsDistributionList) {
+                    atLeastOneFieldWithWrongName = true;
+                    wrongFields.add(fieldName);
+                }
             } else {
                 if (currEntry.length() > 0) {
                     currField.doSwitch(conSet, contactObj, currEntry);
@@ -353,6 +364,11 @@ public class CSVContactImporter extends AbstractImporter {
                 atLeastOneFieldInserted[0] = true;
             }
         }
+
+        if (markAsDistributionlist) {
+            contactObj.setMarkAsDistributionlist(true);
+        }
+
         if (!warnings.isEmpty()) {
             final OXException warning = warnings.iterator().next();
             result.setException(warning);

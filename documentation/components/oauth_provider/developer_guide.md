@@ -25,7 +25,7 @@ All calls towards the authorization or token endpoint enforce HTTPS. Plain HTTP 
 | scope | The scope according to the API requests you are going to make after access was granted. Can be omitted, in which case the default scope is applied that has been submitted during client registration. A scope is a space-separated string of scope tokens, e.g. `read_contacts write_contacts`. | No |
 | language | An optional locale (e.g. `de_DE`) that is used to translate the user-visible parts of the authorization flow if possible. If omitted `en_US` is used. | No |
 
-The response is a login screen. You propably want to display it within a popup window:
+The response is a login screen. You probably want to display it within a popup window:
 ![OAuth Login Screen](login_screen.png "fig:OAuth Login Screen")
 
 After signing in the user gets display a screen where he can choose to grant or deny access to the requesting application:
@@ -127,6 +127,26 @@ It's up to you if you want to invalidate by access or refresh token, as long as 
       "error": "invalid_request",
       "error_description": "invalid parameter value: access_token"
     }
+    
+## Validating the token
+
+Provided that the Open-Xchange Server is also acting as authorization server verifying a token using the Open-Xchange Authorization Server endpoint is relatively simple. Your application includes the access token in the `access_token` parameter for the following endpoint:
+
+    GET /appsuite/api/oauth/provider/tokeninfo?access_token=ae113KfFBGRNJru1FQd44AzqT3Zg...
+
+That endpoint accepts an access token and returns information about that access token including which application was it issued to, the scopes the user consented to, the remaining lifetime of the token, and the context/user identifiers. Example:
+
+    {
+      "audience": "ZGVmYXVsdA/4ecafb74...b94b0a8e4e0e325d07f6d0",
+      "context_id": 1,
+      "user_id": 2,
+      "expiration_date": "2016-09-15T00:00:00",
+      "scope": "write_contacts read_contacts"
+    }
+    
+If the token has expired, has been tampered with, or the permissions revoked, the Open-Xchange Authorization Server will respond with an error. The error surfaces as a 400 status code, and a JSON body as follows:
+
+    {"error":"invalid_token"}
 
 # Available APIs
 

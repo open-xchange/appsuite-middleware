@@ -54,6 +54,7 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -108,92 +109,6 @@ public final class Tools {
     }
 
     /**
-     * The radix for base <code>10</code>.
-     */
-    private static final int RADIX = 10;
-
-    /**
-     * Parses a positive <code>int</code> value from passed {@link String} instance.
-     *
-     * @param s The string to parse
-     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
-     */
-    public static final int getUnsignedInteger(final String s) {
-        if (s == null) {
-            return -1;
-        }
-
-        final int max = s.length();
-
-        if (max <= 0) {
-            return -1;
-        }
-        if (s.charAt(0) == '-') {
-            return -1;
-        }
-
-        int result = 0;
-        int i = 0;
-
-        final int limit = -Integer.MAX_VALUE;
-        final int multmin = limit / RADIX;
-        int digit;
-
-        if (i < max) {
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return -1;
-            }
-            result = -digit;
-        }
-        while (i < max) {
-            /*
-             * Accumulating negatively avoids surprises near MAX_VALUE
-             */
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return -1;
-            }
-            if (result < multmin) {
-                return -1;
-            }
-            result *= RADIX;
-            if (result < limit + digit) {
-                return -1;
-            }
-            result -= digit;
-        }
-        return -result;
-    }
-
-    private static int digit(final char c) {
-        switch (c) {
-        case '0':
-            return 0;
-        case '1':
-            return 1;
-        case '2':
-            return 2;
-        case '3':
-            return 3;
-        case '4':
-            return 4;
-        case '5':
-            return 5;
-        case '6':
-            return 6;
-        case '7':
-            return 7;
-        case '8':
-            return 8;
-        case '9':
-            return 9;
-        default:
-            return -1;
-        }
-    }
-
-    /**
      * Checks for presence of default folder full names and creates them if absent.
      *
      * @param account The corresponding account
@@ -236,7 +151,7 @@ public final class Tools {
         if (null == given_names) {
             given_names = new HashMap<String, String>();
         }
-        
+
         final int accountId = account.getId();
         if (MailAccount.DEFAULT_ID == accountId) {
             /*
@@ -707,4 +622,20 @@ public final class Tools {
         }
         return fullName.substring(fullName.lastIndexOf(separator) + 1);
     }
+
+    /**
+     * Validates specified account description.
+     *
+     * @param account The account to check
+     * @param session The associated session
+     * @param ignoreInvalidTransport
+     * @param warnings The warnings list
+     * @param errorOnDenied <code>true</code> to throw an error in case account description is denied (either by host or port); otherwise <code>false</code>
+     * @return <code>true</code> for successful validation; otherwise <code>false</code>
+     * @throws OXException If an severe error occurs
+     */
+    public static Boolean actionValidateBoolean(MailAccount account, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
+        return com.openexchange.mailaccount.json.actions.StatusAction.actionValidateBoolean(account, session, ignoreInvalidTransport, warnings, errorOnDenied);
+    }
+
 }

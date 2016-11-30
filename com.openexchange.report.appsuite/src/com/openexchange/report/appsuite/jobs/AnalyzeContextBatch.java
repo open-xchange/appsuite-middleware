@@ -65,13 +65,14 @@ import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportUserHandler;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.user.UserService;
 
 /**
  * The {@link AnalyzeContextBatch} class is the workhorse of the reporting system. It runs the reports on a batch of
- * context ids and is distributed cluster-wide via hazelcasts executor service.
+ * context ids.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
@@ -86,21 +87,6 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
     private String reportType;
     private List<Integer> contextIds;
     private Report report;
-
-    /**
-     *
-     * Initializes a new {@link AnalyzeContextBatch}.
-     *
-     * @param uuid The uuid of the report we're running
-     * @param reportType The type of report that is being run
-     * @param chunk a list of context IDs to analyze
-     */
-    public AnalyzeContextBatch(String uuid, String reportType, List<Integer> chunk) {
-        super();
-        this.uuid = uuid;
-        this.reportType = reportType;
-        this.contextIds = chunk;
-    }
 
     /**
      *
@@ -123,7 +109,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
     public Integer call() throws Exception {
         Thread currentThread = Thread.currentThread();
         int previousPriority = currentThread.getPriority();
-        currentThread.setPriority(Thread.MIN_PRIORITY);
+        currentThread.setPriority(ReportProperties.getThreadPriority());
 
         try {
             if (reportType == null) {
@@ -148,7 +134,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                         break;
                     }
                     if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {
-                        LOG.info("Stop execution of report generation due to an user instruction!");
+                        LOG.info("Stop execution of report generation due to an user instruction!" , oxException);
                         contextIds = Collections.emptyList();
                         reportService.abortGeneration(uuid, reportType, "Cancelled report generation based on user interaction.");
                         break;
@@ -198,19 +184,10 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
             UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);
             // Are extended options available?
             if (this.report != null) {
-                if (report.isAdminIgnore() && ctx.getMailadmin() == user.getId()) {
-                    continue;
-                }
-                userReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
-                userReport.setShowMailMetrics(this.report.isShowMailMetrics());
-                userReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
-                userReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                userReport.setReportConfig(this.report.getReportConfig());
                 //Add user to context
                 contextReport.getUserList().add(user.getId());
-                contextReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
-                contextReport.setShowMailMetrics(this.report.isShowMailMetrics());
-                contextReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
-                contextReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                contextReport.setReportConfig(this.report.getReportConfig());
             }
             // Run User Analyzers
             for (ReportUserHandler userHandler : Services.getUserHandlers()) {

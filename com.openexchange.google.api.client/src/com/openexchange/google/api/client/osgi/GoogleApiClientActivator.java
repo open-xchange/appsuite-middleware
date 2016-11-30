@@ -49,7 +49,9 @@
 
 package com.openexchange.google.api.client.osgi;
 
+import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -81,6 +83,8 @@ public final class GoogleApiClientActivator extends HousekeepingActivator {
 
         trackService(OAuthService.class);
         trackService(ConfigurationService.class);
+        trackService(ConfigViewFactory.class);
+        trackService(ClusterLockService.class);
         openTrackers();
     }
 

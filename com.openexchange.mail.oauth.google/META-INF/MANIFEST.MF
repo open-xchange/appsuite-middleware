@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The mail OAuth resolver for Google
+Bundle-SymbolicName: com.openexchange.mail.oauth.google
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.google.api.client.auth.oauth2,
+ com.google.api.client.googleapis.auth.oauth2,
+ com.google.api.client.googleapis.services,
+ com.google.api.client.http,
+ com.google.api.client.json,
+ com.google.api.services.gmail,
+ com.google.api.services.gmail.model,
+ com.google.api.services.oauth2,
+ com.google.api.services.oauth2.model,
+ com.openexchange.exception,
+ com.openexchange.google.api.client,
+ com.openexchange.i18n,
+ com.openexchange.mail.autoconfig,
+ com.openexchange.mail.oauth,
+ com.openexchange.oauth,
+ com.openexchange.oauth.access,
+ com.openexchange.oauth.scope,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.mail.oauth.google.osgi.GoogleMailOAuthActivator

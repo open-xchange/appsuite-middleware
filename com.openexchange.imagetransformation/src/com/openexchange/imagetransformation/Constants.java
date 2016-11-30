@@ -49,8 +49,9 @@
 
 package com.openexchange.imagetransformation;
 
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.imagetransformation.osgi.Services;
 
@@ -80,8 +81,8 @@ public class Constants {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return DefaultInterests.builder().propertiesOfInterest("com.openexchange.tools.images.maxHeight", "com.openexchange.tools.images.maxWidth").build();
             }
         });
     }

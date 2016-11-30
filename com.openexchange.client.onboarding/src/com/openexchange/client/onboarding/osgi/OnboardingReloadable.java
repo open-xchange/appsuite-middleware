@@ -55,6 +55,8 @@ import com.openexchange.client.onboarding.internal.ConfiguredScenario;
 import com.openexchange.client.onboarding.internal.OnboardingConfig;
 import com.openexchange.client.onboarding.internal.OnboardingServiceImpl;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 
@@ -89,8 +91,8 @@ public class OnboardingReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    public Interests getInterests() {
+        return DefaultInterests.builder().configFileNames(OnboardingConfig.getScenariosConfigFileName()).build();
     }
 
 }

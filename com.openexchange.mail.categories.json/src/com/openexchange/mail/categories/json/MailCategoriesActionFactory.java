@@ -51,8 +51,8 @@ package com.openexchange.mail.categories.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -87,10 +87,11 @@ public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
      */
     private MailCategoriesActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractCategoriesAction>(10, 0.9f, 1);
+        ImmutableMap.Builder<String, AbstractCategoriesAction> actions = ImmutableMap.builder();
         actions.put("unread", new UnreadAction(services));
         actions.put("train", new TrainAction(services));
         actions.put("move", new MoveAction(services));
+        this.actions = actions.build();
     }
 
     @Override

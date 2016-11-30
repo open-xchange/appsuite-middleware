@@ -50,6 +50,8 @@
 package com.openexchange.mail.service.impl;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -57,6 +59,10 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -96,6 +102,22 @@ public final class MailServiceImpl implements MailService {
     @Override
     public TransportConfig getTransportConfig(Session session, int accountId) throws OXException {
         return MailTransport.getInstance(session, accountId).getTransportConfig();
+    }
+
+    @Override
+    public String getMailLoginFor(int userId, int contextId, int accountId) throws OXException {
+        // Get the user
+        User user = UserStorage.getInstance().getUser(userId, contextId);
+
+        // Get the mail account
+        MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+        }
+        MailAccount mailAccount = service.getMailAccount(accountId, userId, contextId);
+
+        // Return login
+        return MailConfig.getMailLogin(mailAccount, user.getLoginInfo());
     }
 
 }

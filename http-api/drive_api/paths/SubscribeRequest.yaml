@@ -2,7 +2,7 @@
   get:
     operationId: subscribePushEvents
     tags:
-      - drive
+      - Drive
     summary: Subscribes to push events.
     description: |
       Registers a client device to receive push notifications from the server. The subscription is performed based on
@@ -29,3 +29,64 @@
           An empty JSON result. In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/CommonResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=subscribe&root=65841&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677
+
+          <== HTTP 200 OK (13.6268 ms elapsed, 11 bytes received)
+          <   Content: 
+              {
+                "data" : {
+                }
+              }
+  put:
+    operationId: subscribePushEvents
+    tags:
+      - Drive
+    summary: Subscribes to push events.
+    description: |
+      Registers a client device to receive push notifications from the server. Supported
+      services currently include the Apple Push Notification Service (APN) and Google Cloud Messaging (GCM). Trying
+      to perform an identical subscription from the same user account again
+      is treated as a no-op.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: service
+        type: string
+        description: The name of the underlying push service to use, currently one of gcm, apn, or apn.macos.
+        required: true
+      - in: query
+        name: token
+        type: string
+        description: The device's registration token as assigned by the service.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object named root holding a JSON array of those root folder identifiers to subscribe to.
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: |
+          An empty JSON result. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/CommonResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> PUT http://192.168.32.191/ajax/drive?action=subscribe&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677
+          > Content:
+            {
+              "root": [ "129136", "129137" ]
+            },
+
+          <== HTTP 200 OK (132.7421 ms elapsed, 11 bytes received)
+          <   Content: 
+              {
+                "data": {}
+              }

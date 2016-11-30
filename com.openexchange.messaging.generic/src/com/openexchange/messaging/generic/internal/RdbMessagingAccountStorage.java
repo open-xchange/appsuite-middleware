@@ -60,12 +60,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -188,15 +190,35 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         }
     }
 
-    private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
-
     @Override
     public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws OXException {
+        Context context = getContext(session);
+        return getAccounts(serviceId, session.getUserId(), context, modifier);
+    }
+
+    /**
+     * Gets all accounts belonging to specified user
+     *
+     * @param serviceId The service identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param modifier The optional modifier
+     * @return The accounts
+     * @throws OXException If accounts cannot be returned
+     */
+    public List<MessagingAccount> getAccounts(String serviceId, int userId, int contextId, Modifier modifier) throws OXException {
+        Context context = getContext(contextId);
+        return getAccounts(serviceId, userId, context, modifier);
+    }
+
+    private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
+
+    private List<MessagingAccount> getAccounts(String serviceId, int userId, Context context, Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
          */
-        final int contextId = session.getContextId();
+        int contextId = context.getContextId();
         final Connection rc = databaseService.getReadOnly(contextId);
         List<MessagingAccount> accounts;
         PreparedStatement stmt = null;
@@ -205,7 +227,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             stmt = rc.prepareStatement(SQL_SELECT_ACCOUNTS);
             int pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, session.getUserId());
+            stmt.setInt(pos++, userId);
             stmt.setString(pos, serviceId);
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -214,17 +236,80 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 final MessagingService messagingService;
                 {
                     final MessagingServiceRegistry registry = getService(MessagingServiceRegistry.class);
-                    messagingService = registry.getMessagingService(serviceId, session.getUserId(), session.getContextId());
+                    messagingService = registry.getMessagingService(serviceId, userId, contextId);
                 }
                 do {
                     final DefaultMessagingAccount account = new DefaultMessagingAccount();
                     account.setDisplayName(rs.getString(3));
                     final Map<String, Object> configuration = new HashMap<String, Object>();
-                    genericConfStorageService.fill(rc, getContext(session), rs.getInt(2), configuration);
+                    genericConfStorageService.fill(rc, context, rs.getInt(2), configuration);
                     account.setConfiguration(configuration);
                     account.setId(rs.getInt(1));
                     account.setMessagingService(messagingService);
                     accounts.add(modifier.modifyOutgoing(account));
+                } while (rs.next());
+            } else {
+                accounts = Collections.emptyList();
+            }
+            return accounts;
+        } catch (final SQLException e) {
+            throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, rc);
+        }
+    }
+
+    /**
+     * Gets all accounts belonging to specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param modifier The optional modifier
+     * @return All accounts for the user
+     * @throws OXException If accounts cannot be returned
+     */
+    public List<MessagingAccount> getAccounts(int userId, int contextId, Modifier modifier) throws OXException {
+        Context context = getContext(contextId);
+        return getAccounts(userId, context, modifier);
+    }
+
+    private static final String SQL_SELECT_USER_ACCOUNTS = "SELECT account, confId, displayName, serviceId FROM messagingAccount WHERE cid = ? AND user = ?";
+
+    private List<MessagingAccount> getAccounts(int userId, Context context, Modifier modifier) throws OXException {
+        final DatabaseService databaseService = getService(CLAZZ_DB);
+        /*
+         * Readable connection
+         */
+        int contextId = context.getContextId();
+        final Connection rc = databaseService.getReadOnly(contextId);
+        List<MessagingAccount> accounts;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = rc.prepareStatement(SQL_SELECT_USER_ACCOUNTS);
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                accounts = new LinkedList<MessagingAccount>();
+                final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
+                do {
+                    String serviceId = rs.getString(4);
+                    final MessagingService messagingService;
+                    {
+                        final MessagingServiceRegistry registry = getService(MessagingServiceRegistry.class);
+                        messagingService = registry.getMessagingService(serviceId, userId, contextId);
+                    }
+                    final DefaultMessagingAccount account = new DefaultMessagingAccount();
+                    account.setDisplayName(rs.getString(3));
+                    final Map<String, Object> configuration = new HashMap<String, Object>();
+                    genericConfStorageService.fill(rc, context, rs.getInt(2), configuration);
+                    account.setConfiguration(configuration);
+                    account.setId(rs.getInt(1));
+                    account.setMessagingService(messagingService);
+                    accounts.add(null == modifier ? account : modifier.modifyOutgoing(account));
                 } while (rs.next());
             } else {
                 accounts = Collections.emptyList();
@@ -380,7 +465,6 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         return encryptionService.decrypt(session, toDecrypt, new GenericProperty(confId, propertyName, serviceId, id, session));
     }
 
-    private static final String SQL_DELETE = "DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
     @Override
     public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
@@ -398,20 +482,58 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
      * @throws OXException If delete operation fails
      */
     public void deleteAccounts(final String serviceId, final MessagingAccount[] accounts, final int[] genericConfIds, final Session session, final Modifier optModifier) throws OXException {
-        final DatabaseService databaseService = getService(CLAZZ_DB);
-        /*
-         * Writable connection
-         */
-        final int contextId = session.getContextId();
-        final Connection wc;
+        Context context = getContext(session);
+        deleteAccounts(serviceId, accounts, genericConfIds, session.getUserId(), context, optModifier);
+    }
+
+    /**
+     * Deletes specified accounts.
+     *
+     * @param serviceId The service identifier
+     * @param accounts The accounts to delete
+     * @param genericConfIds The associated identifiers of generic configuration
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param optModifier The modifier
+     * @param con The optional connection to use
+     * @throws OXException If delete operation fails
+     */
+    public void deleteAccounts(final String serviceId, final MessagingAccount[] accounts, final int[] genericConfIds, int userId, int contextId, final Modifier optModifier, Connection con) throws OXException {
+        Context context = getContext(contextId);
+        if (null == con) {
+            deleteAccounts(serviceId, accounts, genericConfIds, userId, context, optModifier);
+        } else {
+            deleteAccounts(serviceId, accounts, genericConfIds, userId, context, optModifier, con);
+        }
+    }
+
+    private void deleteAccounts(String serviceId, MessagingAccount[] accounts, int[] genericConfIds, int userId, Context context, Modifier optModifier) throws OXException {
+        DatabaseService databaseService = getService(CLAZZ_DB);
+        int contextId = context.getContextId();
+        Connection con = databaseService.getWritable(contextId);
+        boolean rollback = false;
         try {
-            wc = databaseService.getWritable(contextId);
-            wc.setAutoCommit(false); // BEGIN
+            Databases.startTransaction(con);
+            rollback = false;
+
+            deleteAccounts(serviceId, accounts, genericConfIds, userId, context, optModifier, con);
+
+            con.commit();
+            rollback = false;
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            databaseService.backWritable(contextId, con);
         }
-        boolean committed = false;
+    }
+
+    private void deleteAccounts(String serviceId, MessagingAccount[] accounts, int[] genericConfIds, int userId, Context context, Modifier optModifier, Connection con) throws OXException {
         try {
+            int contextId = context.getContextId();
             for (int i = 0; i < accounts.length; i++) {
                 final MessagingAccount account = accounts[i];
                 if (null != optModifier) {
@@ -425,19 +547,19 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                     final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                     int genericConfId = genericConfIds[i];
                     if (genericConfId <= 0) {
-                        genericConfId = getGenericConfId(contextId, session.getUserId(), serviceId, accountId, wc);
+                        genericConfId = getGenericConfId(contextId, userId, serviceId, accountId, con);
                     }
-                    genericConfStorageService.delete(wc, getContext(session), genericConfId);
+                    genericConfStorageService.delete(con, context, genericConfId);
                 }
                 /*
                  * Delete account data
                  */
                 PreparedStatement stmt = null;
                 try {
-                    stmt = wc.prepareStatement(SQL_DELETE);
+                    stmt = con.prepareStatement("DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?");
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos++, session.getUserId());
+                    stmt.setInt(pos++, userId);
                     stmt.setString(pos++, serviceId);
                     stmt.setInt(pos, accountId);
                     stmt.executeUpdate();
@@ -447,18 +569,10 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                     DBUtils.closeSQLStuff(stmt);
                 }
             }
-            wc.commit();
-            committed = true;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (!committed) {
-                DBUtils.rollback(wc);
-            }
-            DBUtils.autocommit(wc);
-            databaseService.backWritable(contextId, wc);
         }
     }
 
@@ -550,7 +664,11 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getContext();
         }
-        return getService(ContextService.class).getContext(session.getContextId());
+        return getContext(session.getContextId());
+    }
+
+    private static Context getContext(int contextId) throws OXException {
+        return getService(ContextService.class).getContext(contextId);
     }
 
     private static int getGenericConfId(final int contextId, final int userId, final String serviceId, final int accountId, final Connection con) throws OXException, SQLException {

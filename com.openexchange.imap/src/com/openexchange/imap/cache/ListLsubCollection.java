@@ -73,7 +73,9 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPReloadable;
@@ -472,8 +474,8 @@ final class ListLsubCollection implements Serializable {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.initStatusThreshold", "com.openexchange.imap.initAclThreshold");
             }
         });
     }
@@ -777,6 +779,10 @@ final class ListLsubCollection implements Serializable {
         final ListLsubEntryImpl p = lle.getParentImpl();
         if (null != p) {
             p.removeChild(lle);
+            if (p.isDummy() && p.emptyChildren()) {
+                // Drop dummy parent, too
+                dropEntryFrom(p, map);
+            }
         }
     }
 
@@ -1153,7 +1159,7 @@ final class ListLsubCollection implements Serializable {
                             true,
                             false,
                             Boolean.TRUE,
-                            lsub ? null : lsubMap);
+                            lsub ? null : lsubMap).setDummy(true);
                     if (isNamespace(parentFullName)) {
                         parent.setNamespace(true);
                         if (equalsNamespace(parentFullName)) {
@@ -2272,6 +2278,8 @@ final class ListLsubCollection implements Serializable {
         private Rights myRights;
 
         private Boolean subscribed;
+        
+        private boolean dummy;
 
         protected ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
@@ -2291,6 +2299,7 @@ final class ListLsubCollection implements Serializable {
             }
             this.type = type;
             this.lsubMap = lsubMap;
+            dummy = false;
         }
 
         protected ListLsubEntryImpl(final ListLsubEntryImpl newEntry, final boolean subscribed) {
@@ -2306,6 +2315,7 @@ final class ListLsubCollection implements Serializable {
             hasChildren = newEntry.hasChildren;
             this.subscribed = Boolean.valueOf(subscribed);
             lsubMap = null;
+            dummy = false;
         }
 
         protected void copyFrom(final ListLsubEntryImpl newEntry) {
@@ -2320,12 +2330,33 @@ final class ListLsubCollection implements Serializable {
             type = newEntry.type;
             namespace = newEntry.namespace;
             hasChildren = newEntry.hasChildren;
+            dummy = newEntry.dummy;
         }
 
         protected void clearChildren() {
             if (children != null) {
                 children.clear();
             }
+        }
+        
+        /**
+         * Sets the dummy flag
+         *
+         * @param dummy The dummy flag to set
+         * @return This instance
+         */
+        protected ListLsubEntryImpl setDummy(boolean dummy) {
+            this.dummy = dummy;
+            return this;
+        }
+        
+        /**
+         * Gets the dummy flag
+         *
+         * @return The dummy flag
+         */
+        protected boolean isDummy() {
+            return dummy;
         }
 
         @Override
@@ -2416,6 +2447,15 @@ final class ListLsubCollection implements Serializable {
 
         protected Set<ListLsubEntryImpl> getChildrenSet() {
             return null == children ? Collections.<ListLsubEntryImpl> emptySet() : children;
+        }
+
+        /**
+         * Checks if children listing is empty
+         *
+         * @return <code>true</code> if there are no children listed; otherwise <code>false</code>
+         */
+        protected boolean emptyChildren() {
+            return null == children ? true : children.isEmpty();
         }
 
         @Override

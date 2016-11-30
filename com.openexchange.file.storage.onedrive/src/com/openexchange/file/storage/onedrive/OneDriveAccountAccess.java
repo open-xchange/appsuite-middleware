@@ -60,7 +60,12 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
+import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
+import com.openexchange.file.storage.onedrive.osgi.Services;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.session.Session;
 
 /**
@@ -73,7 +78,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private OneDriveAccess oneDriveAccess;
+    private volatile OAuthAccess oneDriveAccess;
 
     /**
      * Initializes a new {@link OneDriveAccountAccess}.
@@ -103,7 +108,20 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
 
     @Override
     public void connect() throws OXException {
-        oneDriveAccess = OneDriveAccess.accessFor(account, session);
+        OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
+        OAuthAccessRegistry registry = service.get(API.MS_LIVE_CONNECT.getFullName());
+        OAuthAccess oneDriveAccess = registry.get(session.getContextId(), session.getUserId());
+        if (oneDriveAccess == null) {
+            OneDriveOAuthAccess access = new OneDriveOAuthAccess(account, session);
+            oneDriveAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), access);
+            if (oneDriveAccess == null) {
+                access.initialize();
+                oneDriveAccess = access;
+            }
+            this.oneDriveAccess = oneDriveAccess;
+        } else {
+            this.oneDriveAccess = oneDriveAccess.ensureNotExpired();
+        }
     }
 
     @Override
@@ -118,7 +136,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
 
     @Override
     public boolean ping() throws OXException {
-        return OneDriveAccess.pingFor(account, session);
+        return oneDriveAccess.ping();
     }
 
     @Override
@@ -133,20 +151,20 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
-        OneDriveAccess oneDriveAccess = this.oneDriveAccess;
+        OAuthAccess oneDriveAccess = this.oneDriveAccess;
         if (null == oneDriveAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new OneDriveFileAccess(oneDriveAccess, account, session, this);
+        return new OneDriveFileAccess((OneDriveOAuthAccess) oneDriveAccess, account, session, this);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        OneDriveAccess oneDriveAccess = this.oneDriveAccess;
+        OAuthAccess oneDriveAccess = this.oneDriveAccess;
         if (null == oneDriveAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new OneDriveFolderAccess(oneDriveAccess, account, session, this);
+        return new OneDriveFolderAccess((OneDriveOAuthAccess) oneDriveAccess, account, session, this);
     }
 
     @Override

@@ -51,14 +51,15 @@ package com.openexchange.contact.storage.ldap.osgi;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.ldap.config.LdapContactStorageFactory;
@@ -74,6 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -99,7 +101,7 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, TimerService.class,
-            CacheService.class, ConfigurationService.class, CapabilityService.class };
+            CacheService.class, ConfigurationService.class, CapabilityService.class, SSLSocketFactoryProvider.class };
     }
 
     @Override
@@ -171,8 +173,8 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>();
+    public Interests getInterests() {
+        Set<String> fileNames = new TreeSet<>();
         try {
             File[] newProperties = Tools.listPropertyFiles();
             Set<File> files = new HashSet<File>(Arrays.asList(newProperties));
@@ -181,14 +183,15 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
             }
             oldProperties = Arrays.copyOf(newProperties, newProperties.length);
             for (File propertyFile : files) {
-                if (null != map.put(propertyFile.getName(), PROPERTIES)) {
-                    LOG.warn("Duplicate entry in map: {}", propertyFile.getName());
+                if (false == fileNames.add(propertyFile.getName())) {
+                    LOG.warn("Duplicate entry in set: {}", propertyFile.getName());
                 }
             }
         } catch (OXException e) {
             LOG.error("error reloading config file: {}", e);
         }
-        return map;
+
+        return DefaultInterests.builder().configFileNames(fileNames.toArray(new String[fileNames.size()])).build();
     }
 
 }

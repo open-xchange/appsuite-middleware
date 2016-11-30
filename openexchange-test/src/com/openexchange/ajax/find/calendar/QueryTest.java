@@ -231,7 +231,7 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testFilterParticipants() throws Exception {
-        ExternalUserParticipant participant = new ExternalUserParticipant(randomUID() + "example.com");
+        ExternalUserParticipant participant = new ExternalUserParticipant(randomUID() + "@example.com");
         Appointment appointment = randomPrivateAppointment();
         appointment.addParticipant(participant);
         appointment = manager.insert(appointment);

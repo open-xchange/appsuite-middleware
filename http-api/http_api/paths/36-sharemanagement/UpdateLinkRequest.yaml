@@ -2,8 +2,8 @@
   put:
     operationId: updateShareLink
     tags:
-      - share/management
-    summary: Updates a share link (**available since v7.8.0**).
+      - Share/Management
+    summary: Updates a share link.
     consumes:
       - application/json
     parameters:
@@ -24,6 +24,6 @@
       200:
         description: |
           A JSON object containing data of the (newly created) share link. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ShareLinkResponse"

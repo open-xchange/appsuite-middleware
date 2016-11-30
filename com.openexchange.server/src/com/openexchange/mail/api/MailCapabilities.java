@@ -208,10 +208,21 @@ public abstract class MailCapabilities {
      * Indicates if mail system supports search of attachment file names.
      * <p>
      * Defaults to <code>false</code>
-     * 
+     *
      * @return <code>true</code> if mail system supports search of attachment file names; otherwise <code>false</code>
      */
     public boolean hasFileNameSearch() {
+        return false;
+    }
+
+    /**
+     * Indicates if mail system supports retrieving folder validity information.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports retrieving folder validity information; otherwise <code>false</code>
+     */
+    public boolean hasFolderValidity() {
         return false;
     }
 

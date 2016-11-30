@@ -108,3 +108,17 @@ CREATE TABLE replicationMonitor (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO replicationMonitor (cid,transaction) VALUES (0,0);
+
+CREATE TABLE advertisement_mapping (
+    reseller VARCHAR(128) NOT NULL,
+    package VARCHAR(128) NOT NULL,
+    configId int NOT NULL,    
+    PRIMARY KEY (reseller, package)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    
+CREATE TABLE advertisement_config (
+	configId int NOT NULL AUTO_INCREMENT,
+	reseller VARCHAR(128) NOT NULL,
+	config text NOT NULL,
+	PRIMARY KEY (configId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

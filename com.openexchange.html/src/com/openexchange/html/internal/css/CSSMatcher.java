@@ -245,7 +245,7 @@ public final class CSSMatcher {
          * Ensure to check against pattern first
          */
         for (Iterator<String> it = allowedValues.iterator(); it.hasNext();) {
-            final String allowedValue = it.next();
+            String allowedValue = it.next();
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
                 it.remove();
                 if (allowedValue.indexOf('d') >= 0) {

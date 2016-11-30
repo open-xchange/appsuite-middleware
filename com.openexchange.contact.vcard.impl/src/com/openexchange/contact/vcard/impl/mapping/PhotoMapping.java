@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
@@ -73,6 +74,7 @@ import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
@@ -100,7 +102,7 @@ public class PhotoMapping extends AbstractMapping {
      * Initializes a new {@link PhotoMapping}.
      */
     public PhotoMapping() {
-        super("PHOTO");
+        super("PHOTO", ContactField.IMAGE1, ContactField.NUMBER_OF_IMAGES, ContactField.IMAGE1_CONTENT_TYPE);
     }
 
     @Override
@@ -128,6 +130,11 @@ public class PhotoMapping extends AbstractMapping {
     }
 
     private static Photo exportPhoto(Contact contact, VCardParameters parameters, List<OXException> warnings) {
+        URI photoUri = contact.getProperty("com.openexchange.contact.vcard.photo.uri");
+        if (null != photoUri) {
+            String contentType = contact.getProperty("com.openexchange.contact.vcard.photo.contentType");
+            return new Photo(photoUri.toString(), getImageType(contentType));
+        }
         byte[] contactImage = contact.getImage1();
         if (null != contactImage) {
             ImageType imageType = getImageType(contact.getImageContentType());
@@ -175,6 +182,10 @@ public class PhotoMapping extends AbstractMapping {
             }
         } else if (null != photo.getUrl()) {
             String urlString = photo.getUrl();
+            URI photoUri = contact.getProperty("com.openexchange.contact.vcard.photo.uri");
+            if (null != photoUri && photoUri.toString().equals(urlString)) {
+                return; // no changes
+            }
             IFileHolder fileHolder = null;
             InputStream inputStream = null;
             try {
@@ -229,6 +240,9 @@ public class PhotoMapping extends AbstractMapping {
     }
 
     private static ImageType getImageType(String mimeType) {
+        if (null == mimeType) {
+            return ImageType.JPEG;
+        }
         ImageType imageType = ImageType.find(null, mimeType, null);
         return null != imageType ? imageType : ImageType.JPEG;
     }

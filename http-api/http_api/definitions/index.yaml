@@ -190,6 +190,10 @@ ResolveShareReferenceElement:
   $ref: ./mail/ResolveShareReferenceElement.yaml
 ResolveShareReferenceResponse:
   $ref: ./mail/ResolveShareReferenceResponse.yaml
+ExamineResponse:
+ $ref: ./mail/ExamineResponse.yaml
+PutAttachmentBody:
+ $ref: ./mail/PutAttachmentBody.yaml
 # Module: groups
 GroupData:
   $ref: ./groups/GroupData.yaml
@@ -288,8 +292,8 @@ ReminderResponse:
 # Module: multiple
 SingleRequest:
   $ref: ./multiple/SingleRequest.yaml
-SingleResponse:
-  $ref: ./multiple/SingleResponse.yaml
+MultipleResponse:
+  $ref: ./multiple/MultipleResponse.yaml
 # Module: quota
 QuotasResponse:
   $ref: ./quota/QuotasResponse.yaml
@@ -349,6 +353,8 @@ MailAccountDeletionResponse:
   $ref: ./mailaccount/MailAccountDeletionResponse.yaml
 MailAccountValidationResponse:
   $ref: ./mailaccount/MailAccountValidationResponse.yaml
+MailAccountStatusResponse:
+  $ref: ./mailaccount/MailAccountStatusResponse.yaml
 # Module: autoconfig
 AutoConfigResponse:
   $ref: ./autoconfig/AutoConfigResponse.yaml
@@ -539,3 +545,17 @@ Mail_CategoriesMoveBody:
   $ref: ./mail_categories/Mail_CategoriesMoveBody.yaml
 Mail_CategoriesTrainBody:
   $ref: ./mail_categories/Mail_CategoriesTrainBody.yaml
+# Module: clientonboarding
+ClientOnboardingData:
+  $ref: ./clientonboarding/ClientOnboardingData.yaml
+ClientOnboardingResponse:
+  $ref: ./clientonboarding/ClientOnboardingResponse.yaml
+# Module: pns
+PnsData:
+  $ref: ./pns/PnsData.yaml
+PnsResponse:
+  $ref: ./pns/PnsResponse.yaml
+SubscriptionData:
+  $ref: ./pns/SubscriptionData.yaml
+UnsubscriptionData:
+  $ref: ./pns/UnsubscriptionData.yaml

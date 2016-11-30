@@ -969,8 +969,6 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_ADD_PERMS = "INSERT INTO oxfolder_permissions" + " (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, system)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
     /**
      * Inserts a single folder permission.
      *
@@ -1023,11 +1021,11 @@ public final class OXFolderSQL {
             stmt = null;
 
             // Do the update if absent
-            final boolean success;
+            boolean success;
             if (alreadyExists) {
                 success = true;
             } else {
-                stmt = wc.prepareStatement(SQL_ADD_PERMS);
+                stmt = wc.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
                 stmt.setInt(pos++, folderId);
@@ -1039,7 +1037,16 @@ public final class OXFolderSQL {
                 stmt.setInt(pos++, objectDeletePermission);
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
                 stmt.setInt(pos++, system);
-                success = executeUpdate(stmt) == 1;
+                try {
+                    success = executeUpdate(stmt) == 1;
+                } catch (SQLException e) {
+                    // INSERT failed
+                    if (false == Databases.isPrimaryKeyConflictInMySQL(e)) {
+                        throw e;
+                    }
+                    // Already available
+                    success = true;
+                }
             }
 
             if (startedTransaction) {
@@ -3081,6 +3088,33 @@ public final class OXFolderSQL {
         } finally {
             closeResources(rs, stmt, null, true, ctx);
         }
+    }
+
+    private static final String SQL_CLEAN_LOCKS =   "DELETE FROM infostore_lock WHERE cid=? AND userid=? AND " +
+                                                    "entity IN (SELECT id FROM infostore WHERE cid=? AND folder_id=?) AND " +
+                                                    "entity NOT IN (SELECT object_id FROM object_permission WHERE cid=? AND folder_id=?) AND " +
+                                                    "entity NOT IN (SELECT i.id FROM oxfolder_permissions AS fp INNER JOIN infostore AS i ON i.folder_id=fp.fuid AND i.cid=fp.cid WHERE fp.owp=2 AND i.created_by=?);";
+
+    static void cleanLocksForFolder(int folder, int[] userIds, Connection con, Context ctx) throws SQLException {
+
+        PreparedStatement stmt = null;
+        try {
+            for (int userId : userIds) {
+                stmt = con.prepareStatement(SQL_CLEAN_LOCKS);
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, userId);
+                stmt.setInt(3, ctx.getContextId());
+                stmt.setInt(4, folder);
+                stmt.setInt(5, ctx.getContextId());
+                stmt.setInt(6, folder);
+                stmt.setInt(7, userId);
+                stmt.execute();
+                closeSQLStuff(stmt);
+            }
+        } finally {
+            closeResources(null, stmt, null, true, ctx);
+        }
+
     }
 
     /**

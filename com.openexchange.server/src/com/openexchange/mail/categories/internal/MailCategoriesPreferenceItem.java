@@ -96,7 +96,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
         return new String[] { "modules", "mail", "categories" };
     }
 
-    private static final String MAIL_CATEGORIES_CAPABILTY = "mail_categories";
+    private static final String MAIL_CATEGORIES_CAPABILITY = "mail_categories";
 
     private static final String FIELD_LIST = "list";
     private static final String FIELD_FEATURE_ENABLED = "enabled";
@@ -118,7 +118,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
             @Override
             public boolean isAvailable(UserConfiguration userConfig) {
-                return userConfig.hasWebMail() && userConfig.getExtendedPermissions().contains(MAIL_CATEGORIES_CAPABILTY);
+                return userConfig.hasWebMail() && userConfig.getExtendedPermissions().contains(MAIL_CATEGORIES_CAPABILITY);
             }
 
             @Override
@@ -128,7 +128,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                 }
 
                 CapabilityService service = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
-                return service.getCapabilities(session).contains(MAIL_CATEGORIES_CAPABILTY);
+                return service.getCapabilities(session).contains(MAIL_CATEGORIES_CAPABILITY);
             }
 
             @Override
@@ -187,7 +187,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
             public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
 
                 CapabilityService capabilityService = lookupService.getService(CapabilityService.class);
-                if (capabilityService == null || !capabilityService.getCapabilities(session).contains(MAIL_CATEGORIES_CAPABILTY)) {
+                if (capabilityService == null || !capabilityService.getCapabilities(session).contains(MAIL_CATEGORIES_CAPABILITY)) {
                     return;
                 }
 
@@ -225,7 +225,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                         try {
                             service.updateConfigurations(newConfigs, session, user.getLocale());
                         } catch (OXException e) {
-                            throw SettingExceptionCodes.NOT_ALLOWED.create();
+                            throw SettingExceptionCodes.NOT_ALLOWED.create(e, new Object[0]);
                         }
                     }
                 } catch (JSONException e) {

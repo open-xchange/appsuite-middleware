@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JRugged Java Library
+Bundle-SymbolicName: org.fishwife.jrugged
+Bundle-Version: 3.2.2
+Bundle-Vendor: Comcast Interactive Media, LLC.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: lib/jrugged-core-3.2.2.jar,
+ .
+Export-Package: org.fishwife.jrugged,
+ org.fishwife.jrugged.clocks,
+ org.fishwife.jrugged.control,
+ org.fishwife.jrugged.interval

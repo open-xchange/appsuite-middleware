@@ -17,7 +17,7 @@ BuildRequires:    java-devel >= 1.7.0
 BuildRequires:    systemd-rpm-macros
 %endif
 Version:          @OXVERSION@
-%define           ox_release 16
+%define           ox_release 5
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -26,6 +26,8 @@ URL:              http://www.open-xchange.com/
 Source:           %{name}_%{version}.orig.tar.bz2
 Source1:          open-xchange.init
 Source2:          open-xchange.service
+%define           dropin_dir /etc/systemd/system/open-xchange.service.d
+%define           dropin_example limits.conf
 Summary:          The Open-Xchange backend
 Requires:         open-xchange-core >= @OXVERSION@
 Requires:         open-xchange-authentication
@@ -39,7 +41,7 @@ Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
 %endif
-%if 0%{?rhel_version}
+%if 0%{?rhel_version} && 0%{?rhel_version} < 700
 # Bug #23216
 Requires:         redhat-lsb
 %endif
@@ -75,6 +77,18 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %service_add_post open-xchange.service
 %endif
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700)
+if [ ! -f %{dropin_dir}/%{dropin_example} ]
+then
+  install -D -m 644 %{_defaultdocdir}/%{name}-%{version}/%{dropin_example} %{dropin_dir}/%{dropin_example}
+fi
+%endif
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+if [ ! -f %{dropin_dir}/%{dropin_example} ]
+then
+  install -D -m 644 %{_defaultdocdir}/%{name}/%{dropin_example} %{dropin_dir}/%{dropin_example}
+fi
+%endif
 
 %preun
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
@@ -99,31 +113,24 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 /usr/sbin/rcopen-xchange
 %endif
 
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%doc docs/%{dropin_example}
+%endif
+
+
 %changelog
-* Sat Nov 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-11-21 (3731)
-* Tue Nov 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-11-07 (3678)
-* Wed Oct 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-08 (3699)
-* Mon Oct 17 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-10-24 (3630)
-* Thu Oct 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-10-10 (3597)
-* Mon Sep 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-26 (3572)
-* Mon Sep 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-08 (3580)
-* Mon Sep 05 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-12 (3547)
-* Mon Aug 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-29 (3522)
-* Mon Aug 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-26 (3512)
-* Mon Aug 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-15 (3490)
-* Fri Jul 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-01 (3467)
+* Fri Nov 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.3 release
+* Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Third preview for 7.8.3 release
+* Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.8.3 release
+* Fri Oct 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First preview 7.8.3 release
+* Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>

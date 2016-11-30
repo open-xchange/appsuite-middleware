@@ -2,8 +2,8 @@
   get:
     operationId: getContactByUser
     tags:
-      - contacts
-    summary: Gets a contact by user ID (**available since SP4**).
+      - Contacts
+    summary: Gets a contact by user ID.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -15,6 +15,6 @@
       200:
         description: |
           An object containing all data of the requested contact. In case of errors the
-          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ContactResponse"

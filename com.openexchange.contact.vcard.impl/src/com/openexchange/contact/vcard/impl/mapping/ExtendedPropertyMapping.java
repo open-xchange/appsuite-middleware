@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.RawProperty;
@@ -65,9 +66,16 @@ public abstract class ExtendedPropertyMapping extends SimpleMapping<RawProperty>
 
     protected final String propertyName;
 
-    protected ExtendedPropertyMapping(int field, String name) {
-        super(field, RawProperty.class, name);
-        this.propertyName = name;
+    /**
+     * Initializes a new {@link ExtendedPropertyMapping}.
+     *
+     * @param field The contact field
+     * @param propertyName The vCard property name
+     * @param contactFields The corresponding contact fields
+     */
+    protected ExtendedPropertyMapping(int field, String propertyName, ContactField...contactFields) {
+        super(field, RawProperty.class, propertyName);
+        this.propertyName = propertyName;
     }
 
     @Override

@@ -50,30 +50,26 @@
 package com.openexchange.file.storage.boxcom;
 
 import static com.openexchange.java.Strings.isEmpty;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import com.box.boxjavalibv2.BoxClient;
-import com.box.boxjavalibv2.dao.BoxCollection;
-import com.box.boxjavalibv2.dao.BoxFile;
-import com.box.boxjavalibv2.dao.BoxFolder;
-import com.box.boxjavalibv2.dao.BoxThumbnail;
-import com.box.boxjavalibv2.dao.BoxTypedObject;
-import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
-import com.box.boxjavalibv2.exceptions.BoxJSONException;
-import com.box.boxjavalibv2.exceptions.BoxServerException;
-import com.box.boxjavalibv2.requests.requestobjects.BoxFileRequestObject;
-import com.box.boxjavalibv2.requests.requestobjects.BoxImageRequestObject;
-import com.box.boxjavalibv2.requests.requestobjects.BoxItemCopyRequestObject;
-import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
-import com.box.boxjavalibv2.resourcemanagers.IBoxFilesManager;
-import com.box.restclientv2.exceptions.BoxRestException;
-import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
-import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.box.sdk.BoxAPIConnection;
+import com.box.sdk.BoxAPIException;
+import com.box.sdk.BoxFile.Info;
+import com.box.sdk.BoxItem;
+import com.box.sdk.BoxSearch;
+import com.box.sdk.BoxSearchParameters;
+import com.box.sdk.PartialCollection;
+import com.box.sdk.ProgressListener;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -86,12 +82,12 @@ import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
-import com.openexchange.file.storage.boxcom.access.BoxAccess;
-import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
+import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -104,7 +100,9 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageLockedFileAccess {
 
-    private static final String THUMBNAIL_EXTENSION = "png";
+    static final Logger LOGGER = LoggerFactory.getLogger(BoxFileAccess.class);
+
+    // --------------------------------------------------------------------------------------------
 
     private final BoxAccountAccess accountAccess;
     final int userId;
@@ -112,16 +110,10 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     /**
      * Initializes a new {@link BoxFileAccess}.
      */
-    public BoxFileAccess(BoxAccess boxAccess, FileStorageAccount account, Session session, BoxAccountAccess accountAccess) throws OXException {
+    public BoxFileAccess(BoxOAuthAccess boxAccess, FileStorageAccount account, Session session, BoxAccountAccess accountAccess) throws OXException {
         super(boxAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
-    }
-
-    protected void checkFileValidity(BoxTypedObject typedObject) throws OXException {
-        if (isFolder(typedObject) || null != ((BoxFile) typedObject).getTrashedAt()) {
-            throw FileStorageExceptionCodes.NOT_A_FILE.create(BoxConstants.ID, typedObject.getId());
-        }
     }
 
     @Override
@@ -164,19 +156,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
+            protected Boolean doPerform() throws BoxAPIException, OXException {
                 try {
-                    BoxClient boxClient = boxAccess.getBoxClient();
-                    BoxFile file = boxClient.getFilesManager().getFile(id, customRequestObject(Arrays.asList(BoxFile.FIELD_ID)));
-                    checkFileValidity(file);
+                    BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
+                    com.box.sdk.BoxFile file = new com.box.sdk.BoxFile(boxClient, id);
+                    checkFileValidity(file.getInfo("trashed_at"));
                     return Boolean.TRUE;
-                } catch (final BoxRestException e) {
-                    if (404 == e.getStatusCode()) {
-                        return Boolean.FALSE;
-                    }
-                    throw e;
-                } catch (final BoxServerException e) {
-                    if (404 == e.getStatusCode()) {
+                } catch (final BoxAPIException e) {
+                    if (SC_NOT_FOUND == e.getResponseCode()) {
                         return Boolean.FALSE;
                     }
                     throw e;
@@ -190,19 +177,20 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<File>() {
 
             @Override
-            protected File doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
+            protected File doPerform() throws BoxAPIException, OXException {
                 try {
-                    BoxClient boxClient = boxAccess.getBoxClient();
+                    BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
 
                     // Versions are only tracked for Box users with premium accounts- Hence we do not support it (anymore)
                     /* final int versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, customRequestObject(Arrays.asList(BoxFile.FIELD_NAME))).size(); */
 
-                    BoxFile file = boxClient.getFilesManager().getFile(id, defaultBoxRequest());
-                    checkFileValidity(file);
+                    com.box.sdk.BoxFile file = new com.box.sdk.BoxFile(boxClient, id);
+                    Info fileInfo = file.getInfo();
+                    checkFileValidity(fileInfo);
 
-                    com.openexchange.file.storage.boxcom.BoxFile boxFile = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(file);
+                    com.openexchange.file.storage.boxcom.BoxFile boxFile = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(fileInfo);
                     return boxFile;
-                } catch (final BoxServerException e) {
+                } catch (final BoxAPIException e) {
                     throw handleHttpResponseError(id, account.getId(), e);
                 }
             }
@@ -220,20 +208,19 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             return perform(new BoxClosure<IDTuple>() {
 
                 @Override
-                protected IDTuple doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                protected IDTuple doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                     try {
-                        BoxClient boxClient = boxAccess.getBoxClient();
-                        BoxFile boxfile = boxClient.getFilesManager().getFile(file.getId(), customRequestObject(Arrays.asList(BoxFile.FIELD_TYPE)));
-                        checkFileValidity(boxfile);
+                        BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
+                        com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(boxClient, file.getId());
+                        Info fileInfo = boxFile.getInfo();
+                        checkFileValidity(fileInfo);
 
-                        BoxFileRequestObject requestObject = BoxFileRequestObject.getRequestObject();
+                        fileInfo.setName(file.getFileName());
+                        fileInfo.setDescription(file.getDescription());
+                        boxFile.updateInfo(fileInfo);
 
-                        requestObject.setName(file.getFileName());
-                        requestObject.setDescription(file.getDescription());
-                        boxfile = boxClient.getFilesManager().updateFileInfo(file.getId(), requestObject);
-
-                        return new IDTuple(file.getFolderId(), boxfile.getId());
-                    } catch (final BoxServerException e) {
+                        return new IDTuple(file.getFolderId(), boxFile.getID());
+                    } catch (final BoxAPIException e) {
                         throw handleHttpResponseError(file.getId(), account.getId(), e);
                     }
                 }
@@ -243,7 +230,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, String version, final String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(final IDTuple source, final String version, final String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
             // can only copy the current revision
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(BoxConstants.ID);
@@ -252,17 +239,18 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
+            protected IDTuple doPerform() throws BoxAPIException, OXException {
                 try {
-                    BoxClient boxClient = boxAccess.getBoxClient();
-                    BoxFile boxfile = boxClient.getFilesManager().getFile(source.getId(), null);
-                    checkFileValidity(boxfile);
+                    BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
+                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(boxClient, source.getId());
+                    com.box.sdk.BoxFile.Info fileInfo = boxFile.getInfo();
+                    checkFileValidity(fileInfo);
 
                     String boxFolderId = toBoxFolderId(destFolder);
-                    BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(boxFolderId, null);
+                    com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(boxClient, boxFolderId);
 
                     // Check destination folder
-                    String title = boxfile.getName();
+                    String title = fileInfo.getName();
                     {
                         String baseName;
                         String ext;
@@ -276,12 +264,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                                 ext = "";
                             }
                         }
+
                         int count = 1;
                         boolean keepOn = true;
                         while (keepOn) {
                             keepOn = false;
-                            for (BoxTypedObject child : boxfolder.getItemCollection().getEntries()) {
-                                if (isFile(child) && title.equals(((BoxFile) child).getName())) {
+                            for (com.box.sdk.BoxItem.Info info : boxFolder) {
+                                // Check for filename clashes and append a number at the end of the filename
+                                if (info instanceof Info && title.equals(info.getName())) {
                                     keepOn = true;
                                     title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
                                     break;
@@ -290,12 +280,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         }
                     }
 
-                    BoxItemCopyRequestObject reqObj = BoxItemCopyRequestObject.copyItemRequestObject(boxFolderId);
-                    reqObj.setName(title);
-                    BoxFile copiedFile = boxClient.getFilesManager().copyFile(source.getId(), reqObj);
+                    // Copy the file
+                    Info copiedFile = boxFile.copy(boxFolder, title);
 
-                    return new IDTuple(destFolder, copiedFile.getId());
-                } catch (final BoxServerException e) {
+                    return new IDTuple(destFolder, copiedFile.getID());
+                } catch (final BoxAPIException e) {
                     throw handleHttpResponseError(source.getId(), account.getId(), e);
                 }
             }
@@ -307,17 +296,18 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected IDTuple doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
-                    BoxClient boxClient = boxAccess.getBoxClient();
-                    BoxFile boxfile = boxClient.getFilesManager().getFile(source.getId(), null);
-                    checkFileValidity(boxfile);
+                    BoxAPIConnection apiConnection = getAPIConnection();
+                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, source.getId());
+                    Info fileInfo = boxFile.getInfo();
+                    checkFileValidity(fileInfo);
 
                     String boxFolderId = toBoxFolderId(destFolder);
-                    BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(boxFolderId, null);
+                    com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, boxFolderId);
 
                     // Check destination folder
-                    String title = boxfile.getName();
+                    String title = fileInfo.getName();
                     {
                         String baseName;
                         String ext;
@@ -335,8 +325,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         boolean keepOn = true;
                         while (keepOn) {
                             keepOn = false;
-                            for (BoxTypedObject child : boxfolder.getItemCollection().getEntries()) {
-                                if (isFile(child) && title.equals(((BoxFile) child).getName())) {
+                            // TODO: Expensive as it needs to iterate through all the files in a folder...
+                            //       Consider the possibility of checking if the file exists in the folder with the exists method
+                            for (com.box.sdk.BoxItem.Info info : boxFolder) {
+                                // Check for filename clashes and append a number at the end of the filename
+                                if (info instanceof Info && title.equals(info.getName())) {
                                     keepOn = true;
                                     title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
                                     break;
@@ -345,13 +338,10 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         }
                     }
 
-                    BoxFileRequestObject reqObj = BoxFileRequestObject.getRequestObject();
-                    reqObj.setName(title);
-                    reqObj.setParent(boxFolderId);
-                    BoxFile movedFile = boxClient.getFilesManager().updateFileInfo(source.getId(), reqObj);
+                    com.box.sdk.BoxItem.Info movedFile = boxFile.move(boxFolder, title);
 
-                    return new IDTuple(destFolder, movedFile.getId());
-                } catch (final BoxServerException e) {
+                    return new IDTuple(destFolder, movedFile.getID());
+                } catch (final BoxAPIException e) {
                     throw handleHttpResponseError(source.getId(), account.getId(), e);
                 }
             }
@@ -363,17 +353,22 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<InputStream>() {
 
             @Override
-            protected InputStream doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected InputStream doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
-                    BoxClient boxClient = boxAccess.getBoxClient();
+                    BoxAPIConnection apiConnection = getAPIConnection();
+                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
+                    Info fileInfo = boxFile.getInfo("trashed_at", "name", "size");
+                    checkFileValidity(fileInfo);
 
-                    BoxFile boxfile = boxClient.getFilesManager().getFile(id, defaultBoxRequest());
-                    checkFileValidity(boxfile);
+                    // FIXME: Memory intensive?
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    boxFile.download(outputStream);
+                    outputStream.close();
 
-                    BoxDefaultRequestObject versionRequest = new BoxDefaultRequestObject();
-                    versionRequest.getRequestExtras().addQueryParam("version", version);
-                    return new SizeKnowingInputStream(boxClient.getFilesManager().downloadFile(id, versionRequest), boxfile.getSize().longValue());
-                } catch (final BoxServerException e) {
+                    return new SizeKnowingInputStream(new ByteArrayInputStream(outputStream.toByteArray()), fileInfo.getSize());
+                } catch (IOException e) {
+                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                } catch (final BoxAPIException e) {
                     throw handleHttpResponseError(id, account.getId(), e);
                 }
             }
@@ -385,15 +380,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<InputStream>() {
 
             @Override
-            protected InputStream doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected InputStream doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
-                    BoxClient boxClient = boxAccess.getBoxClient();
+                    BoxAPIConnection apiConnection = getAPIConnection();
+                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
+                    byte[] thumbnail = boxFile.getThumbnail(com.box.sdk.BoxFile.ThumbnailFileType.PNG, 64, 64, 128, 128);
 
-                    BoxImageRequestObject reqObj = BoxImageRequestObject.pagePreviewRequestObject(1, 64, 128, 64, 128);
-                    BoxThumbnail thumbnail = boxClient.getFilesManager().getThumbnail(id, THUMBNAIL_EXTENSION, reqObj);
-
-                    return thumbnail.getContent();
-                } catch (final BoxServerException e) {
+                    return new ByteArrayInputStream(thumbnail);
+                } catch (final BoxAPIException e) {
                     throw handleHttpResponseError(id, account.getId(), e);
                 }
             }
@@ -409,45 +403,50 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     @Override
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
 
-
-
         return perform(new BoxClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected IDTuple doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
-                    BoxClient boxClient = boxAccess.getBoxClient();
+                    //TODO: rework upload logic
+                    BoxAPIConnection apiConnection = getAPIConnection();
 
-                    String id = file.getId();
+                    String fileId = file.getId();
                     String boxFolderId = toBoxFolderId(file.getFolderId());
 
-                    {
-                        PreflightCheckRequestObject reqObj = new PreflightCheckRequestObject(file.getFileName(), boxFolderId, file.getFileSize());
-                        if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
-                            boxAccess.getExtendedBoxClient().getFilesManager().preflightCheck(reqObj);
-                        } else {
-                            boxAccess.getExtendedBoxClient().getFilesManager().preflightCheck(id, reqObj);
+                    // Pre-flight Check
+                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, file.getId());
+                    try {
+                        boxFile.canUploadVersion(file.getFileName(), file.getFileSize(), boxFolderId);
+                    } catch (BoxAPIException e) {
+                        if (e.getResponseCode() != SC_NOT_FOUND) {
+                            throw handleHttpResponseError(file.getId(), account.getId(), e);
                         }
+
+                        LOGGER.debug("Pre-flight check: File does not exist.");
                     }
-                    BoxFile boxFile = null;
-                    if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
+
+                    // Upload new
+                    Info fileInfo = null;
+                    if (isEmpty(fileId) || !exists(null, fileId, CURRENT_VERSION)) {
                         ThresholdFileHolder sink = null;
                         try {
                             sink = new ThresholdFileHolder();
-                            sink.write(data);
+                            sink.write(data); // Implicitly closes 'data' input stream
 
                             int count = 0;
                             String name = file.getFileName();
                             String fileName = name;
 
+                            // TODO: Should we retry a max number of tries or for ever?
                             boolean retry = true;
                             while (retry) {
                                 try {
-                                    BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, fileName, sink.getStream());
-                                    boxFile = boxClient.getFilesManager().uploadFile(reqObj);
+                                    com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, boxFolderId);
+                                    fileInfo = boxFolder.uploadFile(sink.getStream(), fileName, sink.getLength(), new UploadProgressListener());
                                     retry = false;
-                                } catch (BoxServerException e) {
-                                    if (SC_CONFLICT != e.getStatusCode()) {
+                                } catch (BoxAPIException e) {
+                                    if (SC_CONFLICT != e.getResponseCode()) {
                                         throw e;
                                     }
                                     fileName = FileStorageUtility.enhance(name, ++count);
@@ -457,27 +456,28 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                             Streams.close(sink);
                         }
                     } else {
-                        BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
-                        checkFileValidity(boxfile);
-                        BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, id, data);
-                        boxFile = boxClient.getFilesManager().uploadNewVersion(id, reqObj);
+                        try {
+                            boxFile.uploadVersion(data, file.getLastModified(), file.getFileSize(), new UploadProgressListener());
+                            fileInfo = boxFile.getInfo();
+                            checkFileValidity(fileInfo);
+                        } finally {
+                            Streams.close(data);
+                        }
                     }
 
-                    if (null == boxFile) {
+                    if (null == fileInfo) {
                         IllegalStateException x = new IllegalStateException("box.com upload failed");
                         throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
                     }
 
-                    BoxFileRequestObject req = new BoxFileRequestObject();
-                    req.setDescription(file.getDescription());
-                    boxClient.getFilesManager().updateFileInfo(boxFile.getId(), req);
+                    if (!Strings.isEmpty(file.getDescription())) {
+                        fileInfo.setDescription(file.getDescription());
+                        boxFile.updateInfo(fileInfo);
+                    }
 
-                    return new IDTuple(file.getFolderId(), boxFile.getId());
-                } catch (BoxJSONException e) {
-                    throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    return new IDTuple(file.getFolderId(), fileInfo.getID());
+                } catch (BoxAPIException e) {
+                    throw handleHttpResponseError(file.getId(), account.getId(), e);
                 }
             }
         });
@@ -488,20 +488,15 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         perform(new BoxClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
-                BoxFolder folder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
+            protected Void doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                BoxAPIConnection apiConnection = getAPIConnection();
+                com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, folderId);
 
-                List<String> toDelete = new LinkedList<String>();
-                for (BoxTypedObject child : folder.getItemCollection().getEntries()) {
-                    if (isFile(child)) {
-                        toDelete.add(child.getId());
+                for (com.box.sdk.BoxItem.Info info : boxFolder) {
+                    if (info instanceof Info) {
+                        Info i = (Info) info;
+                        new com.box.sdk.BoxFile(apiConnection, i.getID()).delete();
                     }
-                }
-
-                IBoxFilesManager filesManager = boxClient.getFilesManager();
-                for (String id : toDelete) {
-                    filesManager.deleteFile(id, null);
                 }
 
                 return null;
@@ -520,14 +515,15 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<List<IDTuple>>() {
 
             @Override
-            protected List<IDTuple> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
+            protected List<IDTuple> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                BoxAPIConnection apiConnection = getAPIConnection();
 
                 for (IDTuple idTuple : ids) {
                     try {
-                        boxClient.getFilesManager().deleteFile(idTuple.getId(), null);
-                    } catch (BoxServerException e) {
-                        if (404 != e.getStatusCode()) {
+                        com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, idTuple.getId());
+                        boxFile.delete();
+                    } catch (BoxAPIException e) {
+                        if (SC_NOT_FOUND != e.getResponseCode()) {
                             throw e;
                         }
                     }
@@ -548,42 +544,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
-
-                BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
-                IBoxFilesManager filesManager = boxClient.getFilesManager();
-
-                List<File> files = new LinkedList<File>();
-                BoxCollection itemCollection = boxfolder.getItemCollection();
-                if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
-                    for (BoxTypedObject child : itemCollection.getEntries()) {
-                        if (isFile(child)) {
-                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile(filesManager.getFile(child.getId(), defaultBoxRequest())));
-                        }
-                    }
-                } else {
-                    int offset = 0;
-                    final int limit = 100;
-
-                    int resultsFound;
-                    do {
-                        BoxPagingRequestObject reqObj = BoxPagingRequestObject.pagingRequestObject(limit, offset);
-                        BoxCollection collection = boxClient.getFoldersManager().getFolderItems(toBoxFolderId(folderId), reqObj);
-
-                        List<BoxTypedObject> entries = collection.getEntries();
-                        resultsFound = entries.size();
-                        for (BoxTypedObject typedObject : entries) {
-                            if (isFile(typedObject)) {
-                                files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, typedObject.getId(), userId, rootFolderId).parseBoxFile(filesManager.getFile(typedObject.getId(), defaultBoxRequest())));
-                            }
-                        }
-
-                        offset += limit;
-                    } while (resultsFound == limit);
-                }
-
-                return new FileTimedResult(files);
+            protected TimedResult<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                return new FileTimedResult(getFiles(folderId, null));
             }
         });
     }
@@ -594,49 +556,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public TimedResult<File> getDocuments(final String folderId, List<Field> fields, final Field sort, final SortDirection order) throws OXException {
+    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
         return perform(new BoxClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
-
-                BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
-                IBoxFilesManager filesManager = boxClient.getFilesManager();
-
-                List<File> files = new LinkedList<File>();
-
-                BoxCollection itemCollection = boxfolder.getItemCollection();
-                if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
-                    for (BoxTypedObject child : itemCollection.getEntries()) {
-                        if (isFile(child)) {
-                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile(filesManager.getFile(child.getId(), defaultBoxRequest())));
-                        }
-                    }
-                } else {
-                    int offset = 0;
-                    final int limit = 100;
-
-                    int resultsFound;
-                    do {
-                        BoxPagingRequestObject reqObj = BoxPagingRequestObject.pagingRequestObject(limit, offset);
-                        BoxCollection collection = boxClient.getFoldersManager().getFolderItems(toBoxFolderId(folderId), reqObj);
-
-                        List<BoxTypedObject> entries = collection.getEntries();
-                        resultsFound = entries.size();
-                        for (BoxTypedObject typedObject : entries) {
-                            if (isFile(typedObject)) {
-                                files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, typedObject.getId(), userId, rootFolderId).parseBoxFile(filesManager.getFile(typedObject.getId(), null)));
-                            }
-                        }
-
-                        offset += limit;
-                    } while (resultsFound == limit);
-                }
-
+            protected TimedResult<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                List<File> files = getFiles(folderId, fields);
                 // Sort collection if needed
                 sort(files, sort, order);
-
                 return new FileTimedResult(files);
             }
         });
@@ -647,13 +574,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
+            protected TimedResult<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                BoxAPIConnection apiConnection = getAPIConnection();
 
                 List<File> files = new LinkedList<File>();
                 for (IDTuple id : ids) {
-                    BoxFile boxfile = boxClient.getFilesManager().getFile(id.getId(), defaultBoxRequest());
-                    files.add(new com.openexchange.file.storage.boxcom.BoxFile(id.getFolder(), id.getId(), userId, rootFolderId).parseBoxFile(boxfile));
+                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id.getId());
+                    Info info = boxFile.getInfo();
+                    files.add(new com.openexchange.file.storage.boxcom.BoxFile(id.getFolder(), id.getId(), userId, rootFolderId).parseBoxFile(info));
                 }
 
                 return new FileTimedResult(files);
@@ -683,36 +611,39 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<SearchIterator<File>>() {
 
             @Override
-            protected SearchIterator<File> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
+            protected SearchIterator<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                BoxAPIConnection apiConnection = getAPIConnection();
                 List<File> files = new LinkedList<File>();
 
-                int offset = 0;
-                final int limit = 100;
+                BoxSearchParameters bsp = new BoxSearchParameters(pattern == null ? "*" : pattern);
+                bsp.setType("file");
+                if (folderId != null) {
+                    bsp.setAncestorFolderIds(Collections.singletonList(toBoxFolderId(folderId)));
+                }
 
-                int resultsFound;
-                do {
-                    BoxDefaultRequestObject reqObj = new BoxDefaultRequestObject();
-                    reqObj.put("type", "file");
-                    if (null != folderId) {
-                        reqObj.put("ancestor_folder_ids", toBoxFolderId(folderId));
-                    }
-                    reqObj.setPage(limit, offset);
-                    BoxCollection collection = boxClient.getSearchManager().search(null == pattern ? "*" : pattern, reqObj);
+                // TODO: play with start and end parameters
+                final int limit = 30; //Default Box limit
+                int s = start;
+                int e = end;
+                if (s < 0) {
+                    s = 0;
+                }
+                if (e < 0 || e < s) {
+                    e = limit;
+                }
 
-                    List<BoxTypedObject> entries = collection.getEntries();
-                    resultsFound = entries.size();
-                    for (BoxTypedObject typedObject : entries) {
-                        BoxFile boxfile = (BoxFile) typedObject;
-                        String parentFolderId = toFileStorageFolderId(boxfile.getParent().getId());
+                BoxSearch boxSearch = new BoxSearch(apiConnection);
+                PartialCollection<com.box.sdk.BoxItem.Info> searchRange = boxSearch.searchRange(s, limit, bsp);
+                for (BoxItem.Info info : searchRange) {
+                    if (info instanceof com.box.sdk.BoxFile.Info) {
+                        com.box.sdk.BoxFile.Info i = (Info) info;
+                        String parentFolderId = i.getParent().getID();
                         if (null != folderId && false == includeSubfolders && false == folderId.equals(parentFolderId)) {
                             continue;
                         }
-                        files.add(new com.openexchange.file.storage.boxcom.BoxFile(parentFolderId, boxfile.getId(), userId, rootFolderId).parseBoxFile(boxfile));
+                        files.add(new BoxFile(parentFolderId, i.getID(), userId, rootFolderId).parseBoxFile(i));
                     }
-
-                    offset += limit;
-                } while (resultsFound == limit);
+                }
 
                 // Sort collection
                 sort(files, sort, order);
@@ -758,87 +689,17 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         }
     }
 
-    /*-
-     * Deprecated versions-related methods:
-     *
-
-    @Override
-    public String[] removeVersion(String folderId, final String id, final String[] versions) throws OXException {
-        return perform(new BoxClosure<String[]>() {
-
-            @Override
-            protected String[] doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                List<String> undeletable = new ArrayList<String>();
-                Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
-                for (String version : versions) {
-                    try {
-                        boxAccess.getExtendedBoxClient().getFilesManager().deleteFileVersion(id, version);
-                    } catch (BoxServerException e) {
-                        undeletable.add(version);
-                        logger.warn("Could not delete version: {}", version, e);
-                    }
-                }
-                return undeletable.toArray(new String[undeletable.size()]);
-            }
-
-        });
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        return getVersions(folderId, id, null);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        return perform(new BoxClosure<TimedResult<File>>() {
-
-            @Override
-            protected TimedResult<File> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                List<BoxFileVersion> versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, null);
-                MimeTypeMap map = Services.getService(MimeTypeMap.class);
-
-                List<File> files = new LinkedList<File>();
-                for (BoxFileVersion version : versions) {
-                    com.openexchange.file.storage.boxcom.BoxFile file = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId);
-                    file.setTitle(version.getName());
-                    file.setFileName(version.getName());
-                    file.setFileSize((int) version.getExtraData("size"));
-                    file.setFileMD5Sum((String) version.getValue("sha1"));
-                    file.setFileMIMEType(map.getContentType(version.getName()));
-                    file.setVersion(version.getId());
-                    file.setNumberOfVersions(versions.size());
-                    try {
-                        file.setLastModified(ISO8601DateParser.parse(version.getModifiedAt()));
-                    } catch (ParseException e) {
-                        Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
-                        logger.warn("Could not parse date from: {}", version.getModifiedAt(), e);
-                    }
-                    files.add(file);
-                }
-                return new FileTimedResult(files);
-            }
-
-        });
-    }
-     *
-     */
-
     @Override
     public void unlock(String folderId, final String id) throws OXException {
         perform(new BoxClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                boxAccess.getExtendedBoxClient().getFilesManager().unlockFile(id);
+            protected Void doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                BoxAPIConnection apiConnection = getAPIConnection();
+                com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
+                boxFile.unlock();
                 return null;
             }
-
         });
     }
 
@@ -847,58 +708,166 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         perform(new BoxClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                boxAccess.getExtendedBoxClient().getFilesManager().lockFile(id);
+            protected Void doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                BoxAPIConnection apiConnection = getAPIConnection();
+                com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
+                boxFile.lock(new Date());
                 return null;
             }
-
         });
     }
 
-    /**
-     * Create a default request
-     *
-     * @return The default request
-     */
-    static BoxDefaultRequestObject defaultBoxRequest() {
-        List<String> fields = new ArrayList<String>();
-        fields.add(BoxFile.FIELD_MODIFIED_AT);
-        fields.add(BoxFile.FIELD_MODIFIED_BY);
-        fields.add(BoxFile.FIELD_PARENT);
-        fields.add(BoxFile.FIELD_NAME);
-        fields.add(BoxFile.FIELD_VERSION_NUMBER);
-        //fields.add(BoxFile.FIELD_); content?
-        fields.add(BoxFile.FIELD_ID);
-        fields.add(BoxFile.FIELD_SIZE);
-        fields.add(BoxFile.FIELD_DESCRIPTION);
-        fields.add(BoxFile.FIELD_SHARED_LINK);
-        fields.add(BoxFile.FIELD_CREATED_BY);
-        fields.add(BoxFile.FIELD_NAME);//filename
-        fields.add(BoxFile.FIELD_TYPE); //mimetype
-        fields.add(BoxFile.FIELD_SEQUENCE_ID);
-        //fields.add(BoxFile.FIELD_); category?
-        //fields.add(BoxFile.FIELD_LOCK); locked until?
-        //fields.add(BoxFile.FIELD_); comment?
-        fields.add(BoxFile.FIELD_ETAG); //version?
-        //fields.add(BoxFile.FIELD_); color?
-        fields.add(BoxFile.FIELD_MODIFIED_AT); //convert to utc
-        //fields.add(BoxFile.FIELD_VERSION_NUMBER);
-        fields.add(BoxFile.FIELD_LOCK);
+    private static final class UploadProgressListener implements ProgressListener {
 
-        return customRequestObject(fields);
+        /**
+         * Initializes a new {@link BoxFileAccess.UploadProgressListener}.
+         */
+        UploadProgressListener() {
+            super();
+        }
+
+        @Override
+        public void onProgressChanged(long numBytes, long totalBytes) {
+            if (totalBytes > 0) {
+                LOGGER.debug("Uploaded {} of {} bytes in total", numBytes, totalBytes);
+            }
+        }
     }
 
     /**
-     * Create a custom request object with the specified fields
-     *
-     * @param fields The fields to request
-     * @return A request object with the specified fields
+     * Returns a {@link List} of {@link File}s contained in the specified folder
+     * 
+     * @param folderId The folder identifier
+     * @param fields The optional fields to fetch for each file
+     * @return a {@link List} of {@link File}s contained in the specified folder
+     * @throws OXException if an error is occurred
      */
-    static BoxDefaultRequestObject customRequestObject(List<String> fields) {
-        BoxDefaultRequestObject customRequestObject = new BoxDefaultRequestObject();
-        for (String field : fields) {
-            customRequestObject.getRequestExtras().addField(field);
+    private List<File> getFiles(String folderId, List<Field> fields) throws OXException {
+        BoxAPIConnection apiConnection = getAPIConnection();
+        com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
+
+        String[] bxFields = (fields == null || fields.isEmpty()) ? BoxFileField.getAllFields() : BoxFileField.parseFields(fields);
+        List<File> files = new LinkedList<File>();
+        Iterable<com.box.sdk.BoxItem.Info> children = boxFolder.getChildren(bxFields);
+        for (com.box.sdk.BoxItem.Info info : children) {
+            if (info instanceof Info) {
+                Info i = (Info) info;
+                files.add(new BoxFile(folderId, i.getID(), userId, rootFolderId).parseBoxFile(i));
+            }
         }
-        return customRequestObject;
+        return files;
+    }
+
+    /**
+     * {@link BoxFileField} to {@link Field} mapper
+     *
+     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+     */
+    private enum BoxFileField {
+        //type,
+        ID(Field.ID, "id"),
+        //file_version,
+        SEQUENCE_NUMBER(Field.SEQUENCE_NUMBER, "sequence_id"),
+        //etag,
+        FILE_MD5SUM(Field.FILE_MD5SUM, "sha1"),
+        FILENAME(Field.FILENAME, "name"),
+        DESCRIPTION(Field.DESCRIPTION, "description"),
+        FILE_SIZE(Field.FILE_SIZE, "size"),
+        //path_collection,
+        CREATED(Field.CREATED, "created_at"),
+        LAST_MODIFIED(Field.LAST_MODIFIED, "modified_at"),
+        //trashed_at,
+        //purged_at,
+        //content_created_at,
+        //content_modified_at,
+        CREATED_BY(Field.CREATED_BY, "created_by"),
+        MODIFIED_BY(Field.MODIFIED_BY, "modified_by"),
+        //owned_by,
+        URL(Field.URL, "shared_link"),
+        FOLDER_ID(Field.FOLDER_ID, "parent"),
+        //item_status,
+        //VERSION(Field.VERSION, "version_number"),
+        //comment_count,
+        OBJECT_PERMISSIONS(Field.OBJECT_PERMISSIONS, "permissions"),
+        //tags,
+        LOCKED_UNTIL(Field.LOCKED_UNTIL, "lock"),
+        //extension,
+        //is_package,
+        //expiring_embeded_link,
+        //watermark_info;
+        ;
+
+        // Commented out BoxFileFields are not mappable with OX File Fields
+
+        private final Field field;
+        private final String boxField;
+
+        private static String[] allFields;
+
+        static {
+            BoxFileField[] boxFileFields = BoxFileField.values();
+            String[] allFields = new String[boxFileFields.length];
+            int index = 0;
+            for (BoxFileField bxField : boxFileFields) {
+                allFields[index++] = bxField.getBoxField();
+            }
+        }
+
+        /**
+         * Initialises a new {@link BoxFileField}.
+         * 
+         * @param field The mapped {@link Field}
+         */
+        private BoxFileField(Field field, String boxField) {
+            this.field = field;
+            this.boxField = boxField;
+        }
+
+        /**
+         * Gets the field
+         *
+         * @return The field
+         */
+        public Field getField() {
+            return field;
+        }
+
+        /**
+         * Gets the boxField
+         *
+         * @return The boxField
+         */
+        public String getBoxField() {
+            return boxField;
+        }
+
+        /**
+         * Return an array of strings of the {@link BoxFileField}s
+         * 
+         * @return an array of string of the {@link BoxFileField}s
+         */
+        public static String[] getAllFields() {
+            return allFields;
+        }
+
+        /**
+         * Parses the specified {@link Field}s to {@link BoxFileField}s and returns those as a string array
+         * 
+         * @param fields The OX File {@link Field}s
+         * @return a string array with all parsed {@link BoxFileField}s
+         */
+        public static String[] parseFields(List<Field> fields) {
+            //String[] parsedFields = new String[fields.size()];
+            List<String> parsedFields = new ArrayList<String>(fields.size());
+            for (Field f : fields) {
+                try {
+                    BoxFileField bff = BoxFileField.valueOf(f.name());
+                    parsedFields.add(bff.boxField);
+                } catch (IllegalArgumentException e) {
+                    LOGGER.debug("OX File Field '{}' is not mappable to a BoxField. Skipping.", f);
+                }
+            }
+            return parsedFields.toArray(new String[parsedFields.size()]);
+        }
     }
 }

@@ -50,6 +50,7 @@
 package com.openexchange.contact.vcard.impl.internal;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
@@ -79,6 +80,7 @@ import com.openexchange.contact.vcard.impl.mapping.UIDMapping;
 import com.openexchange.contact.vcard.impl.mapping.URLMapping;
 import com.openexchange.contact.vcard.impl.mapping.VCardMapping;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.io.scribe.ScribeIndex;
@@ -311,46 +313,67 @@ public class VCardMapper {
         /*
          * X-... (well known / used elsewhere)
          */
-        mappings.add(new ExtendedStringPropertyMapping(Contact.ASSISTANT_NAME, "X-ASSISTANT", "X-MS-ASSISTANT", "X-KADDRESSBOOK-X-AssistantsName", "X-EVOLUTION-ASSISTANT"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.MANAGER_NAME, "X-MANAGER", "X-MS-MANAGER", "X-KADDRESSBOOK-X-ManagersName", "X-EVOLUTION-MANAGER"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.SPOUSE_NAME, "X-SPOUSE", "X-MS-SPOUSE", "X-KADDRESSBOOK-X-SpouseName", "X-EVOLUTION-SPOUSE"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.NUMBER_OF_CHILDREN, "X-MS-CHILD"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.YOMI_FIRST_NAME, "X-PHONETIC-FIRST-NAME"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.YOMI_LAST_NAME, "X-PHONETIC-LAST-NAME"));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.ASSISTANT_NAME, "X-ASSISTANT", ContactField.ASSISTANT_NAME, "X-MS-ASSISTANT", "X-KADDRESSBOOK-X-AssistantsName", "X-EVOLUTION-ASSISTANT"));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.MANAGER_NAME, "X-MANAGER", ContactField.MANAGER_NAME, "X-MS-MANAGER", "X-KADDRESSBOOK-X-ManagersName", "X-EVOLUTION-MANAGER"));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.SPOUSE_NAME, "X-SPOUSE", ContactField.SPOUSE_NAME, "X-MS-SPOUSE", "X-KADDRESSBOOK-X-SpouseName", "X-EVOLUTION-SPOUSE"));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.NUMBER_OF_CHILDREN, "X-MS-CHILD", ContactField.NUMBER_OF_CHILDREN));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.YOMI_FIRST_NAME, "X-PHONETIC-FIRST-NAME", ContactField.YOMI_FIRST_NAME));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.YOMI_LAST_NAME, "X-PHONETIC-LAST-NAME", ContactField.YOMI_LAST_NAME));
         /*
          * X-OX-...
          */
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD01, "X-OX-USERFIELD-01"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD02, "X-OX-USERFIELD-02"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD03, "X-OX-USERFIELD-03"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD04, "X-OX-USERFIELD-04"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD05, "X-OX-USERFIELD-05"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD06, "X-OX-USERFIELD-06"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD07, "X-OX-USERFIELD-07"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD08, "X-OX-USERFIELD-08"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD09, "X-OX-USERFIELD-09"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD10, "X-OX-USERFIELD-10"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD11, "X-OX-USERFIELD-11"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD12, "X-OX-USERFIELD-12"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD13, "X-OX-USERFIELD-13"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD14, "X-OX-USERFIELD-14"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD15, "X-OX-USERFIELD-15"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD16, "X-OX-USERFIELD-16"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD17, "X-OX-USERFIELD-17"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD18, "X-OX-USERFIELD-18"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD19, "X-OX-USERFIELD-19"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD20, "X-OX-USERFIELD-20"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.ROOM_NUMBER, "X-OX-ROOM-NUMBER"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.INFO, "X-OX-INFO"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.NUMBER_OF_EMPLOYEE, "X-OX-NUMBER-OF-EMPLOYEE"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.BUSINESS_CATEGORY, "X-OX-BUSINESS-CATEGORY"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.COMMERCIAL_REGISTER, "X-OX-COMMERCIAL-REGISTER"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.TAX_ID, "X-OX-TAX-ID"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.SALES_VOLUME, "X-OX-SALES-VOLUME"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.EMPLOYEE_TYPE, "X-OX-EMPLOYEE-TYPE"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.MARITAL_STATUS, "X-OX-MARITAL-STATUS"));
-        mappings.add(new ExtendedStringPropertyMapping(Contact.YOMI_COMPANY, "X-OX-YOMI-COMPANY"));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD01, "X-OX-USERFIELD-01", ContactField.USERFIELD01));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD02, "X-OX-USERFIELD-02", ContactField.USERFIELD02));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD03, "X-OX-USERFIELD-03", ContactField.USERFIELD03));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD04, "X-OX-USERFIELD-04", ContactField.USERFIELD04));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD05, "X-OX-USERFIELD-05", ContactField.USERFIELD05));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD06, "X-OX-USERFIELD-06", ContactField.USERFIELD06));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD07, "X-OX-USERFIELD-07", ContactField.USERFIELD07));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD08, "X-OX-USERFIELD-08", ContactField.USERFIELD08));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD09, "X-OX-USERFIELD-09", ContactField.USERFIELD09));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD10, "X-OX-USERFIELD-10", ContactField.USERFIELD10));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD11, "X-OX-USERFIELD-11", ContactField.USERFIELD11));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD12, "X-OX-USERFIELD-12", ContactField.USERFIELD12));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD13, "X-OX-USERFIELD-13", ContactField.USERFIELD13));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD14, "X-OX-USERFIELD-14", ContactField.USERFIELD14));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD15, "X-OX-USERFIELD-15", ContactField.USERFIELD15));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD16, "X-OX-USERFIELD-16", ContactField.USERFIELD16));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD17, "X-OX-USERFIELD-17", ContactField.USERFIELD17));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD18, "X-OX-USERFIELD-18", ContactField.USERFIELD18));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD19, "X-OX-USERFIELD-19", ContactField.USERFIELD19));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.USERFIELD20, "X-OX-USERFIELD-20", ContactField.USERFIELD20));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.ROOM_NUMBER, "X-OX-ROOM-NUMBER", ContactField.ROOM_NUMBER));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.INFO, "X-OX-INFO", ContactField.INFO));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.NUMBER_OF_EMPLOYEE, "X-OX-NUMBER-OF-EMPLOYEE", ContactField.NUMBER_OF_EMPLOYEE));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.BUSINESS_CATEGORY, "X-OX-BUSINESS-CATEGORY", ContactField.BUSINESS_CATEGORY));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.COMMERCIAL_REGISTER, "X-OX-COMMERCIAL-REGISTER", ContactField.COMMERCIAL_REGISTER));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.TAX_ID, "X-OX-TAX-ID", ContactField.TAX_ID));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.SALES_VOLUME, "X-OX-SALES-VOLUME", ContactField.SALES_VOLUME));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.EMPLOYEE_TYPE, "X-OX-EMPLOYEE-TYPE", ContactField.EMPLOYEE_TYPE));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.MARITAL_STATUS, "X-OX-MARITAL-STATUS", ContactField.MARITAL_STATUS));
+        mappings.add(new ExtendedStringPropertyMapping(Contact.YOMI_COMPANY, "X-OX-YOMI-COMPANY", ContactField.YOMI_COMPANY));
         mappings.add(new ColorLabelMapping());
+    }
+
+    /**
+     * Gets all contact fields from all known mappings corresponding to the supplied set of vCard properties.
+     *
+     * @param propertyNames The property names to get the corresponding fields for
+     * @return The contact fields
+     */
+    public ContactField[] getContactFields(Set<String> propertyNames) {
+        Set<ContactField> fields = new HashSet<ContactField>();
+        for (VCardMapping mapping : mappings) {
+            if (false == skip(mapping, propertyNames)) {
+                ContactField[] contactFields = mapping.getContactFields();
+                if (null != contactFields && 0 < contactFields.length) {
+                    for (ContactField contactField : contactFields) {
+                        fields.add(contactField);
+                    }
+                }
+            }
+        }
+        return fields.toArray(new ContactField[fields.size()]);
     }
 
     /**
@@ -406,18 +429,27 @@ public class VCardMapper {
      * @return <code>true</code> if the mapping may be skipped, <code>false</code>, otherwise
      */
     private static boolean skip(VCardMapping mapping, VCardParameters parameters) {
-        if (null != parameters) {
-            Set<String> configuredProperties = parameters.getPropertyNames();
-            if (null != configuredProperties && 0 < configuredProperties.size()) {
-                String[] propertyNames = mapping.getPropertyNames();
-                if (null != propertyNames) {
-                    for (String propertyName : propertyNames) {
-                        if (configuredProperties.contains(propertyName)) {
-                            return false;
-                        }
+        return null != parameters ? skip(mapping, parameters.getPropertyNames()) : false;
+    }
+
+    /**
+     * Gets a value indicating whether the mapping may be skipped during import or export or not, based on the supplied configured
+     * property names.
+     *
+     * @param mapping The mapping to check
+     * @param configuredProperties The configured property names
+     * @return <code>true</code> if the mapping may be skipped, <code>false</code>, otherwise
+     */
+    private static boolean skip(VCardMapping mapping, Set<String> configuredProperties ) {
+        if (null != configuredProperties && 0 < configuredProperties.size()) {
+            String[] propertyNames = mapping.getPropertyNames();
+            if (null != propertyNames) {
+                for (String propertyName : propertyNames) {
+                    if (configuredProperties.contains(propertyName)) {
+                        return false;
                     }
-                    return true;
                 }
+                return true;
             }
         }
         return false;

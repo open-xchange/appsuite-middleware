@@ -136,7 +136,7 @@ public final class InsertData {
             Quota amountQuota = quotaProvider.getAmountQuota(session);
             long limit = amountQuota.getLimit();
             long usage = amountQuota.getUsage();
-            if (limit > 0 && usage >= limit) {
+            if (limit == 0 || (limit > 0 && usage >= limit)) {
                 throw QuotaExceptionCodes.QUOTA_EXCEEDED_TASKS.create(usage, limit);
             }
         }

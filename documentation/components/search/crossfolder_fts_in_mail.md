@@ -175,7 +175,7 @@ namespace Virtual {
 
 # OX App Suite
 
-The last step is to configure OX App Suite. At first open `/opt/open-xchange/etc/imap.properties` and change the value of `com.openexchange.imap.imapSearch` to `force-imap`. Then open `/opt/open-xchange/etc/findbasic.properties` and configure
+Open `/opt/open-xchange/etc/findbasic.properties` and configure
 
 ```
 com.openexchange.find.basic.mail.allMessagesFolder = Virtual/All

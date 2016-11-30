@@ -50,7 +50,9 @@
 package com.openexchange.folderstorage.cache.osgi;
 
 import java.io.Serializable;
+import java.sql.Connection;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -59,9 +61,11 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
-import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.java.util.Tools;
+import com.openexchange.mailaccount.MailAccountListener;
 
 
 /**
@@ -69,7 +73,7 @@ import com.openexchange.folderstorage.internal.Tools;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CacheFolderStorageInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService> {
+public class CacheFolderStorageInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService>, MailAccountListener {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CacheFolderStorageInvalidator.class);
 
@@ -83,6 +87,30 @@ public class CacheFolderStorageInvalidator implements CacheListener, ServiceTrac
     public CacheFolderStorageInvalidator(BundleContext context) {
         super();
         this.context = context;
+    }
+
+    @Override
+    public void onBeforeMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        // Don't care
+    }
+
+    @Override
+    public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        invalidateFor(userId, contextId);
+    }
+
+    @Override
+    public void onMailAccountCreated(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
+        invalidateFor(userId, contextId);
+    }
+
+    @Override
+    public void onMailAccountModified(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
+        invalidateFor(userId, contextId);
+    }
+
+    private void invalidateFor(int userId, int contextId) {
+        FolderMapManagement.getInstance().dropFor(userId, contextId, true);
     }
 
     @Override

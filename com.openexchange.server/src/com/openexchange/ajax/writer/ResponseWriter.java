@@ -49,8 +49,22 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.*;
-import static com.openexchange.ajax.requesthandler.Utils.getUnsignedInteger;
+import static com.openexchange.ajax.fields.ResponseFields.ARGUMENTS;
+import static com.openexchange.ajax.fields.ResponseFields.CONTINUATION;
+import static com.openexchange.ajax.fields.ResponseFields.DATA;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORY;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_DESC;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
+import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
+import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
+import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
+import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
@@ -509,10 +523,14 @@ public final class ResponseWriter {
          * Put argument JSON array for compatibility reasons
          */
         {
-            Object[] args = exception.getLogArgs();
+            Object[] args = exception.getDisplayArgs();
+            /*-
+             * Only check display arguments to keep the ones for log message intact
+             *
             if ((null == args) || (0 == args.length)) {
-                args = exception.getDisplayArgs();
+                args = exception.getLogArgs();
             }
+            */
             // For compatibility
             if ((null == args) || (0 == args.length)) {
                 json.put(ERROR_PARAMS, new JSONArray(0));
@@ -855,10 +873,14 @@ public final class ResponseWriter {
          * Put argument JSON array for compatibility reasons
          */
         {
-            Object[] args = exc.getLogArgs();
+            Object[] args = exc.getDisplayArgs();
+            /*-
+             * Only check display arguments to keep the ones for log message intact
+             *
             if ((null == args) || (0 == args.length)) {
-                args = exc.getDisplayArgs();
+                args = exc.getLogArgs();
             }
+            */
             // For compatibility
             if ((null == args) || (0 == args.length)) {
                 writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(0));
@@ -911,13 +933,6 @@ public final class ResponseWriter {
         writeTruncated(exc, writer);
         if (includeArguments()) {
             writeArguments(exc, writer);
-        }
-        if (exc.getLogArgs() != null) {
-            final JSONArray array = new JSONArray();
-            for (final Object tmp : exc.getLogArgs()) {
-                array.put(tmp);
-            }
-            writer.key(ResponseFields.ERROR_PARAMS).value(array);
         }
         // Write stack trace
         if (includeStackTraceOnError || includeStackTraceOnError()) {

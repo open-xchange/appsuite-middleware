@@ -71,7 +71,6 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Flags;
@@ -96,7 +95,9 @@ import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
@@ -1468,9 +1469,7 @@ public final class MimeMessageConverter {
                         mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
                     } else {
                         try {
-                            mailMessage.setHasAttachment(ct.startsWith(multipart) && (mixed.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
-                                (Multipart) msg.getContent(),
-                                ct.getSubType())));
+                            mailMessage.setHasAttachment(ct.startsWith(multipart) && hasAttachments((Part) msg.getContent()));
                         } catch (final ClassCastException e) {
                             // Cast to javax.mail.Multipart failed
                             LOG1.debug(new StringBuilder(256).append(
@@ -1914,25 +1913,7 @@ public final class MimeMessageConverter {
             }
            {
                 ContentType ct = mail.getContentType();
-                if (ct.startsWith(MULTI_PRIMTYPE)) {
-                    if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType())) {
-                        // For convenience consider multipart/mixed to hold file attachments
-                        mail.setHasAttachment(true);
-                    } else if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(ct.getSubType())) {
-                        // For convenience consider multipart/alternative to hold file attachments if it has more than 2 sub-parts
-                        if (mail.getEnclosedCount() > 2) {
-                            mail.setHasAttachment(true);
-                        } else {
-                            examineAttachmentPresence(mail, ct);
-                        }
-                    } else {
-                        // Examine...
-                        examineAttachmentPresence(mail, ct);
-                    }
-                } else {
-                    // No multipart/* at all
-                    mail.setHasAttachment(false);
-                }
+                examineAttachmentPresence(mail, ct);
             }
             {
                 final String[] tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_ID);
@@ -2427,8 +2408,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.mime.enableMime4j");
             }
         });
     }

@@ -71,7 +71,18 @@ public final class RateLimitedException extends RuntimeException {
      * @param retryAfterSeconds The time in seconds to wait before retrying
      */
     public RateLimitedException(final String message, final int retryAfterSeconds) {
-        super(message);
+        this(message, retryAfterSeconds, null);
+    }
+
+    /**
+     * Initializes a new {@link RateLimitedException}.
+     *
+     * @param message The message
+     * @param retryAfterSeconds The time in seconds to wait before retrying
+     * @param cause The cause
+     */
+    public RateLimitedException(final String message, final int retryAfterSeconds, Throwable cause) {
+        super(message, cause);
         this.retryAfterSeconds = retryAfterSeconds;
     }
 

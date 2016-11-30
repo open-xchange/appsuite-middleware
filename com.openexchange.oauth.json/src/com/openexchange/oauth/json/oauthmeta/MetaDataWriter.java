@@ -51,14 +51,17 @@ package com.openexchange.oauth.json.oauthmeta;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.json.AbstractOAuthWriter;
+import com.openexchange.session.Session;
 
 /**
  * The OAuth service meta data writer
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MetaDataWriter {
+public class MetaDataWriter extends AbstractOAuthWriter {
 
     /**
      * Initializes a new {@link MetaDataWriter}.
@@ -73,11 +76,13 @@ public class MetaDataWriter {
      * @param metaData The meta data
      * @return The JSON object
      * @throws JSONException If writing to JSON fails
+     * @throws OXException
      */
-    public static JSONObject write(final OAuthServiceMetaData metaData) throws JSONException {
+    public static JSONObject write(final OAuthServiceMetaData metaData, Session session) throws JSONException, OXException {
         final JSONObject metaDataJSON = new JSONObject();
         metaDataJSON.put(MetaDataField.ID.getName(), metaData.getId());
         metaDataJSON.put(MetaDataField.DISPLAY_NAME.getName(), metaData.getDisplayName());
+        metaDataJSON.put(MetaDataField.AVAILABLE_SCOPES.getName(), write(metaData.getAvailableScopes(session.getUserId(), session.getContextId())));
         return metaDataJSON;
     }
 

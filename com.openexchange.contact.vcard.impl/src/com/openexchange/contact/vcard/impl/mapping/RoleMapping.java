@@ -51,6 +51,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Role;
 
@@ -65,7 +66,7 @@ public class RoleMapping extends SimpleMapping<Role> {
      * Initializes a new {@link RoleMapping}.
      */
     public RoleMapping() {
-        super(Contact.PROFESSION, Role.class, "ROLE");
+        super(Contact.PROFESSION, Role.class, "ROLE", ContactField.PROFESSION);
     }
 
     @Override

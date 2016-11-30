@@ -66,6 +66,7 @@ import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.HttpServletResponse;
+import org.jdom2.CDATA;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
@@ -83,6 +84,7 @@ import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.freebusy.FreeBusyData;
+import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.webdav.protocol.Protocol;
@@ -170,7 +172,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
                 String[] resolvedAttendees = resolveCalendarUsers(requestedAttendees);
                 Map<String, FreeBusyData> freeBusy = null;
                 try {
-                    freeBusy = factory.getFreeBusyService().getMergedFreeBusy(factory.getSession(),
+                    freeBusy = factory.requireService(FreeBusyService.class).getMergedFreeBusy(factory.getSession(),
                         Arrays.asList(resolvedAttendees), freeBusyInformation.getStartDate(), freeBusyInformation.getEndDate());
                 } catch (OXException e) {
                     LOG.error("error getting free/busy information", e);
@@ -271,7 +273,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
                 if (false == freeBusyData.hasData() && freeBusyData.hasWarnings()) {
                     requestStatus.addContent("3.7;Invalid calendar user");
                 } else {
-                    calendarData.addContent(getVFreeBusy(uid, freeBusyData, attendee));
+                    calendarData.addContent(new CDATA(getVFreeBusy(uid, freeBusyData, attendee)));
                     requestStatus.addContent("2.0;Success");
                 }
             } catch (OXException e) {

@@ -49,8 +49,6 @@
 
 package com.openexchange.authentication.ldap;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
@@ -69,18 +67,19 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * This class implements the login by using an LDAP for authentication.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LDAPAuthentication implements AuthenticationService, Reloadable {
-
-    private static final String CONFIGFILE = "ldapauth.properties";
-    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     private static final class AuthenticatedImpl implements Authenticated {
 
@@ -127,14 +126,13 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPAuthentication.class);
 
-    /**
-     * Properties for the JNDI context.
-     */
+    /** The OSGi service look-up */
+    private final ServiceLookup services;
+
+    /** Properties for the JNDI context. */
     private Properties props;
 
-    /**
-     * attribute name and base DN.
-     */
+    /** Attribute name and base DN. */
     private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, proxyUser, proxyDelimiter, referral, ldapScope;
 
     private boolean bindOnly, useFullLoginInfo;
@@ -147,9 +145,10 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
      * Default constructor.
      * @throws LoginException if setup fails.
      */
-    public LDAPAuthentication(Properties props) throws OXException {
+    public LDAPAuthentication(Properties props, ServiceLookup services) throws OXException {
         super();
         this.props = props;
+        this.services = services;
         init();
     }
 
@@ -348,7 +347,11 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         if (null == url) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(Context.PROVIDER_URL);
         } else if (url.startsWith("ldaps")) {
-            props.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
+            SSLSocketFactoryProvider factoryProvider = services.getOptionalService(SSLSocketFactoryProvider.class);
+            if (null == factoryProvider) {
+                throw ServiceExceptionCode.absentService(SSLSocketFactoryProvider.class);
+            }
+            props.put("java.naming.ldap.factory.socket", factoryProvider.getDefault().getClass().getName());
         }
 
         this.ldapReturnField = props.getProperty(PropertyNames.LDAP_RETURN_FIELD.name);
@@ -431,7 +434,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        Properties properties = configService.getFile(CONFIGFILE);
+        Properties properties = configService.getFile("ldapauth.properties");
         this.props = properties;
         try {
             init();
@@ -441,10 +444,8 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().configFileNames("ldapauth.properties").build();
     }
 
     /**

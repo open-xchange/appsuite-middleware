@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/imgscalr-lib-4.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/imgscalr-lib-4.2.jar" sourcepath="lib/source/imgscalr-lib-4.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/common-image-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/common-io-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/common-lang-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>

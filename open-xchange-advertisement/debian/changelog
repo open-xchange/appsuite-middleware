@@ -1,0 +1,41 @@
+open-xchange-advertisement (7.8.3-5) stable; urgency=medium
+
+  * Second release candidate for 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 25 Nov 2016 17:53:35 +0100
+
+open-xchange-advertisement (7.8.3-4) stable; urgency=medium
+
+  * First release candidate for 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Thu, 24 Nov 2016 20:46:52 +0100
+
+open-xchange-advertisement (7.8.3-3) stable; urgency=medium
+
+  * Third preview for 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 15 Nov 2016 15:44:08 +0100
+
+open-xchange-advertisement (7.8.3-2) stable; urgency=medium
+
+  * Second preview for 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Sat, 29 Oct 2016 09:46:23 +0200
+
+open-xchange-advertisement (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 14 Oct 2016 15:21:19 +0200
+
+open-xchange-advertisement (7.8.3-0) unstable; urgency=medium
+
+  * prepare for 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 06 Sep 2016 11:26:19 +0200
+
+open-xchange-advertisement (7.8.2-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 2 Aug 2016 14:36:00 +0200

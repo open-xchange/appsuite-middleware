@@ -71,6 +71,7 @@ public class MailCategoriesTestSuite extends TestSuite {
         mailSuite.addTest(new JUnit4TestAdapter(TrainTest.class));
         mailSuite.addTest(new JUnit4TestAdapter(MoveTest.class));
         mailSuite.addTest(new JUnit4TestAdapter(UnreadTest.class));
+        mailSuite.addTest(new JUnit4TestAdapter(ThreadedMailCategoriesTest.class));
         return mailSuite;
     }
 

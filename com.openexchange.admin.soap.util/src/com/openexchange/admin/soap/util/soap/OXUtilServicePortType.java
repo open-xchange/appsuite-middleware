@@ -114,6 +114,28 @@ public interface OXUtilServicePortType {
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:unblockDatabase", output = "urn:unblockDatabaseResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:unblockDatabaseStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:unblockDatabaseInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:unblockDatabaseInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:unblockDatabaseRemoteException")})
+    @RequestWrapper(localName = "unblockDatabase", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.UnblockDatabase")
+    @WebMethod(action = "urn:unblockDatabase")
+    @ResponseWrapper(localName = "unblockDatabaseResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.UnblockDatabaseResponse")
+    public java.util.List<com.openexchange.admin.soap.util.dataobjects.Database> unblockDatabase(
+        @WebParam(name = "db", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.util.dataobjects.Database db,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.util.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:checkDatabase", output = "urn:checkDatabaseResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:checkDatabaseStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:checkDatabaseInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:checkDatabaseInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:checkDatabaseRemoteException")})
+    @RequestWrapper(localName = "checkDatabase", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CheckDatabase")
+    @WebMethod(action = "urn:checkDatabase")
+    @ResponseWrapper(localName = "checkDatabaseResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CheckDatabaseResponse")
+    public com.openexchange.admin.soap.util.dataobjects.CheckedDatabases checkDatabase(
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.util.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:createMaintenanceReason", output = "urn:createMaintenanceReasonResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:createMaintenanceReasonStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:createMaintenanceReasonInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:createMaintenanceReasonInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:createMaintenanceReasonRemoteException")})
     @RequestWrapper(localName = "createMaintenanceReason", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateMaintenanceReason")
     @WebMethod(action = "urn:createMaintenanceReason")
@@ -203,5 +225,15 @@ public interface OXUtilServicePortType {
     public void unregisterDatabase(
         @WebParam(partName = "parameters", name = "unregisterDatabase", targetNamespace = "http://soap.admin.openexchange.com")
         UnregisterDatabase parameters
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:createSchema", output = "urn:createSchemaResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:createSchemaStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:createSchemaInvalidCredentialsException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:createSchemaRemoteException")})
+    @RequestWrapper(localName = "createSchema", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateSchema")
+    @WebMethod(action = "urn:createSchema")
+    @ResponseWrapper(localName = "createSchemaResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateSchemaResponse")
+    public com.openexchange.admin.soap.util.dataobjects.Database createSchema(
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.util.dataobjects.Credentials auth,
+        @WebParam(name = "optDBId", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer optDBId
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
 }

@@ -56,6 +56,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.Event;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -111,6 +112,21 @@ final class SanitizingStorageService implements MailAccountStorageService {
             Sanitizer.sanitize(userId, cid, storageService);
             return storageService.getRawMailAccount(id, userId, cid);
         }
+    }
+
+    @Override
+    public int acquireId(int userId, Context ctx) throws OXException {
+        return storageService.acquireId(userId, ctx);
+    }
+
+    @Override
+    public String getDefaultFolderPrefix(Session session) throws OXException {
+        return storageService.getDefaultFolderPrefix(session);
+    }
+
+    @Override
+    public char getDefaultSeparator(Session session) throws OXException {
+        return storageService.getDefaultSeparator(session);
     }
 
     @Override
@@ -226,6 +242,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException {
+        storageService.propagateEvent(event, id, eventProps, userId, contextId);
+    }
+
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid);
     }
@@ -306,6 +327,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public void deleteTransportAccount(int id, int userId, int contextId, Connection con) throws OXException {
+        storageService.deleteTransportAccount(id, userId, contextId, con);
+    }
+
+    @Override
     public TransportAccount getTransportAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
         return storageService.getTransportAccount(accountId, userId, contextId, con);
     }
@@ -313,6 +339,16 @@ final class SanitizingStorageService implements MailAccountStorageService {
     @Override
     public void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int cid, Session session) throws OXException {
         storageService.updateTransportAccount(transportAccount, userId, cid, session);
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException {
+        storageService.updateTransportAccount(transportAccount, attributes, userId, contextId, session);
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
+        storageService.updateTransportAccount(transportAccount, attributes, userId, contextId, updateProperties);
     }
 
     @Override

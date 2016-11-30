@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-drive-v2-rev224-1.21.0.jar" sourcepath="lib/source/google-api-services-drive-v2-rev224-1.21.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-gmail-v1-rev48-1.22.0.jar" sourcepath="lib/source/google-api-services-gmail-v1-rev48-1.22.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev120-1.22.0.jar" sourcepath="lib/source/google-api-services-oauth2-v2-rev120-1.22.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-drive-v2-rev224-1.21.0.jar" sourcepath="lib/source/google-api-services-drive-v2-rev137-1.19.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-calendar-v3-rev191-1.21.0.jar" sourcepath="lib/source/google-api-services-calendar-v3-rev191-1.21.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.21.0.jar" sourcepath="lib/source/google-api-client-1.21.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-client-appengine-1.21.0.jar" sourcepath="lib/source/google-api-client-appengine-1.21.0-sources.jar"/>
@@ -21,7 +23,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.21.0.jar" sourcepath="lib/source/google-oauth-client-1.21.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-appengine-1.21.0.jar" sourcepath="lib/source/google-oauth-client-appengine-1.21.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.21.0.jar" sourcepath="lib/source/google-oauth-client-java6-1.21.0-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gson-2.1.jar" sourcepath="lib/source/gson-2.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/protobuf-java-2.4.1.jar" sourcepath="lib/source/protobuf-java-2.4.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-core-asl-1.9.11.jar" sourcepath="lib/source/jackson-core-asl-1.9.11-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>

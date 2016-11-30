@@ -76,28 +76,27 @@ public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer
 
     @Override
     public SpamHandler addingService(final ServiceReference<SpamHandler> reference) {
-        final SpamHandler addedService = context.getService(reference);
-        if (null == addedService) {
-            LOG.warn("Added service is null!", new Throwable());
-        }
-        final Object registrationName = reference.getProperty("name");
+        SpamHandler spamHandler = context.getService(reference);
+        Object registrationName = reference.getProperty("name");
         if (null == registrationName) {
-            LOG.error("Missing registration name in spam handler service: {}", addedService.getClass().getName());
-            return addedService;
+            LOG.error("Missing registration name in spam handler service: {}", spamHandler.getClass().getName());
+            context.ungetService(reference);
+            return null;
         }
-        /*
-         * TODO: Clarify if proxy object is reasonable or if service itself should be registered
-         */
-        if (SpamHandlerRegistry.registerSpamHandler(registrationName.toString(), addedService)) {
+
+        if (SpamHandlerRegistry.registerSpamHandler(registrationName.toString(), spamHandler)) {
             LOG.info("Spam handler registered for name '{}", registrationName);
-        } else {
-            LOG.warn("Spam handler could not be registered for name '{}. Another spam handler has already been registered for the same name.", registrationName);
+            return spamHandler;
         }
-        return addedService;
+
+        LOG.warn("Spam handler could not be registered for name '{}. Another spam handler has already been registered for the same name.", registrationName);
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
     public void modifiedService(final ServiceReference<SpamHandler> reference, final SpamHandler service) {
+        // Ignore
     }
 
     @Override

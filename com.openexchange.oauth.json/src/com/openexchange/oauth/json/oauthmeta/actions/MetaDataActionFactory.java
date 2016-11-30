@@ -50,9 +50,8 @@
 package com.openexchange.oauth.json.oauthmeta.actions;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -67,15 +66,22 @@ public final class MetaDataActionFactory implements AJAXActionServiceFactory {
 
     private static final MetaDataActionFactory SINGLETON = new MetaDataActionFactory();
 
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static final MetaDataActionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     private final Map<String, AJAXActionService> actions;
 
     private MetaDataActionFactory() {
         super();
         actions = initActions();
-    }
-
-    public static final MetaDataActionFactory getInstance() {
-        return SINGLETON;
     }
 
     @Override
@@ -88,10 +94,10 @@ public final class MetaDataActionFactory implements AJAXActionServiceFactory {
     }
 
     private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(2);
+        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
         tmp.put("all", new AllAction());
         tmp.put("get", new GetAction());
-        return Collections.unmodifiableMap(tmp);
+        return tmp.build();
     }
 
     @Override

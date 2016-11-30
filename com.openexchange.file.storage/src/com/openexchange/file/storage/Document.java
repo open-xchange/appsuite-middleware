@@ -208,6 +208,15 @@ public abstract class Document {
     }
 
     /**
+     * Gets whether the InputStream returned by {@link getData()} is repetitive or not.
+     *
+     * @return Whether {@link getData()} returns a repetitive InputStream or not
+     */
+    public boolean isRepetitive() {
+        return true;
+    }
+
+    /**
      * Gets the data input stream
      *
      * @return The input stream

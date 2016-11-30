@@ -49,20 +49,13 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
-import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -71,30 +64,34 @@ import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationS
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.setuptools.TestConfig;
+import junit.framework.JUnit4TestAdapter;
 
 public class Bug8681forVCard extends AbstractVCardTest {
 
-
-	//workaround for JUnit 3 runner
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(Bug8681forVCard.class);
-	}
+    //workaround for JUnit 3 runner
+    public static junit.framework.Test suite() {
+        return new JUnit4TestAdapter(Bug8681forVCard.class);
+    }
 
     @BeforeClass
 
     public static void initialize() throws Exception {
         AbstractVCardTest.initialize();
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        final TestConfig config = new TestConfig();
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(config.getContextName()));
     }
 
-    @Test public void checkVCard() throws OXException, UnsupportedEncodingException, SQLException, OXException{
-		//creating folder before changing permissions...
-		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "vcard7719Folder");
+    @Test
+    public void checkVCard() throws OXException {
+        //creating folder before changing permissions...
+        folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "vcard7719Folder");
 
-		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
         final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
+
             @Override
-			public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
+            public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
                 final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
                 final MutableUserConfiguration copy = orig.getMutable();
                 copy.setContact(false);
@@ -103,19 +100,21 @@ public class Bug8681forVCard extends AbstractVCardTest {
         };
         override.override();
         try {
-			//uploading
-			final List <String> folders = Arrays.asList( Integer.toString(folderId) );
+            //uploading
+            final List<String> folders = Arrays.asList(Integer.toString(folderId));
 
-			try{
-				imp.canImport(sessObj, Format.VCARD, folders, null);
-				fail("Could import Contacts without permission on Contact module!");
-			} catch(final OXException e) {
-				assertEquals("I_E-0607" , e.getErrorCode() );
-			}
-		} finally {
-			//undo changes
-			override.takeBack();
-		}
-	}
-    @Test public void testDummy(){}
+            try {
+                imp.canImport(sessObj, Format.VCARD, folders, null);
+                fail("Could import Contacts without permission on Contact module!");
+            } catch (final OXException e) {
+                assertEquals("I_E-0607", e.getErrorCode());
+            }
+        } finally {
+            //undo changes
+            override.takeBack();
+        }
+    }
+
+    @Test
+    public void testDummy() {}
 }

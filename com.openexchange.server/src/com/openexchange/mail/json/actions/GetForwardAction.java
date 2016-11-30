@@ -58,9 +58,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
@@ -78,12 +75,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "forward", description = "Forward a mail.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the requested Message."),
-    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
-    @Parameter(name = "view", optional=true, description = "(available with SP6) - \"text\" forces the server to deliver a text-only version of the requested mail's body, even if content is HTML. \"html\" to allow a possible HTML mail body being transferred as it is (but white-list filter applied).NOTE: if set, the corresponding gui config setting will be ignored.")
-}, responseDescription = "(not IMAP: with timestamp): An object containing all data of the requested mail. The fields of the object are listed in Detailed mail data. The fields id and attachment are not included.")
 public final class GetForwardAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetForwardAction.class);
@@ -186,18 +177,12 @@ public final class GetForwardAction extends AbstractMailAction {
             /*
              * Overwrite settings with request's parameters
              */
-            if (null != view) {
-                if (VIEW_TEXT.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(false);
-                } else if (VIEW_HTML.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(true);
-                } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(false);
-                } else {
-                    LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", Mail.PARAMETER_VIEW, view);
-                }
+            detectDisplayMode(true, view, usmNoSave);
+            if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("dropPrefix"))) {
+                usmNoSave.setDropReplyForwardPrefix(true);
+            }
+            if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("attachOriginalMessage"))) {
+                usmNoSave.setAttachOriginalMessage(true);
             }
             boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
             MailServletInterface mailInterface = getMailInterface(req);

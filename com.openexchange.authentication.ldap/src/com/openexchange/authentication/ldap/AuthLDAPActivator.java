@@ -50,74 +50,52 @@
 package com.openexchange.authentication.ldap;
 
 import java.util.Properties;
-import javax.security.auth.login.LoginException;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link AuthLDAPActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class AuthLDAPActivator extends DeferredActivator {
+public class AuthLDAPActivator extends HousekeepingActivator {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthLDAPActivator.class);
 
-	private ServiceRegistration<AuthenticationService> registration;
-	private ServiceRegistration<Reloadable> reloadable;
-
+	/**
+	 * Initializes a new {@link AuthLDAPActivator}.
+	 */
 	public AuthLDAPActivator() {
 	    super();
 	}
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nothing to do.
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nothing to do.
+        return new Class<?>[] { ConfigurationService.class, SSLSocketFactoryProvider.class };
     }
 
     /**
      * {@inheritDoc}
-     * @throws LoginException if the authentication class can not be initialized.
+     * @throws Exception if the authentication class can not be initialized.
      */
     @Override
-    protected void startBundle() throws OXException {
+    protected void startBundle() throws Exception {
         LOG.info("Starting ldap authentication service.");
+
         final ConfigurationService config = getService(ConfigurationService.class);
         final Properties props = config.getFile("ldapauth.properties");
 
-        if (null == registration) {
-            final LDAPAuthentication impl = new LDAPAuthentication(props);
-            registration = context.registerService(AuthenticationService.class, impl, null);
-            reloadable = context.registerService(Reloadable.class, impl, null);
-        } else {
-            LOG.error("Duplicate startup of deferred activator.");
-        }
+        LDAPAuthentication impl = new LDAPAuthentication(props, this);
+        registerService(AuthenticationService.class, impl, null);
+        registerService(Reloadable.class, impl, null);
     }
 
     @Override
-    protected void stopBundle() {
+    protected void stopBundle() throws Exception {
         LOG.info("Stopping ldap authentication service.");
-        if (null != registration) {
-            registration.unregister();
-            registration = null;
-        }
-        if (null != reloadable) {
-            reloadable.unregister();
-            reloadable = null;
-        }
+        super.stopBundle();
     }
 }

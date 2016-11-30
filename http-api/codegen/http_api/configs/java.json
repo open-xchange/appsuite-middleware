@@ -1,9 +1,0 @@
-{
-	"modelPackage": "com.openexchange.clientapi.http.models",
-	"apiPackage": "com.openexchange.clientapi.http.modules",
-	"invokerPackage": "com.openexchange.clientapi.http.invoker",
-	"groupId": "com.openexchange.clientapi.http",
-	"artifactId": "OXHttpApi",
-	"artifactVersion": "0.0.1",
-	"serializableModel": false
-}

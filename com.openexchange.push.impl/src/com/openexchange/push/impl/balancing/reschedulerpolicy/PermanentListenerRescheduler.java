@@ -286,7 +286,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
             // Plan rescheduling
             if (remotePlan) {
-                rescheduleQueue.offerOrReplaceAndReset(ReschedulePlan.getInstance(true));
+                rescheduleQueue.offerOrReplace(ReschedulePlan.getInstance(true));
                 LOG.info("Planned rescheduling including remote plan");
             } else {
                 boolean added = rescheduleQueue.offerIfAbsentElseReset(ReschedulePlan.getInstance(false));

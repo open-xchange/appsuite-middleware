@@ -2,12 +2,5 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    type: array
+    type: object
     description: Array of contacts. Each contact is described as an array itself.
-    items:
-      type: array
-      items:
-        type: object
-        description: |
-          Array with elements that contain the information of a contact specified by the corresponding
-          identifiers in the `columns` parameter. The element types can be distinguished.

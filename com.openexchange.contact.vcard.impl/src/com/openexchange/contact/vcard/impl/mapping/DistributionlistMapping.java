@@ -58,6 +58,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.java.Strings;
@@ -82,7 +83,8 @@ public class DistributionlistMapping extends AbstractMapping {
      * Initializes a new {@link DistributionlistMapping}.
      */
     public DistributionlistMapping() {
-        super("KIND", "MEMBER");
+        super(new String[] { "KIND", "MEMBER" },
+            new ContactField[] { ContactField.DISTRIBUTIONLIST, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.NUMBER_OF_DISTRIBUTIONLIST });
     }
 
     @Override
@@ -139,8 +141,8 @@ public class DistributionlistMapping extends AbstractMapping {
             /*
              * apply distribution list flag and import members
              */
-            contact.setMarkAsDistributionlist(true);
             contact.setDistributionList(importMembers(vCard.getMembers(), parameters, warnings));
+            contact.setMarkAsDistributionlist(true);
         } else {
             /*
              * not/no longer a distribution list, remove distribution list entries and flag

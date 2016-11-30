@@ -61,8 +61,10 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -91,6 +93,28 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
     private static final ServiceListing<QuotaFileStorageListener> EMPTY_LISTENERS = new ServiceListing<QuotaFileStorageListener>() {
+
+        @Override
+        public Iterator<QuotaFileStorageListener> iterator() {
+            return new Iterator<QuotaFileStorageListener>() {
+
+                @Override
+                public boolean hasNext() {
+                    return false;
+                }
+
+                @Override
+                public QuotaFileStorageListener next() {
+                    throw new NoSuchElementException();
+                }
+
+                @Override
+                public void remove() {
+                    // Ignore
+                }
+
+            };
+        }
 
         @Override
         public List<QuotaFileStorageListener> getServiceList() {
@@ -194,7 +218,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
 
             // Advertise usage increment to listeners
-            for (QuotaFileStorageListener listener : listeners.getServiceList()) {
+            for (QuotaFileStorageListener listener : listeners) {
                 listener.onUsageIncrement(id, usage, oldUsage, quota, ownerId, contextId);
             }
 
@@ -240,7 +264,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     private boolean checkExceededQuota(String id, long quota, long required, long newUsage, long oldUsage) {
         if ((quota == 0) || (quota > 0 && newUsage > quota)) {
             // Advertise exceeded quota to listeners
-            for (QuotaFileStorageListener listener : listeners.getServiceList()) {
+            for (QuotaFileStorageListener listener : listeners) {
                 try {
                     listener.onQuotaExceeded(id, required, oldUsage, quota, ownerId, contextId);
                 } catch (Exception e) {
@@ -253,10 +277,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     }
 
     private boolean checkNoQuota(String id) {
-        long quota = this.quota;
+        long quota = getQuota();
         if (quota == 0) {
             // Advertise no quota to listeners
-            for (QuotaFileStorageListener listener : listeners.getServiceList()) {
+            for (QuotaFileStorageListener listener : listeners) {
                 try {
                     listener.onNoQuotaAvailable(id, ownerId, contextId);
                 } catch (Exception e) {
@@ -321,7 +345,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
 
             // Advertise usage increment to listeners
-            for (QuotaFileStorageListener listener : listeners.getServiceList()) {
+            for (QuotaFileStorageListener listener : listeners) {
                 try {
                     listener.onUsageDecrement(ids, usage, oldUsage, quota, ownerId, contextId);
                 } catch (Exception e) {

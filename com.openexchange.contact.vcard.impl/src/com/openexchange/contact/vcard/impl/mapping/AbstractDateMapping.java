@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.DateOrTimeProperty;
 
@@ -63,8 +64,16 @@ import ezvcard.property.DateOrTimeProperty;
  */
 public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends SimpleMapping<T> {
 
-    protected AbstractDateMapping(int field, Class<T> propertyClass, String...propertyNames) {
-        super(field, propertyClass, propertyNames);
+    /**
+     * Initializes a new {@link AbstractDateMapping}.
+     *
+     * @param field The mapped contact column identifier
+     * @param propertyClass The vCard property class
+     * @param propertyName The affected vCard property name
+     * @param contactFields The affected contact fields
+     */
+    protected AbstractDateMapping(int field, Class<T> propertyClass, String propertyName, ContactField...contactFields) {
+        super(field, propertyClass, propertyName, contactFields);
     }
 
     protected abstract T newProperty();

@@ -1,0 +1,59 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+###
+# Infos about Push Notification Service:
+#   avg:      The number of submitted notifications per minute.
+#   enqueued: The number of notifications that are currently submitted, but not yet processed
+###
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats --pnsstats";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-e "/opt/open-xchange/bundles/com.openexchange.pns.impl.jar") {
+        print "yes\n";
+        exit 0;
+    }
+    else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+    print "graph_title Push Notification Service\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel number of notifications\n";
+    print "graph_period minute\n";
+    
+    print "enqueued.label enqueued notifications\n";
+    
+    print "avg.label notifications per minute\n";
+    print "avg.draw AREA\n";
+
+    exit 0
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /PushNotificationMBean,EnqueuedNotifications/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "enqueued.value $val\n";
+        next;
+    }
+    if ( $_ =~ /PushNotificationMBean,NotificationsPerMinute/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "avg.value $val\n";
+        next;
+    }
+}
+
+close (SHOWRUNTIME);

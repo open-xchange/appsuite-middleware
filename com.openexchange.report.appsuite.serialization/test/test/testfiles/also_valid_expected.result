@@ -1,0 +1,18 @@
+    "root" : {
+      "container" : [
+        {
+          "test-key2.1" : 1,
+          "test-key2.2" : 2,
+          "test-list2.1" : {
+            "list-entry" : 3
+          }
+        },
+        {
+          "test-list1.1" : {
+            "list-entry" : 1
+          },
+          "test-key1.1" : 2,
+          "test-key1.2" : 3
+        }
+      ]
+    },

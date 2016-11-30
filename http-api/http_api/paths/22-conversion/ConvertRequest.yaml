@@ -2,7 +2,7 @@
   put:
     operationId: convertData
     tags:
-      - conversion
+      - Conversion
     summary: Converts data from source using a specific data handler.
     description: |
       #### Saving an iCal email attachment
@@ -60,7 +60,7 @@
         }
       }
       ```
-      The response is a JSON array of JSON objects for each appointment/task as described in the [TaskData](#/definitions/TaskData) and [AppointmentData](#/definitions/AppointmentData) model.
+      The response is a JSON array of JSON objects for each appointment/task. See the TaskData model of the [getTask](#tasks/getTask) request and the AppointmentData model of the [getAttachment](#attachments/getAttachment) request for more informations.
       #### Saving a vCard email attachment
       If a vCard file is attached to an email, its content can be saved as contacts into given contact folder.
       ```json
@@ -104,7 +104,7 @@
         }
       }
       ```
-      The response is a JSON object as described in [MailData](#/definitions/MailData) model.
+      The response is a JSON object containing mail data. See the MailData model of the [getMail](#mail/getMail) request.
       `[{"folder_id":2567,"id":7689}, ...]`.
     consumes:
       - application/json
@@ -120,6 +120,6 @@
       200:
         description: |
           The conversion result. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ConversionResponse"

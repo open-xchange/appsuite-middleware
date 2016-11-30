@@ -193,11 +193,8 @@ public final class LoginTools {
     }
 
     public static String parseParameter(HttpServletRequest req, String paramName, String fallback) {
-        final String value = req.getParameter(paramName);
-        if (null == value) {
-            return fallback;
-        }
-        return value;
+        String value = req.getParameter(paramName);
+        return null == value ? fallback : value;
     }
 
     public static String parseParameter(HttpServletRequest req, String paramName) throws OXException {
@@ -323,19 +320,28 @@ public final class LoginTools {
         }
     }
 
+    /**
+     * Parses possibly available share information (more precisely the value for <code>"share"</code> query parameter) from given HTTP request.
+     *
+     * @param req The HTTP request to parse from
+     * @return The parsed share information or <code>null</code>
+     * @throws OXException If parsing share information fails; e.g. guest infor cannot be obtained from available share token
+     */
     public static String[] parseShareInformation(HttpServletRequest req) throws OXException {
         String token = req.getParameter(SHARE_TOKEN);
-        if (Strings.isNotEmpty(token)) {
-            ShareService shareService = ServerServiceRegistry.getInstance().getService(ShareService.class);
-            if (null == shareService) {
-                return null;
-            }
-            GuestInfo guest = shareService.resolveGuest(token);
-            int contextId = guest.getContextID();
-            int guestId = guest.getGuestID();
-            return new String[] { String.valueOf(contextId), String.valueOf(guestId) };
+        if (Strings.isEmpty(token)) {
+            return null;
         }
-        return null;
+
+        ShareService shareService = ServerServiceRegistry.getInstance().getService(ShareService.class);
+        if (null == shareService) {
+            return null;
+        }
+
+        GuestInfo guest = shareService.resolveGuest(token);
+        int contextId = guest.getContextID();
+        int guestId = guest.getGuestID();
+        return new String[] { String.valueOf(contextId), String.valueOf(guestId) };
     }
 
 }

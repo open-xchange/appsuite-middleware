@@ -50,16 +50,19 @@
 package com.openexchange.cluster.lock.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.cluster.lock.internal.ClusterLockServiceImpl;
+import com.openexchange.cluster.lock.internal.ClusterLockServiceDatabaseImpl;
+import com.openexchange.cluster.lock.internal.ClusterLockServiceHazelcastImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
+import com.openexchange.cluster.lock.internal.groupware.ClusterLockCreateTableTask;
+import com.openexchange.cluster.lock.internal.groupware.CreateClusterLockTable;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
@@ -82,44 +85,28 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, DatabaseService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final Logger LOG = LoggerFactory.getLogger(ClusterLockActivator.class);
-
-        Services.setServiceLookup(this);
-
         final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
         final boolean enabled = hzConfigService.isEnabled();
 
         if (false == enabled) {
-            LOG.warn("{} will be disabled due to disabled Hazelcast services", context.getBundle().getSymbolicName());
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ClusterLockCreateTableTask(this)));
+            registerService(CreateTableService.class, new CreateClusterLockTable(), null);
+            registerService(ClusterLockService.class, new ClusterLockServiceDatabaseImpl(this));
         } else {
-            final BundleContext context = this.context;
-            tracker = track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
-
-                @Override
-                public HazelcastInstance addingService(ServiceReference<HazelcastInstance> ref) {
-                    HazelcastInstance hzInstance = context.getService(ref);
-                    registerService(ClusterLockService.class, new ClusterLockServiceImpl(hzInstance, ClusterLockActivator.this));
-                    return hzInstance;
-                }
-
-                @Override
-                public void modifiedService(ServiceReference<HazelcastInstance> ref, HazelcastInstance srv) {
-                    // nothing
-                }
-
-                @Override
-                public void removedService(ServiceReference<HazelcastInstance> ref, HazelcastInstance srv) {
-                    unregisterService(ClusterLockService.class);
-                    context.ungetService(ref);
-                }
-            });
+            registerService(ClusterLockService.class, new ClusterLockServiceHazelcastImpl(this, this));
+            tracker = track(HazelcastInstance.class, new HazelcastClusterLockServiceTracker(context));
             openTrackers();
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        unregisterService(ClusterLockService.class);
     }
 
     @Override
@@ -139,7 +126,6 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
             tracker.close();
             this.tracker = null;
         }
-        Services.setServiceLookup(null);
     }
 
     @Override

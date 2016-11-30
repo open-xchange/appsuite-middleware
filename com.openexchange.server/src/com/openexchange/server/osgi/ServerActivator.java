@@ -193,6 +193,7 @@ import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegis
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.osgi.MailCapabilityServiceTracker;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.MailSessionCacheInvalidator;
@@ -215,6 +216,7 @@ import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.notification.service.FullNameBuilderService;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
@@ -223,6 +225,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
@@ -441,6 +444,13 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MessageGeneratorRegistry.class, new RegistryCustomizer<MessageGeneratorRegistry>(context, MessageGeneratorRegistry.class));
         track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
         track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
+
+        // OAuth service
+        track(OAuthService.class, new RegistryCustomizer<OAuthService>(context, OAuthService.class));
+        track(MailOAuthService.class, new RegistryCustomizer<MailOAuthService>(context, MailOAuthService.class));
+
+        // Push notification service (PNS)
+        track(PushNotificationService.class, new RegistryCustomizer<PushNotificationService>(context, PushNotificationService.class));
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));

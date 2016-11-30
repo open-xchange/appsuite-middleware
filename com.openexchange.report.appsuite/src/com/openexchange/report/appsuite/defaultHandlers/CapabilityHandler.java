@@ -49,22 +49,31 @@
 
 package com.openexchange.report.appsuite.defaultHandlers;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.json.JSONException;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ContextReport;
@@ -75,9 +84,12 @@ import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportUserHandler;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
-import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.report.appsuite.serialization.Report.JsonObjectType;
+import com.openexchange.report.appsuite.storage.ChunkingUtilities;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * The {@link CapabilityHandler} analyzes a users capabilities and filestore quota. It sums up unique combinations of capabilities and quota and gives counts for
@@ -101,7 +113,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // Grab the file store quota from the context and save them in the report
         Context ctx = contextReport.getContext();
         try {
-            long quota = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx).getQuota();
+            QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+            if (null == storageService) {
+                throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
+            }
+            QuotaFileStorage userStorage = storageService.getQuotaFileStorage(ctx.getContextId());
+            long quota = userStorage.getQuota();
             contextReport.set(Report.MACDETAIL_QUOTA, Report.QUOTA, quota);
         } catch (OXException e) {
             LOG.error("", e);
@@ -111,35 +128,47 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     @Override
     public void runUserReport(UserReport userReport) throws OXException {
-        // First look up the capabilities for this user
-        CapabilitySet capabilities = new CapabilitySet(0);
-        if (userReport.getUser().isGuest()) {
-            capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getCreatedBy(), userReport.getContext().getContextId());
+        this.createCapabilityInformations(userReport);
+        this.addUserInformationToReport(userReport);
+    }
+
+    private void createCapabilityInformations(UserReport userReport) throws OXException {
+        CapabilitySet userCapabilitySet = getUserCapabilities(userReport.getUser(), userReport.getContext());
+        ArrayList<String> userCapabilityIds = createSortedListOfCapabilityIds(userCapabilitySet);
+        userReport.set(Report.MACDETAIL, Report.CAPABILITIES, createCommaSeparatedStringOfIds(userCapabilityIds));
+        userReport.set(Report.MACDETAIL, Report.CAPABILITY_LIST, userCapabilityIds);
+    }
+
+    private CapabilitySet getUserCapabilities(User user, Context context) throws OXException {
+        CapabilitySet userCapabilitySet = new CapabilitySet(0);
+        if (user.isGuest()) {
+            userCapabilitySet = Services.getService(CapabilityService.class).getCapabilities(user.getCreatedBy(), context.getContextId());
         } else {
-            capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
+            userCapabilitySet = Services.getService(CapabilityService.class).getCapabilities(user.getId(), context.getContextId());
         }
+        return userCapabilitySet;
+    }
 
-        // Next, turn them into a list of strings
-        ArrayList<String> c = new ArrayList<String>(capabilities.size());
+    private ArrayList<String> createSortedListOfCapabilityIds(CapabilitySet userCapabilitySet) {
+        ArrayList<String> userCapabilityIds = new ArrayList<String>(userCapabilitySet.size());
 
-        for (Capability capability : capabilities) {
-            c.add(capability.getId().toLowerCase());
+        for (Capability capability : userCapabilitySet) {
+            userCapabilityIds.add(capability.getId().toLowerCase());
         }
+        Collections.sort(userCapabilityIds);
+        return userCapabilityIds;
+    }
 
-        // Sort them alphabetically so we can more easily find the same list of capabilities again
-        Collections.sort(c);
-
-        StringBuilder cString = new StringBuilder();
-        for (String cap : c) {
-            cString.append(cap).append(",");
+    private String createCommaSeparatedStringOfIds(ArrayList<String> userCapabilityIds) {
+        StringBuilder capabilityIdsAsString = new StringBuilder();
+        for (String capabilityId : userCapabilityIds) {
+            capabilityIdsAsString.append(capabilityId).append(",");
         }
+        capabilityIdsAsString.setLength(capabilityIdsAsString.length() - 1);
+        return capabilityIdsAsString.toString();
+    }
 
-        cString.setLength(cString.length() - 1);
-
-        // Remember both the list and the identifying comma-separated String in the userReport
-        userReport.set(Report.MACDETAIL, Report.CAPABILITIES, cString.toString());
-        userReport.set(Report.MACDETAIL, Report.CAPABILITY_LIST, c);
-
+    private void addUserInformationToReport(UserReport userReport) throws OXException {
         if (!userReport.getUser().isGuest()) {
             // Determine if the user is disabled
             if (!userReport.getUser().isMailEnabled()) {
@@ -154,15 +183,17 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             } else {
                 userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
             }
-            // Get all relevant logins for this user and add them to the report
-            Calendar cal = Calendar.getInstance();
-            Date endDate = cal.getTime();
-            cal.add(Calendar.YEAR, -1);
-            Date startDate = cal.getTime();
-            LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
-            HashMap<String, Long> userLogins = loginCounterService.getLastClientLogIns(userReport.getUser().getId(), userReport.getContext().getContextId(), startDate, endDate);
-            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
+            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, getUserLoginsForPastYear(userReport.getContext().getContextId(), userReport.getUser().getId()));
         }
+    }
+
+    public HashMap<String, Long> getUserLoginsForPastYear(int contextId, int userId) throws OXException {
+        Calendar calender = Calendar.getInstance();
+        Date endDate = calender.getTime();
+        calender.add(Calendar.YEAR, -1);
+        Date startDate = calender.getTime();
+        LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
+        return loginCounterService.getLastClientLogIns(userId, contextId, startDate, endDate);
     }
 
     // In the context report we keep a count of users/disabled users/admins that share the same capabilities
@@ -170,7 +201,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     @Override
     public void merge(UserReport userReport, ContextReport contextReport) {
         if (userReport.getUser().isGuest()) {
-            handleGuests(userReport, contextReport);
+            incrementGuestOrLinkCount(userReport, contextReport);
         } else {
             handleInternalUser(userReport, contextReport);
         }
@@ -181,7 +212,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     @Override
     public void merge(ContextReport contextReport, Report report) {
         // Retrieve the quota
+        boolean storeCapS = false;
         long quota = contextReport.get(Report.MACDETAIL_QUOTA, Report.QUOTA, 0l, Long.class);
+        Collection<Object> reportValues = ((Map<String, Object>) report.getNamespace(Report.MACDETAIL)).values();
+        if (reportValues.size() >= ReportProperties.getMaxChunkSize()) {
+            storeCapS = true;
+        }
 
         // Retrieve all capabilities combinations
         Map<String, Object> macdetail = contextReport.getNamespace(Report.MACDETAIL);
@@ -199,48 +235,73 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             counts.put(Report.QUOTA, quota);
 
             // Retrieve or create (if this is the first merge) the total counts for the system thusfar
-            HashMap<String, Object> savedCounts = report.get(Report.MACDETAIL, capSpec, HashMap.class);
-            if (savedCounts == null) {
-                savedCounts = new HashMap<String, Object>();
-                savedCounts.put(Report.ADMIN, 0l);
-                savedCounts.put(Report.DISABLED, 0l);
-                savedCounts.put(Report.TOTAL, 0l);
-                savedCounts.put(Report.CAPABILITIES, contextReport.get(Report.MACDETAIL_LISTS, entry.getKey(), ArrayList.class));
-                savedCounts.put(Report.QUOTA, quota);
-                savedCounts.put(Report.GUESTS, 0l);
-                savedCounts.put(Report.LINKS, 0l);
-                savedCounts.put(Report.CONTEXTS, 0l);
-                savedCounts.put(Report.CONTEXT_USERS_MAX, 0l);
-                savedCounts.put(Report.CONTEXT_USERS_MIN, 0l);
-                savedCounts.put(Report.CONTEXT_USERS_AVG, 0l);
+            HashMap<String, Object> storedCapSData = report.get(Report.MACDETAIL, capSpec, HashMap.class);
+            if (storedCapSData == null) {
+                storedCapSData = prepareCapSData(contextReport, entry.getKey(), quota);
             }
             // And add our counts to it
-            add(savedCounts, counts);
+            addNewValuesToExistingValues(storedCapSData, counts);
             // Save it back to the report
-            report.set(Report.MACDETAIL, capSpec, savedCounts);
+            report.set(Report.MACDETAIL, capSpec, storedCapSData);
         }
         //Only for single tenant deployment
         if (report.isSingleDeployment()) {
-            // Get all capS of the currentContext
-            for (Entry<String, LinkedHashMap<Integer, ArrayList<Integer>>> capS : contextReport.getCapSToContext().entrySet()) {
-                // Add all Context/UserIds to this reports capS
-                String capSpec = capS.getKey() + "," + quotaSpec;
-                LinkedHashMap<Integer, ArrayList<Integer>> capSContextMap = (LinkedHashMap<Integer, ArrayList<Integer>>) report.getTenantMap().get("deployment").get(capSpec);
-                // This capS are not available yet
-                if (capSContextMap == null) {
-                    capSContextMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
-                    report.getTenantMap().get("deployment").put(capSpec, capSContextMap);
-                }
-                // For each context in this capSMap, add the context/User map
-                for (Entry<Integer, ArrayList<Integer>> singleContext : capS.getValue().entrySet()) {
-                    if (capSContextMap.get(singleContext.getKey()) == null) {
-                        capSContextMap.put(singleContext.getKey(), new ArrayList<Integer>());
-                    }
-                    capSContextMap.get(singleContext.getKey()).addAll(singleContext.getValue());
-                }
-            }
+            addContextAndUserToDeployment(report, contextReport, quotaSpec);
+        }
+
+        if (storeCapS) {
+            prepareReportForStorageOfContent(report);
+            storeAndMergeReportParts(report);
         }
         //What to do with multi-tenant deployment
+    }
+
+    private HashMap<String, Object> prepareCapSData(ContextReport contextReport, String capS, long quota) {
+        HashMap<String, Object> capSData = new HashMap<>();
+        capSData = new HashMap<String, Object>();
+        capSData.put(Report.ADMIN, 0l);
+        capSData.put(Report.DISABLED, 0l);
+        capSData.put(Report.TOTAL, 0l);
+        capSData.put(Report.CAPABILITIES, contextReport.get(Report.MACDETAIL_LISTS, capS, ArrayList.class));
+        capSData.put(Report.QUOTA, quota);
+        capSData.put(Report.GUESTS, 0l);
+        capSData.put(Report.LINKS, 0l);
+        capSData.put(Report.CONTEXTS, 0l);
+        capSData.put(Report.CONTEXT_USERS_MAX, 0l);
+        capSData.put(Report.CONTEXT_USERS_MIN, 0l);
+        capSData.put(Report.CONTEXT_USERS_AVG, 0l);
+
+        return capSData;
+    }
+
+    private void addContextAndUserToDeployment(Report report, ContextReport contextReport, String quotaSpec) {
+        // Get all capS of the currentContext
+        for (Entry<String, LinkedHashMap<Integer, ArrayList<Integer>>> capS : contextReport.getCapSToContext().entrySet()) {
+            // Add all Context/UserIds to this reports capS
+            String capSpec = capS.getKey() + "," + quotaSpec;
+            LinkedHashMap<Integer, ArrayList<Integer>> capSContextMap = (LinkedHashMap<Integer, ArrayList<Integer>>) report.getTenantMap().get("deployment").get(capSpec);
+            // This capS are not available yet
+            if (capSContextMap == null) {
+                capSContextMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
+                report.getTenantMap().get("deployment").put(capSpec, capSContextMap);
+            }
+            // For each context in this capSMap, add the context/User map
+            for (Entry<Integer, ArrayList<Integer>> singleContext : capS.getValue().entrySet()) {
+                if (capSContextMap.get(singleContext.getKey()) == null) {
+                    capSContextMap.put(singleContext.getKey(), new ArrayList<Integer>());
+                }
+                capSContextMap.get(singleContext.getKey()).addAll(singleContext.getValue());
+            }
+        }
+    }
+
+    public void prepareReportForStorageOfContent(Report report) {
+        report.setNeedsComposition(true);
+        Map<String, Object> reportMacdetail = report.getNamespace(Report.MACDETAIL);
+        ArrayList values = new ArrayList(reportMacdetail.values());
+        report.clearNamespace(Report.MACDETAIL);
+        this.sumClientsInSingleMap(values);
+        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
     }
 
     // A little cleanup. We don't need the unwieldly mapping of capability String + quota to counts anymore.
@@ -248,29 +309,72 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void finish(Report report) {
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
 
-        ArrayList values = new ArrayList(macdetail.values());
-        this.sumClientsInSingleMap(values);
+        ArrayList<Object> values = new ArrayList(macdetail.values());
 
         if (report.getType().equals("extended")) {
-            for (Entry<String, LinkedHashMap<String, Object>> currentTenant : report.getTenantMap().entrySet()) {
-                for (Entry<String, Object> currentCapS : currentTenant.getValue().entrySet()) {
-                    addDriveMetrics((HashMap<String, Object>) macdetail.get(currentCapS.getKey()), (LinkedHashMap<Integer, ArrayList<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart()), new Date(report.getConsideredTimeframeEnd()), report);
-                }
-            }
-
-            // calculate correct drive average values
-            this.calculateCorrectDriveAvg(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class));
+            addDriveMetricsToReport(report);
         }
+        // Merge all stored data into report files, if neccessary
+        this.sumClientsInSingleMap(values);
 
+        if (report.isNeedsComposition()) {
+            storeAndMergeReportParts(report);
+            report.composeReportFromStoredParts(Report.CAPABILITY_SETS, JsonObjectType.ARRAY, Report.MACDETAIL, 1);
+        }
         report.clearNamespace(Report.MACDETAIL);
 
         report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
     }
 
+    private void addDriveMetricsToReport(Report report) {
+        Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
+        for (Entry<String, LinkedHashMap<String, Object>> currentTenant : report.getTenantMap().entrySet()) {
+            for (Entry<String, Object> currentCapS : currentTenant.getValue().entrySet()) {
+                String compositionCapS = currentCapS.getKey().substring(0, currentCapS.getKey().lastIndexOf(","));
+                ArrayList<String> compositionCapSList = null;
+                if (report.isNeedsComposition()) {
+                    macdetail.put(currentCapS.getKey(), new HashMap<>());
+                    compositionCapSList = new ArrayList<>(Arrays.asList(compositionCapS.split(",")));
+                }
+                addDriveMetricsToCapS((Map<String, Object>) macdetail.get(currentCapS.getKey()), (Map<Integer, List<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart()), new Date(report.getConsideredTimeframeEnd()), report, compositionCapSList);
+            }
+        }
+        // calculate correct drive average values
+        this.calculateCorrectDriveAvg(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class));
+        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList(macdetail.values()));
+    }
+
+    @Override
+    public void storeAndMergeReportParts(Report report) {
+        // create storage folder, if not already exists
+        File storageFolder = new File(ReportProperties.getStoragePath());
+        if (!storageFolder.exists()) {
+            if (!storageFolder.mkdir()) {
+                LOG.error("Failed to create storage folder");
+                return;
+            }
+        }
+
+        // Get all capability sets
+        ArrayList<HashMap<String, Object>> capSets = report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>(), ArrayList.class);
+        report.clearNamespace(Report.MACDETAIL);
+        // serialize each capability set into a single HashMap and merge the data if a file for the
+        // given capability set already exists
+        for (HashMap<String, Object> singleCapS : capSets) {
+            try {
+                ChunkingUtilities.storeCapSContentToFiles(report.getUUID(), ReportProperties.getStoragePath(), singleCapS);
+            } catch (JSONException e) {
+                LOG.error("Error while trying create JSONObject from stored capability-set data. ", e);
+            } catch (IOException e) {
+                LOG.error("Error while trying to read stored capability-set data. ", e);
+            }
+        }
+    }
+
     /**
      * Set the user specific data for the given {@link ContextReport}. The capability-set specific values
      * like total, admin... are incremented depending on the given {@link UserReport}.
-     * 
+     *
      * @param userReport
      * @param contextReport
      */
@@ -286,18 +390,18 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         // Depending on the users type, we have to increase the accompanying count
         if (userReport.get(Report.MACDETAIL, Report.MAILADMIN, Boolean.class)) {
-            incCount(counts, Report.ADMIN);
+            incrementCounter(counts, Report.ADMIN);
         } else if (userReport.get(Report.MACDETAIL, Report.DISABLED, Boolean.class)) {
-            incCount(counts, Report.DISABLED);
+            incrementCounter(counts, Report.DISABLED);
         }
 
         // Get the users client logins and save them also to this context/capability-set
         HashMap<String, Long> userLogins = userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class);
         for (Entry<String, Long> clientName : userLogins.entrySet()) {
-            incCount(counts, (String) clientName.getKey());
+            incrementCounter(counts, clientName.getKey());
         }
 
-        incCount(counts, Report.TOTAL);
+        incrementCounter(counts, Report.TOTAL);
 
         contextReport.set(Report.MACDETAIL, capString, userLogins);
 
@@ -313,44 +417,28 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         capSContextMap.get(contextReport.getContext().getContextId()).add(userReport.getUser().getId());
     }
 
-    /**
-     * Distinguish the guest type (link or guest) and increment the predestined parameter in the
-     * given context report
-     * 
-     * @param userReport
-     * @param contextReport
-     */
-    private void handleGuests(UserReport userReport, ContextReport contextReport) {
-        String capString = userReport.get(Report.MACDETAIL, Report.CAPABILITIES, String.class);
-        // The context report maintains a mapping of unique capabilities set -> a map of counts for admins / disabled users  and regular users
-        HashMap<String, Long> counts = contextReport.get(Report.MACDETAIL, capString, HashMap.class);
-        if (counts == null) {
-            counts = new HashMap<String, Long>();
-        }
+    private void incrementGuestOrLinkCount(UserReport userReport, ContextReport contextReport) {
+        String userCapabilities = userReport.get(Report.MACDETAIL, Report.CAPABILITIES, String.class);
+        HashMap<String, Long> contextTotals = contextReport.get(Report.MACDETAIL, userCapabilities, new HashMap<String, Long>(), HashMap.class);
         if (userReport.getUser().getMail().isEmpty()) {
-            incCount(counts, Report.LINKS);
+            incrementCounter(contextTotals, Report.LINKS);
         } else {
-            incCount(counts, Report.GUESTS);
+            incrementCounter(contextTotals, Report.GUESTS);
         }
-        contextReport.set(Report.MACDETAIL, capString, counts);
+        contextReport.set(Report.MACDETAIL, userCapabilities, contextTotals);
     }
 
-    /**
-     * Increments the value of an element in the given map, identified by the given key
-     * 
-     * @param elementMap
-     * @param keyInMap
-     */
-    private void incCount(HashMap<String, Long> elementMap, String keyInMap) {
-        Long value = (Long) elementMap.get(keyInMap);
+    private void incrementCounter(HashMap<String, Long> counterMap, String keyOfValueToIncrement) {
+        Long value = counterMap.get(keyOfValueToIncrement);
         if (value == null) {
             value = Long.valueOf(0);
         }
-        elementMap.put(keyInMap, value + 1);
+        counterMap.put(keyOfValueToIncrement, value + 1);
     }
+
     /**
      * Calculate drive specific average-metrics and clean up the given map form unneeded parameters.
-     * 
+     *
      * @param driveTotalMap, the map with all relevant drive metrics.
      */
     private void calculateCorrectDriveAvg(LinkedHashMap<String, Long> driveTotalMap) {
@@ -376,22 +464,23 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             driveTotalMap.remove("quota-usage-percent-sum");
         }
 
-        if (driveTotalMap.get("external-storages-users") != null && driveTotalMap.get("external-storages-users") != 0)
+        if (driveTotalMap.get("external-storages-users") != null && driveTotalMap.get("external-storages-users") != 0) {
             driveTotalMap.put("external-storages-avg", driveTotalMap.get("external-storages-total") / driveTotalMap.get("external-storages-users"));
+        }
     }
 
     /**
      * Get all drive metrics from db for the given usersInContext map. The result is saved into the given
      * capSMap. All new total values on report level are then recalculated and saved into the given
      * report.
-     * 
+     *
      * @param capSMap, the capability-set key/value pairs
      * @param usersInContext, all relevant contexts and users for this capability-set
      * @param consideredTimeframeStart, beginning of potential timeframe for calculating file count
      * @param consideredTimeframeEnd, end of potential timeframe for calculating file count
      * @param report, the report with all values
      */
-    private void addDriveMetrics(HashMap<String, Object> capSMap, LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report) {
+    private void addDriveMetricsToCapS(Map<String, Object> capSMap, Map<Integer, List<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report, List<String> compositionCapS) {
         InfostoreInformationService informationService = Services.getService(InfostoreInformationService.class);
         LinkedHashMap<String, Integer> driveUserMetrics = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> driveMetrics = new LinkedHashMap<>();
@@ -422,9 +511,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 driveUserMetrics.put("quota-usage-percent-" + quotaUsage.getKey(), quotaUsage.getValue());
             }
         } catch (final SQLException e) {
-            e.printStackTrace();
+            LOG.error("Unable to execute SQL for drive metric gathering.", e);
         } catch (OXException e) {
-            e.printStackTrace();
+            LOG.error("Unable to gather drive metrics.", e);
         } finally {
             informationService.closeAllDBConnections();
         }
@@ -466,33 +555,32 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
         }
         report.set(Report.TOTAL, Report.DRIVE_TOTAL, totalDrive);
+        // Merge drive metrics into files and remove the data from the report, if neccessary
+        if (report.isNeedsComposition()) {
+            capSMap.put(Report.CAPABILITIES, compositionCapS);
+            report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>(), ArrayList.class).add(capSMap);
+            storeAndMergeReportParts(report);
+        }
     }
 
-    /**
-     * Add all values from counts to saveCounts. Also calculate Context-users-min/max/avg in savedCounts, depending
-     * on the new values.
-     * 
-     * @param savedCounts
-     * @param counts
-     */
-    private void add(HashMap<String, Object> savedCounts, HashMap<String, Object> counts) {
-        savedCounts.put(Report.CONTEXTS, (Long) savedCounts.get(Report.CONTEXTS) + 1);
-        for (Map.Entry<String, Object> entry : counts.entrySet()) {
+    private void addNewValuesToExistingValues(Map<String, Object> existingValues, Map<String, Object> newValues) {
+        existingValues.put(Report.CONTEXTS, Long.parseLong(String.valueOf(existingValues.get(Report.CONTEXTS))) + 1L);
+        for (Map.Entry<String, Object> entry : newValues.entrySet()) {
             if (entry.getValue() instanceof Long) {
-                Long value = (Long) savedCounts.get(entry.getKey());
+                Long value = (Long) existingValues.get(entry.getKey());
                 if (value == null) {
                     value = Long.valueOf(0);
                 }
-                savedCounts.put(entry.getKey(), value + (Long) entry.getValue());
+                existingValues.put(entry.getKey(), value + (Long) entry.getValue());
                 if (entry.getKey().equals(Report.TOTAL)) {
                     Long newValue = (Long) entry.getValue();
-                    if (newValue > (Long) savedCounts.get(Report.CONTEXT_USERS_MAX)) {
-                        savedCounts.put(Report.CONTEXT_USERS_MAX, newValue);
+                    if (newValue > (Long) existingValues.get(Report.CONTEXT_USERS_MAX)) {
+                        existingValues.put(Report.CONTEXT_USERS_MAX, newValue);
                     }
-                    if (newValue < (Long) savedCounts.get(Report.CONTEXT_USERS_MIN) || (Long) savedCounts.get(Report.CONTEXT_USERS_MIN) == 0l) {
-                        savedCounts.put(Report.CONTEXT_USERS_MIN, newValue);
+                    if (newValue < (Long) existingValues.get(Report.CONTEXT_USERS_MIN) || (Long) existingValues.get(Report.CONTEXT_USERS_MIN) == 0l) {
+                        existingValues.put(Report.CONTEXT_USERS_MIN, newValue);
                     }
-                    savedCounts.put(Report.CONTEXT_USERS_AVG, (Long) savedCounts.get(Report.TOTAL) / (Long) savedCounts.get(Report.CONTEXTS));
+                    existingValues.put(Report.CONTEXT_USERS_AVG, (Long) existingValues.get(Report.TOTAL) / (Long) existingValues.get(Report.CONTEXTS));
                 }
             }
         }
@@ -502,21 +590,25 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * Sum all clients of the given attribute list in one single Map and remove them from from the given {@link ArrayList} afterwards.
      * A client is identified by the preceding string "client:". In the new Map, this preceding string is removed and the rest
      * represents the key. The value is the amount. The result is added to the given ArrayList.
-     * 
+     *
      * @param capSValueMap - A list of {@link HashMap}<String, Object>s with the counted values of a capability-set
      */
-    private void sumClientsInSingleMap(ArrayList capSValueMap) {
+    private void sumClientsInSingleMap(List<Object> capSValueMap) {
         for (Object valueMap : capSValueMap) {
-            HashMap<String, Object> capSMap = (HashMap<String, Object>) valueMap;
-            HashMap<String, Object> clients = new HashMap<>();
-            for (Iterator<Map.Entry<String, Object>> it = capSMap.entrySet().iterator(); it.hasNext();) {
-                Map.Entry<String, Object> entry = it.next();
-                if (entry.getKey().contains("client:")) {
-                    clients.put(entry.getKey().replace("client:", ""), entry.getValue());
-                    it.remove();
-                }
-            }
-            capSMap.put(Report.CLIENT_LOGINS, clients);
+            Map<String, Object> capSMap = (HashMap<String, Object>) valueMap;
+            capSMap.put(Report.CLIENT_LOGINS, extractClientMapFromCapSContent(capSMap));
         }
+    }
+
+    private Map<String, Object> extractClientMapFromCapSContent(Map<String, Object> capSMap) {
+        Map<String, Object> clients = new HashMap<>();
+        for (Iterator<Map.Entry<String, Object>> it = capSMap.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, Object> entry = it.next();
+            if (entry.getKey().contains("client:")) {
+                clients.put(entry.getKey().replace("client:", ""), entry.getValue());
+                it.remove();
+            }
+        }
+        return clients;
     }
 }

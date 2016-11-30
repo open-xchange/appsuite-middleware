@@ -2,19 +2,20 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The REST service for capabilities
 Bundle-SymbolicName: com.openexchange.rest.services.capabilities
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax.requesthandler,
- com.openexchange.config,
  com.openexchange.capabilities,
  com.openexchange.capabilities.json,
+ com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
  com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.rest.services,
+ com.openexchange.rest.services.annotation,
  com.openexchange.server,
  com.openexchange.tools.servlet,
  javax.inject,

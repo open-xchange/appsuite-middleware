@@ -2,7 +2,7 @@
   post:
     operationId: importCSV
     tags:
-      - import
+      - Import
     summary: Imports contact data from CSV file.
     description: |
       #### Example CSV
@@ -12,7 +12,7 @@
       "Hildegard","Musterfrau"
       ```
       The delimiter may be any CSV-valid character (e.g. "," or ";"). The first line must contain the column titles that are related
-      to the corresponding fields of the [ContactData](#/definitions/ContactData) model. See [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data)
+      to the corresponding fields of the ContactData model (see [getContact](#contacts/getContact) request). See [Detailed contact data](#detailed-contact-data)
       for a mapping of fields to CSV column titles.
     consumes:
       - multipart/form-data
@@ -28,18 +28,18 @@
       - in: query
         name: charset
         type: string
-        description: A fixed character encoding to use when parsing the uploaded file, overriding the built-in defaults, following the conventions documented in [RFC 2278](http://tools.ietf.org/html/rfc2278) (preliminary, since 7.6.2).
+        description: A fixed character encoding to use when parsing the uploaded file, overriding the built-in defaults, following the conventions documented in [RFC 2278](http://tools.ietf.org/html/rfc2278).
         required: false
       - in: formData
         name: file
         type: file
-        description: The CSV file containing the contact data. The column titles are the ones described in [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data).
+        description: The CSV file containing the contact data. The column titles are the ones described in [Detailed contact data](#detailed-contact-data).
         required: true
     responses:
       200:
         description: |
-          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON object with the field `data` that represents
+          A HTML page as described in [File uploads](#file-uploads) containing a JSON object with the field `data` that represents
           an array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created contacts.
-          In case of errors the JSON object contains the well known [error fields](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling).
+          In case of errors the JSON object contains the well known [error fields](#error-handling).
         schema:
           type: string

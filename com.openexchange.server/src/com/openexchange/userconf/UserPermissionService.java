@@ -180,4 +180,14 @@ public interface UserPermissionService {
      */
     void deleteUserPermissionBits(Connection connection, Context context, int userId) throws OXException;
 
+    /**
+     * Retrieves the accessCombinationName for the given user
+     * 
+     * @param context The context
+     * @param userId The user id
+     * @return The accessCombinationName
+     * @throws OXException if accessCombinationName could not be retrieved
+     */
+    String getAccessCombinationName(Context context, int userId) throws OXException;
+
 }

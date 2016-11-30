@@ -74,6 +74,8 @@ public interface MailAccountFields {
 
     public static final String MAIL_STARTTLS = "mail_starttls";
 
+    public static final String MAIL_OAUTH = "mail_oauth";
+
     public static final String TRANSPORT_URL = "transport_url";
 
     public static final String TRANSPORT_SERVER = "transport_server";
@@ -89,6 +91,8 @@ public interface MailAccountFields {
     public static final String TRANSPORT_PASSWORD = "transport_password";
 
     public static final String TRANSPORT_STARTTLS = "transport_starttls";
+
+    public static final String TRANSPORT_OAUTH = "transport_oauth";
 
     /**
      * Specifies if transport authentication is supposed being performed (with either dedicate credentials or the ones from mail services)
@@ -153,4 +157,5 @@ public interface MailAccountFields {
     public static final String META = "meta";
 
     public static final String ROOT_FOLDER = "root_folder";
+
 }

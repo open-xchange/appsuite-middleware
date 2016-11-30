@@ -31,6 +31,11 @@ And then either of:
  - After failed authentication
  - After redirected authentication (neither failed nor succeeded, but authentication is supposed to happen at another service). Not used by OXWF.
 
+**NOTE**
+Login listeners are also called for password-protected guest and share logins. The latter one (password-protected share) always advertises `anonymous` as login name.
+Hence, the utilized Weakforced policy should not operate solely on login name, but also take IP addresses into consideration. Otherwise all `anonymous` login attempts
+might be temporarily back-listed.
+
 The OXWF itself registers such a login listener, which triggers the HTTP calls to Weakforced service. Currently used:
 
  - `allow`
@@ -52,7 +57,7 @@ A successful authentication attempt is `report`ed back to Weakforced service by 
 A failed authentication attempt is `report`ed back to Weakforced service by providing login, password-hash, remote address (either host name or IP address) and client identifier in order to be tracked for subsequent validations of login attempts from the same client/user.
 
 # Installation
-Deploying the OXWF simply requires to install the `open-xchange-weakforced` package. Once istalled the associated login listener gets registered and receives the mentioned call-backs during login requests.
+Deploying the OXWF simply requires to install the `open-xchange-weakforced` package. Once installed the associated login listener gets registered and receives the mentioned call-backs during login requests.
 
 # Configuration
 After the package is deployed, an administrator is able to configure the OXWF through `/opt/open-xchange/etc/weakforced.properties` file.

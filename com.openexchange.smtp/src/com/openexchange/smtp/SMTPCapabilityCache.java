@@ -67,9 +67,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.services.Services;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link SMTPCapabilityCache} - A cache for CAPABILITY and greeting from SMTP servers.
@@ -251,7 +251,8 @@ public final class SMTPCapabilityCache {
             try {
                 try {
                     if (isSecure) {
-                        s = TrustAllSSLSocketFactory.getDefault().createSocket();
+                        SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+                        s = factoryProvider.getDefault().createSocket();
                     } else {
                         s = new Socket();
                     }

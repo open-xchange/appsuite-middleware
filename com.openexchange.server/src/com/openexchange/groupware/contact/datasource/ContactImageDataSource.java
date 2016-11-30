@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.java.util.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -231,8 +232,8 @@ public final class ContactImageDataSource implements ImageDataSource {
      * @throws OXException
      */
     private static Contact optContact(Session session, ImageLocation imageLocation, ContactField...fields) throws OXException {
-        return optContact(session, ImageUtility.getUnsignedInteger(imageLocation.getId()),
-            ImageUtility.getUnsignedInteger(imageLocation.getFolder()), fields);
+        return optContact(session, Tools.getUnsignedInteger(imageLocation.getId()),
+            Tools.getUnsignedInteger(imageLocation.getFolder()), fields);
     }
 
     /**

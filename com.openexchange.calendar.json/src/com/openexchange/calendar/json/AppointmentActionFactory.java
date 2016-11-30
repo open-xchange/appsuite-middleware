@@ -51,7 +51,7 @@ package com.openexchange.calendar.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.calendar.json.actions.AllAction;
@@ -69,7 +69,6 @@ import com.openexchange.calendar.json.actions.ResolveUIDAction;
 import com.openexchange.calendar.json.actions.SearchAction;
 import com.openexchange.calendar.json.actions.UpdateAction;
 import com.openexchange.calendar.json.actions.UpdatesAction;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
@@ -80,7 +79,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Module(name = "calendar", description = "Provides access to calendar information.")
 @OAuthModule
 public class AppointmentActionFactory implements AJAXActionServiceFactory {
 
@@ -97,7 +95,7 @@ public class AppointmentActionFactory implements AJAXActionServiceFactory {
      */
     public AppointmentActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(15, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("new", new NewAction(services));
         actions.put("update", new UpdateAction(services));
         actions.put("updates", new UpdatesAction(services));
@@ -113,6 +111,7 @@ public class AppointmentActionFactory implements AJAXActionServiceFactory {
         actions.put("copy", new CopyAction(services));
         actions.put("resolveuid", new ResolveUIDAction(services));
         actions.put("getChangeExceptions", new ChangeExceptionsAction(services));
+        this.actions = actions.build();
     }
 
     @Override

@@ -49,10 +49,8 @@
 
 package com.openexchange.folderstorage;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 
 /**
@@ -68,7 +66,7 @@ public interface RemoveAfterAccessFolder extends Folder {
     /**
      * Set of ignorable mail protocol identifiers.
      */
-    public static final Set<String> IGNORABLES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("pop3", UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX)));
+    public static final Set<String> IGNORABLES = ImmutableSet.of("pop3", UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX);
 
     /**
      * Whether to load subfolders.

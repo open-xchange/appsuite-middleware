@@ -69,7 +69,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-import com.google.api.client.googleapis.media.MediaHttpUploader;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
@@ -93,10 +92,9 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
-import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
-import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
+import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.SizeKnowingInputStream;
@@ -111,7 +109,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess, FileStoragePersistentIDs {
+public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStoragePersistentIDs {
 
     private final GoogleDriveAccountAccess accountAccess;
     private final int userId;
@@ -124,23 +122,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param session The session
      * @param accountAccess A Google Drive account access reference
      */
-    public GoogleDriveFileAccess(GoogleDriveAccess googleDriveAccess, FileStorageAccount account, Session session, GoogleDriveAccountAccess accountAccess) throws OXException {
+    public GoogleDriveFileAccess(GoogleDriveOAuthAccess googleDriveAccess, FileStorageAccount account, Session session, GoogleDriveAccountAccess accountAccess) throws OXException {
         super(googleDriveAccess, account, session);
         this.accountAccess = accountAccess;
         this.userId = session.getUserId();
-    }
-
-    private List<Revision> optRevisions(Drive drive, String id) throws IOException, HttpResponseException {
-        List<Revision> revisions;
-        try {
-            revisions = drive.revisions().list(id).setFields("items/id").execute().getItems();
-        } catch (HttpResponseException e) {
-            if (e.getStatusCode() != SC_BAD_REQUEST) {
-                throw e;
-            }
-            revisions = null;
-        }
-        return revisions;
     }
 
     @Override
@@ -183,8 +168,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         try {
             return null != getMetadata(folderId, id, version, Collections.singletonList(Field.ID), 0);
         } catch (OXException e) {
-            if (FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e) || FileStorageExceptionCodes.FOLDER_NOT_FOUND.equals(e) ||
-                FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.equals(e)) {
+            if (FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e) || FileStorageExceptionCodes.FOLDER_NOT_FOUND.equals(e) || FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.equals(e)) {
                 return false;
             }
             throw e;
@@ -209,40 +193,13 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields, int retryCount) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME) || modifiedFields.contains(Field.VERSION)) {
             try {
-                Drive drive = googleDriveAccess.getDrive(session);
+                Drive drive = googleDriveAccess.<Drive> getClient().client;
                 com.google.api.services.drive.model.File savedFile = new com.google.api.services.drive.model.File();
                 if (FileStorageFileAccess.NEW != file.getId()) {
                     savedFile.setId(file.getId());
                     if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName())) {
                         savedFile.setTitle(file.getFileName());
                         savedFile = drive.files().patch(file.getId(), savedFile).execute();
-                    }
-                    if ((null == modifiedFields || modifiedFields.contains(Field.VERSION)) && false == Strings.isEmpty(file.getVersion())) {
-                        List<Revision> revisions = drive.revisions().list(file.getId()).execute().getItems();
-                        Revision referencedRevision = null;
-                        for (Revision revision : revisions) {
-                            if (revision.getId().equals(file.getVersion())) {
-                                referencedRevision = revision;
-                                break;
-                            }
-                        }
-                        if (null == referencedRevision) {
-                            throw FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.create(file.getVersion(), file.getId(), file.getFolderId());
-                        }
-                        if (revisions.size() - 1 != revisions.indexOf(referencedRevision)) {
-                            HttpResponse resp = drive.getRequestFactory().buildGetRequest(new GenericUrl(referencedRevision.getDownloadUrl())).execute();
-                            InputStream content = null;
-                            try {
-                                content = resp.getContent();
-                                Drive.Files.Update update = drive.files().update(file.getId(), savedFile,
-                                    new InputStreamContent(referencedRevision.getMimeType(), content));
-                                MediaHttpUploader uploader = update.getMediaHttpUploader();
-                                uploader.setDirectUploadEnabled(true);
-                                savedFile = update.execute();
-                            } finally {
-                                Streams.close(content);
-                            }
-                        }
                     }
                 } else {
                     savedFile.setTitle(file.getFileName());
@@ -262,7 +219,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     throw handleHttpResponseError(file.getId(), e);
                 }
 
-                long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
                 LockSupport.parkNanos(nanosToWait);
                 return saveFileMetadata(file, sequenceNumber, modifiedFields, retry);
             } catch (final IOException e) {
@@ -286,7 +243,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         }
         String id = source.getId();
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
 
             // Get source file
             com.google.api.services.drive.model.File srcFile = drive.files().get(id).execute();
@@ -330,8 +287,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             copy.setTitle(title);
             copy.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destId)));
             if (null != update) {
-                if (false == Strings.isEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) &&
-                    false == update.getTitle().equals(srcFile.getTitle())) {
+                if (false == Strings.isEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getTitle())) {
                     copy.setTitle(update.getTitle());
                 }
             }
@@ -353,7 +309,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(id, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return copy(source, version, destFolder, update, newFil, modifiedFields, retry);
         } catch (final IOException e) {
@@ -371,7 +327,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields, int retryCount) throws OXException {
         String id = source.getId();
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
 
             // Get source file
             com.google.api.services.drive.model.File srcFile = drive.files().get(id).execute();
@@ -393,8 +349,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             com.google.api.services.drive.model.File patch = new com.google.api.services.drive.model.File();
             patch.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destFolder)));
             if (null != update) {
-                if (false == Strings.isEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) &&
-                    false == update.getTitle().equals(srcFile.getTitle())) {
+                if (false == Strings.isEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getTitle())) {
                     patch.setTitle(update.getTitle());
                 }
             }
@@ -416,7 +371,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(id, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return move(source, destFolder, sequenceNumber, update, modifiedFields, retry);
         } catch (final IOException e) {
@@ -433,7 +388,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private InputStream getDocument(String folderId, String id, String version, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             /*
              * get download URL from file or revision
              */
@@ -472,7 +427,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(id, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return getDocument(folderId, id, version, retry);
         } catch (final IOException e) {
@@ -489,7 +444,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private InputStream getThumbnailStream(String folderId, String id, String version, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             /*
              * get thumbnail link from file
              */
@@ -499,15 +454,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             if (Strings.isEmpty(thumbnailLink)) {
                 // The file doesn't have a thumbnail
                 return null;
-            }
-            /*
-             * thumbnail link is valid for latest revision only
-             */
-            if (CURRENT_VERSION != version) {
-                List<Revision> revisions = optRevisions(drive, id);
-                if (null == revisions || 0 == revisions.size() || false == version.equals(revisions.get(revisions.size() - 1).getId())) {
-                    return null;
-                }
             }
             /*
              * get thumbnail stream
@@ -527,7 +473,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(id, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return getThumbnailStream(folderId, id, version, retry);
         } catch (final IOException e) {
@@ -554,10 +500,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
         fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(toGoogleDriveFolderId(file.getFolderId()))));
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             if (FileStorageFileAccess.NEW == file.getId()) {
                 /*
-                 * insert new file
+                 * Insert new file
                  */
                 ThresholdFileHolder sink = null;
                 try {
@@ -589,19 +535,20 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 } finally {
                     Streams.close(sink);
                 }
-
-            } else {
-                /*
-                 * upload new version of existing file, adjusting metadata as requested
-                 */
-                if (null != file.getFileName() && (null == modifiedFields || modifiedFields.contains(Field.FILENAME))) {
-                    fileMetadata.setTitle(file.getFileName());
-                }
-                Drive.Files.Update update = drive.files().update(file.getId(), fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
-                update.getMediaHttpUploader().setDirectUploadEnabled(true);
-                fileMetadata = update.execute();
-                return new IDTuple(file.getFolderId(), fileMetadata.getId());
             }
+
+            /*-
+             * Update an existing file...
+             *
+             * Upload new version of existing file, adjusting metadata as requested
+             */
+            if (null != file.getFileName() && (null == modifiedFields || modifiedFields.contains(Field.FILENAME))) {
+                fileMetadata.setTitle(file.getFileName());
+            }
+            Drive.Files.Update update = drive.files().update(file.getId(), fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
+            update.getMediaHttpUploader().setDirectUploadEnabled(true);
+            fileMetadata = update.execute();
+            return new IDTuple(file.getFolderId(), fileMetadata.getId());
         } catch (final HttpResponseException e) {
             if (!isUserRateLimitExceeded(e)) {
                 // Otherwise throw exception
@@ -615,7 +562,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(file.getId(), e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return saveDocument(file, data, sequenceNumber, modifiedFields, retry);
         } catch (final IOException e) {
@@ -632,7 +579,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private void removeDocument(String folderId, long sequenceNumber, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
 
             // Determine folder identifier
             String fid = toGoogleDriveFolderId(folderId);
@@ -684,7 +631,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(folderId, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             removeDocument(folderId, sequenceNumber, retry);
             return;
@@ -707,7 +654,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             Map<String, Boolean> knownTrashFolders = new HashMap<String, Boolean>();
             List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (IDTuple id : ids) {
@@ -748,7 +695,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(null, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return removeDocument(ids, sequenceNumber, hardDelete, retry);
         } catch (final IOException e) {
@@ -780,14 +727,12 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             List<File> files = new LinkedList<File>();
             /*
              * build request to list all files in a folder
              */
-            com.google.api.services.drive.Drive.Files.List listRequest = drive.files().list()
-                .setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH + " and '" + toGoogleDriveFolderId(folderId) + "' in parents")
-                .setFields("kind,nextPageToken,items(" + getFields(fields) + ')');
+            com.google.api.services.drive.Drive.Files.List listRequest = drive.files().list().setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH + " and '" + toGoogleDriveFolderId(folderId) + "' in parents").setFields("kind,nextPageToken,items(" + getFields(fields) + ')');
             /*
              * execute as often as needed & parse files
              */
@@ -796,16 +741,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 fileList = listRequest.execute();
                 for (com.google.api.services.drive.model.File file : fileList.getItems()) {
                     GoogleDriveFile metadata = createFile(folderId, file.getId(), file, fields);
-                    if (null == fields || fields.contains(Field.VERSION) || fields.contains(Field.NUMBER_OF_VERSIONS)) {
-                        List<Revision> revisions = optRevisions(drive, metadata.getId());
-                        if (null != revisions && 0 < revisions.size()) {
-                            metadata.setNumberOfVersions(revisions.size());
-                            metadata.setVersion(revisions.get(revisions.size() - 1).getId());
-                        } else {
-                            metadata.setVersion(FileStorageFileAccess.CURRENT_VERSION);
-                            metadata.setNumberOfVersions(1);
-                        }
-                    }
                     files.add(metadata);
                 }
                 listRequest.setPageToken(fileList.getNextPageToken());
@@ -828,7 +763,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(folderId, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return getDocuments(folderId, fields, sort, order, retry);
         } catch (final IOException e) {
@@ -859,7 +794,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             List<File> updatedFiles = new LinkedList<File>();
             List<File> deletedFiles = new LinkedList<File>();
             List<File> newFiles = new LinkedList<File>();
@@ -872,8 +807,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             if (Long.MIN_VALUE != updateSince) {
                 stringBuilder.append(" and modifiedDate > '").append(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date(updateSince))).append('\'');
             }
-            com.google.api.services.drive.Drive.Files.List listRequest =
-                drive.files().list().setQ(stringBuilder.toString()).setFields("kind,nextPageToken,items(" + getFields(fields, Field.CREATED) + ')');
+            com.google.api.services.drive.Drive.Files.List listRequest = drive.files().list().setQ(stringBuilder.toString()).setFields("kind,nextPageToken,items(" + getFields(fields, Field.CREATED) + ')');
             /*
              * execute as often as needed & parse files
              */
@@ -889,16 +823,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     if (null != file.getLabels() && Boolean.TRUE.equals(file.getLabels().getTrashed())) {
                         deletedFiles.add(metadata);
                     } else {
-                        if (null == fields || fields.contains(Field.VERSION) || fields.contains(Field.NUMBER_OF_VERSIONS)) {
-                            List<Revision> revisions = optRevisions(drive, metadata.getId());
-                            if (null != revisions && 0 < revisions.size()) {
-                                metadata.setNumberOfVersions(revisions.size());
-                                metadata.setVersion(revisions.get(revisions.size() - 1).getId());
-                            } else {
-                                metadata.setVersion(FileStorageFileAccess.CURRENT_VERSION);
-                                metadata.setNumberOfVersions(1);
-                            }
-                        }
                         if (Long.MIN_VALUE == updateSince || null != metadata.getCreated() && metadata.getCreated().getTime() > updateSince) {
                             newFiles.add(metadata);
                         } else {
@@ -928,7 +852,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(folderId, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return getDelta(folderId, updateSince, fields, sort, order, ignoreDeleted, retry);
         } catch (final IOException e) {
@@ -982,7 +906,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private Map<String, Long> getSequenceNumbers(List<String> folderIds, int retryCount) throws OXException {
         Long largestChangeId;
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             ChangeList changeList = drive.changes().list().setFields("largestChangeId").execute();
             largestChangeId = changeList.getLargestChangeId();
         } catch (HttpResponseException e) {
@@ -998,7 +922,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(null, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return getSequenceNumbers(folderIds, retry);
         } catch (IOException e) {
@@ -1026,7 +950,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      */
     private List<File> searchByFileNamePattern(String pattern, String folderId, boolean includeSubfolders, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             List<File> files = new ArrayList<File>();
             /*
              * build search query
@@ -1048,8 +972,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             /*
              * build request based on query
              */
-            com.google.api.services.drive.Drive.Files.List listRequest = drive.files().list().setQ(stringBuilder.toString())
-                .setFields("kind,nextPageToken,items(" + getFields(fields, sort) + ')');
+            com.google.api.services.drive.Drive.Files.List listRequest = drive.files().list().setQ(stringBuilder.toString()).setFields("kind,nextPageToken,items(" + getFields(fields, sort) + ')');
             /*
              * execute as often as needed & parse files
              */
@@ -1066,16 +989,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         }
                         if (false == allowed.booleanValue()) {
                             continue; // skip this file
-                        }
-                    }
-                    if (null == fields || fields.contains(Field.VERSION) || fields.contains(Field.NUMBER_OF_VERSIONS)) {
-                        List<Revision> revisions = optRevisions(drive, metadata.getId());
-                        if (null != revisions && 0 < revisions.size()) {
-                            metadata.setNumberOfVersions(revisions.size());
-                            metadata.setVersion(revisions.get(revisions.size() - 1).getId());
-                        } else {
-                            metadata.setVersion(FileStorageFileAccess.CURRENT_VERSION);
-                            metadata.setNumberOfVersions(1);
                         }
                     }
                     files.add(metadata);
@@ -1100,7 +1013,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(folderId, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return searchByFileNamePattern(pattern, folderId, includeSubfolders, fields, sort, order, retry);
         } catch (IOException e) {
@@ -1116,7 +1029,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param drive A reference to the drive service
      * @param folderId The identifier of the folder to check
      * @param parentFolderId The identifier of the parent folder, or <code>null</code> to fall back to the root folder
-     * @return <code>true</code> if the folder  is a subfolder (at any level) of the parent folder, <code>false</code>, otherwise
+     * @return <code>true</code> if the folder is a subfolder (at any level) of the parent folder, <code>false</code>, otherwise
      */
     private boolean isSubfolderOf(Drive drive, String folderId, String parentFolderId) throws OXException, IOException {
         String driveId = toGoogleDriveFolderId(folderId);
@@ -1140,103 +1053,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         return accountAccess;
     }
 
-    @Override
-    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        return removeVersion(folderId, id, versions, 0);
-    }
-
-    private String[] removeVersion(String folderId, String id, String[] versions, int retryCount) throws OXException {
-        try {
-            Drive drive = googleDriveAccess.getDrive(session);
-            for (String version : versions) {
-                drive.revisions().delete(id, version).execute();
-            }
-            return new String[0];
-        } catch (HttpResponseException e) {
-            if (!isUserRateLimitExceeded(e)) {
-                // Otherwise throw exception
-                throw handleHttpResponseError(id, e);
-            }
-
-            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
-            int retry = retryCount + 1;
-            if (retry > 5) {
-                // Exceeded max. retry count
-                throw handleHttpResponseError(id, e);
-            }
-
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
-            LockSupport.parkNanos(nanosToWait);
-            return removeVersion(folderId, id, versions, retry);
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        return getVersions(folderId, id, null);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        return getVersions(folderId, id, fields, sort, order, 0);
-    }
-
-    private TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
-        try {
-            Drive drive = googleDriveAccess.getDrive(session);
-            /*
-             * get parent file & apply revisions
-             */
-            com.google.api.services.drive.model.File file = drive.files().get(id).setFields(getFields(fields)).execute();
-            checkFileValidity(file);
-            List<Revision> revisions = drive.revisions().list(file.getId()).execute().getItems();
-            int numRevisions = revisions.size();
-            List<File> versions = new ArrayList<File>(numRevisions);
-            for (int i = 0; i < numRevisions; i++) {
-                Revision revision = revisions.get(i);
-                boolean current = i == numRevisions - 1;
-                String name = current ? file.getTitle() : revisions.get(i + 1).getOriginalFilename();
-                GoogleDriveFile version = applyRevision(createFile(folderId, id, file, fields), revision, fields, name, current);
-                version.setNumberOfVersions(numRevisions);
-                versions.add(version);
-            }
-            /*
-             * sort & return results
-             */
-            sort(versions, sort, order);
-            return new FileTimedResult(versions);
-        } catch (HttpResponseException e) {
-            if (!isUserRateLimitExceeded(e)) {
-                // Otherwise throw exception
-                throw handleHttpResponseError(id, e);
-            }
-
-            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
-            int retry = retryCount + 1;
-            if (retry > 5) {
-                // Exceeded max. retry count
-                throw handleHttpResponseError(id, e);
-            }
-
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
-            LockSupport.parkNanos(nanosToWait);
-            return getVersions(folderId, id, fields, sort, order, retry);
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
     /**
      * Gets metadata of a single file version in a folder.
      *
@@ -1248,7 +1064,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      */
     private GoogleDriveFile getMetadata(String folderId, String id, String version, List<Field> fields, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             /*
              * get single file
              */
@@ -1259,35 +1075,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             if (null != folderId && false == folderId.equals(metadata.getFolderId())) {
                 throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
             }
-            /*
-             * add version information as needed
-             */
-            if (FileStorageFileAccess.CURRENT_VERSION != version || null == fields || fields.contains(Field.NUMBER_OF_VERSIONS) || fields.contains(Field.VERSION)) {
-                if (FileStorageFileAccess.CURRENT_VERSION == version) {
-                    List<Revision> revisions = optRevisions(drive, id);
-                    if (revisions!= null && !revisions.isEmpty()) {
-                        metadata.setNumberOfVersions(revisions.size());
-                        metadata.setVersion(revisions.get(revisions.size() - 1).getId());
-                    } else {
-                        metadata.setNumberOfVersions(1);
-                        metadata.setVersion(FileStorageFileAccess.CURRENT_VERSION);
-                    }
-                    return metadata;
-                } else {
-                    List<Revision> revisions = drive.revisions().list(id).execute().getItems();
-                    int numRevisions = revisions.size();
-                    metadata.setNumberOfVersions(numRevisions);
-                    for (int i = 0; i < numRevisions; i++) {
-                        Revision revision = revisions.get(i);
-                        if (revision.getId().equals(version)) {
-                            boolean current = i == numRevisions - 1;
-                            String name = current ? file.getTitle() : revisions.get(i + 1).getOriginalFilename();
-                            return applyRevision(metadata, revision, fields, name, current);
-                        }
-                    }
-                    throw FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.create(id, version, folderId);
-                }
-            }
+
             return metadata;
         } catch (final HttpResponseException e) {
             if (!isUserRateLimitExceeded(e)) {
@@ -1302,7 +1090,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw handleHttpResponseError(id, e);
             }
 
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return getMetadata(folderId, id, version, fields, retry);
         } catch (final IOException e) {
@@ -1326,22 +1114,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             folderId = file.getParents().get(0).getId();
         }
         return new GoogleDriveFile(folderId, fileId, userId, getRootFolderId()).parseGoogleDriveFile(file, fields);
-    }
-
-    /**
-     * Applies a {@link Revision} to a parent a {@link GoogleDriveFile}.
-     *
-     * @param file The parent file
-     * @param revision The revision to apply
-     * @param fields The fields to assign, or <code>null</code> to set all fields
-     * @param name The file-name/title to set
-     * @param current <code>true</code> if this is the current version, <code>false</code>, otherwise
-     * @return The file
-     */
-    private GoogleDriveFile applyRevision(GoogleDriveFile file, Revision revision, List<Field> fields, String name, boolean current) throws OXException {
-        file.parseRevision(revision, name, fields);
-        file.setIsCurrentVersion(current);
-        return file;
     }
 
     private void checkFileValidity(com.google.api.services.drive.model.File file) throws OXException {

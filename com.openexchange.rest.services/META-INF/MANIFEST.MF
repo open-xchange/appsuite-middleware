@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange  REST Services Bundle
 Bundle-SymbolicName: com.openexchange.rest.services
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.eclipsesource.jaxrs.publisher,
@@ -31,6 +31,7 @@ Import-Package: com.eclipsesource.jaxrs.publisher,
  javax.ws.rs.ext;version="[2.0.0,3.0.0)",
  org.glassfish.jersey.server;version="[2.3.0,3.0.0)",
  org.glassfish.jersey.server.model;version="[2.3.0,3.0.0)",
+ org.glassfish.jersey.servlet;version="[2.3.0,3.0.0)",
  org.json,
  org.osgi.framework,
  org.osgi.service.cm,
@@ -38,6 +39,7 @@ Import-Package: com.eclipsesource.jaxrs.publisher,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
-Export-Package: com.openexchange.rest.services
+Export-Package: com.openexchange.rest.services,
+ com.openexchange.rest.services.annotation
 Bundle-Activator: com.openexchange.rest.services.osgi.Activator
 Bundle-ClassPath: .

@@ -2,7 +2,7 @@
   put:
     operationId: moveInfoItems
     tags:
-      - infostore
+      - Infostore
     summary: Moves one or more infoitems to another folder.
     consumes:
       - application/json
@@ -26,6 +26,6 @@
         description: |
           A JSON object with an array of infoitem identifiers that could not be moved (due to a conflict).
           Th array is empty if everything went fine. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/InfoItemsMovedResponse"

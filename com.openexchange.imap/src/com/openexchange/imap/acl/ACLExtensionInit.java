@@ -60,8 +60,6 @@ import com.openexchange.server.Initialization;
  */
 public final class ACLExtensionInit implements Initialization {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ACLExtensionInit.class);
-
     private static final ACLExtensionInit instance = new ACLExtensionInit();
 
     /**
@@ -72,6 +70,8 @@ public final class ACLExtensionInit implements Initialization {
     public static ACLExtensionInit getInstance() {
         return instance;
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
 
     // private Class<? extends ACLExtension> implementingClass;
 
@@ -88,7 +88,8 @@ public final class ACLExtensionInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (started.get()) {
-            LOG.error("{} already started", ACLExtensionInit.class.getName());
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ACLExtensionInit.class);
+            logger.warn("{} already started", ACLExtensionInit.class.getName());
             return;
         }
         ACLExtensionFactory.createInstance();
@@ -131,13 +132,11 @@ public final class ACLExtensionInit implements Initialization {
 
     @Override
     public void stop() throws OXException {
-        if (!started.get()) {
-            LOG.error("{} cannot be stopped since it has not been started before", ACLExtensionInit.class.getName());
-            return;
+        if (started.get()) {
+            ACLExtensionFactory.getInstance().resetACLExtensionFactory();
+            // ACLExtensionAutoDetector.resetACLExtensionMappings();
+            ACLExtensionFactory.releaseInstance();
         }
-        ACLExtensionFactory.getInstance().resetACLExtensionFactory();
-        // ACLExtensionAutoDetector.resetACLExtensionMappings();
-        ACLExtensionFactory.releaseInstance();
     }
 
 }

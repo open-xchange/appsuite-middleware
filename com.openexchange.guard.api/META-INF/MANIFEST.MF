@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Guard API Backend Bundle
 Bundle-SymbolicName: com.openexchange.guard.api
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -15,6 +15,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.util,
  com.openexchange.ajax,
  com.openexchange.exception,
+ com.openexchange.file.storage.composition,
  com.openexchange.i18n,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,

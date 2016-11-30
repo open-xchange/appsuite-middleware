@@ -55,12 +55,12 @@ package com.openexchange.mail.autoconfig;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class IndividualAutoconfig extends Autoconfig {
+public class IndividualAutoconfig extends DefaultAutoconfig {
 
-    private final Autoconfig delegate;
+    private final DefaultAutoconfig delegate;
     private String individualUsername;
 
-    public IndividualAutoconfig(Autoconfig autoconfig) {
+    public IndividualAutoconfig(DefaultAutoconfig autoconfig) {
         super();
         this.delegate = autoconfig;
     }

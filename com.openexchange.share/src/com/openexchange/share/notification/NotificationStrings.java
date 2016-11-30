@@ -263,6 +263,15 @@ public class NotificationStrings implements LocalizableStrings {
 
     // An error occurred for user 'unknown'
     public static final String UNKNOWN_USER_NAME = "unknown";
+    
+    /*
+     * Drive Mail notifications
+     */
+    /** and %1$d more files. */
+    public static final String DRIVE_MAIL_MORE_FILES = "and %1$d more files.";
+    
+    /** and 1 more file. */
+    public static final String DRIVE_MAIL_ONE_MORE_FILE = "and 1 more file.";
 
 }
 

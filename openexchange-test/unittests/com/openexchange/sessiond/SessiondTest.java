@@ -52,7 +52,6 @@ package com.openexchange.sessiond;
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.UUID;
-import junit.framework.TestCase;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -62,19 +61,21 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
+import junit.framework.TestCase;
 
 public class SessiondTest extends TestCase {
 
     protected static final String sessiondPropertiesFile = "sessiondPropertiesFile";
 
-    protected static String testUser1 = "test01";
+    protected static String testUser1 = null;
 
-    protected static String testUser2 = "test02";
+    protected static String testUser2 = null;
 
-    protected static String testUser3 = "test03";
+    protected static String testUser3 = null;
 
-    protected static String defaultContext = "defaultcontext";
+    protected static String defaultContext = null;
 
     protected static String notExistingUser = "notexistinguser";
 
@@ -84,8 +85,6 @@ public class SessiondTest extends TestCase {
 
     protected static String userWithoutContext = "user@withoutcontext.de";
 
-    protected static String password = "netline";
-
     protected static String invalidPassword = "qwertz";
 
     private static boolean isInit = false;
@@ -93,10 +92,15 @@ public class SessiondTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
+        
         if (isInit) {
-            return ;
+            return;
         }
+        TestConfig config = new TestConfig();
+        defaultContext = config.getContextName();
+        testUser1 = config.getUser();
+        testUser2 = config.getSecondUser();
+        testUser3 = config.getThirdUser();
 
         Init.startServer();
 
@@ -111,12 +115,6 @@ public class SessiondTest extends TestCase {
         final Properties p = new Properties();
 
         p.load(new FileInputStream(propfile));
-
-        testUser1 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser1", testUser1);
-        testUser2 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser2", testUser2);
-        testUser3 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser3", testUser3);
-
-        defaultContext = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.defaultContext", defaultContext);
 
         notExistingUser = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.notExistingUser", notExistingUser);
         notActiveUser = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.notActiveUser", notActiveUser);
@@ -146,53 +144,64 @@ public class SessiondTest extends TestCase {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-                SessiondService.class);
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         sessiondCon.addSession(new AddSessionParameter() {
+
             @Override
             public String getClientIP() {
                 return "localhost";
             }
+
             @Override
             public Context getContext() {
                 return context;
             }
+
             @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+
             @Override
             public String getPassword() {
                 return "secret";
             }
+
             @Override
             public int getUserId() {
                 return userId;
             }
+
             @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+
             @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
             @Override
             public String getHash() {
                 return "123";
             }
+
             @Override
             public String getClient() {
                 return "test";
             }
+
             @Override
             public String getClientToken() {
                 return "testToken";
             }
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;
@@ -204,53 +213,64 @@ public class SessiondTest extends TestCase {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-                SessiondService.class);
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         final Session session = sessiondCon.addSession(new AddSessionParameter() {
+
             @Override
             public String getClientIP() {
                 return "localhost";
             }
+
             @Override
             public Context getContext() {
                 return context;
             }
+
             @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+
             @Override
             public String getPassword() {
                 return "secret";
             }
+
             @Override
             public int getUserId() {
                 return userId;
             }
+
             @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+
             @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
             @Override
             public String getHash() {
                 return "123";
             }
+
             @Override
             public String getClient() {
                 return "test";
             }
+
             @Override
             public String getClientToken() {
                 return "testToken";
             }
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;
@@ -263,53 +283,64 @@ public class SessiondTest extends TestCase {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-                SessiondService.class);
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         final Session session = sessiondCon.addSession(new AddSessionParameter() {
+
             @Override
             public String getClientIP() {
                 return "localhost";
             }
+
             @Override
             public Context getContext() {
                 return context;
             }
+
             @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+
             @Override
             public String getPassword() {
                 return "secret";
             }
+
             @Override
             public int getUserId() {
                 return userId;
             }
+
             @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+
             @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
             @Override
             public String getHash() {
                 return "123";
             }
+
             @Override
             public String getClient() {
                 return "test";
             }
+
             @Override
             public String getClientToken() {
                 return "testToken";
             }
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;
@@ -322,53 +353,64 @@ public class SessiondTest extends TestCase {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-                SessiondService.class);
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         final Session session = sessiondCon.addSession(new AddSessionParameter() {
+
             @Override
             public String getClientIP() {
                 return "localhost";
             }
+
             @Override
             public Context getContext() {
                 return context;
             }
+
             @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+
             @Override
             public String getPassword() {
                 return "secret";
             }
+
             @Override
             public int getUserId() {
                 return userId;
             }
+
             @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+
             @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
             @Override
             public String getHash() {
                 return "123";
             }
+
             @Override
             public String getClient() {
                 return "test";
             }
+
             @Override
             public String getClientToken() {
                 return "testToken";
             }
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;

@@ -3,7 +3,7 @@
     operationId: setJSlob
     tags:
       - JSlob
-    summary: Stores or deletes a JSlob (**available since v6.22**).
+    summary: Stores or deletes a JSlob.
     description: To delete a JSON configuration just send an empty request body for the specified `id`.
     consumes:
       - application/json
@@ -26,6 +26,6 @@
           type: object
     responses:
       200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/CommonResponse"

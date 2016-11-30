@@ -120,6 +120,10 @@ public enum Attribute {
     TRANSPORT_STARTTLS_LITERAL(MailAccountFields.TRANSPORT_STARTTLS, 1045),
     // Root folder identifier
     ROOT_FOLDER(MailAccountFields.ROOT_FOLDER, 1046),
+    // Whether OAuth is required for mail server
+    MAIL_OAUTH_LITERAL(MailAccountFields.MAIL_OAUTH, 1047),
+    // Whether OAuth is required for transport server
+    TRANSPORT_OAUTH_LITERAL(MailAccountFields.TRANSPORT_OAUTH, 1048),
 
     ;
 
@@ -270,6 +274,10 @@ public enum Attribute {
             return switcher.mailStartTls();
         case TRANSPORT_STARTTLS_LITERAL:
             return switcher.transportStartTls();
+        case MAIL_OAUTH_LITERAL:
+            return switcher.mailOAuth();
+        case TRANSPORT_OAUTH_LITERAL:
+            return switcher.transportOAuth();
         case ROOT_FOLDER:
             return switcher.rootFolder();
         default:

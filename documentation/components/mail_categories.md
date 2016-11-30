@@ -8,31 +8,31 @@ title: Mail categories
 
 - [Prerequisites](#prerequisites)
 - [Quickstart guide](#quickstart-guide)
-    - [1. Install the open-xchange-mail-categories package.](#1-install-the-open-xchange-mail-categories-package)
-    - [2. Add 'mail_categories' capability](#2-add-mailcategories-capability)
-    - [3. Add category identifiers](#3-add-category-identifiers)
-    - [4. Add category configurations](#4-add-category-configurations)
-    - [5. Setup the initiale system category rules (optional)](#5-setup-the-initiale-system-category-rules-optional)
-    - [6. Check properties and restart the server](#6-check-properties-and-restart-the-server)
+	- [1. Install the open-xchange-mail-categories package.](#1-install-the-open-xchange-mail-categories-package)
+	- [2. Add 'mail_categories' capability](#2-add-mailcategories-capability)
+	- [3. Add category identifiers](#3-add-category-identifiers)
+	- [4. Add category configurations](#4-add-category-configurations)
+	- [5. Setup the initiale system category rules (optional)](#5-setup-the-initiale-system-category-rules-optional)
+	- [6. Check properties and restart the server](#6-check-properties-and-restart-the-server)
 - [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Configuration](#configuration)
-    - [Server](#server)
-        - [com.openexchange.mail.categories](#comopenexchangemailcategories)
-        - [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)
-        - [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)
-        - [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)
-        - [com.openexchange.mail.categories.general.name.[locale]](#comopenexchangemailcategoriesgeneralnamelocale)
-        - [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)
-        - [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)
-        - [com.openexchange.mail.categories.[category].flag](#comopenexchangemailcategoriescategoryflag)
-        - [com.openexchange.mail.categories.[category].active](#comopenexchangemailcategoriescategoryactive)
-        - [com.openexchange.mail.categories.[category].force](#comopenexchangemailcategoriescategoryforce)
-        - [com.openexchange.mail.categories.[category].name.fallback](#comopenexchangemailcategoriescategorynamefallback)
-        - [com.openexchange.mail.categories.[category].name.[locale]](#comopenexchangemailcategoriescategorynamelocale)
-        - [com.openexchange.mail.categories.apply.ox.rules](#comopenexchangemailcategoriesapplyoxrules)
-        - [com.openexchange.mail.categories.rules.[category]](#comopenexchangemailcategoriesrulescategory)
-    - [Client](#client)
+	- [Server](#server)
+		- [com.openexchange.mail.categories](#comopenexchangemailcategories)
+		- [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)
+		- [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)
+		- [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)
+		- [com.openexchange.mail.categories.general.name.[locale]](#comopenexchangemailcategoriesgeneralnamelocale)
+		- [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)
+		- [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)
+		- [com.openexchange.mail.categories.[category].flag](#comopenexchangemailcategoriescategoryflag)
+		- [com.openexchange.mail.categories.[category].active](#comopenexchangemailcategoriescategoryactive)
+		- [com.openexchange.mail.categories.[category].force](#comopenexchangemailcategoriescategoryforce)
+		- [com.openexchange.mail.categories.[category].name.fallback](#comopenexchangemailcategoriescategorynamefallback)
+		- [com.openexchange.mail.categories.[category].name.[locale]](#comopenexchangemailcategoriescategorynamelocale)
+		- [com.openexchange.mail.categories.apply.ox.rules](#comopenexchangemailcategoriesapplyoxrules)
+		- [com.openexchange.mail.categories.rules.[category]](#comopenexchangemailcategoriesrulescategory)
+	- [Client](#client)
 
 <!-- /TOC -->
 
@@ -40,10 +40,10 @@ title: Mail categories
 
 The mail categorization feature has some requirements towards the used IMAP server for the primary mail accounts:
 
-1.  The server needs to fully support user flags, i.e.
-    *   SEARCH by KEYWORD and UNKEYWORD
-    *   STORE for user flags, e.g. `STORE 1:3 +FLAGS ($offers)`
-    *   providing fast results for keyword searches, otherwise responsiveness of the mail views might suffer
+1.	The server needs to fully support user flags, i.e.
+	*	SEARCH by KEYWORD and UNKEYWORD
+	*	STORE for user flags, e.g. `STORE 1:3 +FLAGS ($offers)`
+	*	providing fast results for keyword searches, otherwise responsiveness of the mail views might suffer
 2. A Sieve server supporting the [`imap4flags`](https://tools.ietf.org/html/rfc5232) extension.
 3. The App Suite middleware must have the `open-xchange-mailfilter` packaged installed and configured properly.
 
@@ -233,8 +233,10 @@ If everything is allright you only have to restart the server.
 
 With OX Middleware version 7.8.2 a feature called mail categories (aka tabbed inbox) is introduced.
 This features divides the inbox of the primary email account into categories. Each category acts like a container for emails.
-The emails will be categorized into this containers based on email flags. Whereby each mail can only be in one category at a time.
+The emails will be categorized into this containers based on email flags. Whereby each mail can only be in one category at a time with the exception of conversations.
 All mails which does not belong to any active category will be categorized in a 'general' category.
+In case of conversations the complete conversation will be shown in each category in which at least one email of the conversation belong. For example if a conversations contains mails from three different categories, the complete conversation will be shown in each of those three categories. 
+
 
 The mail categories feature currently allows the hoster/admin to:
 * Enable the feature for users via config cascade

@@ -112,7 +112,7 @@ public class OXExceptionFactory {
      * @param code The exception code
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final OXExceptionCode code) {
+    public OXException create(OXExceptionCode code) {
         return create(code, new Object[0]);
     }
 
@@ -123,7 +123,7 @@ public class OXExceptionFactory {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final OXExceptionCode code, final Object... args) {
+    public OXException create(OXExceptionCode code, Object... args) {
         return create(code, (Throwable) null, args);
     }
 
@@ -135,7 +135,7 @@ public class OXExceptionFactory {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final OXExceptionCode code, final Throwable cause, final Object... args) {
+    public OXException create(OXExceptionCode code, Throwable cause, Object... args) {
         return create(code, null, cause, args);
     }
 
@@ -162,12 +162,15 @@ public class OXExceptionFactory {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final OXExceptionCode code, final Category category, final Throwable cause, final Object... args) {
+    public OXException create(OXExceptionCode code, Category category, Throwable cause, Object... args) {
         return create(code, category, cause, true, args);
     }
 
     private OXException create(OXExceptionCode code, Category category, Throwable cause, boolean intercept, Object... args) {
-        final Category cat = null == category ? code.getCategory() : category;
+        // Determine category
+        Category cat = null == category ? code.getCategory() : category;
+
+        // Initialize OXException instance
         OXException ret;
         if (DisplayableOXExceptionCode.class.isInstance(code)) {
             ret = new OXException(code.getNumber(), ((DisplayableOXExceptionCode) code).getDisplayMessage(), cause, args).setLogMessage(code.getMessage(), args);

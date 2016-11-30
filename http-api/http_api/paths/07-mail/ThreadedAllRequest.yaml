@@ -2,7 +2,7 @@
   get:
     operationId: getMailConversations
     tags:
-      - mail
+      - Mail
     summary: Gets all mail conversations.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -38,6 +38,11 @@
         type: integer
         description: 'A positive integer number to specify how many items shall be returned according to given sorting; overrides `left_hand_limit`/`right_hand_limit` parameters and is equal to `left_hand_limit=0` and `right_hand_limit=<limit>`. Note: Applies only to root-level messages.'
         required: false
+      - in: query
+        name: categoryid
+        type: string
+        description: The category id to filter for. Retrieves all conversations with at least one mail in the category.
+        required: false
     responses:
       200:
         description: |
@@ -46,6 +51,6 @@
           and is enhanced by a special `thread` field representing the full message thread (including the root
           message itself). `thread` is a JSON array of objects each representing a message in the conversation
           sorted by time-line and filled with the specified `columns`. Not IMAP: with timestamp. In case of
-          errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailConversationsResponse"

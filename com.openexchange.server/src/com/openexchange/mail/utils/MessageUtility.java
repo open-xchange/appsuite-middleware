@@ -56,9 +56,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +73,7 @@ import javax.mail.internet.HeaderTokenizer;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
@@ -461,14 +460,7 @@ public final class MessageUtility {
             // MS932
             return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
         }
-        final String retval = readStream0(streamProvider.getInputStream(), charset, errorOnNoContent, maxSize);
-        if (true || retval.indexOf(UNKNOWN) < 0) {
-            return retval;
-        }
-        final byte[] bytes = getBytesFrom(streamProvider.getInputStream(), maxSize);
-        final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-        LOG.debug("Mapped \"{}\" charset to \"{}\".", charset, detectedCharset);
-        return new String(bytes, detectedCharset);
+        return readStream0(streamProvider.getInputStream(), charset, errorOnNoContent, maxSize);
     }
 
     /**
@@ -736,7 +728,7 @@ public final class MessageUtility {
         return GB2312.equals(com.openexchange.java.Strings.asciiLowerCase(charset));
     }
 
-    private static final Set<String> SHIFT_JIS = new HashSet<String>(Arrays.asList("shift_jis", "shift-jis", "sjis", "cp932"));
+    private static final Set<String> SHIFT_JIS = ImmutableSet.of("shift_jis", "shift-jis", "sjis", "cp932");
 
     /**
      * Checks if specified charset name can be considered as <i>Shift-JIS</i>.
@@ -1181,7 +1173,9 @@ public final class MessageUtility {
 
             headers = new HashMap<String, MailMessage>(ms.length);
             for (MailMessage header : ms) {
-                headers.put(header.getMailId(), header);
+                if (header != null) {
+                    headers.put(header.getMailId(), header);
+                }
             }
         }
 

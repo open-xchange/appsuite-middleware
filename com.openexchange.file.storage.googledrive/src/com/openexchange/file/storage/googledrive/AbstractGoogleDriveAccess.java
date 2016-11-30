@@ -58,7 +58,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
+import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
+import com.openexchange.java.Strings;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthUtil;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
 
 /**
@@ -71,7 +77,7 @@ public abstract class AbstractGoogleDriveAccess {
     private static final String MIME_TYPE_DIRECTORY = GoogleDriveConstants.MIME_TYPE_DIRECTORY;
     // private static final String QUERY_STRING_DIRECTORIES_ONLY = GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY;
 
-    protected final GoogleDriveAccess googleDriveAccess;
+    protected final GoogleDriveOAuthAccess googleDriveAccess;
     protected final Session session;
     protected final FileStorageAccount account;
     protected String rootFolderIdentifier;
@@ -79,7 +85,7 @@ public abstract class AbstractGoogleDriveAccess {
     /**
      * Initializes a new {@link AbstractGoogleDriveAccess}.
      */
-    protected AbstractGoogleDriveAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
+    protected AbstractGoogleDriveAccess(final GoogleDriveOAuthAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
         super();
         this.googleDriveAccess = googleDriveAccess;
         this.account = account;
@@ -99,7 +105,7 @@ public abstract class AbstractGoogleDriveAccess {
             rootFolderId = (String) session.getParameter(key);
             if (null == rootFolderId) {
                 try {
-                    Drive drive = googleDriveAccess.getDrive(session);
+                    Drive drive = googleDriveAccess.<Drive> getClient().client;
                     rootFolderId = drive.files().get("root").execute().getId();
                     session.setParameter(key, rootFolderId);
                 } catch (HttpResponseException e) {
@@ -140,7 +146,17 @@ public abstract class AbstractGoogleDriveAccess {
             return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, identifier, "");
         }
 
+        if (SC_BAD_REQUEST == e.getStatusCode()) {
+            if (hasInvalidGrant(e)) {
+                return createInvalidAccessTokenException();
+            }
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e.getMessage(), e);
+        }
+
         if (SC_UNAUTHORIZED == e.getStatusCode()) {
+            if (hasInvalidGrant(e)) {
+                return createInvalidAccessTokenException();
+            }
             return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), GoogleDriveConstants.ID, e.getMessage());
         }
 
@@ -150,11 +166,35 @@ public abstract class AbstractGoogleDriveAccess {
                 return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
             }
             if (e.getMessage().indexOf("insufficientPermissions") > 0) {
-                return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
+                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, API.GOOGLE.getShortName(), OXScope.drive.getDisplayName());
             }
         }
 
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
+    }
+
+    /**
+     * Creates an access token invalid {@link OXException}
+     * 
+     * @return The {@link OXException}
+     */
+    private OXException createInvalidAccessTokenException() {
+        OAuthAccount oAuthAccount = googleDriveAccess.getOAuthAccount();
+        String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
+        API api = oAuthAccount.getAPI();
+        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+    }
+
+    /**
+     * Determines whether the specified {@link HttpResponseException} is caused due to an 'invalid_grant'.
+     * 
+     * @param e The {@link HttpResponseException}
+     * @return <code>true</code> if the exception was caused due to an 'invalid_grant'; <code>false</code>
+     *         otherwise
+     */
+    private boolean hasInvalidGrant(HttpResponseException e) {
+        String content = e.getContent();
+        return !Strings.isEmpty(content) && content.contains("invalid_grant");
     }
 
     /**

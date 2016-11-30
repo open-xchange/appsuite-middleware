@@ -183,7 +183,7 @@ public class AppointmentWriter extends CalendarWriter {
              * Check for alarm for requesting user in user participants
              */
             NextUser: for (final UserParticipant userParticipant : appointmentObject.getUsers()) {
-                if (userId == userParticipant.getIdentifier() && userParticipant.getAlarmMinutes() > 0) {
+                if (userId == userParticipant.getIdentifier() && userParticipant.getAlarmMinutes() >= 0) {
                     /*
                      * Set appropriate alarm in appointment
                      */

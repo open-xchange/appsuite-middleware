@@ -50,8 +50,6 @@
 package com.openexchange.mail.autoconfig;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -63,26 +61,28 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface AutoconfigService {
 
     /**
-     * Tries to generate an Autoconfig Object just with the given mail address.
-     * @param email
-     * @param password
-     * @param user
-     * @param context
-     * @return An autoconfig Object if generation was successfull, null otherwise.
-     * @throws OXException
+     * Tries to generate an auto-config result just with the given mail address.
+     *
+     * @param email The E-Mail address
+     * @param password The password
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return An auto-config result if generation was successful, <code>null</code> otherwise
+     * @throws OXException If determining auto-config result causes an error
      */
-    public Autoconfig getConfig(String email, String password, User user, Context context) throws OXException;
+    Autoconfig getConfig(String email, String password, int userId, int contextId) throws OXException;
 
     /**
-     * Tries to generate an Autoconfig Object just with the given mail address.
-     * 
-     * @param email
-     * @param password
-     * @param user
-     * @param context
-     * @param forceSecure
-     * @return An autoconfig Object if generation was successfull, null otherwise.
-     * @throws OXException
+     * Tries to generate an auto-config result just with the given mail address.
+     *
+     * @param email The E-Mail address
+     * @param password The password
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
+     * @return An auto-config result if generation was successful, <code>null</code> otherwise
+     * @throws OXException If determining auto-config result causes an error
      */
-    public Autoconfig getConfig(String email, String password, User user, Context context, boolean forceSecure) throws OXException;
+    Autoconfig getConfig(String email, String password, int userId, int contextId, boolean forceSecure) throws OXException;
+
 }

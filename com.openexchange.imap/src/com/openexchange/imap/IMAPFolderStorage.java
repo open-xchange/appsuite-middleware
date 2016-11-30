@@ -81,7 +81,9 @@ import javax.mail.Quota.Resource;
 import javax.mail.StoreClosedException;
 import javax.mail.search.FlagTerm;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -122,6 +124,7 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
+import com.openexchange.mail.api.IMailFolderStorageStatusSupport;
 import com.openexchange.mail.api.IMailSharedFolderPathResolver;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
@@ -129,6 +132,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailFolderInfo;
+import com.openexchange.mail.dataobjects.MailFolderStatus;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -154,7 +158,7 @@ import com.sun.mail.imap.protocol.ListInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver, IMailFolderStorageStatusSupport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
@@ -187,8 +191,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.maxMailboxNameLength", "com.openexchange.imap.invalidMailboxNameCharacters");
             }
         });
     }
@@ -338,6 +342,60 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             separator = Character.valueOf(sep);
         }
         return separator.charValue();
+    }
+
+    @Override
+    public boolean isStatusSupported() throws OXException {
+    	return true;
+    }
+
+    @Override
+    public MailFolderStatus getFolderStatus(String fullName) throws OXException {
+    	try {
+            final String fn = (DEFAULT_FOLDER_ID.equals(fullName) ? "" : fullName);
+            // Retrieve folder...
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
+            IMAPFolder f;
+            if (0 == fn.length()) {
+                f = (IMAPFolder) imapStore.getDefaultFolder();
+            } else {
+                f = (IMAPFolder) imapStore.getFolder(fullName);
+            }
+
+            // ... and check existence
+            boolean exists = f.exists();
+            if (!exists) {
+
+                try {
+                    f.open(IMAPFolder.READ_ONLY);
+                    exists = true;
+                } catch (javax.mail.FolderNotFoundException e) {
+                    exists = false;
+                } finally {
+                    if (exists) {
+                        f.close(false);
+                    }
+                }
+
+                if (!exists) {
+                    f = checkForNamespaceFolder(fn);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                }
+            }
+
+            return MailFolderStatus.builder()
+                .nextId(Long.toString(f.getUIDNext()))
+                .total(f.getMessageCount())
+                .unread(f.getUnreadMessageCount())
+                .validity(Long.toString(f.getUIDValidity()))
+                .build();
+        } catch (final MessagingException e) {
+            throw handleMessagingException(fullName, e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
     }
 
     @Override

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Push Bundle
 Bundle-SymbolicName: com.openexchange.push.mail.notify
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
@@ -24,6 +24,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.mail.utils,
  com.openexchange.mailaccount,
  com.openexchange.osgi,
+ com.openexchange.pns,
  com.openexchange.push,
  com.openexchange.server,
  com.openexchange.session,

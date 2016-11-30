@@ -59,7 +59,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -70,7 +69,9 @@ import javax.imageio.stream.ImageOutputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.Constants;
@@ -197,8 +198,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties(
+                    "com.openexchange.tools.images.transformations.preferThumbnailThreshold",
+                    "com.openexchange.tools.images.transformations.maxResolution",
+                    "com.openexchange.tools.images.transformations.maxSize",
+                    "com.openexchange.tools.images.transformations.waitTimeoutSeconds"
+                    );
             }
         });
     }
@@ -662,7 +668,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
                     }
                 }
             } catch (IOException e) {
-                LOG.debug(e.getMessage());
+                LOG.debug(e.getMessage(), e);
                 // fallback to image transformation
             }
             /*

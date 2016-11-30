@@ -50,8 +50,8 @@
 package com.openexchange.find.json;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -73,9 +73,10 @@ public class FindActionFactory implements AJAXActionServiceFactory {
 
     public FindActionFactory(ServiceLookup lookup) {
         super();
-        actions = new HashMap<String, AbstractFindAction>(3);
+        ImmutableMap.Builder<String, AbstractFindAction> actions = ImmutableMap.builder();
         actions.put("autocomplete", new AutocompleteAction(lookup));
         actions.put("query", new QueryAction(lookup));
+        this.actions = actions.build();
     }
 
     @Override

@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Reseller
+Bundle-SymbolicName: com.openexchange.reseller
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: com.openexchange.reseller.osgi.Activator
+Import-Package: com.google.common.collect;version="19.0.0",
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.osgi,
+ org.osgi.framework
+Export-Package: com.openexchange.reseller,
+ com.openexchange.reseller.data

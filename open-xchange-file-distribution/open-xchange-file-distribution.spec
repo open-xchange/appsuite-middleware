@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 16
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,30 +59,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
-* Sat Nov 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-11-21 (3731)
-* Tue Nov 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-11-07 (3678)
-* Wed Oct 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-08 (3699)
-* Mon Oct 17 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-10-24 (3630)
-* Thu Oct 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-10-10 (3597)
-* Mon Sep 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-26 (3572)
-* Mon Sep 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-08 (3580)
-* Mon Sep 05 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-12 (3547)
-* Mon Aug 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-29 (3522)
-* Mon Aug 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-26 (3512)
-* Mon Aug 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-15 (3490)
-* Fri Jul 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-01 (3467)
+* Fri Nov 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.3 release
+* Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Third preview for 7.8.3 release
+* Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.8.3 release
+* Fri Oct 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First preview 7.8.3 release
+* Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>

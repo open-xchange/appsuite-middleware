@@ -49,10 +49,7 @@
 
 package com.openexchange.importexport.exporters;
 
-import static com.openexchange.importexport.formats.csv.CSVLibrary.CELL_DELIMITER;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.ROW_DELIMITER;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderId;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -72,6 +69,7 @@ import com.openexchange.groupware.contact.helpers.ContactStringGetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
@@ -89,8 +87,6 @@ import com.openexchange.tools.session.ServerSession;
 public class CSVContactExporter implements Exporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactExporter.class);
-
-    public static final String PARAMETER_EXPORT_DLISTS = "export_dlists";
 
     /**
      * All possible contact fields as used by the CSV contact exporter
@@ -110,6 +106,7 @@ public class CSVContactExporter implements Exporter {
         // ContactFieldObject.IMAGE1, // ContactFieldObject.IMAGE1_CONTENT_TYPE,
         ContactField.INFO, ContactField.INSTANT_MESSENGER1, ContactField.INSTANT_MESSENGER2,
         // ContactFieldObject.LINKS,
+        ContactField.MARK_AS_DISTRIBUTIONLIST,
         ContactField.MANAGER_NAME, ContactField.MARITAL_STATUS, ContactField.MIDDLE_NAME, ContactField.NICKNAME, ContactField.NOTE,
         ContactField.NUMBER_OF_CHILDREN, ContactField.NUMBER_OF_EMPLOYEE, ContactField.POSITION, ContactField.POSTAL_CODE_BUSINESS,
         ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_OTHER,
@@ -180,21 +177,17 @@ public class CSVContactExporter implements Exporter {
         if (optionalParams == null) {
             exportDlists = true;
         } else {
-            exportDlists = optionalParams.containsKey(PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+            exportDlists = optionalParams.containsKey(ContactExportAction.PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
         }
 
         SearchIterator<Contact> conIter;
         try {
-            if (!exportDlists) {
-                List<ContactField> fieldList = Arrays.asList(fields.clone());
-                if (!fieldList.contains(ContactField.MARK_AS_DISTRIBUTIONLIST)) {
-                    fieldList = new ArrayList<>(fieldList);
-                    fieldList.add(ContactField.MARK_AS_DISTRIBUTIONLIST);
-                }
-                conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fieldList.toArray(new ContactField[fieldList.size()]));
-            } else {
-                conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fields);
+            List<ContactField> fieldList = Arrays.asList(fields.clone());
+            if (!fieldList.contains(ContactField.MARK_AS_DISTRIBUTIONLIST)) {
+                fieldList = new ArrayList<>(fieldList);
+                fieldList.add(ContactField.MARK_AS_DISTRIBUTIONLIST);
             }
+            conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fieldList.toArray(new ContactField[fieldList.size()]));
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
@@ -319,10 +312,10 @@ public class CSVContactExporter implements Exporter {
     private static final Pattern PATTERN_QUOTE = Pattern.compile("\"", Pattern.LITERAL);
 
     protected String convertToLine(final List<String> line) {
-        final StringBuilder bob = new StringBuilder(1024);
-        for (final String str : line) {
+        StringBuilder bob = new StringBuilder(1024);
+        for (String token : line) {
             bob.append('"');
-            bob.append(PATTERN_QUOTE.matcher(str).replaceAll("\"\""));
+            bob.append(PATTERN_QUOTE.matcher(token).replaceAll("\"\""));
             bob.append('"');
             bob.append(CELL_DELIMITER);
         }

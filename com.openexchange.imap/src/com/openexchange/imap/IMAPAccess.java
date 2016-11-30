@@ -49,7 +49,7 @@
 
 package com.openexchange.imap;
 
-import java.net.SocketTimeoutException;
+import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Date;
@@ -72,7 +72,9 @@ import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -102,6 +104,7 @@ import com.openexchange.log.audit.DefaultAttribute;
 import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
@@ -116,11 +119,14 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.StarttlsRequiredException;
 import com.sun.mail.imap.IMAPFolder;
@@ -142,8 +148,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The logger instance for {@link IMAPAccess} class.
      */
-    private static final transient org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(IMAPAccess.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPAccess.class);
 
     /**
      * The max. temporary-down value; 5 Minutes.
@@ -169,6 +174,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static volatile Map<HostAndPort, Long> timedOutServers;
 
     /**
+     * Gets the timedOutServers
+     *
+     * @return The timedOutServers
+     */
+    public static Map<HostAndPort, Long> getTimedOutServers() {
+        return timedOutServers;
+    }
+
+    /**
      * Remembers whether a certain IMAP server supports the ACL extension.
      */
     private static volatile ConcurrentMap<String, Boolean> aclCapableServers;
@@ -179,6 +193,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static volatile ScheduledTimerTask cleanUpTimerTask;
 
     private static volatile Boolean checkConnectivityIfPolled;
+
     private static boolean checkConnectivityIfPolled() {
         Boolean b = checkConnectivityIfPolled;
         if (null == b) {
@@ -197,7 +212,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         return b.booleanValue();
     }
-
 
     /*-
      * Member section
@@ -295,8 +309,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.maxNumConnections");
             }
         });
     }
@@ -509,6 +523,24 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
+    protected boolean supports(AuthType authType) throws OXException {
+        switch (authType) {
+            case LOGIN:
+                return true;
+            case OAUTH:
+                try {
+                    IMAPConfig imapConfig = getIMAPConfig();
+                    final String serverUrl = new StringBuilder().append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
+                    return IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=XOAUTH2");
+                } catch (IOException e) {
+                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                }
+            default:
+                return false;
+        }
+    }
+
+    @Override
     public int getUnreadMessagesCount(final String fullname) throws OXException {
         if (!isConnected()) {
             connect(false);
@@ -627,6 +659,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 warnings.add(MailExceptionCode.PING_FAILED_AUTH.create(e, config.getServer(), config.getLogin()));
                 throw MimeMailException.handleMessagingException(e, config, session);
             } catch (final MessagingException e) {
+                if (MimeMailException.isSSLHandshakeException(e)) {
+                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), config.getServer());
+                    warnings.add(oxe);
+                    throw oxe;
+                }
+
                 Exception cause = e.getNextException();
                 if (com.sun.mail.iap.ConnectionException.class.isInstance(cause)) {
                     OXException oxe = MimeMailException.handleMessagingException(e, config, session);
@@ -774,17 +812,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Check for a SocketTimeoutException
                  */
-                if (tmpDownEnabled) {
-                    final Exception nextException = e.getNextException();
-                    if (SocketTimeoutException.class.isInstance(nextException)) {
-                        /*
-                         * Remember a timed-out IMAP server on connect attempt
-                         */
-                        final Map<HostAndPort, Long> map = timedOutServers;
-                        if (null != map) {
-                            map.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
-                        }
+                if (tmpDownEnabled && MimeMailException.isTimeoutException(e)) {
+                    /*
+                     * Remember a timed-out IMAP server on connect attempt
+                     */
+                    final Map<HostAndPort, Long> map = timedOutServers;
+                    if (null != map) {
+                        map.put(newHostAndPort(config), Long.valueOf(System.currentTimeMillis()));
                     }
+                }
+                if (MimeMailException.isSSLHandshakeException(e)) {
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
                 }
                 {
                     Exception next = e.getNextException();
@@ -1062,7 +1100,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
 
         MailConfig mailConfig = getMailConfig();
-        HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
+        HostAndPort key = newHostAndPort(mailConfig);
         Long range = map.get(key);
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
@@ -1248,15 +1286,41 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return true;
     }
 
-    private static final class HostAndPort {
+    /**
+     * Creates a new <code>HostAndPort</code> instance from given arguments.
+     *
+     * @param config The configuration providing host name or IP address of the IMAP server as well as port
+     * @return The new instance
+     */
+    public static HostAndPort newHostAndPort(MailConfig config) {
+        return newHostAndPort(config.getServer(), config.getPort());
+    }
+
+    /**
+     * Creates a new <code>HostAndPort</code> instance from given arguments.
+     *
+     * @param host The host name or IP address of the IMAP server
+     * @param port The port
+     * @return The new instance
+     */
+    public static HostAndPort newHostAndPort(String host, int port) {
+        return new HostAndPort(host, port);
+    }
+
+    /** Simple class to hold host and port for an IMAP end-point */
+    public static final class HostAndPort {
 
         private final String host;
-
         private final int port;
-
         private final int hashCode;
 
-        public HostAndPort(final String host, final int port) {
+        /**
+         * Initializes a new {@link HostAndPort}.
+         *
+         * @param host The host name or IP address of the IMAP server
+         * @param port The port
+         */
+        HostAndPort(final String host, final int port) {
             super();
             if (port < 0 || port > 0xFFFF) {
                 throw new IllegalArgumentException("port out of range:" + port);
@@ -1335,10 +1399,20 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapProps.put("mail.imap.auditLog.enabled", "true");
         }
         /*
+         * Enable XOAUTH2 (if appropriate)
+         */
+        if (AuthType.OAUTH == config.getAuthType()) {
+            imapProps.put("mail.imap.auth.mechanisms", "XOAUTH2");
+        }
+        /*
          * Check if a secure IMAP connection should be established
          */
-        final String sPort = String.valueOf(config.getPort());
-        final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        String sPort = String.valueOf(config.getPort());
+        SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+        String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
+        String protocols = config.getIMAPProperties().getSSLProtocols();
+        String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
+        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         if (config.isSecure()) {
             /*
              * Enables the use of the STARTTLS command.
@@ -1357,13 +1431,25 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL protocols
              */
-            imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
+            if (Strings.isNotEmpty(protocols)) {
+                imapProps.put("mail.imap.ssl.protocols", protocols);
+            } else {
+                if (sslConfigService == null) {
+                    throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                }
+                imapProps.put("mail.imap.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+            }
             /*
              * Specify SSL cipher suites
              */
-            final String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
-            if (false == Strings.isEmpty(cipherSuites)) {
+
+            if (Strings.isNotEmpty(cipherSuites)) {
                 imapProps.put("mail.imap.ssl.ciphersuites", cipherSuites);
+            } else {
+                if (null == sslConfigService) {
+                    throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                }
+                imapProps.put("mail.imap.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
             }
         } else {
             /*
@@ -1385,13 +1471,24 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL protocols
              */
-            imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
+            if (Strings.isNotEmpty(protocols)) {
+                imapProps.put("mail.imap.ssl.protocols", protocols);
+            } else {
+                if (null == sslConfigService) {
+                    throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                }
+                imapProps.put("mail.imap.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+            }
             /*
              * Specify SSL cipher suites
              */
-            final String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
-            if (false == Strings.isEmpty(cipherSuites)) {
+            if (Strings.isNotEmpty(cipherSuites)) {
                 imapProps.put("mail.imap.ssl.ciphersuites", cipherSuites);
+            } else {
+                if (null == sslConfigService) {
+                    throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                }
+                imapProps.put("mail.imap.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
             }
             // imapProps.put("mail.imap.ssl.enable", "true");
             /*

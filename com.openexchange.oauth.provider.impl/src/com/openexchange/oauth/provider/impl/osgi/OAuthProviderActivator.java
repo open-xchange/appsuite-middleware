@@ -104,6 +104,7 @@ import com.openexchange.oauth.provider.impl.groupware.OAuthProviderDeleteListene
 import com.openexchange.oauth.provider.impl.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.RevokeEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.TokenEndpoint;
+import com.openexchange.oauth.provider.impl.servlets.TokenInfo;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -227,22 +228,34 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         registerService(OAuthAuthorizationService.class, authorizationService, null);
 
         // Register endpoints
-        AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(clientManagement, grantManagement, this);
-        TokenEndpoint tokenEndpoint = new TokenEndpoint(clientManagement, grantManagement, this);
-        RevokeEndpoint revokeEndpoint = new RevokeEndpoint(clientManagement, grantManagement, this);
-
         HttpService httpService = getService(HttpService.class);
         DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
         String prefix = dispatcherPrefixService.getPrefix();
-        String authorizationEndpointAlias = prefix + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
-        httpService.registerServlet(authorizationEndpointAlias, authorizationEndpoint, null, httpService.createDefaultHttpContext());
-        registeredServlets.add(authorizationEndpointAlias);
-        String tokenEndpointAlias = prefix + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS;
-        httpService.registerServlet(tokenEndpointAlias, tokenEndpoint, null, httpService.createDefaultHttpContext());
-        registeredServlets.add(tokenEndpointAlias);
-        String revokeEndpointAlias = prefix + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
-        httpService.registerServlet(revokeEndpointAlias, revokeEndpoint, null, httpService.createDefaultHttpContext());
-        registeredServlets.add(revokeEndpointAlias);
+
+        {
+            AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(clientManagement, grantManagement, this);
+            String authorizationEndpointAlias = prefix + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
+            httpService.registerServlet(authorizationEndpointAlias, authorizationEndpoint, null, httpService.createDefaultHttpContext());
+            registeredServlets.add(authorizationEndpointAlias);
+        }
+        {
+            TokenEndpoint tokenEndpoint = new TokenEndpoint(clientManagement, grantManagement, this);
+            String tokenEndpointAlias = prefix + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS;
+            httpService.registerServlet(tokenEndpointAlias, tokenEndpoint, null, httpService.createDefaultHttpContext());
+            registeredServlets.add(tokenEndpointAlias);
+        }
+        {
+            RevokeEndpoint revokeEndpoint = new RevokeEndpoint(clientManagement, grantManagement, this);
+            String revokeEndpointAlias = prefix + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
+            httpService.registerServlet(revokeEndpointAlias, revokeEndpoint, null, httpService.createDefaultHttpContext());
+            registeredServlets.add(revokeEndpointAlias);
+        }
+        {
+            TokenInfo tokenInfo = new TokenInfo(authorizationService, clientManagement, grantManagement, this);
+            String tokenInfoAlias = prefix + OAuthProviderConstants.TOKEN_INFO_SERVLET_ALIAS;
+            httpService.registerServlet(tokenInfoAlias, tokenInfo, null, httpService.createDefaultHttpContext());
+            registeredServlets.add(tokenInfoAlias);
+        }
     }
 
     private void stopAuthorizationServer() {

@@ -62,6 +62,8 @@ public interface OAuthServiceMetaDataRegistry {
     /**
      * Gets all known services.
      *
+     * @param uid The user id
+     * @param cid The context id
      * @return All services
      * @throws OXException If operation fails
      */
@@ -82,6 +84,8 @@ public interface OAuthServiceMetaDataRegistry {
      * Checks for existence of specified service
      *
      * @param id The service identifier
+     * @param uid The user id
+     * @param cid The context id
      * @return <code>true</code> if such a service exists; otherwise <code>false</code>
      * @throws OXException If operation fails
      */

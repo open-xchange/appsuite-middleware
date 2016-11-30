@@ -353,4 +353,14 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         }
     }
 
+    /**
+     * Actively prevents additional image transformations by setting the <code>transformationNeeded</code> parameter to
+     * <code>false</code> in the supplied request data reference.
+     *
+     * @param requestData The request data
+     */
+    protected void preventTransformations(AJAXRequestData requestData) {
+        requestData.putParameter("transformationNeeded", String.valueOf(false));
+    }
+
 }

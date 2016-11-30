@@ -49,18 +49,19 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -72,7 +73,15 @@ import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
-
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link OXFolderDependentDeleter}
@@ -81,6 +90,8 @@ import com.openexchange.tools.sql.DBUtils;
  * @since v7.8.0
  */
 public class OXFolderDependentDeleter {
+
+    private static final int DELETE_CHUNK_SIZE = 50;
 
     /**
      * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
@@ -94,58 +105,142 @@ public class OXFolderDependentDeleter {
      * @throws OXException
      */
     public static void folderDeleted(Connection con, Session session, FolderObject folder, boolean handDown) throws OXException {
+        foldersDeleted(con, session, Collections.singletonList(folder), handDown);
+    }
+
+    /**
+     * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
+     *
+     * @param con A "write" connection to the database
+     * @param session The affected session
+     * @param folders The deleted folders
+     * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
+     *                 otherwise
+     * @return The number of removed subscriptions and publications
+     * @throws OXException
+     */
+    public static void foldersDeleted(Connection con, Session session, Collection<FolderObject> folders, boolean handDown) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         Context context = serverSession.getContext();
-        List<Integer> subfolderIDs;
-        try {
-            subfolderIDs = handDown ? OXFolderSQL.getSubfolderIDs(folder.getObjectID(), con, context, true) : null;
-        } catch (SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
         /*
-         * publications & subscriptions
+         * gather all folder identifiers
          */
-        deletePublicationsAndSubscriptions(con, context, folder, subfolderIDs);
+        TIntObjectMap<List<Integer>> byModule = new TIntObjectHashMap<>();
+        List<Integer> folderIDs;
+        if (handDown) {
+            folderIDs = new LinkedList<>();
+            byModule = new TIntObjectHashMap<>();
+            for (FolderObject folder : folders) {
+                List<Integer> subfolderIDs;
+                try {
+                    subfolderIDs = OXFolderSQL.getSubfolderIDs(folder.getObjectID(), con, context, true);
+                } catch (SQLException e) {
+                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                }
+
+                List<Integer> list = byModule.get(folder.getModule());
+                if (null == list) {
+                    list = new LinkedList<>();
+                    byModule.put(folder.getModule(), list);
+                }
+                list.add(Integer.valueOf(folder.getObjectID()));
+                list.addAll(subfolderIDs);
+
+                folderIDs.add(Integer.valueOf(folder.getObjectID()));
+                folderIDs.addAll(subfolderIDs);
+            }
+        } else {
+            folderIDs = new ArrayList<>(folders.size());
+            for (FolderObject folder : folders) {
+                List<Integer> list = byModule.get(folder.getModule());
+                if (null == list) {
+                    list = new LinkedList<>();
+                    byModule.put(folder.getModule(), list);
+                }
+                list.add(Integer.valueOf(folder.getObjectID()));
+
+                folderIDs.add(Integer.valueOf(folder.getObjectID()));
+            }
+        }
         /*
          * determine potentially affected guest user entities
          */
-        Set<Integer> affectedEntities = new HashSet<Integer>();
-        affectedEntities.addAll(getPermissionEntities(folder, false));
-        if (null != subfolderIDs && 0 < subfolderIDs.size()) {
+        TIntSet affectedEntities = new TIntHashSet(folderIDs.size());
+        if (false == folderIDs.isEmpty()) {
             try {
-                affectedEntities.addAll(OXFolderSQL.getPermissionEntities(subfolderIDs, con, context, false));
+                affectedEntities.addAll(OXFolderSQL.getPermissionEntities(folderIDs, con, context, false));
             } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
-        affectedEntities.addAll(getObjectPermissionEntities(con, context, folder, subfolderIDs, false));
+        TIntObjectIterator<List<Integer>> iterator = byModule.iterator();
+        for (int i = byModule.size(); i-- > 0;) {
+            iterator.advance();
+            int module = iterator.key();
+            List<Integer> fuids = iterator.value();
+            affectedEntities.addAll(getObjectPermissionEntities(con, context, module, fuids, false));
+        }
         /*
-         * remove any adjacent object permissions
+         * delete publications, subscriptions, and any adjacent object permissions
          */
-        deleteObjectPermissions(con, context, folder, subfolderIDs);
+        iterator = byModule.iterator();
+        for (int i = byModule.size(); i-- > 0;) {
+            iterator.advance();
+            int module = iterator.key();
+            List<Integer> fuids = iterator.value();
+            try {
+                deleteDependentEntries(con, context.getContextId(), module, fuids);
+            } catch (SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
         /*
          * schedule cleanup for affected guest users as needed
          */
-        List<Integer> guestIDs = filterGuests(con, context, new ArrayList<Integer>(affectedEntities));
-        if (false == guestIDs.isEmpty()) {
-            ServerServiceRegistry.getInstance().getService(ShareService.class, true).scheduleGuestCleanup(context.getContextId(), I2i(guestIDs));
+        int[] guestIDs = filterGuests(con, context, affectedEntities.toArray());
+        if (guestIDs.length > 0) {
+            ServerServiceRegistry.getInstance().getService(ShareService.class, true).scheduleGuestCleanup(context.getContextId(), guestIDs);
         }
     }
 
-    private static List<Integer> filterGuests(Connection con, Context context, List<Integer> entityIDs) throws OXException {
-        if (0 == entityIDs.size()) {
+    /**
+     * Deletes all publications, subscriptions and object permissions referencing one of the supplied folder identifiers.
+     *
+     * @param con The (writable) database connection to use
+     * @param cid The context identifier
+     * @param module The folder's module identifier
+     * @param folderIDs The folder identifiers to delete the dependent entries for
+     */
+    private static void deleteDependentEntries(Connection con, int cid, int module, List<Integer> folderIDs) throws SQLException {
+        for (int i = 0; i < folderIDs.size(); i += DELETE_CHUNK_SIZE) {
+            /*
+             * prepare chunk
+             */
+            int length = Math.min(folderIDs.size(), i + DELETE_CHUNK_SIZE) - i;
+            List<Integer> chunk = folderIDs.subList(i, i + length);
+            /*
+             * delete chunk
+             */
+            deletePublications(con, cid, Module.getModuleString(module, -1), chunk);
+            deleteSubscriptions(con, cid, chunk);
+            deleteObjectPermissions(con, cid, module, chunk);
+        }
+    }
+
+    private static int[] filterGuests(Connection con, Context context, int[] entityIDs) throws OXException {
+        if (0 == entityIDs.length) {
             return entityIDs;
         }
-        List<Integer> guestIDs = new ArrayList<Integer>();
+        TIntList guestIDs = new TIntArrayList(entityIDs.length);
         /*
          * build statement
          */
         StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT id FROM user where cid=? AND id");
-        if (1 == entityIDs.size()) {
+        if (1 == entityIDs.length) {
             stringBuilder.append("=?");
         } else {
             stringBuilder.append(" IN (?");
-            for (int i = 1; i < entityIDs.size(); i++) {
+            for (int i = 1; i < entityIDs.length; i++) {
                 stringBuilder.append(",?");
             }
             stringBuilder.append(')');
@@ -158,33 +253,34 @@ public class OXFolderDependentDeleter {
              * execute query
              */
             stmt = con.prepareStatement(stringBuilder.toString());
-            stmt.setInt(1, context.getContextId());
-            for (int i = 0; i < entityIDs.size(); i++) {
-                stmt.setInt(i + 2, i(entityIDs.get(i)));
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            for (int i = 0; i < entityIDs.length; i++) {
+                stmt.setInt(pos++, entityIDs[i]);
             }
             rs = stmt.executeQuery();
             while (rs.next()) {
-                guestIDs.add(I(rs.getInt(1)));
+                guestIDs.add(rs.getInt(1));
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        return guestIDs;
+        return guestIDs.toArray();
     }
 
-    private static List<Integer> getObjectPermissionEntities(Connection con, Context context, FolderObject folder, List<Integer> subfolderIDs, boolean includeGroups) throws OXException {
+    private static List<Integer> getObjectPermissionEntities(Connection con, Context context, int module, List<Integer> folderIDs, boolean includeGroups) throws OXException {
         List<Integer> entityIDs = new ArrayList<Integer>();
         /*
          * prepare statement
          */
         StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT permission_id FROM object_permission WHERE cid=? AND module=? AND folder_id");
-        if (null == subfolderIDs || 0 == subfolderIDs.size()) {
+        if (1 == folderIDs.size()) {
             stringBuilder.append("=?");
         } else {
             stringBuilder.append(" IN (?");
-            for (int i = 0; i < subfolderIDs.size(); i++) {
+            for (int i = 1; i < folderIDs.size(); i++) {
                 stringBuilder.append(",?");
             }
             stringBuilder.append(')');
@@ -199,14 +295,11 @@ public class OXFolderDependentDeleter {
              * read out permission entities
              */
             stmt = con.prepareStatement(stringBuilder.toString());
-            stmt.setInt(1, context.getContextId());
-            int folderID = folder.getObjectID();
-            stmt.setInt(2, folder.getModule());
-            stmt.setInt(3, folderID);
-            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stmt.setInt(i + 4, i(subfolderIDs.get(i)));
-                }
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, module);
+            for (Integer folderId : folderIDs) {
+                stmt.setInt(pos++, i(folderId));
             }
             rs = stmt.executeQuery();
             while (rs.next()) {
@@ -220,102 +313,109 @@ public class OXFolderDependentDeleter {
         return entityIDs;
     }
 
-    /**
-     * Deletes all object permission assigned to any item in the supplied folder (and subfolders, if set).
-     *
-     * @param con The (writable) database connection to use
-     * @param context The context
-     * @param folder The folder
-     * @param subfolderIDs The identifiers of subfolders to include when cleaning up, or <code>null</code> if not needed
-     * @throws OXException
-     */
-    private static void deleteObjectPermissions(Connection con, Context context, FolderObject folder, List<Integer> subfolderIDs) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            /*
-             * prepare clause for folder IDs
-             */
-            String whereFolderID;
-            if (null == subfolderIDs || 0 == subfolderIDs.size()) {
-                whereFolderID = "=?;";
-            } else {
-                StringBuilder StringBuilder = new StringBuilder(" IN (?");
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    StringBuilder.append(",?");
+    private static int deletePublications(Connection connection, int cid, String module, List<Integer> entities) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder(96);
+        stringBuilder.append("SELECT id FROM publications WHERE cid=? AND module=? AND entity");
+        appendPlaceholdersForWhere(stringBuilder, entities.size());
+
+        TIntList ids;
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = connection.prepareStatement(stringBuilder.toString());
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setString(pos++, module);
+                for (Integer entity : entities) {
+                    stmt.setInt(pos++, entity.intValue());
                 }
-                StringBuilder.append(");");
-                whereFolderID = StringBuilder.toString();
-            }
-            /*
-             * delete object permisssions
-             */
-            stmt = con.prepareStatement("DELETE FROM object_permission WHERE cid=? AND module=? AND folder_id" + whereFolderID);
-            stmt.setInt(1, context.getContextId());
-            int folderID = folder.getObjectID();
-            stmt.setInt(2, folder.getModule());
-            stmt.setInt(3, folderID);
-            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stmt.setInt(i + 4, i(subfolderIDs.get(i)));
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return 0;
                 }
+
+                ids = new TIntLinkedList();
+                pos = 1;
+                do {
+                    ids.add(rs.getInt(pos));
+                } while (rs.next());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
             }
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
+        }
+
+        stringBuilder.setLength(0);
+        stringBuilder.append("DELETE FROM publications WHERE cid=? AND id");
+        appendPlaceholdersForWhere(stringBuilder, ids.size());
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            TIntIterator iterator = ids.iterator();
+            for (int j = ids.size(); j-- > 0;) {
+                stmt.setInt(parameterIndex++, iterator.next());
+            }
+            return stmt.executeUpdate();
         }
     }
 
-    private static void deletePublicationsAndSubscriptions(Connection con, Context context, FolderObject folder, List<Integer> subfolderIDs) throws OXException {
-        PreparedStatement stmt1 = null;
-        PreparedStatement stmt2 = null;
-        try {
-            /*
-             * prepare clause for folder IDs
-             */
-            String whereFolderID;
-            if (null == subfolderIDs || 0 == subfolderIDs.size()) {
-                whereFolderID = "=?;";
-            } else {
-                StringBuilder stringBuilder = new StringBuilder(" IN (?");
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stringBuilder.append(",?");
+    private static int deleteSubscriptions(Connection connection, int cid, List<Integer> folderIDs) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder(96);
+        stringBuilder.append("SELECT id FROM subscriptions WHERE cid=? AND folder_id");
+        appendPlaceholdersForWhere(stringBuilder, folderIDs.size());
+
+        TIntList ids;
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = connection.prepareStatement(stringBuilder.toString());
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                for (Integer folderID : folderIDs) {
+                    stmt.setInt(pos++, folderID.intValue());
                 }
-                stringBuilder.append(");");
-                whereFolderID = stringBuilder.toString();
-            }
-            /*
-             * delete publications
-             */
-            stmt1 = con.prepareStatement("DELETE FROM publications WHERE cid=? AND module=? AND entity" + whereFolderID);
-            stmt1.setInt(1, context.getContextId());
-            int folderID = folder.getObjectID();
-            stmt1.setString(2, Module.getModuleString(folder.getModule(), folderID));
-            stmt1.setInt(3, folderID);
-            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stmt1.setInt(i + 4, i(subfolderIDs.get(i)));
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return 0;
                 }
+
+                ids = new TIntLinkedList();
+                pos = 1;
+                do {
+                    ids.add(rs.getInt(pos));
+                } while (rs.next());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
             }
-            /*
-             * delete subscriptions
-             */
-            stmt1.executeUpdate();
-            stmt2 = con.prepareStatement("DELETE FROM subscriptions WHERE cid=? AND folder_id" + whereFolderID);
-            stmt2.setInt(1, context.getContextId());
-            stmt2.setInt(2, folderID);
-            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stmt2.setInt(i + 3, subfolderIDs.get(i));
-                }
+        }
+
+        stringBuilder.setLength(0);
+        stringBuilder.append("DELETE FROM subscriptions WHERE cid=? AND id");
+        appendPlaceholdersForWhere(stringBuilder, ids.size());
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            TIntIterator iterator = ids.iterator();
+            for (int j = ids.size(); j-- > 0;) {
+                stmt.setInt(parameterIndex++, iterator.next());
             }
-            stmt2.executeUpdate();
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt1);
-            DBUtils.closeSQLStuff(stmt2);
+            return stmt.executeUpdate();
+        }
+    }
+
+    private static int deleteObjectPermissions(Connection connection, int cid, int module, List<Integer> folderIDs) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder(128);
+        stringBuilder.append("DELETE FROM object_permission WHERE cid=? AND module=? AND folder_id");
+        appendPlaceholdersForWhere(stringBuilder, folderIDs.size()).append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setInt(parameterIndex++, module);
+            for (Integer entity : folderIDs) {
+                stmt.setInt(parameterIndex++, entity.intValue());
+            }
+            return stmt.executeUpdate();
         }
     }
 
@@ -338,6 +438,22 @@ public class OXFolderDependentDeleter {
             }
         }
         return entityIDs;
+    }
+
+    private static StringBuilder appendPlaceholdersForWhere(StringBuilder stringBuilder, int count) {
+        if (1 > count) {
+            throw new IllegalArgumentException("count");
+        }
+        if (1 == count) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < count; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        return stringBuilder;
     }
 
 }

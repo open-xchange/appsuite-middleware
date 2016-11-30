@@ -49,6 +49,8 @@
 
 package com.openexchange.imagetransformation;
 
+import com.openexchange.java.Strings;
+
 /**
  * {@link ScaleType}
  *
@@ -76,6 +78,33 @@ public enum ScaleType {
     CONTAIN("contain"),
 
     /**
+     * The "containForceDimension" scale type, specifying the maximum target dimensions. The source image will be resized in a way that the resulting
+     * image fits into the target resolution entirely, with the original aspect ratio being preserved while smaller sides get padded to fit exact dimension.
+     * <p/>
+     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the
+     * picture being first resized to 200x150 pixels, then height gets padded by 25 pixels per side resulting in exactly 200x200 pixels.
+     */
+    CONTAIN_FORCE_DIMENSION("containforcedimension"),
+
+
+    /**
+     * The "cover" scale type, specifying the target dimensions. If the source image is bigger than the target dimension, in a first step the image will be resized in a way that the resulting
+     * image covers the target resolution entirely, with the original aspect ratio being preserved. In a second step the image will be cropped to fit the target dimension.
+     *
+     * <p/>
+     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "coverandcrop", will result in the
+     * picture being resized to 267x200 pixels and then cropped to fit 200x200.
+     *
+     * <p/>
+     * In case the image is smaller than then target dimension the image will not be resized and instead it gets padded to fit exact dimension.
+     *
+     * <p/>
+     * For example, with an original resolution of 100x100 pixels and a target dimension of 200x200 pixels and type "coverandcrop", will result in the
+     * picture being padded on all sides with 50 pixels.
+     */
+    COVER_AND_CROP("coverandcrop"),
+
+    /**
      * The "auto" scale type
      */
     AUTO("auto");
@@ -99,19 +128,19 @@ public enum ScaleType {
      * Gets the scale type for given keyword.
      *
      * @param keyword The keyword
-     * @return The associated scale type or <code>null</code>
+     * @return The associated scale type or {@link ScaleType#AUTO AUTO}
      */
     public static ScaleType getType(String keyword) {
         if (keyword == null) {
             return AUTO;
         }
-        keyword = keyword.trim().toLowerCase();
-        if (keyword.equals(COVER.getKeyword())) {
-            return COVER;
-        } else if (keyword.equals(CONTAIN.getKeyword())) {
-            return CONTAIN;
-        } else {
-            return AUTO;
+
+        String toLookUp = Strings.asciiLowerCase(keyword.trim());
+        for (ScaleType scaleType : ScaleType.values()) {
+            if (toLookUp.equals(scaleType.keyword)) {
+                return scaleType;
+            }
         }
+        return AUTO;
     }
 }

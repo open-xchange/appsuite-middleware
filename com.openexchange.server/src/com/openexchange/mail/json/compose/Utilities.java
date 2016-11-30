@@ -415,9 +415,6 @@ public enum Utilities {
         if (source.containsUserFlags()) {
             composedMail.addUserFlags(source.getUserFlags());
         }
-        if (source.containsUserFlags()) {
-            composedMail.addUserFlags(source.getUserFlags());
-        }
         if (source.containsHeaders()) {
             composedMail.addHeaders(source.getHeaders());
         }
@@ -435,9 +432,6 @@ public enum Utilities {
         }
         if (source.containsReplyTo()) {
             composedMail.addReplyTo(source.getReplyTo());
-        }
-        if (source.containsDispositionNotification()) {
-            composedMail.setDispositionNotification(source.getDispositionNotification());
         }
         if (source.containsDispositionNotification()) {
             composedMail.setDispositionNotification(source.getDispositionNotification());

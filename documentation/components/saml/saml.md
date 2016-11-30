@@ -19,6 +19,11 @@ Below are illustrations of the supported message flows. For reasons of clarity s
 ![SP-initiated login flow](SAML_login_flow.png "SP-initiated login flow")
 
 
+## IdP-initiated Login
+
+![IdP-initiated login flow](SAML_idp_login_flow.png "IdP-initiated login flow")
+
+
 ## SP-initiated Logout
 
 ![SP-initiated logout flow](SAML_sp_logout_flow.png "SP-initiated logout flow")
@@ -37,7 +42,7 @@ The core implementation is contained in its own bundle `com.openexchange.saml` w
 
 A SAML backend consists at least of an implementation of `com.openexchange.saml.spi.SAMLBackend`. An instance of this implementation must be registered as OSGi service under this interface. It is considered best practice to start with inheriting from `com.openexchange.saml.spi.AbstractSAMLBackend` instead of implementing the interface directly. This reduces the number of methods to implement while default implementations are used where it is possible. You probably need to override some of the other methods as well to customize their behavior. Especially the validation of SAML responses needs likely to be adjusted, as the default strategy is very strict and will fail if the IdP does not obey the specification in every point. Start with reading the JavaDoc of the mentioned classes and follow their references to get an overview of what you need to implement. Additionally there is an example implementation in the `examples/backend-samples` repository that targets WSO2 Identity Server as IdP. The according project is `com.openexchange.saml.wso2`, its packaging information is contained in `open-xchange-saml-wso2`.
 
-SAML might replace the web login of OX App Suite but it cannot be used by non-web clients that make use of the HTTP API directly. Therefore it uses sepcial login/logout calls instead of changing the behavior of the calls from the login module. While those calls are based on an installed authentication service (i.e. a package that provides `open-xchange-authentication`), SAML is not. Nevertheless an authentication service must always be provided. If you want SAML as your only login mechanims, you can simply register an instance of `com.openexchange.saml.spi.DisabledAuthenticationService` as OSGi service and let your package provide `open-xchange-authentication`. You can also decide to implement an own authentication service that takes care of authentication for other clients. It is also possible to install one of the existing `open-xchange-authentication` providers to allow e.g. IMAP or LDAP authentication.
+SAML might replace the web login of OX App Suite but it cannot be used by non-web clients that make use of the HTTP API directly. Therefore it uses sepcial login/logout calls instead of changing the behavior of the calls from the login module. While those calls are based on an installed authentication service (i.e. a package that provides `open-xchange-authentication`), SAML is not. Nevertheless an authentication service must always be provided. If you want SAML as your only login mechanisms, you can simply register an instance of `com.openexchange.saml.spi.DisabledAuthenticationService` as OSGi service and let your package provide `open-xchange-authentication`. You can also decide to implement an own authentication service that takes care of authentication for other clients. It is also possible to install one of the existing `open-xchange-authentication` providers to allow e.g. IMAP or LDAP authentication.
 
 
 # Operators Guide
@@ -75,3 +80,14 @@ The frontend plugin `open-xchange-appsuite-saml` is deactivated by default. In o
         samlLogin: true
 
 **Please note:** Make sure to use spaces to indent, not tabs!
+
+### IdP Configuration
+
+Unsolicited responses or IdP-initiated login does support additional parameters carried by the *RelayState*. These parameters can either be handled by a custom SAML Backend or must be in the following form. A base64 encoded string that may hold any of the following key-values, split by `:` where each key uses a `=` split from its value:
+
+* domain
+* loginpath
+* client
+
+Example `domain=example.com:client=specialClient`
+Encoded RelayState = `ZG9tYWluPWV4YW1wbGUuY29tOmNsaWVudD1zcGVjaWFsQ2xpZW50`

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Twitter Bundle
 Bundle-SymbolicName: com.openexchange.twitter
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
@@ -118,7 +118,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Eclipse-RegisterBuddy: com.openexchange.xerces.sun 
- 
 Bundle-Activator: com.openexchange.twitter.osgi.TwitterActivator
 Export-Package: com.openexchange.twitter

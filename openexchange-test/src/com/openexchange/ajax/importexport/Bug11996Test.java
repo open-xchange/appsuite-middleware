@@ -98,7 +98,7 @@ public final class Bug11996Test extends AbstractAJAXSession {
         "BEGIN:VTODO\n" +
         "STATUS:COMPLETED\n" +
         "ORGANIZER:MAILTO:david12@maxoxtest.com\n" +
-        "ATTENDEE;RSVP=TRUE:MAILTO:0\n" +
+            "ATTENDEE;RSVP=TRUE:MAILTO:david13@maxoxtest.com\n" +
         "DTSTART:20080116T000000Z\n" +
         "DUE:20080716T000100Z\n" +
         "TRANSP:OPAQUE\n" +

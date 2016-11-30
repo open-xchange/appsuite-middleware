@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -378,6 +379,29 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             checkOpenedStorage(realStorage, openedStorages);
                             realStorage.updateFolder(folder, storageParameters);
                             storage.updateFolder(folder, storageParameters);
+
+                            if (comparedPermissions.hasRemovedUsers() || comparedPermissions.hasModifiedUsers()) {
+                                if (realStorage instanceof LockCleaningFolderStorage) {
+                                    List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
+                                    int[] userIdRemoved = new int[removedPermissions.size()];
+                                    int x = 0;
+                                    for(Permission perm: removedPermissions){
+                                        userIdRemoved[x++] = perm.getEntity();
+                                    }
+
+                                    List<Permission> modifiedPermissions = comparedPermissions.getModifiedUserPermissions();
+                                    int[] userIdModified = new int[modifiedPermissions.size()];
+                                    x = 0;
+                                    for (Permission perm : modifiedPermissions) {
+                                        if (perm.getWritePermission() == Permission.NO_PERMISSIONS || perm.getWritePermission() == Permission.WRITE_OWN_OBJECTS) {
+                                            userIdModified[x++] = perm.getEntity();
+                                        }
+                                    }
+
+                                    int[] merged = com.openexchange.tools.arrays.Arrays.concatenate(userIdRemoved, userIdModified);
+                                    ((LockCleaningFolderStorage) realStorage).cleanLocksFor(folder, merged, storageParameters);
+                                }
+                            }
                         }
                     }
                     /*

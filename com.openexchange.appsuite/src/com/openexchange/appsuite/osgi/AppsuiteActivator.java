@@ -50,7 +50,6 @@
 package com.openexchange.appsuite.osgi;
 
 import java.io.File;
-import java.util.Map;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
@@ -60,7 +59,9 @@ import com.openexchange.appsuite.FileContribution;
 import com.openexchange.appsuite.FileContributor;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRampUpService;
@@ -200,7 +201,8 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    public Interests getInterests() {
+        return Reloadables.getInterestsForAll();
     }
+
 }

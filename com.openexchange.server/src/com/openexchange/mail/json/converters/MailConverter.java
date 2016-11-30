@@ -53,7 +53,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -85,8 +87,11 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailThread;
+import com.openexchange.mail.dataobjects.MailThreads;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
@@ -94,11 +99,13 @@ import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.json.writer.MessageWriter;
+import com.openexchange.mail.json.writer.MessageWriterParams;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -188,6 +195,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 }
             } else if (resultObject instanceof ThreadedStructure) {
                 convertThreadStructure((ThreadedStructure) resultObject, requestData, result, session);
+            } else if (resultObject instanceof MailThreads) {
+                convertMailThreads((MailThreads) resultObject, requestData, result, session);
             } else {
                 @SuppressWarnings("unchecked") final Collection<MailMessage> mails = (Collection<MailMessage>) resultObject;
                 if (AJAXServlet.ACTION_ALL.equalsIgnoreCase(action)) {
@@ -200,6 +209,112 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             }
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void convertMailThreads(final MailThreads mailThreads, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData).getColumns();
+        String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        tmp = null;
+
+        MailFields mailFields = new MailFields();
+        List<MailFieldWriter> writers = new ArrayList<MailFieldWriter>(columns.size());
+        for (Column column : columns) {
+            MailFieldWriter fieldWriter;
+            if (column.getField() > 0) {
+                fieldWriter = MessageWriter.getMailFieldWriter(MailListField.getField(column.getField()));
+                MailField mailField = MailField.getField(column.getField());
+                if (null != mailField) {
+                    mailFields.add(mailField);
+                }
+            } else {
+                fieldWriter = MessageWriter.getHeaderFieldWriter(column.getHeader());
+            }
+            writers.add(fieldWriter);
+        }
+
+        OXJSONWriter jsonWriter = new OXJSONWriter();
+        jsonWriter.array();
+        try {
+            int userId = session.getUserId();
+            int contextId = session.getContextId();
+            for (MailThread mailThread : mailThreads.getMailThreads()) {
+                JSONObject jMailThread = writeMailThread(mailThread, writers, mailFields, userId, contextId, timeZone);
+                jsonWriter.value(jMailThread);
+            }
+        } finally {
+            jsonWriter.endArray();
+        }
+        final JSONValue newJsonValue = jsonWriter.getObject();
+        result.setResultObject(newJsonValue, "json");
+    }
+
+    private static final MailMessageComparator COMPARATOR_ASC = new MailMessageComparator(MailSortField.RECEIVED_DATE, false, null);
+
+    private JSONObject writeMailThread(MailThread mailThread, List<MailFieldWriter> writers, MailFields mailFields, int userId, int contextId, TimeZone timeZone) throws OXException, JSONException {
+        MailMessage rootMessage = mailThread.getParent();
+        int accountId = rootMessage.getAccountId();
+        List<MailThread> subthreads = mailThread.getChildren();
+
+        LinkedList<MailMessage> flatList = new LinkedList<>();
+        flatList.add(rootMessage);
+        if (null != subthreads && !subthreads.isEmpty()) {
+            addToFlatList(subthreads, flatList, mailFields);
+        }
+        Collections.sort(flatList, COMPARATOR_ASC);
+        MailMessage latestMessage = flatList.getLast();
+
+        // Write messages
+        JSONArray jMessages = new JSONArray(flatList.size());
+        for (MailMessage mail : flatList) {
+            JSONObject jMessage = new JSONObject(writers.size());
+            for (MailFieldWriter writer : writers) {
+                writer.writeField(jMessage, mail, 0, true, accountId, userId, contextId, timeZone);
+            }
+            jMessages.put(jMessage);
+        }
+
+        JSONObject jMailThread = new JSONObject(4);
+        jMailThread.put("rootMailId", rootMessage.getMailId());
+        {
+            String originalId = rootMessage.getOriginalId();
+            if (null != originalId) {
+                jMailThread.put("rootOriginalMailId", originalId);
+            }
+            String originalFolder = rootMessage.getOriginalFolder();
+            if (null != originalFolder) {
+                jMailThread.put("rootOriginalFolderId", originalFolder);
+            }
+        }
+
+        jMailThread.put("latestMailId", latestMessage.getMailId());
+        {
+            String originalId = latestMessage.getOriginalId();
+            if (null != originalId) {
+                jMailThread.put("latestOriginalMailId", originalId);
+            }
+            String originalFolder = latestMessage.getOriginalFolder();
+            if (null != originalFolder) {
+                jMailThread.put("latestOriginalFolderId", originalFolder);
+            }
+        }
+        jMailThread.put("latestReceivedDate", MessageWriter.addUserTimezone(latestMessage.getReceivedDate().getTime(), timeZone));
+
+        jMailThread.put("thread", jMessages);
+        return jMailThread;
+    }
+
+    private void addToFlatList(List<MailThread> subthreads, List<MailMessage> flatList, MailFields mailFields) {
+        for (MailThread subthread : subthreads) {
+            MailMessage mail = subthread.getParent();
+            if (seemsValid(mail, mailFields)) {
+                flatList.add(mail);
+            }
+            List<MailThread> subSubThreads = subthread.getChildren();
+            if (null != subSubThreads && !subSubThreads.isEmpty()) {
+                addToFlatList(subSubThreads, flatList, mailFields);
+            }
         }
     }
 
@@ -542,6 +657,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         tmp = paramContainer.getStringParam("embedded");
         final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = paramContainer.getStringParam("includePlainText");
+        final boolean includePlainText = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = paramContainer.getStringParam("ignorable");
         final MimeFilter mimeFilter;
         if (com.openexchange.java.Strings.isEmpty(tmp)) {
@@ -597,7 +714,21 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         boolean exactLength = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
         JSONObject jMail;
         try {
-            jMail = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, token, ttlMillis, mimeFilter, timeZone, exactLength, maxContentSize, allowNestedMessages ? -1 : 1);
+            MessageWriterParams params = MessageWriterParams.builder(mail.getAccountId(), mail, session)
+                                                            .setDisplayMode(displayMode)
+                                                            .setEmbedded(embedded)
+                                                            .setExactLength(exactLength)
+                                                            .setIncludePlainText(includePlainText)
+                                                            .setMaxContentSize(maxContentSize)
+                                                            .setMaxNestedMessageLevels(allowNestedMessages ? -1 : 1)
+                                                            .setMimeFilter(mimeFilter)
+                                                            .setOptTimeZone(timeZone)
+                                                            .setSettings(usmNoSave)
+                                                            .setToken(token)
+                                                            .setTokenTimeout(ttlMillis)
+                                                            .setWarnings(warnings)
+                                                            .build();
+            jMail = MessageWriter.writeMailMessage(params);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();

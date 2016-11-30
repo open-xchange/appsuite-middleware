@@ -86,7 +86,6 @@ public class Services {
         services.set(lookup);
     }
     
-    
     public static <T> T getService(Class<T> klass) {
         return services.get().getService(klass);
     }

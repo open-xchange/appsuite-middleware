@@ -73,7 +73,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
-import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
+import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
@@ -119,7 +119,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     /**
      * Initializes a new {@link OneDriveFolderAccess}.
      */
-    public OneDriveFolderAccess(final OneDriveAccess oneDriveAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) {
+    public OneDriveFolderAccess(final OneDriveOAuthAccess oneDriveAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) {
         super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
@@ -492,8 +492,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                 HttpGet request = null;
                 try {
                     request = new HttpGet(buildUri("me/skydrive/quota", initiateQueryString()));
-                    com.openexchange.file.storage.onedrive.rest.Quota quota = handleHttpResponse(
-                        execute(request, httpClient), com.openexchange.file.storage.onedrive.rest.Quota.class);
+                    com.openexchange.file.storage.onedrive.rest.Quota quota = handleHttpResponse(execute(request, httpClient), com.openexchange.file.storage.onedrive.rest.Quota.class);
                     return new Quota(quota.getQuota(), quota.getQuota() - quota.getAvailable(), Type.STORAGE);
                 } finally {
                     if (null != request) {

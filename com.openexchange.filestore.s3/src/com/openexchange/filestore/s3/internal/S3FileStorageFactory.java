@@ -79,6 +79,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
+import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -152,7 +153,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
             AmazonS3Client client = clientInfo.client;
             String bucketName = initBucket(client, filestoreID);
             LOG.debug("Using \"{}\" as bucket name.", bucketName);
-            S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri));
+            S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {
                 storage = newStorage;
@@ -235,9 +236,14 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (configService.getBoolProperty("com.openexchange.filestore.s3." + filestoreID + ".pathStyleAccess", true)) {
             client.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         }
-
-
-        return new AmazonS3ClientInfo(client, encrypted);
+        long chunkSize;
+        String chunkSizeValue = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".chunkSize", "5MB");
+        try {
+            chunkSize = ConfigTools.parseBytes(chunkSizeValue);
+        } catch (NumberFormatException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, chunkSizeValue);
+        }
+        return new AmazonS3ClientInfo(client, encrypted, chunkSize);
     }
 
     private ClientConfiguration getClientConfiguration(String filestoreID) {
@@ -369,17 +375,46 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (path.endsWith("ctx_store")) {
             Matcher matcher = CTX_STORE_PATTERN.matcher(path);
             if (false == matcher.matches()) {
-                throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
+                throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\" in URI: " + uri);
             }
             return new StringBuilder(16).append(matcher.group(1)).append("ctxstore").toString();
         }
 
-        // Expect user store identifier
-        Matcher matcher = USER_STORE_PATTERN.matcher(path);
-        if (false == matcher.matches()) {
-            throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\"");
+        if (path.endsWith("user_store")) {
+            // Expect user store identifier
+            Matcher matcher = USER_STORE_PATTERN.matcher(path);
+            if (false == matcher.matches()) {
+                throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\" in URI: " + uri);
+            }
+            return new StringBuilder(24).append(matcher.group(1)).append("ctx").append(matcher.group(2)).append("userstore").toString();
         }
-        return new StringBuilder(24).append(matcher.group(1)).append("ctx").append(matcher.group(2)).append("userstore").toString();
+
+        // Any path that serves as prefix; e.g. "photos"
+        return sanitizePathForPrefix(path, uri);
+    }
+
+    private static String sanitizePathForPrefix(String path, URI uri) {
+        if (Strings.isEmpty(path)) {
+            throw new IllegalArgumentException("Path is empty in URI: " + uri);
+        }
+
+        StringBuilder sb = null;
+        for (int k = path.length(), i = 0; k-- > 0; i++) {
+            char ch = path.charAt(i);
+            if ('_' == ch) {
+                // Underscore not allowed
+                if (null == sb) {
+                    sb = new StringBuilder(path.length());
+                    sb.append(path, 0, i);
+                }
+            } else {
+                // Append
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+        return null == sb ? path : sb.toString();
     }
 
     /**
@@ -411,10 +446,14 @@ public class S3FileStorageFactory implements FileStorageProvider {
         /** Whether associated Amazon S3 client reference has encryption enabled */
         final boolean encrypted;
 
-        AmazonS3ClientInfo(AmazonS3Client client, boolean encrypted) {
+        /** The chunk size to use for multipart uploads */
+        final long chunkSize;
+
+        AmazonS3ClientInfo(AmazonS3Client client, boolean encrypted, long chunkSize) {
             super();
             this.client = client;
             this.encrypted = encrypted;
+            this.chunkSize = chunkSize;
         }
     }
 

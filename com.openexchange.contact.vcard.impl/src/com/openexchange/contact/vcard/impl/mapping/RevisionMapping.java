@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.Revision;
@@ -68,7 +69,7 @@ public class RevisionMapping extends AbstractMapping {
      * Initializes a new {@link RevisionMapping}.
      */
     public RevisionMapping() {
-        super("REV");
+        super("REV", ContactField.LAST_MODIFIED);
     }
 
     @Override

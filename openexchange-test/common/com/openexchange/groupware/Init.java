@@ -164,6 +164,12 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.TrustedSSLSocketFactory;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.impl.internal.SSLConfigurationServiceImpl;
+import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
+import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
@@ -365,6 +371,8 @@ public final class Init {
         startAndInjectConfigBundle();
         System.out.println("startAndInjectConfigBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
+        startAndInjectNetSSLBundle();
+
         startTestServices = System.currentTimeMillis();
         startAndInjectConfigViewFactory();
         System.out.println("startAndInjectConfigViewFactory took " + (System.currentTimeMillis() - startTestServices) + "ms.");
@@ -406,7 +414,7 @@ public final class Init {
         System.out.println("startAndInjectDatabaseUpdate took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
-//        startAndInjectI18NBundle();
+        //        startAndInjectI18NBundle();
         System.out.println("startAndInjectI18NBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
@@ -563,6 +571,23 @@ public final class Init {
         com.openexchange.http.grizzly.osgi.Services.setServiceLookup(LOOKUP);
     }
 
+    private static void startAndInjectNetSSLBundle() {
+        SimpleServiceLookup myServices = new SimpleServiceLookup();
+        Object configurationService = services.get(ConfigurationService.class);
+        myServices.add(ConfigurationService.class, configurationService);
+        myServices.add(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
+        com.openexchange.net.ssl.osgi.Services.setServiceLookup(myServices);
+
+        services.put(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
+        services.put(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
+
+        TestServiceRegistry.getInstance().addService(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
+        TestServiceRegistry.getInstance().addService(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
+
+        TrustedSSLSocketFactory.init();
+        SSLProperties.initJvmDefaultCipherSuites();
+    }
+
     private static void startAndInjectThreadPoolBundle() {
         if (null == TestServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
             final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
@@ -585,6 +610,7 @@ public final class Init {
     private static void startAndInjectBasicServices() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
             final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
+
                 @Override
                 public synchronized List<UserServiceInterceptor> getInterceptors() {
                     return Collections.emptyList();
@@ -621,11 +647,9 @@ public final class Init {
             final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
             com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
             final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getFileByName("HTMLEntities.properties"));
-            @SuppressWarnings("unchecked")
-            final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+            @SuppressWarnings("unchecked") final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
             htmlEntityMap.put("apos", Character.valueOf('\''));
-            @SuppressWarnings("unchecked")
-            final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+            @SuppressWarnings("unchecked") final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
             htmlCharMap.put(Character.valueOf('\''), "apos");
             final HtmlService service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
             services.put(HtmlService.class, service);
@@ -636,16 +660,15 @@ public final class Init {
     private static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
         new Component() {
+
             private static final long serialVersionUID = 2411378382745647554L;
+
             @Override
             public String getAbbreviation() {
                 return "TEST";
             }
         };
-        return new OXException(
-            9999,
-            null == message ? "[Not available]" : message,
-                cause);
+        return new OXException(9999, null == message ? "[Not available]" : message, cause);
     }
 
     private static void startAndInjectCalendarServices() {
@@ -668,20 +691,7 @@ public final class Init {
                     /*
                      * Compose cache configuration
                      */
-                    final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                        "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                        "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
-                        "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                        "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                        "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
-                        "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
-                        "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                        "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                        "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
-                        "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
-                        "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                        "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                        "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                    final byte[] ccf = ("jcs.region." + regionName + "=LTCP\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=" + maxObjects + "\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=" + shrinkerIntervalSeconds + "\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=" + maxLifeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
                     final CacheService cacheService = TestServiceRegistry.getInstance().getService(CacheService.class);
                     cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
                     CalendarVolatileCache.initInstance(cacheService.getCache(regionName));
@@ -707,17 +717,18 @@ public final class Init {
     private static void startAndInjectImportExportServices() throws OXException {
         if (null == com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.get()) {
             com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(new ServiceLookup() {
+
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
+
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
                 }
             });
-            SubscriptionServiceRegistry.getInstance().addService(
-                ContactService.class, services.get(ContactService.class));
+            SubscriptionServiceRegistry.getInstance().addService(ContactService.class, services.get(ContactService.class));
         }
     }
 
@@ -741,10 +752,12 @@ public final class Init {
             registry.addStorage(new RdbContactStorage());
             TestServiceRegistry.getInstance().addService(ContactStorageRegistry.class, registry);
             com.openexchange.contact.storage.rdb.internal.RdbServiceLookup.set(new ServiceLookup() {
+
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
+
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
@@ -757,10 +770,12 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
             final ContactService contactService = new ContactServiceImpl(new UserServiceInterceptorRegistry(null));
             ContactServiceLookup.set(new ServiceLookup() {
+
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
+
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
@@ -852,7 +867,7 @@ public final class Init {
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
-        if(databaseUpdateinitialized ) {
+        if (databaseUpdateinitialized) {
             return;
         }
         // ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -918,9 +933,7 @@ public final class Init {
             SpamHandlerRegistry.registerSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName(), DefaultSpamHandler.getInstance());
         }
         if (null == SpamHandlerRegistry.getSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName())) {
-            SpamHandlerRegistry.registerSpamHandler(
-                SpamAssassinSpamHandler.getInstance().getSpamHandlerName(),
-                SpamAssassinSpamHandler.getInstance());
+            SpamHandlerRegistry.registerSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName(), SpamAssassinSpamHandler.getInstance());
         }
     }
 
@@ -1005,7 +1018,7 @@ public final class Init {
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();
-            JCSCacheServiceInit.getInstance().setCacheEventService((CacheEventService)services.get(CacheEventService.class));
+            JCSCacheServiceInit.getInstance().setCacheEventService((CacheEventService) services.get(CacheEventService.class));
             JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
             final CacheService cache = JCSCacheService.getInstance();
             services.put(CacheService.class, cache);

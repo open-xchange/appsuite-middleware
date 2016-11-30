@@ -67,6 +67,7 @@ import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
 import com.openexchange.mailfilter.services.Services;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 
@@ -92,6 +93,9 @@ public class MailFilterActivator extends HousekeepingActivator {
             Services.setServiceLookup(this);
 
             checkConfigfile();
+
+            trackService(SSLSocketFactoryProvider.class);
+            openTrackers();
 
             {
                 EventHandler eventHandler = new EventHandler() {

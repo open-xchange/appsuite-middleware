@@ -83,6 +83,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.api.TransactionallyCachingCalendar;
 import com.openexchange.calendar.cache.Attribute;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
@@ -92,6 +93,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
@@ -170,7 +172,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String select = "SELECT intfield01, timestampfield01, timestampfield02, field01 FROM prg_dates ";
 
-    private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone, intfield05, intfield03, field09 FROM prg_dates ";
+    private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone, intfield05, intfield03, field09, field02 FROM prg_dates ";
 
     private static final String RANGE_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield02, intfield04, field06, field07, field08, timezone, intfield07 FROM prg_dates ";
 
@@ -1768,7 +1770,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         Quota amountQuota = CalendarQuotaProvider.getAmountQuota(session, connection, viewFactory, this);
         long limit = amountQuota.getLimit();
         long usage = amountQuota.getUsage();
-        if (limit > 0 && amountQuota.getUsage() >= limit) {
+        if (limit == 0 || (limit > 0 && amountQuota.getUsage() >= limit)) {
             throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(usage, limit);
         }
     }
@@ -2188,11 +2190,17 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     reminder = new Date(cdao.getStartDate().getTime() - la);
                                 }
                             }
+                            /*
+                             * Bug 47094 - Missing reminder for appointment from series
+                             *
+                             * In case of an exception on a series appointment the resulting reminders were bound to the creators folder ID.
+                             * This caused all other participants in not having the permission for the exception.                             * 
+                             */
                             if (null != reminder) {
                                 changeReminder(
                                     cdao.getObjectID(),
                                     user.getIdentifier(),
-                                    cdao.getEffectiveFolderId(),
+                                    FolderObject.PUBLIC == cdao.getFolderType() ? cdao.getEffectiveFolderId() : user.getPersonalFolderId(), 
                                     cdao.getContext(),
                                     cdao.isSequence(true),
                                     cdao.getEndDate(),
@@ -5319,7 +5327,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private final void triggerDeleteEvent(final Connection con, final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
-        final CalendarDataObject ao;
+        CalendarDataObject ao;
         if (edao == null) {
             // fix for bug 48598 where we previously sent a shallow CalenderDataObject that only
             // contained the objectID and parentFolderID (as of the setters invoked below), but that
@@ -5329,8 +5337,9 @@ public class CalendarMySQL implements CalendarSqlImp {
             final AppointmentSQLInterface calendarSql = FACTORY_REF.get().createAppointmentSql(so);
             try {
                 ao = calendarSql.getObjectById(oid, fid);
-            } catch (final SQLException e) {
-                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+            } catch (Exception e) {
+                LOG.warn("Unable to load appointment for event. Fallback to empty Object.", e);
+                ao = new CalendarDataObject();
             }
         } else {
             ao = edao.clone();

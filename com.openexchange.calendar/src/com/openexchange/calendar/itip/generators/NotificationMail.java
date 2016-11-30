@@ -55,7 +55,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
@@ -112,6 +114,48 @@ public class NotificationMail {
     private boolean attachmentUpdate;
 
     private boolean sortedParticipants;
+
+    private final Map<String, String> additionalHeaders;
+
+    /**
+     * Initializes a new {@link NotificationMail}.
+     */
+    public NotificationMail() {
+        super();
+        additionalHeaders = new LinkedHashMap<>(4);
+    }
+
+    /**
+     * Sets given additional header
+     * <p>
+     * Note: Header name is required to start with <code>"X-"</code> prefix.
+     *
+     * @param name The header name
+     * @param value The header value
+     * @throws IllegalArgumentException If either name/value is <code>null</code> or name does not start with <code>"X-"</code> prefix
+     */
+    public void setAdditionalHeader(String name, String value) {
+        if (null == name) {
+            throw new IllegalArgumentException("name is null");
+        }
+        if (null == value) {
+            throw new IllegalArgumentException("value is null");
+        }
+        if (!name.startsWith("X-")) {
+            throw new IllegalArgumentException("name does not start with \"X-\" prefix");
+        }
+
+        additionalHeaders.put(name, value);
+    }
+
+    /**
+     * Gets the additional headers
+     *
+     * @return The additional headers as an unmodifiable map
+     */
+    public Map<String, String> getAdditionalHeaders() {
+        return Collections.unmodifiableMap(additionalHeaders);
+    }
 
     public ITipMessage getMessage() {
         return itipMessage;
@@ -563,8 +607,15 @@ public class NotificationMail {
         if (isAttachmentUpdate()) {
             return true;
         }
+        if (isChangeUserSpecific()) {
+            return false;
+        }
 
         return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
+    }
+
+    private boolean isChangeUserSpecific() {
+        return diff.exactlyTheseChanged(CalendarFields.CHANGE_EXCEPTIONS, CalendarFields.RECURRENCE_DATE_POSITION, CalendarFields.RECURRENCE_POSITION);
     }
 
     public boolean isAboutStateChangesOnly() {
@@ -610,7 +661,7 @@ public class NotificationMail {
         }
         return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
     }
-    
+
     public boolean isStateChangeExceptionCreate() {
         boolean candidate = diff.exactlyTheseChanged(CalendarFields.CHANGE_EXCEPTIONS, CalendarFields.RECURRENCE_DATE_POSITION, CalendarFields.RECURRENCE_POSITION, CalendarFields.USERS);
         if (candidate) {

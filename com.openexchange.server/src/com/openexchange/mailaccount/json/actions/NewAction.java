@@ -49,8 +49,7 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -66,9 +65,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -86,9 +82,12 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -97,10 +96,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "new", description = "Create a new mail account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "A JSON object describing the new account to create. See mail account data.",
-    responseDescription = "A JSON object representing the inserted mail account. See mail account data.")
+@OAuthAction(MailAccountOAuthConstants.OAUTH_WRITE_SCOPE)
 public final class NewAction extends AbstractMailAccountAction implements MailAccountFields {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NewAction.class);
@@ -110,8 +106,8 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
     /**
      * Initializes a new {@link NewAction}.
      */
-    public NewAction() {
-        super();
+    public NewAction(ActiveProviderDetector activeProviderDetector) {
+        super(activeProviderDetector);
     }
 
     @Override
@@ -137,6 +133,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             availableAttributes.remove(Attribute.TRANSPORT_PASSWORD_LITERAL);
             accountDescription.setTransportLogin(null);
             accountDescription.setTransportPassword(null);
+            accountDescription.setTransportOAuthId(-1);
         }
 
         checkNeededFields(accountDescription);

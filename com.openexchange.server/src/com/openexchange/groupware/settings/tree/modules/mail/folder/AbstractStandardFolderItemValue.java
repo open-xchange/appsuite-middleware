@@ -49,10 +49,13 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
-import java.util.Map;
+import javax.mail.MessagingException;
+import javax.mail.Store;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -61,8 +64,13 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailStoreAware;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -105,8 +113,8 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.settings.mail.failOnError");
             }
         });
     }
@@ -130,19 +138,47 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
     public boolean isAvailable(UserConfiguration userConfig) {
         return userConfig.hasWebMail();
     }
+    
+    private int trySetReadTimeout(int readTimeout, Store messageStore) {
+        try {
+            return messageStore.setAndGetReadTimeout(readTimeout);
+        } catch (Exception e) {
+            // Ignore
+        }
+        return -1;
+    }
 
     @Override
     public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-        MailServletInterface mailInterface = null;
+        if (false == needsConnectedMailAccess()) {
+            getValue(setting, null);
+            return;
+        }
+        
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        Store messageStore = null;
+        int prevReadTimeout = -1;
         try {
             // Establish mail connection
-            mailInterface = MailServletInterface.getInstance(session);
+            mailAccess = MailAccess.getInstance(session, MailAccount.DEFAULT_ID);
+            mailAccess.connect();
 
-            // Set setting
-            getValue(setting, mailInterface);
-
+            // Lower read timeout (if possible)
+            if (mailAccess instanceof IMailStoreAware) {
+                IMailStoreAware storeAware = (IMailStoreAware) mailAccess;
+                if (storeAware.isStoreSupported()) {
+                    Store store = storeAware.getStore();
+                    if (store.isSetAndGetReadTimeoutSupported() && (prevReadTimeout = trySetReadTimeout(3500, store)) >= 0) {
+                        messageStore = store;
+                    }
+                }
+            }
+            
+            // Get setting
+            getValue(setting, mailAccess);
+            
             // Check for possible warnings
-            addWarnings(mailInterface.getWarnings());
+            addWarnings(mailAccess.getWarnings());
         } catch (OXException e) {
             if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
                 // Admin/user has no mail access
@@ -165,23 +201,38 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
             LOGGER.warn("Could not determine mail setting", rte);
             setting.setSingleValue(null);
         } finally {
-            if (mailInterface != null) {
+            // Restore previous read timeout
+            if (null != messageStore) {
+                trySetReadTimeout(prevReadTimeout, messageStore);
+            }
+            
+            // Close mail access
+            if (null != mailAccess) {                
                 try {
-                    mailInterface.close(true);
-                } catch (OXException e) {
-                    LOGGER.error("Failed to close MailServletInterface instance", e);
+                    mailAccess.close(true);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to close MailAccess instance", e);
                 }
             }
         }
     }
 
     /**
+     * Checks if a connected instance of <code>MailAccess</code> is needed.
+     *
+     * @return <code>true</code> if a connected instance of <code>MailAccess</code> is needed; otherwise <code>false</code>
+     */
+    protected boolean needsConnectedMailAccess() {
+        return true;
+    }
+
+    /**
      * Determines the value and applies it to given setting.
      *
      * @param setting The setting to apply to
-     * @param mailInterface The connected mail interface to use
+     * @param mailAccess The connected mail access to use
      * @throws OXException If operation fails
      */
-    protected abstract void getValue(Setting setting, MailServletInterface mailInterface) throws OXException;
+    protected abstract void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException;
 
 }

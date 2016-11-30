@@ -2,18 +2,20 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Monitoring
 Bundle-SymbolicName: com.openexchange.monitoring
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
  com.openexchange.counter,
  com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.sessiond,
+ com.openexchange.timer,
  javax.management,
  org.apache.commons.logging,
  org.osgi.framework,

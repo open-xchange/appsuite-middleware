@@ -49,10 +49,10 @@
 
 package com.openexchange.jslob.config;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 
 /**
@@ -82,10 +82,8 @@ public class ConfigJSlobReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(4);
-        map.put("upsell-appsuite.properties", new String[] { "all properties in file" });
-        map.put("appsuite.properties", new String[] { "all properties in file" });
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("upsell-appsuite.properties", "appsuite.properties");
     }
+
 }

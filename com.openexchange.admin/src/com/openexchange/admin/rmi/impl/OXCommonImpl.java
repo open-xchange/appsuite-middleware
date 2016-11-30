@@ -157,9 +157,10 @@ public abstract class OXCommonImpl {
             throw new NoSuchContextException("The context " + ctx.getId() + " does not exist!");
         }
         if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
-            final DatabaseUpdateException e = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+            DatabaseUpdateException e = tool.generateDatabaseUpdateException(ctx.getId().intValue());
             LOGGER.error(e.getMessage(), e);
             throw e;
         }
     }
+
 }

@@ -588,17 +588,12 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (true || isInline) { // Fix for bug #16461: Show every RFC822 part as a nested mail
-                if (!handler.handleNestedMessage(mailPart, getSequenceId(prefix, partCount))) {
-                    stop = true;
-                    return;
-                }
-            } else {
-                if (!handler.handleAttachment(mailPart, isInline, MimeTypes.MIME_MESSAGE_RFC822, fileName, mailPart.getSequenceId())) {
-                    stop = true;
-                    return;
-                }
+            // Fix for bug #16461: Show every RFC822 part as a nested mail
+            if (!handler.handleNestedMessage(mailPart, getSequenceId(prefix, partCount))) {
+                stop = true;
+                return;
             }
+            
         } else if (TNEFUtils.isTNEFMimeType(lcct)) {
             try {
                 /*

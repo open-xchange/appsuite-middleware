@@ -51,9 +51,13 @@ package com.openexchange.messaging.generic.internal;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.procedure.TIntProcedure;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -61,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.session.Session;
 
 /**
@@ -69,7 +74,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class CachingMessagingAccountStorage implements MessagingAccountStorage {
+public final class CachingMessagingAccountStorage implements MessagingAccountStorage, OAuthAccountDeleteListener {
 
     private static final CachingMessagingAccountStorage INSTANCE = new CachingMessagingAccountStorage();
 
@@ -133,7 +138,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
      */
 
     /**
-     * The database-backed delegatee.
+     * The database-backed delegate.
      */
     private final RdbMessagingAccountStorage delegatee;
 
@@ -143,6 +148,55 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
     private CachingMessagingAccountStorage() {
         super();
         delegatee = RdbMessagingAccountStorage.getInstance();
+    }
+
+    @Override
+    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        List<MessagingAccount> accounts = delegatee.getAccounts(userId, contextId, null);
+        if (accounts.isEmpty()) {
+            return;
+        }
+
+        Map<String, List<MessagingAccount>> toDelete = new LinkedHashMap<>(accounts.size());
+        for (MessagingAccount messagingAccount : accounts) {
+            Object object = messagingAccount.getConfiguration().get("account");
+            if (null != object && Integer.toString(id).equals(object.toString())) {
+                String serviceId = messagingAccount.getMessagingService().getId();
+                List<MessagingAccount> l = toDelete.get(serviceId);
+                if (null == l) {
+                    l = new LinkedList<>();
+                    toDelete.put(serviceId, l);
+                }
+                l.add(messagingAccount);
+            }
+        }
+
+        if (false == toDelete.isEmpty()) {
+            CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
+            Cache cache = null;
+            if (cacheService != null) {
+                cache = cacheService.getCache(REGION_NAME);
+            }
+
+            for (Map.Entry<String, List<MessagingAccount>> deleteEntry : toDelete.entrySet()) {
+                String serviceId = deleteEntry.getKey();
+                if (null != cache) {
+                    cache.remove(accountIDsCacheKey(cacheService, serviceId, userId, contextId));
+                }
+
+                for (MessagingAccount deleteMe : deleteEntry.getValue()) {
+                    if (null != cache) {
+                        cache.remove(newCacheKey(cacheService, serviceId, deleteMe.getId(), userId, contextId));
+                    }
+                    delegatee.deleteAccounts(serviceId, new MessagingAccount[] { deleteMe }, new int[] { 0 }, userId, contextId, null, con);
+                }
+            }
+        }
     }
 
     /**

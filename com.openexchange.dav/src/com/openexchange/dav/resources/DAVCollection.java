@@ -52,10 +52,12 @@ package com.openexchange.dav.resources;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -78,6 +80,8 @@ public abstract class DAVCollection extends AbstractCollection {
     private final DAVFactory factory;
     private final WebdavPath url;
 
+    private DAVUserAgent userAgent;
+
     /**
      * Initializes a new {@link DAVCollection}.
      *
@@ -93,6 +97,28 @@ public abstract class DAVCollection extends AbstractCollection {
     }
 
     /**
+     * Gets the user agent derived from the request's <code>user-agent</code> header.
+     *
+     * @return The user agent, or {@link DAVUserAgent#UNKNOWN} if not set or unknown
+     */
+    protected DAVUserAgent getUserAgent() {
+        if (null == userAgent) {
+            String value = null;
+            com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+            if (null != requestContext) {
+                value = requestContext.getUserAgent();
+            } else {
+                Session session = factory.getSession();
+                if (null != session) {
+                    value = (String) session.getParameter("user-agent");
+                }
+            }
+            userAgent = DAVUserAgent.parse(value);
+        }
+        return userAgent;
+    }
+
+    /**
      * Gets the collection's sync token based on the last modification timestamp.
      *
      * @return The sync token
@@ -100,22 +126,6 @@ public abstract class DAVCollection extends AbstractCollection {
     public String getSyncToken() throws WebdavProtocolException {
         Date lastModified = getLastModified();
         return null == lastModified ? "0" : String.valueOf(lastModified.getTime());
-    }
-
-    protected WebdavProtocolException protocolException(Throwable t) {
-        if (WebdavProtocolException.class.isInstance(t)) {
-            return (WebdavProtocolException) t;
-        }
-        return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
-    protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error("{}", this.getUrl(), t);
-        return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
-    }
-
-    protected WebdavProtocolException protocolException(int statusCode) {
-        return protocolException(new Throwable(), statusCode);
     }
 
     /**

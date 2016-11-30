@@ -59,6 +59,14 @@ import com.openexchange.report.appsuite.serialization.Report;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ContextReportCumulator {
+    
+    /**
+     * Store the report parts into files located at the path determined by the report.
+     * Merge content into already existing report-parts if necessary.
+     * 
+     * @param report, the report whose parts should be stored on hdd.
+     */
+    void storeAndMergeReportParts(Report report);
 
     /**
      * Take information from a contextReport and add it to the Report.
@@ -69,5 +77,5 @@ public interface ContextReportCumulator {
      * Declare whether to run as part of this reportType
      */
     boolean appliesTo(String reportType);
-
+    
 }

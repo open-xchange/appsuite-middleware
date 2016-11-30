@@ -51,8 +51,6 @@ package com.openexchange.mailaccount.json.parser;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,15 +62,17 @@ import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Tools;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link DefaultMailAccountParser} - Parses a JSON object to a mail account.
@@ -185,6 +185,13 @@ public class DefaultMailAccountParser extends DataParser {
                 attributes.add(Attribute.MAIL_STARTTLS_LITERAL);
             }
         }
+        if (json.hasAndNotNull(MailAccountFields.MAIL_OAUTH)) {
+            int mailOAuthAccountId = json.optInt(MailAccountFields.MAIL_OAUTH, account.getMailOAuthId());
+            if (mailOAuthAccountId != account.getMailOAuthId()) {
+                account.setMailOAuthId(mailOAuthAccountId);
+                attributes.add(Attribute.MAIL_OAUTH_LITERAL);
+            }
+        }
         // Expect URL or separate fields for protocol, server, port, and secure
         if (json.hasAndNotNull(MailAccountFields.MAIL_URL)) {
             account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL).trim());
@@ -240,6 +247,13 @@ public class DefaultMailAccountParser extends DataParser {
             if (transportStartTls != account.isTransportStartTls()) {
                 account.setTransportStartTls(transportStartTls);
                 attributes.add(Attribute.TRANSPORT_STARTTLS_LITERAL);
+            }
+        }
+        if (json.hasAndNotNull(MailAccountFields.TRANSPORT_OAUTH)) {
+            int transportOAuthAccountId = json.optInt(MailAccountFields.TRANSPORT_OAUTH, account.getTransportOAuthId());
+            if (transportOAuthAccountId != account.getTransportOAuthId()) {
+                account.setTransportOAuthId(transportOAuthAccountId);
+                attributes.add(Attribute.TRANSPORT_OAUTH_LITERAL);
             }
         }
         if (json.hasAndNotNull(MailAccountFields.TRANSPORT_URL)) {

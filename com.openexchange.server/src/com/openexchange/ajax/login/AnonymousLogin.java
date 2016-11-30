@@ -135,24 +135,28 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected User authenticateUser(GuestInfo guest, LoginInfo loginInfo, Context context) throws OXException {
-        // Get needed services
+    protected User resolveUser(GuestInfo guest, Context context) throws OXException {
+        // Get needed service
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
         if (null == userService) {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
+
+       return userService.getUser(guest.getGuestID(), context);
+    }
+
+    @Override
+    protected void authenticateUser(LoginInfo loginInfo, User user, Context context) throws OXException {
+        // Get needed service
         PasswordMechFactory factory = ServerServiceRegistry.getInstance().getService(PasswordMechFactory.class);
         if (null == factory) {
             throw ServiceExceptionCode.absentService(PasswordMechFactory.class);
         }
 
-        User user = userService.getUser(guest.getGuestID(), context);
         IPasswordMech iPasswordMech = factory.get(user.getPasswordMech());
         if (!iPasswordMech.check(loginInfo.getPassword(), user.getUserPassword())) {
             throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
         }
-
-        return user;
     }
 
 }

@@ -49,10 +49,12 @@
 
 package com.openexchange.subscribe.crawler.internal;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import org.ho.yaml.Yaml;
+import java.io.InputStream;
+import org.yaml.snakeyaml.Yaml;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.Workflow;
 
@@ -64,24 +66,24 @@ import com.openexchange.subscribe.crawler.Workflow;
 public class WorkflowFactory {
 
     public static Workflow createWorkflow(final String filename) throws OXException {
-
-        Workflow workflow = null;
+        InputStream input = null;
         try {
-            workflow = Yaml.loadType(new File(filename), Workflow.class);
+            input = new FileInputStream(filename);
+            Yaml yaml = new Yaml();
+            Workflow workflow = yaml.loadAs(input, Workflow.class);
             //checkSanity(workflow);
+            return workflow;
         } catch (final FileNotFoundException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        } finally {
+            Streams.close(input);
         }
-
-        return workflow;
     }
 
     public static Workflow createWorkflowByString(final String string) throws OXException {
-
-        Workflow workflow = null;
-
-        workflow = Yaml.loadType(string, Workflow.class);
+        Yaml yaml = new Yaml();
+        Workflow workflow = yaml.loadAs(string, Workflow.class);
         //checkSanity(workflow);
-
         return workflow;
     }
 

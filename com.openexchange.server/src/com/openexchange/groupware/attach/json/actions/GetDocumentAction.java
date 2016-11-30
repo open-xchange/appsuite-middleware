@@ -54,9 +54,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
@@ -73,14 +70,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "[filename]?action=document", description = "Get an attachments filedata.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
-    @Parameter(name = "attached", description= "Object ID of the object to which the attachments are attached."),
-    @Parameter(name = "module", description = "Module ID (as per Attachment object) of the attached object."),
-    @Parameter(name = "id", description = "Object ID of the requested attachment."),
-    @Parameter(name = "content_type", optional=true, description = "If set the responses Content-Type header is set to this value, not the attachements file mime type.")
-}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem. Note: The File name may be added to the customary infostore path to suggest a filename to a Save-As dialog.")
 public final class GetDocumentAction extends AbstractAttachmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetDocumentAction.class);

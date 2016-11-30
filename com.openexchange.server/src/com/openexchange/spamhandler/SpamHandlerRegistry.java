@@ -49,8 +49,8 @@
 
 package com.openexchange.spamhandler;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
@@ -70,20 +70,14 @@ public final class SpamHandlerRegistry {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamHandlerRegistry.class);
 
-    /**
-     * Dummy value to associate with an Object in the backing Map.
-     */
+    /** Dummy value to associate with an Object in the backing Map. */
     private static final Object PRESENT = new Object();
 
-    /**
-     * Concurrent map for spam handlers.
-     */
-    private static final Map<String, SpamHandler> spamHandlers = new ConcurrentHashMap<String, SpamHandler>();
+    /** Concurrent map for spam handlers. */
+    private static final ConcurrentMap<String, SpamHandler> SPAM_HANDLERS = new ConcurrentHashMap<String, SpamHandler>();
 
-    /**
-     * Concurrent "set" for unknown spam handlers.
-     */
-    private static final Map<String, Object> unknownSpamHandlers = new ConcurrentHashMap<String, Object>();
+    /** Concurrent "set" for unknown spam handlers. */
+    private static final ConcurrentMap<String, Object> UNKNOWN_SPAM_HANDLERS = new ConcurrentHashMap<String, Object>();
 
     /**
      * Initializes a new {@link SpamHandlerRegistry}.
@@ -160,67 +154,50 @@ public final class SpamHandlerRegistry {
         SpamHandler handler;
         try {
             handler = mailSessionCache.getParameter(accountId, key);
+            if (null != handler) {
+                return handler;
+            }
         } catch (final ClassCastException e) {
-            /*
-             * Probably caused by bundle update(s)
-             */
-            handler = null;
-        }
-        if (null != handler) {
-            return handler;
+            // Probably caused by bundle update(s)
+            LOG.debug("Failed to cast spam handler. Continuing with regaular look-up.", e);
         }
         /*
          * Session does not hold spam handler
          */
-        final MailAccount mailAccount;
-        try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-        } catch (final OXException e) {
-            throw e;
-        }
-        final MailProviderGetter mailProviderGetter;
-        if (null == mailProvider) {
-            mailProviderGetter = new SessionMailProviderGetter(mailAccount.getMailProtocol());
-        } else {
-            mailProviderGetter = new SimpleMailProviderGetter(mailProvider);
-        }
-        handler = getSpamHandler0(mailAccount, mailProviderGetter);
-        //if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+        handler = getSpamHandler0(mailAccount, null == mailProvider ? new SessionMailProviderGetter(mailAccount.getMailProtocol()) : new SimpleMailProviderGetter(mailProvider));
         /*
          * Cache in session
          */
         mailSessionCache.putParameter(accountId, key, handler);
-        //}
         return handler;
     }
 
     private static SpamHandler getSpamHandler0(final MailAccount mailAccount, final MailProviderGetter mailProviderGetter) throws OXException {
         /*
-         * On first load account's spam handler
+         * At first, load account's spam handler
          */
-        final String spamHandlerName;
-        if (mailAccount.isDefaultAccount()) {
-            // TODO: Decide whether to return provider's spam handler if default account is denoted by account ID
-            /*-
-             * By now the providers spam handler is returned to maintain backward compatibility.
-             * To retrieve account's spam handler type:
-             *
-             * spamHandlerName = mailAccount.getSpamHandler();
-             */
-            final MailProvider mailProvider = mailProviderGetter.getMailProvider();
-            if (null == mailProvider) {
-                return NoSpamHandler.getInstance();
-            }
-            spamHandlerName = mailProvider.getSpamHandler().getSpamHandlerName();
-        } else {
+        if (!mailAccount.isDefaultAccount()) {
             /*
              * No spam handler for external accounts
              */
             LOG.debug("No spam handler for the external account with login {} (user {}) available per design.", mailAccount.getLogin(), mailAccount.getUserId());
             return NoSpamHandler.getInstance();
         }
+
+        /*-
+         * By now the providers spam handler is returned to maintain backward compatibility.
+         * To retrieve account's spam handler type:
+         *
+         * spamHandlerName = mailAccount.getSpamHandler();
+         */
+        MailProvider mailProvider = mailProviderGetter.getMailProvider();
+        if (null == mailProvider) {
+            return NoSpamHandler.getInstance();
+        }
+
+        String spamHandlerName = mailProvider.getSpamHandler().getSpamHandlerName();
         SpamHandler handler;
         if (null != spamHandlerName && spamHandlerName.length() > 0) {
             /*
@@ -231,7 +208,7 @@ public final class SpamHandlerRegistry {
             /*
              * Account does not specify a valid spam handler name; take from mail provider
              */
-            handler = mailProviderGetter.getMailProvider().getSpamHandler();
+            handler = mailProvider.getSpamHandler();
         }
         return handler;
     }
@@ -249,13 +226,13 @@ public final class SpamHandlerRegistry {
         if (null == registrationName) {
             LOG.warn("Given registration name is null. Using fallback spam handler '{}'", SpamHandler.SPAM_HANDLER_FALLBACK);
             return NoSpamHandler.getInstance();
-        } else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || unknownSpamHandlers.containsKey(registrationName)) {
+        } else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || UNKNOWN_SPAM_HANDLERS.containsKey(registrationName)) {
             return NoSpamHandler.getInstance();
         }
-        final SpamHandler spamHandler = spamHandlers.get(registrationName);
+        final SpamHandler spamHandler = SPAM_HANDLERS.get(registrationName);
         if (null == spamHandler) {
             LOG.warn("No spam handler found for registration name '{}'. Using fallback '{}'", registrationName, SpamHandler.SPAM_HANDLER_FALLBACK);
-            unknownSpamHandlers.put(registrationName, PRESENT);
+            UNKNOWN_SPAM_HANDLERS.put(registrationName, PRESENT);
             return NoSpamHandler.getInstance();
         }
         return spamHandler;
@@ -272,20 +249,15 @@ public final class SpamHandlerRegistry {
     public static boolean registerSpamHandler(final String registrationName, final SpamHandler spamHandler) {
         if (null == registrationName || SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName)) {
             return false;
-        } else if (spamHandlers.containsKey(registrationName)) {
+        }
+
+        if (null != SPAM_HANDLERS.putIfAbsent(registrationName, spamHandler)) {
+            // There is already such a spam handler
             return false;
         }
-        try {
-            /*
-             * Add to registry
-             */
-            spamHandlers.put(registrationName, spamHandler);
-            unknownSpamHandlers.remove(registrationName);
-            return true;
-        } catch (final RuntimeException t) {
-            LOG.error("", t);
-            return false;
-        }
+
+        UNKNOWN_SPAM_HANDLERS.remove(registrationName);
+        return true;
     }
 
     /**
@@ -295,8 +267,8 @@ public final class SpamHandlerRegistry {
         /*
          * Clear registry
          */
-        spamHandlers.clear();
-        unknownSpamHandlers.clear();
+        SPAM_HANDLERS.clear();
+        UNKNOWN_SPAM_HANDLERS.clear();
     }
 
     /**
@@ -306,12 +278,7 @@ public final class SpamHandlerRegistry {
      * @return The unregistered spam handler, or <code>null</code>
      */
     public static SpamHandler unregisterSpamHandler(final SpamHandler spamHandler) {
-        /*
-         * Unregister
-         */
-        final String registrationName = spamHandler.getSpamHandlerName();
-        unknownSpamHandlers.put(registrationName, PRESENT);
-        return spamHandlers.remove(registrationName);
+        return null == spamHandler ? null : unregisterSpamHandlerByName(spamHandler.getSpamHandlerName());
     }
 
     /**
@@ -325,8 +292,8 @@ public final class SpamHandlerRegistry {
         /*
          * Unregister
          */
-        unknownSpamHandlers.put(registrationName, PRESENT);
-        return spamHandlers.remove(registrationName);
+        UNKNOWN_SPAM_HANDLERS.put(registrationName, PRESENT);
+        return SPAM_HANDLERS.remove(registrationName);
     }
 
     /*-

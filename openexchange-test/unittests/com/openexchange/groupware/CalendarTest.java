@@ -57,12 +57,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-import junit.framework.TestCase;
 import com.openexchange.api2.ReminderService;
+import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.CalendarSqlImp;
 import com.openexchange.calendar.ConflictHandler;
+import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.exception.OXException;
@@ -99,6 +100,7 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import junit.framework.TestCase;
 
 public class CalendarTest extends TestCase {
 
@@ -139,6 +141,8 @@ public class CalendarTest extends TestCase {
         contextid = ctx.getContextId();
         userid = user;
         ContextStorage.start();
+        
+        CalendarMySQL.setApppointmentSqlFactory(new AppointmentSqlFactory());
     }
 
     @Override

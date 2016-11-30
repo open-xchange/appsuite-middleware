@@ -49,18 +49,15 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
-import com.openexchange.oauth.json.Tools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,9 +66,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete an OAuth account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The account identifier.") }, requestBody = "A JSON object providing the OAuth account fields to update. See OAuth account data. Currently the only values which make sende being updated are \"displayName\" and the \"token\"-\"secret\"-pair.", responseDescription = "The boolean value \"true\" if successful.")
 public final class DeleteAction extends AbstractOAuthAJAXActionService {
 
     /**
@@ -96,7 +90,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
              * Delete account
              */
             final OAuthService oAuthService = getOAuthService();
-            oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+            oAuthService.deleteAccount(getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
         } else if(data instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) data;
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -110,7 +104,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
                  * Delete account
                  */
                 final OAuthService oAuthService = getOAuthService();
-                oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+                oAuthService.deleteAccount(getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
                 } catch (JSONException e) {
                     throw AjaxExceptionCodes.JSON_ERROR.create(e);
                 }

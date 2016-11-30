@@ -90,6 +90,7 @@
 package org.glassfish.grizzly.http.server;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
@@ -111,6 +112,7 @@ import org.glassfish.grizzly.PortRange;
 import org.glassfish.grizzly.Processor;
 import org.glassfish.grizzly.TransportProbe;
 import org.glassfish.grizzly.attributes.AttributeBuilder;
+import org.glassfish.grizzly.filterchain.DefaultFilterChain;
 import org.glassfish.grizzly.filterchain.FilterChain;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.TransportFilter;
@@ -133,7 +135,10 @@ import org.glassfish.grizzly.threadpool.ThreadPoolProbe;
 import org.glassfish.grizzly.utils.Charsets;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import org.glassfish.grizzly.utils.IdleTimeoutFilter;
+import org.glassfish.grizzly.websockets.WebSocketAddOn;
+import org.glassfish.grizzly.websockets.WebSocketFilter;
 import com.openexchange.http.grizzly.GrizzlyConfig;
+import com.openexchange.java.Reflections;
 
 
 /**
@@ -146,7 +151,7 @@ public class OXHttpServer extends HttpServer {
     /**
      * Configuration details for this server instance.
      */
-    private final ServerConfiguration serverConfig = new ServerConfiguration(this);
+    private final OXServerConfiguration serverConfig = new OXServerConfiguration(this);
 
 
     /**
@@ -734,6 +739,21 @@ public class OXHttpServer extends HttpServer {
             if (addons != null) {
                 for (AddOn addon : addons) {
                     addon.setup(listener, builder);
+                    if (addon instanceof WebSocketAddOn) {
+                        try {
+                            int index = builder.indexOfType(org.glassfish.grizzly.websockets.WebSocketFilter.class);
+                            Field field = org.glassfish.grizzly.filterchain.FilterChainBuilder.class.getDeclaredField("patternFilterChain");
+                            field.setAccessible(true);
+                            org.glassfish.grizzly.filterchain.DefaultFilterChain filterChain = (DefaultFilterChain) field.get(builder);
+
+                            org.glassfish.grizzly.websockets.WebSocketFilter filter = (WebSocketFilter) filterChain.get(index);
+                            Field wsTimeoutMSField = org.glassfish.grizzly.websockets.WebSocketFilter.class.getDeclaredField("wsTimeoutMS");
+                            Reflections.makeModifiable(wsTimeoutMSField);
+                            wsTimeoutMSField.set(filter, Long.valueOf(serverConfig.getWsTimeoutMillis()));
+                        } catch (Exception e) {
+                            LOGGER.log(Level.WARNING, "Failed to apply Web Socket timeout milliseconds of " + serverConfig.getWsTimeoutMillis(), e);
+                        }
+                    }
                 }
             }
 

@@ -1215,6 +1215,50 @@ ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt
 # SoftwareChange_Request-3482
 ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xchange/etc/secret.properties
 
+# Bug 47925
+dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/contextSets/index.yml 7.8.3~ -- "$@"
+
+# SoftwareChange_Request-3528
+ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
+
+# Bug #45347
+old_key=io.ox.calendar//participantBlacklist
+new_key=io.ox/calendar//participantBlacklist
+propfile=/opt/open-xchange/etc/settings/participant-blacklist.properties
+
+if ! ox_exists_property ${new_key} ${propfile}
+then
+    if ox_exists_property ${old_key} ${propfile}
+    then
+        value=$(ox_read_property ${old_key} ${propfile})
+        ox_remove_property ${old_key} ${propfile}
+        ox_add_property ${new_key} "${value}" ${propfile}
+    else
+        ox_comment ${old_key} remove ${propfile}
+        ox_remove_property ${old_key} ${propfile}
+        ox_add_property ${new_key} "" ${propfile}
+    fi
+fi
+
+# SoftwareChange_Request-3616
+ox_add_property com.openexchange.mail.compose.share.preview.timeout 1000 /opt/open-xchange/etc/mail-compose.properties
+
+# SoftwareChange_Request-3637
+if dpkg --compare-versions "7.8.3-0" gt-nl "$2"; then
+    VALUE=$(ox_read_property com.openexchange.connector.maxRequestParameters /opt/open-xchange/etc/server.properties)
+    if [ "30" = "$VALUE" ]; then
+        ox_set_property com.openexchange.connector.maxRequestParameters 1000 /opt/open-xchange/etc/server.properties
+    fi
+fi
+
+# SoftwareChange_Request-3773
+sed -i '/^# Maximum number of open Files for the groupware$/{i\
+# Maximum number of open Files for the groupware. This value will only be\
+# applied when using sysv init. For systemd have a look at the drop-in configs\
+# at /etc/systemd/system/open-xchange.service.d
+d
+}' /opt/open-xchange/etc/ox-scriptconf.sh
+
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
     for FILE in "${PROTECT[@]}"
@@ -1225,6 +1269,7 @@ setConfigFilePermissions() {
     ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
     ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
     ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+    ox_update_permissions "/opt/open-xchange/sbin/reloadconfiguration" root:open-xchange 740
 }
 
 case "$1" in

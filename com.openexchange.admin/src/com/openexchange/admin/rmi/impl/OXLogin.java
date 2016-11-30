@@ -85,19 +85,19 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     @Override
     public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {
-        new BasicAuthenticator().doUserAuthentication(auth, ctx);
+        BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
         triggerUpdateProcess(ctx);
     }
 
     @Override
     public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         doNullCheck(auth);
-        new BasicAuthenticator().doAuthentication(auth);
+        BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
     }
 
     @Override
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        new BasicAuthenticator().doUserAuthentication(auth, ctx);
+        BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
 
         triggerUpdateProcess(ctx);
 
@@ -129,15 +129,15 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         return retusers[0];
     }
 
-    private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException{
+    private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException {
         // Check for update.
         try {
             OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
-            if( oxt.checkAndUpdateSchemaIfRequired(ctx) ) {
-                throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+            if (oxt.checkAndUpdateSchemaIfRequired(ctx)) {
+                oxt.generateDatabaseUpdateException(ctx.getId().intValue());
             }
         } catch (StorageException e) {
-            LOGGER.error("Error running updateprocess",e);
+            LOGGER.error("Error running updateprocess", e);
             throw new DatabaseUpdateException(e.toString());
         }
     }

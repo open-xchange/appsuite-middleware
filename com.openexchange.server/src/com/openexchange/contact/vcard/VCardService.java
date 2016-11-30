@@ -50,7 +50,9 @@
 package com.openexchange.contact.vcard;
 
 import java.io.InputStream;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -97,5 +99,13 @@ public interface VCardService extends VCardParametersFactory {
      * @throws OXException If importing the vCard fails - non-fatal conversion warnings are accessible in each import result
      */
     SearchIterator<VCardImport> importVCards(InputStream vCards, VCardParameters parameters) throws OXException;
+
+    /**
+     * Gets all contact fields from all known mappings corresponding to the supplied set of vCard properties.
+     *
+     * @param propertyNames The property names to get the corresponding fields for
+     * @return The contact fields
+     */
+    ContactField[] getContactFields(Set<String> propertyNames);
 
 }

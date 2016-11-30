@@ -139,7 +139,9 @@ public enum MailListField {
      */
     FOLDER(650, MailJSONField.FOLDER.getKey()),
     /**
-     * Flag \SEEN (651)
+     * Flag \SEEN (651).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by seen/unseen status.
      */
     FLAG_SEEN(651, MailJSONField.SEEN.getKey()),
     /**
@@ -181,10 +183,46 @@ public enum MailListField {
      * @since v7.8.0
      */
     MIME_TYPE(656, MailJSONField.CONTENT_TYPE.getKey()),
+    /**
+     * Flag \ANSWERED (657).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by answered/unanswered status.
+     */
+    FLAG_ANSWERED(657, MailJSONField.ANSWERED.getKey()),
+    /**
+     * Flag \FORWARDED (658).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by forwarded/not forwarded status.
+     * <p>
+     * <b>Note</b>:<br>
+     * To serve that sort field, the backing mail service is required to either support a <code>\Forwarded</code> system flag or
+     * a <code>$Forwarded</code> user flag. For the latter, the user flags capability is needed; otherwise an error is returned.
+     */
+    FLAG_FORWARDED(658, MailJSONField.FORWARDED.getKey()),
+    /**
+     * Flag \DRAFT (659).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by draft flag.
+     */
+    FLAG_DRAFT(659, MailJSONField.DRAFT.getKey()),
+    /**
+     * Flag \FLAGGED (660).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by flagged/unflagged status.
+     */
+    FLAG_FLAGGED(660, MailJSONField.FLAGGED.getKey()),
+    /**
+     * The date of a mail message. As configured (see <code>"com.openexchange.mail.preferSentDate"</code>), either the internal received date or mail's sent date (as given by <code>"Date"</code> header).
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * This field is only considered in JSON layer and is not supposed to be treated in actual MAL implementations.
+     * </div>
+     * <p>
+     */
+    DATE(661, MailJSONField.DATE.getKey()),
     ;
 
     private final int field;
-
     private final String key;
 
     private MailListField(final int field, final String jsonKey) {

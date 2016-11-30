@@ -52,9 +52,9 @@ package com.openexchange.groupware.infostore.database.impl;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -74,15 +74,14 @@ public class CheckSizeSwitch {
     private final DBProvider provider;
     private final Context ctx;
 
-    private static final Set<Metadata> FIELDS_TO_CHECK = new HashSet<Metadata>() {{
-        add(Metadata.CATEGORIES_LITERAL);
-        add(Metadata.FILE_MIMETYPE_LITERAL);
-        add(Metadata.FILENAME_LITERAL);
-        add(Metadata.URL_LITERAL);
-        add(Metadata.DESCRIPTION_LITERAL);
-        add(Metadata.TITLE_LITERAL);
-        add(Metadata.VERSION_COMMENT_LITERAL);
-    }};
+    private static final Set<Metadata> FIELDS_TO_CHECK = ImmutableSet.of(
+        Metadata.CATEGORIES_LITERAL,
+        Metadata.FILE_MIMETYPE_LITERAL,
+        Metadata.FILENAME_LITERAL,
+        Metadata.URL_LITERAL,
+        Metadata.DESCRIPTION_LITERAL,
+        Metadata.TITLE_LITERAL,
+        Metadata.VERSION_COMMENT_LITERAL);
 
     public CheckSizeSwitch(final DBProvider provider, final Context ctx) {
         this.provider = provider;

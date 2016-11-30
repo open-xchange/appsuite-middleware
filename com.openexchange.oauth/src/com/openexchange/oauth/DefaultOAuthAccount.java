@@ -49,22 +49,29 @@
 
 package com.openexchange.oauth;
 
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.oauth.scope.OAuthScope;
+
 /**
  * {@link DefaultOAuthAccount}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccount {
 
     private int id;
     private String displayName;
     private OAuthServiceMetaData metaData;
+    private Set<OAuthScope> enabledScopes;
 
     /**
-     * Initializes a new {@link DefaultOAuthAccount}.
+     * Initialises a new {@link DefaultOAuthAccount}.
      */
     public DefaultOAuthAccount() {
         super();
+        enabledScopes = new HashSet<>();
     }
 
     @Override
@@ -112,13 +119,30 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
     @Override
     public String toString() {
         final String delim = ", ";
-        return new StringBuilder(64).append("( id = ").append(this.id).append(delim).append("displayName = ").append(
-            this.displayName).append(delim).append("metaData = ").append(this.metaData).append(delim).append(" )").toString();
+        return new StringBuilder(64).append("( id = ").append(this.id).append(delim).append("displayName = ").append(this.displayName).append(delim).append("metaData = ").append(this.metaData).append(delim).append(" )").toString();
     }
 
-	@Override
-	public API getAPI() {
-		return metaData.getAPI();
-	}
+    @Override
+    public API getAPI() {
+        return metaData.getAPI();
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthAccount#getEnabledScopes()
+     */
+    @Override
+    public Set<OAuthScope> getEnabledScopes() {
+        return enabledScopes;
+    }
+
+    /**
+     * Sets the enabledScopes
+     *
+     * @param enabledScopes The enabledScopes to set
+     */
+    public void setEnabledScopes(Set<OAuthScope> enabledScopes) {
+        this.enabledScopes = enabledScopes;
+    }
 }

@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 16
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1375,6 +1375,45 @@ ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt
 # SoftwareChange_Request-3482
 ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xchange/etc/secret.properties
 
+# SoftwareChange_Request-3528
+ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
+
+# Bug #45347
+old_key=io.ox.calendar//participantBlacklist
+new_key=io.ox/calendar//participantBlacklist
+propfile=/opt/open-xchange/etc/settings/participant-blacklist.properties
+
+if ! ox_exists_property ${new_key} ${propfile}
+then
+    if ox_exists_property ${old_key} ${propfile}
+    then
+        value=$(ox_read_property ${old_key} ${propfile})
+        ox_remove_property ${old_key} ${propfile}
+        ox_add_property ${new_key} "${value}" ${propfile}
+    else
+        ox_comment ${old_key} remove ${propfile}
+        ox_remove_property ${old_key} ${propfile}
+        ox_add_property ${new_key} "" ${propfile}
+    fi
+fi
+
+# SoftwareChange_Request-3616
+ox_add_property com.openexchange.mail.compose.share.preview.timeout 1000 /opt/open-xchange/etc/mail-compose.properties
+
+# SoftwareChange_Request-3637
+VALUE=$(ox_read_property com.openexchange.connector.maxRequestParameters /opt/open-xchange/etc/server.properties)
+if [ "30" = "$VALUE" ]; then
+    ox_set_property com.openexchange.connector.maxRequestParameters 1000 /opt/open-xchange/etc/server.properties
+fi
+
+# SoftwareChange_Request-3773
+sed -i '/^# Maximum number of open Files for the groupware$/{i\
+# Maximum number of open Files for the groupware. This value will only be\
+# applied when using sysv init. For systemd have a look at the drop-in configs\
+# at /etc/systemd/system/open-xchange.service.d
+d
+}' /opt/open-xchange/etc/ox-scriptconf.sh
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1384,6 +1423,7 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
 ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
 ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+ox_update_permissions "/opt/open-xchange/sbin/reloadconfiguration" root:open-xchange 740
 exit 0
 
 %clean
@@ -1412,32 +1452,21 @@ exit 0
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples
+%doc com.openexchange.database/doc/examples
 
 %changelog
-* Sat Nov 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-11-21 (3731)
-* Tue Nov 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-11-07 (3678)
-* Wed Oct 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-08 (3699)
-* Mon Oct 17 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-10-24 (3630)
-* Thu Oct 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-10-10 (3597)
-* Mon Sep 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-26 (3572)
-* Mon Sep 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-08 (3580)
-* Mon Sep 05 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-09-12 (3547)
-* Mon Aug 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-29 (3522)
-* Mon Aug 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-26 (3512)
-* Mon Aug 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-15 (3490)
-* Fri Jul 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-08-01 (3467)
+* Fri Nov 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.3 release
+* Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Third preview for 7.8.3 release
+* Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.8.3 release
+* Fri Oct 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First preview 7.8.3 release
+* Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>

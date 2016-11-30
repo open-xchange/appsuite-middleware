@@ -69,7 +69,12 @@ public final class BoxConstants implements FileStorageConstants {
      * The identifier for Box file storage service.
      */
     public static final String ID = "boxcom";
-    
+
+    /**
+     * The display name for the box file storage service.
+     */
+    public static final String DISPLAY_NAME = "Box File Storage Service";
+
     // ----------------------------------------------------------------------------------------------------------- //
 
     /**

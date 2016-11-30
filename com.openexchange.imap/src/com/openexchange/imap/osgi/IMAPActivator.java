@@ -83,8 +83,13 @@ import com.openexchange.imap.util.ExtAccountFolderField;
 import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -123,7 +128,8 @@ public final class IMAPActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
-            EventAdmin.class, GroupService.class, ContextService.class, ConfigViewFactory.class };
+            EventAdmin.class, GroupService.class, ContextService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class,
+            SSLConfigurationService.class, UserAwareSSLConfigurationService.class };
     }
 
     @Override
@@ -136,7 +142,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Register IMAP mail provider
              */
             {
-                Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+                Dictionary<String, String> dictionary = new Hashtable<>(1);
                 dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
                 registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
             }
@@ -154,7 +160,8 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Trackers
              */
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
-            track(CacheEventService.class, new ListLsubInvalidator(context));
+            ListLsubInvalidator listLsubInvalidator = new ListLsubInvalidator(context);
+            track(CacheEventService.class, listLsubInvalidator);
             trackService(FolderService.class);
             trackService(AuditLogService.class);
             openTrackers();
@@ -162,6 +169,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Command provider
              */
             registerService(CommandProvider.class, new ListLsubCommandProvider());
+            registerService(MailAccountDeleteListener.class, listLsubInvalidator);
             /*
              * Initialize cache regions
              */
@@ -260,10 +268,61 @@ public final class IMAPActivator extends HousekeepingActivator {
                     }
                 };
 
-                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
                 serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }
+            {
+                // The mail categories event handler
+                EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(final Event event) {
+                        if (false == MailCategoriesConfigService.TOPIC_REORGANIZE.equals(event.getTopic())) {
+                            return;
+                        }
+
+                        ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                        if (null == threadPool) {
+                            doHandleEvent(event);
+                        } else {
+                            AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                                @Override
+                                public Void call() throws Exception {
+                                    try {
+                                        doHandleEvent(event);
+                                    } catch (Exception e) {
+                                        LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                                    }
+                                    return null;
+                                }
+                            };
+                            threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+                        }
+                    }
+
+                    /**
+                     * Handles given event.
+                     *
+                     * @param event The event
+                     */
+                    protected void doHandleEvent(Event event) {
+                        Integer contextId = (Integer) event.getProperty(MailCategoriesConfigService.PROP_CONTEXT_ID);
+                        if (null != contextId) {
+                            Integer userId = (Integer) event.getProperty(MailCategoriesConfigService.PROP_USER_ID);
+                            if (null != userId) {
+                                ConversationCache.getInstance().removeUserConversations(userId.intValue(), contextId.intValue());
+                            }
+                        }
+                    }
+                };
+
+                Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, MailCategoriesConfigService.TOPIC_REORGANIZE);
+                registerService(EventHandler.class, eventHandler, serviceProperties);
+            }
+
             {
                 EventHandler eventHandler = new EventHandler() {
 
@@ -278,7 +337,7 @@ public final class IMAPActivator extends HousekeepingActivator {
 
                 };
 
-                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
                 serviceProperties.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }
@@ -305,7 +364,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                     }
                 };
 
-                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
                 serviceProperties.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }

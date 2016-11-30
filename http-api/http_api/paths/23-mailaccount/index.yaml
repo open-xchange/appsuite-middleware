@@ -5,3 +5,4 @@ requests:
   - UpdateRequest.yaml
   - DeleteRequest.yaml
   - ValidateRequest.yaml
+  - StatusRequest.yaml

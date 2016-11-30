@@ -119,7 +119,7 @@ public class HTTPToolkit {
                 port = 443;
             }
 
-            final Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+            final Protocol https = new Protocol("https", new TrustAdapter(), 443);
             client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
 
             final GetMethod getMethod = new GetMethod(javaURL.getFile());
@@ -161,7 +161,7 @@ public class HTTPToolkit {
                 port = 443;
             }
 
-            final Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+            final Protocol https = new Protocol("https", new TrustAdapter(), 443);
             client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
 
             final PostMethod postMethod = new PostMethod(javaURL.getFile());

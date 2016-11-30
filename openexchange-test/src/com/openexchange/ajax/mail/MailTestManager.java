@@ -67,6 +67,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.ArchiveRequest;
+import com.openexchange.ajax.mail.actions.ConversationResponse;
 import com.openexchange.ajax.mail.actions.CopyRequest;
 import com.openexchange.ajax.mail.actions.CopyResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -84,6 +85,7 @@ import com.openexchange.ajax.mail.actions.ReplyRequest;
 import com.openexchange.ajax.mail.actions.ReplyResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
+import com.openexchange.ajax.mail.actions.ThreadedAllRequest;
 import com.openexchange.ajax.mail.actions.TrainRequest;
 import com.openexchange.ajax.mail.actions.TrainResponse;
 import com.openexchange.ajax.mail.actions.UnreadRequest;
@@ -94,6 +96,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 
 /**
  * {@link MailTestManager}
@@ -111,7 +114,7 @@ public class MailTestManager {
     private AbstractAJAXResponse lastResponse;
 
     public MailTestManager() {
-        cleaningSteps = new LinkedList<MailCleaner>();
+        cleaningSteps = new LinkedList<>();
     }
 
     public MailTestManager(AJAXClient client) {
@@ -163,10 +166,10 @@ public class MailTestManager {
 
         JSONArray ids = searchResponse.getDataAsJSONArray();
         if (null == ids || 0 == ids.length()) {
-            return new LinkedList<String[]>();
+            return new LinkedList<>();
         }
 
-        LinkedList<String[]> FoldersAndIds = new LinkedList<String[]>();
+        LinkedList<String[]> FoldersAndIds = new LinkedList<>();
         for (int i = 0, length = ids.length(); i < length; i++) {
             JSONArray temp = ids.getJSONArray(i);
             FoldersAndIds.add(new String[] { folder, temp.getString(0) });
@@ -177,7 +180,7 @@ public class MailTestManager {
 
     public List<TestMail> findAndLoadSimilarMails(TestMail mail, AJAXClient client, String folder) throws JSONException, OXException, IOException, SAXException {
         LinkedList<String[]> mailIDs = findSimilarMails(mail, client, folder);
-        LinkedList<TestMail> results = new LinkedList<TestMail>();
+        LinkedList<TestMail> results = new LinkedList<>();
         for (String[] folderAndId : mailIDs) {
             results.add(get(folderAndId));
         }
@@ -320,7 +323,7 @@ public class MailTestManager {
      * @param sort The sort field
      * @param order The sort order
      * @param failOnError Whether the request should fail on error
-     * @param filter The filter parameter
+     * @param categoryId The optional category identifier
      * @return An array of {@link MailMessage}
      * @throws Exception
      */
@@ -329,6 +332,27 @@ public class MailTestManager {
         AllResponse response = client.execute(request);
         lastResponse = response;
         return response.getMailMessages(columns);
+    }
+
+    /**
+     * Retrieves a list of {@link ThreadSortMailMessage}
+     * 
+     * @param folderPath The folder path
+     * @param columns The columns
+     * @param sort The sort field
+     * @param order The sort order
+     * @param failOnError Whether the request should fail on error
+     * @param categoryId The optional category identifier
+     * @return A list of {@link ThreadSortMailMessage}
+     * @throws Exception
+     */
+    public List<ThreadSortMailMessage> listConversations(String folderPath, int[] columns, int sort, Order order, boolean failOnError, String categoryId, int leftLimit, int rightLimit) throws Exception {
+        ThreadedAllRequest request = new ThreadedAllRequest(folderPath, columns, sort, order, failOnError, true, categoryId);
+        request.setLeftHandLimit(leftLimit);
+        request.setRightHandLimit(rightLimit);
+        ConversationResponse response = client.execute(request);
+        lastResponse = response;
+        return response.getConversations();
     }
 
     /**
@@ -447,7 +471,7 @@ public class MailTestManager {
      * Returns all recipients of a mail, be they from to, cc, or bcc
      */
     protected Set<String> extractAllRecipients(TestMail mail) {
-        Set<String> recipients = new HashSet<String>();
+        Set<String> recipients = new HashSet<>();
         if (mail.getFrom() != null) {
             recipients.addAll(mail.getTo());
         }

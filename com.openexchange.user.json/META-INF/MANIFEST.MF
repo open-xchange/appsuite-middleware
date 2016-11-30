@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange User HTTP/JSON interface
 Bundle-SymbolicName: com.openexchange.user.json
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -13,6 +13,9 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
  com.openexchange.ajax,
  com.openexchange.ajax.anonymizer,
  com.openexchange.ajax.fields,
@@ -29,7 +32,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.database,
  com.openexchange.dispatcher,
  com.openexchange.documentation,
- com.openexchange.documentation.annotations,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contact,

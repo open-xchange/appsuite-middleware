@@ -50,14 +50,14 @@
 package com.openexchange.monitoring.osgi;
 
 import org.osgi.framework.BundleActivator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
-import com.openexchange.monitoring.services.MonitoringServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link MonitoringActivator} - The {@link BundleActivator activator} for monitoring bundle.
@@ -67,7 +67,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class MonitoringActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringActivator.class);
+    private MonitoringInit init;
 
     /**
      * Initializes a new {@link MonitoringActivator}
@@ -78,58 +78,39 @@ public final class MonitoringActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class, SessiondService.class };
+        return new Class<?>[] { ConfigurationService.class, ManagementService.class, SessiondService.class };
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-        MonitoringServiceRegistry.getServiceRegistry().removeService(clazz);
+    public synchronized void startBundle() throws Exception {
+        MonitoringInit init = MonitoringInit.newInstance(this);
+        init.start();
+        this.init = init;
+
+        ConfigurationService service = getService(ConfigurationService.class);
+        int periodMinutes = service.getIntProperty("com.openexchange.monitoring.memory.periodMinutes", 5);
+        double threshold = Double.parseDouble(service.getProperty("com.openexchange.monitoring.memory.threshold", "10.0").trim());
+
+        rememberTracker(new MailCounterServiceTracker(context));
+        rememberTracker(new MailIdleCounterServiceTracker(context));
+        track(TimerService.class, new MemoryMonitoringInitializer(periodMinutes, threshold, context));
+        openTrackers();
+
+        /*
+         * Register monitor service
+         */
+        registerService(MonitorService.class, new MonitorImpl(), null);
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.warn("Re-available service: {}", clazz.getName());
-        MonitoringServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    public void startBundle() throws Exception {
-        try {
-            final ServiceRegistry registry = MonitoringServiceRegistry.getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (int i = 0; i < classes.length; i++) {
-                final Object service = getService(classes[i]);
-                if (null != service) {
-                    registry.addService(classes[i], service);
-                }
-            }
-
-            MonitoringInit.getInstance().start();
-
-            rememberTracker(new MailCounterServiceTracker(context));
-            rememberTracker(new MailIdleCounterServiceTracker(context));
-            openTrackers();
-
-            /*
-             * Register monitor service
-             */
-            registerService(MonitorService.class, new MonitorImpl(), null);
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+    public synchronized void stopBundle() throws Exception {
+        MonitoringInit init = this.init;
+        if (null != init) {
+            this.init = null;
+            init.stop();
         }
-    }
 
-    @Override
-    public void stopBundle() throws Exception {
-        try {
-            cleanUp();
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
+        super.stopBundle();
     }
 
 }

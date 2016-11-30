@@ -57,6 +57,8 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.SimpleMode;
+import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
@@ -97,7 +99,7 @@ public class CalendarTimezone extends SingleXMLPropertyMixin {
             }
             if (Strings.isNotEmpty(user.getTimeZone())) {
                 ICalEmitter icalEmitter = factory.getIcalEmitter();
-                ICalSession iCalSession = icalEmitter.createSession();
+                ICalSession iCalSession = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
                 if (icalEmitter.writeTimeZone(iCalSession, user.getTimeZone(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>())) {
                     ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(4096);
                     icalEmitter.writeSession(iCalSession, outputStream);

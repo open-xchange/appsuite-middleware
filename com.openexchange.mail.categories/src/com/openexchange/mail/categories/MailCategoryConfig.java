@@ -201,6 +201,7 @@ public class MailCategoryConfig {
     private final String name;
     private final boolean isSystemCategory;
     private final String description;
+    private int hash = 0;
 
     /**
      * Initializes a new {@link MailCategoryConfig}.
@@ -295,14 +296,37 @@ public class MailCategoryConfig {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o instanceof MailCategoryConfig) {
-            MailCategoryConfig other = (MailCategoryConfig) o;
-            if (this.getCategory().equals(other.getCategory())) {
-                return true;
-            }
+    public int hashCode() {
+        int result = hash;
+        if (result == 0) {
+            final int prime = 31;
+            result = 1;
+            result = prime * result + ((category == null) ? 0 : category.hashCode());
+            hash = result;
         }
-        return false;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof MailCategoryConfig)) {
+            return false;
+        }
+        MailCategoryConfig other = (MailCategoryConfig) obj;
+        if (category == null) {
+            if (other.category != null) {
+                return false;
+            }
+        } else if (!category.equals(other.category)) {
+            return false;
+        }
+        return true;
     }
 
 }

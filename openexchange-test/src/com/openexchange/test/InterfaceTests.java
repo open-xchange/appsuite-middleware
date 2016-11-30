@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import com.openexchange.ajax.advertisement.AdvertisementTestSuite;
 import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
@@ -141,6 +142,8 @@ public final class InterfaceTests {
         tests.addTest(DriveAJAXSuite.suite());
         tests.addTest(OnboardingAJAXSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class));
+
+        tests.addTest(AdvertisementTestSuite.suite());
 
         return tests;
     }

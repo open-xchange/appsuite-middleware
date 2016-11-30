@@ -60,9 +60,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
@@ -103,14 +101,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "all", description = "Get all mails.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Detailed mail data. The alias \\\"all\\\" uses the predefined columnset [600, 601]."),
-    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response or the string \u201cthread\u201d to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified."),
-    @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
-    @Parameter(name = "categoryid", optional = true, description = "The identifier of a category if only mails of the given category should be returned. Allows the use of 'none' if the mails shouldn't be filtered.")
-}, responseDescription = "Response (not IMAP: with timestamp): An array with mail data. Each array element describes one mail and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
     /**
@@ -320,16 +310,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         }
                     }
                 } else {
-                    int sortCol;
-                    try {
-                        sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                    } catch (NumberFormatException e) {
-                        throw MailExceptionCode.INVALID_INT_VALUE.create(e, AJAXServlet.PARAMETER_SORT);
-                    }
+                    int sortCol = req.getSortFieldFor(sort);
                     String category_filter = req.getParameter("categoryid");
-                    if (category_filter == null) { //TODO remove after ui update
-                        category_filter = req.getParameter("filter");
-                    }
                     if (filterApplied || category_filter != null) {
                         mailInterface.openFor(folderId);
                         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
@@ -337,39 +319,48 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         SearchTerm<?> searchTerm;
                         {
                             SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                            SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */: new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
+                            SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */ : new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
                             searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
                             // Check if mail categories are enabled
-                            MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
-                            if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
+                            CapabilityService capabilityService = MailJSONActivator.SERVICES.get().getService(CapabilityService.class);
+                            if (null != capabilityService && capabilityService.getCapabilities(req.getSession()).contains("mail_categories")) {
+                                MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
+                                if (categoriesService != null && category_filter != null && !category_filter.equals("none")) {
 
-                                if (category_filter.equals("general")) {
-                                    // Special case with unkeyword
-                                    String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
-                                    if (categoryNames.length != 0) {
-                                        if (searchTerm != null) {
-                                            searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
-                                        } else {
-                                            searchTerm = new UserFlagTerm(categoryNames, false);
-                                        }
-                                    }
-                                } else {
-                                    // Normal case with keyword
-                                    String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
-                                    if (flag == null) {
-                                        throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
-                                    }
-
-                                    // test if category is a system category
-                                    if(categoriesService.isSystemCategory(category_filter, req.getSession())){
-                                        // Add active user categories as unkeywords
-                                        String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
-                                        if(unkeywords.length!=0){
+                                    if (category_filter.equals("general")) {
+                                        // Special case with unkeyword
+                                        String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
+                                        if (categoryNames.length != 0) {
                                             if (searchTerm != null) {
-                                                searchTerm = new ANDTerm(searchTerm, new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false)));
+                                                searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
                                             } else {
-                                                searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
+                                                searchTerm = new UserFlagTerm(categoryNames, false);
+                                            }
+                                        }
+                                    } else {
+                                        // Normal case with keyword
+                                        String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
+                                        if (flag == null) {
+                                            throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
+                                        }
+
+                                        // test if category is a system category
+                                        if (categoriesService.isSystemCategory(category_filter, req.getSession())) {
+                                            // Add active user categories as unkeywords
+                                            String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
+                                            if (unkeywords.length != 0) {
+                                                if (searchTerm != null) {
+                                                    searchTerm = new ANDTerm(searchTerm, new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false)));
+                                                } else {
+                                                    searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
+                                                }
+                                            } else {
+                                                if (searchTerm != null) {
+                                                    searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(flag, true));
+                                                } else {
+                                                    searchTerm = new UserFlagTerm(flag, true);
+                                                }
                                             }
                                         } else {
                                             if (searchTerm != null) {
@@ -377,12 +368,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                             } else {
                                                 searchTerm = new UserFlagTerm(flag, true);
                                             }
-                                        }
-                                    } else {
-                                        if (searchTerm != null) {
-                                            searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(flag, true));
-                                        } else {
-                                            searchTerm = new UserFlagTerm(flag, true);
                                         }
                                     }
                                 }

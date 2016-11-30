@@ -2,10 +2,10 @@
 package com.openexchange.report.appsuite.serialization.osgi;
 
 import static com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry.getServiceRegistry;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.report.appsuite.serialization.PortableReportFactory;
+import com.openexchange.report.appsuite.serialization.internal.Services;
 import com.openexchange.tools.strings.StringParser;
 
 /**
@@ -22,7 +22,7 @@ public class ReportSerializationActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
-            StringParser.class
+            StringParser.class, ConfigurationService.class
         };
     }
 
@@ -47,8 +47,6 @@ public class ReportSerializationActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        registerService(CustomPortableFactory.class, new PortableReportFactory());
-
         final ServiceRegistry registry = getServiceRegistry();
         registry.clearRegistry();
         final Class<?>[] classes = getNeededServices();
@@ -58,6 +56,7 @@ public class ReportSerializationActivator extends HousekeepingActivator {
                 registry.addService(classe, service);
             }
         }
+        Services.setServices(this);
     }
 
     /**
@@ -65,6 +64,7 @@ public class ReportSerializationActivator extends HousekeepingActivator {
      */
     @Override
     protected void stopBundle() throws Exception {
+        Services.setServices(null);
         getServiceRegistry().clearRegistry();
     }
 }

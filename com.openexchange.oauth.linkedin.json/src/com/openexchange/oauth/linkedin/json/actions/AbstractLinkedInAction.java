@@ -52,6 +52,7 @@ package com.openexchange.oauth.linkedin.json.actions;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
@@ -83,7 +84,7 @@ public abstract class AbstractLinkedInAction implements AJAXActionService {
             throw ServiceExceptionCode.absentService(LinkedInService.class);
         }
 
-        List<OAuthAccount> oauthAccount = oAuthService.getAccounts(LinkedInService.SERVICE_ID, session, session.getUserId(), session.getContextId());
+        List<OAuthAccount> oauthAccount = oAuthService.getAccounts(API.LINKEDIN.getFullName(), session, session.getUserId(), session.getContextId());
 
         if (oauthAccount.isEmpty()) {
             throw OAuthExceptionCodes.INVALID_ACCOUNT.create();

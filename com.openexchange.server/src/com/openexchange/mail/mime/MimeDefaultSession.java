@@ -49,9 +49,9 @@
 
 package com.openexchange.mail.mime;
 
-import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
@@ -107,7 +107,7 @@ public final class MimeDefaultSession {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
+            public Interests getInterests() {
                 return null;
             }
         });

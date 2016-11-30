@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Net SSL bundle providing user configuration
+Bundle-SymbolicName: com.openexchange.net.ssl.config.impl
+Bundle-Version: 7.8.3
+Bundle-Activator: com.openexchange.net.ssl.config.impl.osgi.SSLConfigActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.context,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.java,
+ com.openexchange.jslob,
+ com.openexchange.net,
+ com.openexchange.net.ssl.config,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.user,
+ javax.crypto,
+ javax.crypto.interfaces,
+ javax.crypto.spec,
+ javax.net,
+ javax.net.ssl,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-ClassPath: .

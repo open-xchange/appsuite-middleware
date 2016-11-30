@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import javax.net.ssl.SSLHandshakeException;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,9 +72,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.osgi.Services;
@@ -214,7 +217,7 @@ public class RssAction implements AJAXActionService {
 
     /**
      * Retrieves all RSS URLs wrapped in the given request.
-     * 
+     *
      * @param request - the {@link AJAXRequestData} containing all feed URLs
      * @return {@link List} with desired feed URLs for further processing
      * @throws OXException
@@ -244,7 +247,7 @@ public class RssAction implements AJAXActionService {
 
     /**
      * Checks given URLs for validity (esp. host name blacklisting and port whitelisting) and adds not accepted feeds to the provided warnings list. Returns a list of accepted feeds for further processing
-     * 
+     *
      * @param urls - List of {@link URL}s to check
      * @param warnings - List of {@link OXException} that might be enhanced by possible errors
      * @return {@link List} of {@link SyndFeed}s that have been accepted for further processing
@@ -270,7 +273,12 @@ public class RssAction implements AJAXActionService {
             } catch (UnsupportedEncodingException e) {
                 /* yeah, right... not happening for UTF-8 */
             } catch (IOException e) {
-                OXException oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
+                OXException oxe;
+                if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
+                    oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, url.getHost());
+                } else {
+                    oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
+                }
                 if (1 == urls.size()) {
                     throw oxe;
                 }
@@ -331,7 +339,7 @@ public class RssAction implements AJAXActionService {
 
     /**
      * Sanitises the specified string via the {@link HtmlService}
-     * 
+     *
      * @param string The string to sanitise
      * @return The sanitised string if the {@link HtmlService} is available
      */

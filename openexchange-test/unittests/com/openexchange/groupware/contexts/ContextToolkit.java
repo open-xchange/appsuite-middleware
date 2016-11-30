@@ -51,6 +51,7 @@ package com.openexchange.groupware.contexts;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.setuptools.TestConfig;
 
 /**
  *
@@ -67,6 +68,8 @@ public final class ContextToolkit {
         super();
     }
     public static Context getDefaultContext() throws OXException {
-        return stor.getContext(stor.getContextId("defaultcontext"));
+        final TestConfig config = new TestConfig();
+
+        return stor.getContext(stor.getContextId(config.getContextName()));
     }
 }

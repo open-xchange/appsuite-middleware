@@ -54,7 +54,7 @@ import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.MsLiveConnectApi;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -66,12 +66,12 @@ import com.openexchange.server.ServiceLookup;
 public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     /**
-     * Initializes a new {@link MsLiveConnectOAuthServiceMetaData}.
-     * 
+     * Initialises a new {@link MsLiveConnectOAuthServiceMetaData}.
+     *
      * @param services the service lookup instance
      */
     public MsLiveConnectOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, "com.openexchange.oauth.msliveconnect", "Microsoft Live Connect");
+        super(services, API.MS_LIVE_CONNECT, MSLiveConnectOAuthScope.values());
     }
 
     @Override
@@ -82,16 +82,6 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
         return Collections.singletonList(OAuthPropertyID.redirectUrl);
-    }
-
-    @Override
-    public String getScope() {
-        return "wl.offline_access wl.signin wl.basic wl.skydrive wl.skydrive_update wl.contacts_birthday wl.contacts_photos wl.contacts_skydrive wl.contacts_emails wl.photos wl.postal_addresses";
-    }
-
-    @Override
-    public API getAPI() {
-        return API.MS_LIVE_CONNECT;
     }
 
     @Override

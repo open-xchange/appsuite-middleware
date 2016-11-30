@@ -2,7 +2,7 @@
   get:
     operationId: getQuota
     tags:
-      - drive
+      - Drive
     summary: Gets quota limits and current usage.
     description: |
       Gets the quota limits and current usage for the storage the supplied root folder belongs to. Depending on
@@ -21,3 +21,26 @@
           In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveQuotaResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> GET http://192.168.32.191/ajax/drive?action=quota&root=56&session=35cb8c2d1423480692f0d5053d14ba52
+  
+          <== HTTP 200 OK (9.6854 ms elapsed, 113 bytes received)
+          <   Content: 
+              {
+                "data" : {
+                  "quota" : [{
+                      "limit" : 107374182400,
+                      "use" : 1109974882,
+                      "type" : "storage"
+                    }, {
+                      "limit" : 800000000000,
+                      "use" : 1577,
+                      "type" : "file"
+                    }
+                  ],
+                  "manageLink" : "https://www.example.com/manageQuota"
+                }
+              }

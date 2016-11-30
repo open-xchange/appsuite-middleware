@@ -49,8 +49,8 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
-import static com.openexchange.mailaccount.Tools.getUnsignedInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -86,8 +86,11 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
+import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountJsonUtility;
 import com.openexchange.secret.SecretService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -95,7 +98,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractMailAccountAction} - An abstract folder action.
+ * {@link AbstractMailAccountAction} - An abstract mail account action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -109,24 +112,61 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     /** The reference to JSlobStorageRegistry */
     private static final AtomicReference<JSlobStorageRegistry> STORAGE_REGISTRY = new AtomicReference<JSlobStorageRegistry>();
 
+    /** The detector for (other) active provider */
+    private final ActiveProviderDetector activeProviderDetector;
+
     /**
      * Initializes a new {@link AbstractMailAccountAction}.
      */
-    protected AbstractMailAccountAction() {
+    protected AbstractMailAccountAction(ActiveProviderDetector activeProviderDetector) {
         super();
+        this.activeProviderDetector = activeProviderDetector;
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        AJAXRequestResult result = optResultUsing(requestData, session);
+        if (null != result) {
+            return result;
+        }
+
+        // Fall-back to regular action handling through built-in mail account management
         try {
-            final Object data = requestData.getData();
+            Object data = requestData.getData();
             if (data instanceof JSONValue) {
                 return innerPerform(requestData, session, (JSONValue) data);
             }
             return innerPerform(requestData, session, null);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
+    }
+
+    /**
+     * Optionally gets the active {@link MailAccountActionProvider action provider}.
+     *
+     * @param session The session
+     * @return The active provider or <code>null</code>
+     * @throws OXException If active provider cannot be determined
+     */
+    protected MailAccountActionProvider optActiveProvider(ServerSession session) throws OXException {
+        return null == activeProviderDetector ? null : activeProviderDetector.getActiveProvider(session);
+    }
+
+    private AJAXRequestResult optResultUsing(AJAXRequestData requestData, ServerSession session) throws OXException {
+        MailAccountActionProvider activeProvider = null == activeProviderDetector ? null : activeProviderDetector.getActiveProvider(session);
+        if (null == activeProvider) {
+            // No dedicated action provider available
+            return null;
+        }
+
+        AJAXActionService actionService = activeProvider.getAction(requestData.getAction());
+        if (null == actionService) {
+            // Obviously request's action is not supported by provider
+            return null;
+        }
+
+        return actionService.perform(requestData, session);
     }
 
     /**
@@ -159,6 +199,10 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      */
     public static JSlobStorage getStorage() throws OXException {
         final JSlobStorageRegistry storageRegistry = STORAGE_REGISTRY.get();
+        if (null == storageRegistry) {
+            throw ServiceExceptionCode.absentService(JSlobStorageRegistry.class);
+        }
+
         // TODO: Make configurable
         final String storageId = "io.ox.wd.jslob.storage.db";
         final JSlobStorage storage = storageRegistry.getJSlobStorage(storageId);
@@ -194,12 +238,29 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The parsed <code>int</code>
      * @throws OXException If parameter is not present in given request
      */
-    protected static int parseIntParameter(final String parameterName, final AJAXRequestData request) throws OXException {
+    protected static int requireIntParameter(String parameterName, AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameterName);
         }
         return getUnsignedInteger(tmp);
+    }
+
+    /**
+     * Parses specified parameter into <code>int</code>.
+     *
+     * @param parameterName The parameter name
+     * @param defaultValue The default value to return in case given parameter is absent or is not an integer value
+     * @param request The request
+     * @return The parsed <code>int</code>
+     */
+    protected static int optionalIntParameter(String parameterName, int defaultValue, AJAXRequestData request) {
+        final String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            return defaultValue;
+        }
+        int parsed = getUnsignedInteger(tmp);
+        return parsed < 0 ? defaultValue : parsed;
     }
 
     private static final Pattern PAT = Pattern.compile(" *, *");
@@ -323,7 +384,8 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             int accountId = accountDescription.getId();
             MailAccess<?, ?> mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
             mailConfig = mailAccess.getMailConfig();
-            // Set login and password
+            // Set auth-type, login and password
+            mailConfig.setAuthType(accountDescription.getAuthType());
             mailConfig.setLogin(accountDescription.getLogin());
             mailConfig.setPassword(accountDescription.getPassword());
             // Set server and port

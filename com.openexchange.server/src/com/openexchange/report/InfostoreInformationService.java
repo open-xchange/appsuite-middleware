@@ -49,9 +49,8 @@
 package com.openexchange.report;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 
@@ -96,7 +95,7 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileSizeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getFileSizeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
 
     /**
      * Get all file types and their amount from all relevant schemas. Relevent schemas are determined by
@@ -115,7 +114,7 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileCountMimetypeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getFileCountMimetypeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total for the amount of storage every drive user is using. Users, that do not use drive are irrelevant
@@ -146,7 +145,7 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getStorageUseMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getStorageUseMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total for the amount of files every drive user possesses. Users, that do not use drive are irrelevant
@@ -180,7 +179,7 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileCountMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getFileCountMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total for the amount of files every drive user possessed, in the given timeframe.
@@ -213,7 +212,7 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileCountInTimeframeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException;
+    public Map<String, Integer> getFileCountInTimeframeMetrics(Map<Integer, List<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total for the number of external storages every drive user possesses.
@@ -247,7 +246,7 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getExternalStorageMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getExternalStorageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
 
     /**
      * Get the number of files without taking their versions into account. The function Iterates over all schemas relevant, determined by
@@ -266,7 +265,7 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileCountNoVersions(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getFileCountNoVersions(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total in percent for the quota per context-/dedicated user-filestore.
@@ -299,7 +298,7 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getQuotaUsageMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getQuotaUsageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
 
     /**
      * Return all used connections to the pool. Should be called after the last metric has been calculated.

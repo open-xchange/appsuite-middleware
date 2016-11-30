@@ -53,9 +53,6 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
@@ -75,11 +72,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "delete", description = "Delete a messaging account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "messagingService", description = "The messaging service id that the account belongs to."),
-    @Parameter(name = "id", description = "An account ID to delete.")
-}, responseDescription = "A response object containing 1 as its data on success.")
 public class DeleteAction extends AbstractMessagingAccountAction {
 
     public DeleteAction(final MessagingServiceRegistry registry) {

@@ -65,23 +65,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
-import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.ParameterList;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.TextList;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.parameter.Cn;
-import net.fortuna.ical4j.model.parameter.CuType;
-import net.fortuna.ical4j.model.parameter.PartStat;
-import net.fortuna.ical4j.model.parameter.Role;
-import net.fortuna.ical4j.model.parameter.Rsvp;
-import net.fortuna.ical4j.model.parameter.XParameter;
-import net.fortuna.ical4j.model.property.Attendee;
-import net.fortuna.ical4j.model.property.Resources;
-import net.fortuna.ical4j.model.property.XProperty;
-import net.fortuna.ical4j.util.Uris;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -109,6 +94,22 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.server.ServiceExceptionCode;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.ParameterList;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.TextList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.Cn;
+import net.fortuna.ical4j.model.parameter.CuType;
+import net.fortuna.ical4j.model.parameter.PartStat;
+import net.fortuna.ical4j.model.parameter.Role;
+import net.fortuna.ical4j.model.parameter.Rsvp;
+import net.fortuna.ical4j.model.parameter.XParameter;
+import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Resources;
+import net.fortuna.ical4j.model.property.XProperty;
+import net.fortuna.ical4j.util.Uris;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -154,7 +155,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         for(final Participant p : cObj.getParticipants()) {
             switch(p.getType()) {
                 case Participant.EXTERNAL_USER:
-                    addExternalAttendee((ExternalUserParticipant)p, component);
+                    addExternalAttendee(index, (ExternalUserParticipant)p, component, warnings);
                     break;
                 case Participant.RESOURCE:
                     resources.add((ResourceParticipant) p);
@@ -224,9 +225,16 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         component.getProperties().add(property);
     }
 
-    protected void addExternalAttendee(final ExternalUserParticipant externalUserParticipant, final T component) {
+    protected void addExternalAttendee(int index, final ExternalUserParticipant externalUserParticipant, final T component, List<ConversionWarning> warnings) {
         final Attendee attendee = new Attendee();
         try {
+            try {
+                new InternetAddress(externalUserParticipant.getEmailAddress()).validate();
+            } catch (AddressException e) {
+                warnings.add(new ConversionWarning(index, Code.INVALID_MAIL_ADDRESS, externalUserParticipant.getEmailAddress()));
+                // Discard
+                return;
+            }
             attendee.setValue("mailto:" + IDNA.toACE(externalUserParticipant.getEmailAddress()));
             final ParameterList parameters = attendee.getParameters();
             parameters.add(CuType.INDIVIDUAL);
@@ -293,6 +301,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     break;
                 case CalendarObject.TENTATIVE:
                     parameters.add(PartStat.TENTATIVE);
+                    break;
+                case CalendarObject.NONE:
+                    parameters.add(PartStat.NEEDS_ACTION);
                     break;
                 default:
                     break;
@@ -393,8 +404,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                                     continue;
                                 case Participant.USER:
                                     User user = userResolver.loadUser(entity, ctx);
-                                    String mail = IDNA.toIDN(user.getMail());
-                                    mails.put(mail, createIcalParticipant(attendee, mail, comment));
+                                    addMail(index, user.getMail(), mails, attendee, comment, warnings);
                                     continue;
                                 default:
                                     break;
@@ -443,9 +453,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                      * add iCal participant if parsed successfully
                      */
                     if (false == Strings.isEmpty(mail)) {
-                        mail = IDNA.toIDN(mail);
-                        final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
-                        mails.put(mail, icalP);
+                        addMail(index, mail, mails, attendee, comment, warnings);
                     }
                 }
             }
@@ -551,6 +559,16 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         if (null != privateCommentProperty) {
             cObj.setProperty("com.openexchange.data.conversion.ical.participants.privateComment", privateCommentProperty.getValue());
         }
+    }
+
+    private void addMail(int index, String mail, Map<String, ICalParticipant> mails, Attendee attendee, String comment, List<ConversionWarning> warnings) {
+        try {
+            new InternetAddress(mail).validate();
+        } catch (AddressException e) {
+            warnings.add(new ConversionWarning(index, Code.INVALID_MAIL_ADDRESS, mail));
+            return;
+        }
+        mails.put(mail, createIcalParticipant(attendee, IDNA.toIDN(mail), comment));
     }
 
     private static Set<String> getPossibleAddresses(User user) {

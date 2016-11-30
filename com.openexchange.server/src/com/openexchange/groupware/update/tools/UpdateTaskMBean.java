@@ -53,8 +53,12 @@ import static com.openexchange.groupware.update.tools.Utility.parsePositiveInt;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -78,6 +82,10 @@ import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.CanceledTimerTaskException;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * MBean for update task toolkit.
@@ -92,12 +100,95 @@ public final class UpdateTaskMBean implements DynamicMBean {
     private final MBeanInfo mbeanInfo;
 
     private final String[] taskTypeNames = { "taskName", "successful", "lastModified" };
+    private final ConcurrentMap<String, UpdateTaskToolkitJob<?>> jobs;
     private CompositeType taskType;
     private TabularType taskListType;
+    private ScheduledTimerTask timerTask; // Guarded by synchronized
 
+    /**
+     * Initializes a new {@link UpdateTaskMBean}.
+     */
     public UpdateTaskMBean() {
         super();
         mbeanInfo = buildMBeanInfo();
+        jobs = new ConcurrentHashMap<String, UpdateTaskToolkitJob<?>>(10, 0.9F, 1);
+    }
+
+    private void addJob(UpdateTaskToolkitJob<Void> job) {
+        synchronized (this) {
+            jobs.put(job.getId(), job);
+
+            if (null == timerTask) {
+                TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                if (null != timerService) {
+                    Runnable task = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            cleanUp();
+                        }
+                    };
+                    timerTask = timerService.scheduleWithFixedDelay(task, 5L, 5L, TimeUnit.MINUTES);
+                }
+            }
+
+            job.start();
+        }
+    }
+
+    private String getJobStatusText(final Object[] params) {
+        String key = params[0].toString();
+        UpdateTaskToolkitJob<?> job = jobs.get(key);
+        if (null == job) {
+            return null;
+        }
+
+        String stText = job.getStatusText();
+        if (job.isDone()) {
+            if (null != jobs.remove(key)) {
+                synchronized (this) {
+                    dropTimerTaskIfEmpty();
+                }
+            }
+            return "NOK:" + stText;
+        }
+
+        return "OK:" + stText;
+    }
+
+    /**
+     * Cleans-up the job collection.
+     *
+     * @throws CanceledTimerTaskException If timer task is supposed to be terminated
+     */
+    void cleanUp() {
+        synchronized (this) {
+            boolean somethingRemoved = false;
+            for (Iterator<UpdateTaskToolkitJob<?>> it = jobs.values().iterator(); it.hasNext();) {
+                UpdateTaskToolkitJob<?> job = it.next();
+                if (null == job || job.isDone()) {
+                    it.remove();
+                    somethingRemoved = true;
+                }
+            }
+            if (somethingRemoved && dropTimerTaskIfEmpty()) {
+                throw new CanceledTimerTaskException();
+            }
+        }
+    }
+
+    private boolean dropTimerTaskIfEmpty() {
+        if (null == timerTask || !jobs.isEmpty()) {
+            return false;
+        }
+
+        timerTask.cancel();
+        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+        if (null != timerService) {
+            timerService.purge();
+        }
+        timerTask = null;
+        return true;
     }
 
     private MBeanInfo buildMBeanInfo() {
@@ -156,6 +247,12 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } catch (final OpenDataException e) {
             LOG.error("", e);
         }
+        // Get status text
+        final MBeanParameterInfo[] sparams = { new MBeanParameterInfo(
+            "id",
+            "java.lang.String",
+            "A valid job identifier") };
+        operations.add(new MBeanOperationInfo("getStatus", "Gets the status text for a given job identifier.", tparams, "void", MBeanOperationInfo.ACTION));
         // MBean info
         return new MBeanInfo(UpdateTaskMBean.class.getName(), "Update task toolkit", null, null, operations.toArray(new MBeanOperationInfo[operations.size()]), null);
     }
@@ -189,7 +286,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                         final String sParam = param.toString();
                         final int parsed = parsePositiveInt(sParam);
 
-                        updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true);
+                        updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true, false) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true, false);
                     }
                 }
 
@@ -213,7 +310,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 }
             } catch (final OXException e) {
                 LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
+                final Exception wrapMe = new Exception(e.getPlainLogMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -226,10 +323,22 @@ public final class UpdateTaskMBean implements DynamicMBean {
             return null;
         } else if (actionName.equals("runAllUpdate")) {
             try {
-                UpdateTaskToolkit.runUpdateOnAllSchemas();
+                boolean throwExceptionOnFailure;
+                {
+                    Object param = params[0];
+                    if (param instanceof Boolean) {
+                        throwExceptionOnFailure = ((Boolean) param).booleanValue();
+                    } else {
+                        throwExceptionOnFailure = Boolean.parseBoolean(param.toString());
+                    }
+                }
+
+                UpdateTaskToolkitJob<Void> job = UpdateTaskToolkit.runUpdateOnAllSchemas(throwExceptionOnFailure);
+                addJob(job);
+                return job.getId();
             } catch (final OXException e) {
                 LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
+                final Exception wrapMe = new Exception(e.getPlainLogMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -238,8 +347,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error("", e);
                 throw e;
             }
-            // Void
-            return null;
         } else if (actionName.equals("force")) {
             try {
                 final Object secParam = params[1];
@@ -256,7 +363,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 }
             } catch (final OXException e) {
                 LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
+                final Exception wrapMe = new Exception(e.getPlainLogMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -272,7 +379,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 UpdateTaskToolkit.forceUpdateTaskOnAllSchemas(((String) params[0]));
             } catch (final OXException e) {
                 LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
+                final Exception wrapMe = new Exception(e.getPlainLogMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -288,7 +395,18 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 return getExecutedTasksList(params[0].toString());
             } catch (final OXException e) {
                 LOG.error("", e);
-                throw new MBeanException(new Exception(e.getMessage()), e.getMessage());
+                String message = e.getPlainLogMessage();
+                throw new MBeanException(new Exception(message), message);
+            } catch (final RuntimeException e) {
+                LOG.error("", e);
+                throw e;
+            } catch (final Error e) {
+                LOG.error("", e);
+                throw e;
+            }
+        } else if (actionName.equals("getStatus")) {
+            try {
+                return getJobStatusText(params);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
                 throw e;

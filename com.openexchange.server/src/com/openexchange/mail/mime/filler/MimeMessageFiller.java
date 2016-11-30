@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -90,9 +89,12 @@ import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -366,7 +368,7 @@ public class MimeMessageFiller {
         }
     }
 
-    private static final Set<String> LOCAL_ADDRS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("127.0.0.1", "localhost", "::1")));
+    private static final Set<String> LOCAL_ADDRS = ImmutableSet.of("127.0.0.1", "localhost", "::1");
 
     static boolean isLocalhost(final String localIp) {
         return LOCAL_ADDRS.contains(localIp);
@@ -1337,8 +1339,8 @@ public class MimeMessageFiller {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.octetExtensions");
             }
         });
     }
@@ -1867,19 +1869,7 @@ public class MimeMessageFiller {
          * Determine filename
          */
         String fileName = imageProvider.getFileName();
-        if (null == fileName) {
-            /*
-             * Generate dummy file name
-             */
-            final List<String> exts = MimeType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder("image.");
-            if (exts == null) {
-                sb.append("dat");
-            } else {
-                sb.append(exts.get(0));
-            }
-            fileName = sb.toString();
-        } else {
+        if (null != fileName)  {
             /*
              * Encode image's file name for being mail-safe
              */

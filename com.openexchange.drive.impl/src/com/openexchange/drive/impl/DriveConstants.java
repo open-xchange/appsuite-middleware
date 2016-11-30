@@ -52,6 +52,7 @@ package com.openexchange.drive.impl;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.FolderObject;
@@ -95,7 +96,7 @@ public class DriveConstants {
      */
     public static final List<Field> FILE_FIELDS = Arrays.asList(new Field[] {
         Field.ID, Field.FOLDER_ID, Field.LAST_MODIFIED, Field.TITLE, Field.FILENAME, Field.FILE_MD5SUM, Field.FILE_SIZE, Field.VERSION,
-        Field.SEQUENCE_NUMBER, Field.FILE_MIMETYPE, Field.CREATED
+        Field.SEQUENCE_NUMBER, Field.FILE_MIMETYPE, Field.CREATED, Field.CURRENT_VERSION
     });
 
     /**
@@ -112,6 +113,11 @@ public class DriveConstants {
      * The base number of milliseconds to wait until retrying
      */
     public static final int RETRY_BASEDELAY = 1000;
+
+    /**
+     * A random number generator
+     */
+    public static final Random RANDOM = new Random();
 
     /**
      * The maximum allowed length of any synchronized path segment, i.e. the parts in a path separated by the {@link #PATH_SEPARATOR}
@@ -131,8 +137,9 @@ public class DriveConstants {
      * 3: .drive-meta
      * 4: subfolders action, sharing
      * 5: push for multiple root folders (listen/subscribe), inline .drive-meta, trash stats, empty trash
+     * 6: moveFile/moveFolder
      */
-    public static final int SUPPORTED_API_VERSION = 5;
+    public static final int SUPPORTED_API_VERSION = 6;
 
     /**
      * The files module identifier.

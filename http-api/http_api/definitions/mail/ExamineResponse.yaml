@@ -1,0 +1,18 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    properties:
+        validity:
+          type: string
+          description: The folder validity string.
+        total:
+          type: integer
+          description: The number of total messages.
+        unread:
+          type: integer
+          description: The number of unread messages.
+        next:
+          type: string
+          description: The expected next identifier.

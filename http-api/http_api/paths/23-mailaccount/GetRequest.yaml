@@ -2,8 +2,8 @@
   get:
     operationId: getAccount
     tags:
-      - mailaccount
-    summary: Gets a mail account (**available since v6.12**).
+      - Mailaccount
+    summary: Gets a mail account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -15,6 +15,6 @@
       200:
         description: |
           An object containing all data of the requested account. In case of errors the
-          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailAccountResponse"

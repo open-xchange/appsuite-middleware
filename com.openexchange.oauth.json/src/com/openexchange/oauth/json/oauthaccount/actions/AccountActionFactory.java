@@ -50,9 +50,8 @@
 package com.openexchange.oauth.json.oauthaccount.actions;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -88,7 +87,7 @@ public final class AccountActionFactory implements AJAXActionServiceFactory {
     }
 
     private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(10);
+        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
         tmp.put("all", new AllAction());
         tmp.put("list", new AllAction());
         tmp.put("create", new CreateAction());
@@ -97,7 +96,7 @@ public final class AccountActionFactory implements AJAXActionServiceFactory {
         tmp.put("delete", new DeleteAction());
         tmp.put("init", new InitAction());
         tmp.put("reauthorize", new ReauthorizeAction());
-        return Collections.unmodifiableMap(tmp);
+        return tmp.build();
     }
 
     @Override

@@ -19,7 +19,13 @@ properties:
     description: The end time of the interval.
   shown_as:
     type: integer
-    description: 'The busy status of this interval, one of: 0 (unknown), 1 (reserved), 2 (temporary), 3 (absent), 4 (free).'
+    description: The busy status of this interval.
+    enum: 
+      - 0 (unknown)
+      - 1 (reserved)
+      - 2 (temporary)
+      - 3 (absent)
+      - 4 (free)
   location:
     type: string
     description: The location of the corresponding appointment if available.

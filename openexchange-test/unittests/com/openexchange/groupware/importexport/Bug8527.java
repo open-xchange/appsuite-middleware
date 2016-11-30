@@ -49,25 +49,22 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.setuptools.TestConfig;
+import junit.framework.JUnit4TestAdapter;
 
 public class Bug8527 extends AbstractICalImportTest {
 
@@ -144,7 +141,8 @@ public class Bug8527 extends AbstractICalImportTest {
 					"END:VALARM\n" +
 				"END:VEVENT\n" +
 				"END:VCALENDAR";
-        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
+        final TestConfig config = new TestConfig();
+        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(config.getContextName())) ;
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "8475",ctx, false);
 
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);

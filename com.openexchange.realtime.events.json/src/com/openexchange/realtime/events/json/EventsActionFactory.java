@@ -51,11 +51,10 @@ package com.openexchange.realtime.events.json;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.events.json.actions.AllAction;
 import com.openexchange.realtime.events.json.actions.EventsAction;
@@ -69,19 +68,20 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Module(name = "events", description = "Allows clients to register for events. Events are transmitted via the RT system.")
 public class EventsActionFactory implements AJAXActionServiceFactory {
 
-    private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>();
-    
+    private final Map<String, AJAXActionService> actions;
+
     public EventsActionFactory(ServiceLookup services) {
-        ACTIONS.put("on", new OnAction(services));
-        ACTIONS.put("off", new OffAction(services));
-        ACTIONS.put("all", new AllAction(services));
-        ACTIONS.put("events", new EventsAction(services));
-        
+        super();
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
+        actions.put("on", new OnAction(services));
+        actions.put("off", new OffAction(services));
+        actions.put("all", new AllAction(services));
+        actions.put("events", new EventsAction(services));
+        this.actions = actions.build();
     }
-    
+
     @Override
     public Collection<?> getSupportedServices() {
         return Arrays.asList("on", "off", "all", "events");
@@ -89,7 +89,7 @@ public class EventsActionFactory implements AJAXActionServiceFactory {
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+        return actions.get(action);
     }
 
 }

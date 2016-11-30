@@ -67,6 +67,11 @@ public enum MetaDataField {
      */
     DISPLAY_NAME(OAuthConstants.ARGUMENT_DISPLAY_NAME),
 
+    /**
+     * The available oauth scopes for the serviceId
+     */
+    AVAILABLE_SCOPES("availableScopes"),
+
     ;
 
     private final String name;

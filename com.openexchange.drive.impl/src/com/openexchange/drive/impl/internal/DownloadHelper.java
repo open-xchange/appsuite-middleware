@@ -57,6 +57,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.FileChecksum;
+import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
@@ -133,7 +134,9 @@ public class DownloadHelper {
                 if (null == inputStream) {
                     throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
                 }
-                return new DriveFileHolder(session, inputStream, fileVersion.getName(), file.getFileMIMEType());
+                long contentLength = 0 < offset || 0 < length && length != file.getFileSize() ? -1L : file.getFileSize();
+                boolean throttled = 0 < DriveConfig.getInstance().getMaxBandwidth() || 0 < DriveConfig.getInstance().getMaxBandwidthPerClient();
+                return new DriveFileHolder(session, inputStream, fileVersion.getName(), file.getFileMIMEType(), contentLength, throttled);
             }
         });
     }

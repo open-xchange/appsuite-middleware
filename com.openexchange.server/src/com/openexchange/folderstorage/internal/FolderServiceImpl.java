@@ -49,12 +49,10 @@
 
 package com.openexchange.folderstorage.internal;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -298,7 +296,7 @@ public final class FolderServiceImpl implements FolderService {
 
     }
 
-    private static final Set<String> KNOWN_TREES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID)));
+    private static final Set<String> KNOWN_TREES = ImmutableSet.of(FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID);
 
     @Override
     public FolderResponse<Void> subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String optTargetParentId, final Session session) throws OXException {
@@ -354,7 +352,7 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public ContentType parseContentType(String value) {
-        int module = Tools.getUnsignedInteger(value);
+        int module = com.openexchange.java.util.Tools.getUnsignedInteger(value);
         if (-1 != module) {
             return ContentTypeRegistry.getInstance().getByModule(module);
         } else {

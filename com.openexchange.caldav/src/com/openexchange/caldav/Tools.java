@@ -50,11 +50,15 @@
 package com.openexchange.caldav;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -143,6 +147,51 @@ public class Tools {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
+    }
+
+    /**
+     * Gets a value indicating whether the supplied appointment represents a <i>phantom master</i>, i.e. a recurring event master the
+     * user has no access for that serves as container for detached occurrences.
+     *
+     * @param appointment The appointment to check
+     * @return <code>true</code> if the appointment is a phantom master, <code>false</code>, otherwise
+     */
+    public static boolean isPhantomMaster(Appointment appointment) {
+        return Boolean.TRUE.equals(appointment.getProperty("com.openexchange.caldav.phantomMaster"));
+    }
+
+    /**
+     * Creates a <i>phantom master</i> appointment as container for the supplied detached occurrences.
+     *
+     * @param detachedOccurrences The recurring event exceptions to include
+     * @return The phantom master appointment
+     */
+    public static Appointment createPhantomMaster(Appointment[] detachedOccurrences) {
+        if (null == detachedOccurrences || 0 == detachedOccurrences.length) {
+            return null;
+        }
+        Appointment phantomMaster = new Appointment();
+        phantomMaster.setProperty("com.openexchange.caldav.phantomMaster", Boolean.TRUE);
+        Appointment occurrence = detachedOccurrences[0];
+        phantomMaster.setTitle("[Placeholder Item]");
+        phantomMaster.setUid(occurrence.getUid());
+        phantomMaster.setFilename(occurrence.getFilename());
+        phantomMaster.setObjectID(occurrence.getRecurrenceID());
+        phantomMaster.setRecurrenceID(occurrence.getRecurrenceID());
+        phantomMaster.setCreationDate(occurrence.getCreationDate());
+        phantomMaster.setCreatedBy(occurrence.getCreatedBy());
+        phantomMaster.setModifiedBy(occurrence.getModifiedBy());
+        List<Date> changeExceptionDates = new ArrayList<Date>(detachedOccurrences.length);
+        Date lastModified = occurrence.getLastModified();
+        for (Appointment appointment : detachedOccurrences) {
+            lastModified = Tools.getLatestModified(lastModified, appointment);
+            if (null != appointment.getChangeException()) {
+                changeExceptionDates.addAll(Arrays.asList(appointment.getChangeException()));
+            }
+        }
+        phantomMaster.setLastModified(lastModified);
+        phantomMaster.setChangeExceptions(changeExceptionDates);
+        return phantomMaster;
     }
 
     private Tools() {

@@ -180,6 +180,15 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
     /** Empty files indicated for directory \"%1$s\". */
     ZERO_BYTE_FILES(ZERO_BYTE_FILES_MSG, ZERO_BYTE_FILES_MSG, Category.CATEGORY_ERROR, 39),
 
+    /** A file named \"%1$s\" already exists at \"%2$s\". */
+    FILE_ALREADY_EXISTS(FILE_ALREADY_EXISTS_MSG, FILE_ALREADY_EXISTS_MSG, Category.CATEGORY_ERROR, 40),
+
+    /** A directory named \"%1$s\" already exists at \"%2$s\". */
+    DIRECTORY_ALREADY_EXISTS(DIRECTORY_ALREADY_EXISTS_MSG, DIRECTORY_ALREADY_EXISTS_MSG, Category.CATEGORY_ERROR, 41),
+
+    /** Unexpected database error, try again: \"%1$s\" */
+    DB_ERROR_RETRY("Unexpected database error, try again: \"%1$s\"", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 42),
+
     ;
 
     private static final String PREFIX = "DRV";

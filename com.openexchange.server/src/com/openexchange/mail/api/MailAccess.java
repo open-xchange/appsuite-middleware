@@ -85,7 +85,13 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeCleanUp;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -754,8 +760,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 checkDefaultFolderOnConnect();
             }
         } else {
-            checkFieldsBeforeConnect(getMailConfig());
-            connectInternal();
+            MailConfig mailConfig = getMailConfig();
+            checkFieldsBeforeConnect(mailConfig);
+            if (!supports(mailConfig.getAuthType())) {
+                throw MailExceptionCode.AUTH_TYPE_NOT_SUPPORTED.create(mailConfig.getAuthType().getName(), mailConfig.getServer());
+            }
+            try {
+                connectInternal();
+            } catch (OXException e) {
+                throw handleConnectFailure(e, mailConfig);
+            }
             if (checkDefaultFolder) {
                 checkDefaultFolderOnConnect();
             }
@@ -767,6 +781,36 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
         }
+    }
+
+    private OXException handleConnectFailure(OXException e, MailConfig mailConfig) {
+        if (!MimeMailExceptionCode.LOGIN_FAILED.equals(e) && !MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
+            return e;
+        }
+
+        // Authentication failed... Check for OAuth-based authentication
+        if (AuthType.OAUTH.equals(mailConfig.getAuthType())) {
+            // Determine identifier of the associated OAuth account
+            int oauthAccountId = mailConfig.getOAuthAccountId();
+            if (oauthAccountId >= 0) {
+                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
+                if (null == oauthService) {
+                    LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
+                } else {
+                    try {
+                        OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                        String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
+                        API api = oAuthAccount.getAPI();
+                        Throwable cause = e.getCause();
+                        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+                    } catch (Exception x) {
+                        LOG.warn("Failed to handle failed OAuth authentication", x);
+                    }
+                }
+            }
+        }
+
+        return e;
     }
 
     private void checkDefaultFolderOnConnect() throws OXException {
@@ -839,6 +883,17 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If connection could not be established
      */
     protected abstract void connectInternal() throws OXException;
+
+    /**
+     * Checks if specified authentication type is supported by this mail access.
+     *
+     * @param authType The authentication type to check
+     * @return <code>true</code> if authentication type is supported; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    protected boolean supports(AuthType authType) throws OXException {
+        return AuthType.LOGIN == authType;
+    }
 
     @Override
     public void close() {

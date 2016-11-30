@@ -1,0 +1,31 @@
+/onboarding?action=execute:
+  put:
+    operationId: executeClientOnboarding
+    tags: 
+      - Clientonboarding
+    summary: Performs a certain client on-boarding action for a given device and scenario; e.g. download a profile or send an E-Mail/SMS
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The compiste identifier of device and scenario pair; e.g. "apple.iphone/davsync"
+        required: true
+      - in: query
+        name: action_id
+        type: string
+        description: |
+          The identifier of action to perform; one of
+          - download
+          - email
+          - sms
+          - display or
+          - link
+        required: true
+    responses:  
+      200:
+        description: |
+          'The appropriate result object or binary data dependent on specified action. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).'
+        schema:
+          $ref: "#/definitions/CommonResponse"

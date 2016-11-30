@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +61,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.ParticipantTools;
 import com.openexchange.caldav.Patches;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
@@ -86,9 +88,6 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
-
-    /** A custom marker used as constant prefix for the resource name of single recurrences */
-    private static final String RECURRENCE_MARKER = "WX8ZQ";
 
     /** A basic set of columns used to retrieve from the appointment service in list requests */
     private static final int[] BASIC_COLUMNS = {
@@ -135,12 +134,33 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
      * @return The loaded change exceptions, or <code>null</code> if there are none
      */
     protected CalendarDataObject[] loadChangeExceptions(Appointment recurringMaster, boolean applyPatches) throws OXException {
-        CalendarDataObject[] changeExceptions = null;
         if (0 < recurringMaster.getRecurrenceID() && recurringMaster.getRecurrenceID() == recurringMaster.getObjectID() &&
             null != recurringMaster.getChangeException() && 0 < recurringMaster.getChangeException().length) {
-            changeExceptions = factory.getCalendarUtilities().getChangeExceptionsByRecurrence(
-                recurringMaster.getRecurrenceID(), CalendarSql.EXCEPTION_FIELDS, factory.getSession());
-            if (applyPatches && null != changeExceptions && 0 < changeExceptions.length) {
+            return loadChangeExceptions(recurringMaster.getRecurrenceID(), applyPatches, true);
+        }
+        return null;
+    }
+
+    /**
+     * Loads all existing change exceptions of a specific recurring appointment.
+     *
+     * @param recurrenceID The recurrence identifier
+     * @param applyPatches <code>true</code> to apply patches for the loaded exceptions, <code>false</code>, otherwise
+     * @param all <code>true</code> if all change exceptions should be loaded (without further checks), <code>false</code> to ensure
+     *        that only exceptions accessible by the user are included
+     * @return The loaded change exceptions, or <code>null</code> if there are none
+     */
+    protected CalendarDataObject[] loadChangeExceptions(int recurrenceID, boolean applyPatches, boolean all) throws OXException {
+        CalendarDataObject[] changeExceptions = factory.getCalendarUtilities().getChangeExceptionsByRecurrence(
+            recurrenceID, CalendarSql.EXCEPTION_FIELDS, factory.getSession());
+        if (null != changeExceptions && 0 < changeExceptions.length) {
+            if (false == all) {
+                changeExceptions = filterInaccessibleExceptions(changeExceptions);
+                if (0 == changeExceptions.length) {
+                    return null;
+                }
+            }
+            if (applyPatches) {
                 for (int i = 0; i < changeExceptions.length; i++) {
                     changeExceptions[i] = patch(changeExceptions[i]);
                 }
@@ -163,7 +183,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     factory.getAppointmentInterface().getObjectById(appointment.getObjectID());
             return applyPatches ? patch(cdo) : cdo;
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -173,23 +193,10 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             try {
                 lastModified = Tools.getLatestModified(new Date(factory.getAppointmentInterface().getSequenceNumber(folderID)), folder);
             } catch (OXException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
         return lastModified;
-    }
-
-    @Override
-    protected WebdavPath constructPathForChildResource(Appointment appointment) {
-        if (0 < appointment.getRecurrenceID() && appointment.getRecurrenceID() != appointment.getObjectID()) {
-            /*
-             * construct special resource name to directly access this appointment exceptions
-             */
-            String name = factory.getContext().getContextId() + "-" + folderID + "-" + appointment.getObjectID();
-            String encodedName = BaseEncoding.base64Url().omitPadding().encode(name.getBytes(Charsets.UTF_8));
-            return constructPathForChildResource(RECURRENCE_MARKER + encodedName + getFileExtension());
-        }
-        return super.constructPathForChildResource(appointment);
     }
 
     @Override
@@ -200,6 +207,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         /*
          * check resource name for directly targeted appointment (as used by change exceptions without recurrence master)
          */
+        // TODO: just kept for backwards compatibility, may be removed later on
         Appointment appointment = getByRecurrenceMarker(resourceName);
         if (null != appointment) {
             return appointment;
@@ -215,17 +223,34 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             try {
                 return factory.getAppointmentInterface().getObjectById(objectID, folderID);
             } catch (OXException e) {
-                if ("APP-0059".equals(e.getErrorCode())) {
-                    // Got the wrong folder identification. You do not have the appropriate permissions to modify this object
-                    // ignore
+                if ("APP-0059".equals(e.getErrorCode()) || "APP-0060".equals(e.getErrorCode())) {
+                    /*
+                     * "Got the wrong (shared) folder identification. You do not have the appropriate permissions..."
+                     * also try to load detached occurrences
+                     */
+                    Appointment phantomMaster = getPhantomMaster(objectID);
+                    if (null != phantomMaster) {
+                        return phantomMaster;
+                    }
                 } else {
                     throw e;
                 }
             } catch (SQLException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
-        return null;
+        return null; // not found
+    }
+
+    /**
+     * Creates a <i>phantom master</i> appointment as container for those occurrences a user is participant in, without having access
+     * to the parent series master appointment.
+     *
+     * @param recurrenceID The recurrence identifier to construct the phantom master for
+     * @return The phantom master appointment, or <code>null</code> if there is none
+     */
+    private Appointment getPhantomMaster(int recurrenceID) throws OXException {
+        return Tools.createPhantomMaster(loadChangeExceptions(recurrenceID, false, false));
     }
 
     @Override
@@ -252,7 +277,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                 folderID, BASIC_COLUMNS, intervalStart, intervalEnd, -1, Order.NO_ORDER);
             return getSignificantAppointments(searchIterator);
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -266,7 +291,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                 folderID, getIntervalStart(), getIntervalEnd(), BASIC_COLUMNS, since);
             return getSignificantAppointments(searchIterator);
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -279,7 +304,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             searchIterator = factory.getAppointmentInterface().getDeletedAppointmentsInFolder(folderID, BASIC_COLUMNS, since);
             return getSignificantAppointments(searchIterator);
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -293,7 +318,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                 folderID, BASIC_COLUMNS, getIntervalStart(), getIntervalEnd(), -1, Order.NO_ORDER);
             return getSignificantAppointments(searchIterator);
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -309,9 +334,9 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             Patches.Outgoing.adjustAlarm(getFolder(), appointment);
             Patches.Outgoing.resolveGroupParticipants(appointment);
             Patches.Outgoing.setOrganizerInformation(factory, appointment);
-            Patches.Outgoing.setOrganizersParticipantStatus(appointment);
             Patches.Outgoing.setSeriesStartAndEnd(factory, appointment);
             Patches.Outgoing.removeImplicitParticipant(getFolder(), appointment);
+            Patches.Outgoing.adjustProposedTimePrefixes(appointment);
         }
         return appointment;
     }
@@ -323,6 +348,8 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
      * @return The recurring appointment occurrence, or <code>null</code> if not found
      */
     private Appointment getByRecurrenceMarker(String resourceName) throws OXException {
+        /** A custom marker used as constant prefix for the resource name of single recurrences */
+        final String RECURRENCE_MARKER = "WX8ZQ";
         if (resourceName.startsWith(RECURRENCE_MARKER)) {
             /*
              * check resource name for directly targeted appointment (as used by change exceptions without recurrence master)
@@ -340,11 +367,12 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     try {
                         return factory.getAppointmentInterface().getObjectById(objectId, folderId);
                     } catch (SQLException e) {
-                        throw protocolException(e);
+                        throw protocolException(getUrl(), e);
                     } catch (OXException e) {
-                        if ("APP-0059".equals(e.getErrorCode()) || "OX-0001".equals(e.getErrorCode())) {
-                            throw protocolException(e, HttpServletResponse.SC_NOT_FOUND);
+                        if ("APP-0059".equals(e.getErrorCode()) || "APP-0060".equals(e.getErrorCode()) || "OX-0001".equals(e.getErrorCode())) {
+                            throw protocolException(getUrl(), e, HttpServletResponse.SC_NOT_FOUND);
                         }
+                        throw e;
                     }
                 }
             } catch (IllegalArgumentException e) {
@@ -352,6 +380,35 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             }
         }
         return null;
+    }
+
+    /**
+     * Filters out any inaccessible change exception from the supplied change exception array, by ensuring the user is actually
+     * participating, as well as he is able to load the exception from the storage.
+     *
+     * @param changeExceptions The change exceptions to filter
+     * @return The filtered change exceptions
+     */
+    private CalendarDataObject[] filterInaccessibleExceptions(CalendarDataObject[] changeExceptions) throws OXException {
+        List<CalendarDataObject> accessibleChangeExceptions = new ArrayList<CalendarDataObject>(changeExceptions.length);
+        for (CalendarDataObject changeException : changeExceptions) {
+            if (ParticipantTools.isParticipant(changeException, factory.getUser().getId())) {
+                try {
+                    CalendarDataObject loadedException = factory.getAppointmentInterface().getObjectById(changeException.getObjectID(), folderID);
+                    if (null != loadedException) {
+                        accessibleChangeExceptions.add(changeException);
+                    }
+                } catch (OXException e) {
+                    if ("APP-0059".equals(e.getErrorCode()) || "APP-0060".equals(e.getErrorCode())) {
+                        continue;
+                    }
+                    throw e;
+                } catch (SQLException e) {
+                    throw protocolException(getUrl(), e);
+                }
+            }
+        }
+        return accessibleChangeExceptions.toArray(new CalendarDataObject[accessibleChangeExceptions.size()]);
     }
 
     /**
@@ -384,22 +441,25 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         }
         List<Appointment> appointments = new ArrayList<Appointment>(appointmentsByUids.size());
         for (List<Appointment> appointmentsWithUid : appointmentsByUids.values()) {
-             if (1 == appointmentsWithUid.size()) {
-                 appointments.add(appointmentsWithUid.get(0));
-             } else {
-                 Appointment recurringMaster = null;
-                 for (Appointment appointment : appointmentsWithUid) {
-                     if (false == appointment.containsRecurrenceID() || appointment.getRecurrenceID() == appointment.getObjectID()) {
-                         recurringMaster = appointment;
-                         break;
-                     }
-                 }
-                 if (null != recurringMaster) {
-                     appointments.add(recurringMaster);
-                 } else {
-                     appointments.addAll(appointmentsWithUid);
-                 }
-             }
+            if (1 == appointmentsWithUid.size() && 0 >= appointmentsWithUid.get(0).getRecurrenceID()) {
+                /*
+                 * add non-recurring appointment as-is
+                 */
+                appointments.add(appointmentsWithUid.get(0));
+                continue;
+            }
+            Appointment recurringMaster = getRecurringMaster(appointmentsWithUid);
+            if (null != recurringMaster) {
+                /*
+                 * only add recurring master if available
+                 */
+                appointments.add(recurringMaster);
+            } else {
+                /*
+                 * add a "phantom master" as container for the detached occurrences
+                 */
+                appointments.add(Tools.createPhantomMaster(appointmentsWithUid.toArray(new Appointment[appointmentsWithUid.size()])));
+            }
         }
         return appointments;
     }
@@ -427,6 +487,15 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             appointments.add(appointment);
         }
         return appointmentsByUid;
+    }
+
+    private static Appointment getRecurringMaster(List<Appointment> appointments) {
+        for (Appointment appointment : appointments) {
+            if (appointment.getRecurrenceID() == appointment.getObjectID()) {
+                return appointment;
+            }
+        }
+        return null;
     }
 
 }

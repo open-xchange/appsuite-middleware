@@ -51,8 +51,10 @@ package com.openexchange.imap.osgi;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
+import java.sql.Connection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -62,9 +64,11 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.java.util.Pair;
-import com.openexchange.mailaccount.Tools;
+import com.openexchange.java.util.Tools;
+import com.openexchange.mailaccount.MailAccountListener;
 
 
 /**
@@ -73,7 +77,7 @@ import com.openexchange.mailaccount.Tools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public final class ListLsubInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService> {
+public final class ListLsubInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService>, MailAccountListener {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ListLsubInvalidator.class);
 
@@ -89,6 +93,30 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
     public ListLsubInvalidator(BundleContext context) {
         super();
         this.context = context;
+    }
+
+    @Override
+    public void onBeforeMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        // Don't care
+    }
+
+    @Override
+    public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        invalidateFor(userId, contextId);
+    }
+
+    @Override
+    public void onMailAccountCreated(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
+        invalidateFor(userId, contextId);
+    }
+
+    @Override
+    public void onMailAccountModified(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
+        invalidateFor(userId, contextId);
+    }
+
+    private void invalidateFor(int userId, int contextId) {
+        ListLsubCache.dropFor(userId, contextId, true);
     }
 
     @Override

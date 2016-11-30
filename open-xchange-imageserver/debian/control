@@ -1,0 +1,14 @@
+Source: open-xchange-imageserver
+Section: web
+Priority: optional
+Maintainer: Kai Ahrens <kai.ahrens@open-xchange.com>
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 8.0.0), lsb-release, ant-optional (>= 1.7.0), java7-jdk, open-xchange-grizzly (>= @OXVERSION@), open-xchange-admin (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-imageserver
+Architecture: amd64
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-grizzly (>= @OXVERSION@), open-xchange-admin (>= @OXVERSION@)
+Description: The Open-Xchange backend for the imageserver web service
+ Package contains the backend components for the imageserver web service.

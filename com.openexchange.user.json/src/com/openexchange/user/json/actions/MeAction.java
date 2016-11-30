@@ -54,9 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -70,9 +67,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "GET", description = "Get information about requesting user.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, responseDescription = "Response with timestamp: A JSON object providing some user information.")
 @OAuthAction(OAuthAction.GRANT_ALL)
 public final class MeAction extends AbstractUserAction {
 

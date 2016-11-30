@@ -54,9 +54,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
@@ -78,14 +75,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.PUT, name = "saveAs", description = "Save an attachment in the infostore", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "attached", description = "The Object ID of the Object with the attachment."),
-    @Parameter(name = "folder", description = "The Folder ID of the Object with the attachment."),
-    @Parameter(name = "module", description = "the Module type of the Object with the attachment."),
-    @Parameter(name = "Attachment", description = "The id of the attachement to save.")
-}, requestBody = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included. The fields in this infoitem object override values from the attachment. The folder_id must be given.",
-responseDescription = "Object ID of the newly created infoitem.")
 public class SaveAsAction extends AbstractWriteAction {
 
     @Override

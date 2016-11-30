@@ -62,6 +62,8 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.json.CapabilitiesJsonWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -71,7 +73,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @since v7.6.2
  */
-@Path("/capabilities/v1/")
+@Path("/preliminary/capabilities/v1/")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class CapabilitiesRESTService {
 
     private final ServiceLookup services;
@@ -97,6 +100,13 @@ public class CapabilitiesRESTService {
         CapabilityService capService = services.getOptionalService(CapabilityService.class);
         if (null == capService) {
             throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+
+        if (context <= 0) {
+            throw CapabilityExceptionCodes.INVALID_CONTEXT.create(context);
+        }
+        if (user <= 0) {
+            throw CapabilityExceptionCodes.INVALID_USER.create(user);
         }
 
         try {

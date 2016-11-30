@@ -12,6 +12,8 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -29,15 +31,22 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.pns.DefaultPushNotification;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushNotificationField;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.push.dovecot.osgi.Services;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionMatcher;
@@ -52,7 +61,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-@Path("/http-notify/v1/")
+@Path("/preliminary/http-notify/v1/")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class DovecotPushRESTService {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);
@@ -105,6 +115,11 @@ public class DovecotPushRESTService {
                     int userId = userAndContext[0];
                     String folder = data.getString("folder");
                     long uid = data.getLong("imap-uid");
+
+                    PushNotificationService pushNotificationService = Services.optService(PushNotificationService.class);
+                    if (null != pushNotificationService) {
+                        sendViaNotificationService(userId, contextId, uid, folder, data, pushNotificationService);
+                    }
 
                     SessiondService sessiondService = Services.getService(SessiondService.class);
                     Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
@@ -187,7 +202,8 @@ public class DovecotPushRESTService {
                         LOGGER.warn("Could not look-up an appropriate session for user {} in context {}. Hence cannot push 'new-message' event.", userId, contextId);
                     } else {
                         Map<String, Object> props = new LinkedHashMap<String, Object>(4);
-                        setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), data.optInt("unread", -1), props);
+                        props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
+                        setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), data.optInt("unseen", -1), props);
                         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), session, props, true, true);
                         LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", userId, contextId);
                     }
@@ -198,6 +214,54 @@ public class DovecotPushRESTService {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private void sendViaNotificationService(int userId, int contextId, long uid, String folder, JSONObject data, PushNotificationService pushNotificationService) throws OXException {
+        Map<String, Object> messageData = new LinkedHashMap<>(6);
+        messageData.put(PushNotificationField.FOLDER.getId(), MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, folder));
+        messageData.put(PushNotificationField.ID.getId(), Long.toString(uid));
+        {
+            String from = data.optString("from", null);
+            if (null != from) {
+                try {
+                    InternetAddress fromAddress = QuotedInternetAddress.parseHeader(from, true)[0];
+                    messageData.put(PushNotificationField.MAIL_SENDER_EMAIL.getId(), fromAddress.getAddress());
+                    String personal = fromAddress.getPersonal();
+                    if (Strings.isNotEmpty(personal)) {
+                        messageData.put(PushNotificationField.MAIL_SENDER_PERSONAL.getId(), personal);
+                    }
+                } catch (AddressException e) {
+                    LOGGER.warn("Failed to parse \"from\" address: {}", from, e);
+                    messageData.put(PushNotificationField.MAIL_SENDER_EMAIL.getId(),  MimeMessageUtility.decodeEnvelopeSubject(from));
+                }
+            }
+        }
+        {
+            String subject = data.optString("subject", null);
+            if (null != subject) {
+                messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), MimeMessageUtility.decodeEnvelopeSubject(subject));
+            }
+        }
+        {
+            int unread = data.optInt("unseen", -1);
+            if (unread >= 0) {
+                messageData.put(PushNotificationField.MAIL_UNREAD.getId(), Integer.valueOf(unread));
+            }
+        }
+        {
+            String snippet = data.optString("snippet", null);
+            if (null != snippet) {
+                messageData.put(PushNotificationField.MAIL_TEASER.getId(), snippet);
+            }
+        }
+
+        DefaultPushNotification notification = DefaultPushNotification.builder()
+            .contextId(contextId)
+            .userId(userId)
+            .topic(KnownTopic.MAIL_NEW.getName())
+            .messageData(messageData)
+            .build();
+        pushNotificationService.handle(notification);
     }
 
     private void setEventProperties(long uid, String fullName, String from, String subject, int unread, Map<String, Object> props) {
@@ -215,7 +279,7 @@ public class DovecotPushRESTService {
     private MailMessage asMessage(long uid, String fullName, String from, String subject, int unread) throws MessagingException {
         MailMessage mailMessage = new IDMailMessage(Long.toString(uid), fullName);
         mailMessage.addFrom(QuotedInternetAddress.parseHeader(from, true));
-        mailMessage.setSubject(subject);
+        mailMessage.setSubject(null == subject ? null : MimeMessageUtility.decodeEnvelopeSubject(subject));
         if (unread >= 0) {
             mailMessage.setUnreadMessages(unread);
         }

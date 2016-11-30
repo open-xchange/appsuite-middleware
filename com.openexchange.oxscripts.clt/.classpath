@@ -22,5 +22,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.configread"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.push"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessiond"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

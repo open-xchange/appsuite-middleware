@@ -105,8 +105,8 @@ public class AddressTest extends VCardTest {
          */
         VCard vCard = new VCard();
         Address address = new Address();
-        address.addType(AddressType.WORK);
-        address.addType(AddressType.PREF);
+        address.getTypes().add(AddressType.WORK);
+        address.getTypes().add(AddressType.PREF);
         address.setStreetAddress("existing street");
         address.setPoBox("existing po box");
         vCard.addAddress(address);
@@ -135,8 +135,8 @@ public class AddressTest extends VCardTest {
          */
         VCard vCard = new VCard();
         Address address = new Address();
-        address.addType(AddressType.WORK);
-        address.addType(AddressType.PREF);
+        address.getTypes().add(AddressType.WORK);
+        address.getTypes().add(AddressType.PREF);
         address.setStreetAddress("existing street");
         address.setPoBox("existing po box");
         vCard.addAddress(address);

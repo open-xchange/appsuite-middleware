@@ -51,7 +51,6 @@ package com.openexchange.imap;
 
 import static com.openexchange.java.Strings.toUpperCase;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.Flags;
@@ -59,7 +58,9 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -85,6 +86,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.sun.mail.iap.ResponseCode;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights.Right;
@@ -142,8 +144,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.failFastTimeout");
             }
         });
     }
@@ -263,9 +265,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         } catch (final MessagingException e) {
             if (recoverFromServerbug) {
                 Exception exception = e.getNextException();
-                if ((exception instanceof com.sun.mail.iap.CommandFailedException)) {
+                if ((exception instanceof com.sun.mail.iap.CommandFailedException) && (ResponseCode.SERVERBUG == ((com.sun.mail.iap.CommandFailedException) exception).getKnownResponseCode())) {
                     String message = Strings.asciiLowerCase(exception.getMessage());
-                    if ((null != message) && (message.indexOf("[serverbug]") >= 0) && (message.indexOf("reopen the virtual mailbox") >= 0)) {
+                    if ((null != message) && (message.indexOf("reopen the virtual mailbox") >= 0)) {
                         // Retry to open the virtual mailbox
                         openFolder(desiredMode, imapFolder, false);
                         return;

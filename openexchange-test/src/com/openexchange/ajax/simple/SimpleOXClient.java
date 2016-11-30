@@ -65,7 +65,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.subscribe.helpers.TrustAllAdapter;
+import com.openexchange.subscribe.helpers.TrustAdapter;
 
 /**
  * {@link SimpleOXClient}
@@ -83,7 +83,7 @@ public class SimpleOXClient {
 
     public SimpleOXClient(String host, boolean secure) {
         if (secure) {
-            final Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+            final Protocol https = new Protocol("https", new TrustAdapter(), 443);
             client.getHostConfiguration().setHost(host, 443, https);
         } else {
             client.getHostConfiguration().setHost(host);

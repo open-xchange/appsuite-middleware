@@ -663,6 +663,15 @@ public final class DBUtils {
             }
             throw transactionRollbackException;
         }
+
+        /**
+         * Gets the number of retries
+         *
+         * @return The retry count
+         */
+        public int getCount() {
+            return count;
+        }
     }
 
 }

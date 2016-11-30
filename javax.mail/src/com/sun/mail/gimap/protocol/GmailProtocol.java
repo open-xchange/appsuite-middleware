@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -91,11 +91,14 @@ public class GmailProtocol extends IMAPProtocol {
     /**
      * Connect to Gmail.
      *
+     * @param name	the protocol name
      * @param host	host to connect to
      * @param port	portnumber to connect to
      * @param props	Properties object used by this protocol
      * @param isSSL	use SSL?
      * @param logger	for log messages
+     * @exception	IOException	for I/O errors
+     * @exception	ProtocolException	for protocol failures
      */
     public GmailProtocol(String name, String host, int port, 
 			Properties props, boolean isSSL, MailLogger logger)
@@ -128,6 +131,74 @@ public class GmailProtocol extends IMAPProtocol {
 							myFetchItems.length);
 	}
 	return fetchItems;
+    }
+
+    /**
+     * Set the specified labels on this message.
+     *
+     * @param	msgsets	the message sets
+     * @param	labels	the labels
+     * @param	set	true to set, false to clear
+     * @exception	ProtocolException	for protocol failures
+     * @since	JavaMail 1.5.5
+     */
+    public void storeLabels(MessageSet[] msgsets, String[] labels, boolean set)
+			throws ProtocolException {
+	storeLabels(MessageSet.toString(msgsets), labels, set);
+    }
+
+    /**
+     * Set the specified labels on this message.
+     *
+     * @param	start	the first message number
+     * @param	end	the last message number
+     * @param	labels	the labels
+     * @param	set	true to set, false to clear
+     * @exception	ProtocolException	for protocol failures
+     * @since	JavaMail 1.5.5
+     */
+    public void storeLabels(int start, int end, String[] labels, boolean set)
+			throws ProtocolException {
+	storeLabels(String.valueOf(start) + ":" + String.valueOf(end),
+		   labels, set);
+    }
+
+    /**
+     * Set the specified labels on this message.
+     *
+     * @param	msg	the message number
+     * @param	labels	the labels
+     * @param	set	true to set, false to clear
+     * @exception	ProtocolException	for protocol failures
+     * @since	JavaMail 1.5.5
+     */
+    public void storeLabels(int msg, String[] labels, boolean set)
+			throws ProtocolException { 
+	storeLabels(String.valueOf(msg), labels, set);
+    }
+
+    private void storeLabels(String msgset, String[] labels, boolean set)
+			throws ProtocolException {
+	Response[] r;
+	if (set)
+	    r = command("STORE " + msgset + " +X-GM-LABELS",
+			 createLabelList(labels));
+	else
+	    r = command("STORE " + msgset + " -X-GM-LABELS",
+			createLabelList(labels));
+	
+	// Dispatch untagged responses
+	notifyResponseHandlers(r);
+	handleResult(r[r.length-1]);
+    }
+
+    private Argument createLabelList(String[] labels) {
+	Argument args = new Argument();	
+	Argument itemArgs = new Argument();
+	for (int i = 0, len = labels.length; i < len; i++)
+	    itemArgs.writeAtom(labels[i]);
+	args.writeArgument(itemArgs);
+	return args;
     }
 
     /**

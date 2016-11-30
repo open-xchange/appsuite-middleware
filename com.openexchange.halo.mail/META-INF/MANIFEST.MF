@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Mail
 Bundle-SymbolicName: com.openexchange.halo.mail
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.halo.mail.osgi.MailHaloActivator
 Bundle-Vendor: OPENEXCHANGE INC.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -10,6 +10,7 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.exception,
  com.openexchange.halo,
  com.openexchange.java,
+ com.openexchange.java.util,
  com.openexchange.mail,
  com.openexchange.mail.api,
  com.openexchange.mail.dataobjects,

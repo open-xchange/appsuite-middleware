@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -90,6 +90,7 @@ public class SMTPTransport extends Transport {
     private int defaultPort = 25;	// default SMTP port
     private boolean isSSL = false;	// use SSL?
     private String host;		// host we're connected to
+    private int port;           // port we're connected to
 
     // Following fields valid only during the sendMessage method.
     private MimeMessage message;	// Message to be sent
@@ -136,6 +137,8 @@ public class SMTPTransport extends Transport {
     private SaslAuthenticator saslAuthenticator; // if SASL is being used
 
     private boolean noauthdebug = true;	// hide auth info in debug output
+    private boolean debugusername;	// include username in debug output?
+    private boolean debugpassword;	// include password in debug output?
 
     /** Headers that should not be included when sending */
     private static final String[] ignoreList = { "Bcc", "Content-Length" };
@@ -169,6 +172,10 @@ public class SMTPTransport extends Transport {
 	traceLogger = logger.getSubLogger("protocol", null);
 	noauthdebug = !PropUtil.getBooleanSessionProperty(session,
 			    "mail.debug.auth", false);
+	debugusername = PropUtil.getBooleanSessionProperty(session,
+			"mail.debug.auth.username", true);
+	debugpassword = PropUtil.getBooleanSessionProperty(session,
+			"mail.debug.auth.password", false);
 	if (urlname != null)
 	    name = urlname.getProtocol();
 	this.name = name;
@@ -223,7 +230,8 @@ public class SMTPTransport extends Transport {
 	    new PlainAuthenticator(),
 	    new DigestMD5Authenticator(),
 	    new NtlmAuthenticator(),
-	    new OAuth2Authenticator()
+	    new OAuth2Authenticator(),
+	    new OAuthBearerAuthenticator()
 	};
 	StringBuffer sb = new StringBuffer();
 	for (int i = 0; i < a.length; i++) {
@@ -644,12 +652,12 @@ public class SMTPTransport extends Transport {
      * @param	host		  the name of the host to connect to
      * @param	port		  the port to use (-1 means use default port)
      * @param	user		  the name of the user to login as
-     * @param	passwd	  	  the user's password
+     * @param	password	  the user's password
      * @return	true if connection successful, false if authentication failed
      * @exception MessagingException	for non-authentication failures
      */
     protected synchronized boolean protocolConnect(String host, int port,
-			String user, String passwd) throws MessagingException {
+			String user, String password) throws MessagingException {
 	// setting mail.smtp.auth to true enables attempts to use AUTH
 	boolean useAuth = PropUtil.getBooleanSessionProperty(session,
 					"mail." + name + ".auth", false);
@@ -660,8 +668,14 @@ public class SMTPTransport extends Transport {
 	 * because the server doesn't support ESMTP or doesn't support
 	 * the AUTH extension).
 	 */
-	if (useAuth && (user == null || passwd == null)) {
+	if (useAuth && (user == null || password == null)) {
+	    if (logger.isLoggable(Level.FINE)) {
 	    logger.fine("need username and password for authentication");
+	    logger.fine("protocolConnect returning false" +
+	            ", host=" + host +
+	            ", user=" + traceUser(user) +
+	            ", password=" + tracePassword(password));
+	    }
 	    return false;
 	}
 
@@ -722,10 +736,15 @@ public class SMTPTransport extends Transport {
 		}
 	    }
 
-	    if ((useAuth || (user != null && passwd != null)) &&
+	    if ((useAuth || (user != null && password != null)) &&
 		  (supportsExtension("AUTH") ||
 		   supportsExtension("AUTH=LOGIN"))) {
-		connected = authenticate(user, passwd);
+		if (logger.isLoggable(Level.FINE))
+		    logger.fine("protocolConnect login" +
+				", host=" + host +
+				", user=" + traceUser(user) +
+				", password=" + tracePassword(password));
+		connected = authenticate(user, password);
 		return connected;
 	    }
 
@@ -820,7 +839,7 @@ public class SMTPTransport extends Transport {
 
 	    // only the first supported and enabled mechanism is used
 	    logger.log(Level.FINE, "Using mechanism {0}", m);
-	    return a.authenticate(host, authzid, user, passwd);
+	    return a.authenticate(host, port, authzid, user, passwd);
 	}
 
 	// if no authentication mechanism found, fail
@@ -858,12 +877,12 @@ public class SMTPTransport extends Transport {
 	 * Delegate to the doAuth method to do the mechanism-specific
 	 * part of the handshake.
 	 */
-	boolean authenticate(String host, String authzid,
+	boolean authenticate(String host, int port, String authzid,
 			String user, String passwd) throws MessagingException {
 	    Throwable thrown = null;
 	    try {
 		// use "initial response" capability, if supported
-		String ir = getInitialResponse(host, authzid, user, passwd);
+		String ir = getInitialResponse(host, port, authzid, user, passwd);
 		if (noauthdebug && isTracing()) {
 		    logger.fine("AUTH " + mech + " command trace suppressed");
 		    suspendTracing();
@@ -886,7 +905,7 @@ public class SMTPTransport extends Transport {
 			resp = simpleCommand("AUTH " + mech);
 		}
 		if (resp == 334)
-		    doAuth(host, authzid, user, passwd);
+		    doAuth(host, port, authzid, user, passwd);
 	    } catch (IOException ex) {	// should never happen, ignore
 		logger.log(Level.FINE, "AUTH " + mech + " failed", ex);
 	    } catch (Throwable t) {	// crypto can't be initialized?
@@ -920,12 +939,12 @@ public class SMTPTransport extends Transport {
 	 * or null if not supported.  Subclasses that support the
 	 * initial response capability will override this method.
 	 */
-	String getInitialResponse(String host, String authzid, String user,
+	String getInitialResponse(String host, int port, String authzid, String user,
 		    String passwd) throws MessagingException, IOException {
 	    return null;
 	}
 
-	abstract void doAuth(String host, String authzid, String user,
+	abstract void doAuth(String host, int port, String authzid, String user,
 		    String passwd) throws MessagingException, IOException;
     }
 
@@ -937,7 +956,7 @@ public class SMTPTransport extends Transport {
 	    super("LOGIN");
 	}
 
-	void doAuth(String host, String authzid, String user, String passwd)
+	void doAuth(String host, int port, String authzid, String user, String passwd)
 				    throws MessagingException, IOException {
 	    // send username
 	    resp = simpleCommand(
@@ -958,7 +977,7 @@ public class SMTPTransport extends Transport {
 	    super("PLAIN");
 	}
 
-	String getInitialResponse(String host, String authzid, String user,
+	String getInitialResponse(String host, int port, String authzid, String user,
 			String passwd) throws MessagingException, IOException {
 	    // return "authzid<NUL>user<NUL>passwd"
 	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -975,7 +994,7 @@ public class SMTPTransport extends Transport {
 	    return ASCIIUtility.toString(bos.toByteArray());
 	}
 
-	void doAuth(String host, String authzid, String user, String passwd)
+	void doAuth(String host, int port, String authzid, String user, String passwd)
 				    throws MessagingException, IOException {
 	    // should never get here
 	    throw new AuthenticationFailedException("PLAIN asked for more");
@@ -998,7 +1017,7 @@ public class SMTPTransport extends Transport {
 	    return md5support;
 	}
 
-	void doAuth(String host, String authzid, String user, String passwd)
+	void doAuth(String host, int port, String authzid, String user, String passwd)
 				    throws MessagingException, IOException {
 	    DigestMD5 md5 = getMD5();
 	    assert md5 != null;
@@ -1029,7 +1048,7 @@ public class SMTPTransport extends Transport {
 	    super("NTLM");
 	}
 
-	String getInitialResponse(String host, String authzid, String user,
+	String getInitialResponse(String host, int port, String authzid, String user,
 		String passwd) throws MessagingException, IOException {
 	    ntlm = new Ntlm(getNTLMDomain(), getLocalHost(),
 				user, passwd, logger);
@@ -1042,7 +1061,7 @@ public class SMTPTransport extends Transport {
 	    return type1;
 	}
 
-	void doAuth(String host, String authzid, String user, String passwd)
+	void doAuth(String host, int port, String authzid, String user, String passwd)
 		throws MessagingException, IOException {
 	    assert ntlm != null;
 	    String type3 = ntlm.generateType3Msg(
@@ -1061,7 +1080,7 @@ public class SMTPTransport extends Transport {
 	    super("XOAUTH2", false);	// disabled by default
 	}
 
-	String getInitialResponse(String host, String authzid, String user,
+	String getInitialResponse(String host, int port, String authzid, String user,
 		String passwd) throws MessagingException, IOException {
 	    String resp = "user=" + user + "\001auth=Bearer " +
 			    passwd + "\001\001";
@@ -1069,11 +1088,37 @@ public class SMTPTransport extends Transport {
 	    return ASCIIUtility.toString(b);
 	}
 
-	void doAuth(String host, String authzid, String user, String passwd)
+	void doAuth(String host, int port, String authzid, String user, String passwd)
 		throws MessagingException, IOException {
 	    // should never get here
 	    throw new AuthenticationFailedException("OAUTH2 asked for more");
 	}
+    }
+
+    /**
+     * Perform the authentication handshake for OAUTHBEARER authentication.
+     */
+    private class OAuthBearerAuthenticator extends Authenticator {
+
+        OAuthBearerAuthenticator() {
+        super("OAUTHBEARER", false);    // disabled by default
+    }
+
+    String getInitialResponse(String host, int port, String authzid, String user,
+        String passwd) throws MessagingException, IOException {
+        // From https://tools.ietf.org/html/rfc7628#section-4.1
+        // n,a=user@example.com,^Ahost=server.example.com^Aport=143^A
+        // auth=Bearer vF9dft4qmTc2Nvb3RlckBhbHRhdmlzdGEuY29tCg==^A^A
+        String resp = "n,a=" + user + ",\001host=" + host + "\001port=" + port + "\001auth=Bearer " + passwd + "\001\001";
+        byte[] b = BASE64EncoderStream.encode(ASCIIUtility.getBytes(resp));
+        return ASCIIUtility.toString(b);
+    }
+
+    void doAuth(String host, int port, String authzid, String user, String passwd)
+        throws MessagingException, IOException {
+        // should never get here
+        throw new AuthenticationFailedException("OAUTH2 asked for more");
+    }
     }
 
     /**
@@ -2086,6 +2131,7 @@ public class SMTPTransport extends Transport {
 	    // socket factory may've chosen a different port,
 	    // update it for the debug messages that follow
 	    port = serverSocket.getPort();
+	    this.port = port;
 	    // save host name for startTLS
 	    this.host = host;
 
@@ -2130,6 +2176,7 @@ public class SMTPTransport extends Transport {
 	host = "UNKNOWN";
 	try {
 	    port = serverSocket.getPort();
+	    this.port = port;
 	    host = serverSocket.getInetAddress().getHostName();
 	    if (logger.isLoggable(Level.FINE))
 		logger.fine("starting protocol to host \"" +
@@ -2539,6 +2586,15 @@ public class SMTPTransport extends Transport {
 	    }
 	}
 	return sb != null ? sb.toString() : s;
+    }
+
+    private String traceUser(String user) {
+	return debugusername ? user : "<user name suppressed>";
+    }
+
+    private String tracePassword(String password) {
+	return debugpassword ? password :
+				(password == null ? "<null>" : "<non-null>");
     }
 
     /*

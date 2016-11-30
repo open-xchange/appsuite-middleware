@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2015 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2009-2015 Jason Mehrens. All rights reserved.
+ * Copyright (c) 2009-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2016 Jason Mehrens. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,6 +44,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
@@ -78,6 +79,63 @@ final class LogManagerProperties extends Properties {
      * Generated serial id.
      */
     private static final long serialVersionUID = -2239983349056806252L;
+    /**
+     * Holds the method used to get the LogRecord instant if running on JDK 9 or
+     * later.
+     */
+    private static final Method LR_GET_INSTANT;
+
+    /**
+     * Holds the method used to get the default time zone if running on JDK 9 or
+     * later.
+     */
+    private static final Method ZI_SYSTEM_DEFAULT;
+
+    /**
+     * Holds the method used to convert and instant to a zoned date time if
+     * running on JDK 9 later.
+     */
+    private static final Method ZDT_OF_INSTANT;
+
+    static {
+        Method lrgi = null;
+        Method zisd = null;
+        Method zdtoi = null;
+        try {
+            lrgi = LogRecord.class.getMethod("getInstant");
+            assert Comparable.class
+                    .isAssignableFrom(lrgi.getReturnType()) : lrgi;
+            zisd = findClass("java.time.ZoneId")
+                    .getMethod("systemDefault");
+            if (!Modifier.isStatic(zisd.getModifiers())) {
+                throw new NoSuchMethodException(zisd.toString());
+            }
+
+            zdtoi = findClass("java.time.ZonedDateTime")
+                    .getMethod("ofInstant", findClass("java.time.Instant"),
+                            findClass("java.time.ZoneId"));
+            if (!Modifier.isStatic(zdtoi.getModifiers())) {
+                throw new NoSuchMethodException(zdtoi.toString());
+            }
+
+            if (!Comparable.class.isAssignableFrom(zdtoi.getReturnType())) {
+                throw new NoSuchMethodException(zdtoi.toString());
+            }
+        } catch (final RuntimeException ignore) {
+        } catch (final Exception ignore) { //No need for specific catch.
+        } catch (final LinkageError ignore) {
+        } finally {
+            if (lrgi == null || zisd == null || zdtoi == null) {
+                lrgi = null; //If any are null then clear all.
+                zisd = null;
+                zdtoi = null;
+            }
+        }
+
+        LR_GET_INSTANT = lrgi;
+        ZI_SYSTEM_DEFAULT = zisd;
+        ZDT_OF_INSTANT = zdtoi;
+    }
     /**
      * Caches the read only reflection class names string array. Declared
      * volatile for safe publishing only. The VO_VOLATILE_REFERENCE_TO_ARRAY
@@ -254,6 +312,44 @@ final class LogManagerProperties extends Properties {
     static boolean hasLogManager() {
         final Object m = LOG_MANAGER;
         return m != null && !(m instanceof Properties);
+    }
+
+    /**
+     * Gets the ZonedDateTime from the given log record.
+     *
+     * @param record used to generate the zoned date time.
+     * @return null if LogRecord doesn't support nanoseconds otherwise a new
+     * zoned date time is returned.
+     * @throws NullPointerException if record is null.
+     * @since JavaMail 1.5.6
+     */
+    @SuppressWarnings("UseSpecificCatch")
+    static Comparable<?> getZonedDateTime(LogRecord record) {
+        if (record == null) {
+           throw new NullPointerException();
+        }
+        final Method m = ZDT_OF_INSTANT;
+        if (m != null) {
+            try {
+                return (Comparable<?>) m.invoke((Object) null,
+                        LR_GET_INSTANT.invoke(record),
+                        ZI_SYSTEM_DEFAULT.invoke((Object) null));
+            } catch (final RuntimeException ignore) {
+                assert LR_GET_INSTANT != null
+                        && ZI_SYSTEM_DEFAULT != null : ignore;
+            } catch (final InvocationTargetException ite) {
+                final Throwable cause = ite.getCause();
+                if (cause instanceof Error) {
+                    throw (Error) cause;
+                } else if (cause instanceof RuntimeException) {
+                    throw (RuntimeException) cause;
+                } else { //Should never happen.
+                    throw new UndeclaredThrowableException(ite);
+                }
+            } catch (final Exception ignore) {
+            }
+        }
+        return null;
     }
 
     /**
@@ -633,7 +729,7 @@ final class LogManagerProperties extends Properties {
             //case insensitive (BUG ID 6196068).  In some cases, we allow class
             //names or literal names, this code guards against the case where a
             //literal name happens to match a class name in a different case.
-            //This is also a nice way to adap this error for the error manager.
+            //This is also a nice way to adapt this error for the error manager.
             throw new ClassNotFoundException(NCDFE.toString(), NCDFE);
         } catch (final ExceptionInInitializerError EIIE) {
             throw wrapOrThrow(EIIE);
@@ -652,8 +748,10 @@ final class LogManagerProperties extends Properties {
     private static Exception paramOrError(InvocationTargetException ite) {
         final Throwable cause = ite.getCause();
         if (cause != null) {
+            //Bitwise inclusive OR produces tighter bytecode for instanceof
+            //and matches with multicatch syntax.
             if (cause instanceof VirtualMachineError
-                    || cause instanceof ThreadDeath) {
+                    | cause instanceof ThreadDeath) {
                 throw (Error) cause;
             }
         }
@@ -733,6 +831,7 @@ final class LogManagerProperties extends Properties {
     private static ClassLoader[] getClassLoaders() {
         return AccessController.doPrivileged(new PrivilegedAction<ClassLoader[]>() {
 
+            @SuppressWarnings("override") //JDK-6954234
             public ClassLoader[] run() {
                 final ClassLoader[] loaders = new ClassLoader[2];
                 try {

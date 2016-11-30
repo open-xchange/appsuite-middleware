@@ -67,6 +67,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -151,45 +152,51 @@ public class Executor extends Assert {
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
         final String protocol, final String hostname, final int sleep) throws OXException, IOException,
         JSONException {
-
-        final String urlString = protocol + "://" + hostname + request.getServletPath();
+        final String urlString;
+        if (request instanceof PortAwareAjaxRequest) {
+            urlString = protocol + "://" + hostname + ":" + ((PortAwareAjaxRequest<T>) request).getPort() + request.getServletPath();
+        } else {
+            urlString = protocol + "://" + hostname + request.getServletPath();
+        }
         final HttpUriRequest httpRequest;
         final Method method = request.getMethod();
         switch (method) {
-        case GET:
-            httpRequest = new HttpGet(
-                addQueryParamsToUri(urlString, getGETParameter(session, request)));
-            break;
-        case POST:
-            HttpEntity postEntity;
-            String contentType = detectContentTypeHeader(request);
-            if ("multipart/form-data".equals(contentType)) {
-                postEntity = buildMultipartEntity(request);
-            } else {
-                postEntity = getBodyParameters(request);
-            }
+            case GET:
+                httpRequest = new HttpGet(addQueryParamsToUri(urlString, getGETParameter(session, request)));
+                break;
+            case DELETE:
+                httpRequest = new HttpDelete(addQueryParamsToUri(urlString, getGETParameter(session, request)));
+                break;
+            case POST:
+                HttpEntity postEntity;
+                String contentType = detectContentTypeHeader(request);
+                if ("multipart/form-data".equals(contentType)) {
+                    postEntity = buildMultipartEntity(request);
+                } else {
+                    postEntity = getBodyParameters(request);
+                }
 
-            HttpPost httpPost = new HttpPost(urlString + getURLParameter(session, request, true));
-            httpPost.setEntity(postEntity);
-            httpRequest = httpPost;
-            break;
-        case UPLOAD:
-            final HttpPost httpUpload = new HttpPost(urlString + getURLParameter(session, request, false)); //TODO old request used to set "mimeEncoded" = true here
-            addUPLOADParameter(httpUpload, request);
-            httpRequest = httpUpload;
-            break;
-        case PUT:
-            final HttpPut httpPut = new HttpPut(urlString + getURLParameter(session, request, false));
-            Object body = request.getBody();
-            if (null != body) {
-                final ByteArrayEntity entity = new ByteArrayEntity(createBodyBytes(body));
-                entity.setContentType("text/javascript; charset=UTF-8");
-                httpPut.setEntity(entity);
-            }
-            httpRequest = httpPut;
-            break;
-        default:
-            throw AjaxExceptionCodes.IMVALID_PARAMETER.create(request.getMethod().name());
+                HttpPost httpPost = new HttpPost(urlString + getURLParameter(session, request, true));
+                httpPost.setEntity(postEntity);
+                httpRequest = httpPost;
+                break;
+            case UPLOAD:
+                final HttpPost httpUpload = new HttpPost(urlString + getURLParameter(session, request, false)); //TODO old request used to set "mimeEncoded" = true here
+                addUPLOADParameter(httpUpload, request);
+                httpRequest = httpUpload;
+                break;
+            case PUT:
+                final HttpPut httpPut = new HttpPut(urlString + getURLParameter(session, request, false));
+                Object body = request.getBody();
+                if (null != body) {
+                    final ByteArrayEntity entity = new ByteArrayEntity(createBodyBytes(body));
+                    entity.setContentType("text/javascript; charset=UTF-8");
+                    httpPut.setEntity(entity);
+                }
+                httpRequest = httpPut;
+                break;
+            default:
+                throw AjaxExceptionCodes.IMVALID_PARAMETER.create(request.getMethod().name());
         }
         for (final Header header : request.getHeaders()) {
             if (method == Method.POST ) {
@@ -279,7 +286,7 @@ public class Executor extends Assert {
         }
         final String[] cookies = conversation.getCookieNames();
         final CookieStore cookieStore = httpClient.getCookieStore();
-        final Set<String> storedNames = new HashSet<String>();
+        final Set<String> storedNames = new HashSet<>();
         for (final Cookie cookie : cookieStore.getCookies()) {
             storedNames.add(cookie.getName());
         }
@@ -294,7 +301,7 @@ public class Executor extends Assert {
     }
 
     public static void syncCookies(final DefaultHttpClient httpClient, final WebConversation conversation) {
-        final Set<String> storedNames = new HashSet<String>();
+        final Set<String> storedNames = new HashSet<>();
         for (final String name : conversation.getCookieNames()) {
             storedNames.add(name);
         }
@@ -391,7 +398,7 @@ public class Executor extends Assert {
     }
 
     private static List<NameValuePair> getGETParameter(final AJAXSession session, final AJAXRequest<?> ajaxRequest) throws IOException, JSONException{ //new
-        final List<NameValuePair> pairs = new LinkedList<NameValuePair>();
+        final List<NameValuePair> pairs = new LinkedList<>();
 
         if (session.getId() != null) {
             pairs.add( new BasicNameValuePair(AJAXServlet.PARAMETER_SESSION, session.getId()));
@@ -433,7 +440,7 @@ public class Executor extends Assert {
     }
 
     private static HttpEntity getBodyParameters(final AJAXRequest<?> request) throws IOException, JSONException {
-        final List<NameValuePair> pairs = new LinkedList<NameValuePair>();
+        final List<NameValuePair> pairs = new LinkedList<>();
 
         for (final Parameter param : request.getParameters()) {
             if (param instanceof FieldParameter) {

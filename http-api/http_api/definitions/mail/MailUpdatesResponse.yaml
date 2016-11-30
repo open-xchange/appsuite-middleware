@@ -2,6 +2,5 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    type: array
-    items:
-      type: object
+    type: object
+    description: An empty json array

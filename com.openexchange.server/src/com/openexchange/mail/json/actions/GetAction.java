@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.java.Strings.toLowerCase;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -76,9 +77,6 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -105,19 +103,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "get", description = "Get a mail.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the requested mail."),
-    @Parameter(name = "message_id", description = "(Preliminary) The value of \"Message-Id\" header of the requested mail. This parameter is a substitute for \"id\" parameter."),
-    @Parameter(name = "folder", description = "Object ID of the mail's folder."),
-    @Parameter(name = "edit", optional=true, description = "1 indicates that this request should fill the message compose dialog to edit a message and thus display-specific date is going to be withheld."),
-    @Parameter(name = "hdr", optional=true, description = "1 to let the response contain only the (formatted) message headers as plain text"),
-    @Parameter(name = "src", optional=true, description = "1 to let the response contain the complete message source as plain text"),
-    @Parameter(name = "save", optional=true, description = "1 to write the complete message source to output stream. NOTE: This parameter will only be used if parameter src is set to 1."),
-    @Parameter(name = "view", optional=true, description = "(available with SP4) \"raw\" returns the content as it is, meaning no preparation are performed and thus no guarantee for safe contents is given (available with SP6 v6.10). \"text\" forces the server to deliver a text-only version of the requested mail's body, even if content is HTML. \"textNoHtmlAttach\" is the same as \"text\", but does not deliver the HTML part as attachment in case of multipart/alternative content. \"html\" to allow a possible HTML mail body being transferred as it is (but white-list filter applied). \"noimg\" to allow a possible HTML content being transferred but without original image src attributes which references external images: Can be used to prevent loading external linked images (spam privacy protection). NOTE: if set, the corresponding gui config setting will be ignored."),
-    @Parameter(name = "unseen", optional = true, description = "\"1\" or \"true\" to leave an unseen mail as unseen although its content is requested"),
-    @Parameter(name = "max_size", optional = true, description = "Maximum size of the returned mail content")
-}, responseDescription = "(not IMAP: with timestamp): An JSON object containing all data of the requested mail. The fields of the object are listed in Detailed mail data. The fields id and attachment are not included. NOTE: Of course response is not a JSON object if either parameter hdr or parameter src are set to \"1\". Then the response contains plain text. Moreover if optional parameter save is set to \"1\" the complete message source is going to be directly written to output stream to open browser's save dialog.")
 public final class GetAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
@@ -459,7 +444,7 @@ public final class GetAction extends AbstractMailAction {
                             if (fileHolder.isInMemory()) {
                                 jMail.put("source", new String(fileHolder.toByteArray(), Charsets.UTF_8));
                             } else {
-                                jMail.put("source", new InputStreamReader(fileHolder.getClosingStream(), Charsets.UTF_8));
+                                jMail.put("source", new BufferedReader(new InputStreamReader(fileHolder.getClosingStream(), Charsets.UTF_8), 65536));
                                 fileHolder = null; // Avoid preliminary closing
                             }
                         }

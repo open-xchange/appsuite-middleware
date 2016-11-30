@@ -345,7 +345,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
                 /*
                  * Own HTTPS host configuration and relative URI
                  */
-                final Protocol httpsProtocol = new Protocol(HTTPS, ((ProtocolSocketFactory) new TrustAllAdapter()), port);
+                final Protocol httpsProtocol = new Protocol(HTTPS, ((ProtocolSocketFactory) new TrustAdapter()), port);
                 hostConfiguration = new HostConfiguration();
                 hostConfiguration.setHost(host, port, httpsProtocol);
             } else {

@@ -49,13 +49,18 @@
 
 package com.openexchange.imap.config;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.exception.OXException;
 
 /**
@@ -69,8 +74,6 @@ public final class IMAPReloadable implements Reloadable {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IMAPReloadable.class);
 
     private static final IMAPReloadable INSTANCE = new IMAPReloadable();
-
-    private static final String CONFIGFILE = "imap.properties";
 
     private static final String[] PROPERTIES = new String[] {"com.openexchange.imap.invalidMailboxNameCharacters",
         "com.openexchange.imap.enableTls", "com.openexchange.imap.maxNumExternalConnections", "com.openexchange.imap.maxNumConnections",
@@ -124,10 +127,35 @@ public final class IMAPReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        Set<String> properties = new TreeSet<>();
+        properties.addAll(Arrays.asList(PROPERTIES));
+        Set<String> fileNames = new TreeSet<>();
+
+        for (Reloadable reloadable : reloadables) {
+            Interests interests = reloadable.getInterests();
+            if (null == interests) {
+                return Reloadables.getInterestsForAll();
+            }
+
+            String[] propertiesOfInterest = interests.getPropertiesOfInterest();
+            if (null != propertiesOfInterest) {
+                properties.addAll(Arrays.asList(propertiesOfInterest));
+            }
+            String[] configFileNames = interests.getConfigFileNames();
+            if (null != configFileNames) {
+                fileNames.addAll(Arrays.asList(configFileNames));
+            }
+        }
+
+        Builder builder = DefaultInterests.builder();
+        if (!properties.isEmpty()) {
+            builder.propertiesOfInterest(properties.toArray(new String[properties.size()]));
+        }
+        if (!fileNames.isEmpty()) {
+            builder.configFileNames(fileNames.toArray(new String[fileNames.size()]));
+        }
+        return builder.build();
     }
 
 }

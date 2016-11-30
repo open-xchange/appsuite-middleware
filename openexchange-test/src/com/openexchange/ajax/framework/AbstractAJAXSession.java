@@ -64,10 +64,20 @@ public abstract class AbstractAJAXSession extends TestCase {
         super(name);
     }
 
+    /**
+     * Gets the client identifier to use when performing a login
+     *
+     * @return The client identifier or <code>null</code> to use default one (<code>"com.openexchange.ajax.framework.AJAXClient"</code>)
+     */
+    protected String getClientId() {
+        return null;
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
+        String clientId = getClientId();
+        client = null == clientId ? new AJAXClient(User.User1) : new AJAXClient(User.User1, clientId);
     }
 
     @Override
@@ -75,6 +85,7 @@ public abstract class AbstractAJAXSession extends TestCase {
         if (client != null) {
             // Client can be null if setUp() fails
             client.logout();
+            client = null;
         }
         super.tearDown();
     }

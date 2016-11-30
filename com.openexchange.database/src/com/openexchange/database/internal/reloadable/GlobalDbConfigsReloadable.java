@@ -49,12 +49,13 @@
 
 package com.openexchange.database.internal.reloadable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.internal.GlobalDatabaseServiceImpl;
 import com.openexchange.database.internal.GlobalDbConfig;
@@ -73,8 +74,6 @@ import com.openexchange.exception.OXException;
 public class GlobalDbConfigsReloadable implements Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalDbConfigsReloadable.class);
-
-    private static final String[] PROPERTIES = new String[] { "complete yaml file" };
 
     private static final AtomicReference<GlobalDatabaseServiceImpl> GLOBAL_DB_REF = new AtomicReference<>();
 
@@ -132,10 +131,8 @@ public class GlobalDbConfigsReloadable implements Reloadable {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(GlobalDbInit.CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().configFileNames(GlobalDbInit.CONFIGFILE).build();
     }
 
     public static void setGlobalDatabaseServiceRef(GlobalDatabaseServiceImpl lGlobalDatabaseServiceRef) {

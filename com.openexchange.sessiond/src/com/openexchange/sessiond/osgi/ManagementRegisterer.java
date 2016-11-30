@@ -57,7 +57,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.sessiond.SessiondMBean;
+import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 
 /**

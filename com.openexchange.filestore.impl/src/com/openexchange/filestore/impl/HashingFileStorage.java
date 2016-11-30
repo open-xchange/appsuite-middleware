@@ -143,14 +143,15 @@ public class HashingFileStorage extends DefaultFileStorage {
     }
 
     public String[] generateName() {
-        final String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+        // The random UUID for the file
+        final UUID uuid = UUID.randomUUID();
 
-        final String prefix = Integer.toHexString(uuid.hashCode());
-
-        final StringBuilder b = new StringBuilder();
-
+        // Build the directory prefix
+        StringBuilder b = new StringBuilder(10);
         int i = 0;
-        for (; i < prefix.length() && i < 6; i++) {
+        String prefix = Integer.toHexString(uuid.hashCode());
+        int length = prefix.length();
+        for (; i < length && i < 6; i++) {
             b.append(prefix.charAt(i));
             if (((i & 1) == 1) && (i > 0)) {
                 b.append('/');
@@ -162,10 +163,9 @@ public class HashingFileStorage extends DefaultFileStorage {
                 b.append('/');
             }
         }
-
         b.setLength(b.length()-1);
 
-        return new String[] { b.toString(), uuid };
+        return new String[] { b.toString(), UUIDs.getUnformattedString(uuid) };
     }
 
     @Override

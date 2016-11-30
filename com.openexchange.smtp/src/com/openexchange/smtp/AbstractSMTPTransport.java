@@ -104,6 +104,7 @@ import com.openexchange.log.audit.DefaultAttribute;
 import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -126,13 +127,21 @@ import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtil;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.JavaSMTPTransport;
 import com.sun.mail.smtp.SMTPMessage;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -452,10 +461,20 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         smtpProps.put("mail.smtp.sendpartial", "true");
                     }
                     /*
+                     * Enable XOAUTH2 (if appropriate)
+                     */
+                    if (AuthType.OAUTH == smtpConfig.getAuthType()) {
+                        smtpProps.put("mail.smtp.auth.mechanisms", "XOAUTH2");
+                    }
+                    /*
                      * Check if a secure SMTP connection should be established
                      */
-                    final String sPort = String.valueOf(smtpConfig.getPort());
-                    final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+                    String sPort = String.valueOf(smtpConfig.getPort());
+                    SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+                    String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
+                    String protocols = smtpConfig.getSMTPProperties().getSSLProtocols();
+                    String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
+                    SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
                     if (smtpConfig.isSecure()) {
                         /*
                          * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected
@@ -472,13 +491,24 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         /*
                          * Specify SSL protocols
                          */
-                        smtpProps.put("mail.smtp.ssl.protocols", smtpConfig.getSMTPProperties().getSSLProtocols());
+                        if (Strings.isNotEmpty(protocols)) {
+                            smtpProps.put("mail.smtp.ssl.protocols", protocols);
+                        } else {
+                            if (null == sslConfigService) {
+                                throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                            }
+                            smtpProps.put("mail.smtp.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+                        }
                         /*
                          * Specify SSL cipher suites
                          */
-                        final String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
-                        if (false == Strings.isEmpty(cipherSuites)) {
+                        if (Strings.isNotEmpty(cipherSuites)) {
                             smtpProps.put("mail.smtp.ssl.ciphersuites", cipherSuites);
+                        } else {
+                            if (null == sslConfigService) {
+                                throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                            }
+                            smtpProps.put("mail.smtp.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
                         }
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*
@@ -514,13 +544,24 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         /*
                          * Specify SSL protocols
                          */
-                        smtpProps.put("mail.smtp.ssl.protocols", smtpConfig.getSMTPProperties().getSSLProtocols());
+                        if (Strings.isNotEmpty(protocols)) {
+                            smtpProps.put("mail.smtp.ssl.protocols", protocols);
+                        } else {
+                            if (null == sslConfigService) {
+                                throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                            }
+                            smtpProps.put("mail.smtp.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+                        }
                         /*
                          * Specify SSL cipher suites
                          */
-                        final String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
-                        if (false == Strings.isEmpty(cipherSuites)) {
+                        if (Strings.isNotEmpty(cipherSuites)) {
                             smtpProps.put("mail.smtp.ssl.ciphersuites", cipherSuites);
+                        } else {
+                            if (null == sslConfigService) {
+                                throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                            }
+                            smtpProps.put("mail.smtp.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
                         }
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*
@@ -533,8 +574,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                      */
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, sPort);
-                    smtpSession = javax.mail.Session.getInstance(smtpProps, null);
+                    javax.mail.Session smtpSession = javax.mail.Session.getInstance(smtpProps, null);
                     smtpSession.addProvider(new Provider(Provider.Type.TRANSPORT, "smtp", JavaSMTPTransport.class.getName(), "OX Software GmbH", MailAccess.getVersion()));
+                    this.smtpSession = smtpSession;
                 }
             }
         }
@@ -610,10 +652,10 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         handlePrivilegedActionException(e);
                     }
                 } else {
-                    transport.connect(server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword);
+                    doConnectTransport(transport, server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword, smtpConfig, session);
                 }
             } else {
-                transport.connect(server, port, null, null);
+                doConnectTransport(transport, server, port, null, null, smtpConfig, session);
             }
 
             Session session = this.session;
@@ -627,10 +669,54 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         } catch (javax.mail.AuthenticationFailedException e) {
             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
         } catch (MessagingException e) {
-            if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {
-                throw SMTPExceptionCode.SECURE_CONNECTION_NOT_POSSIBLE.create(e.getNextException(), server, login);
+            if (MimeMailException.isSSLHandshakeException(e)) {
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
             }
             throw handleMessagingException(e, smtpConfig);
+        }
+    }
+
+    /**
+     * Connects specified transport using given arguments
+     *
+     * @param transport The transport to connect
+     * @param host The host name
+     * @param port The port
+     * @param user The user name
+     * @param password The password to use
+     * @throws OXException If connect attempt fails
+     * @throws MessagingException If connect attempt fails
+     */
+    protected static void doConnectTransport(Transport transport, String host, int port, String user, String password, SMTPConfig smtpConfig, Session session) throws OXException, MessagingException {
+        try {
+            transport.connect(host, port, user, password);
+        } catch (javax.mail.AuthenticationFailedException e) {
+            if (null == smtpConfig || null == session) {
+                throw e;
+            }
+
+            if (AuthType.OAUTH.equals(smtpConfig.getAuthType())) {
+                // Determine identifier of the associated OAuth account
+                int oauthAccountId = smtpConfig.getOAuthAccountId();
+                if (oauthAccountId >= 0) {
+                    OAuthService oauthService = Services.optService(OAuthService.class);
+                    if (null == oauthService) {
+                        LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
+                    } else {
+                        try {
+                            OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                            String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
+                            API api = oAuthAccount.getAPI();
+                            Throwable cause = e.getCause();
+                            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+                        } catch (Exception x) {
+                            LOG.warn("Failed to handle failed OAuth authentication", x);
+                        }
+                    }
+                }
+            }
+
+            throw e;
         }
     }
 
@@ -843,6 +929,19 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             }
         }
         return tmp;
+    }
+
+    @Override
+    protected boolean supports(AuthType authType) {
+        switch (authType) {
+            case LOGIN:
+                return true;
+            case OAUTH:
+                // Don't know better here
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -1482,8 +1581,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
 
         @Override
-        public Object run() throws MessagingException {
-            transport.connect(server, port, login, pw);
+        public Object run() throws Exception {
+            doConnectTransport(transport, server, port, login, pw, null, null);
             return null;
         }
     } // End of class SaslSmtpLoginAction

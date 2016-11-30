@@ -49,10 +49,8 @@
 
 package com.openexchange.ajax.fields;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  *
@@ -148,7 +146,7 @@ public final class ResponseFields {
     /**
      * A set of reserved identifiers.
      */
-    public static final Set<String> RESERVED_IDENTIFIERS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    public static final Set<String> RESERVED_IDENTIFIERS = ImmutableSet.of(
         DATA,
         WARNINGS,
         ERROR,
@@ -162,7 +160,7 @@ public final class ResponseFields {
         MAX_SIZES,
         PROBLEMATIC,
         TIMESTAMP,
-        TRUNCATED)));
+        TRUNCATED);
 
     /**
      * Prevent instantiation.

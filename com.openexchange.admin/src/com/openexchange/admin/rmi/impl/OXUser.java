@@ -66,6 +66,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
@@ -112,9 +114,6 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -1277,6 +1276,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // change cached admin credentials if necessary
         if (isContextAdmin && usrdata.getPassword() != null) {
             final Credentials cauth = cache.getAdminCredentials(ctx);
+            if(cauth==null){
+                // change via master credentials and no admin credentials in cache
+                return;
+            }
+
             final String mech = cache.getAdminAuthMech(ctx);
             if ("{CRYPT}".equalsIgnoreCase(mech)) {
                 try {
@@ -1788,21 +1792,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (viewFactory != null) {
-            ConfigView view;
-            try {
-                view = viewFactory.getView(usr.getId(), ctx.getId());
-                Boolean check = view.get("com.openexchange.imap.initWithSpecialUse", Boolean.class);
-                if (check != null && check) {
-                    ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
-                    prop.set(Boolean.TRUE);
-                }
-            } catch (OXException e) {
-                LOGGER.error("Unable to set special use check property!");
-            }
-        }
-
         // Return created user
         return usr;
     }
@@ -1886,11 +1875,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
                 }
             } else {
-                if (destUser > 0) { // Move to master store
-                    if (!tool.existsUser(ctx, destUser)) {
-                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
+                if (destUser.intValue() > 0) { // Move to master store
+                    if (!tool.existsUser(ctx, destUser.intValue())) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser, ctx.getId()));
                     }
-                    User masterUser = new User(destUser);
+                    if (!tool.isMasterFilestoreOwner(ctx, destUser.intValue())) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s is not an owner of a filestore. Please choose a different reassign user.", destUser, ctx.getId()));
+                    }
+                    User masterUser = new User(destUser.intValue());
                     for (User filestoreOwner : filestoreOwners) {
                         LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
                         moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
@@ -2745,6 +2737,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     /**
+     * Property name black list REGEX. Taken from the oxsysreport
+     */
+    private static final Pattern PROPERTY_BLACK_LIST = Pattern.compile("[pP]assword[[:blank:]]*|[sS]ecret[[:blank:]]*|[kK]ey[[:blank:]]*|secretSource[[:blank:]]*|secretRandom[[:blank:]]*|[sS]alt[[:blank:]]*|SSLKey(Pass|Name)[[:blank:]]*|[lL]ogin[[:blank:]]*");
+
+    /**
      *
      * {@inheritDoc}
      */
@@ -2777,7 +2774,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
 
             for (ConfigurationProperty property: capabilitiesSource) {
-                userProperties.add(new UserProperty(property.getScope(), property.getName(), property.getValue()));
+                Matcher m = PROPERTY_BLACK_LIST.matcher(property.getName());
+                String value = m.find() ? "<OBFUSCATED>" : property.getValue();
+                userProperties.add(new UserProperty(property.getScope(), property.getName(), value));
             }
 
             Collections.sort(userProperties, new OXUserPropertySorter());

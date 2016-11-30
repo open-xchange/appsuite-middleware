@@ -78,7 +78,6 @@ public interface AntiAbuseService {
      * Performs the <code>"report"</code> request.
      *
      * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param rejectedByWeakforced <code>true</code>
      * @param login The login string
      * @param password The password
      * @param remoteAddress The remote address

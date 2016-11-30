@@ -1,0 +1,26 @@
+array:
+  - data:
+      Key: com.openexchange.advertisement.<reseller>.packageScheme
+      Description: >
+        Defines which package scheme is used for the reseller. <reseller> can be replaced with either the reseller name or the reseller id.
+        Use 'OX_ALL' for the default reseller. Available package schemes are:
+        Global - always uses the default reseller and default package.
+        AccessCombinations - Using access combination names to retrive the package.
+        TaxonomyTypes - Using taxonomy types to retrieve the package.
+      Default: Global
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related: 
+      File: advertisement.properties
+  - data:
+      Key: com.openexchange.advertisement.<reseller>.taxonomy.types
+      Description: >
+        Defines a comma separated list of taxonomy types which are used as package identifiers. 
+        This list is used by the 'TaxonomyTypes' package scheme to identify the package.
+      Default: 
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related: 
+      File: advertisement.properties

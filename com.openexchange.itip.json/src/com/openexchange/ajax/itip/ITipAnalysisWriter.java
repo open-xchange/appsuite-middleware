@@ -52,11 +52,9 @@ package com.openexchange.ajax.itip;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
@@ -239,20 +237,30 @@ public class ITipAnalysisWriter {
 
         final Difference difference = (Difference) extraInfo;
         if (difference.getField() != Difference.COMMON) {
-            JSONObject json = new JSONObject();
-            CalendarDataObject calendarDataObject = new CalendarDataObject();
-            calendarDataObject.set(difference.getField(), difference.getAdded());
-            appointmentWriter.writeAppointment(calendarDataObject, json);
-            extraInfoObject.put("added", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
+            if (null != difference.getAdded() || !difference.getAdded().isEmpty()) {
+                JSONObject json = new JSONObject();
+                CalendarDataObject calendarDataObject = new CalendarDataObject();
+                calendarDataObject.set(difference.getField(), difference.getAdded());
+                appointmentWriter.writeAppointment(calendarDataObject, json);
+                Object opt = json.opt(CalendarField.getByColumn(difference.getField()).getJsonName());
+                if (null != opt) {
+                    extraInfoObject.put("added", opt);
+                }
+            }
 
-            json = new JSONObject();
-            calendarDataObject = new CalendarDataObject();
-            calendarDataObject.set(difference.getField(), difference.getRemoved());
-            appointmentWriter.writeAppointment(calendarDataObject, json);
-            extraInfoObject.put("removed", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
+            if (null != difference.getRemoved() || !difference.getRemoved().isEmpty()) {
+                JSONObject json = new JSONObject();
+                CalendarDataObject calendarDataObject = new CalendarDataObject();
+                calendarDataObject.set(difference.getField(), difference.getRemoved());
+                appointmentWriter.writeAppointment(calendarDataObject, json);
+                Object opt = json.opt(CalendarField.getByColumn(difference.getField()).getJsonName());
+                if (null != opt) {
+                    extraInfoObject.put("removed", opt);
+                }
+            }
 
             final List<Change> changed = difference.getChanged();
-            final JSONArray jsonChanges = new JSONArray();
+            final JSONArray jsonChanges = new JSONArray(changed.size());
             for (final Change change : changed) {
                 if (!ConfirmationChange.class.isInstance(change)) {
                     continue;
@@ -261,7 +269,10 @@ public class ITipAnalysisWriter {
                 final JSONObject jsonChange = new JSONObject();
                 jsonChange.put("id", confirmationChange.getIdentifier());
                 if (confirmationChange.getNewMessage() != null) {
-                    jsonChange.put("oldMessage", confirmationChange.getOldMessage());
+                    String oldMessage = confirmationChange.getOldMessage();
+                    if (null != oldMessage) {
+                        jsonChange.put("oldMessage", oldMessage);
+                    }
                     jsonChange.put("newMessage", confirmationChange.getNewMessage());
                 }
                 if (confirmationChange.getNewStatus() != -1) {

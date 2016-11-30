@@ -133,12 +133,13 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
             throw new JSONException("Unknown test command while creating object: " + id);
         }
         TestCommand parsedTestCommand = parser.parse(object);
-        if (existingTestCommand == null) {
-            if (rule.getCommands().isEmpty()) {
-                rule.addCommand(new IfCommand(parsedTestCommand));
-            }
-        } else {
+        if (existingTestCommand != null) {
             rule.getIfCommand().setTestcommand(parsedTestCommand);
+            return;
+        }
+        
+        if (rule.getCommands().isEmpty()) {
+            rule.addCommand(new IfCommand(parsedTestCommand));
         }
     }
 }

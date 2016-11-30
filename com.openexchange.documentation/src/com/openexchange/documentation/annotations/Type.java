@@ -53,7 +53,9 @@ package com.openexchange.documentation.annotations;
  * {@link Type} - Types for {@link Parameter}s used by {@link Action}s and {@link Attribute}s used by {@link Container}s.
  *
  * @author <a href="tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @deprecated Never used & obsolete, therefore <b>to be removed with v7.10.0</b>. See <a href="../../../../../http-api/readme.md">http-api/readme.md</a> for details about API documentation.
  */
+@Deprecated
 public enum Type {
 	/**
 	 * Value   ::= "null" | Boolean | Number | String | Array | Object

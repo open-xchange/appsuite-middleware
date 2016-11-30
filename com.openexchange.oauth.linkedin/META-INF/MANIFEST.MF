@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Social OX Plug-In for LinkedIn
 Bundle-SymbolicName: com.openexchange.oauth.linkedin
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.oauth.linkedin.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -27,6 +27,8 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.json,
  com.openexchange.log,
  com.openexchange.oauth,
+ com.openexchange.oauth.impl,
+ com.openexchange.oauth.scope,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,

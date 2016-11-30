@@ -1,0 +1,57 @@
+# Configuration file for global, cross-context databases
+
+# Please ensure that the same version of this configuration file is used for 
+# all nodes in the cluster.
+
+# By default, no database is configured, so that features that require access
+# to the cross-context database are not available.
+
+# For each cross-context database, the database pool identifier, as well as 
+# the associated context groups need to be specified. The "id" property refers
+# to the database pool identifier of the corresponding database master of the 
+# targeted pool, previously registered with "./registerdatabase". The 
+# identifier is also printed out when executing the "./listdatabase" 
+# commandline tool.
+ 
+# In most cases, it's sufficient to configure the same global database 
+# settings for the whole user base of the installation. For that purpose, the 
+# "default" section is used, and no further configuration steps are necessary 
+# after the referenced database has been registered.
+
+# For setups serving multiple different "brands" or "domains", one or more 
+# contexts can be classified into a specific "group". The association with
+# the group is done by assigning the property "com.openexchange.context.group"
+# to a context via config cascade. A context may only be part of one group,
+# contexts without group association automatically fall into the "default"
+# group. 
+
+# Having contexts separated into different groups also allows to use different
+# global databases as defined in the additional sections of this configuration 
+# file. Context groups are bound to each configuration section by specifying 
+# the group name in the "groups" array. 
+# Each group name can only be specified in one section. The name of each
+# configuration block may be chosen freely, yet the referenced group names 
+# have to match the actual values assigned to the contexts via 
+# "com.openexchange.context.group".
+
+# Besides using different database schemas for the cross-context database, the 
+# context group names also serve as differentiating key for various data held 
+# in the global databases. For example, data of a guest user that was invited 
+# to a share in one context of a group can be used throughout all other 
+# contexts of the same group. Or, there may be a different set of registered 
+# OAuth applications available for each context group.
+
+
+# Section for the "default" global database. The configuration becomes active 
+# once the "id" is defined.
+default:
+    groups: [default]
+    id:
+
+# Example for an additional configuration setting that directs all cross-
+# context data from the context groups "de", "fr" and "nl" to the database
+# pool with identifier 32. As outlined above, contexts may be assigned to 
+# those groups via config cascade.
+# central_europe:
+#     groups: [de, fr, nl]
+#     id: 32

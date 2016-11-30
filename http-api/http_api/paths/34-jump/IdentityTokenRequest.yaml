@@ -2,8 +2,8 @@
   get:
     operationId: acquireIdentityToken
     tags:
-      - jump
-    summary: Acquires an identity token (**available since v7.6.0**).
+      - Jump
+    summary: Acquires an identity token.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -14,6 +14,6 @@
       200:
         description: |
           A JSON object containing the identity token. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/JumpResponse"

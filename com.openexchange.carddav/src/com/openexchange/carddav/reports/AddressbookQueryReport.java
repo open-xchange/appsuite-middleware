@@ -51,12 +51,15 @@ package com.openexchange.carddav.reports;
 
 import static com.openexchange.dav.DAVProtocol.CARD_NS;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.actions.PROPFINDAction;
@@ -97,7 +100,7 @@ public class AddressbookQueryReport extends PROPFINDAction {
     public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
         CardDAVCollection collection = requireResource(request, CardDAVCollection.class);
         Element rootElement = requireRootElement(request, CARD_NS, "addressbook-query");
-        SearchTerm<?> searchTerm = parseFilter(rootElement.getChild("filter", CARD_NS));
+        SearchTerm<?> searchTerm = parseFilter(collection.getFactory(), rootElement.getChild("filter", CARD_NS));
         List<WebdavResource> resources;
         if (null == searchTerm) {
             /*
@@ -120,9 +123,32 @@ public class AddressbookQueryReport extends PROPFINDAction {
         sendMultistatusResponse(response, multistatusElement);
     }
 
-    private SearchTerm<?> parsePropFilter(Element propFilterElement) throws WebdavProtocolException {
+    private SearchTerm<?> parseFilter(DAVFactory factory, Element filterElement) throws WebdavProtocolException {
+        if (null == filterElement) {
+            return null;
+        }
+        List<Element> propFilterElements = filterElement.getChildren("prop-filter", CARD_NS);
+        if (null == propFilterElements || 0 == propFilterElements.size()) {
+            return null;
+        }
+        if (1 == propFilterElements.size()) {
+            return parsePropFilter(factory, propFilterElements.get(0));
+        }
+        CompositeOperation operation = CompositeOperation.OR;
+        Attribute testAttribute = filterElement.getAttribute("test");
+        if (null != testAttribute && "allof".equals(testAttribute.getValue())) {
+            operation = CompositeOperation.AND;
+        }
+        CompositeSearchTerm compositeTerm = new CompositeSearchTerm(operation);
+        for (Element propFilterElement : propFilterElements) {
+            compositeTerm.addSearchTerm(parsePropFilter(factory, propFilterElement));
+        }
+        return compositeTerm;
+    }
+
+    private SearchTerm<?> parsePropFilter(DAVFactory factory, Element propFilterElement) throws WebdavProtocolException {
         String name = propFilterElement.getAttributeValue("name");
-        ContactField[] matchingFields = getMatchingFields(name);
+        ContactField[] matchingFields = getMatchingFields(factory, name);
         if (null == matchingFields || 0 == matchingFields.length) {
             throw new PreconditionException(CARD_NS.getURI(), "supported-filter", null, HttpServletResponse.SC_FORBIDDEN);
         }
@@ -175,65 +201,11 @@ public class AddressbookQueryReport extends PROPFINDAction {
         return term;
     }
 
-    private static ContactField[] getMatchingFields(String attributeName) {
+    private static ContactField[] getMatchingFields(DAVFactory factory, String attributeName) {
         if (null == attributeName) {
             return null;
         }
-        switch (attributeName) {
-            case "EMAIL":
-                return new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
-            case "FN":
-                return new ContactField[] { ContactField.DISPLAY_NAME };
-            case "N":
-                return new ContactField[] { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.MIDDLE_NAME, ContactField.TITLE, ContactField.SUFFIX };
-            case "NICKNAME":
-                return new ContactField[] { ContactField.NICKNAME };
-            case "COMPANY":
-                return new ContactField[] { ContactField.COMPANY };
-            case "TEL":
-                return new ContactField[] { ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_TTYTDD, ContactField.TELEPHONE_ISDN,
-                    ContactField.TELEPHONE_CAR, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.TELEPHONE_CALLBACK,
-                    ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_ASSISTANT, ContactField.TELEPHONE_IP, ContactField.TELEPHONE_RADIO,
-                    ContactField.TELEPHONE_PRIMARY, ContactField.FAX_BUSINESS, ContactField.FAX_HOME, ContactField.FAX_OTHER,
-                    ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_HOME1, ContactField.TELEPHONE_HOME2,
-                    ContactField.TELEPHONE_OTHER
-                };
-            case "UID":
-                return new ContactField[] { ContactField.UID };
-            case "CATEGORIES":
-                return new ContactField[] { ContactField.CATEGORIES };
-            case "NOTE":
-                return new ContactField[] { ContactField.NOTE };
-            case "ORG":
-                return new ContactField[] { ContactField.COMPANY, ContactField.DEPARTMENT, ContactField.BRANCHES };
-            case "IM":
-                return new ContactField[] { ContactField.INSTANT_MESSENGER1, ContactField.INSTANT_MESSENGER2 };
-            default:
-                return null;
-        }
-    }
-
-    private SearchTerm<?> parseFilter(Element filterElement) throws WebdavProtocolException {
-        if (null == filterElement) {
-            return null;
-        }
-        List<Element> propFilterElements = filterElement.getChildren("prop-filter", CARD_NS);
-        if (null == propFilterElements || 0 == propFilterElements.size()) {
-            return null;
-        }
-        if (1 == propFilterElements.size()) {
-            return parsePropFilter(propFilterElements.get(0));
-        }
-        CompositeOperation operation = CompositeOperation.OR;
-        Attribute testAttribute = filterElement.getAttribute("test");
-        if (null != testAttribute && "allof".equals(testAttribute.getValue())) {
-            operation = CompositeOperation.AND;
-        }
-        CompositeSearchTerm compositeTerm = new CompositeSearchTerm(operation);
-        for (Element propFilterElement : propFilterElements) {
-            compositeTerm.addSearchTerm(parsePropFilter(propFilterElement));
-        }
-        return compositeTerm;
+        return factory.getService(VCardService.class).getContactFields(Collections.singleton(attributeName));
     }
 
 }

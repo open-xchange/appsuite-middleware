@@ -94,6 +94,20 @@ public class TransportAccountImpl implements TransportAccount {
     private String transportServer;
     private String transportServerUrl;
     private boolean transportStartTls;
+    protected int transportOAuthId;
+
+    /**
+     * Initializes a new {@link TransportAccountImpl}.
+     */
+    public TransportAccountImpl() {
+        super();
+        transportProperties = new HashMap<>(4);
+        transportAuth = TransportAuth.MAIL;
+        transportPort = 25;
+        transportProtocol = "smtp";
+        id = -1;
+        transportOAuthId = -1;
+    }
 
     @Override
     public String generateTransportServerURL() {
@@ -121,6 +135,11 @@ public class TransportAccountImpl implements TransportAccount {
     @Override
     public int getId() {
         return this.id;
+    }
+
+    @Override
+    public boolean isMailAccount() {
+        return false;
     }
 
     @Override
@@ -290,7 +309,7 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public void setTransportProperties(final Map<String, String> transportProperties) {
         if (null == transportProperties) {
-            this.transportProperties = new HashMap<String, String>(4);
+            this.transportProperties = new HashMap<>(4);
         } else {
             this.transportProperties = transportProperties;
         }
@@ -331,6 +350,25 @@ public class TransportAccountImpl implements TransportAccount {
         this.transportServer = transportServer == null ? null : IDNA.toUnicode(transportServer);
     }
 
+    @Override
+    public boolean isTransportOAuthAble() {
+        return transportOAuthId >= 0;
+    }
+
+    @Override
+    public int getTransportOAuthId() {
+        return transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for transport server
+     *
+     * @param transportOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setTransportOAuthId(int transportOAuthId) {
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
     /**
      * Sets the transport server.
      *
@@ -355,14 +393,19 @@ public class TransportAccountImpl implements TransportAccount {
     }
 
     /**
-     * Sets the startTLS flag
+     * Sets the STARTTLS flag
      *
-     * @param startTLS The startTLS flag
+     * @param startTLS The STARTTLS flag
      */
     public void setTransportStartTls(boolean startTLS) {
         this.transportStartTls = startTLS;
     }
 
+    /**
+     * Sets the send address
+     *
+     * @param sendAddress The send address
+     */
     public void setSendAddress(String sendAddress) {
         this.sendAddress = sendAddress;
     }

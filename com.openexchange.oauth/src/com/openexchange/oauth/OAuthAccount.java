@@ -49,12 +49,16 @@
 
 package com.openexchange.oauth;
 
+import java.util.Set;
+import com.openexchange.oauth.scope.OAuthScope;
+
 /**
  * {@link OAuthAccount} - Represents an OAuth account.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OAuthAccount extends OAuthToken {
 
@@ -86,4 +90,10 @@ public interface OAuthAccount extends OAuthToken {
      */
     API getAPI();
 
+    /**
+     * Returns an unmodifiable {@link Set} with all enabled {@link OAuthScope}s for this {@link OAuthAccount}
+     * 
+     * @return an unmodifiable {@link Set} with all enabled {@link OAuthScope}s for this {@link OAuthAccount}
+     */
+    Set<OAuthScope> getEnabledScopes();
 }

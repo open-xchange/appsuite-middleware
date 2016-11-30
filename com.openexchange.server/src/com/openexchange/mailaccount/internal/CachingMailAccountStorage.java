@@ -269,6 +269,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public void propagateEvent(com.openexchange.mailaccount.Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException {
+        delegate.propagateEvent(event, id, eventProps, userId, contextId);
+    }
+
+    @Override
     public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary, Connection con) throws OXException {
         dropSessionParameter(userId, contextId);
 
@@ -307,6 +312,21 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             }
         };
         ThreadPools.getThreadPool().submit(task);
+    }
+
+    @Override
+    public int acquireId(int userId, Context ctx) throws OXException {
+        return delegate.acquireId(userId, ctx);
+    }
+
+    @Override
+    public String getDefaultFolderPrefix(Session session) throws OXException {
+        return delegate.getDefaultFolderPrefix(session);
+    }
+
+    @Override
+    public char getDefaultSeparator(Session session) throws OXException {
+        return delegate.getDefaultSeparator(session);
     }
 
     @Override
@@ -391,24 +411,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return (MailAccount) object;
             }
 
-            RdbMailAccountStorage d = delegate;
-            try {
-                MailAccount mailAccount = d.getMailAccount(id, userId, contextId);
-                cache.put(key, mailAccount, false);
-                return mailAccount;
-            } catch (OXException e) {
-                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                Connection wcon = Database.get(contextId, true);
-                try {
-                    MailAccount mailAccount = d.getMailAccount(id, userId, contextId, wcon);
-                    cache.put(key, mailAccount, false);
-                    return mailAccount;
-                } finally {
-                    Database.backAfterReading(contextId, wcon);
-                }
-            }
+            MailAccount mailAccount = delegate.getMailAccount(id, userId, contextId);
+            cache.put(key, mailAccount, false);
+            return mailAccount;
         } finally {
             lock.unlock();
         }
@@ -732,7 +737,13 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         dropSessionParameter(userId, contextId);
         delegate.deleteTransportAccount(id, userId, contextId);
         invalidateMailAccount(id, userId, contextId);
+    }
 
+    @Override
+    public void deleteTransportAccount(int id, int userId, int contextId, Connection con) throws OXException {
+        dropSessionParameter(userId, contextId);
+        delegate.deleteTransportAccount(id, userId, contextId, con);
+        invalidateMailAccount(id, userId, contextId);
     }
 
     @Override
@@ -758,24 +769,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return (TransportAccount) object;
             }
 
-            RdbMailAccountStorage d = delegate;
-            try {
-                TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, con);
-                cache.put(key, transportAccount, false);
-                return transportAccount;
-            } catch (OXException e) {
-                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                Connection wcon = Database.get(contextId, true);
-                try {
-                    TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, wcon);
-                    cache.put(key, transportAccount, false);
-                    return transportAccount;
-                } finally {
-                    Database.backAfterReading(contextId, wcon);
-                }
-            }
+            TransportAccount transportAccount = delegate.getTransportAccount(accountId, userId, contextId, con);
+            cache.put(key, transportAccount, false);
+            return transportAccount;
         } finally {
             lock.unlock();
         }
@@ -783,11 +779,6 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int contextId, Session session) throws OXException {
-        if (null != session) {
-            session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
-        }
-        dropSessionParameter(userId, contextId);
-
         TransportAccount changedAccount = delegate.updateAndReturnTransportAccount(transportAccount, userId, contextId, session);
         invalidateMailAccount(transportAccount.getId(), userId, contextId);
 
@@ -796,6 +787,36 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             Cache cache = cacheService.getCache(REGION_NAME);
             CacheKey key = newCacheKey(cacheService, transportAccount.getId(), userId, contextId);
             cache.put(key, changedAccount, false);
+        }
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException {
+        delegate.updateTransportAccount(transportAccount, attributes, userId, contextId, session);
+
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService != null) {
+            Cache cache = cacheService.getCache(REGION_NAME);
+            CacheKey key = newCacheKey(cacheService, transportAccount.getId(), userId, contextId);
+            Object object = cache.get(key);
+            if (null != object) {
+                cache.remove(key);
+            }
+        }
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
+        delegate.updateTransportAccount(transportAccount, attributes, userId, contextId, updateProperties);
+
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService != null) {
+            Cache cache = cacheService.getCache(REGION_NAME);
+            CacheKey key = newCacheKey(cacheService, transportAccount.getId(), userId, contextId);
+            Object object = cache.get(key);
+            if (null != object) {
+                cache.remove(key);
+            }
         }
     }
 
@@ -822,24 +843,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return (TransportAccount) object;
             }
 
-            RdbMailAccountStorage d = delegate;
-            try {
-                TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId);
-                cache.put(key, transportAccount, false);
-                return transportAccount;
-            } catch (OXException e) {
-                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                Connection wcon = Database.get(contextId, true);
-                try {
-                    TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, wcon);
-                    cache.put(key, transportAccount, false);
-                    return transportAccount;
-                } finally {
-                    Database.backAfterReading(contextId, wcon);
-                }
-            }
+            TransportAccount transportAccount = delegate.getTransportAccount(accountId, userId, contextId);
+            cache.put(key, transportAccount, false);
+            return transportAccount;
         } finally {
             lock.unlock();
         }

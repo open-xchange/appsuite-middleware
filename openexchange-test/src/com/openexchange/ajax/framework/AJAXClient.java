@@ -85,7 +85,11 @@ public class AJAXClient {
         this.mustLogout = logout;
     }
 
-    public AJAXClient(final User user) throws OXException, OXException, IOException, JSONException {
+    public AJAXClient(User user) throws OXException, OXException, IOException, JSONException {
+        this(user, AJAXClient.class.getName());
+    }
+
+    public AJAXClient(User user, String client) throws OXException, OXException, IOException, JSONException {
         super();
         AJAXConfig.init();
         String login = AJAXConfig.getProperty(user.getLogin());
@@ -112,7 +116,7 @@ public class AJAXClient {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getPassword().getPropertyName());
         }
         session = new AJAXSession();
-        session.setId(execute(new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), VERSION)).getSessionId());
+        session.setId(execute(new LoginRequest(login, password, LoginTools.generateAuthId(), null == client ? AJAXClient.class.getName() : client, VERSION)).getSessionId());
     }
 
     public AJAXClient() throws OXException {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Proxy Servlet Bundle
 Bundle-SymbolicName: com.openexchange.proxy.servlet
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax,
@@ -11,6 +11,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.net.ssl,
  com.openexchange.osgi,
  com.openexchange.proxy,
  com.openexchange.server,
@@ -19,6 +20,8 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.timer,
  com.openexchange.tools.service,
  com.openexchange.tools.ssl,
+ javax.net,
+ javax.net.ssl,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.httpclient,

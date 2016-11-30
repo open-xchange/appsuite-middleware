@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.linkedin.osgi;
 
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
@@ -89,7 +90,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     public void registerServices() {
-        if (null != oAuthServiceMetadata && null != linkedInService && null != contextService){
+        if (null != oAuthServiceMetadata && null != linkedInService && null != contextService) {
             final LinkedInSubscribeService linkedInSubscribeService = new LinkedInSubscribeService(this);
             registerService(SubscribeService.class, linkedInSubscribeService);
 

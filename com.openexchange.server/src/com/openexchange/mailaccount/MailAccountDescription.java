@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
@@ -113,12 +114,18 @@ public final class MailAccountDescription implements Serializable {
     private String confirmedHamFullname;
     private Map<String, String> properties;
     private Map<String, String> transportProperties;
+    private int mailOAuthId;
+    private int transportOAuthId;
+    private AuthType authType;
+    private AuthType transportAuthType;
 
     /**
      * Initializes a new {@link MailAccountDescription}.
      */
     public MailAccountDescription() {
         super();
+        authType = AuthType.LOGIN;
+        transportAuthType = null;
         properties = new HashMap<String, String>(4);
         transportProperties = new HashMap<String, String>(4);
         transportAuth = TransportAuth.MAIL;
@@ -127,6 +134,8 @@ public final class MailAccountDescription implements Serializable {
         transportProtocol = "smtp";
         mailProtocol = "imap";
         id = -1;
+        mailOAuthId = -1;
+        transportOAuthId = -1;
     }
 
     /**
@@ -145,6 +154,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public String getLogin() {
         return login;
+    }
+
+    /**
+     * Gets the authentication type.
+     *
+     * @return The authentication type
+     */
+    public AuthType getAuthType() {
+        return authType;
     }
 
     /**
@@ -211,6 +229,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setLogin(final String login) {
         this.login = login;
+    }
+
+    /**
+     * Sets the authentication type.
+     *
+     * @param authType The authentication type to set
+     */
+    public void setAuthType(AuthType authType) {
+        this.authType = authType;
     }
 
     /**
@@ -303,7 +330,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets if STARTTLS should be used to connect to mail server
-     * 
+     *
      * @return
      */
     public void setMailStartTls(boolean mailStartTls) {
@@ -312,7 +339,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Checks if STARTTLS should be used to connect to mail server
-     * 
+     *
      * @return
      */
     public boolean isMailStartTls() {
@@ -418,7 +445,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets if STARTTLS should be used to connect to transport server
-     * 
+     *
      * @return
      */
     public void setTransportStartTls(boolean transportStartTls) {
@@ -427,11 +454,65 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Checks if STARTTLS should be used to connect to transport server
-     * 
+     *
      * @return
      */
     public boolean isTransportStartTls() {
         return transportStartTls;
+    }
+
+    /**
+     * Checks if mail server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
+     */
+    public boolean isMailOAuthAble() {
+        return mailOAuthId >= 0;
+    }
+
+    /**
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against mail server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
+     */
+    public int getMailOAuthId() {
+        return mailOAuthId < 0 ? -1 : mailOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for mail server
+     *
+     * @param mailOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setMailOAuthId(int mailOAuthId) {
+        this.mailOAuthId = mailOAuthId < 0 ? -1 : mailOAuthId;
+    }
+
+    /**
+     * Checks if transport server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
+     */
+    public boolean isTransportOAuthAble() {
+        return transportOAuthId >= 0;
+    }
+
+    /**
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against transport server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
+     */
+    public int getTransportOAuthId() {
+        return transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for transport server
+     *
+     * @param transportOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setTransportOAuthId(int transportOAuthId) {
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
     }
 
     /**
@@ -819,6 +900,15 @@ public final class MailAccountDescription implements Serializable {
     }
 
     /**
+     * Gets the transport authentication type.
+     *
+     * @return The transport authentication type
+     */
+    public AuthType getTransportAuthType() {
+        return transportAuthType;
+    }
+
+    /**
      * Sets the optional transport login.
      *
      * @param transportLogin The optional transport login
@@ -834,6 +924,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setTransportPassword(final String transportPassword) {
         this.transportPassword = transportPassword;
+    }
+
+    /**
+     * Sets the optional transport authentication type.
+     *
+     * @param transportAuthType The optional transport authentication type
+     */
+    public void setTransportAuthType(AuthType transportAuthType) {
+        this.transportAuthType = transportAuthType;
     }
 
     /**
@@ -1088,4 +1187,5 @@ public final class MailAccountDescription implements Serializable {
         }
         return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
     }
+
 }

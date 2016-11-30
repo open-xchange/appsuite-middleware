@@ -49,16 +49,13 @@
 
 package com.openexchange.importexport.actions.exporter;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.importexport.exporters.CSVContactExporter;
 import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.json.ExportRequest;
 
 @DispatcherNotes(defaultFormat="file")
-public class CsvExportAction extends AbstractExportAction {
+public class CsvExportAction extends ContactExportAction {
 
 	private Exporter exporter;
 
@@ -73,21 +70,6 @@ public class CsvExportAction extends AbstractExportAction {
 			exporter = new CSVContactExporter();
 		}
 		return exporter;
-	}
-
-	@Override
-	protected Map<String, Object> getOptionalParams(ExportRequest req) {
-	    Map<String, Object> params = super.getOptionalParams(req);
-	    if (params == null) {
-	        params = new HashMap<String, Object>();
-	    }
-
-	    final String exportDlistsParam = req.getRequest().getParameter(CSVContactExporter.PARAMETER_EXPORT_DLISTS);
-	    if (exportDlistsParam != null) {
-	        params.put(CSVContactExporter.PARAMETER_EXPORT_DLISTS, exportDlistsParam);
-	    }
-
-	    return params;
 	}
 
 }

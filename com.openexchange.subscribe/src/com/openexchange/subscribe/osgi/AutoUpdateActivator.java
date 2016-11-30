@@ -52,11 +52,17 @@ package com.openexchange.subscribe.osgi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.DefaultRequestContext;
+import com.openexchange.framework.request.RequestContext;
+import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
@@ -66,8 +72,8 @@ import com.openexchange.session.Session;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
 
 /**
  * {@link AutoUpdateActivator}
@@ -76,24 +82,52 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AutoUpdateActivator extends HousekeepingActivator implements BundleActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoUpdateActivator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoUpdateActivator.class);
 
-    public static OSGiSubscriptionSourceDiscoveryCollector COLLECTOR;
+    private static final AtomicReference<OSGiSubscriptionSourceDiscoveryCollector> COLLECTOR_REFERENCE = new AtomicReference<>();
+    
+    /**
+     * Sets the collector to use
+     *
+     * @param collector The collector to use
+     */
+    public static void setCollector(OSGiSubscriptionSourceDiscoveryCollector collector) {
+        COLLECTOR_REFERENCE.set(collector);
+    }
 
-    public static SubscriptionExecutionServiceImpl EXECUTOR;
+    private static final AtomicReference<SubscriptionExecutionServiceImpl> EXECUTOR_REFERENCE = new AtomicReference<>();
+    
+    /**
+     * Sets the executor to use.
+     *
+     * @param executor The executor to use
+     */
+    public static void setExecutor(SubscriptionExecutionServiceImpl executor) {
+        EXECUTOR_REFERENCE.set(executor);
+    }
+    
+    // -------------------------------------------------------------------------------
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigViewFactory.class, SecretService.class};
+        return new Class[] { ConfigViewFactory.class, SecretService.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerService(LoginHandlerService.class, new SubscriptionLoginHandler());
     }
-
+    
+    private static final Long DEFAULT_INTERVAL = Long.valueOf(24 * 60 * 60 * 1000l);
 
     private final class SubscriptionLoginHandler implements LoginHandlerService, NonTransient {
+
+        /**
+         * Initializes a new {@link AutoUpdateActivator.SubscriptionLoginHandler}.
+         */
+        SubscriptionLoginHandler() {
+            super();
+        }
 
         @Override
         public void handleLogin(LoginResult login) throws OXException {
@@ -102,8 +136,16 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
                 if (!view.opt("com.openexchange.subscribe.autorun", boolean.class, false)) {
                     return;
                 }
-                if (COLLECTOR == null || EXECUTOR == null) {
-                    LOG.warn("Autoupdate of subscriptions enabled but collector {} or executor {} not available.", COLLECTOR, EXECUTOR);
+                
+                OSGiSubscriptionSourceDiscoveryCollector collector = COLLECTOR_REFERENCE.get();
+                if (collector == null) {
+                    LOG.warn("Autoupdate of subscriptions enabled but collector not available.");
+                    return;
+                }
+                
+                SubscriptionExecutionServiceImpl executor = EXECUTOR_REFERENCE.get();
+                if (executor == null) {
+                    LOG.warn("Autoupdate of subscriptions enabled but executor not available.");
                     return;
                 }
 
@@ -112,13 +154,12 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
                 String secret = getService(SecretService.class).getSecret(session);
                 long now = System.currentTimeMillis();
 
-
-                List<SubscriptionSource> sources = COLLECTOR.getSources();
+                List<SubscriptionSource> sources = collector.getSources();
                 List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
 
                 for (SubscriptionSource subscriptionSource : sources) {
-                    String autorunName = subscriptionSource.getId()+".autorunInterval";
-                    Long interval = view.opt(autorunName, Long.class, 24 * 60 * 60 * 1000l);
+                    String autorunName = subscriptionSource.getId() + ".autorunInterval";
+                    long interval = view.opt(autorunName, Long.class, DEFAULT_INTERVAL).longValue();
                     if (interval < 0) {
                         continue;
                     }
@@ -131,7 +172,10 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
                     }
                 }
 
-                EXECUTOR.executeSubscriptions(subscriptionsToRefresh, ServerSessionAdapter.valueOf(session), null);
+                // Set request context
+                RequestContextHolder.set(buildRequestContext(login));
+
+                executor.executeSubscriptions(subscriptionsToRefresh, ServerSessionAdapter.valueOf(session), null);
             } catch (OXException e) {
                 LOG.error("", e);
             }
@@ -141,6 +185,60 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
         public void handleLogout(LoginResult logout) throws OXException {
             // nothing to do
         }
-    }
 
+        /**
+         * Builds the {@link RequestContext} from the specified {@link LoginResult}
+         * 
+         * @param login The {@link LoginResult} from which to build the {@link RequestContext}
+         * @return The built {@link RequestContext}
+         */
+        private RequestContext buildRequestContext(LoginResult login) {
+            DefaultRequestContext context = new DefaultRequestContext();
+            HostData hostData = createHostData(login);
+            context.setHostData(hostData);
+            context.setUserAgent(login.getRequest().getUserAgent());
+            return context;
+        }
+
+        /**
+         * Creates and returns the {@link HostData} out of the specified {@link LoginResult}
+         * 
+         * @param login The {@link LoginResult} from which to create the {@link HostData}
+         * @return The {@link HostData}
+         */
+        private HostData createHostData(final LoginResult login) {
+            return new HostData() {
+
+                @Override
+                public String getHTTPSession() {
+                    return login.getRequest().getHttpSessionID();
+                }
+
+                @Override
+                public boolean isSecure() {
+                    return login.getRequest().isSecure();
+                }
+
+                @Override
+                public String getRoute() {
+                    return Tools.extractRoute(getHTTPSession());
+                }
+
+                @Override
+                public int getPort() {
+                    return login.getRequest().getServerPort();
+                }
+
+                @Override
+                public String getHost() {
+                    return login.getRequest().getServerName();
+                }
+
+                @Override
+                public String getDispatcherPrefix() {
+                    return getService(DispatcherPrefixService.class).getPrefix();
+                }
+            };
+        }
+    }
 }

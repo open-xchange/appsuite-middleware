@@ -2,8 +2,8 @@
   put:
     operationId: getUserList
     tags:
-      - user
-    summary: Gets a list of users (**available since v6.14**).
+      - User
+    summary: Gets a list of users.
     consumes:
       - application/json
     parameters:
@@ -11,7 +11,7 @@
       - $ref: "#/parameters/gblQueryParamUserColumns"
       - in: body
         name: body
-        description: A JSON array of identifiers of the requested users. Since v6.18.1, a `null` value in the array is interpreted as the currently logged in user.
+        description: A JSON array of identifiers of the requested users. A `null` value in the array is interpreted as the currently logged in user.
         required: true
         schema:
           type: array
@@ -23,6 +23,6 @@
           A JSON object containing an array with data for the requested users. Each array element describes one user and
           is itself an array. The elements of each array contain the information specified by the corresponding
           identifiers in the `columns` parameter. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/UsersResponse"

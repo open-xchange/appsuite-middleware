@@ -49,14 +49,9 @@
 
 package com.openexchange.folderstorage.internal;
 
-import gnu.trove.EmptyTIntSet;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -69,6 +64,9 @@ import com.openexchange.groupware.userconfiguration.AllowAllUserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import gnu.trove.EmptyTIntSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link EffectivePermission} - A read-only permission considering user access restrictions and folder boundaries.
@@ -106,7 +104,7 @@ public final class EffectivePermission implements Permission {
     /**
      * <code>"9"</code>, <code>"10"</code>, and <code>"15"</code>
      */
-    private static final Set<String> SYSTEM_INFOSTORES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(INFOSTORE, INFOSTORE_PUBLIC, INFOSTORE_USER)));
+    private static final Set<String> SYSTEM_INFOSTORES = ImmutableSet.of(INFOSTORE, INFOSTORE_PUBLIC, INFOSTORE_USER);
 
     /**
      * The configuration profile of the current logged in user.
@@ -253,7 +251,7 @@ public final class EffectivePermission implements Permission {
     }
 
     private boolean isNumericId() {
-        return Tools.getUnsignedInteger(folderId) >= 0;
+        return com.openexchange.java.util.Tools.getUnsignedInteger(folderId) >= 0;
     }
 
     private UserPermissionBits getUserPermissionBits() {

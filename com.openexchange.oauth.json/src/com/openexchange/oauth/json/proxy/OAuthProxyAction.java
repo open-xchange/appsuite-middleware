@@ -61,7 +61,7 @@ import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
 import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
-import com.openexchange.oauth.OAuthHTTPClientFactory;
+import com.openexchange.oauth.http.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;

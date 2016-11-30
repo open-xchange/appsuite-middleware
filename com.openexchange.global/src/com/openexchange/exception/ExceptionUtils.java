@@ -216,11 +216,52 @@ public class ExceptionUtils {
                 path = argument.substring(17).trim();
                 File file = new File(path);
                 if (!file.exists() || !file.canWrite()) {
-                   path = null;
+                    path = null;
                 }
             }
         }
         return new Pair<Boolean, String>(Boolean.valueOf(heapDumpOnOOm), path);
     }
 
+    /**
+     * Checks if the exception class occurs in exception chain of given {@link Throwable} instance.
+     *
+     * @param e The {@link Throwable} instance whose exception chain is supposed to be checked
+     * @param clazz The exception class to check for
+     * @return <code>true</code> if the exception class occurs in exception chain; otherwise <code>false</code>
+     */
+	public static boolean isEitherOf(Throwable e, Class<? extends Exception> clazz) {
+		if (null == e || null == clazz) {
+			return false;
+		}
+
+		if (clazz.isInstance(e)) {
+			return true;
+		}
+
+		Throwable next = e.getCause();
+		return null == next ? false : isEitherOf(next, clazz);
+	}
+
+    /**
+     * Checks if any of specified exception (classes) occurs in exception chain of given {@link Throwable} instance.
+     *
+     * @param e The {@link Throwable} instance whose exception chain is supposed to be checked
+     * @param classes The exception classes
+     * @return <code>true</code> if any of specified exception (classes) occurs in exception chain; otherwise <code>false</code>
+     */
+    public static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
+        if (null == e || null == classes || 0 == classes.length) {
+            return false;
+        }
+
+        for (Class<? extends Exception> clazz : classes) {
+            if (clazz.isInstance(e)) {
+                return true;
+            }
+        }
+
+        Throwable next = e.getCause();
+        return null == next ? false : isEitherOf(next, classes);
+    }
 }

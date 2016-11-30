@@ -49,20 +49,19 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Random;
-
-import junit.framework.TestCase;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.setuptools.TestConfig;
+import junit.framework.TestCase;
 
 /**
  * Checks if {@link IDGenerator} works as expected and how fast it is.
@@ -92,7 +91,8 @@ public class IDGeneratorTest extends TestCase {
         super.setUp();
         Init.startServer();
         final ContextStorage cs = ContextStorage.getInstance();
-        context = cs.getContext(cs.getContextId("defaultcontext"));
+        final TestConfig config = new TestConfig();
+        context = cs.getContext(cs.getContextId(config.getContextName()));
     }
 
     @Override

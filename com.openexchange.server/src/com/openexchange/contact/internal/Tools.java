@@ -692,6 +692,7 @@ public final class Tools {
     private static ContactSearchObject prepareSearchContacts(ContactSearchObject contactSearch) {
         ContactSearchObject preparedSearchObject = new ContactSearchObject();
         preparedSearchObject.setFolders(contactSearch.getFolders());
+        preparedSearchObject.setExcludeFolders(contactSearch.getExcludeFolders());
         if (contactSearch.isStartLetter()) {
             preparedSearchObject.setStartLetter(true);
             preparedSearchObject.setPattern(addWildcards(contactSearch.getPattern(), false, true));
@@ -710,6 +711,7 @@ public final class Tools {
         preparedSearchObject.setExactMatch(contactSearch.isExactMatch());
         preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
         preparedSearchObject.setFolders(contactSearch.getFolders());
+        preparedSearchObject.setExcludeFolders(contactSearch.getExcludeFolders());
         preparedSearchObject.setCatgories(addWildcards(contactSearch.getCatgories(), true, true));
         preparedSearchObject.setCityBusiness(addWildcards(contactSearch.getCityBusiness(), prependWildcard, appendWildcard));
         preparedSearchObject.setCompany(addWildcards(contactSearch.getCompany(), prependWildcard, appendWildcard));

@@ -52,10 +52,8 @@ package com.openexchange.mail.structure.parser;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -70,6 +68,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -94,8 +93,6 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportProperties;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -400,7 +397,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private static final Set<String> HEADERS_ADDRESS = new HashSet<String>(Arrays.asList(
+    private static final Set<String> HEADERS_ADDRESS = ImmutableSet.of(
         "from",
         "to",
         "cc",
@@ -413,9 +410,9 @@ public final class MIMEStructure2ComposedMailParser {
         "resent-from",
         "resent-to",
         "resent-sender",
-        "disposition-notification-to"));
+        "disposition-notification-to");
 
-    private static final Set<String> HEADERS_DATE = new HashSet<String>(Arrays.asList("date"));
+    private static final Set<String> HEADERS_DATE = ImmutableSet.of("date");
 
     private static void parseHeaders(final JSONObject jsonHeaders, final MailMessage composedMail, final ContentType contentType) throws OXException {
         try {

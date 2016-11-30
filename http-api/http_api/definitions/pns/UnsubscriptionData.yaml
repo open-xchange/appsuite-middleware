@@ -1,0 +1,19 @@
+type: object
+required: 
+- token
+- transport
+properties:
+  client:
+    type: string    
+    description: The client identifier; e.g. "open-xchange-appsuite". If not specified, session-associated client identifier is considered
+  token:
+    type: string
+    description: The token to use when sending out notifications using specified transport
+  transport:
+    type: string
+    description: |
+      The identifer of the transport; currently supported:
+      - "apn"
+      - "gcm"
+      - "wns" and
+      - "websocket"

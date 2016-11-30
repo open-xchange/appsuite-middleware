@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Advertisment Default Impl
+Bundle-SymbolicName: com.openexchange.advertisement.impl
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software AG
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: com.openexchange.advertisement.osgi.Activator
+Import-Package: com.openexchange.advertisement,
+ com.openexchange.caching,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.context,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.reseller,
+ com.openexchange.reseller.data,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.sql,
+ com.openexchange.user,
+ com.openexchange.userconf,
+ org.json,
+ org.osgi.framework,
+ org.slf4j

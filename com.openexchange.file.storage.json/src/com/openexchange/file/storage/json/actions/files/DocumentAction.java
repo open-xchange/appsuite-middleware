@@ -49,8 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import static com.google.common.net.HttpHeaders.ETAG;
-import static com.google.common.net.HttpHeaders.LAST_MODIFIED;
+import static com.google.common.net.HttpHeaders.*;
 import static com.openexchange.java.Streams.bufferedInputStreamFor;
 import static com.openexchange.tools.images.ImageTransformationUtility.seemsLikeThumbnailRequest;
 import java.io.IOException;
@@ -66,9 +65,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
@@ -86,11 +82,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, defaultFormat = "file", name = "[filename]?action=document", description = "Get an infoitem document", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the requested infoitem."), @Parameter(name = "folder", description = "Object ID of the infoitem's folder."),
-    @Parameter(name = "version", optional = true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned"),
-    @Parameter(name = "content_type", optional = true, description = "If present the response declares the given content_type in the Content-Type header.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
@@ -148,7 +139,11 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                     if (false == document.getFile().isAccurateSize()) {
                         size = -1;
                     }
-                    FileHolder fileHolder = new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName());
+
+                    FileHolder fileHolder = document.isRepetitive() ?
+                        new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName()) :
+                        new FileHolder(bufferedInputStreamFor(document.getData()), size, document.getMimeType(), document.getName());
+
                     if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
                         fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
                     }

@@ -30,6 +30,9 @@ postFix() {
 
     # SoftwareChange_Request-2673
     ox_add_property com.openexchange.saml.enableAutoLogin false $PFILE
+
+    # SoftwareChange_Request-3548
+    ox_add_property com.openexchange.saml.allowUnsolicitedResponses true /opt/open-xchange/etc/saml.properties
 }
 
 case "$1" in

@@ -49,15 +49,16 @@
 
 package com.openexchange.configread.clt;
 
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.config.mbean.ConfigReloadMBean;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.config.rmi.RemoteConfigurationService;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -66,7 +67,7 @@ import com.openexchange.config.mbean.ConfigReloadMBean;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ListReloadablesCLT extends AbstractMBeanCLI<Void> {
+public class ListReloadablesCLT extends AbstractRmiCLI<Void> {
 
     /**
      * Initializes a new {@link ListReloadablesCLT}.
@@ -98,16 +99,30 @@ public class ListReloadablesCLT extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        Object result = null;
-        result = mbsc.invoke(getObjectName(ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN), "listReloadables", null, null);
-        Map<String, List<String>> res = (Map<String, List<String>>) result;
+    protected void checkOptions(CommandLine cmd) {
+        // nothing to do
+    }
+
+    @Override
+    protected void addOptions(Options options) {
+        // nothing to do
+    }
+
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        // nothing to do
+    }
+
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        RemoteConfigurationService remoteConfigService = getRmiStub(optRmiHostName, RemoteConfigurationService.RMI_NAME);
+        Map<String, List<String>> reloadables = remoteConfigService.listReloadables();
         StringBuilder sb = new StringBuilder();
-        for (Entry<String, List<String>> configfileEntry : res.entrySet()) {
-            String configfile = configfileEntry.getKey();
-            if (null != configfile && !configfile.isEmpty()) {
-                sb.append(configfile).append(":\n");
-                for (String property : configfileEntry.getValue()) {
+        for (Entry<String, List<String>> entry : reloadables.entrySet()) {
+            String fileName = entry.getKey();
+            if (null != fileName && Strings.isNotEmpty(fileName)) {
+                sb.append(fileName).append(":").append("\n");
+                for (String property : entry.getValue()) {
                     sb.append(property).append("\n");
                 }
                 sb.append("\n");
@@ -115,21 +130,6 @@ public class ListReloadablesCLT extends AbstractMBeanCLI<Void> {
         }
         System.out.println(sb.toString());
         return null;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) {
-        // nothing to do
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        // nothing to do
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-     // nothing to do
     }
 
 }

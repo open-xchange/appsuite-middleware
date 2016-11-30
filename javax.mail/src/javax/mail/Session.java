@@ -211,7 +211,7 @@ public final class Session {
 	    debug = true;
 
 	initLogger();
-	logger.log(Level.CONFIG, "JavaMail version {0}", "1.5.5");
+	logger.log(Level.CONFIG, "JavaMail version {0}", "1.5.6");
 
 	// get the Class associated with the Authenticator
 	Class<?> cl;
@@ -383,7 +383,7 @@ public final class Session {
 	this.debug = debug;
 	initLogger();
 	logger.log(Level.CONFIG, "setDebug: JavaMail version {0}",
-				    "1.5.5");
+				    "1.5.6");
     }
 
     /**
@@ -940,22 +940,22 @@ public final class Session {
 	    // failed to load any providers, initialize with our defaults
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imap", "com.sun.mail.imap.IMAPStore",
-			"Oracle", "1.5.5"));
+			"Oracle", "1.5.6"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imaps", "com.sun.mail.imap.IMAPSSLStore",
-			"Oracle", "1.5.5"));
+			"Oracle", "1.5.6"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3", "com.sun.mail.pop3.POP3Store",
-			"Oracle", "1.5.5"));
+			"Oracle", "1.5.6"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3s", "com.sun.mail.pop3.POP3SSLStore",
-			"Oracle", "1.5.5"));
+			"Oracle", "1.5.6"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtp", "com.sun.mail.smtp.SMTPTransport",
-			"Oracle", "1.5.5"));
+			"Oracle", "1.5.6"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtps", "com.sun.mail.smtp.SMTPSSLTransport",
-			"Oracle", "1.5.5"));
+			"Oracle", "1.5.6"));
 	}
 
 	if (logger.isLoggable(Level.CONFIG)) {
@@ -1144,7 +1144,7 @@ public final class Session {
     /**
      * Load all of the named resource.
      */
-    private void loadAllResources(String name, Class cl, StreamLoader loader) {
+    private void loadAllResources(String name, Class<?> cl, StreamLoader loader) {
 	boolean anyLoaded = false;
 	try {
 	    URL[] urls;
@@ -1227,7 +1227,15 @@ public final class Session {
 	    return AccessController.doPrivileged(
 		    new PrivilegedExceptionAction<InputStream>() {
 			public InputStream run() throws IOException {
-			    return c.getResourceAsStream(name);
+			    try {
+				return c.getResourceAsStream(name);
+			    } catch (RuntimeException e) {
+				// gracefully handle ClassLoader bugs (Tomcat)
+				IOException ioex = new IOException(
+				    "ClassLoader.getResourceAsStream failed");
+				ioex.initCause(e);
+				throw ioex;
+			    }
 			}
 		    }
 	    );

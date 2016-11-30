@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange IMAP
 Bundle-SymbolicName: com.openexchange.imap
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.google.common.annotations,
  com.google.common.base,
@@ -40,6 +40,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.mail.api,
  com.openexchange.mail.api.enhanced,
  com.openexchange.mail.cache,
+ com.openexchange.mail.categories,
  com.openexchange.mail.config,
  com.openexchange.mail.dataobjects,
  com.openexchange.mail.dataobjects.compose,
@@ -59,6 +60,9 @@ Import-Package: com.google.common.annotations,
  com.openexchange.mail.uuencode,
  com.openexchange.mailaccount,
  com.openexchange.monitoring,
+ com.openexchange.net.ssl,
+ com.openexchange.net.ssl.config,
+ com.openexchange.net.ssl.exception,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.push,

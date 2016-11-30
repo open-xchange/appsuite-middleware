@@ -50,12 +50,10 @@
 package com.openexchange.folder.json.actions;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -65,21 +63,27 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@Module(name = "folders", description = "Provides access to OX folder structure.")
 @OAuthModule
 public final class FolderActionFactory implements AJAXActionServiceFactory {
 
     private static final FolderActionFactory SINGLETON = new FolderActionFactory();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static final FolderActionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    // -----------------------------------------------------------------------------------------------------
 
     private final Map<String, AJAXActionService> actions;
 
     private FolderActionFactory() {
         super();
         actions = initActions();
-    }
-
-    public static final FolderActionFactory getInstance() {
-        return SINGLETON;
     }
 
     @Override
@@ -97,7 +101,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
     }
 
     private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(12);
+        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
         tmp.put(RootAction.ACTION, new RootAction());
         tmp.put(ListAction.ACTION, new ListAction());
         tmp.put(GetAction.ACTION, new GetAction());
@@ -111,7 +115,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(SubscribeAction.ACTION, new SubscribeAction());
         tmp.put(SharesAction.ACTION, new SharesAction());
         tmp.put(NotifyAction.ACTION, new NotifyAction());
-        return Collections.unmodifiableMap(tmp);
+        return tmp.build();
     }
 
 }

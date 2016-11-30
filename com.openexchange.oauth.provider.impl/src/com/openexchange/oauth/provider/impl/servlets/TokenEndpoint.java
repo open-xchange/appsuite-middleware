@@ -193,7 +193,7 @@ public class TokenEndpoint extends OAuthEndpoint {
     }
 
     private static void respondWithToken(Grant grant, HttpServletResponse resp) throws IOException, JSONException {
-        JSONObject result = new JSONObject();
+        JSONObject result = new JSONObject(6);
         result.put("access_token", grant.getAccessToken());
         result.put("refresh_token", grant.getRefreshToken());
         result.put("token_type", "Bearer");

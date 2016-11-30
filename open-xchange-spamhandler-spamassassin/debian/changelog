@@ -1,74 +1,38 @@
-open-xchange-spamhandler-spamassassin (7.8.2-16) stable; urgency=medium
+open-xchange-spamhandler-spamassassin (7.8.3-5) stable; urgency=medium
 
-  * Build for patch 2016-11-21 (3731)
+  * Second release candidate for 7.8.3 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Sat, 12 Nov 2016 13:42:30 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 25 Nov 2016 17:54:53 +0100
 
-open-xchange-spamhandler-spamassassin (7.8.2-15) stable; urgency=medium
+open-xchange-spamhandler-spamassassin (7.8.3-4) stable; urgency=medium
 
-  * Build for patch 2016-11-07 (3678)
+  * First release candidate for 7.8.3 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 08 Nov 2016 09:39:00 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 24 Nov 2016 20:48:02 +0100
 
-open-xchange-spamhandler-spamassassin (7.8.2-14) stable; urgency=medium
+open-xchange-spamhandler-spamassassin (7.8.3-3) stable; urgency=medium
 
-  * Build for patch 2016-09-08 (3699)
+  * Third preview for 7.8.3 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 26 Oct 2016 14:38:39 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 15 Nov 2016 15:45:17 +0100
 
-open-xchange-spamhandler-spamassassin (7.8.2-13) stable; urgency=medium
+open-xchange-spamhandler-spamassassin (7.8.3-2) stable; urgency=medium
 
-  * Build for patch 2016-10-24 (3630)
+  * Second preview for 7.8.3 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Oct 2016 10:55:44 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Sat, 29 Oct 2016 09:47:31 +0200
 
-open-xchange-spamhandler-spamassassin (7.8.2-12) stable; urgency=medium
+open-xchange-spamhandler-spamassassin (7.8.3-1) stable; urgency=medium
 
-  * Build for patch 2016-10-10 (3597)
+  * First preview 7.8.3 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 06 Oct 2016 14:22:18 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 14 Oct 2016 15:22:33 +0200
 
-open-xchange-spamhandler-spamassassin (7.8.2-11) stable; urgency=medium
+open-xchange-spamhandler-spamassassin (7.8.3-0) unstable; urgency=medium
 
-  * Build for patch 2016-09-26 (3572)
+  * prepare for 7.8.3 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 19 Sep 2016 17:55:18 +0200
-
-open-xchange-spamhandler-spamassassin (7.8.2-10) stable; urgency=medium
-
-  * Build for patch 2016-09-08 (3580)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 19 Sep 2016 15:43:40 +0200
-
-open-xchange-spamhandler-spamassassin (7.8.2-9) stable; urgency=medium
-
-  * Build for patch 2016-09-12 (3547)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 05 Sep 2016 10:03:40 +0200
-
-open-xchange-spamhandler-spamassassin (7.8.2-8) stable; urgency=medium
-
-  * Build for patch 2016-08-29 (3522)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 22 Aug 2016 11:37:11 +0200
-
-open-xchange-spamhandler-spamassassin (7.8.2-7) stable; urgency=medium
-
-  * Build for patch 2016-08-26 (3512)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Aug 2016 12:25:20 +0200
-
-open-xchange-spamhandler-spamassassin (7.8.2-6) stable; urgency=medium
-
-  * Build for patch 2016-08-15 (3490)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 08 Aug 2016 09:41:43 +0200
-
-open-xchange-spamhandler-spamassassin (7.8.2-5) stable; urgency=medium
-
-  * Build for patch 2016-08-01 (3467)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 22 Jul 2016 16:07:52 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 06 Sep 2016 11:27:01 +0200
 
 open-xchange-spamhandler-spamassassin (7.8.2-4) stable; urgency=medium
 

@@ -51,11 +51,12 @@ package com.openexchange.file.storage;
 
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.internal.FileStorageConfigReloadable;
@@ -294,6 +295,20 @@ public final class FileStorageUtility {
         return tmp.intValue();
     }
 
+    /**
+     * Checks of passed file meta-data hints to an encrypted file.
+     * <ul>
+     * <li>MIME type is equal to <code>"application/pgp-encrypted"</code> or
+     * <li>File name ends with <code>".pgp"</code> extension
+     * </ul>
+     *
+     * @param document The file meta-data to check
+     * @return <code>true</code> if given file meta-data hints to an encrypted file; otherwise <code>false</code>
+     */
+    public static boolean isEncryptedFile(File document) {
+        return (null != document) && ("application/pgp-encrypted".equalsIgnoreCase(document.getFileMIMEType()) || (Strings.isNotEmpty(document.getFileName()) && Strings.toLowerCase(document.getFileName()).endsWith(".pgp")));
+    }
+
     static {
         FileStorageConfigReloadable.getInstance().addReloadable(new Reloadable() {
 
@@ -305,8 +320,12 @@ public final class FileStorageUtility {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return DefaultInterests.builder().propertiesOfInterest(
+                    "com.openexchange.file.storage.numberOfPregeneratedPreviews",
+                    "com.openexchange.file.storage.zipFolderThreshold",
+                    "com.openexchange.infostore.zipDocumentsCompressionLevel"
+                    ).build();
             }
         });
     }

@@ -175,7 +175,7 @@ public class GlobalDbInit {
             LOG.info("Created schema for global database: {}", schema);
             return true;
         }
-        LOG.debug("Global databse schema {} already exists.", schema);
+        LOG.debug("Global database schema {} already exists.", schema);
         return false;
     }
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Category JSON Bundle
 Bundle-SymbolicName: com.openexchange.mail.categories.json
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.mail.categories.osgi.Activator
@@ -28,6 +28,9 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.session,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
+ com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
  javax.servlet.http,
  org.json,
  org.osgi.framework,

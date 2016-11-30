@@ -2,7 +2,7 @@
   get:
     operationId: getAllMails
     tags:
-      - mail
+      - Mail
     summary: Gets all mails.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -34,7 +34,7 @@
         description: A positive integer number to specify how many items shall be returned according to given sorting; overrides `left_hand_limit`/`right_hand_limit` parameters and is equal to `left_hand_limit=0` and `right_hand_limit=<limit>`.
         required: false
       - in: query
-        name: filter
+        name: categoryid
         type: string
         description: The category id to filter for. If set to "general" all mails which does not belong to any other category are retrieved.
         required: false
@@ -44,6 +44,6 @@
           'A JSON object containing an array with mail data. Each array element describes one mail and
           is itself an array. The elements of each array contain the information specified by the corresponding
           identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+          response are filled (see [Error handling](#error-handling)).'
         schema:
           $ref: "#/definitions/MailsResponse"

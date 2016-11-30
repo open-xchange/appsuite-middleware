@@ -4,7 +4,7 @@
   get:
     operationId: getAttachmentDocument
     tags:
-      - attachments
+      - Attachments
     summary: Gets an attachment's document/filedata.
     description: |
       It is possible to add a filename to the request's URI like `/attachment/{filename}?action=document`.

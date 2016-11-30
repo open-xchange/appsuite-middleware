@@ -63,7 +63,6 @@ import com.openexchange.config.ConfigurationService;
 public class ConfigurationTracker implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
     private final BundleContext context;
-
     private final Services services;
 
     /**

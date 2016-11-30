@@ -50,14 +50,14 @@
 package com.openexchange.realtime;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentSet;
 import com.openexchange.management.ManagementAware;
@@ -215,10 +215,8 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("realtime.properties", new String[] {isTraceAllUsersEnabledPropertyName, usersToTracePropertyName});
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(isTraceAllUsersEnabledPropertyName, usersToTracePropertyName);
     }
 
 }

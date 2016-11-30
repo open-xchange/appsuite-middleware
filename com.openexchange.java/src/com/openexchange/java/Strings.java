@@ -1363,4 +1363,36 @@ public class Strings {
         return sb;
     }
 
+    /**
+     * 
+     * @param array
+     * @return
+     */
+    public static String toWhitespaceSeparatedList(String[] array) {
+        StringBuilder sb = new StringBuilder();
+        if (null != array && array.length > 0) {
+            for (String s : array) {
+                sb.append(s).append(" ");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 
+     * @param array
+     * @return
+     */
+    public static String toCommaSeparatedList(String[] array) {
+        StringBuilder sb = new StringBuilder();
+        if (null != array && array.length > 0) {
+            for (String s : array) {
+                sb.append(s).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
 }

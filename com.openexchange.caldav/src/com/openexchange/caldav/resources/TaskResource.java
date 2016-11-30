@@ -49,9 +49,8 @@
 
 package com.openexchange.caldav.resources;
 
-import java.io.ByteArrayOutputStream;
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
@@ -63,6 +62,8 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.SimpleMode;
+import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.Truncated;
@@ -138,26 +139,20 @@ public class TaskResource extends CalDAVResource<Task> {
     }
 
     @Override
-    protected String generateICal() throws OXException {
+    protected byte[] generateICal() throws OXException {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
-        ICalSession session = icalEmitter.createSession();
+        ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
         Task task = parent.load(object);
         applyAttachments(task);
         icalEmitter.writeTask(session, task, factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        icalEmitter.writeSession(session, bytes);
-        try {
-            return new String(bytes.toByteArray(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw protocolException(e);
-        }
+        return serialize(session);
     }
 
     @Override
     protected void deserialize(InputStream body) throws OXException {
         List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         if (null == tasks || 1 != tasks.size()) {
-            throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
+            throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } else {
             taskToSave = tasks.get(0);
             taskToSave.removeLastModified();

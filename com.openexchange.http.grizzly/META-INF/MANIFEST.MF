@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Grizzly Bundle
 Bundle-SymbolicName: com.openexchange.http.grizzly
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -67,6 +67,11 @@ Export-Package: com.openexchange.http.grizzly.service.comet,
  com.openexchange.http.grizzly.service.websocket,
  org.glassfish.grizzly,
  org.glassfish.grizzly.comet,
+ org.glassfish.grizzly.filterchain,
+ org.glassfish.grizzly.http,
  org.glassfish.grizzly.http.server,
+ org.glassfish.grizzly.http.server.util,
+ org.glassfish.grizzly.http.util,
+ org.glassfish.grizzly.servlet,
  org.glassfish.grizzly.websockets,
  org.glassfish.grizzly.websockets.frametypes

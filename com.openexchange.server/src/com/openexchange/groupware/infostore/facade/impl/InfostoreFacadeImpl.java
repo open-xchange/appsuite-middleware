@@ -49,10 +49,7 @@
 
 package com.openexchange.groupware.infostore.facade.impl;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.*;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.io.IOException;
 import java.io.InputStream;
@@ -599,25 +596,23 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 int id = (int) e.getDisplayArgs()[2];
                 if (id == 0) {
                     throw InfostoreExceptionCodes.MODIFIED_CONCURRENTLY.create();
-                } else {
-                    try {
-                        DocumentMetadata existing = getDocumentMetadata(folderId, id, CURRENT_VERSION, session);
-                        DocumentMetadata update = new DocumentMetadataImpl();
-                        update.setFolderId(folderId);
-                        update.setId(id);
-                        update.setLastModified(new Date());
-                        return saveDocument(update, data, existing.getSequenceNumber(), new Metadata[] { Metadata.LAST_MODIFIED_LITERAL }, session);
-                    } catch (OXException x) {
-                        if (x.getCode() == InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.getNumber() && x.getPrefix().equals(EnumComponent.INFOSTORE.getAbbreviation())) {
-                            return saveDocument(document, data, sequenceNumber, false, session);
-                        } else {
-                            throw x;
-                        }
-                    }
                 }
-            } else {
-                throw e;
+                try {
+                    DocumentMetadata existing = load(id, CURRENT_VERSION, session.getContext());
+                    DocumentMetadata update = new DocumentMetadataImpl(document);
+                    update.setFolderId(folderId);
+                    update.setId(id);
+                    update.setLastModified(new Date());
+                    Metadata[] columns = null == modifiedColumns ? new Metadata[] { Metadata.LAST_MODIFIED_LITERAL } : addLastModifiedIfNeeded(modifiedColumns);
+                    return saveDocument(update, data, existing.getSequenceNumber(), columns, session);
+                } catch (OXException x) {
+                    if (x.getCode() == InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.getNumber() && x.getPrefix().equals(EnumComponent.INFOSTORE.getAbbreviation())) {
+                        return saveDocument(document, data, sequenceNumber, false, session);
+                    }
+                    throw x;
+                }
             }
+            throw e;
         }
     }
 

@@ -1,0 +1,15 @@
+{
+  "Context-users-max" : 10,
+  "total" : 10,
+  "admin" : 0,
+  "guests" : 0,
+  "Context-users-avg" : 0,
+  "Context-users-min" : 0,
+  "contexts" : 1,
+  "links" : 0,
+  "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav" ],
+  "client-list" : {
+    "open-xchange-appsuite" : 1
+  },
+  "disabled" : 0
+}

@@ -67,15 +67,18 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.htmlparser.jericho.Attribute;
 import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Renderer;
@@ -538,6 +541,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = replacePercentTags(html);
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
+            html = dropWeirdXmlNamespaceDeclarations(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
             html = dropExtraChar(html);
@@ -727,7 +731,50 @@ public final class HtmlServiceImpl implements HtmlService {
         }
 
         try {
-            String prepared = prepareSignatureStart(htmlContent);
+            String prepared = htmlContent;
+
+            // Keep considerable content inside <head> element
+            {
+                Source source = new Source(prepared);
+                source.fullSequentialParse();
+                OutputDocument outputDocument = new OutputDocument(source);
+
+                Element headElement = source.getFirstElement(HTMLElementName.HEAD);
+                if (null != headElement) {
+                    // Check for other content that should not reside in <head>
+                    List<Element> allElements = headElement.getChildElements();
+                    if (null != allElements) {
+                        Set<String> elementsAllowedInHead = HtmlServices.getElementsAllowedInHead();
+                        boolean any = false;
+                        for (Iterator<Element> it = allElements.iterator(); false == any && it.hasNext();) {
+                            Element element = it.next();
+                            if (!elementsAllowedInHead.contains(Strings.asciiLowerCase(element.getName()))) {
+                                any = true;
+                            }
+                        }
+
+                        if (any) {
+                            for (Element element : allElements) {
+                                if (elementsAllowedInHead.contains(Strings.asciiLowerCase(element.getName()))) {
+                                    outputDocument.remove(element);
+                                }
+                            }
+
+                            StartTag headStart = headElement.getStartTag();
+                            if (null != headStart) {
+                                outputDocument.remove(headStart);
+                            }
+                            EndTag headEnd = headElement.getEndTag();
+                            if (null != headEnd) {
+                                outputDocument.remove(headEnd);
+                            }
+                            prepared = outputDocument.toString().trim();
+                        }
+                    }
+                }
+            }
+
+            prepared = prepareSignatureStart(prepared);
             prepared = prepareHrTag(prepared);
             prepared = prepareAnchorTag(prepared);
             prepared = insertBlockquoteMarker(prepared);
@@ -1753,6 +1800,31 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlContent;
     }
 
+    private static final Pattern PATTERN_XML_NS_DECLARATION = Pattern.compile("<\\?xml:namespace[^>]*>", Pattern.CASE_INSENSITIVE);
+
+    private static String dropWeirdXmlNamespaceDeclarations(String htmlContent) {
+        // <?xml:namespace prefix = "o" ns =  "urn:schemas-microsoft-com:office:office" />
+        if (null == htmlContent) {
+            return htmlContent;
+        }
+
+        if (htmlContent.indexOf("<?xml:") < 0 && htmlContent.indexOf("<?XML:") < 0) {
+            return htmlContent;
+        }
+
+        Matcher m = PATTERN_XML_NS_DECLARATION.matcher(htmlContent);
+        if (false == m.find()) {
+            return htmlContent;
+        }
+
+        StringBuffer sb = new StringBuffer(htmlContent.length());
+        do {
+            m.appendReplacement(sb, "");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
     private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);
     private static final Pattern PATTERN_CC2 = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
 
@@ -1761,7 +1833,7 @@ public final class HtmlServiceImpl implements HtmlService {
     private static final String CC_END_IF = " -->";
 
     private static final String CC_ENDIF = "<!-- <![endif] -->";
-    
+
     private static final String CC_UNCOMMENTED_ENDIF = "<![endif] -->";
 
     /**
@@ -1799,7 +1871,7 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             return htmlContent;
         }
-        
+
         int lastMatch = 0;
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
         do {

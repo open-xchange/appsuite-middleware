@@ -402,6 +402,8 @@ public class SnippetProcessor {
         if (isEmpty(content)) {
             return;
         }
+        
+        boolean isSignature = "signature".equalsIgnoreCase(snippet.getType());
 
         MaxImageProps maxImageProps = getMaxImageProps();
         long maxImageSize = maxImageProps.maxImageSize;
@@ -442,7 +444,7 @@ public class SnippetProcessor {
 
                     // Replace "src" attribute
                     boolean appendBodyPart = trackedIds.add(id);
-                    String contentId = processLocalImage(mf, id, appendBodyPart, attachments);
+                    String contentId = processLocalImage(mf, id, appendBodyPart, attachments, isSignature);
 
                     String iTag = PATTERN_SRC_ATTRIBUTE.matcher(imageTag).replaceFirst(Strings.quoteReplacement("src=\"cid:" + contentId + "\""));
                     iTag = PATTERN_ID_ATTRIBUTE.matcher(iTag).replaceFirst("");
@@ -475,7 +477,7 @@ public class SnippetProcessor {
      * @param attachments The attachment list
      * @return The content id
      */
-    private final String processLocalImage(ManagedFile mf, String id, boolean appendBodyPart, List<Attachment> attachments) {
+    private final String processLocalImage(ManagedFile mf, String id, boolean appendBodyPart, List<Attachment> attachments, boolean isSignature) {
         /*
          * Determine filename
          */
@@ -510,7 +512,9 @@ public class SnippetProcessor {
             {
                 ContentDisposition cd = new ContentDisposition();
                 cd.setInline();
-                cd.setFilenameParameter(fileName);
+                if (!isSignature) {
+                    cd.setFilenameParameter(fileName);
+                }
                 att.setContentDisposition(cd.toString());
             }
             att.setContentType(mf.getContentType());
@@ -518,7 +522,9 @@ public class SnippetProcessor {
             att.setId(mf.getID());
             att.setSize(mf.getSize());
             att.setStreamProvider(new ManagedFileInputStreamProvider(mf));
-            att.setFilename(fileName);
+            if (!isSignature) {
+                att.setFilename(fileName);
+            }
             attachments.add(att);
         }
         return id;

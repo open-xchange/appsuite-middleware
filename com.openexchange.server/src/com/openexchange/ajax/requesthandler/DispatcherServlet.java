@@ -53,12 +53,10 @@ import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -67,6 +65,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Client;
 import com.openexchange.ajax.LoginServlet;
@@ -132,7 +131,8 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final EnumSet<Name> PROPS_TO_IGNORE = EnumSet.of(LogProperties.Name.SESSION_CONTEXT_ID);
 
-    protected static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
+    /** The reference to the <code>Dispatcher</code> instance */
+    private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
     /**
      * Sets the dispatcher instance.
@@ -153,41 +153,6 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private static final AtomicReference<List<ResponseRenderer>> RESPONSE_RENDERERS = new AtomicReference<List<ResponseRenderer>>(Collections.<ResponseRenderer> emptyList());
-
-    /**
-     * The default <code>AJAXRequestDataTools</code>.
-     */
-    protected final AJAXRequestDataTools defaultRequestDataTools;
-
-    /**
-     * The line separator.
-     */
-    protected final String lineSeparator;
-
-    /**
-     * The dispatcher servlet prefix (e.g. /appsuite/api/)
-     */
-    protected final String prefix;
-
-
-    /**
-     * Initializes a new {@link DispatcherServlet}.
-     */
-    public DispatcherServlet(String prefix) {
-        super();
-        this.prefix = prefix;
-        defaultRequestDataTools = AJAXRequestDataTools.getInstance();
-        lineSeparator = System.getProperty("line.separator");
-    }
-
-    /**
-     * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
-     *
-     * @return The <code>AJAXRequestDataTools</code> instance
-     */
-    protected AJAXRequestDataTools getAjaxRequestDataTools() {
-        return defaultRequestDataTools;
-    }
 
     /**
      * The prefix reference for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
@@ -259,6 +224,43 @@ public class DispatcherServlet extends SessionServlet {
      */
     public static void clearRenderer() {
         RESPONSE_RENDERERS.set(Collections.<ResponseRenderer> emptyList());
+    }
+
+    // -------------------------------------------------------------------------------------------------
+
+    /**
+     * The default <code>AJAXRequestDataTools</code>.
+     */
+    protected final AJAXRequestDataTools defaultRequestDataTools;
+
+    /**
+     * The line separator.
+     */
+    protected final String lineSeparator;
+
+    /**
+     * The dispatcher servlet prefix (e.g. /appsuite/api/)
+     */
+    protected final String prefix;
+
+
+    /**
+     * Initializes a new {@link DispatcherServlet}.
+     */
+    public DispatcherServlet(String prefix) {
+        super();
+        this.prefix = prefix;
+        defaultRequestDataTools = AJAXRequestDataTools.getInstance();
+        lineSeparator = System.getProperty("line.separator");
+    }
+
+    /**
+     * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
+     *
+     * @return The <code>AJAXRequestDataTools</code> instance
+     */
+    protected AJAXRequestDataTools getAjaxRequestDataTools() {
+        return defaultRequestDataTools;
     }
 
     @Override
@@ -379,12 +381,12 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
-    private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND, SessionExceptionCodes.SESSION_EXPIRED, UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED, UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED)));
+    private static final Set<OXExceptionCode> IGNOREES = ImmutableSet.<OXExceptionCode> of(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND, SessionExceptionCodes.SESSION_EXPIRED, UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED, UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED);
 
     /**
      * A set of those {@link Category categories} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
-    private static final Set<Category> CAT_IGNOREES = Collections.unmodifiableSet(new HashSet<Category>(Arrays.<Category> asList(Category.CATEGORY_PERMISSION_DENIED)));
+    private static final Set<Category> CAT_IGNOREES = ImmutableSet.of(Category.CATEGORY_PERMISSION_DENIED);
 
     /**
      * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
@@ -620,7 +622,7 @@ public class DispatcherServlet extends SessionServlet {
         /*
          * Parse AJAXRequestData
          */
-        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, prefix, httpResponse);
+        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), false, session, prefix, httpResponse);
         requestData.setSession(session);
         LogProperties.putSessionProperties(session);
         return requestData;

@@ -51,11 +51,13 @@ package com.openexchange.push.dovecot.osgi;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.dovecot.DefaultRegistrationPerformer;
 import com.openexchange.push.dovecot.DovecotPushConfiguration;
@@ -89,13 +91,15 @@ public class DovecotPushActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class,
-            ThreadPoolService.class, ContextService.class, UserService.class, PushListenerService.class, ObfuscatorService.class };
+        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, ConfigViewFactory.class,
+            SessiondService.class, ThreadPoolService.class, ContextService.class, UserService.class, PushListenerService.class, ObfuscatorService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+
+        trackService(PushNotificationService.class);
 
         DovecotPushListener.setIfHigherRanked(new DefaultRegistrationPerformer(this));
 

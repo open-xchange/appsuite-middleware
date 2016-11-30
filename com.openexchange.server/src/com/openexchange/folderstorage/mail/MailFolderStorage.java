@@ -71,6 +71,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.mail.Message;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
@@ -339,7 +340,7 @@ public final class MailFolderStorage implements FolderStorage {
                         final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
                         Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate));
                         final int size = folderInfos.size();
-                        final List<SortableId> list = new ArrayList<SortableId>(size);
+                        final List<SortableId> list = new ArrayList<>(size);
                         /*
                          * Add external account root folders
                          */
@@ -355,7 +356,7 @@ public final class MailFolderStorage implements FolderStorage {
                             if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
                                 final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
                                 final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
-                                accountList = new ArrayList<MailAccount>(accounts.length);
+                                accountList = new ArrayList<>(accounts.length);
                                 for (final MailAccount mailAccount : accounts) {
                                     if (!mailAccount.isDefaultAccount()) {
                                         accountList.add(mailAccount);
@@ -402,7 +403,7 @@ public final class MailFolderStorage implements FolderStorage {
             /*
              * The regular way
              */
-            final List<MailFolder> folders = new ArrayList<MailFolder>(32);
+            final List<MailFolder> folders = new ArrayList<>(32);
             final MailFolder rootFolder = mailAccess.getRootFolder();
             folders.add(rootFolder);
             /*
@@ -414,7 +415,7 @@ public final class MailFolderStorage implements FolderStorage {
              */
             Collections.sort(folders, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
             final int size = folders.size();
-            final List<SortableId> list = new ArrayList<SortableId>(size);
+            final List<SortableId> list = new ArrayList<>(size);
             /*
              * Add external account root folders
              */
@@ -430,7 +431,7 @@ public final class MailFolderStorage implements FolderStorage {
                 if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
                     final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
                     final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
-                    accountList = new ArrayList<MailAccount>(accounts.length);
+                    accountList = new ArrayList<>(accounts.length);
                     for (final MailAccount mailAccount : accounts) {
                         if (!mailAccount.isDefaultAccount()) {
                             accountList.add(mailAccount);
@@ -592,7 +593,7 @@ public final class MailFolderStorage implements FolderStorage {
                 } else {
                     final MailFolder parent = mailAccess.getFolderStorage().getFolder(parentFullName);
                     final MailPermission[] parentPermissions = parent.getPermissions();
-                    final List<MailPermission> mailPermissions = new ArrayList<MailPermission>();
+                    final List<MailPermission> mailPermissions = new ArrayList<>();
                     final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
                     for (final MailPermission parentPerm : parentPermissions) {
                         final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
@@ -884,14 +885,14 @@ public final class MailFolderStorage implements FolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        TIntObjectMap<MailAccess<?, ?>> accesses = new TIntObjectHashMap<MailAccess<?, ?>>(2);
+        TIntObjectMap<MailAccess<?, ?>> accesses = new TIntObjectHashMap<>(2);
         try {
             ServerSession session = getServerSession(storageParameters);
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            TIntObjectMap<MailAccount> accounts = new TIntObjectHashMap<MailAccount>(2);
-            List<Folder> ret = new ArrayList<Folder>(folderIds.size());
+            TIntObjectMap<MailAccount> accounts = new TIntObjectHashMap<>(2);
+            List<Folder> ret = new ArrayList<>(folderIds.size());
 
             ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             boolean translatePrimaryAccountDefaultFolders = (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
@@ -1017,10 +1018,10 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * Denoted parent is not capable to hold default folders. Therefore output as it is.
                  */
-                boolean reverse;
+                boolean isArchive;
                 {
                     String archiveFullname = optArchiveFullName(mailAccount, mailAccess);
-                    reverse = null != archiveFullname && archiveFullname.equals(fullName);
+                    isArchive = null != archiveFullname && archiveFullname.equals(fullName);
                 }
 
                 boolean doIt = true;
@@ -1037,7 +1038,7 @@ public final class MailFolderStorage implements FolderStorage {
                                 filterPOP3StorageFolderInfos(folderInfos, session);
                             }
                             final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
-                            Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate, reverse));
+                            Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate, false, isArchive));
                             final String[] subfolderIds = new String[folderInfos.size()];
                             int i = 0;
                             for (final MailFolderInfo child : folderInfos) {
@@ -1050,14 +1051,14 @@ public final class MailFolderStorage implements FolderStorage {
                 }
 
                 if (doIt) {
-                    final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullName, true)));
+                    final List<MailFolder> children = new ArrayList<>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullName, true)));
                     /*
                      * Filter against possible POP3 storage folders
                      */
                     if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
                         filterPOP3StorageFolders(children, session);
                     }
-                    Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), reverse));
+                    Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), false, isArchive));
                     final String[] subfolderIds = new String[children.size()];
                     int i = 0;
                     for (final MailFolder child : children) {
@@ -1223,7 +1224,7 @@ public final class MailFolderStorage implements FolderStorage {
                 if (session.getUserPermissionBits().isMultipleMailAccounts()) {
                     final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                     final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
-                    final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
+                    final List<MailAccount> tmp = new ArrayList<>(accountsArr.length);
                     tmp.addAll(Arrays.asList(accountsArr));
                     Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
                     accounts = tmp;
@@ -1243,7 +1244,7 @@ public final class MailFolderStorage implements FolderStorage {
                         }
                     }
                 } else {
-                    accounts = new ArrayList<MailAccount>(1);
+                    accounts = new ArrayList<>(1);
                     final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                     try {
                         accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
@@ -1255,7 +1256,7 @@ public final class MailFolderStorage implements FolderStorage {
                 }
 
                 int size = accounts.size();
-                List<SortableId> list = new ArrayList<SortableId>(size);
+                List<SortableId> list = new ArrayList<>(size);
                 for (int j = 0; j < size; j++) {
                     list.add(new MailId(prepareFullname(accounts.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), j).setName(MailFolder.DEFAULT_FOLDER_NAME));
                 }
@@ -1299,15 +1300,15 @@ public final class MailFolderStorage implements FolderStorage {
                             /*
                              * Denoted parent is not capable to hold default folders. Therefore output as it is.
                              */
-                            boolean reverse;
+                            boolean isArchive;
                             {
                                 MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                                 MailAccount mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                                 String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
-                                reverse = null != archiveFullName && archiveFullName.equals(fullname);
+                                isArchive = null != archiveFullName && archiveFullName.equals(fullname);
                             }
 
-                            Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate, reverse));
+                            Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate, false, isArchive));
                         } else {
                             /*
                              * Ensure default folders are at first positions
@@ -1316,7 +1317,7 @@ public final class MailFolderStorage implements FolderStorage {
                             if (isDefaultFoldersChecked(accountId, storageParameters.getSession())) {
                                 names = getSortedDefaultMailFolders(accountId, storageParameters.getSession());
                             } else {
-                                final List<String> tmp = new ArrayList<String>();
+                                final List<String> tmp = new ArrayList<>();
                                 tmp.add("INBOX");
 
                                 String fn = folderStorage.getDraftsFolder();
@@ -1352,7 +1353,7 @@ public final class MailFolderStorage implements FolderStorage {
                          * Generate sorted IDs preserving order
                          */
                         final int size = folderInfos.size();
-                        final List<SortableId> list = new ArrayList<SortableId>(size);
+                        final List<SortableId> list = new ArrayList<>(size);
                         for (int j = 0; j < size; j++) {
                             final MailFolderInfo tmp = folderInfos.get(j);
                             list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(translate ? tmp.getDisplayName() : tmp.getName()));
@@ -1362,7 +1363,7 @@ public final class MailFolderStorage implements FolderStorage {
                 }
             }
 
-            List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
+            List<MailFolder> children = new ArrayList<>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
             /*
              * Filter against possible POP3 storage folders
              */
@@ -1377,14 +1378,14 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * Denoted parent is not capable to hold default folders. Therefore output as it is.
                  */
-                boolean reverse;
+                boolean isArchive;
                 {
                     MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                     MailAccount mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                     String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
-                    reverse = null != archiveFullName && archiveFullName.equals(fullname);
+                    isArchive = null != archiveFullName && archiveFullName.equals(fullname);
                 }
-                Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), reverse));
+                Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), false, isArchive));
             } else {
                 /*
                  * Ensure default folders are at first positions
@@ -1393,7 +1394,7 @@ public final class MailFolderStorage implements FolderStorage {
                 if (isDefaultFoldersChecked(accountId, storageParameters.getSession())) {
                     names = getSortedDefaultMailFolders(accountId, storageParameters.getSession());
                 } else {
-                    final List<String> tmp = new ArrayList<String>();
+                    final List<String> tmp = new ArrayList<>();
                     tmp.add("INBOX");
 
                     final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
@@ -1481,7 +1482,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Generate sorted IDs preserving order
              */
             final int size = children.size();
-            final List<SortableId> list = new ArrayList<SortableId>(size);
+            final List<SortableId> list = new ArrayList<>(size);
             for (int j = 0; j < size; j++) {
                 final MailFolder tmp = children.get(j);
                 list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(tmp.getName()));
@@ -1561,8 +1562,8 @@ public final class MailFolderStorage implements FolderStorage {
         if (null == includeContentTypes || includeContentTypes.length == 0) {
             return new String[0];
         }
-        final List<String> ret = new ArrayList<String>();
-        final Set<ContentType> supported = new HashSet<ContentType>(Arrays.asList(getSupportedContentTypes()));
+        final List<String> ret = new ArrayList<>();
+        final Set<ContentType> supported = new HashSet<>(Arrays.asList(getSupportedContentTypes()));
         for (final ContentType includeContentType : includeContentTypes) {
             if (supported.contains(includeContentType)) {
                 final SortableId[] subfolders = getSubfolders(treeId, PRIVATE_FOLDER_ID, storageParameters);
@@ -1837,7 +1838,7 @@ public final class MailFolderStorage implements FolderStorage {
             int len = msgs.length;
             int limit = 15;
             int offset = 0;
-            List<Message> arr = new ArrayList<Message>(limit);
+            List<Message> arr = new ArrayList<>(limit);
 
             do {
                 int end = offset + limit;
@@ -1862,7 +1863,7 @@ public final class MailFolderStorage implements FolderStorage {
             int len = msgs.length;
             int limit = 15;
             int offset = 0;
-            List<String> ids = new ArrayList<String>(limit);
+            List<String> ids = new ArrayList<>(limit);
 
             do {
                 int end = offset + limit;
@@ -1932,21 +1933,52 @@ public final class MailFolderStorage implements FolderStorage {
 
         private final Collator collator;
         private final boolean reverse;
+        private final boolean isArchive;
 
         public SimpleMailFolderComparator(Locale locale) {
-            this(locale, false);
+            this(locale, false, false);
         }
 
-        public SimpleMailFolderComparator(Locale locale, boolean reverse) {
+        public SimpleMailFolderComparator(Locale locale, boolean reverse, boolean isArchive) {
             super();
             collator = Collators.getSecondaryInstance(locale);
             this.reverse = reverse;
+            this.isArchive = isArchive;
         }
 
         @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
-            int result = collator.compare(o1.getName(), o2.getName());
+
+            int result = 0;
+            if (isArchive) {
+                result = compareArchive(o1, o2);
+            } else {
+                result = collator.compare(o1.getName(), o2.getName());
+            }
             return reverse ? -result : result;
+        }
+
+        private int compareArchive(MailFolder o1, MailFolder o2) {
+            String str1 = o1.getName();
+            String str2 = o2.getName();
+
+            boolean isNumberic1 = StringUtils.isNumeric(str1);
+            boolean isNumberic2 = StringUtils.isNumeric(str2);
+
+            if (isNumberic1 && !isNumberic2) {
+                return -1;
+            }
+
+            if (!isNumberic1 && isNumberic2) {
+                return 1;
+            }
+
+            if (isNumberic1 && isNumberic2) {
+                return -1 * collator.compare(str1, str2);
+            }
+
+            return collator.compare(str1, str2);
+
         }
     }
 
@@ -1955,22 +1987,52 @@ public final class MailFolderStorage implements FolderStorage {
         private final Collator collator;
         private final boolean translate;
         private final boolean reverse;
+        private final boolean isArchive;
 
         public SimpleMailFolderInfoComparator(Locale locale, boolean translate) {
-            this(locale, translate, false);
+            this(locale, translate, false, false);
         }
 
-        public SimpleMailFolderInfoComparator(Locale locale, boolean translate, boolean reverse) {
+        public SimpleMailFolderInfoComparator(Locale locale, boolean translate, boolean reverse, boolean isArchive) {
             super();
             this.reverse = reverse;
+            this.isArchive = isArchive;
             this.translate = translate;
             collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
         public int compare(MailFolderInfo o1, MailFolderInfo o2) {
-            int result = collator.compare(translate ? o1.getDisplayName() : o1.getName(), translate ? o2.getDisplayName() : o2.getName());
+            int result = 0;
+            if (isArchive) {
+                result = compareArchive(o1, o2);
+            } else {
+                result = collator.compare(translate ? o1.getDisplayName() : o1.getName(), translate ? o2.getDisplayName() : o2.getName());
+            }
             return reverse ? -result : result;
+        }
+
+        private int compareArchive(MailFolderInfo o1, MailFolderInfo o2) {
+            String str1 = translate ? o1.getDisplayName() : o1.getName();
+            String str2 = translate ? o2.getDisplayName() : o2.getName();
+
+            boolean isNumberic1 = StringUtils.isNumeric(str1);
+            boolean isNumberic2 = StringUtils.isNumeric(str2);
+
+            if (isNumberic1 && !isNumberic2) {
+                return -1;
+            }
+
+            if (!isNumberic1 && isNumberic2) {
+                return 1;
+            }
+
+            if (isNumberic1 && isNumberic2) {
+                return -1 * collator.compare(str1, str2);
+            }
+
+            return collator.compare(str1, str2);
+
         }
     }
 
@@ -1982,7 +2044,7 @@ public final class MailFolderStorage implements FolderStorage {
 
         public MailFolderComparator(String[] names, Locale locale) {
             super();
-            indexMap = new HashMap<String, Integer>(names.length);
+            indexMap = new HashMap<>(names.length);
             for (int i = 0; i < names.length; i++) {
                 indexMap.put(names[i], Integer.valueOf(i));
             }
@@ -2023,7 +2085,7 @@ public final class MailFolderStorage implements FolderStorage {
         public MailFolderInfoComparator(String[] names, Locale locale, boolean translate) {
             super();
             this.translate = translate;
-            indexMap = new HashMap<String, Integer>(names.length);
+            indexMap = new HashMap<>(names.length);
             for (int i = 0; i < names.length; i++) {
                 indexMap.put(names[i], Integer.valueOf(i));
             }
@@ -2057,7 +2119,7 @@ public final class MailFolderStorage implements FolderStorage {
     private static void postEvent4Subfolders(int accountId, Map<String, Map<?, ?>> subfolders, boolean post, StorageParameters params) {
         int size = subfolders.size();
         Iterator<Entry<String, Map<?, ?>>> iter = subfolders.entrySet().iterator();
-        List<String> ids = new LinkedList<String>();
+        List<String> ids = new LinkedList<>();
         String firstKey = null;
         for (int i = 0; i < size; i++) {
             Entry<String, Map<?, ?>> entry = iter.next();
@@ -2076,7 +2138,7 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     private static Map<String, Map<?, ?>> subfolders(String fullname, MailAccess<?, ?> mailAccess) throws OXException {
-        Map<String, Map<?, ?>> m = new HashMap<String, Map<?, ?>>();
+        Map<String, Map<?, ?>> m = new HashMap<>();
         subfoldersRecursively(fullname, m, mailAccess);
         return m;
     }
@@ -2087,7 +2149,7 @@ public final class MailFolderStorage implements FolderStorage {
             final Map<String, Map<?, ?>> emptyMap = Collections.emptyMap();
             m.put(parent, emptyMap);
         } else {
-            Map<String, Map<?, ?>> subMap = new HashMap<String, Map<?, ?>>();
+            Map<String, Map<?, ?>> subMap = new HashMap<>();
             int size = mailFolders.length;
             for (int i = 0; i < size; i++) {
                 String fullname = mailFolders[i].getFullname();
@@ -2100,7 +2162,7 @@ public final class MailFolderStorage implements FolderStorage {
     private void postChangedId(String newId, String oldId, String delim, Session session) {
         EventAdmin eventAdmin = Services.getService(EventAdmin.class);
         if (null != eventAdmin) {
-            Map<String, Object> properties = new HashMap<String, Object>(6);
+            Map<String, Object> properties = new HashMap<>(6);
             properties.put(FolderEventConstants.PROPERTY_SESSION, session);
             properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
             properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
@@ -2209,7 +2271,7 @@ public final class MailFolderStorage implements FolderStorage {
         if (null == list || list.isEmpty()) {
             return list;
         }
-        final List<E> ret = new ArrayList<E>(list.size());
+        final List<E> ret = new ArrayList<>(list.size());
         for (final E element : list) {
             if (null != element) {
                 ret.add(element);

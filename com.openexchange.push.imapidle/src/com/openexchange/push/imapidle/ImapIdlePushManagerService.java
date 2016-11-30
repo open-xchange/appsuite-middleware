@@ -303,12 +303,12 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
                         listener.start();
                         unlock = false;
-                        LOGGER.info("Started IMAP-IDLE listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
+                        LOGGER.info("Started IMAP-IDLE listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
                         return listener;
                     }
 
                     // Already running for session user
-                    LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                    LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
                 } finally {
                     if (unlock) {
                         releaseLock(sessionInfo);
@@ -316,7 +316,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
         }
 
         // No listener registered for given session
@@ -430,7 +430,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             // Query local ones first
             Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
             for (Session session : sessions) {
-                if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
                     return injectAnotherListenerUsing(session, false).injectedPushListener;
                 }
             }
@@ -439,17 +439,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             if (sessiondService instanceof SessiondServiceExtended) {
                 sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
                 for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
-                        return injectAnotherListenerUsing(session, false).injectedPushListener;
-                    }
-                }
-            }
-
-            // Look-up remote sessions, too, if possible
-            if (sessiondService instanceof SessiondServiceExtended) {
-                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
-                for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
                         return injectAnotherListenerUsing(session, false).injectedPushListener;
                     }
                 }

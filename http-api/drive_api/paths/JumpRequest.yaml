@@ -2,8 +2,8 @@
   get:
     operationId: generateDirectLink
     tags:
-      - drive
-    summary: Gets a direct link for a folder or a file into AppSuite (**avalaible with API version 4**).
+      - Drive
+    summary: Gets a direct link for a folder or a file into AppSuite.
     description: |
       Generates a direct link into the AppSuite UI for a synchronized file or a synchronized folder and a
       token for token-based login.
@@ -50,3 +50,17 @@
           In case of errors the responsible fields in the response are filled.
         schema:
           $ref: "#/definitions/DriveJumpResponse"
+    x-ox-examples:      
+      - Example1:
+        description: Basic example
+        example: |
+          ==> POST http://localhost/ajax/drive?action=jump&session=48a289898ad949faaa46c04e7fb422f5&root=9547&path=/path/to/file&name=file_to_edit.txt&method=edit&authId=41763584-8460-11e4-b116-123b93f75dba
+          > Content: clientToken=47d74b1c-81df-11e4-b116-123b93f75cba
+
+          <== HTTP 200 OK
+          <   Content: 
+              {
+                "data": {
+                  "redirectUrl": "http://localhost/appsuite#app=io.ox/editor&folder=273264&id=273264/307438&serverToken=7b90972628e34e89bb9a3946d1372c68"
+                }
+              }

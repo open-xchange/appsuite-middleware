@@ -152,7 +152,7 @@ public abstract class AbstractJsonMetadata  {
         }
     }
 
-    protected void addShareInfo(JSONObject jsonObject, ShareInfo share) throws JSONException {
+    protected void addShareInfo(JSONObject jsonObject, ShareInfo share) throws JSONException, OXException {
         if (null != share) {
             HostData hostData = session.getDriveSession().getHostData();
             if (null != hostData) {

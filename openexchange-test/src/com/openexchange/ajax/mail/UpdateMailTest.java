@@ -92,12 +92,14 @@ public class UpdateMailTest extends AbstractMailTest {
         values = getClient().getValues();
         clearFolder(getSentFolder());
         clearFolder(getInboxFolder());
+        clearFolder(getTrashFolder());
     }
 
     @Override
     protected void tearDown() throws Exception {
-//        clearFolder( values.getSentFolder() );
-//        clearFolder( values.getInboxFolder() );
+        clearFolder( getSentFolder() );
+        clearFolder( getInboxFolder() );
+        clearFolder(getTrashFolder());
         super.tearDown();
     }
 

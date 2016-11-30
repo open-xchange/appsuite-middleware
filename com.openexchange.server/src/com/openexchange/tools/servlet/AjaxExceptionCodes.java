@@ -63,9 +63,9 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
-     * Unknown AJAX action: %1$s.
+     * Unknown AJAX action.
      */
-    UNKNOWN_ACTION("Unknown AJAX action: %1$s.", MESSAGE, Category.CATEGORY_ERROR, 1),
+    UNKNOWN_ACTION("Unknown AJAX action.", MESSAGE, Category.CATEGORY_ERROR, 1, false),
     /**
      * Missing the following request parameter: %1$s
      */
@@ -87,9 +87,9 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      */
     MISSING_REQUEST_HANDLER("Missing AJAX request handler for module %s", MESSAGE, Category.CATEGORY_ERROR, 6),
     /**
-     * Unknown module: %s.
+     * Unknown module.
      */
-    UNKNOWN_MODULE("Unknown module: %s.", MESSAGE, Category.CATEGORY_ERROR, 7),
+    UNKNOWN_MODULE("Unknown module.", MESSAGE, Category.CATEGORY_ERROR, 7, false),
     /**
      * JSON error: %s
      */
@@ -195,41 +195,36 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
 
     ;
 
+    /** The prefix for this error code class: <code>"SVL"</code> */
     public static final String PREFIX = "SVL";
 
-    /**
-     * (Log) Message of the exception.
-     */
+    /** (Log) Message of the exception. */
     private final String message;
 
-    /**
-     * Display message of the exception.
-     */
+    /** Display message of the exception. */
     private final String displayMessage;
 
-    /**
-     * Category of the exception.
-     */
+    /** Category of the exception. */
     private final Category category;
 
-    /**
-     * Detail number of the exception.
-     */
+    /** Detail number of the exception. */
     private final int number;
 
-    /**
-     * Default constructor.
-     *
-     * @param message message.
-     * @param displayMessage The (optional) display message
-     * @param category category.
-     * @param detailNumber detail number.
-     */
-    private AjaxExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
+    /** Whether log/display arguments are allowed */
+    private final boolean allowArguments;
+
+    /** Constructor. */
+    private AjaxExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
+        this(message, displayMessage, category, detailNumber, true);
+    }
+
+    /** Constructor. */
+    private AjaxExceptionCodes(String message, String displayMessage, Category category, int detailNumber, boolean allowArguments) {
         this.message = message;
         this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
         this.category = category;
         number = detailNumber;
+        this.allowArguments = allowArguments;
     }
 
     @Override
@@ -278,7 +273,7 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, allowArguments ? args : MESSAGE_ARGS_EMPTY);
     }
 
     /**
@@ -289,7 +284,7 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        return OXExceptionFactory.getInstance().create(this, cause, allowArguments ? args : MESSAGE_ARGS_EMPTY);
     }
 
 }

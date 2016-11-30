@@ -227,7 +227,7 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
         final MailMessage[] pop3Msgs;
         {
             final int length = pop3Messages.length;
-            final List<MailMessage> tmp = new LinkedList<MailMessage>();
+            final List<MailMessage> tmp = new LinkedList<>();
             boolean failee = false;
             for (int i = 0; i < length; i++) {
                 final MailMessage m = pop3Messages[i];
@@ -256,7 +256,7 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
         if ((pop3Msgs[0] instanceof MimeRawSource) && (delegatee instanceof IMailMessageStorageMimeSupport)) {
             final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
             if (streamSupport.isMimeSupported()) {
-                final List<Message> tmp = new LinkedList<Message>();
+                final List<Message> tmp = new LinkedList<>();
                 for (final MailMessage pop3Message : pop3Msgs) {
                     tmp.add((Message) ((MimeRawSource) pop3Message).getPart());
                 }
@@ -398,8 +398,8 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
                 trashContainer.addAllUIDL(cleanedUIDLs);
             }
         } else {
-            final List<String> uidls = new ArrayList<String>(mailIDs.length);
-            final List<FullnameUIDPair> pairs = new ArrayList<FullnameUIDPair>(mailIDs.length);
+            final List<String> uidls = new ArrayList<>(mailIDs.length);
+            final List<FullnameUIDPair> pairs = new ArrayList<>(mailIDs.length);
             for (int i = 0; i < mailIDs.length; i++) {
                 final String mailID = mailIDs[i];
                 final String uidl = uidlMap.getUIDL(new FullnameUIDPair(sourceFolder, mailID));
@@ -439,11 +439,11 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields, SearchTerm<?> searchTerm) throws OXException {
         if (!(delegatee instanceof ISimplifiedThreadStructure)) {
             throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
         }
-        final List<List<MailMessage>> messagesList = ((ISimplifiedThreadStructure) delegatee).getThreadSortedMessages(getRealFullname(folder), includeSent, cache, indexRange, max, sortField, order, fields);
+        final List<List<MailMessage>> messagesList = ((ISimplifiedThreadStructure) delegatee).getThreadSortedMessages(getRealFullname(folder), includeSent, cache, indexRange, max, sortField, order, fields, searchTerm);
         for (final List<MailMessage> messages : messagesList) {
             for (final MailMessage mailMessage : messages) {
                 setFolderAndAccount(folder, mailMessage);
@@ -496,7 +496,7 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     }
 
     private Set<String> getContainedUIDLs(final String virtualFullname, final String[] mailIDs) throws OXException {
-        final Set<String> retval = new HashSet<String>(mailIDs.length);
+        final Set<String> retval = new HashSet<>(mailIDs.length);
         for (int i = 0; i < mailIDs.length; i++) {
             final String uidl = uidlMap.getUIDL(new FullnameUIDPair(virtualFullname, mailIDs[i]));
             if (null != uidl) {

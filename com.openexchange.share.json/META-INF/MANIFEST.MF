@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The share API bundle
 Bundle-SymbolicName: com.openexchange.share.json
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -76,6 +76,7 @@ Import-Package: com.fasterxml.jackson.core,
  javax.mail.internet,
  javax.servlet,
  javax.servlet.http,
+ org.apache.commons.validator.routines,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,

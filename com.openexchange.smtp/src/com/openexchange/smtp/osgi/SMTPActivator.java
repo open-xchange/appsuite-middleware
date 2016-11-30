@@ -63,6 +63,10 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mail.transport.listener.MailTransportListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.smtp.ListenerChain;
@@ -90,7 +94,8 @@ public final class SMTPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class, ContextService.class, UserService.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class, ContextService.class, UserService.class,
+            SSLSocketFactoryProvider.class, SSLConfigurationService.class, UserAwareSSLConfigurationService.class };
     }
 
     @Override
@@ -105,6 +110,7 @@ public final class SMTPActivator extends HousekeepingActivator {
             trackService(HostnameService.class);
             trackService(NoReplyConfigFactory.class);
             trackService(AuditLogService.class);
+            trackService(OAuthService.class);
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             openTrackers();
 

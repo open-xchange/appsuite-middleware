@@ -102,6 +102,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
@@ -707,11 +708,15 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
         if (user.isGuest()) {
             capabilities.add(getCapability("guest"));
-            capabilities.remove(getCapability("share_links"));
-            capabilities.remove(getCapability("invite_guests"));
+            if (ShareTool.isAnonymousGuest(user)) {
+                capabilities.add(getCapability("anonymous"));
+            }
+            capabilities.remove("share_links");
+            capabilities.remove("invite_guests");
             if (!Strings.isEmpty(user.getMail())) {
                 capabilities.add(getCapability("edit_password"));
             }
+            capabilities.remove("guard");
         }
     }
 
