@@ -50,21 +50,29 @@
 package com.openexchange.http.grizzly.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import com.google.common.net.InetAddresses;
+import com.openexchange.java.Strings;
 
 /**
- * {@link IPTools} Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
+ * {@link IPTools} - Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IPTools {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(IPTools.class);
+
+    /**
+     * Initializes a new {@link IPTools}.
+     */
+    private IPTools() {
+        super();
+    }
 
     public final static String COMMA_SEPARATOR = ",";
 
@@ -83,25 +91,27 @@ public class IPTools {
      * @param knownProxies A List of Strings containing the known proxies
      * @return the first ip that isn't a known proxy iow. the remote IP or an empty String if no valid remote IP could be found
      */
-    public static String getRemoteIP(String forwardedIPs, List<String> knownProxies) {
-        if (forwardedIPs == null || forwardedIPs.isEmpty()) {
-            return "";
+    public static String getRemoteIP(String forwardedIPs, Collection<String> knownProxies) {
+        if (Strings.isEmpty(forwardedIPs)) {
+            return null;
         }
-        List<String> forwarded = splitAndTrim(forwardedIPs, COMMA_SEPARATOR);
-        ListIterator<String> iterator = forwarded.listIterator(forwarded.size());
-        String remoteIP = "";
-        while (iterator.hasPrevious()) {
-            String previousIP = iterator.previous();
+
+        // Split & iterate in reverse order until first remote IP occurs
+        String[] ips = Strings.splitByComma(forwardedIPs);
+        String remoteIP = null;
+        for (int i = ips.length; null == remoteIP && i-- > 0;) {
+            String previousIP = ips[i];
             if (!knownProxies.contains(previousIP)) {
                 remoteIP = previousIP;
-                break;
             }
         }
+
         // Don't return invalid IPs
-        if (!InetAddresses.isInetAddress(remoteIP)) {
-            LOG.debug("{} is not a valid IP. Discarding candidate for remote IP.", remoteIP);
-            return "";
+        if (null != remoteIP && !InetAddresses.isInetAddress(remoteIP)) {
+            LOG.debug("{} is not a valid IP. Discarding that candidate for remote IP.", remoteIP);
+            return null;
         }
+
         return remoteIP;
     }
 

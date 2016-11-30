@@ -102,10 +102,10 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     /**
      * Initializes a new {@link HttpServletRequestWrapper}.
      *
-     * @param requestScheme The scheme of the incoming request: http or https
-     * @param remoteAddress
-     * @param serverPort The serverPort of the incoming request
-     * @param httpServletRequest The incoming request
+     * @param requestScheme The scheme of the request: http or https
+     * @param remoteAddress The remote IP address of the request
+     * @param serverPort The server port of the request
+     * @param httpServletRequest The request (to delegate to)
      * @throws IllegalArgumentException If the port is smaller than 1
      */
     public HttpServletRequestWrapper(String requestScheme, String remoteAddress, int serverPort, HttpServletRequest httpServletRequest) {

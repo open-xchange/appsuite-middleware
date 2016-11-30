@@ -52,7 +52,9 @@ package com.openexchange.http.grizzly.servletfilter;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.servlet.Filter;
@@ -92,7 +94,7 @@ public class WrappingFilter implements Filter {
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     private final String forHeader;
-    private final List<String> knownProxies;
+    private final Set<String> knownProxies;
     private final String protocolHeader;
     private final boolean isConsiderXForwards;
     private final String echoHeaderName;
@@ -105,7 +107,7 @@ public class WrappingFilter implements Filter {
     public WrappingFilter(GrizzlyConfig config) {
         super();
         this.forHeader = config.getForHeader();
-        this.knownProxies = config.getKnownProxies();
+        this.knownProxies = new LinkedHashSet<>(config.getKnownProxies());
         this.protocolHeader = config.getProtocolHeader();
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeaderName = config.getEchoHeader();
@@ -189,18 +191,19 @@ public class WrappingFilter implements Filter {
             return new HttpServletRequestWrapper(httpRequest);
         }
 
+        // Determine remote IP address
         String forHeaderValue = httpRequest.getHeader(forHeader);
         String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
-        String protocol = httpRequest.getHeader(protocolHeader);
+        if (null == remoteIP) {
+            LOG.debug("Could not detect a valid remote IP address in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
+            remoteIP = httpRequest.getRemoteAddr();
+        }
 
+        // Determine protocol/scheme of the incoming request
+        String protocol = httpRequest.getHeader(protocolHeader);
         if (!isValidProtocol(protocol)) {
             LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
             protocol = httpRequest.getScheme();
-        }
-
-        if (remoteIP.isEmpty()) {
-            LOG.debug("Could not detect a valid remote IP address in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
-            remoteIP = httpRequest.getRemoteAddr();
         }
 
         return new HttpServletRequestWrapper(protocol, remoteIP, httpRequest.getServerPort(), httpRequest);
