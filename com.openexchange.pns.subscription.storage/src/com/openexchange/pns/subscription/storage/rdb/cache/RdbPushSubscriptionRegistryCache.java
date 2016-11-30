@@ -223,7 +223,7 @@ public class RdbPushSubscriptionRegistryCache {
     }
 
     private void fireInvalidateCacheEvent(int userId, int contextId) {
-        if (null != cacheEventService && cacheEventService.getConfiguration().remoteInvalidationForPersonalFolders()) {
+        if (null != cacheEventService) {
             CacheEvent event = newCacheEventFor(userId, contextId);
             if (null != event) {
                 cacheEventService.notify(this, event, false);
