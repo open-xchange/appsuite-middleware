@@ -80,6 +80,7 @@ public class OXSessionManager implements SessionManager {
     // -----------------------------------------------------------------------------------------------
 
     private final GrizzlyConfig grizzlyConfig;
+    private final TimerService timerService;
     private final ConcurrentMap<String, Session> sessions;
     private final Random rnd;
     private final ScheduledTimerTask sessionExpirer;
@@ -95,6 +96,7 @@ public class OXSessionManager implements SessionManager {
     public OXSessionManager(GrizzlyConfig grizzlyConfig, TimerService timerService) {
         super();
         this.grizzlyConfig = grizzlyConfig;
+        this.timerService = timerService;
         int max = grizzlyConfig.getMaxNumberOfHttpSessions();
         this.max = max;
         this.considerSessionCount = max > 0;
@@ -114,19 +116,11 @@ public class OXSessionManager implements SessionManager {
             periodSeconds = MIN_PERIOD_SECONDS;
         }
 
-        Runnable expirerTask = new Runnable() {
+        this.sessionExpirer = timerService.scheduleAtFixedRate(newTaskForPeriodicChecks(lock), periodSeconds, periodSeconds, TimeUnit.SECONDS);
+    }
 
-            @Override
-            public void run() {
-                lock.lock();
-                try {
-                    cleanUp(System.currentTimeMillis());
-                } finally {
-                    lock.unlock();
-                }
-            }
-        };
-        this.sessionExpirer = timerService.scheduleAtFixedRate(expirerTask, periodSeconds, periodSeconds, TimeUnit.SECONDS);
+    private void scheduleCleanUpNow(long currentTime) {
+        timerService.schedule(newTaskForOneTimeCheck(currentTime, lock), 0, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -193,15 +187,11 @@ public class OXSessionManager implements SessionManager {
         try {
             if (considerSessionCount && sessionsCount >= max) {
                 long currentTime = System.currentTimeMillis();
-                if ((currentTime - lastCleanUp) < (MIN_PERIOD_SECONDS * 1000)) {
-                    throw onMaxSessionCountExceeded();
+                if ((currentTime - lastCleanUp) >= (MIN_PERIOD_SECONDS * 1000)) {
+                    scheduleCleanUpNow(currentTime);
                 }
 
-                // Clean-up & check again
-                cleanUp(currentTime);
-                if (sessionsCount >= max) {
-                    throw onMaxSessionCountExceeded();
-                }
+                throw onMaxSessionCountExceeded();
             }
 
             Session session = new Session();
@@ -221,7 +211,12 @@ public class OXSessionManager implements SessionManager {
         }
     }
 
-    private IllegalStateException onMaxSessionCountExceeded() {
+    /**
+     * Invoked when max. session count is exceeded.
+     *
+     * @return The appropriate instance of <code>IllegalStateException</code> reflecting the exceeded count
+     */
+    protected IllegalStateException onMaxSessionCountExceeded() {
         String message = "Max. number of HTTP sessions (" + max + ") exceeded.";
         LOG.warn(message);
         return new IllegalStateException(message);
@@ -390,5 +385,37 @@ public class OXSessionManager implements SessionManager {
     private long generateRandomLong() {
         return (rnd.nextLong() & 0x7FFFFFFFFFFFFFFFL);
     }
+
+    // ---------------------------------------------------------------------------------------------------------------------
+
+    private ExpirerTask newTaskForPeriodicChecks(Lock lock) {
+        return new ExpirerTask(-1L, lock);
+    }
+
+    private ExpirerTask newTaskForOneTimeCheck(long currentTime, Lock lock) {
+        return new ExpirerTask(currentTime, lock);
+    }
+
+    private final class ExpirerTask implements Runnable {
+
+        private final Lock tlock;
+        private final long currentTime;
+
+        ExpirerTask(long currentTime, Lock lock) {
+            super();
+            this.tlock = lock;
+            this.currentTime = currentTime;
+        }
+
+        @Override
+        public void run() {
+            tlock.lock();
+            try {
+                cleanUp(currentTime < 0 ? System.currentTimeMillis() : currentTime);
+            } finally {
+                tlock.unlock();
+            }
+        }
+    } // End of class ExpirerTask
 
 }
