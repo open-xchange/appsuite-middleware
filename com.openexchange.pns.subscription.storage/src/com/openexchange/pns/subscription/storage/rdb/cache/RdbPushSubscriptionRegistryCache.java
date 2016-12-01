@@ -97,8 +97,7 @@ public class RdbPushSubscriptionRegistryCache {
 
             @Override
             public CachedPushSubscriptionCollection load(UserAndContext userAndContext) throws Exception {
-                LoadInMemoryPushSubscriptionCollectionCallable callable = new LoadInMemoryPushSubscriptionCollectionCallable(userAndContext.getUserId(), userAndContext.getContextId(), registry);
-                return callable.call();
+                return LoadInMemoryPushSubscriptionCollectionCallable.loadCollectionFor(userAndContext.getUserId(), userAndContext.getContextId(), registry);
             }
         };
 
