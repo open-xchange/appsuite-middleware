@@ -50,10 +50,11 @@
 package org.glassfish.grizzly.http.server;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.utils.DataStructures;
 import org.slf4j.Logger;
@@ -78,12 +79,15 @@ public class OXSessionManager implements SessionManager {
 
     // -----------------------------------------------------------------------------------------------
 
-    /** The Grizzly configuration */
     private final GrizzlyConfig grizzlyConfig;
-
-    final ConcurrentMap<String, Session> sessions = DataStructures.getConcurrentMap();
-    private final Random rnd = new Random();
+    private final ConcurrentMap<String, Session> sessions;
+    private final Random rnd;
     private final ScheduledTimerTask sessionExpirer;
+    private final int max;
+    private final boolean considerSessionCount;
+    private final Lock lock;
+    private int sessionsCount;  // protected by lock
+    private long lastCleanUp;   // protected by lock
 
     /**
      * Initializes a new {@link OXSessionManager}.
@@ -91,6 +95,15 @@ public class OXSessionManager implements SessionManager {
     public OXSessionManager(GrizzlyConfig grizzlyConfig, TimerService timerService) {
         super();
         this.grizzlyConfig = grizzlyConfig;
+        int max = grizzlyConfig.getMaxNumberOfHttpSessions();
+        this.max = max;
+        this.considerSessionCount = max > 0;
+        this.sessions = DataStructures.getConcurrentMap();
+        this.rnd = new Random();
+        this.sessionsCount = 0;
+        final ReentrantLock lock = new ReentrantLock();
+        this.lock = lock;
+        this.lastCleanUp = 0;
 
         int configuredSessionTimeout = grizzlyConfig.getCookieMaxInactivityInterval();
         int periodSeconds = grizzlyConfig.getSessionExpiryCheckInterval();
@@ -101,36 +114,54 @@ public class OXSessionManager implements SessionManager {
             periodSeconds = MIN_PERIOD_SECONDS;
         }
 
-        sessionExpirer = timerService.scheduleAtFixedRate(new Runnable() {
+        Runnable expirerTask = new Runnable() {
 
             @Override
             public void run() {
-                Iterator<Map.Entry<String, Session>> iterator = sessions.entrySet().iterator();
-                if (false == iterator.hasNext()) {
-                    return;
+                lock.lock();
+                try {
+                    cleanUp(System.currentTimeMillis());
+                } finally {
+                    lock.unlock();
                 }
-
-                long currentTime = System.currentTimeMillis();
-                Map.Entry<String, Session> entry;
-                do {
-                    entry = iterator.next();
-                    Session session = entry.getValue();
-
-                    if (!session.isValid() || (session.getSessionTimeout() > 0 && currentTime - session.getTimestamp() > session.getSessionTimeout())) {
-                        session.setValid(false);
-                        iterator.remove();
-                    }
-                } while (iterator.hasNext());
             }
-        }, 5, 5, TimeUnit.SECONDS);
+        };
+        this.sessionExpirer = timerService.scheduleAtFixedRate(expirerTask, periodSeconds, periodSeconds, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Cleans-up the session collection. Drops invalid/expired sessions.
+     * <p>
+     * <b>Must only be called when holding lock.</b>
+     *
+     * @param currentTime The current time stamp
+     */
+    void cleanUp(long currentTime) {
+        Session session;
+        for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
+            session = it.next();
+            if (!session.isValid() || ((session.getSessionTimeout() > 0) && ((currentTime - session.getTimestamp()) > session.getSessionTimeout()))) {
+                session.setValid(false);
+                it.remove();
+                sessionsCount--;
+            }
+        }
+
+        lastCleanUp = System.currentTimeMillis();
     }
 
     /**
      * Disposes this instance
      */
     public void destroy() {
-        sessionExpirer.cancel();
-        sessions.clear();
+        lock.lock();
+        try {
+            sessionExpirer.cancel();
+            sessions.clear();
+            sessionsCount = 0;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -158,36 +189,59 @@ public class OXSessionManager implements SessionManager {
 
     @Override
     public Session createSession(Request request) {
-        int max = grizzlyConfig.getMaxNumberOfHttpSessions();
-        if (max > 0 && sessions.size() >= max) {
-            String message = "Max. number of HTTP sessions (" + max + ") exceeded.";
-            LOG.warn(message);
-            throw new IllegalStateException(message);
+        lock.lock();
+        try {
+            if (considerSessionCount && sessionsCount >= max) {
+                long currentTime = System.currentTimeMillis();
+                if ((currentTime - lastCleanUp) < (MIN_PERIOD_SECONDS * 1000)) {
+                    throw onMaxSessionCountExceeded();
+                }
+
+                // Clean-up & check again
+                cleanUp(currentTime);
+                if (sessionsCount >= max) {
+                    throw onMaxSessionCountExceeded();
+                }
+            }
+
+            Session session = new Session();
+
+            String requestedSessionId;
+            do {
+                requestedSessionId = createSessionID(request);
+                session.setIdInternal(requestedSessionId);
+            } while (sessions.putIfAbsent(requestedSessionId, session) != null);
+            sessionsCount++;
+
+            LogProperties.put(LogProperties.Name.GRIZZLY_HTTP_SESSION, requestedSessionId);
+
+            return session;
+        } finally {
+            lock.unlock();
         }
+    }
 
-        Session session = new Session();
-
-        String requestedSessionId;
-        do {
-            requestedSessionId = createSessionID(request);
-            session.setIdInternal(requestedSessionId);
-        } while (sessions.putIfAbsent(requestedSessionId, session) != null);
-
-        LogProperties.put(LogProperties.Name.GRIZZLY_HTTP_SESSION, requestedSessionId);
-
-        return session;
+    private IllegalStateException onMaxSessionCountExceeded() {
+        String message = "Max. number of HTTP sessions (" + max + ") exceeded.";
+        LOG.warn(message);
+        return new IllegalStateException(message);
     }
 
     @Override
     public String changeSessionId(Request request, Session session) {
-        final String oldSessionId = session.getIdInternal();
-        final String newSessionId = String.valueOf(generateRandomLong());
+        lock.lock();
+        try {
+            final String oldSessionId = session.getIdInternal();
+            final String newSessionId = String.valueOf(generateRandomLong());
 
-        session.setIdInternal(newSessionId);
+            session.setIdInternal(newSessionId);
 
-        sessions.remove(oldSessionId);
-        sessions.put(newSessionId, session);
-        return oldSessionId;
+            sessions.remove(oldSessionId);
+            sessions.put(newSessionId, session);
+            return oldSessionId;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
