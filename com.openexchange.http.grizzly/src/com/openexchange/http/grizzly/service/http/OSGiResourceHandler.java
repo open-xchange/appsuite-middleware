@@ -86,7 +86,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
@@ -185,9 +185,10 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
             final InputStream is = urlConnection.getInputStream();
             final OutputStream os = response.getOutputStream();
 
-            byte buff[] = new byte[1024*8];
-            int read, total = 0;
-            while ((read = is.read(buff)) > 0) {
+            int blen = 8192;
+            byte buff[] = new byte[8192];
+            int total = 0;
+            for (int read; (read = is.read(buff, 0, blen)) > 0;) {
                 total += read;
                 os.write(buff, 0, read);
             }

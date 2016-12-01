@@ -86,7 +86,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
@@ -154,8 +154,7 @@ public class HttpServiceImpl implements HttpServiceExtension {
             final String alias, final Servlet servlet, final Dictionary initparams, HttpContext httpContext)
             throws ServletException, NamespaceException {
 
-        LOG.info("Registering servlet: {}, under: {} with context: {}", servlet.getClass().getName(), alias, httpContext);
-        // .append(", with: ").append(initparams)
+        LOG.info("Registering servlet: {}, under: {}, with: {} and context: {}", servlet, alias, initparams, httpContext);
 
         mainHttpHandler.registerServletHandler(alias, servlet, initparams, httpContext, this);
     }

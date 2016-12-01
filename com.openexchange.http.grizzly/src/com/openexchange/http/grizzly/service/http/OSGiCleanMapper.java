@@ -86,7 +86,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
@@ -299,7 +299,6 @@ public class OSGiCleanMapper {
             HttpHandler httpHandler = getHttpHandler(alias);
             if (httpHandler instanceof OSGiServletHandler) {
                 OSGiServletHandler servletHandler = (OSGiServletHandler) httpHandler;
-
                 java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock removalLock = servletHandler.getRemovalLock();
                 removalLock.lock();
                 try {

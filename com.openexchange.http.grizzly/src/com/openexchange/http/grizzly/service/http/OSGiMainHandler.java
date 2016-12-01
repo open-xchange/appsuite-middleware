@@ -86,7 +86,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
@@ -437,7 +437,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             if (mapper.isLocalyRegisteredAlias(alias)) {
                 mapper.doUnregister(alias, true);
             } else {
-                LOG.warn("Bundle: {} tried to unregister not owned alias '{}{}", bundle, alias, '\'');
+                LOG.warn("Bundle: {} tried to unregister not owned alias '{}'", bundle, alias);
                 throw new IllegalArgumentException(new StringBuilder(64).append("Alias '").append(alias).append(
                     "' was not registered by you.").toString());
             }
