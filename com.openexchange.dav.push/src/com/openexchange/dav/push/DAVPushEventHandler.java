@@ -117,34 +117,44 @@ public class DAVPushEventHandler implements EventHandler {
         String rootTopic = DAVPushUtility.getRootTopic(clientId);
         Long dataChanged = Long.valueOf(getTimestamp(event).getTime() / 1000);
         Long pushRequestSubmitted = Long.valueOf(System.currentTimeMillis() / 1000);
+        Integer priority = determinePriority(event);
         int contextId = event.getContextId();
         for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
             int userId = entry.getKey().intValue();
-            pushNotifications.add(getPushNotification(contextId, userId, rootTopic, dataChanged, pushRequestSubmitted));
+            pushNotifications.add(getPushNotification(contextId, userId, rootTopic, dataChanged, pushRequestSubmitted, priority));
             for (Integer folderId : entry.getValue()) {
                 String folderTopic = DAVPushUtility.getFolderTopic(clientId, folderId.toString());
-                pushNotifications.add(getPushNotification(contextId, userId, folderTopic, dataChanged, pushRequestSubmitted));
+                pushNotifications.add(getPushNotification(contextId, userId, folderTopic, dataChanged, pushRequestSubmitted, priority));
             }
         }
 
         notificationService.handle(pushNotifications);
     }
 
-    private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long dataChanged, Long pushRequestSubmitted) {
+    private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long dataChanged, Long pushRequestSubmitted, Integer priority) {
         String pushKey = DAVPushUtility.getPushKey(topic, contextId, userId);
         return DefaultPushNotification.builder()
             .contextId(contextId)
             .userId(userId)
             .topic(topic)
-            .messageData(getMessageData(dataChanged, pushKey, pushRequestSubmitted))
+            .messageData(getMessageData(dataChanged, pushKey, pushRequestSubmitted, priority))
         .build();
     }
 
-    private static Map<String, Object> getMessageData(Long dataChanged, String pushKey, Long pushRequestSubmitted) {
+    private static Map<String, Object> getMessageData(Long dataChanged, String pushKey, Long pushRequestSubmitted, Integer priority) {
         Map<String, Object> messageData = new HashMap<String, Object>(3);
+        /*
+         * APN properties
+         */
         messageData.put("dataChangedTimestamp", dataChanged);
         messageData.put("key", pushKey);
         messageData.put("pushRequestSubmittedTimestamp", pushRequestSubmitted);
+        /*
+         * DAV-PUSH properties
+         */
+        messageData.put("topic", pushKey);
+        messageData.put("priority", priority);
+        messageData.put("timestamp", dataChanged);
         return messageData;
     }
 
@@ -186,6 +196,10 @@ public class DAVPushEventHandler implements EventHandler {
             }
         }
         return null == timestamp ? new Date() : timestamp;
+    }
+
+    private static int determinePriority(CommonEvent event) {
+        return Integer.valueOf(50);
     }
 
 }

@@ -47,70 +47,32 @@
  *
  */
 
-package com.openexchange.dav.push.subscribe;
+package com.openexchange.dav.push.gcm;
 
-import java.util.EnumMap;
-import java.util.Map;
-import com.openexchange.dav.DAVPerformer;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.webdav.action.WebdavAction;
-import com.openexchange.webdav.action.WebdavExistsAction;
-import com.openexchange.webdav.action.WebdavHeadAction;
-import com.openexchange.webdav.action.WebdavIfAction;
-import com.openexchange.webdav.action.WebdavIfMatchAction;
-import com.openexchange.webdav.action.WebdavOptionsAction;
-import com.openexchange.webdav.action.WebdavTraceAction;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavMethod;
+import java.util.List;
 
 /**
- * {@link PushSubscribePerformer}
+ * {@link DavPushResponse}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class PushSubscribePerformer extends DAVPerformer {
+public class DavPushResponse {
 
-    private static final Protocol PROTOCOL = new Protocol();
-
-    private final PushSubscribeFactory factory;
-    private final Map<WebdavMethod, WebdavAction> actions;
+    private final List<String> noSubscribers;
 
     /**
-     * Initializes a new {@link PushSubscribePerformer}.
+     * Initializes a new {@link DavPushResponse}.
      *
-     * @param services A service lookup reference
+     * @param noSubscribers The list of no longer subscribed topics
      */
-    public PushSubscribePerformer(ServiceLookup services) {
+    public DavPushResponse(List<String> noSubscribers) {
         super();
-        this.factory = new PushSubscribeFactory(PROTOCOL, services, this);
-        this.actions = initActions();
+        this.noSubscribers = noSubscribers;
     }
 
-    private EnumMap<WebdavMethod, WebdavAction> initActions() {
-        EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
-        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.POST, prepare(new PushSubscribeAction(factory), true, true, new WebdavIfMatchAction()));
-        actions.put(WebdavMethod.GET, prepare(new PushSubscribeAction(factory), true, true, false, null, new WebdavExistsAction()));
-        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, null, new WebdavExistsAction()));
-        actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
-        makeLockNullTolerant(actions);
-        return actions;
-    }
-
-    @Override
-    protected String getURLPrefix() {
-        return factory.getURLPrefix();
-    }
-
-    @Override
-    public PushSubscribeFactory getFactory() {
-        return factory;
-    }
-
-    @Override
-    protected WebdavAction getAction(WebdavMethod method) {
-        return actions.get(method);
+    public List<String> getNoSubscribers() {
+        return noSubscribers;
     }
 
 }

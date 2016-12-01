@@ -47,55 +47,67 @@
  *
  */
 
-package com.openexchange.dav.push.subscribe;
+package com.openexchange.dav.push.mixins;
 
-import java.util.Collections;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.mixins.AddressbookHomeSet;
-import com.openexchange.dav.mixins.CalendarHomeSet;
-import com.openexchange.dav.mixins.CurrentUserPrincipal;
-import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.push.DAVPushUtility;
-import com.openexchange.dav.resources.DAVResource;
-import com.openexchange.dav.resources.DAVRootCollection;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.dav.push.gcm.DavPushGateway;
+import com.openexchange.dav.push.gcm.PushTransportOptions;
+import com.openexchange.dav.push.subscribe.PushSubscribeFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.helpers.SingleResourcePropertyMixin;
 
 /**
- * {@link RootPushSubscribeCollection}
+ * {@link SupportedTransportSet}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class RootPushSubscribeCollection extends DAVRootCollection {
+public class SupportedTransportSet extends SingleResourcePropertyMixin {
 
     private final PushSubscribeFactory factory;
 
     /**
-     * Initializes a new {@link RootPushSubscribeCollection}.
+     * Initializes a new {@link SupportedTransportSet}.
      *
-     * @param factory The factory
+     * @param <code>false</code> The push subscribe factory
      */
-    public RootPushSubscribeCollection(PushSubscribeFactory factory) {
-        super(factory, "Push Subscribe");
+    public SupportedTransportSet(PushSubscribeFactory factory) {
+        super(DAVPushUtility.PUSH_NS.getURI(), "supported-transport-set");
         this.factory = factory;
-        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(), new CalendarHomeSet(), new AddressbookHomeSet());
     }
 
     @Override
-    public List<WebdavResource> getChildren() throws WebdavProtocolException {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public DAVResource getChild(String name) throws WebdavProtocolException {
-        String clientId = DAVPushUtility.getClientId(name);
-        if (null != clientId) {
-            return new PushSubscribeResource(factory, clientId, constructPathForChildResource(name));
+    protected WebdavProperty getProperty(WebdavResource resource) throws OXException {
+        if (null != DAVPushUtility.getPushKey(resource)) {
+            String value = getValue();
+            if (null != value) {
+                WebdavProperty property = prepareProperty(true);
+                property.setValue(value);
+                return property;
+            }
         }
-        throw DAVProtocol.protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        return null;
+    }
+
+    private String getValue() {
+        List<DavPushGateway> pushGateways = factory.getGateways();
+        if (null == pushGateways || pushGateways.isEmpty()) {
+            return null;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (DavPushGateway gateway : pushGateways) {
+            PushTransportOptions transportOptions = gateway.getOptions();
+            stringBuilder
+                .append("<transport>")
+                .append(  "<transport-uri>" + transportOptions.getTransportURI() + "</transport-uri>")
+                .append(  "<refresh-interval>" + transportOptions.getRefreshInterval() + "</refresh-interval>")
+                .append("</transport>")
+            ;
+        }
+        return stringBuilder.toString();
     }
 
 }

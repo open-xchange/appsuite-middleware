@@ -49,6 +49,10 @@
 
 package com.openexchange.dav.push;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import org.jdom2.Namespace;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
@@ -63,8 +67,8 @@ import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.login.Interface;
-import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -77,11 +81,27 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class DAVPushUtility {
 
+    /** urn:ietf:params:xml:ns:dav-push */
+    public static final Namespace PUSH_NS = Namespace.getNamespace("DAV-PUSH", "urn:ietf:params:xml:ns:dav-push");
+
     /** The push client identifier for CardDAV */
     public static final String CLIENT_CARDDAV = Interface.CARDDAV.toString().toLowerCase();
 
     /** The push client identifier for CalDAV */
     public static final String CLIENT_CALDAV = Interface.CALDAV.toString().toLowerCase();
+
+    /**
+     * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd'T'HH:mm:ss'Z'" as pattern.
+     */
+    public static final ThreadLocal<SimpleDateFormat> UTC_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            dateFormat.setTimeZone(TimeZones.UTC);
+            return dateFormat;
+        }
+    };
 
     /**
      * Extracts the client identifier from the subscription resource's name.
@@ -91,31 +111,8 @@ public class DAVPushUtility {
      */
     public static String getClientId(String subscriptionResourceName) {
         if (Strings.isNotEmpty(subscriptionResourceName)) {
-            int idx = subscriptionResourceName.indexOf('-');
-            if (-1 != idx) {
-                String clientId = subscriptionResourceName.substring(0, idx);
-                if (CLIENT_CALDAV.equals(clientId) || CLIENT_CARDDAV.equals(clientId)) {
-                    return clientId;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Extracts the transport identifier from the subscription resource's name.
-     *
-     * @param subscriptionResourceName The subscription resource name (i.e. the last part of the resource's WebDAV path)
-     * @return The transport identifier, or <code>null</code> if no valid transport identifier can be extracted
-     */
-    public static String getTransportId(String subscriptionResourceName) {
-        if (Strings.isNotEmpty(subscriptionResourceName)) {
-            int idx = subscriptionResourceName.indexOf('-');
-            if (-1 != idx && idx < subscriptionResourceName.length() - 1) {
-                String value = subscriptionResourceName.substring(idx + 1);
-                if (null != KnownTransport.knownTransportFor(value)) {
-                    return value;
-                }
+            if (CLIENT_CALDAV.equals(subscriptionResourceName) || CLIENT_CARDDAV.equals(subscriptionResourceName)) {
+                return subscriptionResourceName;
             }
         }
         return null;
@@ -147,14 +144,33 @@ public class DAVPushUtility {
     }
 
     /**
+     * Extracts the (internal) push topics from a client-supplied push key strings, implicitly verifying the encoded target user.
+     *
+     * @param pushKeys The push keys to extract the topic from
+     * @param expectedContextId The expected context identifier
+     * @param expectedUserId The expected user identifier
+     * @return The topics
+     * @throws OXException {@link PushExceptionCodes#INVALID_TOPIC}
+     */
+    public static List<String> extractTopics(List<String> pushKeys, int expectedContextId, int expectedUserId) throws OXException {
+        if (null != pushKeys){
+            List<String> topics = new ArrayList<String>(pushKeys.size());
+            for (String pushKey : pushKeys) {
+                topics.add(extractTopic(pushKey, expectedContextId, expectedUserId));
+            }
+            return topics;
+        }
+        return null;
+    }
+
+    /**
      * Gets the push subscription URL to indicate to clients.
      *
      * @param clientId The targeted push client identifier
-     * @param transportId The targeted push transport identifier
      * @return The subscription URL, or <code>null</code> if passed client identifier was <code>null</code>
      */
-    public static String getSubscriptionURL(String clientId, String transportId) {
-        return null != clientId ? "/subscribe/" + clientId + '-' + transportId : null;
+    public static String getSubscriptionURL(String clientId) {
+        return null != clientId ? "/subscribe/" + clientId : null;
     }
 
     /**

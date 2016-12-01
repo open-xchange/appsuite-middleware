@@ -49,13 +49,8 @@
 
 package com.openexchange.dav.push.subscribe;
 
-import java.util.Collections;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.POSTAction;
-import com.openexchange.dav.push.DAVPushUtility;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -68,8 +63,6 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class PushSubscribeAction extends POSTAction {
 
-    private final PushSubscribeFactory factory;
-
     /**
      * Initializes a new {@link PushSubscribeAction}.
      *
@@ -77,29 +70,16 @@ public class PushSubscribeAction extends POSTAction {
      */
     public PushSubscribeAction(PushSubscribeFactory factory) {
         super(factory.getProtocol());
-        this.factory = factory;
 	}
 
 	@Override
 	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        if (Strings.isNotEmpty(request.getParameter("token")) && Strings.isNotEmpty(request.getParameter("key"))) {
-            /*
-             * handle push subscribe action
-             */
-            PushSubscribeResource resource = requireResource(request, PushSubscribeResource.class);
-            String topic;
-            try {
-                topic = DAVPushUtility.extractTopic(request.getParameter("key"), factory.getContext().getContextId(), factory.getUser().getId());
-            } catch (OXException e) {
-                throw DAVProtocol.protocolException(request.getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
-            }
-            resource.subscribe(request.getParameter("token"), Collections.singletonList(topic));
-            response.setStatus(HttpServletResponse.SC_OK);
-            return;
+        /*
+         * handle push subscribe action
+         */
+        if (false == requireResource(request, PushSubscribeResource.class).handle(request, response)) {
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
-	    /*
-	     * bad request, otherwise
-	     */
-	    throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
 	}
+
 }

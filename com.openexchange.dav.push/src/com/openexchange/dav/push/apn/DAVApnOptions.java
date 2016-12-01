@@ -47,70 +47,52 @@
  *
  */
 
-package com.openexchange.dav.push.subscribe;
+package com.openexchange.dav.push.apn;
 
-import java.util.EnumMap;
-import java.util.Map;
-import com.openexchange.dav.DAVPerformer;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.webdav.action.WebdavAction;
-import com.openexchange.webdav.action.WebdavExistsAction;
-import com.openexchange.webdav.action.WebdavHeadAction;
-import com.openexchange.webdav.action.WebdavIfAction;
-import com.openexchange.webdav.action.WebdavIfMatchAction;
-import com.openexchange.webdav.action.WebdavOptionsAction;
-import com.openexchange.webdav.action.WebdavTraceAction;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavMethod;
+import com.openexchange.pns.transport.apn.ApnOptions;
 
 /**
- * {@link PushSubscribePerformer}
+ * {@link DAVApnOptions}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class PushSubscribePerformer extends DAVPerformer {
+public class DAVApnOptions extends ApnOptions {
 
-    private static final Protocol PROTOCOL = new Protocol();
-
-    private final PushSubscribeFactory factory;
-    private final Map<WebdavMethod, WebdavAction> actions;
+    private final String bundleId;
+    private final int refreshInterval;
 
     /**
-     * Initializes a new {@link PushSubscribePerformer}.
+     * Initializes a new {@link DAVApnOptions}.
      *
-     * @param services A service lookup reference
+     * @param bundleId The targeted bundle identifier
+     * @param keystore The keystore location
+     * @param password The password for the keystore
+     * @param production <code>true</code> to use the <i>production</i> push environment, <code>false</code> for the <i>sandbox</i>
+     * @param refreshInterval The refresh interval (in seconds)
      */
-    public PushSubscribePerformer(ServiceLookup services) {
-        super();
-        this.factory = new PushSubscribeFactory(PROTOCOL, services, this);
-        this.actions = initActions();
+    public DAVApnOptions(String bundleId, Object keystore, String password, boolean production, int refreshInterval) {
+        super(keystore, password, production);
+        this.bundleId = bundleId;
+        this.refreshInterval = refreshInterval;
     }
 
-    private EnumMap<WebdavMethod, WebdavAction> initActions() {
-        EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
-        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.POST, prepare(new PushSubscribeAction(factory), true, true, new WebdavIfMatchAction()));
-        actions.put(WebdavMethod.GET, prepare(new PushSubscribeAction(factory), true, true, false, null, new WebdavExistsAction()));
-        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, null, new WebdavExistsAction()));
-        actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
-        makeLockNullTolerant(actions);
-        return actions;
+    /**
+     * Gets the bundle identifier.
+     *
+     * @return The bundle identifier
+     */
+    public String getBundleId() {
+        return bundleId;
     }
 
-    @Override
-    protected String getURLPrefix() {
-        return factory.getURLPrefix();
-    }
-
-    @Override
-    public PushSubscribeFactory getFactory() {
-        return factory;
-    }
-
-    @Override
-    protected WebdavAction getAction(WebdavMethod method) {
-        return actions.get(method);
+    /**
+     * Gets the refresh interval.
+     *
+     * @return The refresh interval
+     */
+    public int getRefreshInterval() {
+        return refreshInterval;
     }
 
 }

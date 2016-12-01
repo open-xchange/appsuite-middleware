@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.dav.push;
+package com.openexchange.dav.push.apn;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.pns.transport.apn.ApnOptionsPerClient;
@@ -69,6 +70,11 @@ import com.openexchange.pns.transport.apn.ApnOptionsProvider;
  */
 public class DAVApnOptionsProvider implements ApnOptionsProvider {
 
+    /**
+     * Gets the configuration properties of interest.
+     *
+     * @return The properties of interest
+     */
     public static String[] getPropertiesOfInterest() {
         List<String> properties = new ArrayList<String>();
         for (String client : new String[] { DAVPushUtility.CLIENT_CALDAV, DAVPushUtility.CLIENT_CARDDAV }) {
@@ -77,12 +83,18 @@ public class DAVApnOptionsProvider implements ApnOptionsProvider {
             properties.add("com.openexchange." + client + ".push.apsd.keystore");
             properties.add("com.openexchange." + client + ".push.apsd.password");
             properties.add("com.openexchange." + client + ".push.apsd.production");
+            properties.add("com.openexchange." + client + ".push.apsd.refreshInterval");
         }
         return properties.toArray(new String[properties.size()]);
     }
 
     private final Map<String, DAVApnOptions> options;
 
+    /**
+     * Initializes a new {@link DAVApnOptionsProvider}.
+     *
+     * @param configService A reference to the configuration service
+     */
     public DAVApnOptionsProvider(ConfigurationService configService) throws OXException {
         super();
         this.options = new HashMap<String, DAVApnOptions>(2);
@@ -127,7 +139,7 @@ public class DAVApnOptionsProvider implements ApnOptionsProvider {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange." + client + ".push.apsd.password");
         }
         boolean production = configService.getBoolProperty("com.openexchange." + client + ".push.apsd.production", true);
-        int refreshInterval = configService.getIntProperty("com.openexchange." + client + ".push.apsd.production", 172800);
+        int refreshInterval = configService.getIntProperty("com.openexchange." + client + ".push.apsd.refreshInterval", 172800);
         return new DAVApnOptions(bundleId, keystore, password, production, refreshInterval);
     }
 

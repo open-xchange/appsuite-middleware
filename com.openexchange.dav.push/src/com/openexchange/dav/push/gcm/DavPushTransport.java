@@ -47,53 +47,53 @@
  *
  */
 
-package com.openexchange.dav.push;
+package com.openexchange.dav.push.gcm;
 
-import java.util.Map;
+import java.util.Collection;
+import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.KnownTransport;
-import com.openexchange.pns.Message;
-import com.openexchange.pns.PushExceptionCodes;
-import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationTransport;
 
 /**
- * {@link DAVPushMessageGenerator}
+ * {@link DavPushTransport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class DAVPushMessageGenerator implements PushMessageGenerator {
+public class DavPushTransport implements PushNotificationTransport {
 
-    private final String client;
+    private final PushTransportOptions transportOptions;
 
-    /**
-     * Initializes a new {@link DAVPushMessageGenerator}.
-     *
-     * @param client The client identifier
-     */
-    public DAVPushMessageGenerator(String client) {
+    public DavPushTransport(PushTransportOptions transportOptions) {
         super();
-        this.client = client;
+        this.transportOptions = transportOptions;
     }
 
     @Override
-    public String getClient() {
-        return client;
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        return true;
     }
 
     @Override
-    public Message<?> generateMessageFor(String transportId, final PushNotification notification) throws OXException {
-        if (KnownTransport.APNS.getTransportId().equals(transportId)) {
-            return new Message<Map<String, Object>>() {
+    public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
 
-                @Override
-                public Map<String, Object> getMessage() {
-                    return notification.getMessageData();
-                }
-            };
-        }
-        throw PushExceptionCodes.NO_SUCH_TRANSPORT.create(transportId);
+
+
+
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public String getId() {
+        return transportOptions.getTransportID();
+    }
+
+    @Override
+    public boolean servesClient(String client) throws OXException {
+        return DAVPushUtility.CLIENT_CALDAV.equals(client) || DAVPushUtility.CLIENT_CARDDAV.equals(client);
     }
 
 }

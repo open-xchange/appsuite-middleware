@@ -47,43 +47,53 @@
  *
  */
 
-package com.openexchange.dav.push;
+package com.openexchange.dav.push.apn;
 
-import com.openexchange.pns.transport.apn.ApnOptions;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.KnownTransport;
+import com.openexchange.pns.Message;
+import com.openexchange.pns.PushExceptionCodes;
+import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.PushNotification;
 
 /**
- * {@link DAVApnOptions}
+ * {@link DAVApnPushMessageGenerator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class DAVApnOptions extends ApnOptions {
+public class DAVApnPushMessageGenerator implements PushMessageGenerator {
 
-    private final String bundleId;
-    private final int refreshInterval;
-
-    public DAVApnOptions(String bundleId, Object keystore, String password, boolean production, int refreshInterval) {
-        super(keystore, password, production);
-        this.bundleId = bundleId;
-        this.refreshInterval = refreshInterval;
-    }
+    private final String client;
 
     /**
-     * Gets the bundleId
+     * Initializes a new {@link DAVApnPushMessageGenerator}.
      *
-     * @return The bundleId
+     * @param client The client identifier
      */
-    public String getBundleId() {
-        return bundleId;
+    public DAVApnPushMessageGenerator(String client) {
+        super();
+        this.client = client;
     }
 
-    /**
-     * Gets the refreshInterval
-     *
-     * @return The refreshInterval
-     */
-    public int getRefreshInterval() {
-        return refreshInterval;
+    @Override
+    public String getClient() {
+        return client;
+    }
+
+    @Override
+    public Message<?> generateMessageFor(String transportId, final PushNotification notification) throws OXException {
+        if (KnownTransport.APNS.getTransportId().equals(transportId)) {
+            return new Message<Map<String, Object>>() {
+
+                @Override
+                public Map<String, Object> getMessage() {
+                    return notification.getMessageData();
+                }
+            };
+        }
+        throw PushExceptionCodes.NO_SUCH_TRANSPORT.create(transportId);
     }
 
 }
