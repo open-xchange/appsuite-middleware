@@ -127,9 +127,7 @@ public class DAVPushEventHandler implements EventHandler {
             }
         }
 
-        for (PushNotification notification : pushNotifications) {
-            notificationService.handle(notification);
-        }
+        notificationService.handle(pushNotifications);
     }
 
     private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long dataChanged, Long pushRequestSubmitted) {

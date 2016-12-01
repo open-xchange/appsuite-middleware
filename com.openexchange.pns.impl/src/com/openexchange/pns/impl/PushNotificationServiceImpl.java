@@ -50,6 +50,7 @@
 package com.openexchange.pns.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -301,16 +302,10 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 return;
             }
 
-            boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
-            if (added) {
-                if (numOfSubmittedNotifications.incrementAndGet() < 0L) {
-                    numOfSubmittedNotifications.set(0L);
-                }
-                LOGGER.debug("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
-            } else {
-                LOGGER.debug("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
-            }
+            // Add to queue
+            addToQueue(notification);
 
+            // Fire off worker if paused
             if (null == scheduledTimerTask) {
                 Runnable task = new Runnable() {
 
@@ -325,6 +320,60 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             }
         } finally {
             lock.unlock();
+        }
+    }
+
+    @Override
+    public void handle(Collection<PushNotification> notifications) throws OXException {
+        if (null == notifications || notifications.isEmpty()) {
+            return;
+        }
+
+        lock.lock();
+        try {
+            if (stopped) {
+                return;
+            }
+
+            // Collection is known to be non-empty. Thus at least one element is contained
+            Iterator<PushNotification> iterator = notifications.iterator();
+
+            // Grab first one for bootstrapping
+            PushNotification firstNotification = iterator.next();
+            addToQueue(firstNotification);
+
+            // Fire off worker if paused
+            if (null == scheduledTimerTask) {
+                Runnable task = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        checkNotifications();
+                    }
+                };
+                long initialDelay = delayDuration(configService);
+                long delay = timerFrequency(configService);
+                scheduledTimerTask = timerService.scheduleWithFixedDelay(task, initialDelay, delay);
+            }
+
+            // Add rest to queue
+            while (iterator.hasNext()) {
+                addToQueue(iterator.next());
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void addToQueue(PushNotification notification) {
+        boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
+        if (added) {
+            if (numOfSubmittedNotifications.incrementAndGet() < 0L) {
+                numOfSubmittedNotifications.set(0L);
+            }
+            LOGGER.debug("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+        } else {
+            LOGGER.debug("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
         }
     }
 
