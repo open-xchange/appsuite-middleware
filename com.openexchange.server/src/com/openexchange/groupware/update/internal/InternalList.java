@@ -628,6 +628,9 @@ public final class InternalList {
         // Removes inconsistent locks (See Bug #47929)
         list.add(new RemoveInconsistentLocksUpdateTasks());
 
+        // Extends the "password" column for "user_mail_account" and "user_transport_account" tables
+        list.add(new com.openexchange.groupware.update.tasks.MailAccountExtendPasswordTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
