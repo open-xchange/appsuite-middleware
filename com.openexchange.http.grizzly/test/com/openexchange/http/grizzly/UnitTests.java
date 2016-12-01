@@ -49,6 +49,7 @@
 
 package com.openexchange.http.grizzly;
 
+import org.glassfish.grizzly.servlet.async.AsyncInputTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -64,7 +65,8 @@ import com.openexchange.http.grizzly.util.RequestToolsTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     RemoteIPFinderTest.class,
-    RequestToolsTest.class
+    RequestToolsTest.class,
+    AsyncInputTest.class
 })
 public class UnitTests {
 

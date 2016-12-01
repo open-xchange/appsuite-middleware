@@ -47,7 +47,7 @@
  *
  */
 
-package org.glassfish.grizzly.http.server;
+package org.glassfish.grizzly.nio.transport;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -146,13 +146,15 @@ public final class OXTCPNIOTransportFilter extends BaseFilter {
         }
     }
 
+    private TCPNIOConnection getPreparedConnectionFrom(FilterChainContext ctx) {
+        TCPNIOConnection connection = (TCPNIOConnection) ctx.getConnection();
+        connectionPreparer.prepareConnection(connection);
+        return connection;
+    }
+
     @Override
     public NextAction handleRead(final FilterChainContext ctx) throws IOException {
-        final TCPNIOConnection connection = (TCPNIOConnection) ctx.getConnection();
-
-        // Set read/write timeout (if set)
-        connectionPreparer.prepareConnection(connection);
-
+        final TCPNIOConnection connection = getPreparedConnectionFrom(ctx);
         final boolean isBlocking = ctx.getTransportContext().isBlocking();
 
         final Buffer inBuffer = ctx.getMessage();
@@ -182,12 +184,12 @@ public final class OXTCPNIOTransportFilter extends BaseFilter {
 
         if (buffer == null || buffer.position() == 0) {
             return ctx.getStopAction();
+        } else {
+            buffer.trim();
+
+            ctx.setMessage(buffer);
+            ctx.setAddressHolder(connection.peerSocketAddressHolder);
         }
-
-        buffer.trim();
-
-        ctx.setMessage(buffer);
-        ctx.setAddress(connection.getPeerAddress());
 
         return ctx.getInvokeAction();
     }
