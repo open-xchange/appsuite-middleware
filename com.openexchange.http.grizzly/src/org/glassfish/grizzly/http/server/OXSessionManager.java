@@ -217,8 +217,14 @@ public class OXSessionManager implements SessionManager {
     }
 
     /**
-     * Create a new JSessioID String that consists of a (random)-(the urlencoded domain of this server with dots and dashes
-     * encoded).(backendRoute).
+     * Create a new JSessioID String that consists of a:
+     * <pre>
+     *  &lt;random&gt; + ("-" + &lt;the urlencoded domain of this server&gt;)? + "." + &lt;backendRoute&gt;
+     * </pre>
+     * Example:
+     * <pre>
+     *  367190855121044669-open%2Dxchange%2Ecom.OX0
+     * </pre>
      *
      * @return A new JSessionId value as String
      */
