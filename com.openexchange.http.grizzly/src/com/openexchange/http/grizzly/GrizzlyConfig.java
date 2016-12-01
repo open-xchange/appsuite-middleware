@@ -112,6 +112,7 @@ public class GrizzlyConfig {
         private List<String> enabledCiphers = null;
         private long wsTimeoutMillis;
         private int sessionExpiryCheckInterval = 60;
+        private boolean checkTrackingIdInRequestParameters = false;
 
         /**
          * Initializes a new {@link GrizzlyConfig.Builder}.
@@ -157,6 +158,7 @@ public class GrizzlyConfig {
             this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
             this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
             this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
+            this.checkTrackingIdInRequestParameters = configService.getBoolProperty("com.openexchange.server.checkTrackingIdInRequestParameters", false);
             final int configuredMaxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
             this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
             final int configuredMaxNumberOfHttpSessions = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
@@ -302,6 +304,11 @@ public class GrizzlyConfig {
             return this;
         }
 
+        public Builder checkTrackingIdInRequestParameters(boolean checkTrackingIdInRequestParameters) {
+            this.checkTrackingIdInRequestParameters = checkTrackingIdInRequestParameters;
+            return this;
+        }
+
         public Builder setConsiderXForwards(boolean isConsiderXForwards) {
             this.isConsiderXForwards = isConsiderXForwards;
             return this;
@@ -373,7 +380,7 @@ public class GrizzlyConfig {
         }
 
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
         }
     }
 
@@ -491,7 +498,10 @@ public class GrizzlyConfig {
     /** The interval in seconds when to check for expired/invalid HTTP sessions */
     private final int sessionExpiryCheckInterval;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
+    /** Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created */
+    private final boolean checkTrackingIdInRequestParameters;
+
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
@@ -509,6 +519,7 @@ public class GrizzlyConfig {
         this.keystorePath = keystorePath;
         this.keystorePassword = keystorePassword;
         this.sessionExpiryCheckInterval = sessionExpiryCheckInterval;
+        this.checkTrackingIdInRequestParameters = checkTrackingIdInRequestParameters;
         this.cookieMaxAge = cookieMaxAge;
         this.cookieMaxInactivityInterval = cookieMaxInactivityInterval;
         this.isForceHttps = isForceHttps;
@@ -820,6 +831,15 @@ public class GrizzlyConfig {
 
     public List<String> getEnabledCiphers() {
         return enabledCiphers;
+    }
+
+    /**
+     * Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created
+     *
+     * @return <code>true</code> to look-up; otherwise <code>false</code> to always create a new one
+     */
+    public boolean isCheckTrackingIdInRequestParameters() {
+        return checkTrackingIdInRequestParameters;
     }
 
 }

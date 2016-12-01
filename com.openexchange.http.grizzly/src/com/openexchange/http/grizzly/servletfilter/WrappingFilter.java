@@ -53,7 +53,6 @@ import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapp
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -100,6 +99,7 @@ public class WrappingFilter implements Filter {
     private final String echoHeaderName;
     private final boolean considerEchoHeader;
     private final String contentSecurityPolicy;
+    private final boolean checkTrackingIdInRequestParameters;
 
     /**
      * Initializes a new {@link WrappingFilter}.
@@ -113,6 +113,7 @@ public class WrappingFilter implements Filter {
         this.echoHeaderName = config.getEchoHeader();
         this.considerEchoHeader = !Strings.isEmpty(echoHeaderName);
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
+        this.checkTrackingIdInRequestParameters = config.isCheckTrackingIdInRequestParameters();
     }
 
     @Override
@@ -143,10 +144,10 @@ public class WrappingFilter implements Filter {
         }
 
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly
-        HttpServletRequestWrapper httpRequestWrapper = buildHttpServletRequestWrapper(httpRequest);
+        httpRequest = buildHttpServletRequestWrapper(httpRequest);
 
         // Build the HttpServletResponseWrapper instance
-        HttpServletResponseWrapper httpResponseWrapper = new HttpServletResponseWrapper(httpResponse, echoHeaderName, echoHeaderValue);
+        httpResponse = new HttpServletResponseWrapper(httpResponse, echoHeaderName, echoHeaderValue);
 
         // Set LogProperties
         {
@@ -162,8 +163,8 @@ public class WrappingFilter implements Filter {
             LogProperties.put(LogProperties.Name.GRIZZLY_METHOD, httpRequest.getMethod());
 
             // Remote infos
-            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpRequestWrapper.getRemotePort()));
-            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpRequestWrapper.getRemoteAddr());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpRequest.getRemotePort()));
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpRequest.getRemoteAddr());
 
             // Names, addresses
             final Thread currentThread = Thread.currentThread();
@@ -175,15 +176,21 @@ public class WrappingFilter implements Filter {
                 LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
             }
 
+            boolean b = false;
+            if (b) {
+                chain.doFilter(httpRequest, httpResponse);
+                return;
+            }
+
             // Tracking identifier
-            String trackingId = request.getParameter("trackingId");
+            String trackingId = checkTrackingIdInRequestParameters ? request.getParameter("trackingId") : null;
             if (trackingId == null) {
                 trackingId = UUIDs.getUnformattedString(UUID.randomUUID());
             }
             LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, trackingId);
         }
 
-        chain.doFilter(httpRequestWrapper, httpResponseWrapper);
+        chain.doFilter(httpRequest, httpResponse);
     }
 
     private HttpServletRequestWrapper buildHttpServletRequestWrapper(HttpServletRequest httpRequest) {

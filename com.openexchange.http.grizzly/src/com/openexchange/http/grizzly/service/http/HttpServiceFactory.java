@@ -93,7 +93,7 @@ package com.openexchange.http.grizzly.service.http;
 
 import java.util.List;
 import javax.servlet.Filter;
-import org.glassfish.grizzly.http.server.OXHttpServer;
+import org.glassfish.grizzly.http.server.HttpServer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -114,7 +114,7 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     private final OSGiMainHandler mainHttpHandler;
     private final List<Filter> initialFilters;
 
-    public HttpServiceFactory(OXHttpServer httpServer, List<Filter> initialFilters, Bundle bundle) {
+    public HttpServiceFactory(HttpServer httpServer, List<Filter> initialFilters, Bundle bundle) {
         super();
         this.initialFilters = initialFilters;
         mainHttpHandler = new OSGiMainHandler(initialFilters, bundle);
