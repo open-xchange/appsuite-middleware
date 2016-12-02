@@ -90,6 +90,7 @@ public class YamlRef {
      * Gets the parsed YAML value from associated file
      *
      * @return The YAML value
+     * @throws IllegalStateException If YAML value cannot be returned
      */
     public Object getValue() {
         Object tmp = value;
