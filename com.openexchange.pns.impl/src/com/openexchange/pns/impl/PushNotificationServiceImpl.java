@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedBufferingQueue;
 import com.openexchange.pns.Hit;
 import com.openexchange.pns.Hits;
+import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
@@ -483,11 +484,14 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             } else {
                 if (isTransportAllowed(transport, topic, client, userId, contextId)) {
                     for (PushNotification notification : notifications) {
-                        LOGGER.debug("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
-                        try {
-                            transport.transport(notification, hit.getMatches());
-                        } catch (Exception e) {
-                            LOGGER.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                        List<PushMatch> matches = filterSourceToken(hit.getMatches(), notification.getSourceToken());
+                        if (null != matches && 0 < matches.size()) {
+                            LOGGER.debug("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
+                            try {
+                                transport.transport(notification, hit.getMatches());
+                            } catch (Exception e) {
+                                LOGGER.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                            }
                         }
                     }
                 } else {
@@ -506,6 +510,18 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             LOGGER.error("Failed to check whether notification \"{}\" is allowed to be sent via transport '{}' to client '{}' for user {} in context {}. Transport will be denied...", topic, transport.getId(), client, I(userId), I(contextId), e);
             return false;
         }
+    }
+
+    private List<PushMatch> filterSourceToken(List<PushMatch> matches, String sourceToken) {
+        if (null != sourceToken && null != matches) {
+            for (Iterator<PushMatch> iterator = matches.iterator(); iterator.hasNext();) {
+                if (sourceToken.equals(iterator.next().getToken())) {
+                    LOGGER.debug("Skipping push match for source token {}", sourceToken);
+                    iterator.remove();
+                }
+            }
+        }
+        return matches;
     }
 
     private void addNumOfProcessedNotifications(int numOfNotifications) {

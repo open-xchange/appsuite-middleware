@@ -145,6 +145,7 @@ public class DAVPushEventHandler implements EventHandler {
             .contextId(contextId)
             .userId(userId)
             .topic(topic)
+            .sourceToken(clientToken)
             .messageData(getMessageData(timestamp, pushKey, priority, clientToken))
         .build();
     }

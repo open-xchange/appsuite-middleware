@@ -96,6 +96,7 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
 
     private volatile PushSubscribeFactory factory;
     private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
+    private ServiceRegistration<EventHandler> eventHandlerRegistration;
     private List<ServiceRegistration<PushNotificationTransport>> pushTransportRegistrations;
 
     @Override
@@ -128,13 +129,7 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
             registerService(PropertyMixin.class, new Topic());
             registerService(PropertyMixin.class, new Version());
             /*
-             * register event handler
-             */
-            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, DAVPushEventHandler.TOPICS);
-            registerService(EventHandler.class, new DAVPushEventHandler(getService(PushNotificationService.class)), serviceProperties);
-            /*
-             * init
+             * initial initialization
              */
             reinit(getService(ConfigurationService.class));
         } catch (Exception e) {
@@ -180,15 +175,22 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
             }
             pushTransportRegistrations = null;
         }
+        ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
+        if (null != eventHandlerRegistration) {
+            eventHandlerRegistration.unregister();
+            this.eventHandlerRegistration = null;
+        }
         /*
          * re-init factory & register options provider and transports
          */
         if (null != configService) {
+            boolean registerEventHandler = false;
             factory.reinit(configService);
             DAVApnOptionsProvider optionsProvider = factory.getApnOptionsProvider();
             if (null != optionsProvider && 0 < optionsProvider.getAvailableOptions().size()) {
                 optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, optionsProvider, null);
                 this.optionsProviderRegistration = optionsProviderRegistration;
+                registerEventHandler = true;
             }
             List<DavPushGateway> pushGateways = factory.getGateways();
             if (null != pushGateways && 0 < pushGateways.size()) {
@@ -197,6 +199,13 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
                     pushTransportRegistrations.add(context.registerService(PushNotificationTransport.class, pushGateway, null));
                 }
                 this.pushTransportRegistrations = pushTransportRegistrations;
+                registerEventHandler = true;
+            }
+            if (registerEventHandler) {
+                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, DAVPushEventHandler.TOPICS);
+                eventHandlerRegistration = context.registerService(EventHandler.class, new DAVPushEventHandler(getService(PushNotificationService.class)), serviceProperties);
+                this.eventHandlerRegistration = eventHandlerRegistration;
             }
         }
     }
