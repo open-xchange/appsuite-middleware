@@ -2415,6 +2415,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                     final int blockSize = imapConfig.getIMAPProperties().getBlockSize();
                     if (blockSize > 0) {
+                        final boolean supportsMove = imapConfig.asMap().containsKey("MOVE");
                         /*
                          * Block-wise deletion
                          */
@@ -2424,7 +2425,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              */
                             if (backup) {
                                 try {
-                                    new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
+                                    if(supportsMove){
+                                        new MoveIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
+                                    } else {
+                                        new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
+                                    }
                                 } catch (final MessagingException e) {
                                     if (e.getMessage().indexOf("Over quota") > -1) {
                                         /*

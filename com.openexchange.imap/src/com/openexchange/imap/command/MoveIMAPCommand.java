@@ -88,8 +88,8 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
      * discarded.
      *
      * @param imapFolder - the IMAP folder
-     * @param startSeqNum - the starting sequence number of the messages that shall be copied
-     * @param endSeqNum - the ending sequence number of the messages that shall be copied
+     * @param startSeqNum - the starting sequence number of the messages that shall be moved
+     * @param endSeqNum - the ending sequence number of the messages that shall be moved
      * @param destFolderName - the destination folder fullname
      * @throws MessagingException If a messaging error occurs
      */
@@ -102,7 +102,7 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
      * discarded.
      *
      * @param imapFolder - the IMAP folder
-     * @param seqNums - the sequence numbers of the messages that shall be copied
+     * @param seqNums - the sequence numbers of the messages that shall be moved
      * @param destFolderName - the destination folder fullname
      * @param isSequential - whether sequence numbers are sequential or not
      * @throws MessagingException If a messaging error occurs
@@ -115,7 +115,7 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
      * Constructor using UIDs and consequently performs a <code>UID MOVE</code> command
      *
      * @param imapFolder - the IMAP folder
-     * @param uids - the UIDs of the messages that shall be copied
+     * @param uids - the UIDs of the messages that shall be moved
      * @param destFolderName - the destination folder fullname
      * @param isSequential - whether UIDs are sequential or not
      * @param fast - <code>true</code> to ignore corresponding UIDs of copied messages and return value is empty (array of length zero)
