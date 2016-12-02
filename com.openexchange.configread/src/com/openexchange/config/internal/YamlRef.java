@@ -90,7 +90,7 @@ public class YamlRef {
      * Gets the parsed YAML value from associated file
      *
      * @return The YAML value
-     * @throws IllegalStateException If YAML value cannot be returned
+     * @throws IllegalArgumentException If YAML value cannot be returned
      */
     public Object getValue() {
         Object tmp = value;
@@ -102,7 +102,7 @@ public class YamlRef {
                         tmp = ConfigurationServices.loadYamlFrom(yamlFile);
                         value = tmp;
                     } catch (IOException e) {
-                        throw new IllegalStateException("Failed to load YAML file '" + yamlFile + "'. Reason:" + e.getMessage(), e);
+                        throw new IllegalArgumentException("Failed to load YAML file '" + yamlFile + "'. Reason:" + e.getMessage(), e);
                     }
                 }
             }
