@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.pns.DefaultPushNotification;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
+import com.openexchange.session.Session;
 
 /**
  * {@link DAVPushEventHandler}
@@ -75,6 +76,9 @@ import com.openexchange.pns.PushNotificationService;
  */
 public class DAVPushEventHandler implements EventHandler {
 
+    /**
+     * The topics handled by the PUSH event handler
+     */
     public static final String[] TOPICS = {
         "com/openexchange/groupware/folder/*",
         "com/openexchange/groupware/contact/*",
@@ -84,6 +88,11 @@ public class DAVPushEventHandler implements EventHandler {
 
     private final PushNotificationService notificationService;
 
+    /**
+     * Initializes a new {@link DAVPushEventHandler}.
+     *
+     * @param notificationService The push notification service to use
+     */
     public DAVPushEventHandler(PushNotificationService notificationService) {
         super();
         this.notificationService = notificationService;
@@ -112,41 +121,42 @@ public class DAVPushEventHandler implements EventHandler {
         if (null == clientId) {
             return;
         }
-
         List<PushNotification> pushNotifications = new ArrayList<PushNotification>();
         String rootTopic = DAVPushUtility.getRootTopic(clientId);
-        Long dataChanged = Long.valueOf(getTimestamp(event).getTime() / 1000);
-        Long pushRequestSubmitted = Long.valueOf(System.currentTimeMillis() / 1000);
+        Long timestamp = Long.valueOf(getTimestamp(event).getTime());
+        Integer priority = determinePriority(event);
+        String clientToken = determineClientToken(event);
         int contextId = event.getContextId();
         for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
             int userId = entry.getKey().intValue();
-            pushNotifications.add(getPushNotification(contextId, userId, rootTopic, dataChanged, pushRequestSubmitted));
+            pushNotifications.add(getPushNotification(contextId, userId, rootTopic, timestamp, priority, clientToken));
             for (Integer folderId : entry.getValue()) {
                 String folderTopic = DAVPushUtility.getFolderTopic(clientId, folderId.toString());
-                pushNotifications.add(getPushNotification(contextId, userId, folderTopic, dataChanged, pushRequestSubmitted));
+                pushNotifications.add(getPushNotification(contextId, userId, folderTopic, timestamp, priority, clientToken));
             }
         }
 
-        for (PushNotification notification : pushNotifications) {
-            notificationService.handle(notification);
-        }
+        notificationService.handle(pushNotifications);
     }
 
-    private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long dataChanged, Long pushRequestSubmitted) {
+    private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long timestamp, Integer priority, String clientToken) {
         String pushKey = DAVPushUtility.getPushKey(topic, contextId, userId);
         return DefaultPushNotification.builder()
             .contextId(contextId)
             .userId(userId)
             .topic(topic)
-            .messageData(getMessageData(dataChanged, pushKey, pushRequestSubmitted))
+            .messageData(getMessageData(timestamp, pushKey, priority, clientToken))
         .build();
     }
 
-    private static Map<String, Object> getMessageData(Long dataChanged, String pushKey, Long pushRequestSubmitted) {
+    private static Map<String, Object> getMessageData(Long timestamp, String pushKey, Integer priority, String clientToken) {
         Map<String, Object> messageData = new HashMap<String, Object>(3);
-        messageData.put("dataChangedTimestamp", dataChanged);
-        messageData.put("key", pushKey);
-        messageData.put("pushRequestSubmittedTimestamp", pushRequestSubmitted);
+        messageData.put(DAVPushUtility.PARAMETER_TIMESTAMP, timestamp);
+        messageData.put(DAVPushUtility.PARAMETER_PUSHKEY, pushKey);
+        messageData.put(DAVPushUtility.PARAMETER_PRIORITY, priority);
+        if (null != clientToken) {
+            messageData.put(DAVPushUtility.PARAMETER_CLIENTTOKEN, clientToken);
+        }
         return messageData;
     }
 
@@ -188,6 +198,21 @@ public class DAVPushEventHandler implements EventHandler {
             }
         }
         return null == timestamp ? new Date() : timestamp;
+    }
+
+    private static int determinePriority(CommonEvent event) {
+        //TODO
+        // - is user attendee?
+        // - is event in past or far in future?
+        return Integer.valueOf(50);
+    }
+
+    private static String determineClientToken(CommonEvent event) {
+        Session session = event.getSession();
+        if (null != session) {
+            return (String) session.getParameter("com.openexchange.dav.push.clientToken");
+        }
+        return null;
     }
 
 }

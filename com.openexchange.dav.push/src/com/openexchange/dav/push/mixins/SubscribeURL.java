@@ -47,55 +47,41 @@
  *
  */
 
-package com.openexchange.dav.push.subscribe;
+package com.openexchange.dav.push.mixins;
 
-import java.util.Collections;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.mixins.AddressbookHomeSet;
-import com.openexchange.dav.mixins.CalendarHomeSet;
-import com.openexchange.dav.mixins.CurrentUserPrincipal;
-import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.push.DAVPushUtility;
-import com.openexchange.dav.resources.DAVResource;
-import com.openexchange.dav.resources.DAVRootCollection;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.helpers.SingleResourcePropertyMixin;
 
 /**
- * {@link RootPushSubscribeCollection}
+ * {@link SubscribeURL}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class RootPushSubscribeCollection extends DAVRootCollection {
-
-    private final PushSubscribeFactory factory;
+public class SubscribeURL extends SingleResourcePropertyMixin {
 
     /**
-     * Initializes a new {@link RootPushSubscribeCollection}.
-     *
-     * @param factory The factory
+     * Initializes a new {@link SubscribeURL}.
      */
-    public RootPushSubscribeCollection(PushSubscribeFactory factory) {
-        super(factory, "Push Subscribe");
-        this.factory = factory;
-        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(), new CalendarHomeSet(), new AddressbookHomeSet());
+    public SubscribeURL() {
+        super(DAVPushUtility.PUSH_NS.getURI(), "subscribe-URL");
     }
 
     @Override
-    public List<WebdavResource> getChildren() throws WebdavProtocolException {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public DAVResource getChild(String name) throws WebdavProtocolException {
-        String clientId = DAVPushUtility.getClientId(name);
-        if (null != clientId) {
-            return new PushSubscribeResource(factory, clientId, constructPathForChildResource(name));
+    protected WebdavProperty getProperty(WebdavResource resource) throws OXException {
+        if (null != DAVPushUtility.getPushKey(resource)) {
+            String clientId = DAVPushUtility.getClientId(resource);
+            if (null != clientId) {
+                String value = "<href xmlns='DAV:'>" + DAVPushUtility.getSubscriptionURL(clientId) + "</href>";
+                WebdavProperty property = prepareProperty(true);
+                property.setValue(value);
+                return property;
+            }
         }
-        throw DAVProtocol.protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        return null;
     }
 
 }

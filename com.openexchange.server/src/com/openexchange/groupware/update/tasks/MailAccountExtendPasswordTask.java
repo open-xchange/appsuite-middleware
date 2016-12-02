@@ -47,53 +47,69 @@
  *
  */
 
-package com.openexchange.dav.push;
+package com.openexchange.groupware.update.tasks;
 
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.KnownTransport;
-import com.openexchange.pns.Message;
-import com.openexchange.pns.PushExceptionCodes;
-import com.openexchange.pns.PushMessageGenerator;
-import com.openexchange.pns.PushNotification;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateConcurrency;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DAVPushMessageGenerator}
+ * {@link MailAccountExtendPasswordTask} - Extends "password" column of the mail/transport account tables.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DAVPushMessageGenerator implements PushMessageGenerator {
+public final class MailAccountExtendPasswordTask extends UpdateTaskAdapter {
 
-    private final String client;
-
-    /**
-     * Initializes a new {@link DAVPushMessageGenerator}.
-     *
-     * @param client The client identifier
-     */
-    public DAVPushMessageGenerator(String client) {
+    public MailAccountExtendPasswordTask() {
         super();
-        this.client = client;
     }
 
     @Override
-    public String getClient() {
-        return client;
+    public TaskAttributes getAttributes() {
+        return new Attributes(UpdateConcurrency.BLOCKING);
     }
 
     @Override
-    public Message<?> generateMessageFor(String transportId, final PushNotification notification) throws OXException {
-        if (KnownTransport.APNS.getTransportId().equals(transportId)) {
-            return new Message<Map<String, Object>>() {
+    public String[] getDependencies() {
+        return new String[] { MailAccountAddArchiveTask.class.getName() };
+    }
 
-                @Override
-                public Map<String, Object> getMessage() {
-                    return notification.getMessageData();
-                }
-            };
+    @Override
+    public void perform(final PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+        Connection con = Database.getNoTimeout(contextId, true);
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            if (128 == Tools.getVarcharColumnSize("password", "user_mail_account", con)) {
+                Tools.changeVarcharColumnSize("password", 256, "user_mail_account", con);
+            }
+
+            if (128 == Tools.getVarcharColumnSize("password", "user_transport_account", con)) {
+                Tools.changeVarcharColumnSize("password", 256, "user_transport_account", con);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Database.backNoTimeout(contextId, true, con);
         }
-        throw PushExceptionCodes.NO_SUCH_TRANSPORT.create(transportId);
     }
 
 }

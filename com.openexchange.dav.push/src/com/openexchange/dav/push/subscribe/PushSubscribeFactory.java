@@ -49,8 +49,15 @@
 
 package com.openexchange.dav.push.subscribe;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.push.apn.DAVApnOptionsProvider;
+import com.openexchange.dav.push.gcm.DavPushGateway;
+import com.openexchange.dav.push.gcm.PushTransportOptions;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
@@ -67,6 +74,10 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class PushSubscribeFactory extends DAVFactory {
 
+    private volatile DAVApnOptionsProvider apnOptionsProvider;
+    private volatile List<DavPushGateway> pushGateways;
+
+
     /**
      * Initializes a new {@link PushSubscribeFactory}.
      *
@@ -76,6 +87,43 @@ public class PushSubscribeFactory extends DAVFactory {
      */
     public PushSubscribeFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
         super(protocol, services, sessionHolder);
+    }
+
+    /**
+     * (Re-) initializes the push configuration options.
+     *
+     * @param configService The configuration service to use
+     */
+    public void reinit(ConfigurationService configService) throws OXException {
+        this.apnOptionsProvider = new DAVApnOptionsProvider(configService);
+        List<PushTransportOptions> transportOptions = PushTransportOptions.load(configService);
+        if (null != transportOptions && 0 < transportOptions.size()) {
+            List<DavPushGateway> gateways = new ArrayList<DavPushGateway>(transportOptions.size());
+            for (PushTransportOptions options : transportOptions) {
+                gateways.add(new DavPushGateway(this, options));
+            }
+            this.pushGateways = gateways;
+        } else {
+            this.pushGateways = null;
+        }
+    }
+
+    /**
+     * Gets the available push gateways.
+     *
+     * @return The push gateways
+     */
+    public List<DavPushGateway> getGateways() {
+        return pushGateways;
+    }
+
+    /**
+     * Gets the APN options provider.
+     *
+     * @return The APN options provider
+     */
+    public DAVApnOptionsProvider getApnOptionsProvider() {
+        return apnOptionsProvider;
     }
 
     @Override

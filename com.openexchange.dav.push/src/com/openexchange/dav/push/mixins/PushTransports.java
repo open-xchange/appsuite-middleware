@@ -49,12 +49,11 @@
 
 package com.openexchange.dav.push.mixins;
 
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.push.DAVApnOptions;
 import com.openexchange.dav.push.DAVPushUtility;
+import com.openexchange.dav.push.apn.DAVApnOptions;
+import com.openexchange.dav.push.subscribe.PushSubscribeFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -69,17 +68,16 @@ import com.openexchange.webdav.protocol.helpers.SingleResourcePropertyMixin;
  */
 public class PushTransports extends SingleResourcePropertyMixin {
 
-    private static final AtomicReference<ApnOptionsProvider> OPTIONS_PROVIDER_REFERENCE = new AtomicReference<ApnOptionsProvider>(null);
-
-    public static void setOptionsProvider(ApnOptionsProvider provider) {
-        OPTIONS_PROVIDER_REFERENCE.set(provider);
-    }
+    private final PushSubscribeFactory factory;
 
     /**
      * Initializes a new {@link PushTransports}.
+     *
+     * @param <code>false</code> The push subscribe factory
      */
-    public PushTransports() {
+    public PushTransports(PushSubscribeFactory factory) {
         super(DAVProtocol.CALENDARSERVER_NS.getURI(), "push-transports");
+        this.factory = factory;
     }
 
     @Override
@@ -95,7 +93,7 @@ public class PushTransports extends SingleResourcePropertyMixin {
         return null;
     }
 
-    private static String getValue(String clientId) {
+    private String getValue(String clientId) {
         DAVApnOptions options = getOptions(clientId);
         if (null == options) {
             return null;
@@ -103,7 +101,7 @@ public class PushTransports extends SingleResourcePropertyMixin {
         return new StringBuilder()
             .append("<transport type='APSD'>")
             .append(  "<subscription-url>")
-            .append(    "<href xmlns='DAV:'>" + DAVPushUtility.getSubscriptionURL(clientId, KnownTransport.APNS.getTransportId()) + "</href>")
+            .append(    "<href xmlns='DAV:'>" + DAVPushUtility.getSubscriptionURL(clientId) + "</href>")
             .append(  "</subscription-url>")
             .append(  "<apsbundleid>" + options.getBundleId() + "</apsbundleid>")
             .append(  "<env>" + (options.isProduction() ? "PRODUCTION" : "SANDBOX") + "</env>")
@@ -112,11 +110,11 @@ public class PushTransports extends SingleResourcePropertyMixin {
         .toString();
     }
 
-    private static DAVApnOptions getOptions(String clientId) {
+    private DAVApnOptions getOptions(String clientId) {
         if (null == clientId) {
             return null;
         }
-        ApnOptionsProvider optionsProvider = OPTIONS_PROVIDER_REFERENCE.get();
+        ApnOptionsProvider optionsProvider = factory.getApnOptionsProvider();
         if (null == optionsProvider) {
             return null;
         }

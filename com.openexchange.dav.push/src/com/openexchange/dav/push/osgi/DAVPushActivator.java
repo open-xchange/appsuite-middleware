@@ -50,8 +50,10 @@
 package com.openexchange.dav.push.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -61,18 +63,25 @@ import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dav.DAVServlet;
-import com.openexchange.dav.push.DAVApnOptionsProvider;
 import com.openexchange.dav.push.DAVPushEventHandler;
-import com.openexchange.dav.push.DAVPushMessageGenerator;
 import com.openexchange.dav.push.DAVPushUtility;
+import com.openexchange.dav.push.apn.DAVApnOptionsProvider;
+import com.openexchange.dav.push.apn.DAVApnPushMessageGenerator;
+import com.openexchange.dav.push.gcm.DavPushGateway;
 import com.openexchange.dav.push.mixins.PushKey;
 import com.openexchange.dav.push.mixins.PushTransports;
+import com.openexchange.dav.push.mixins.SubscribeURL;
+import com.openexchange.dav.push.mixins.SupportedTransportSet;
+import com.openexchange.dav.push.mixins.Topic;
+import com.openexchange.dav.push.mixins.Version;
+import com.openexchange.dav.push.subscribe.PushSubscribeFactory;
 import com.openexchange.dav.push.subscribe.PushSubscribePerformer;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
@@ -85,7 +94,9 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class DAVPushActivator extends HousekeepingActivator implements Reloadable  {
 
+    private volatile PushSubscribeFactory factory;
     private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
+    private List<ServiceRegistration<PushNotificationTransport>> pushTransportRegistrations;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -100,17 +111,22 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
              * register push subscribe servlet
              */
             PushSubscribePerformer performer = new PushSubscribePerformer(this);
+            this.factory = performer.getFactory();
             getService(HttpService.class).registerServlet("/servlet/dav/subscribe", new DAVServlet(performer, Interface.CALDAV), null, null);
             /*
              * register push message generators
              */
-            registerService(PushMessageGenerator.class, new DAVPushMessageGenerator(DAVPushUtility.CLIENT_CARDDAV));
-            registerService(PushMessageGenerator.class, new DAVPushMessageGenerator(DAVPushUtility.CLIENT_CALDAV));
+            registerService(PushMessageGenerator.class, new DAVApnPushMessageGenerator(DAVPushUtility.CLIENT_CARDDAV));
+            registerService(PushMessageGenerator.class, new DAVApnPushMessageGenerator(DAVPushUtility.CLIENT_CALDAV));
             /*
              * register OSGi mixins
              */
             registerService(PropertyMixin.class, new PushKey());
-            registerService(PropertyMixin.class, new PushTransports());
+            registerService(PropertyMixin.class, new PushTransports(performer.getFactory()));
+            registerService(PropertyMixin.class, new SubscribeURL());
+            registerService(PropertyMixin.class, new SupportedTransportSet(performer.getFactory()));
+            registerService(PropertyMixin.class, new Topic());
+            registerService(PropertyMixin.class, new Version());
             /*
              * register event handler
              */
@@ -118,7 +134,7 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
             serviceProperties.put(EventConstants.EVENT_TOPIC, DAVPushEventHandler.TOPICS);
             registerService(EventHandler.class, new DAVPushEventHandler(getService(PushNotificationService.class)), serviceProperties);
             /*
-             * init & register apn options provider
+             * init
              */
             reinit(getService(ConfigurationService.class));
         } catch (Exception e) {
@@ -130,11 +146,7 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
     @Override
     protected void stopBundle() throws Exception {
         getLogger(DAVPushActivator.class).info("stopping bundle {}", context.getBundle());
-        ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration = this.optionsProviderRegistration;
-        if (null != optionsProviderRegistration) {
-            optionsProviderRegistration.unregister();
-            this.optionsProviderRegistration = null;
-        }
+        reinit(null);
         super.stopBundle();
     }
 
@@ -154,19 +166,38 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
 
     private void reinit(ConfigurationService configService) throws OXException {
         /*
-         * re-init options provider
+         * unregister previous options provider and transports
          */
         ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration = this.optionsProviderRegistration;
         if (null != optionsProviderRegistration) {
             optionsProviderRegistration.unregister();
             this.optionsProviderRegistration = null;
-            PushTransports.setOptionsProvider(null);
         }
-        DAVApnOptionsProvider optionsProvider = new DAVApnOptionsProvider(configService);
-        if (0 < optionsProvider.getAvailableOptions().size()) {
-            optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, optionsProvider, null);
-            this.optionsProviderRegistration = optionsProviderRegistration;
-            PushTransports.setOptionsProvider(optionsProvider);
+        List<ServiceRegistration<PushNotificationTransport>> pushTransportRegistrations = this.pushTransportRegistrations;
+        if (null != pushTransportRegistrations && 0 < pushTransportRegistrations.size()) {
+            for (ServiceRegistration<PushNotificationTransport> pushTransportRegistration : pushTransportRegistrations) {
+                pushTransportRegistration.unregister();
+            }
+            pushTransportRegistrations = null;
+        }
+        /*
+         * re-init factory & register options provider and transports
+         */
+        if (null != configService) {
+            factory.reinit(configService);
+            DAVApnOptionsProvider optionsProvider = factory.getApnOptionsProvider();
+            if (null != optionsProvider && 0 < optionsProvider.getAvailableOptions().size()) {
+                optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, optionsProvider, null);
+                this.optionsProviderRegistration = optionsProviderRegistration;
+            }
+            List<DavPushGateway> pushGateways = factory.getGateways();
+            if (null != pushGateways && 0 < pushGateways.size()) {
+                pushTransportRegistrations = new ArrayList<ServiceRegistration<PushNotificationTransport>>(pushGateways.size());
+                for (DavPushGateway pushGateway : pushGateways) {
+                    pushTransportRegistrations.add(context.registerService(PushNotificationTransport.class, pushGateway, null));
+                }
+                this.pushTransportRegistrations = pushTransportRegistrations;
+            }
         }
     }
 

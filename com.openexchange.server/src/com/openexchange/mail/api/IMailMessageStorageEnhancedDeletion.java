@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,69 +47,37 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.mail.api;
 
-import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.mail.MailPath;
 
 /**
- * {@link PushNotificationService} - The service that handles specified push notifications.
+ * {@link IMailMessageStorageEnhancedDeletion} - Extends basic folder storage by requesting a mailbox' conversation threads.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-@SingletonService
-public interface PushNotificationService {
+public interface IMailMessageStorageEnhancedDeletion extends IMailMessageStorage {
 
     /**
-     * Handles the specified notification.
+     * Indicates if enhanced deletion is supported.
+     *
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isEnhancedDeletionSupported() throws OXException;
+
+    /**
+     * Deletes the messages located in given folder identified through given mail IDs.
      * <p>
-     * Looks up associated subscriptions and delivers the notification using the appropriate {@link PushNotificationTransport transport}.
+     * If no mail could be found for a given mail ID, it is treated as a no-op.
      *
-     * @param notification The push notification to handle
-     * @throws OXException If handling push notification fails
+     * @param folder The folder full name
+     * @param mailIds The mail IDs
+     * @param hardDelete <code>true</code> to hard delete the messages, meaning not to create a backup copy of each message in default trash folder; otherwise <code>false</code>
+     * @return The identifiers of those mails that were put into trash (if any)
+     * @throws OXException If messages cannot be deleted.
      */
-    void handle(PushNotification notification) throws OXException;
-
-    /**
-     * Handles the specified notifications.
-     * <p>
-     * Looks up associated subscriptions and delivers the notifications using the appropriate {@link PushNotificationTransport transport}.
-     *
-     * @param notifications The push notifications to handle
-     * @throws OXException If handling push notifications fails
-     */
-    void handle(Collection<PushNotification> notifications) throws OXException;
-
-    // ----------------------------------------------------------------------------------------
-
-    /**
-     * Gets the number of buffered notifications that are supposed to be transported.
-     *
-     * @return The number of buffered notifications
-     * @throws OXException If number of buffered notifications cannot be returned
-     */
-    long getNumberOfBufferedNotifications() throws OXException;
-
-    /**
-     * Gets the total number of submitted notifications so far.
-     * <p>
-     * A notification is in submitted state if fetched from buffer and submitted for being transported, but not yet done.
-     *
-     * @return The total number of submitted notifications
-     * @throws OXException If number of submitted notifications cannot be returned
-     */
-    long getTotalNumberOfSubmittedNotifications() throws OXException;
-
-    /**
-     * Gets the total number of notifications that were processed so far.
-     * <p>
-     * A notification is in processing state if currently transported
-     *
-     * @return The total number of processed notifications
-     * @throws OXException If number of processing notifications cannot be returned
-     */
-    long getTotalNumberOfProcessedNotifications() throws OXException;
+    MailPath[] deleteMessagesEnhanced(String folder, String[] mailIds, boolean hardDelete) throws OXException;
 
 }

@@ -47,39 +47,30 @@
  *
  */
 
-package com.openexchange.dav.push.subscribe;
+package com.openexchange.html.vulntests;
 
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.dav.actions.POSTAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 /**
- * {@link PushSubscribeAction}
+ * {@link Bug50382VulTest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PushSubscribeAction extends POSTAction {
+public class Bug50382VulTest extends AbstractSanitizing {
 
-    /**
-     * Initializes a new {@link PushSubscribeAction}.
-     *
-     * @param factory The factory
-     */
-    public PushSubscribeAction(PushSubscribeFactory factory) {
-        super(factory.getProtocol());
-	}
+    public Bug50382VulTest() {
+        super();
+    }
 
-	@Override
-	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        /*
-         * handle push subscribe action
-         */
-        if (false == requireResource(request, PushSubscribeResource.class).handle(request, response)) {
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        }
-	}
+    @Test
+    public void testStartTagSanitizing() {
+        String content = "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><p><br><a!/onmouseover='prompt(document.cookie)'>Here we go! Another XSS!</a><img!/onerror='prompt(document.domain)' src=x><br></p></body></html>";
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover", "onerror");
+    }
 
 }

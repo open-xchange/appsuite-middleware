@@ -47,43 +47,53 @@
  *
  */
 
-package com.openexchange.dav.push;
+package com.openexchange.dav.push.gcm;
 
-import com.openexchange.pns.transport.apn.ApnOptions;
+import java.util.Collection;
+import com.openexchange.dav.push.DAVPushUtility;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.PushMatch;
+import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationTransport;
 
 /**
- * {@link DAVApnOptions}
+ * {@link DavPushTransport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class DAVApnOptions extends ApnOptions {
+public class DavPushTransport implements PushNotificationTransport {
 
-    private final String bundleId;
-    private final int refreshInterval;
+    private final PushTransportOptions transportOptions;
 
-    public DAVApnOptions(String bundleId, Object keystore, String password, boolean production, int refreshInterval) {
-        super(keystore, password, production);
-        this.bundleId = bundleId;
-        this.refreshInterval = refreshInterval;
+    public DavPushTransport(PushTransportOptions transportOptions) {
+        super();
+        this.transportOptions = transportOptions;
     }
 
-    /**
-     * Gets the bundleId
-     *
-     * @return The bundleId
-     */
-    public String getBundleId() {
-        return bundleId;
+    @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        return true;
     }
 
-    /**
-     * Gets the refreshInterval
-     *
-     * @return The refreshInterval
-     */
-    public int getRefreshInterval() {
-        return refreshInterval;
+    @Override
+    public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
+
+
+
+
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public String getId() {
+        return transportOptions.getTransportID();
+    }
+
+    @Override
+    public boolean servesClient(String client) throws OXException {
+        return DAVPushUtility.CLIENT_CALDAV.equals(client) || DAVPushUtility.CLIENT_CARDDAV.equals(client);
     }
 
 }
