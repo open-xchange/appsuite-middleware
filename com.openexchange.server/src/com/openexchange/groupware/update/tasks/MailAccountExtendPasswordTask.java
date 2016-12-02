@@ -92,8 +92,13 @@ public final class MailAccountExtendPasswordTask extends UpdateTaskAdapter {
             Databases.startTransaction(con);
             rollback = true;
 
-            Tools.changeVarcharColumnSize("password", 256, "user_mail_account", con);
-            Tools.changeVarcharColumnSize("password", 256, "user_transport_account", con);
+            if (128 == Tools.getVarcharColumnSize("password", "user_mail_account", con)) {
+                Tools.changeVarcharColumnSize("password", 256, "user_mail_account", con);
+            }
+
+            if (128 == Tools.getVarcharColumnSize("password", "user_transport_account", con)) {
+                Tools.changeVarcharColumnSize("password", 256, "user_transport_account", con);
+            }
 
             con.commit();
             rollback = false;
