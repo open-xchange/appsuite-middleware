@@ -53,6 +53,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import com.openexchange.config.ConfigurationServices;
+import com.openexchange.startup.StaticSignalStartedService;
+import com.openexchange.startup.StaticSignalStartedService.State;
 
 /**
  * {@link YamlRef} - A reference for a YAML file.
@@ -102,7 +104,12 @@ public class YamlRef {
                         tmp = ConfigurationServices.loadYamlFrom(yamlFile);
                         value = tmp;
                     } catch (IOException e) {
-                        throw new IllegalArgumentException("Failed to load YAML file '" + yamlFile + "'. Reason:" + e.getMessage(), e);
+                        String message = "Failed to load YAML file '" + yamlFile + "'. Reason:" + e.getMessage();
+                        StaticSignalStartedService.getInstance().setState(State.INVALID_CONFIGURATION, e, message);
+                        throw new IllegalArgumentException(message, e);
+                    } catch (RuntimeException e) {
+                        StaticSignalStartedService.getInstance().setState(State.INVALID_CONFIGURATION, e, e.getMessage());
+                        throw e;
                     }
                 }
             }
