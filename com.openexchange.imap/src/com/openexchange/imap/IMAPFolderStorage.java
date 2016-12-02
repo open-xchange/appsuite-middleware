@@ -2427,6 +2427,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 try {
                                     if(supportsMove){
                                         new MoveIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
+                                        msgCount -= blockSize;
+                                        continue;
                                     } else {
                                         new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
                                     }
