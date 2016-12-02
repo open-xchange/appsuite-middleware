@@ -67,70 +67,70 @@ public enum UpdateExceptionCodes implements DisplayableOXExceptionCode {
      */
     ONLY_REDUCE("The current version number %1$s is already lower than or equal to the desired version number %2$s.",
         UpdateExceptionMessages.ONLY_REDUCE_DISPLAY, Category.CATEGORY_USER_INPUT, 13),
-        
+
     /**
-     * A SQL problem occurred: %1$s.
+     * An SQL problem occurred: %1$s.
      */
-    SQL_PROBLEM("A SQL problem occurred: %1$s.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 14),
-    
+    SQL_PROBLEM("An SQL problem occurred: %1$s.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 14),
+
     /**
      * Error loading update task "%1$s".
      */
     LOADING_TASK_FAILED("Error loading update task \"%1$s\".", UpdateExceptionMessages.LOADING_TASK_FAILED_DISPLAY,
         Category.CATEGORY_USER_INPUT, 15),
-        
+
     /**
      * Unknown schema name: %1$s.
      */
     UNKNOWN_SCHEMA("Unknown schema name: %1$s.", UpdateExceptionMessages.UNKNOWN_SCHEMA_DISPLAY, Category.CATEGORY_USER_INPUT, 16),
-    
+
     /**
      * Update task %1$s returned an unknown concurrency level. Running as blocking task.
      */
     UNKNOWN_CONCURRENCY("Update task %1$s returned an unknown concurrency level. Running as blocking task.",
         UpdateExceptionMessages.UNKNOWN_CONCURRENCY_DISPLAY, Category.CATEGORY_ERROR, 17),
-        
+
     /**
      * Version can not be set back if update task handling has been migrated to remembered update tasks concept on schema %1$s.
      */
     RESET_FORBIDDEN("The version can not be set back if the update tasks handling has been migrated to the Remember Executed Update"
         + " Tasks concept on schema %1$s.", UpdateExceptionMessages.RESET_FORBIDDEN_DISPLAY, Category.CATEGORY_USER_INPUT, 18),
-        
+
     /**
      * Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.
      */
     UNRESOLVABLE_DEPENDENCIES("Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.",
         UpdateExceptionMessages.UNRESOLVABLE_DEPENDENCIES_DISPLAY, Category.CATEGORY_ERROR, 19),
-        
+
     /**
      * %1$s.
      */
     OTHER_PROBLEM("%1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 20),
-    
+
     /**
      * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
      */
     WRONG_ROW_COUNT("Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.",
         UpdateExceptionMessages.WRONG_ROW_COUNT_DISPLAY, Category.CATEGORY_ERROR, 21),
-        
+
     /**
      * Updating schema %1$s failed. Cause: %2$s.
      */
     UPDATE_FAILED("Updating schema %1$s failed. Cause: %2$s.", UpdateExceptionMessages.UPDATE_FAILED_DISPLAY, Category.CATEGORY_ERROR, 22),
-    
+
     /**
      * Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).
      */
     BLOCKING_FIRST("Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).",
         UpdateExceptionMessages.BLOCKING_FIRST_DISPLAY, Category.CATEGORY_ERROR, 23),
-        
+
     /** Unknown task: %1$s */
     UNKNOWN_TASK("Unknown task: %1$s.", UpdateExceptionMessages.UNKNOWN_TASK_DISPLAY, Category.CATEGORY_CONFIGURATION, 24),
-    
+
     /** Column "%1$s" not found in table %2$s. */
     COLUMN_NOT_FOUND("Column \"%1$s\" not found in table %2$s.", UpdateExceptionMessages.COLUMN_NOT_FOUND_DISPLAY,
         Category.CATEGORY_ERROR, 25),
-        
+
     /**
      * An error occurred: %1$s.
      */
@@ -138,7 +138,7 @@ public enum UpdateExceptionCodes implements DisplayableOXExceptionCode {
     ;
 
     final String message;
-    
+
     final String displayMessage;
 
     final Category category;
@@ -171,7 +171,7 @@ public enum UpdateExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;
