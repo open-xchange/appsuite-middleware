@@ -165,6 +165,16 @@ public class PushSubscribeResource extends DAVResource {
             } catch (OXException e) {
                 throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
             }
+        } else {
+            /*
+             * unsubscribe for all topics
+             */
+            try {
+                String token = pushGateway.unsubscribe(clientData);
+                unregisterSubscription(pushGateway.getOptions().getTransportID(), token);
+            } catch (OXException e) {
+                throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+            }
         }
         return true;
     }
@@ -211,6 +221,18 @@ public class PushSubscribeResource extends DAVResource {
         .build();
         try {
             subscriptionRegistry.registerSubscription(subscription);
+        } catch (OXException e) {
+            DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+        }
+    }
+
+    protected void unregisterSubscription(String transportId, String token) throws WebdavProtocolException {
+        PushSubscriptionRegistry subscriptionRegistry = factory.getOptionalService(PushSubscriptionRegistry.class);
+        if (null == subscriptionRegistry) {
+            DAVProtocol.protocolException(getUrl(), ServiceExceptionCode.absentService(PushSubscriptionRegistry.class), HttpServletResponse.SC_BAD_REQUEST);
+        }
+        try {
+            subscriptionRegistry.unregisterSubscription(token, transportId);
         } catch (OXException e) {
             DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
         }

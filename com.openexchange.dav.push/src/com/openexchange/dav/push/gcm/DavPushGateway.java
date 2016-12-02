@@ -185,12 +185,20 @@ public class DavPushGateway implements PushNotificationTransport {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(String.valueOf(statusLine));
 
         } catch (IOException e) {
-
-            return transportOptions.getApplicationID(); //TODO: extract from or use response's "push-url"?
-//            throw OXException.general("", e);
+            throw OXException.general("", e);
         } finally {
             close(post, response);
         }
+    }
+
+    /**
+     * Unsubscribes a client at the gateway.
+     *
+     * @param clientData The client data to pass
+     */
+    public String unsubscribe(Object clientData) throws OXException {
+        //TODO necessary?
+        return transportOptions.getApplicationID(); //TODO: extract from or use response's "push-url"?
     }
 
     private DavPushResponse push(PushNotification notification, Collection<PushMatch> matches) throws OXException {
