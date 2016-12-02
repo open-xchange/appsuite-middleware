@@ -115,33 +115,6 @@ public class DavPushGateway implements PushNotificationTransport {
     }
 
     @Override
-    public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
-        DavPushResponse pushResponse = push(notification, matches);
-        handlePushResponse(pushResponse);
-    }
-
-    private void handlePushResponse(DavPushResponse pushResponse) {
-        if (null == pushResponse) {
-            return;
-        }
-        List<String> noSubscribers = pushResponse.getNoSubscribers();
-        if (null != noSubscribers && 0 < noSubscribers.size()) {
-            PushSubscriptionRegistry subscriptionRegistry = factory.getOptionalService(PushSubscriptionRegistry.class);
-            if (null == subscriptionRegistry) {
-                LOG.warn("unable to remove no-subscribers", ServiceExceptionCode.absentService(PushSubscriptionRegistry.class));
-            } else {
-                for (String obsoleteTopic : noSubscribers) {
-                    try {
-                        subscriptionRegistry.unregisterSubscription(obsoleteTopic, transportOptions.getTransportID());
-                    } catch (OXException e) {
-                        LOG.error("error unregistering subsciptions for {}", obsoleteTopic, e);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
     public String getId() {
         return transportOptions.getTransportID();
     }
@@ -151,8 +124,19 @@ public class DavPushGateway implements PushNotificationTransport {
         return DAVPushUtility.CLIENT_CALDAV.equals(client) || DAVPushUtility.CLIENT_CARDDAV.equals(client);
     }
 
+    @Override
+    public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
+        JSONObject pushData = createPushData(notification, matches);
+        if (null != pushData) {
+            JSONObject responseObject = doPost(transportOptions.getGatewayUrl() + transportOptions.getApplicationID(), pushData);
+            if (null != responseObject) {
+                handlePushResponse(responseObject);
+            }
+        }
+    }
+
     /**
-     * Gets the used tranport options.
+     * Gets the used transport options.
      *
      * @return The transport options
      */
@@ -170,25 +154,16 @@ public class DavPushGateway implements PushNotificationTransport {
      */
     public String subscribe(List<String> topics, Object clientData, Date expires) throws OXException {
         JSONObject subscribeData = createSubscribeData(topics, clientData, expires);
-        HttpPost post = null;
-        HttpResponse response = null;
-        try {
-            post = new HttpPost(transportOptions.getGatewayUrl() + transportOptions.getApplicationID());
-            post.setEntity(new StringEntity(subscribeData.toString(), ContentType.APPLICATION_JSON));
-            LOG.trace("Performing subscribe request at {}:{}{}", post.getURI(), System.lineSeparator(), subscribeData);
-            response = httpClient.execute(post);
-            StatusLine statusLine = response.getStatusLine();
-            LOG.trace("Got {} from push gateway.", statusLine);
-            if (null != statusLine && HttpServletResponse.SC_OK == statusLine.getStatusCode()) {
-                return parseSubscribeResponse(response.getEntity());
-            }
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(String.valueOf(statusLine));
-
-        } catch (IOException e) {
-            throw OXException.general("", e);
-        } finally {
-            close(post, response);
+        if (null != subscribeData) {
+            doPost(transportOptions.getGatewayUrl() + transportOptions.getApplicationID(), subscribeData);
+            return transportOptions.getApplicationID();
+//            TODO: extract token from or use response's "push-url"?
+//            JSONObject responseObject = doPost(transportOptions.getGatewayUrl() + transportOptions.getApplicationID(), subscribeData);
+//            if (null != responseObject) {
+//                String pushUrl = responseObject.optString("push-url");
+//            }
         }
+        return null;
     }
 
     /**
@@ -201,25 +176,39 @@ public class DavPushGateway implements PushNotificationTransport {
         return transportOptions.getApplicationID(); //TODO: extract from or use response's "push-url"?
     }
 
-    private DavPushResponse push(PushNotification notification, Collection<PushMatch> matches) throws OXException {
-        JSONObject pushData = createPushData(notification, matches);
-        HttpPost post = null;
-        HttpResponse response = null;
-        try {
-            post = new HttpPost(transportOptions.getGatewayUrl() + transportOptions.getApplicationID());
-            post.setEntity(new StringEntity(pushData.toString(), ContentType.APPLICATION_JSON));
-            LOG.trace("Performing push notification request at {}:{}{}", post.getURI(), System.lineSeparator(), pushData);
-            response = httpClient.execute(post);
-            StatusLine statusLine = response.getStatusLine();
-            LOG.trace("Got {} from push gateway.", statusLine);
-            if (null != statusLine && HttpServletResponse.SC_OK == statusLine.getStatusCode()) {
-                return parsePushResponse(response.getEntity());
+    private void handlePushResponse(JSONObject responseObject) throws OXException {
+        if (null == responseObject) {
+            return;
+        }
+        JSONObject pushResponseObject = responseObject.optJSONObject("push-response");
+        if (null == pushResponseObject) {
+            return;
+        }
+        JSONArray noSubscribersArray = pushResponseObject.optJSONArray("no-subscribers");
+        if (null != noSubscribersArray && 0 < noSubscribersArray.length()) {
+            List<String> unsubscribedTopics = new ArrayList<String>(noSubscribersArray.length());
+            try {
+                for (int i = 0; i < noSubscribersArray.length(); i++) {
+                    JSONObject noSubscribersObject = noSubscribersArray.getJSONObject(i);
+                    unsubscribedTopics.add(noSubscribersObject.getString("topic"));
+                }
+            } catch (JSONException e) {
+                LOG.warn("Error parsing push response", e);
             }
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(String.valueOf(statusLine));
-        } catch (IOException e) {
-            throw OXException.general("", e);
-        } finally {
-            close(post, response);
+            if (0 < unsubscribedTopics.size()) {
+                PushSubscriptionRegistry subscriptionRegistry = factory.getOptionalService(PushSubscriptionRegistry.class);
+                if (null == subscriptionRegistry) {
+                    LOG.warn("Unable to remove unsubscribed topics", ServiceExceptionCode.absentService(PushSubscriptionRegistry.class));
+                } else {
+                    for (String unsubscribedTopic : unsubscribedTopics) {
+                        try {
+                            subscriptionRegistry.unregisterSubscription(unsubscribedTopic, transportOptions.getTransportID());
+                        } catch (OXException e) {
+                            LOG.error("Error unregistering subscriptions for {}", unsubscribedTopic, e);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -245,9 +234,6 @@ public class DavPushGateway implements PushNotificationTransport {
             return null;
         }
         Map<String, Object> messageData = notification.getMessageData();
-        Integer priority = (Integer) messageData.get("priority");
-        Long timestamp = (Long) messageData.get("timestamp");
-        Object clientId = messageData.get("client-id");
         try {
             JSONObject pushData = new JSONObject();
             JSONObject pushObject = new JSONObject();
@@ -256,46 +242,47 @@ public class DavPushGateway implements PushNotificationTransport {
             for (PushMatch match : matches) {
                 JSONObject messageObject = new JSONObject();
                 messageObject.put("topic", DAVPushUtility.getPushKey(match.getTopic(), match.getContextId(), match.getUserId()));
+                Integer priority = (Integer) messageData.get(DAVPushUtility.PARAMETER_PRIORITY);
                 messageObject.put("priority", null == priority ? 50 : priority.intValue());
-                messageObject.put("timestamp", DAVPushUtility.UTC_DATE_FORMAT.get().format(new Date(timestamp.longValue())));
-                messageObject.putOpt("client-id", clientId);
+                Long timestamp = (Long) messageData.get(DAVPushUtility.PARAMETER_TIMESTAMP);
+                messageObject.put("timestamp", DAVPushUtility.UTC_DATE_FORMAT.get().format(null != timestamp ? new Date(timestamp.longValue()) : new Date()));
+                messageObject.putOpt("client-id", messageData.get(DAVPushUtility.PARAMETER_CLIENTTOKEN));
                 jsonMessages.put(messageObject);
             }
             pushObject.put("messages", jsonMessages);
             return pushData;
         } catch (JSONException e) {
-            throw OXException.general("", e);
+            throw PushExceptionCodes.JSON_ERROR.create(e);
         }
     }
 
-    private String parseSubscribeResponse(HttpEntity entity) throws OXException {
-        JSONObject jsonObject = parseJSONObject(entity);
-        LOG.trace("Got subscribe response {}", jsonObject);
-        return transportOptions.getApplicationID(); //TODO: extract from or use response's "push-url"?
-    }
-
-    private DavPushResponse parsePushResponse(HttpEntity entity) throws OXException {
-        JSONObject jsonObject = parseJSONObject(entity);
-        LOG.trace("Got push response {}", jsonObject);
-        if (null != jsonObject) {
-            JSONObject pushResponseObject = jsonObject.optJSONObject("push-response");
-            if (null != pushResponseObject) {
-                JSONArray noSubscribersArray = pushResponseObject.optJSONArray("no-subscribers");
-                if (null != noSubscribersArray && 0 < noSubscribersArray.length()) {
-                    List<String> noSubscribers = new ArrayList<String>(noSubscribersArray.length());
-                    try {
-                        for (int i = 0; i < noSubscribersArray.length(); i++) {
-                            JSONObject noSubscribersObject = noSubscribersArray.getJSONObject(i);
-                            noSubscribers.add(noSubscribersObject.getString("topic"));
-                        }
-                        return new DavPushResponse(noSubscribers);
-                    } catch (JSONException e) {
-                        throw PushExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
-                    }
-                }
+    /**
+     * Posts an <code>application/json</code> request body to a specific URI.
+     *
+     * @param uri The target URI
+     * @param body The request body
+     * @return The JSON response body, or <code>null</code> if there was none
+     */
+    private JSONObject doPost(String uri, JSONObject body) throws OXException {
+        HttpPost post = null;
+        HttpResponse response = null;
+        try {
+            post = new HttpPost(uri);
+            post.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_JSON));
+            LOG.trace(">>> POST {}{}    {}", uri, System.lineSeparator(), body);
+            response = httpClient.execute(post);
+            StatusLine statusLine = response.getStatusLine();
+            if (null != statusLine && HttpServletResponse.SC_OK == statusLine.getStatusCode()) {
+                JSONObject responseBody = parseJSONObject(response.getEntity());
+                LOG.trace("<<< {}{}    {}", response.getStatusLine(), System.lineSeparator(), responseBody);
+                return responseBody;
             }
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(String.valueOf(statusLine));
+        } catch (IOException e) {
+            throw PushExceptionCodes.IO_ERROR.create(e);
+        } finally {
+            close(post, response);
         }
-        return null;
     }
 
     private static JSONObject parseJSONObject(HttpEntity entity) throws OXException {
@@ -306,8 +293,10 @@ public class DavPushGateway implements PushNotificationTransport {
                 try (InputStreamReader reader = new InputStreamReader(inputStream)) {
                     return new JSONObject(reader);
                 }
-            } catch (UnsupportedOperationException | IOException | JSONException e) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+            } catch (UnsupportedOperationException | IOException e) {
+                throw PushExceptionCodes.IO_ERROR.create(e);
+            } catch (JSONException e) {
+                throw PushExceptionCodes.JSON_ERROR.create(e);
             } finally {
                 Streams.close(inputStream);
             }

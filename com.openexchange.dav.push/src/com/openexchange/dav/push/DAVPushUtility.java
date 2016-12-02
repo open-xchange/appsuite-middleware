@@ -90,6 +90,18 @@ public class DAVPushUtility {
     /** The push client identifier for CalDAV */
     public static final String CLIENT_CALDAV = Interface.CALDAV.toString().toLowerCase();
 
+    /** The message data parameter used for the push key indicated to clients (stored as {@link String}) */
+    public static final String PARAMETER_PUSHKEY = "pushKey";
+
+    /** The message data parameter used for the timestamp from the originating event (stored as {@link Long}) */
+    public static final String PARAMETER_TIMESTAMP = "timestamp";
+
+    /** The priority parameter used to indicate the importance of the notification (stored as {@link Integer}) */
+    public static final String PARAMETER_PRIORITY = "priority";
+
+    /** The client push token parameter used to indicate which client was causing the change (stored as {@link String}) */
+    public static final String PARAMETER_CLIENTTOKEN = "clientToken";
+
     /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd'T'HH:mm:ss'Z'" as pattern.
      */

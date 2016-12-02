@@ -50,12 +50,16 @@
 package com.openexchange.dav.push.apn;
 
 import java.util.Map;
+import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
+import javapns.json.JSONException;
+import javapns.notification.Payload;
+import javapns.notification.PushNotificationPayload;
 
 /**
  * {@link DAVApnPushMessageGenerator}
@@ -85,11 +89,34 @@ public class DAVApnPushMessageGenerator implements PushMessageGenerator {
     @Override
     public Message<?> generateMessageFor(String transportId, final PushNotification notification) throws OXException {
         if (KnownTransport.APNS.getTransportId().equals(transportId)) {
-            return new Message<Map<String, Object>>() {
+            /*
+             * build APN payload as expected by client
+             */
+            final PushNotificationPayload payload = new PushNotificationPayload();
+            Map<String, Object> messageData = notification.getMessageData();
+            try {
+                if (null != messageData) {
+                    String pushKey = (String) messageData.get(DAVPushUtility.PARAMETER_PUSHKEY);
+                    if (null != pushKey) {
+                        payload.addCustomDictionary("key", pushKey);
+                    }
+                    Long timestamp = (Long) messageData.get(DAVPushUtility.PARAMETER_TIMESTAMP);
+                    if (null != timestamp) {
+                        payload.addCustomDictionary("dataChangedTimestamp", (int) (timestamp.longValue() / 1000));
+                    }
+                }
+                payload.addCustomDictionary("pushRequestSubmittedTimestamp", (int) (System.currentTimeMillis() / 1000));
+            } catch (JSONException e) {
+                throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
+            }
+            /*
+             * wrap payload in transport message
+             */
+            return new Message<Payload>() {
 
                 @Override
-                public Map<String, Object> getMessage() {
-                    return notification.getMessageData();
+                public Payload getMessage() {
+                    return payload;
                 }
             };
         }
