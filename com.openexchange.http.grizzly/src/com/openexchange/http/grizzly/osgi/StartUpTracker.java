@@ -73,8 +73,10 @@ import com.openexchange.http.grizzly.service.http.OSGiHandler;
 import com.openexchange.http.grizzly.service.http.OSGiMainHandler;
 import com.openexchange.http.grizzly.service.http.OSGiServletHandler;
 import com.openexchange.http.grizzly.util.ThreadControlReference;
+import com.openexchange.java.Strings;
 import com.openexchange.startup.SignalHttpApiAvailabilityService;
 import com.openexchange.startup.SignalStartedService;
+import com.openexchange.startup.StaticSignalStartedService;
 import com.openexchange.startup.ThreadControlService;
 
 /**
@@ -124,12 +126,27 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
         synchronized (grizzlyConfig) {
             SignalStartedService service = context.getService(reference);
 
-            try {
-                grizzly.startListeners();
-                LOGGER.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
-                availabilityReg = context.registerService(SignalHttpApiAvailabilityService.class, new SignalHttpApiAvailabilityService() {}, null);
-            } catch (final Exception e) {
-                LOGGER.error(" ---=== /!\\ ===--- Network listeners could not be started! ---=== /!\\ ===--- ", e);
+            boolean isOk = true;
+            StaticSignalStartedService singleton = null;
+            if (service instanceof StaticSignalStartedService) {
+                singleton = (StaticSignalStartedService) service;
+                if (StaticSignalStartedService.State.OK != singleton.getState()) {
+                    // Error during start-up...
+                    isOk = false;
+                }
+            }
+
+            if (isOk) {
+                try {
+                    grizzly.startListeners();
+                    LOGGER.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
+                    availabilityReg = context.registerService(SignalHttpApiAvailabilityService.class, new SignalHttpApiAvailabilityService() {/*nothing inside*/}, null);
+                } catch (final Exception e) {
+                    LOGGER.error(" ---=== /!\\ ===--- Grizzly network listeners could not be started! ---=== /!\\ ===--- ", e);
+                }
+            } else {
+                String sep = Strings.getLineSeparator();
+                LOGGER.error("{}\t ---=== /!\\ ===--- Grizzly network listeners not started due to start-up error! ---=== /!\\ ===--- {}", sep, sep);
             }
 
             return service;
