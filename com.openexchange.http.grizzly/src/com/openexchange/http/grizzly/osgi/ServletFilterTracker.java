@@ -173,10 +173,15 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
     public Filter addingService(ServiceReference<Filter> reference) {
         try {
             Filter filter = context.getService(reference);
-            String[] paths = getPathsFrom(reference);
 
-            for (String path : paths) {
-                mainHttpHandler.registerFilter(filter, path, null, new HttpContextImpl(context.getBundle()), null);
+            String[] paths = getPathsFrom(reference);
+            if (null == paths) {
+                mainHttpHandler.registerFilter(filter, "/*", null, new HttpContextImpl(context.getBundle()), null);
+            } else {
+                HttpContextImpl httpContext = new HttpContextImpl(context.getBundle());
+                for (String path : paths) {
+                    mainHttpHandler.registerFilter(filter, path, null, httpContext, null);
+                }
             }
 
             return filter;
