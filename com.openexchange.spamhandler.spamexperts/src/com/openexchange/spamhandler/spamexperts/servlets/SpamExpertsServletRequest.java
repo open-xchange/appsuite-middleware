@@ -18,7 +18,6 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
@@ -96,20 +95,17 @@ public final class SpamExpertsServletRequest  {
             HTTPCLIENT = new HttpClient(manager);
     }
 
+    // ------------------------------------------------------------------------------------------------------------
+
 	private final Session session;
 	private final User user;
     private final SpamExpertsConfig config;
 
-	public SpamExpertsServletRequest(Session sessionObj, Context ctx, SpamExpertsConfig config) throws OXException {
+	public SpamExpertsServletRequest(Session session, SpamExpertsConfig config) throws OXException {
 		super();
-	    this.session = sessionObj;
+	    this.session = session;
         this.config = config;
-        try {
-			this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-		} catch (final OXException e) {
-			LOG.error("", e);
-			throw e;
-		}
+        this.user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
 	}
 
 	public Object action(final String action, final JSONObject jsonObject) throws OXException, JSONException {

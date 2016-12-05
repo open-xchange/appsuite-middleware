@@ -59,8 +59,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -102,15 +100,13 @@ public final class SpamExpertsServlet extends DataServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        Session session = getSessionObject(req);
 
-        final Response response = new Response();
-        final Session session = getSessionObject(req);
-
+        Response response = new Response();
         try {
+            String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
 
-            final String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
             JSONObject jsonObj;
-
             try {
                 jsonObj = convertParameter2JSONObject(req);
             } catch (final JSONException e) {
@@ -119,11 +115,10 @@ public final class SpamExpertsServlet extends DataServlet {
                 writeResponse(response, resp, session);
                 return;
             }
-            final Context ctx = ContextStorage.getInstance().getContext(session);
-            final SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, ctx, config);
-            final Object responseObj = proRequest.action(action, jsonObj);
-            response.setData(responseObj);
 
+            SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, config);
+            Object responseObj = proRequest.action(action, jsonObj);
+            response.setData(responseObj);
         } catch (final OXException e) {
             LOG.error("", e);
             response.setException(e);
