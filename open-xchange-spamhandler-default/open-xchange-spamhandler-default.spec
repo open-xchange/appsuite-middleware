@@ -26,7 +26,6 @@ Summary:        The Open-Xchange Default Spam Handler
 Autoreqprov:   no
 Requires:       open-xchange-core >= @OXVERSION@
 Provides:	open-xchange-spamhandler
-Conflicts:	open-xchange-spamhandler-spamassassin
 
 %description
 The Open-Xchange Default Spam Handler
