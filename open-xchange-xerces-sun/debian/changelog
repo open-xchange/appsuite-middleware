@@ -1,9 +1,3 @@
-open-xchange-xerces-sun (7.8.2-17) stable; urgency=medium
-
-  * Build for patch 2016-12-05 (3763)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 28 Nov 2016 17:07:20 +0100
-
 open-xchange-xerces-sun (7.8.2-16) stable; urgency=medium
 
   * Build for patch 2016-11-21 (3731)
