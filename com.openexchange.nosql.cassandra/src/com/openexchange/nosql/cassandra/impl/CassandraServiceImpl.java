@@ -49,13 +49,13 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.mapping.MappingManager;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CassandraServiceImpl}
@@ -63,35 +63,43 @@ import com.openexchange.nosql.cassandra.CassandraService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CassandraServiceImpl implements CassandraService {
-    
-    private final ConcurrentMap<String, Cluster> clusters;
+
+    private final ServiceLookup services;
+
+    private final Cluster cluster;
+    private final Session session;
 
     /**
      * Initialises a new {@link CassandraServiceImpl}.
+     * 
+     * @param services The {@link ServiceLookup} instance
      */
-    public CassandraServiceImpl() {
+    public CassandraServiceImpl(ServiceLookup services) {
         super();
-        clusters = new ConcurrentHashMap<>(4);
+        this.services = services;
+
+        // Build the Cluster
+        cluster = Cluster.buildFrom(new CassandraServiceInitializer(services));
+        session = cluster.connect();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getAllClusters()
+     * @see com.openexchange.nosql.cassandra.CassandraService#getCluster()
      */
     @Override
-    public List<Cluster> getAllClusters() throws OXException {
-        // TODO Auto-generated method stub
+    public Cluster getCluster() throws OXException {
         return null;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getCluster(java.lang.String)
+     * @see com.openexchange.nosql.cassandra.CassandraService#getSession()
      */
     @Override
-    public Cluster getCluster(String name) throws OXException {
+    public Session getSession() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -102,7 +110,7 @@ public class CassandraServiceImpl implements CassandraService {
      * @see com.openexchange.nosql.cassandra.CassandraService#getSession(java.lang.String)
      */
     @Override
-    public Session getSession(String clusterName) throws OXException {
+    public Session getSession(String keyspace) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -110,12 +118,50 @@ public class CassandraServiceImpl implements CassandraService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getSession(java.lang.String, java.lang.String)
+     * @see com.openexchange.nosql.cassandra.CassandraService#getSessionForAsynchronousExecution()
      */
     @Override
-    public Session getSession(String clusterName, String keyspace) throws OXException {
+    public ListenableFuture<Session> getSessionForAsynchronousExecution() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraService#getSessionForAsynchronousExecution(java.lang.String)
+     */
+    @Override
+    public ListenableFuture<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraService#getMapping(com.datastax.driver.core.Session)
+     */
+    @Override
+    public MappingManager getMapping(Session session) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraService#getMapping(java.lang.String)
+     */
+    @Override
+    public MappingManager getMapping(String keyspace) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void shutdown() {
+        if (!cluster.isClosed()) {
+            cluster.close();
+        }
+    }
 }

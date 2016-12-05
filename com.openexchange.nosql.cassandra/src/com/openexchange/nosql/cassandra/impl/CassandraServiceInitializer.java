@@ -55,6 +55,7 @@ import java.util.List;
 import com.datastax.driver.core.Cluster.Initializer;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CassandraServiceInitializer}
@@ -62,13 +63,17 @@ import com.datastax.driver.core.Host.StateListener;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CassandraServiceInitializer implements Initializer {
-    
-    
+
+    private final ServiceLookup services;
+
     /**
      * Initialises a new {@link CassandraServiceInitializer}.
+     * 
+     * @param services The {@link ServiceLookup} instance
      */
-    public CassandraServiceInitializer() {
+    public CassandraServiceInitializer(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /*
