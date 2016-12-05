@@ -79,7 +79,6 @@ import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link MALPollActivator} - The MAL Poll activator.
@@ -168,7 +167,6 @@ public final class MALPollActivator extends HousekeepingActivator {
                     new RegistryServiceTrackerCustomizer<PushNotificationService>(context, getServiceRegistry(), PushNotificationService.class);
                 track(PushNotificationService.class, trackerCustomizer);
             }
-            trackService(UserPermissionService.class);
             openTrackers();
             /*
              * Read configuration
