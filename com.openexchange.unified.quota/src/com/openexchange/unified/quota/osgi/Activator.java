@@ -52,30 +52,27 @@ package com.openexchange.unified.quota.osgi;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.filestore.unified.quota.UnifiedQuotaPreferenceItem;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.3
+ * @since v7.8.4
  */
 public class Activator extends HousekeepingActivator{
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[]{ConfigViewFactory.class};
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
-        registerService(PreferencesItemService.class, new UnifiedQuotaPreferenceItem(this));
+        UnifiedQuotaPreferenceItem item = new UnifiedQuotaPreferenceItem(this);
+        registerService(PreferencesItemService.class, item);
+        registerService(ConfigTreeEquivalent.class, item);
 
     }
 

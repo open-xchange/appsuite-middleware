@@ -82,6 +82,3 @@ modules/infostore/folder/videos > io.ox/files//folder/videos
 
 # Contacts
 modules/contacts/maxImageSize > io.ox/contacts//maxImageSize
-
-# Quota
-unifiedquota > io.ox/core//unifiedquota

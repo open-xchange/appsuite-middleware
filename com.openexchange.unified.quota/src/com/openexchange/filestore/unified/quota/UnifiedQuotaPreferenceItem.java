@@ -59,6 +59,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -68,7 +69,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class UnifiedQuotaPreferenceItem implements PreferencesItemService{
+public class UnifiedQuotaPreferenceItem implements PreferencesItemService, ConfigTreeEquivalent{
 
     private static final String CONFIG = "com.openexchange.unified.quota.enabled";
     final ServiceLookup services;
@@ -104,6 +105,16 @@ public class UnifiedQuotaPreferenceItem implements PreferencesItemService{
                 setting.setSingleValue(enabled);
             }
         };
+    }
+
+    @Override
+    public String getConfigTreePath() {
+       return "unifiedquota";
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/core//unifiedquota";
     }
 
 }
