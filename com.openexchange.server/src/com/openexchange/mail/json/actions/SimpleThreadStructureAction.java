@@ -49,9 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -89,7 +86,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.session.ServerSession;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link SimpleThreadStructureAction}
@@ -335,7 +331,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             /*
              * Prepare search term for mail categories
              */
-            //            String searchTerm = null;
+//            String searchTerm = null;
 
             String category_filter = req.getParameter("categoryid");
 
@@ -389,7 +385,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             int sortCol = req.getSortFieldFor(sort);
             if (!filterApplied) {
                 List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, null);
-                filterConversations(mails);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
 
@@ -447,7 +442,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 }
             }
 
-            filterConversations(mails);
             AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             result.setResponseProperty("cached", Boolean.valueOf(cached));
             if (more > 0) {
@@ -465,28 +459,21 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         if (null != id) {
             return id;
         }
-        final String sha1Sum = JsonCaches.getSHA1Sum("threadedAll", req.checkParameter(Mail.PARAMETER_MAILFOLDER), req.checkParameter(AJAXServlet.PARAMETER_COLUMNS), req.getParameter(AJAXServlet.PARAMETER_SORT), req.getParameter(AJAXServlet.PARAMETER_ORDER), req.getParameter("limit"), req.getParameter("max"), req.getParameter(AJAXServlet.LEFT_HAND_LIMIT), req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT), req.getParameter("includeSent"), req.getParameter("unseen"), req.getParameter("deleted"));
+        final String sha1Sum =
+            JsonCaches.getSHA1Sum(
+                "threadedAll",
+                req.checkParameter(Mail.PARAMETER_MAILFOLDER),
+                req.checkParameter(AJAXServlet.PARAMETER_COLUMNS),
+                req.getParameter(AJAXServlet.PARAMETER_SORT),
+                req.getParameter(AJAXServlet.PARAMETER_ORDER),
+                req.getParameter("limit"),
+                req.getParameter("max"),
+                req.getParameter(AJAXServlet.LEFT_HAND_LIMIT),
+                req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT),
+                req.getParameter("includeSent"),
+                req.getParameter("unseen"),
+                req.getParameter("deleted"));
         return sha1Sum;
     }
 
-    /**
-     * Filter sent items out of conversations by looking up {@link MailMessage} message id
-     * 
-     * @param mails The list containing the conversations
-     */
-    private void filterConversations(List<List<MailMessage>> mails) {
-        // Fix for bug 33801: "Webmailer: duplicate mails in email threads in conversation mode on mailinglists"
-        for (List<MailMessage> conversation : mails) {
-            ArrayList<String> knownMessageID = new ArrayList<>();
-            for (int i = 0; i < conversation.size(); i++) {
-                if (!knownMessageID.contains(conversation.get(i).getMessageId())) {
-                    knownMessageID.add(conversation.get(i).getMessageId());
-                } else {
-                    conversation.remove(i);
-                }
-            }
-            // Remove null pointer in list
-            conversation.removeAll(Collections.singleton(null));
-        }
-    }
 }

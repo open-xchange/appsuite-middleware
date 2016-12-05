@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.alias.impl;
 
+import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,7 +67,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.UserAliasStorageExceptionCodes;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link RdbAliasStorage}
@@ -134,6 +139,75 @@ public class RdbAliasStorage implements UserAliasStorage {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+            Database.back(contextId, false, con);
+        }
+    }
+
+    @Override
+    public List<Set<String>> getAliases(int contextId, int... userIds) throws OXException {
+        if (null == userIds) {
+            return Collections.emptyList();
+        }
+
+        int length = userIds.length;
+        if (length == 0) {
+            return Collections.emptyList();
+        }
+
+        if (1 == length) {
+            return Collections.<Set<String>> singletonList(getAliases(contextId, userIds[0]));
+        }
+
+        TIntObjectMap<Set<String>> map = getAliasesMapping(contextId, userIds);
+        List<Set<String>> list = new ArrayList<>(length);
+        for (int userId : userIds) {
+            list.add(map.get(userId));
+        }
+        return list;
+    }
+
+    /**
+     * Gets the aliases mapping for specified user identifiers
+     *
+     * @param contextId The context identifier
+     * @param userIds The user identifiers
+     * @return The alias mapping
+     * @throws OXException If alias mapping cannot be returned
+     */
+    TIntObjectMap<Set<String>> getAliasesMapping(int contextId, int[] userIds) throws OXException {
+        Connection con = Database.get(contextId, false);
+        try {
+            int length = userIds.length;
+            TIntObjectMap<Set<String>> map = new TIntObjectHashMap<>(length);
+
+            for (int i = 0; i < length; i += IN_LIMIT) {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    int clen = Arrays.determineRealSize(length, i, IN_LIMIT);
+                    stmt = con.prepareStatement(getIN("SELECT user, alias FROM user_alias WHERE cid=? AND user IN (", clen));
+                    int pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    for (int j = 0; j < clen; j++) {
+                        int userId = userIds[i+j];
+                        stmt.setInt(pos++, userId);
+                        map.put(userId, new HashSet<String>(6, 0.9F));
+                    }
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        int userId = rs.getInt(1);
+                        Set<String> aliases = map.get(userId);
+                        aliases.add(rs.getString(2));
+                    }
+                } catch (SQLException e) {
+                    throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(rs, stmt);
+                }
+            }
+
+            return map;
+        } finally {
             Database.back(contextId, false, con);
         }
     }

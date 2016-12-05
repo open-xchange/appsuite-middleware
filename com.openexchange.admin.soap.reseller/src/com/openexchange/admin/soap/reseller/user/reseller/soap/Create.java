@@ -36,7 +36,7 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.User;
 @XmlType(name = "", propOrder = {
     "ctx",
     "usrdata",
-    "auth"
+    "auth",
 })
 @XmlRootElement(name = "create")
 public class Create {

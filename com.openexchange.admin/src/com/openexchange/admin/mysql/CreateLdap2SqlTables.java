@@ -173,7 +173,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
         + "name VARCHAR(128) NOT NULL,"
         + "value TEXT NOT NULL,"
         + "uuid BINARY(16) NOT NULL,"
-        + "PRIMARY KEY (cid, uuid),"
+        + "PRIMARY KEY (cid, id, name),"
         + "INDEX `attributeIndex` (cid,name,value(20)),"
         + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";

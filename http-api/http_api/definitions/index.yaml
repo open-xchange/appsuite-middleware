@@ -148,8 +148,6 @@ MailAttachment:
   $ref: ./mail/MailAttachment.yaml
 MailData:
   $ref: ./mail/MailData.yaml
-ExtendedMailData:
-  $ref: ./mail/ExtendedMailData.yaml
 MailConversationData:
   $ref: ./mail/MailConversationData.yaml
 MailConversationsResponse:

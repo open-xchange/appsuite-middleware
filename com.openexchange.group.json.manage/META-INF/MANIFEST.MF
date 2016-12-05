@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Group manage requests
 Bundle-SymbolicName: com.openexchange.group.json.manage
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.group.servlet.osgi.GroupManageActivator
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.fasterxml.jackson.core,

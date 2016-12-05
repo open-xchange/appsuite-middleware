@@ -203,6 +203,7 @@ public abstract class DAVPerformer implements SessionHolder {
         ServletWebdavRequest webdavRequest = new ServletWebdavRequest(getFactory(), request);
         webdavRequest.setUrlPrefix(getURLPrefix());
         session.setParameter("user-agent", request.getHeader("user-agent"));
+        session.setParameter("com.openexchange.dav.push.clientToken", request.getHeader("X-Apple-DAV-Pushtoken"));
         sessionHolder.set(session);
         try {
             ServletWebdavResponse webdavResponse = new ServletWebdavResponse(response);

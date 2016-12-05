@@ -52,6 +52,9 @@ package com.openexchange.share.notification.impl.mail;
 import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -59,6 +62,7 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.impl.LinkCreatedNotification;
@@ -126,7 +130,12 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         } else {
-            sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
+            boolean usePersonalEmailAddress = getBoolValue("com.openexchange.share.notification.usePersonalEmailAddress", false, casted.getSession());
+            if (usePersonalEmailAddress) {
+                sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID(), false), mail);
+            } else {
+                sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID(), true), mail);
+            }
         }
     }
 
@@ -162,6 +171,31 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
                 // ignore
             }
         }
+    }
+
+    /**
+     * Gets the value for specified <code>boolean</code> property.
+     *
+     * @param propertyName The name of the <code>boolean</code> property
+     * @param defaultValue The default <code>boolean</code> value
+     * @param session The session from requesting user
+     * @return The <code>boolean</code> value or <code>defaultValue</code> (if absent)
+     * @throws OXException If <code>boolean</code> value cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    private boolean getBoolValue(String propertyName, boolean defaultValue, Session session) throws OXException {
+        if (null == session) {
+            throw new IllegalArgumentException("Session must not be null");
+        }
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<Boolean> property = view.property(propertyName, boolean.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        return property.get().booleanValue();
     }
 
 }

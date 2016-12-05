@@ -97,7 +97,7 @@ public class RootFactory extends DAVFactory {
     }
 
     @Override
-    protected String getURLPrefix() {
+    public String getURLPrefix() {
         return "/";
     }
 

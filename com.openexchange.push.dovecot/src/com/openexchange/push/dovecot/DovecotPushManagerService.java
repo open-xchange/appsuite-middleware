@@ -504,9 +504,11 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
     @Override
     public List<PushUserInfo> getAvailablePushUsers() throws OXException {
         List<PushUserInfo> l = new LinkedList<PushUserInfo>();
-        for (Map.Entry<SimpleKey, DovecotPushListener> entry : listeners.entrySet()) {
-            SimpleKey key = entry.getKey();
-            l.add(new PushUserInfo(new PushUser(key.userId, key.contextId), entry.getValue().isPermanent()));
+        synchronized (this) {
+            for (Map.Entry<SimpleKey, DovecotPushListener> entry : listeners.entrySet()) {
+                SimpleKey key = entry.getKey();
+                l.add(new PushUserInfo(new PushUser(key.userId, key.contextId), entry.getValue().isPermanent()));
+            }
         }
         return l;
     }

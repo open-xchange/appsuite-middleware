@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Advertisment Default Impl
 Bundle-SymbolicName: com.openexchange.advertisement.impl
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software AG
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.advertisement.osgi.Activator

@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.osgi.Services;
 import com.openexchange.config.cascade.ConfigView;
@@ -127,30 +126,32 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
         // check user taxonomy types
         UserService userService = Services.getService(UserService.class);
         User user = userService.getUser(session.getUserId(), session.getContextId());
-        Map<String, Set<String>> userAttributes = user.getAttributes();
+        Map<String, String> userAttributes = user.getAttributes();
         List<String> packs = new ArrayList<>();
-        if (userAttributes.containsKey(TAXONOMY_TYPES_CONFIG_CASCADE)) {
-            Set<String> taxonomyTypes = userAttributes.get(TAXONOMY_TYPES_CONFIG_CASCADE);
-            for (String types : taxonomyTypes) {
-                packs.addAll(Arrays.asList(Strings.splitByComma(types)));
+        {
+            String taxonomyType = userAttributes.get(TAXONOMY_TYPES_CONFIG_CASCADE);
+            if (null != taxonomyType) {
+                packs.addAll(Arrays.asList(Strings.splitByComma(taxonomyType)));
             }
         }
-        
+
         for (String type : possibleTypes) {
             if (packs.contains(type)) {
                 return type;
             }
         }
-        
+
         //check context taxonomy types
         ContextService ctxService = Services.getService(ContextService.class);
         Context ctx = ctxService.getContext(session.getContextId());
         Map<String, List<String>> attributes = ctx.getAttributes();
         packs.clear();
-        if (attributes.containsKey(TAXONOMY_TYPES)) {
+        {
             List<String> taxonomyTypes = attributes.get(TAXONOMY_TYPES);
-            for (String types : taxonomyTypes) {
-                packs.addAll(Arrays.asList(Strings.splitByComma(types)));
+            if (null != taxonomyTypes) {
+                for (String types : taxonomyTypes) {
+                    packs.addAll(Arrays.asList(Strings.splitByComma(types)));
+                }
             }
         }
 

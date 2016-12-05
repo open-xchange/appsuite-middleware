@@ -73,6 +73,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contacts.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tasks.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contact.storage.rdb"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.linkedin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.unifiedinbox"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.jcharset"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.version"/>

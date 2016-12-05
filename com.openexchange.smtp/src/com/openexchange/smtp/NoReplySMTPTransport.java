@@ -80,6 +80,7 @@ import com.openexchange.smtp.services.Services;
 public class NoReplySMTPTransport extends AbstractSMTPTransport {
 
     private final NoReplyConfig noReplyConfig;
+    private final boolean useNoReplyAddress;
 
     /**
      * Initializes a new {@link NoReplySMTPTransport}.
@@ -88,7 +89,19 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
      * @throws OXException If initialization fails
      */
     public NoReplySMTPTransport(int contextId) throws OXException {
+        this(contextId, true);
+    }
+
+    /**
+     * Initializes a new {@link NoReplySMTPTransport}.
+     *
+     * @param contextId The context identifier
+     * @param useNoReplyAddress <code>true</code> to use configured no-reply address; otherwise <code>false</code> to keep existing "From" header (if any)
+     * @throws OXException If initialization fails
+     */
+    public NoReplySMTPTransport(int contextId, boolean useNoReplyAddress) throws OXException {
         super(contextId);
+        this.useNoReplyAddress = useNoReplyAddress;
         NoReplyConfigFactory configFactory = Services.getService(NoReplyConfigFactory.class);
         if (configFactory == null) {
             throw ServiceExceptionCode.serviceUnavailable(NoReplyConfigFactory.class);
@@ -124,9 +137,11 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
     @Override
     protected void processAddressHeader(MimeMessage mimeMessage) throws OXException, MessagingException {
         super.processAddressHeader(mimeMessage);
-        mimeMessage.setFrom(noReplyConfig.getAddress());
-        mimeMessage.setSender(null);
-        mimeMessage.setReplyTo(null);
+        if (useNoReplyAddress) {
+            mimeMessage.setFrom(noReplyConfig.getAddress());
+            mimeMessage.setSender(null);
+            mimeMessage.setReplyTo(null);
+        }
     }
 
     @Override

@@ -81,7 +81,6 @@ import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DropDuplicateEntryFromUpdateTaskTable;
-import com.openexchange.groupware.update.tasks.DropLinkedInSubscriptionsUpdateTask;
 import com.openexchange.groupware.update.tasks.DropVersionTableTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
@@ -628,9 +627,13 @@ public final class InternalList {
 
         // Removes inconsistent locks (See Bug #47929)
         list.add(new RemoveInconsistentLocksUpdateTasks());
-        
-        // Removes the LinkedIn entries from the 'subscriptions' table
-        list.add(new DropLinkedInSubscriptionsUpdateTask());
+
+        // Extends the "password" column for "user_mail_account" and "user_transport_account" tables
+        list.add(new com.openexchange.groupware.update.tasks.MailAccountExtendPasswordTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.8.4 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new com.openexchange.groupware.update.tasks.ChangePrimaryKeyForUserAttribute());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

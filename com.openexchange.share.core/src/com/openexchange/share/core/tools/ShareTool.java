@@ -103,17 +103,12 @@ public class ShareTool {
      * @return The first found attribute value, or <code>null</code> if not found
      */
     public static String getUserAttribute(User user, String name) {
-        Map<String, Set<String>> attributes = user.getAttributes();
+        Map<String, String> attributes = user.getAttributes();
         if (attributes == null) {
             return null;
         }
 
-        Set<String> match = attributes.get(name);
-        if (match == null || match.isEmpty()) {
-            return null;
-        }
-
-        return match.iterator().next();
+        return attributes.get(name);
     }
 
     /**
@@ -124,14 +119,14 @@ public class ShareTool {
      * @param value The attribute value
      */
     public static void assignUserAttribute(UserImpl user, String name, String value) {
-        Map<String, Set<String>> existingAttributes = user.getAttributes();
-        Map<String, Set<String>> attributes;
+        Map<String, String> existingAttributes = user.getAttributes();
+        Map<String, String> attributes;
         if (null != existingAttributes) {
-            attributes = new HashMap<String, Set<String>>(existingAttributes);
+            attributes = new HashMap<String, String>(existingAttributes);
         } else {
-            attributes = new HashMap<String, Set<String>>();
+            attributes = new HashMap<String, String>();
         }
-        attributes.put(name, Collections.singleton(value));
+        attributes.put(name, value);
         user.setAttributes(attributes);
     }
 

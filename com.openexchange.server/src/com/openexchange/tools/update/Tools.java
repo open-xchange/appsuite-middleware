@@ -933,24 +933,37 @@ public final class Tools {
     }
 
     /**
-     * Changes the column to a new size
+     * Changes the denoted VARCHAR column to have a new size.
      *
      * @param colName The column to enlarge
      * @param newSize The new size to set the column to
      * @param tableName The table name
      * @param con The connection to use
-     * @throws OXException
+     * @throws OXException If size of the denoted VARCHAR column cannot be changed
      */
     public static void changeVarcharColumnSize(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
         ResultSet rsColumns = null;
-        boolean doAlterTable = false;
         try {
             DatabaseMetaData meta = con.getMetaData();
             rsColumns = meta.getColumns(null, null, tableName, null);
+
+            boolean doAlterTable = false;
             while (rsColumns.next()) {
-                final String columnName = rsColumns.getString("COLUMN_NAME");
+                String columnName = rsColumns.getString("COLUMN_NAME");
                 if (colName.equals(columnName)) {
-                    doAlterTable = true;
+                    int dataType = rsColumns.getInt("DATA_TYPE");
+                    if (java.sql.Types.VARCHAR != dataType) {
+                        // Not a VARCHAR column
+                        Databases.closeSQLStuff(rsColumns);
+                        rsColumns = null;
+                        throw new SQLException("Column \"" + colName + "\" in table \"" + tableName + "\" is not of type VARCHAR");
+                    }
+
+                    int currentSize = rsColumns.getInt("COLUMN_SIZE");
+                    if (currentSize != newSize) {
+                        doAlterTable = true;
+                    }
+
                     break;
                 }
             }
@@ -968,4 +981,40 @@ public final class Tools {
             Databases.closeSQLStuff(rsColumns);
         }
     }
+
+    /**
+     * Gets the size of the denoted VARCHAR column in specified table.
+     *
+     * @param colName The name of the VARCHAR column
+     * @param tableName The name of the table to look-up
+     * @param con The connection to use
+     * @return The size of the denoted VARCHAR column or <code>-1</code> if such a VARCHAR column does not exist
+     * @throws OXException If retrieving size of the VARCHAR column fails
+     */
+    public static int getVarcharColumnSize(String colName, String tableName, Connection con) throws OXException {
+        ResultSet rsColumns = null;
+        try {
+            DatabaseMetaData meta = con.getMetaData();
+            rsColumns = meta.getColumns(null, null, tableName, null);
+            while (rsColumns.next()) {
+                String columnName = rsColumns.getString("COLUMN_NAME");
+                if (colName.equals(columnName)) {
+                    int dataType = rsColumns.getInt("DATA_TYPE");
+                    if (java.sql.Types.VARCHAR == dataType) {
+                        return rsColumns.getInt("COLUMN_SIZE");
+                    }
+                }
+            }
+
+            // No such VARCHAR column
+            return -1;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rsColumns);
+        }
+    }
+
 }

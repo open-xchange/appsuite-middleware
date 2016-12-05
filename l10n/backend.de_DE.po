@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-10-26 10:04+0200\n"
+"PO-Revision-Date: 2016-11-23 15:05+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1971,7 +1971,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
 msgid "Select an existing account"
 msgstr "Zu verwendender OAuth-Account"
@@ -2201,70 +2200,79 @@ msgstr ""
 "Die Datei \"%1$s\" wurde aufgrund möglicher Datenverluste nicht "
 "aktualisiert. Bitte lesen Sie die Warnhinweise für weitere Informationen."
 
-#. The %1$s URL does not denote a file: %2$s
+#. The file(s) were not moved due to possible data loss. Please review the warnings for details.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:119
+msgid ""
+"The file(s) were not moved due to possible data loss. Please review the "
+"warnings for details."
+msgstr ""
+"Die Datei(en) wurde(n) wegen möglicher Datenverluste nicht verschoben. Bitte "
+"lesen Sie die Warnhinweise für weitere Einzelheiten."
+
+#. The %1$s URL does not denote a file: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:122
 msgid "The %1$s URL does not denote a file: %1$s"
 msgstr "Die %1$s URL bezeichnet keine Datei: %1$s"
 
 #. The %1$s URL does not denote a directory: %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:125
 msgid "The %1$s URL does not denote a directory: %2$s"
 msgstr "Die %1$s URL bezeichnet kein Verzeichnis: %2$s"
 
 #. Missing file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:128
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:74
 msgid "Missing file name."
 msgstr "Fehlender Dateiname"
 
 #. Update denied for %1$s resource: %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
 msgid "Update denied for \"%1$s\" resource: %2$s"
 msgstr "Aktualisierung verweigert für die \"%1$s\"-Ressource: %2$s"
 
 #. Delete denied for \"%1$s\" resource: %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
 msgid "Delete denied for \"%1$s\" resource: %2$s"
 msgstr "Löschvorgang verweigert für die \"%1$s\"-Ressource: %2$s"
 
 #. Missing configuration for %1$s account "%2$s".
 #. The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
 #. E.g. 'Missing configuration for boxcom account "3".'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "Missing configuration for %1$s account \"%2$s\"."
 msgstr "Fehlende Konfiguration für den %1$s-Account \"%2$s\"."
 
 #. The provided %1$s resource does not exist: %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
 msgid "The provided %1$s resource does not exist: %2$s"
 msgstr "Die angegebene %1$s-Ressource ist nicht vorhanden: %2$s"
 
 #. The file %1$s doesn't have any content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
 msgid "The file %1$s doesn't have any content."
 msgstr "Die Datei %1$s hat keinen Inhalt."
 
 #. The associated %2$s account does no more exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
 msgid "The associated %2$s account does no more exist"
 msgstr "Der zugehörige %2$s-Account ist nicht mehr vorhanden."
 
 #. Individual permissions are not supported in account \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr ""
 "Für den Account \"%1$s\" werden keine individuellen Benutzerberechtigungen "
 "unterstützt."
 
 #. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
 "Das Speichern von Anmerkungen zur Datei \"%1$s\" wird für den Account \"%2$s"
 "\" nicht unterstützt."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
 msgid ""
 "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
@@ -2272,7 +2280,7 @@ msgstr ""
 "\"%2$s\" nicht unterstützt."
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
 msgid ""
 "The file \"%1$s\" was not saved due to possible data loss. Please review the "
 "warnings for details."
@@ -2281,7 +2289,7 @@ msgstr ""
 "Bitte lesen Sie die Warnhinweise für weitere Informationen."
 
 #. Bad or expired access token. Need to re-authenticate user.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:163
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
 msgid "Bad or expired access token. Need to re-authenticate user."
 msgstr ""
@@ -2289,7 +2297,7 @@ msgstr ""
 "authentifiziert werden."
 
 #. Your rate limit has been exceeded and further access is not possible at the moment.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:163
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:166
 msgid ""
 "Your rate limit has been exceeded and further access is not possible at the "
 "moment."
@@ -2298,7 +2306,7 @@ msgstr ""
 "möglich."
 
 #. You need to get sufficient permissions to perform the operation on the specified entity.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:169
 msgid ""
 "You need to get sufficient permissions to perform the operation on the "
 "specified entity."
@@ -2307,24 +2315,29 @@ msgstr ""
 "das angegebene Entity durchführen zu können."
 
 #. File name contains not allowed characters: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:169
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:172
 msgid "File name contains illegal characters: \"%1$s\""
 msgstr "Der Dateiname enthält ungültige Zeichen: \"%1$s\""
 
 #. File name is a reserved name: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:172
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:175
 msgid "File name is a reserved name: \"%1$s\""
 msgstr "Der Dateiname ist ein reservierter Name: \"%1$s\""
 
 #. File name must not be \".\" or \"..\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:175
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:178
 msgid "File name must not be \".\" or \"..\"."
 msgstr "Folgender Dateiname ist nicht zulässig:  \".\" oder \"..\"."
 
 #. File name must not end with a dot or whitespace.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:181
 msgid "File name must not end with a dot or whitespace."
 msgstr "Der Dateiname darf nicht mit einem Punkt oder Leerzeichen enden."
+
+#. A file with that name already exists.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:184
+msgid "A file with that name already exists."
+msgstr "Eine Datei mit diesem Namen ist bereits vorhanden."
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3284,16 +3297,6 @@ msgstr "Die angegebene Guard-Ressource ist nicht vorhanden: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
 msgid "The Guard resource does not exist"
 msgstr "Die Guard-Ressource ist nicht vorhanden"
-
-#. No Linked-In account available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
-msgid "No Linked-In account available."
-msgstr "Es ist kein LinkedIN-Account verfügbar."
-
-#. Need an e-mail address to look up Linked-In data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:66
-msgid "Need an e-mail address to look up Linked-In data."
-msgstr "Zum Abrufen der LinkedIn-Daten wird eine E-Mail-Adresse benötigt."
 
 #. Cannot search a contact that is neither an internal user nor has an e-mail address.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo/src/com/openexchange/halo/HaloExceptionMessages.java:63
@@ -13071,6 +13074,12 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "No Linked-In account available."
+#~ msgstr "Es ist kein LinkedIN-Account verfügbar."
+
+#~ msgid "Need an e-mail address to look up Linked-In data."
+#~ msgstr "Zum Abrufen der LinkedIn-Daten wird eine E-Mail-Adresse benötigt."
 
 #~ msgid ""
 #~ "An E-Mail address is mandatory for external distribution list members. "

@@ -17,7 +17,7 @@ BuildRequires:    java-devel >= 1.7.0
 BuildRequires:    systemd-rpm-macros
 %endif
 Version:          @OXVERSION@
-%define           ox_release 3
+%define           ox_release 0
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -26,6 +26,8 @@ URL:              http://www.open-xchange.com/
 Source:           %{name}_%{version}.orig.tar.bz2
 Source1:          open-xchange.init
 Source2:          open-xchange.service
+%define           dropin_dir /etc/systemd/system/open-xchange.service.d
+%define           dropin_example limits.conf
 Summary:          The Open-Xchange backend
 Requires:         open-xchange-core >= @OXVERSION@
 Requires:         open-xchange-authentication
@@ -33,8 +35,6 @@ Requires:         open-xchange-authorization
 Requires:         open-xchange-mailstore
 Requires:         open-xchange-httpservice
 Requires:         open-xchange-smtp >= @OXVERSION@
-Conflicts:        open-xchange-linkedin
-Obsoletes:        open-xchange-linkedin
 %if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 Requires(pre):    systemd
 Requires(post):   systemd
@@ -77,6 +77,18 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %service_add_post open-xchange.service
 %endif
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700)
+if [ ! -f %{dropin_dir}/%{dropin_example} ]
+then
+  install -D -m 644 %{_defaultdocdir}/%{name}-%{version}/%{dropin_example} %{dropin_dir}/%{dropin_example}
+fi
+%endif
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+if [ ! -f %{dropin_dir}/%{dropin_example} ]
+then
+  install -D -m 644 %{_defaultdocdir}/%{name}/%{dropin_example} %{dropin_dir}/%{dropin_example}
+fi
+%endif
 
 %preun
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
@@ -101,7 +113,18 @@ ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 /usr/sbin/rcopen-xchange
 %endif
 
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%doc docs/%{dropin_example}
+%endif
+
+
 %changelog
+* Fri Nov 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.4 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.3 release
 * Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>

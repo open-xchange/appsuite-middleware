@@ -177,18 +177,18 @@ public interface OXResellerUserServicePortType {
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-    @Action(input = "urn:listByAliasDomain", output = "urn:listByAliasDomainResponse", fault = { 
-        @FaultAction(className = StorageException_Exception.class, value = "urn:listByAliasDomainStorageException"), 
-        @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listByAliasDomainInvalidCredentialsException"), 
-        @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listByAliasDomainInvalidDataException"), 
-        @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listByAliasDomainNoSuchContextException"), 
+    @Action(input = "urn:listByAliasDomain", output = "urn:listByAliasDomainResponse", fault = {
+        @FaultAction(className = StorageException_Exception.class, value = "urn:listByAliasDomainStorageException"),
+        @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listByAliasDomainInvalidCredentialsException"),
+        @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listByAliasDomainInvalidDataException"),
+        @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listByAliasDomainNoSuchContextException"),
         @FaultAction(className = RemoteException_Exception.class, value = "urn:listByAliasDomainRemoteException"), @FaultAction(className = DuplicateExtensionException_Exception.class, value = "urn:listAllDuplicateExtensionException"), })
     @RequestWrapper(localName = "listByAliasDomain", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.user.reseller.soap.ListByAliasDomain")
     @WebMethod(action = "urn:listByAliasDomain")
     @ResponseWrapper(localName = "listByAliasDomainResponse", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.user.reseller.soap.ListByAliasDomainResponse")
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listByAliasDomain(
         @WebParam(name = "ctx", targetNamespace = "http://soap.reseller.admin.openexchange.com") com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,
-        @WebParam(name = "alias_domain", targetNamespace = "http://soap.reseller.admin.openexchange.com") java.lang.String aliasDomain, 
+        @WebParam(name = "alias_domain", targetNamespace = "http://soap.reseller.admin.openexchange.com") java.lang.String aliasDomain,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com") com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
 
@@ -293,4 +293,13 @@ public interface OXResellerUserServicePortType {
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
+
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    @Action(input = "urn:changeMailAddressPersonal", output = "urn:changeMailAddressPersonalResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:changeMailAddressPersonalStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeMailAddressPersonalInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeMailAddressPersonalInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeMailAddressPersonalNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeMailAddressPersonalRemoteException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:changeMailAddressPersonalNoSuchUserException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:changeMailAddressPersonalDatabaseUpdateException")})
+    @WebMethod(action = "urn:changeMailAddressPersonal")
+    public void changeMailAddressPersonal(
+        @WebParam(partName = "parameters", name = "changeMailAddressPersonal", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        ChangeMailAddressPersonal parameters
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception;
+
 }

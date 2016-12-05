@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Bundle to invalidate nodes running a hazelcast v3.5.5 cluster during upgrade
 Bundle-SymbolicName: com.openexchange.hazelcast.upgrade355
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.caching.events,

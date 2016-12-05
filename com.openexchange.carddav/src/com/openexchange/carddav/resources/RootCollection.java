@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.login.Interface;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -95,6 +96,11 @@ public class RootCollection extends DAVRootCollection {
     	super(factory, "Addressbooks");
     	this.factory = factory;
     	includeProperties(new SyncToken(this));
+    }
+
+    @Override
+    public String getPushTopic() {
+        return isUseAggregatedCollection() ? null : "ox:" + Interface.CARDDAV.toString().toLowerCase();
     }
 
 	@Override
@@ -224,7 +230,7 @@ public class RootCollection extends DAVRootCollection {
 
     private CardDAVCollection createFolderCollection(UserizedFolder folder) throws WebdavProtocolException {
         try {
-            return new CardDAVCollection(factory, constructPathForChildResource(folder.getID()), folder);
+            return factory.mixin(new CardDAVCollection(factory, constructPathForChildResource(folder.getID()), folder));
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
@@ -232,7 +238,7 @@ public class RootCollection extends DAVRootCollection {
 
     private CardDAVCollection createAggregatedCollection() throws WebdavProtocolException {
         try {
-            return new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+            return factory.mixin(new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
@@ -240,7 +246,7 @@ public class RootCollection extends DAVRootCollection {
 
     private CardDAVCollection createReducedAggregatedCollection() throws WebdavProtocolException {
         try {
-            return new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+            return factory.mixin(new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }

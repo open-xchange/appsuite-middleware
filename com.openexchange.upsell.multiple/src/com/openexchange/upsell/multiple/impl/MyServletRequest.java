@@ -60,7 +60,6 @@ import java.net.URLEncoder;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -433,8 +432,8 @@ public final class MyServletRequest  {
         LOG.debug("Admin user attributes for context {} : {}", contextId, this.admin.getAttributes());
 
         if(this.admin.getAttributes().containsKey("com.openexchange.upsell/url")){
-            final Set urlset = this.admin.getAttributes().get("com.openexchange.upsell/url");
-            STATIC_URL_RAW = (String) urlset.iterator().next();
+            String url = this.admin.getAttributes().get("com.openexchange.upsell/url");
+            STATIC_URL_RAW = url;
             STATIC_URL_RAW += "src=ox&user=_USER_&invite=_INVITE_&mail=_MAIL_&purchase_type=_PURCHASE_TYPE_&login=_LOGIN_&imaplogin=_IMAPLOGIN_&clicked_feat=_CLICKED_FEATURE_&upsell_plan=_UPSELL_PLAN_&cid=_CID_&lang=_LANG_";
             LOG.debug("Parsed UPSELL URL from context {} and admin user attributes: {}", contextId, STATIC_URL_RAW);
         }else{

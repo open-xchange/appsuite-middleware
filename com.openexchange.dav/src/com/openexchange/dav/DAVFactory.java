@@ -162,6 +162,6 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
      *
      * @return The (relative) URL prefix, e.g. <code>/principals/users/</code>
      */
-    protected abstract String getURLPrefix();
+    public abstract String getURLPrefix();
 
 }

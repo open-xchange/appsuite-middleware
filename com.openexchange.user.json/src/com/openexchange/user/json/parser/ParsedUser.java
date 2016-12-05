@@ -51,7 +51,6 @@ package com.openexchange.user.json.parser;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -82,7 +81,7 @@ public final class ParsedUser implements User {
     }
 
     @Override
-    public Map<String, Set<String>> getAttributes() {
+    public Map<String, String> getAttributes() {
         return null;
     }
 

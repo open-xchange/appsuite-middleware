@@ -50,7 +50,6 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -162,15 +161,13 @@ public final class UserAttributeAccess {
      * @return The value of the attribute
      */
     public String getAttribute(final String name, final User user, final String defaultValue) {
-        final Map<String, Set<String>> attributes = user.getAttributes();
+        final Map<String, String> attributes = user.getAttributes();
         if (null == attributes) {
             return defaultValue;
         }
-        final Set<String> bset = attributes.get(name);
-        if (null == bset || bset.isEmpty()) {
-            return defaultValue;
-        }
-        return bset.iterator().next();
+
+        String bset = attributes.get(name);
+        return null == bset ? defaultValue : bset;
     }
 
     /**
