@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.service.MailService;
@@ -70,44 +71,40 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 
 	private HTTPServletRegistration servletRegistration;
 
-
 	public SpamExpertsActivator() {
 		super();
 	}
 
 	@Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class, HttpService.class, MailService.class, SSLSocketFactoryProvider.class };
+        return new Class<?>[] { UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class, ConfigViewFactory.class, HttpService.class, MailService.class, SSLSocketFactoryProvider.class };
     }
 
 	@Override
 	protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.spamhandler.spamexperts\"");
-        Services.setServiceLookup(this);
 
-		try {
-		    Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
-	        dictionary.put("name", SpamExpertsSpamHandler.getInstance().getSpamHandlerName());
-			SpamExpertsConfig.getInstance().start();
-			registerService(SpamHandler.class, SpamExpertsSpamHandler.getInstance(), dictionary);
-			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet(), SpamExpertsConfig.getInstance().getPanelServlet());
-		} catch (final Exception t) {
-			LOG.error("", t);
-			throw t;
-		}
+	    SpamExpertsConfig config = new SpamExpertsConfig(this);
 
+	    SpamExpertsSpamHandler spamHandler = new SpamExpertsSpamHandler(config, this);
+	    Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
+        dictionary.put("name", spamHandler.getSpamHandlerName());
+        registerService(SpamHandler.class, spamHandler, dictionary);
+
+        String alias = getService(ConfigurationService.class).getProperty("com.openexchange.custom.spamexperts.panel_servlet", "/ajax/spamexperts/panel").trim();
+		servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet(config), alias);
 	}
 
 	@Override
 	protected synchronized void stopBundle() throws Exception {
         LOG.info("stopping bundle: \"com.openexchange.spamhandler.spamexperts\"");
 
+        HTTPServletRegistration servletRegistration = this.servletRegistration;
         if (servletRegistration != null) {
+            this.servletRegistration = null;
             servletRegistration.unregister();
-            servletRegistration = null;
         }
 
-        Services.setServiceLookup(null);
         super.stopBundle();
 	}
 

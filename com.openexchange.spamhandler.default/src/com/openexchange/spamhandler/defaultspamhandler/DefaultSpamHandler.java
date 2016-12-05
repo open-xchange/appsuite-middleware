@@ -49,7 +49,9 @@
 
 package com.openexchange.spamhandler.defaultspamhandler;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
@@ -85,6 +87,11 @@ public final class DefaultSpamHandler extends SpamHandler {
         super();
     }
 
+    private <V> V getPropertyFromView(ConfigView view, String propertyName, V defaultValue, Class<V> clazz) throws OXException {
+        ComposedConfigProperty<V> property = view.property(propertyName, clazz);
+        return (null != property && property.isDefined()) ? property.get() : defaultValue;
+    }
+
     @Override
     public String getSpamHandlerName() {
         return "DefaultSpamHandler";
@@ -93,7 +100,7 @@ public final class DefaultSpamHandler extends SpamHandler {
     @Override
     public void handleSpam(int accountId, String fullName, String[] mailIDs, boolean move, Session session) throws OXException {
         // Copy to confirmed spam folder (if exists)
-        boolean confirmedSpamExists = isCreateConfirmedSpam();
+        boolean confirmedSpamExists = isCreateConfirmedSpam(session);
         if (!confirmedSpamExists && !move) {
             // Nothing to do...
             return;
@@ -131,7 +138,7 @@ public final class DefaultSpamHandler extends SpamHandler {
     @Override
     public void handleHam(int accountId, String spamFullName, String[] mailIDs, boolean move, Session session) throws OXException {
         // Copy to confirmed ham (if exists)
-        boolean confirmedHamExists = isCreateConfirmedHam();
+        boolean confirmedHamExists = isCreateConfirmedHam(session);
         if (!confirmedHamExists && !move) {
             // Nothing to do...
             return;
@@ -165,24 +172,27 @@ public final class DefaultSpamHandler extends SpamHandler {
     }
 
     @Override
-    public boolean isCreateConfirmedSpam() {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
-        boolean def = true;
-        return null == configService ? def : configService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam", def);
+    public boolean isCreateConfirmedSpam(Session session) throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+
+        return getPropertyFromView(view, "com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam", Boolean.TRUE, Boolean.class).booleanValue();
     }
 
     @Override
-    public boolean isCreateConfirmedHam() {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
-        boolean def = true;
-        return null == configService ? def : configService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam", def);
+    public boolean isCreateConfirmedHam(Session session) throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+
+        return getPropertyFromView(view, "com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam", Boolean.TRUE, Boolean.class).booleanValue();
     }
 
     @Override
-    public boolean isUnsubscribeSpamFolders() {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
-        boolean def = true;
-        return null == configService ? def : configService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders", def);
+    public boolean isUnsubscribeSpamFolders(Session session) throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+
+        return getPropertyFromView(view, "com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders", Boolean.TRUE, Boolean.class).booleanValue();
     }
 
 }

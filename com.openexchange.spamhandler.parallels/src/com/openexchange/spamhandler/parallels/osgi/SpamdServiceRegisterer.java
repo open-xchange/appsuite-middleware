@@ -54,9 +54,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
-import com.openexchange.spamhandler.parallels.Configuration;
 import com.openexchange.spamhandler.parallels.ParallelsSpamdService;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
 import com.openexchange.user.UserService;
@@ -73,7 +72,7 @@ public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, 
 
     private final BundleContext context;
     private ServiceRegistration<SpamdService> registration;
-    private ConfigurationService configService;
+    private ConfigViewFactory factory;
     private ContextService contextService;
     private UserService userService;
 
@@ -92,8 +91,8 @@ public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, 
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
         {
-            if (obj instanceof ConfigurationService) {
-                configService = (ConfigurationService) obj;
+            if (obj instanceof ConfigViewFactory) {
+                factory = (ConfigViewFactory) obj;
             }
             if (obj instanceof ContextService) {
                 contextService = (ContextService) obj;
@@ -101,15 +100,11 @@ public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, 
             if (obj instanceof UserService) {
                 userService = (UserService) obj;
             }
-            needsRegistration = null != configService && null != contextService && null != userService && null == registration;
+            needsRegistration = null != factory && null != contextService && null != userService && null == registration;
         }
         if (needsRegistration) {
             LOG.info("Registering Parallels spam handler service.");
-            Configuration config = Configuration.getInstance(configService);
-            registration = context.registerService(
-                SpamdService.class,
-                new ParallelsSpamdService(config, contextService, userService),
-                null);
+            registration = context.registerService(SpamdService.class, new ParallelsSpamdService(factory, userService), null);
         }
         return null;
     }
@@ -123,8 +118,8 @@ public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, 
     public synchronized void removedService(ServiceReference<Object> reference, Object service) {
         ServiceRegistration<?> unregister = null;
         {
-            if (service instanceof ConfigurationService) {
-                configService = null;
+            if (service instanceof ConfigViewFactory) {
+                factory = null;
             }
             if (service instanceof ContextService) {
                 contextService = null;
@@ -132,7 +127,7 @@ public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, 
             if (service instanceof UserService) {
                 userService = null;
             }
-            if (null != registration && (null == contextService || null == userService)) {
+            if (null != registration && (null == contextService || null == userService || null == factory)) {
                 unregister = registration;
                 registration = null;
             }

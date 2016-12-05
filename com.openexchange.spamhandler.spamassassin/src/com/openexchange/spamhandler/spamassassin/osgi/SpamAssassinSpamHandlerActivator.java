@@ -51,16 +51,13 @@ package com.openexchange.spamhandler.spamassassin.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleException;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
-import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
 
 /**
  * {@link SpamAssassinSpamHandlerActivator} - {@link BundleActivator Activator} for spam-assassin spam handler.
@@ -71,8 +68,6 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamAssassinSpamHandlerActivator.class);
 
-    private static volatile Bundle thisBundle;
-
     /**
      * Initializes a new {@link SpamAssassinSpamHandlerActivator}
      */
@@ -82,49 +77,23 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailService.class, ConfigurationService.class };
+        return new Class<?>[] { MailService.class, ConfigViewFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            Services.setServiceLookup(this);
-
-            final PropertyHandler instance = PropertyHandler.getInstance();
-            instance.loadProperties();
-
+            SpamAssassinSpamHandler spamHandler = new SpamAssassinSpamHandler(this);
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
-            dictionary.put("name", SpamAssassinSpamHandler.getInstance().getSpamHandlerName());
-            registerService(SpamHandler.class, SpamAssassinSpamHandler.getInstance(), dictionary);
+            dictionary.put("name", spamHandler.getSpamHandlerName());
+            registerService(SpamHandler.class, spamHandler, dictionary);
 
             trackService(SpamdService.class);
             openTrackers();
-
-            thisBundle = context.getBundle();
         } catch (final Exception e) {
             LOG.error("Problem while starting bundle: SpamHandler Spamassassin", e);
             throw e;
         }
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            super.stopBundle();
-            Services.setServiceLookup(null);
-            thisBundle = null;
-        } catch (final Exception e) {
-            LOG.error("Problem while stopping bundle: SpamHandler Spamassassin", e);
-            throw e;
-        }
-    }
-
-    public static void shutdownBundle() {
-        try {
-            thisBundle.stop();
-            thisBundle = null;
-        } catch (BundleException e) {
-            LOG.error("Can't stop bundle SpamHandler Spamassassin", e);
-        }
-    }
 }

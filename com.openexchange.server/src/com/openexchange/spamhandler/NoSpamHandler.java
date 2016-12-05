@@ -95,17 +95,17 @@ public final class NoSpamHandler extends SpamHandler {
     }
 
     @Override
-    public boolean isCreateConfirmedSpam() {
+    public boolean isCreateConfirmedSpam(Session session) {
         return false;
     }
 
     @Override
-    public boolean isCreateConfirmedHam() {
+    public boolean isCreateConfirmedHam(Session session) {
         return false;
     }
 
     @Override
-    public boolean isUnsubscribeSpamFolders() {
+    public boolean isUnsubscribeSpamFolders(Session session) {
         return true;
     }
 }
