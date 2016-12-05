@@ -60,6 +60,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.QuotaLimitService;
+import com.openexchange.filestore.QuotaUsageService;
 import com.openexchange.filestore.impl.DatabaseAccessServiceImpl;
 import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
 import com.openexchange.filestore.impl.groupware.AddFilestoreOwnerColumnToUserTable;
@@ -69,6 +71,7 @@ import com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTab
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.user.UserService;
 
 /**
@@ -102,8 +105,16 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         {
             QuotaFileStorageListenerTracker listenerTracker = new QuotaFileStorageListenerTracker(context);
             rememberTracker(listenerTracker);
-            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(listenerTracker, context));
+
+            RankingAwareNearRegistryServiceTracker<QuotaUsageService> usageServices = new RankingAwareNearRegistryServiceTracker<>(context, QuotaUsageService.class, 0);
+            rememberTracker(usageServices);
+
+            RankingAwareNearRegistryServiceTracker<QuotaLimitService> limitServices = new RankingAwareNearRegistryServiceTracker<>(context, QuotaLimitService.class, 0);
+            rememberTracker(limitServices);
+
+            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(usageServices, limitServices, listenerTracker, context));
             rememberTracker(tracker);
+
             trackService(ContextService.class);
             trackService(UserService.class);
 

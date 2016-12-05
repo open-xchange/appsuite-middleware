@@ -857,7 +857,7 @@ public final class Init {
         serviceLookup.add(UserService.class, userService);
         com.openexchange.filestore.impl.osgi.Services.setServiceLookup(serviceLookup);
 
-        DBQuotaFileStorageService qfss = new DBQuotaFileStorageService(null, fileStorageStarter);
+        DBQuotaFileStorageService qfss = new DBQuotaFileStorageService(null, null, null, fileStorageStarter);
         QuotaFileStorage.setQuotaFileStorageStarter(qfss);
         InfostoreFacadeImpl.setQuotaFileStorageService(qfss);
         services.put(QuotaFileStorageService.class, qfss);
