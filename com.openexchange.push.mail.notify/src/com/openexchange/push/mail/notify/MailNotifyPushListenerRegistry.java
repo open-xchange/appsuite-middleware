@@ -514,9 +514,12 @@ public final class MailNotifyPushListenerRegistry {
 
         // Add login-info as well (if demanded)
         if (useOXLogin) {
-            mboxIds.add(user.getLoginInfo().toLowerCase());
+            String loginInfo = user.getLoginInfo();
+            if (loginInfo != null) {
+                mboxIds.add(loginInfo.toLowerCase());
+                LOG.debug("Added login info from user with id {} in context {}.", userId, contextId);
+            }
         }
-
         return mboxIds;
     }
 
