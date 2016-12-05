@@ -87,6 +87,7 @@ public abstract class CreateCore extends ContextAbstraction {
         setContextQuotaOption(parser, true);
 
         setFurtherOptions(parser);
+        setPrimaryAccountOption(parser);
 
         parser.allowDynamicOptions();
     }
@@ -113,6 +114,7 @@ public abstract class CreateCore extends ContextAbstraction {
 
                 // fill user obj with mandatory values from console
                 parseAndSetMandatoryOptionsinUser(parser, usr);
+                parseAndSetPrimaryAccountName(parser, usr);
                 // fill user obj with mandatory values from console
                 final String tz = (String) parser.getOptionValue(this.timezoneOption);
                 if (null != tz) {
