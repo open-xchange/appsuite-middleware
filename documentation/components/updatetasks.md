@@ -60,6 +60,10 @@ The following list gives an overview about the known update tasks of the core Op
   Adds the column "uuid BINARY(16) DEFAULT NULL" to the table "driveEventSubscriptions".
 - ``com.openexchange.groupware.update.tasks.UserSettingMediumTextTask``  
   Applies "MEDIUM TEXT" to "user_setting" table.
+- ``com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask``  
+  Creates tables for the "pns" bundle.
+- ``com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsReindexTask``  
+  Adds the 'client' column to the table's primary key.
 
 
 # Error scenarios

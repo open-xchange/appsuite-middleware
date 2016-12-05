@@ -83,6 +83,19 @@ public class LoadInMemoryPushSubscriptionCollectionCallable implements Callable<
 
     @Override
     public CachedPushSubscriptionCollection call() throws OXException {
+        return loadCollectionFor(userId, contextId, registry);
+    }
+
+    /**
+     * Loads the collection for specified user using given database-backed registry.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param registry The database-backed registry
+     * @return The collection
+     * @throws OXException If collection cannot be loaded
+     */
+    public static CachedPushSubscriptionCollection loadCollectionFor(int userId, int contextId, RdbPushSubscriptionRegistry registry) throws OXException {
         List<PushSubscription> subscriptions = registry.loadSubscriptionsFor(userId, contextId);
         CachedPushSubscriptionCollection collection = new CachedPushSubscriptionCollection(userId, contextId);
         collection.addSubscription(subscriptions);

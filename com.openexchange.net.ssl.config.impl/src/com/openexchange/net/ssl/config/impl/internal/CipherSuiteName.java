@@ -92,7 +92,7 @@ final class CipherSuiteName {
         } else {
             this.unifiedName = unifiedName;
         }
-        hash = 31 * 1 + unifiedName.hashCode();
+        hash = 31 * 1 + this.unifiedName.hashCode();
     }
 
     @Override

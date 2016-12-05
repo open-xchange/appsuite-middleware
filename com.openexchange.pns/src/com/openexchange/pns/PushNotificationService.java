@@ -49,6 +49,7 @@
 
 package com.openexchange.pns;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -70,6 +71,16 @@ public interface PushNotificationService {
      * @throws OXException If handling push notification fails
      */
     void handle(PushNotification notification) throws OXException;
+
+    /**
+     * Handles the specified notifications.
+     * <p>
+     * Looks up associated subscriptions and delivers the notifications using the appropriate {@link PushNotificationTransport transport}.
+     *
+     * @param notifications The push notifications to handle
+     * @throws OXException If handling push notifications fails
+     */
+    void handle(Collection<PushNotification> notifications) throws OXException;
 
     // ----------------------------------------------------------------------------------------
 

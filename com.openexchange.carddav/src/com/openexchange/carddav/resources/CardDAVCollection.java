@@ -85,6 +85,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Strings;
+import com.openexchange.login.Interface;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -127,6 +128,11 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
         super(factory, url, folder);
         this.factory = factory;
         includeProperties(new SupportedReportSet(), new MaxResourceSize(factory), new MaxImageSize(factory), new SupportedAddressData(), new BulkRequests(factory));
+    }
+
+    @Override
+    public String getPushTopic() {
+        return null != folder ? "ox:" + Interface.CARDDAV.toString().toLowerCase() + ":" + folder.getID() : null;
     }
 
     /**

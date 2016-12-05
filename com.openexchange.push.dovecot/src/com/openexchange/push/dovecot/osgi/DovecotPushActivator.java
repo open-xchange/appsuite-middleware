@@ -72,7 +72,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -120,8 +119,6 @@ public class DovecotPushActivator extends HousekeepingActivator {
             track(registeringTracker.getFilter(), registeringTracker);
             trackService(HazelcastInstance.class);
         }
-
-        trackService(UserPermissionService.class);
         openTrackers();
 
         registerService(DeleteListener.class, new DovecotPushDeleteListener());

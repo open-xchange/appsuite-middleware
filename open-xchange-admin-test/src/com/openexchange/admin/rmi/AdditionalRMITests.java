@@ -117,7 +117,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
 
-        user = ui.create(context, user, getCredentials(), null);
+        user = ui.create(context, user, getCredentials());
     }
 
     @After
@@ -281,7 +281,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean userCreated = false;
         OXUserInterface userInterface = getUserInterface();
         try {
-            myNewUser = userInterface.create(context, myNewUser, access, adminCredentials, null);// required line for test
+            myNewUser = userInterface.create(context, myNewUser, access, adminCredentials);// required line for test
             userCreated = true;
             assertUserWasCreatedProperly(myNewUser, context, adminCredentials);
         } finally {

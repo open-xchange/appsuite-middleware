@@ -63,9 +63,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
+import org.opensaml.xml.security.x509.BasicX509Credential;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -131,30 +133,42 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
     }
 
     private static BasicCredential credentialFromKeyPair(KeyStore keyStore, String alias, char[] password, UsageType type) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, OXException {
-        if (!Strings.isEmpty(alias)) {
-            ProtectionParameter pp = null;
-            if (password != null) {
-                pp = new PasswordProtection(password);
-            }
-
-            Entry keyStoreEntry = keyStore.getEntry(alias, pp);
-            if (keyStoreEntry == null) {
-                throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store contains no entry key for alias '" + alias + "'");
-            }
-
-            if (keyStoreEntry instanceof KeyStore.PrivateKeyEntry) {
-                PrivateKeyEntry pke = (PrivateKeyEntry) keyStoreEntry;
-                BasicCredential credential = new BasicCredential();
-                credential.setUsageType(type);
-                credential.setPublicKey(pke.getCertificate().getPublicKey());
-                credential.setPrivateKey(pke.getPrivateKey());
-                return credential;
-            } else {
-                throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store entry for alias '" + alias + "' is not a private key");
-            }
+        if (Strings.isEmpty(alias)) {
+            return null;
         }
 
-        return null;
+        ProtectionParameter pp = null;
+        if (password != null) {
+            pp = new PasswordProtection(password);
+        }
+
+        Entry keyStoreEntry = keyStore.getEntry(alias, pp);
+        if (keyStoreEntry == null) {
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store contains no entry key for alias '" + alias + "'");
+        }
+
+        if (!(keyStoreEntry instanceof KeyStore.PrivateKeyEntry)) {
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store entry for alias '" + alias + "' is not a private key");
+        }
+
+        PrivateKeyEntry pke = (PrivateKeyEntry) keyStoreEntry;
+        Certificate certificate = pke.getCertificate();
+        if (certificate instanceof X509Certificate) {
+            // An X.509 certificate
+            BasicX509Credential x509credential = new BasicX509Credential();
+            x509credential.setUsageType(type);
+            x509credential.setEntityCertificate((X509Certificate) certificate);
+            x509credential.setPrivateKey(pke.getPrivateKey());
+            x509credential.setPublicKey(pke.getCertificate().getPublicKey());
+            return x509credential;
+        }
+
+        // Default one...
+        BasicCredential credential = new BasicCredential();
+        credential.setUsageType(type);
+        credential.setPublicKey(certificate.getPublicKey());
+        credential.setPrivateKey(pke.getPrivateKey());
+        return credential;
     }
 
     private static KeyStore initKeyStore(String path, char[] password) throws OXException, KeyStoreException {

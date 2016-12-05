@@ -34,8 +34,7 @@ public interface OXUserServicePortType {
         @WebParam(name = "access", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.user.dataobjects.UserModuleAccess access,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Credentials auth,
-        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.admin.openexchange.com") String primaryAccountName
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
@@ -89,8 +88,7 @@ public interface OXUserServicePortType {
         @WebParam(name = "access_combination_name", targetNamespace = "http://soap.admin.openexchange.com")
         java.lang.String accessCombinationName,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Credentials auth,
-        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.admin.openexchange.com") String primaryAccountName
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
@@ -204,8 +202,7 @@ public interface OXUserServicePortType {
         @WebParam(name = "usrdata", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.user.dataobjects.User usrdata,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Credentials auth,
-        @WebParam(name = "primaryAccountName", targetNamespace = "http://soap.admin.openexchange.com") String primaryAccountName
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")

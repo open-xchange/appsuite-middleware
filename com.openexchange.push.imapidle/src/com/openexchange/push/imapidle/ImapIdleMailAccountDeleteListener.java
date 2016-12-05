@@ -84,7 +84,7 @@ public final class ImapIdleMailAccountDeleteListener implements MailAccountDelet
                 instance.stopListener(false, true, user, cid);
             } catch (Exception e) {
                 Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleMailAccountDeleteListener.class);
-                logger.warn("Failed to stop IMAP-IDLE listener for user {} in context {}", user, cid, e);
+                logger.warn("Failed to stop IMAP-IDLE listener for user {} in context {}", user, cid);
             }
         }
     }

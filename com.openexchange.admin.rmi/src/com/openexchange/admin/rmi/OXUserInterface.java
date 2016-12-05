@@ -137,7 +137,7 @@ public interface OXUserInterface extends Remote {
      *             If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public User create(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth, final String primaryAccountName) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    public User create(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
 
     /**
@@ -168,7 +168,7 @@ public interface OXUserInterface extends Remote {
      *             If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials auth, final String primaryAccountName) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    public User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
 
     /**
@@ -198,7 +198,7 @@ public interface OXUserInterface extends Remote {
      *             If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public User create(final Context ctx, final User usrdata, final Credentials auth, final String primaryAccountName) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    public User create(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
 
     /**

@@ -47,24 +47,39 @@
  *
  */
 
-package com.openexchange.startup.impl;
+package com.openexchange.dav.push.subscribe;
 
-import com.openexchange.startup.SignalStartedService;
-
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.dav.actions.POSTAction;
+import com.openexchange.webdav.action.WebdavRequest;
+import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
- * {@link SignalStartedServiceImpl} - The singleton started service implementation.
+ * {@link PushSubscribeAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.4
  */
-public final class SignalStartedServiceImpl implements SignalStartedService {
+public class PushSubscribeAction extends POSTAction {
 
     /**
-     * Initializes a new {@link SignalStartedServiceImpl}.
+     * Initializes a new {@link PushSubscribeAction}.
+     *
+     * @param factory The factory
      */
-    public SignalStartedServiceImpl() {
-        super();
-    }
+    public PushSubscribeAction(PushSubscribeFactory factory) {
+        super(factory.getProtocol());
+	}
+
+	@Override
+	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        /*
+         * handle push subscribe action
+         */
+        if (false == requireResource(request, PushSubscribeResource.class).handle(request, response)) {
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        }
+	}
 
 }

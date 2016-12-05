@@ -73,6 +73,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Fri Nov 25 2016 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 prepare for 7.8.4 release
 * Thu Nov 24 2016 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>

@@ -119,7 +119,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
     }
 
     @Override
-    protected String getURLPrefix() {
+    public String getURLPrefix() {
         return "/carddav/";
     }
 

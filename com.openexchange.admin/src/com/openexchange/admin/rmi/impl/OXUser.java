@@ -1522,13 +1522,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials credentials, String primaryAccountName) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         // Call common create method directly because we already have out access module
-        return createUserCommon(ctx, usr, access, credentials, primaryAccountName);
+        return createUserCommon(ctx, usr, access, credentials);
     }
 
     @Override
-    public User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials credentials, String primaryAccountName) throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+    public User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials credentials) throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         // Resolve the access rights by the specified combination name. If combination name does not exists, throw error as it is described
         // in the spec!
         final Credentials auth = credentials == null ? new Credentials("","") : credentials;
@@ -1560,12 +1560,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         access = access.clone();
 
         // Call main create user method with resolved access rights
-        return createUserCommon(ctx, usrdata, access, auth, primaryAccountName);
+        return createUserCommon(ctx, usrdata, access, auth);
     }
 
 
     @Override
-    public User create(final Context ctx, final User usrdata, final Credentials credentials, String primaryAccountName)    throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+    public User create(final Context ctx, final User usrdata, final Credentials credentials)    throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         /*
          * Resolve current access rights from the specified context (admin) as
@@ -1601,7 +1601,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             access.setPublicFolderEditable(false);
         }
 
-        return createUserCommon(ctx, usrdata, access, auth, primaryAccountName);
+        return createUserCommon(ctx, usrdata, access, auth);
     }
 
     @Override
@@ -1629,7 +1629,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /*
      * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
      */
-    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth, String primaryAccountName) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
 
         try {
             doNullCheck(usr,access);
@@ -1661,7 +1661,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException(e.getMessage());
         }
 
-        final int retval = oxu.create(ctx, usr, access, primaryAccountName);
+        final int retval = oxu.create(ctx, usr, access);
         usr.setId(Integer.valueOf(retval));
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 

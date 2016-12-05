@@ -200,9 +200,9 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         oxuser.setEmail1("oxuser"+random+"@example.com");
         oxuser.setPassword("secret");
         if( access == null ) {
-            return oxusr.create(ctx, oxuser, auth, null);
+            return oxusr.create(ctx, oxuser, auth);
         }
-        return oxusr.create(ctx, oxuser, access, auth, null);
+        return oxusr.create(ctx, oxuser, access, auth);
     }
 
     protected static void deleteContext(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, MalformedURLException, NotBoundException {

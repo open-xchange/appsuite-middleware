@@ -1408,7 +1408,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final Set<Attribute> changed = new HashSet<>();
         account.setDefaultFlag(true);
         account.setId(0);
-        account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        if(user.isPrimaryAccountNameSet()){
+            account.setName(Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.DEFAULT_FOLDER_NAME : user.getPrimaryAccountName());
+            changed.add(Attribute.NAME_LITERAL);
+        } else {
+            account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        }
         if (user.isImapServerset() || null != user.getImapServerString()) {
             changed.add(Attribute.MAIL_URL_LITERAL);
             String imapServer = user.getImapServerString();
@@ -1586,7 +1591,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection con, final int userId, final int contactId, final int uid_number, final String primaryAccountName) throws StorageException {
+    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection con, final int userId, final int contactId, final int uid_number) throws StorageException {
         int contextId = ctx.getId().intValue();
 
         // Find file storage for user if a valid quota is specified
@@ -2056,7 +2061,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 Databases.closeSQLStuff(stmt);
             }
             // Write primary mail account.
-            createPrimaryMailAccount(ctx, con, usrdata, userId, primaryAccountName);
+            createPrimaryMailAccount(ctx, con, usrdata, userId);
             // Write GUI configuration to database.
             storeUISettings(ctx, con, usrdata, userId);
             // Set wanted folder tree.
@@ -2140,13 +2145,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void createPrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId, final String name) throws StorageException, OXException {
+    private void createPrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId) throws StorageException, OXException {
         // Loading a context is not possible if here the primary mail account for the admin is created.
         final com.openexchange.groupware.contexts.Context context = new ContextImpl(ctx.getId().intValue());
         final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
-        account.setName(Strings.isEmpty(name) ? MailFolder.DEFAULT_FOLDER_NAME : name);
+        account.setName( (!user.isPrimaryAccountNameSet()) || Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.DEFAULT_FOLDER_NAME : user.getPrimaryAccountName());
         String imapServer = user.getImapServerString();
         if (null == imapServer) {
             imapServer = DEFAULT_IMAP_SERVER_CREATE;
@@ -2301,7 +2306,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final String primaryAccountName) throws StorageException {
+    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException {
         int context_id = ctx.getId().intValue();
         Connection write_ox_con = null;
         boolean rollback = false;
@@ -2317,7 +2322,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             lock(context_id, write_ox_con);
 
-            final int userId = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number, primaryAccountName);
+            final int userId = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
             write_ox_con.commit();
             rollback = false;
             log.info("User {} created!", Integer.toString(userId));
@@ -2656,7 +2661,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmtuserattributes.setInt(1, contextId);
             stmtusm = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
             stmtusm.setInt(1, contextId);
-            stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname FROM user_mail_account WHERE cid = ? and id = "+MailAccount.DEFAULT_ID+" and user = ?");
+            stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname, name FROM user_mail_account WHERE cid = ? and id = "+MailAccount.DEFAULT_ID+" and user = ?");
             stmtacc.setInt(1, contextId);
             ResultSet rs = null;
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
@@ -2793,6 +2798,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     newuser.setMail_folder_archive_full_name(rs.getString("archive_fullname"));
                     newuser.setMail_folder_confirmed_ham_name(rs.getString("confirmed_ham"));
                     newuser.setMail_folder_confirmed_spam_name(rs.getString("confirmed_spam"));
+                    newuser.setPrimaryAccountName(rs.getString("name"));
                 }
                 rs.close();
 

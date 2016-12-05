@@ -1279,7 +1279,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final String groupName = translateGroupName(adminUser);
             contextCommon.createStandardGroupForContext(contextId, oxCon, groupName, groupId, gidNumber);
             final OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
-            oxs.create(ctx, adminUser, access, oxCon, adminId, contactId, uidNumber, null);
+            oxs.create(ctx, adminUser, access, oxCon, adminId, contactId, uidNumber);
 
             // create system folder for context
             // get lang and displayname of admin
