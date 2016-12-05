@@ -135,7 +135,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
             for (int i = 0; i < messages.length; i++) {
                 MailMessage mail = messages[i];
                 if (null != mail) {
-                    sfmesgs[i++] = MimeMessageUtility.newMimeMessage(MimeMessageUtility.getStreamFromMailPart(mail), null);
+                    sfmesgs[i] = MimeMessageUtility.newMimeMessage(MimeMessageUtility.getStreamFromMailPart(mail), null);
                 }
             }
 
