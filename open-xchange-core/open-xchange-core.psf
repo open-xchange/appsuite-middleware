@@ -196,6 +196,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.tokenlogin.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.tx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.uadetector"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.unified.quota"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.utils"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.upload"/>
