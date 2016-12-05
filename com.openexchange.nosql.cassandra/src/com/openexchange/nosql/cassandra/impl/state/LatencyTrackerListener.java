@@ -60,8 +60,7 @@ import com.datastax.driver.core.Statement;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class LatencyTrackerListener implements LatencyTracker {
-    
-    
+
     /**
      * Initialises a new {@link LatencyTrackerListener}.
      */
@@ -69,31 +68,37 @@ public class LatencyTrackerListener implements LatencyTracker {
         super();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.datastax.driver.core.LatencyTracker#update(com.datastax.driver.core.Host, com.datastax.driver.core.Statement, java.lang.Exception, long)
      */
     @Override
     public void update(Host host, Statement statement, Exception exception, long newLatencyNanos) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.datastax.driver.core.LatencyTracker#onRegister(com.datastax.driver.core.Cluster)
      */
     @Override
     public void onRegister(Cluster cluster) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.datastax.driver.core.LatencyTracker#onUnregister(com.datastax.driver.core.Cluster)
      */
     @Override
     public void onUnregister(Cluster cluster) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }
