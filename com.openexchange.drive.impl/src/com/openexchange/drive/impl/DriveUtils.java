@@ -257,6 +257,44 @@ public class DriveUtils {
     }
 
     /**
+     * Handles a 'locked' situation that happened when a new file version was saved by generating an appropriate sequence of
+     * actions to inform the client, download back the server version and copy its own version to another location.
+     *
+     * @param session The sync session
+     * @param lockException The lock exception that occurred
+     * @param path The path where the new file version was tried to be saved
+     * @param originalVersion The original version (that is actually locked by another user)
+     * @param newVersion The new file version that was tried to be saved, or <code>null</code> for a client-side deletion
+     * @return A sequence of file actions the client should execute in order to handle the 'locked' situation
+     */
+    public static List<AbstractAction<FileVersion>> handleLockedContents(SyncSession session, OXException lockException, String path,
+        FileVersion originalVersion, FileVersion newVersion) throws OXException {
+        List<AbstractAction<FileVersion>> actionsForClient = new ArrayList<AbstractAction<FileVersion>>();
+        ServerFileVersion versionToRestore = ServerFileVersion.valueOf(originalVersion, path, session);
+        actionsForClient.add(new ErrorFileAction(originalVersion, newVersion, null, path, lockException, false));
+        if (null == newVersion) {
+            /*
+             * client-side deletion of locked file, undo the deletion
+             */
+            actionsForClient.add(new DownloadFileAction(session, null, versionToRestore, null, path));
+        } else if (originalVersion.getChecksum().equals(newVersion.getChecksum())) {
+            /*
+             * client-side rename of locked file, undo edit operation
+             */
+            actionsForClient.add(new EditFileAction(newVersion, versionToRestore, null, path, false));
+        } else {
+            /*
+             * client-side update of locked file, keep renamed client version and re-download the original one
+             */
+            String alternativeName = RenameTools.findRandomAlternativeName(originalVersion.getName(), session.getDeviceName());
+            FileVersion renamedVersion = new SimpleFileVersion(alternativeName, originalVersion.getChecksum());
+            actionsForClient.add(new EditFileAction(newVersion, renamedVersion, null, path, false));
+            actionsForClient.add(new DownloadFileAction(session, null, versionToRestore, null, path));
+        }
+        return actionsForClient;
+    }
+
+    /**
      * Gets a value indicating whether the supplied exception indicates a 'quota-exceeded' exception or not.
      *
      * @param e The exception to check
@@ -290,6 +328,16 @@ public class DriveUtils {
      */
     public static boolean indicatesFailedRemove(OXException e) {
         return "FLD-0029".equals(e.getErrorCode()) || "FLD-0074".equals(e.getErrorCode());
+    }
+
+    /**
+     * Gets a value indicating whether the supplied exception indicates a problem due to item locked by other users or not.
+     *
+     * @param e The exception to check
+     * @return <code>true</code> if the exception indicates contents locked by other users, <code>false</code>, otherwise
+     */
+    public static boolean indicatesLockedContents(OXException e) {
+        return "IFO-0415".equals(e.getErrorCode());
     }
 
     /**
