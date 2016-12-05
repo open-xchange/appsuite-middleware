@@ -12,4 +12,5 @@ Bundle-ClassPath: lib/cassandra-driver-core-3.1.2.jar,
 Import-Package: com.google.common.util.concurrent;version="19.0.0",
  com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.server

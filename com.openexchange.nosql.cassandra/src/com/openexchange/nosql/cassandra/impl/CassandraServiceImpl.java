@@ -49,12 +49,18 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.exceptions.AuthenticationException;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.mapping.MappingManager;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.nosql.cassandra.exceptions.CassandraServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -64,23 +70,43 @@ import com.openexchange.server.ServiceLookup;
  */
 public class CassandraServiceImpl implements CassandraService {
 
-    private final ServiceLookup services;
-
+    /**
+     * The Cassandra {@link Cluster} instance
+     */
     private final Cluster cluster;
-    private final Session session;
+
+    /**
+     * Local Cassandra {@link Session}s cache; one per keyspace
+     */
+    private final ConcurrentMap<String, Session> synchronousSessions;
+
+    /**
+     * Local Cassandra asynchronous {@link Session}s cache; one per keyspace
+     */
+    private final ConcurrentMap<String, ListenableFuture<Session>> asynchronousSessions;
 
     /**
      * Initialises a new {@link CassandraServiceImpl}.
      * 
      * @param services The {@link ServiceLookup} instance
+     * @throws OXException
      */
-    public CassandraServiceImpl(ServiceLookup services) {
+    public CassandraServiceImpl(ServiceLookup services) throws OXException {
         super();
-        this.services = services;
 
         // Build the Cluster
-        cluster = Cluster.buildFrom(new CassandraServiceInitializer(services));
-        session = cluster.connect();
+        CassandraServiceInitializer initializer = new CassandraServiceInitializer(services);
+        cluster = Cluster.buildFrom(initializer);
+        try {
+            cluster.init();
+        } catch (NoHostAvailableException e) {
+            throw CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.create(e, initializer.getContactPoints());
+        } catch (AuthenticationException e) {
+            throw CassandraServiceExceptionCodes.AUTHENTICATION_ERROR.create(e, initializer.getContactPoints());
+        }
+        // Initialise the sessions cache
+        synchronousSessions = new ConcurrentHashMap<>();
+        asynchronousSessions = new ConcurrentHashMap<>();
     }
 
     /*
@@ -90,18 +116,7 @@ public class CassandraServiceImpl implements CassandraService {
      */
     @Override
     public Cluster getCluster() throws OXException {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getSession()
-     */
-    @Override
-    public Session getSession() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return cluster;
     }
 
     /*
@@ -111,19 +126,23 @@ public class CassandraServiceImpl implements CassandraService {
      */
     @Override
     public Session getSession(String keyspace) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
+        // Fetch a connection from cache
+        Session session = synchronousSessions.get(keyspace);
+        if (session != null) {
+            return session;
+        }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getSessionForAsynchronousExecution()
-     */
-    @Override
-    public ListenableFuture<Session> getSessionForAsynchronousExecution() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        // If none exists, connect
+        Session newSession = cluster.connect(keyspace);
+        // Cache the new session
+        session = synchronousSessions.putIfAbsent(keyspace, newSession);
+        if (session != null) {
+            // A session was already initialised by another thread, thus we close the new session
+            newSession.close();
+        } else {
+            session = newSession;
+        }
+        return session;
     }
 
     /*
@@ -133,8 +152,32 @@ public class CassandraServiceImpl implements CassandraService {
      */
     @Override
     public ListenableFuture<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        // Fetch a connection from cache
+        ListenableFuture<Session> session = asynchronousSessions.get(keyspace);
+        if (session != null) {
+            return session;
+        }
+
+        // If none exists, connect
+        ListenableFuture<Session> newSession = cluster.connectAsync(keyspace);
+        // Cache the new session
+        session = asynchronousSessions.putIfAbsent(keyspace, newSession);
+        if (session != null) {
+            // A session was already initialised by another thread, thus we close the new session
+            try {
+                newSession.get().close();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else {
+            session = newSession;
+        }
+
+        return session;
     }
 
     /*
@@ -144,23 +187,32 @@ public class CassandraServiceImpl implements CassandraService {
      */
     @Override
     public MappingManager getMapping(Session session) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return new MappingManager(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getMapping(java.lang.String)
+    /**
+     * Shutdown the service
      */
-    @Override
-    public MappingManager getMapping(String keyspace) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public void shutdown() {
-        if (!cluster.isClosed()) {
+        if (cluster != null && !cluster.isClosed()) {
+            // Close synchronous session
+            for (Session session : synchronousSessions.values()) {
+                session.close();
+            }
+            // Close asynchronous sessions
+            for (ListenableFuture<Session> session : asynchronousSessions.values()) {
+                try {
+                    session.cancel(false);
+                    session.get().close();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            // Close the cluster
             cluster.close();
         }
     }

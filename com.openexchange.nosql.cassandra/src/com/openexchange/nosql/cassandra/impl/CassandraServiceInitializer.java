@@ -50,11 +50,14 @@
 package com.openexchange.nosql.cassandra.impl;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import com.datastax.driver.core.Cluster.Initializer;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -62,9 +65,12 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CassandraServiceInitializer implements Initializer {
+class CassandraServiceInitializer implements Initializer {
 
-    private final ServiceLookup services;
+    private final String clusterName;
+    private final List<InetSocketAddress> contactPoints;
+    private final Configuration configuration;
+    private final Collection<StateListener> initialListeners;
 
     /**
      * Initialises a new {@link CassandraServiceInitializer}.
@@ -73,7 +79,29 @@ public class CassandraServiceInitializer implements Initializer {
      */
     public CassandraServiceInitializer(ServiceLookup services) {
         super();
-        this.services = services;
+        ConfigurationService configurationService = services.getService(ConfigurationService.class);
+
+        clusterName = configurationService.getProperty(CassandraProperty.clusterName.getName());
+
+        configuration = Configuration.builder().build();
+        contactPoints = new ArrayList<>();
+        initialListeners = new ArrayList<>();
+
+        initialiseContactPoints(configurationService);
+        initialiseListeners(configurationService);
+    }
+
+    private void initialiseContactPoints(ConfigurationService configurationService) {
+        int port = configurationService.getIntProperty(CassandraProperty.port.getName(), CassandraProperty.port.getDefaultValue(Integer.class));
+        String cps = configurationService.getProperty(CassandraProperty.clusterContactPoints.getName());
+        String[] cpsSplit = Strings.splitByComma(cps);
+        for (String contactPoint : cpsSplit) {
+            contactPoints.add(new InetSocketAddress(contactPoint, port));
+        }
+    }
+
+    private void initialiseListeners(ConfigurationService configurationService) {
+
     }
 
     /*
@@ -83,8 +111,7 @@ public class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public String getClusterName() {
-        // TODO Auto-generated method stub
-        return null;
+        return clusterName;
     }
 
     /*
@@ -94,8 +121,7 @@ public class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public List<InetSocketAddress> getContactPoints() {
-        // TODO Auto-generated method stub
-        return null;
+        return contactPoints;
     }
 
     /*
@@ -105,8 +131,7 @@ public class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public Configuration getConfiguration() {
-        // TODO Auto-generated method stub
-        return null;
+        return configuration;
     }
 
     /*
@@ -116,8 +141,6 @@ public class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public Collection<StateListener> getInitialListeners() {
-        // TODO Auto-generated method stub
-        return null;
+        return initialListeners;
     }
-
 }
