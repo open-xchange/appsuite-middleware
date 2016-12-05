@@ -15,7 +15,7 @@ BuildRequires:  java-devel >= 1.7.0
 %endif
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 16
+%define         ox_release 17
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -87,6 +87,8 @@ ox_add_property com.openexchange.custom.parallels.branding.guestfallbackhost "" 
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Mon Dec 05 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-12-05 (3763)
 * Sat Nov 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-11-21 (3731)
 * Tue Nov 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
