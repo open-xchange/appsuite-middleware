@@ -68,6 +68,10 @@ public enum CassandraServiceExceptionCodes implements DisplayableOXExceptionCode
      * An authentication error while contacting the initial contact points '%1%s'
      */
     AUTHENTICATION_ERROR("An authentication error while contacting the initial contact points '%1%s'", Category.CATEGORY_ERROR, 2),
+    /**
+     * An unexpected error occurred: %1$s
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 3);
     ;
 
     private final int number;

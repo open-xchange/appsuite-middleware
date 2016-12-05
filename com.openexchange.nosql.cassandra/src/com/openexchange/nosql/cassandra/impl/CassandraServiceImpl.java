@@ -49,9 +49,12 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AuthenticationException;
@@ -69,6 +72,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CassandraServiceImpl implements CassandraService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraServiceImpl.class);
 
     /**
      * The Cassandra {@link Cluster} instance
@@ -167,11 +172,11 @@ public class CassandraServiceImpl implements CassandraService {
             try {
                 newSession.get().close();
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (ExecutionException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (CancellationException e) {
+                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         } else {
             session = newSession;
@@ -201,15 +206,21 @@ public class CassandraServiceImpl implements CassandraService {
             }
             // Close asynchronous sessions
             for (ListenableFuture<Session> session : asynchronousSessions.values()) {
+                Session futureSession = null;
                 try {
-                    session.cancel(false);
-                    session.get().close();
+                    boolean canceled = session.cancel(false);
+                    if (canceled) {
+                        futureSession = session.get();
+                    }
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn("{}", e.getMessage(), e);
                 } catch (ExecutionException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn("{}", e.getMessage(), e);
+                } catch (CancellationException e) {
+                    LOGGER.warn("{}", e.getMessage(), e);
+                }
+                if (futureSession != null) {
+                    futureSession.close();
                 }
             }
             // Close the cluster
