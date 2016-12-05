@@ -1,3 +1,9 @@
+open-xchange-pns-transport-websockets (7.8.3-6) stable; urgency=medium
+
+  * Build for patch 2016-12-12 (3775)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 05 Dec 2016 10:49:06 +0100
+
 open-xchange-pns-transport-websockets (7.8.3-5) stable; urgency=medium
 
   * Second release candidate for 7.8.3 release
