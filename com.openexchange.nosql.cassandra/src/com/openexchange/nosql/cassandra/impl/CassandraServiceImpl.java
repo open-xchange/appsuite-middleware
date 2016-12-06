@@ -56,11 +56,13 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.QueryLogger;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AuthenticationException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.mapping.MappingManager;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.exceptions.CassandraServiceExceptionCodes;
@@ -105,6 +107,15 @@ public class CassandraServiceImpl implements CassandraService {
         try {
             // Initialise the cluster
             cluster.init();
+
+            // Register the query logger
+            ConfigurationService configurationService = services.getService(ConfigurationService.class);
+            boolean enableQueryLogger = configurationService.getBoolProperty(CassandraProperty.enableQueryLogger.getName(), CassandraProperty.enableQueryLogger.getDefaultValue(Boolean.class));
+            if (enableQueryLogger) {
+                int slowQueryLatencyThresholdMillis = configurationService.getIntProperty(CassandraProperty.queryLatencyThreshold.getName(), CassandraProperty.queryLatencyThreshold.getDefaultValue(Integer.class));
+                QueryLogger queryLogger = QueryLogger.builder().withConstantThreshold(slowQueryLatencyThresholdMillis).build();
+                cluster.register(queryLogger);
+            }
         } catch (NoHostAvailableException e) {
             throw CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.create(e, initializer.getContactPoints());
         } catch (AuthenticationException e) {

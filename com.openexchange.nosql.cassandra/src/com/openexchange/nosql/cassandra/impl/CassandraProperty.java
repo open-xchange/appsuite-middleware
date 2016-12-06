@@ -60,7 +60,9 @@ public enum CassandraProperty {
     port(9042),
     loadBalancingPolicy("dc-token-aware"),
     retryPolicy("defaultRetryPolicy"),
-    logRetryPolicy(false)
+    logRetryPolicy(false),
+    enableQueryLogger(false),
+    queryLatencyThreshold(5000),
     ;
 
     private Object defaultValue;
