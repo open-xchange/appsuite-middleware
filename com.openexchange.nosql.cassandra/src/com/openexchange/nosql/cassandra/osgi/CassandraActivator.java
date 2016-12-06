@@ -49,6 +49,8 @@
 
 package com.openexchange.nosql.cassandra.osgi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
@@ -87,6 +89,9 @@ public class CassandraActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         CassandraService cassandraService = new CassandraServiceImpl(this);
         registerService(CassandraService.class, cassandraService);
+
+        final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
+        logger.info("Cassandra service was successfully registered");
     }
 
     /*
@@ -101,5 +106,8 @@ public class CassandraActivator extends HousekeepingActivator {
             return;
         }
         ((CassandraServiceImpl) cassandraService).shutdown();
+
+        final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
+        logger.info("Cassandra service was successfully shutdown and unregistered");
     }
 }
