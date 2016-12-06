@@ -93,7 +93,6 @@ import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.framework.pool.TestContext;
 import com.openexchange.ajax.framework.pool.TestContextPool;
 import com.openexchange.ajax.framework.pool.TestUser;
@@ -133,7 +132,6 @@ public abstract class WebDAVTest {
     @BeforeClass
     public static void prepareFramework() throws OXException {
         AJAXConfig.init();
-        ProvisioningSetup.init();
     }
 
     // --- BEGIN: Optional OAuth Configuration ------------------------------------------------------------------------------

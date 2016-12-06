@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.framework.pool.TestContext;
 import com.openexchange.ajax.framework.pool.TestContextPool;
 import com.openexchange.ajax.framework.pool.TestUser;
@@ -89,7 +88,6 @@ public class PermissionTest implements SessionHolder {
     @Before
     public void setUp() throws Exception {
         Init.startServer();
-        ProvisioningSetup.init();
         AJAXConfig.init();
 
         testContext = TestContextPool.acquireContext();

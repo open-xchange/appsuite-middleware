@@ -85,7 +85,7 @@ public class TestContext implements Serializable {
     private volatile BlockingQueue<String> groupParticipants = new LinkedBlockingQueue<>();
 
     // the admin is not handled to be acquired only by one party
-    private AtomicReference<TestUser> admin = new AtomicReference<>();
+    private AtomicReference<TestUser> contextAdmin = new AtomicReference<>();
 
     public TestContext(String name, int id) {
         this.name = name;
@@ -93,11 +93,11 @@ public class TestContext implements Serializable {
     }
 
     public void setAdmin(TestUser lAdmin) {
-        admin.compareAndSet(null, lAdmin);
+        contextAdmin.compareAndSet(null, lAdmin);
     }
 
     public TestUser getAdmin() {
-        return admin.get();
+        return contextAdmin.get();
     }
 
     public void addGroupParticipant(String groupParticipant) {
@@ -169,5 +169,4 @@ public class TestContext implements Serializable {
     public String getName() {
         return name;
     }
-
 }

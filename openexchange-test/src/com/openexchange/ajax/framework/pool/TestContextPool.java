@@ -92,12 +92,23 @@ public class TestContextPool {
             LOG.error("", e);
         }
     }
-    
+
     public static List<Integer> getAvailableContexts() {
         List<Integer> contextIds = new ArrayList<>();
         for (TestContext context : contexts) {
             contextIds.add(context.getId());
         }
         return contextIds;
+    }
+
+    // the admin is not handled to be acquired only by one party
+    private static TestUser oxAdminMaster = null;
+
+    public static TestUser getOxAdminMaster() {
+        return oxAdminMaster;
+    }
+
+    public static void setOxAdminMaster(TestUser oxAdminMaster) {
+        TestContextPool.oxAdminMaster = oxAdminMaster;
     }
 }

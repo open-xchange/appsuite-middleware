@@ -56,7 +56,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.framework.pool.TestContext;
 import com.openexchange.ajax.framework.pool.TestContextPool;
 import com.openexchange.ajax.framework.pool.TestUser;
@@ -83,12 +82,11 @@ public class DuplicateAuthIdTest {
 
     @Before
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
+        AJAXConfig.init();
         testContext = TestContextPool.acquireContext();
         testUser = testContext.acquireUser();
         testUser2 = testContext.acquireUser();
 
-        AJAXConfig.init();
         sameAuthId = LoginTools.generateAuthId();
         final AJAXSession session1 = new AJAXSession();
         client = new AJAXClient(testUser);

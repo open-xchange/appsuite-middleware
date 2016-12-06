@@ -49,6 +49,7 @@
 
 package com.openexchange.configuration;
 
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
@@ -79,6 +80,7 @@ public class AJAXConfig extends AbstractConfig {
      * @throws OXException if reading configuration fails.
      */
     public static void init() throws OXException {
+        ProvisioningSetup.init();
         TestConfig.init();
         if (null == singleton) {
             synchronized (AJAXConfig.class) {

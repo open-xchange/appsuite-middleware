@@ -77,7 +77,6 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.framework.pool.TestContext;
 import com.openexchange.ajax.framework.pool.TestContextPool;
 import com.openexchange.ajax.framework.pool.TestUser;
@@ -120,8 +119,6 @@ public abstract class EndpointTest {
 
     @BeforeClass
     public static void beforeClass() throws OXException {
-        ProvisioningSetup.init();
-
         AJAXConfig.init();
         hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
     }

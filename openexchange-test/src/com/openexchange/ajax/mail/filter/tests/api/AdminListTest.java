@@ -64,7 +64,8 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.pool.TestUserRegistry;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
@@ -108,7 +109,8 @@ public class AdminListTest extends AbstractMailFilterTest {
         try {
             Context ctx = new Context(testContext.getId());
             ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "false");
-            Credentials credentials = new Credentials(TestUserRegistry.getMasterUser(), TestUserRegistry.getMasterPassword());
+            TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
+            Credentials credentials = new Credentials(oxAdminMaster.getLogin(), oxAdminMaster.getPassword());
             OXContextInterface iface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
             iface.change(ctx, credentials);
 

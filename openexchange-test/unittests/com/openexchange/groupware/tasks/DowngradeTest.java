@@ -57,7 +57,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.mysql.jdbc.AssertionFailedException;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.framework.pool.TestContext;
 import com.openexchange.ajax.framework.pool.TestContextPool;
 import com.openexchange.ajax.framework.pool.TestUser;
@@ -108,7 +107,6 @@ public class DowngradeTest {
     public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
-        ProvisioningSetup.init();
 
         testContext = TestContextPool.acquireContext();
         testUser = testContext.acquireUser();
