@@ -200,7 +200,7 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
             attendee.setSentBy(sentByUser);
         }
         attendee.setCn(optParameterValue(property, Parameter.CN));
-        attendee.setPartStat(Enums.parse(ParticipationStatus.class, optParameterValue(property, Parameter.PARTSTAT), null));
+        attendee.setPartStat(Enums.parse(ParticipationStatus.class, optParameterValue(property, Parameter.PARTSTAT), ParticipationStatus.NEEDS_ACTION));
         attendee.setRole(Enums.parse(ParticipantRole.class, optParameterValue(property, Parameter.ROLE), null));
         attendee.setCuType(Enums.parse(CalendarUserType.class, optParameterValue(property, Parameter.CUTYPE), null));
         attendee.setRsvp(Boolean.valueOf(optParameterValue(property, Parameter.RSVP)));

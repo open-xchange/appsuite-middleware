@@ -50,13 +50,16 @@
 package com.openexchange.chronos.ical.impl;
 
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ComponentData;
+import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
@@ -64,6 +67,7 @@ import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactoryImpl;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Method;
@@ -80,6 +84,7 @@ public class CalendarExportImpl implements CalendarExport {
     private final ICalMapper mapper;
     private final ICalParameters parameters;
     private final Calendar calendar;
+    private final Set<String> timezoneIDs;
 
     /**
      * Initializes a new {@link CalendarExportImpl}.
@@ -94,6 +99,7 @@ public class CalendarExportImpl implements CalendarExport {
         this.warnings = warnings;
         this.calendar = new Calendar();
         this.mapper = mapper;
+        this.timezoneIDs = new HashSet<String>();
     }
 
     @Override
@@ -129,6 +135,21 @@ public class CalendarExportImpl implements CalendarExport {
 
     @Override
     public ThresholdFileHolder getVCalendar() throws OXException {
+        /*
+         * add components for all contained timezones
+         */
+        for (String timezoneID : timezoneIDs) {
+            TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParameters.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
+            net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
+            if (null != timeZone) {
+                calendar.getComponents().add(0, timeZone.getVTimeZone());
+            } else {
+                warnings.add(ICalExceptionCodes.CONVERSION_FAILED.create("No timezone '" + timezoneID + "' registered."));
+            }
+        }
+        /*
+         * export calendar
+         */
         return ICalUtils.exportCalendar(calendar, parameters);
     }
 
@@ -170,7 +191,17 @@ public class CalendarExportImpl implements CalendarExport {
                 vEvent.getAlarms().add(exportAlarm(alarm));
             }
         }
+        trackTimezones(event);
         return vEvent;
+    }
+
+    private void trackTimezones(Event event) {
+        if (null != event.getStartTimeZone()) {
+            timezoneIDs.add(event.getStartTimeZone());
+        }
+        if (null != event.getEndTimeZone()) {
+            timezoneIDs.add(event.getEndTimeZone());
+        }
     }
 
 }

@@ -50,17 +50,15 @@
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
 import java.util.List;
-
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Clazz;
-
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.Clazz;
 
 /**
  * {@link ClassMapping}
@@ -84,7 +82,7 @@ public class ClassMapping extends ICalTextMapping<VEvent, Event> {
 
 	@Override
 	protected void setValue(Event object, String value) {
-		object.setClassification(Enums.parse(Classification.class, value, null));
+        object.setClassification(Enums.parse(Classification.class, value, Classification.PUBLIC));
 	}
 
 	@Override

@@ -47,62 +47,71 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalParameters;
-import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.ExDate;
 
 /**
- * {@link ICalParametersImpl}
+ * {@link ExDateMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ICalParametersImpl implements ICalParameters {
-
-    private Map<String, Object> parameters;
-
-    /**
-     * Initializes a new, empty {@link ICalParametersImpl}.
-     */
-    public ICalParametersImpl() {
-        super();
-        applyDefaults();
-    }
-
-    private void applyDefaults() {
-        set(TIMEZONE_REGISTRY, new TimeZoneRegistryImpl("zoneinfo-outlook/"));
-        set(DEFAULT_TIMEZONE, TimeZone.getTimeZone("EST"));
-        //        set(DEFAULT_TIMEZONE, TimeZone.getDefault());
-        set(KEEP_COMPONENTS, Boolean.TRUE);
-    }
+public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
 
     @Override
-    public <T> T get(String name, Class<T> clazz) {
-        if (null == name || null == parameters) {
-            return null;
-        }
-        try {
-            return clazz.cast(parameters.get(name));
-        } catch (ClassCastException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public <T> ICalParameters set(String name, T value) {
-        if (null != name) {
-            if (null == parameters) {
-                parameters = new HashMap<String, Object>();
+    public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
+        List<Date> value = object.getDeleteExceptionDates();
+        if (null == value || 0 == value.size()) {
+            removeProperties(component, Property.EXDATE);
+        } else {
+            removeProperties(component, Property.EXDATE);
+            DateList dateList = new DateList();
+            dateList.setUtc(true);
+            for (Date date : value) {
+                if (hasTime(object)) {
+                    dateList.add(new DateTime(date.getTime()));
+                } else {
+                    dateList.add(new net.fortuna.ical4j.model.Date(date.getTime()));
+                }
             }
-            parameters.put(name, value);
-        } else if (null != parameters) {
-            parameters.remove(name);
+            component.getProperties().add(new ExDate(dateList));
         }
-        return this;
+    }
+
+    @Override
+    public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
+        PropertyList properties = component.getProperties(Property.EXDATE);
+        if (null == properties || 0 == properties.size()) {
+            object.setDeleteExceptionDates(null);
+        } else {
+            List<Date> deleteExceptionDates = new ArrayList<Date>();
+            for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
+                ExDate property = (ExDate) iterator.next();
+                for (Iterator<?> i = property.getDates().iterator(); i.hasNext();) {
+                    net.fortuna.ical4j.model.Date date = (net.fortuna.ical4j.model.Date) i.next();
+                    deleteExceptionDates.add(new Date(date.getTime()));
+                }
+            }
+            object.setDeleteExceptionDates(deleteExceptionDates);
+        }
+    }
+
+    protected boolean hasTime(Event object) {
+        return false == object.isAllDay();
     }
 
 }

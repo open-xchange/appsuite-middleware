@@ -77,6 +77,7 @@ public class EventMappings {
 		new DtEndMapping(),
 		new DtStampMapping(),
 		new DtStartMapping(),
+        new ExDateMapping(),
 		new LastModifiedMapping(),
 		new LocationMapping(),
 		new OrganizerMapping(),
