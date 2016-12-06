@@ -77,7 +77,7 @@ public class Bug29728Test extends CalDAVTest {
 		 */
 		String uid = randomUID();
         Date start = TimeTools.D("next friday at 8:00");
-    	Date end = TimeTools.D("next thursday at 10:00");
+        Date end = TimeTools.D("next friday at 10:00");
     	Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     	calendar.setTime(start);
         calendar.add(Calendar.WEEK_OF_YEAR, 2);

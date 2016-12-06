@@ -117,7 +117,7 @@ public class Bug31490Test extends CalDAVTest {
 	        "ATTENDEE;PARTSTAT=ACCEPTED;CN=\"'Sophia Xu' <sophia.xu@mocgnigasse.mwo>\";RO\r\n" +
 	        "\tLE=REQ-PARTICIPANT;RSVP=TRUE:'Sophia Xu' <sophia.xu@mocgnigasse.mwo>\r\n" +
             "ATTENDEE;PARTSTAT=ACCEPTED;CN=\"'Ted Corning' <" + client.getValues().getDefaultAddress() + ">\r\n" +
-            "\t\";ROLE=REQ-PARTICIPANT;RSVP=TRUE:'Ted Corning' <"+ client.getValues().getDefaultAddress() + "\r\n" +
+            "\t\";ROLE=REQ-PARTICIPANT;RSVP=TRUE:'Ted Corning' <"+ client.getValues().getDefaultAddress() + ">\r\n" +
 	        "ATTENDEE;PARTSTAT=ACCEPTED;CN=\"'Paolo Biancolli' <paolo.biancolli@mocgniga\r\n" +
 	        "\tsse.mwo>\";ROLE=REQ-PARTICIPANT;RSVP=TRUE:'Paolo Biancolli' <paolo.biancol\r\n" +
 	        "\tli@mocgnigasse.mwo>\r\n" +
@@ -174,7 +174,8 @@ public class Bug31490Test extends CalDAVTest {
 	        "\t65-4406\r\n" +
 	        "PRIORITY:5\r\n" +
 	        "SEQUENCE:8\r\n" +
-	        "END:VEVENT\r\n"
+	        "END:VEVENT\r\n" +
+            "END:VCALENDAR\r\n"
 	    ;
 		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
         /*
