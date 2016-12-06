@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,63 +47,26 @@
  *
  */
 
-package com.openexchange.spamhandler.defaultspamhandler.osgi;
+package com.openexchange.filestore;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.spamhandler.SpamHandler;
-import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
-import com.openexchange.spamhandler.defaultspamhandler.Services;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link DefaultSpamHandlerActivator} - {@link BundleActivator Activator} for default spam handler bundle.
+ * {@link QuotaUsageService} - Provides methods to query and increment/decrement the file storage usage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultSpamHandlerActivator.class);
+public interface QuotaUsageService {
 
     /**
-     * Initializes a new {@link DefaultSpamHandlerActivator}
+     * Gets the current usage for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The current usage for specified user
+     * @throws OXException If current usage cannot be returned
      */
-    public DefaultSpamHandlerActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailService.class, ConfigurationService.class, ConfigViewFactory.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("name", DefaultSpamHandler.getInstance().getSpamHandlerName());
-            registerService(SpamHandler.class, DefaultSpamHandler.getInstance(), dictionary);
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
-
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            cleanUp();
-            Services.setServiceLookup(null);
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
-    }
+    long getUsage(int userId, int contextId) throws OXException;
 
 }

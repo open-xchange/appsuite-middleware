@@ -52,6 +52,7 @@ package com.openexchange.spamhandler.cloudmark.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.cloudmark.CloudmarkSpamHandler;
@@ -73,7 +74,7 @@ public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class };
+		return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
 	}
 
 	@Override

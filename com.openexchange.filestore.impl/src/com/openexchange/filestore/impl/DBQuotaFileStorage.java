@@ -76,6 +76,8 @@ import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageListener;
+import com.openexchange.filestore.QuotaLimitService;
+import com.openexchange.filestore.QuotaUsageService;
 import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.osgi.ServiceListing;
 
@@ -92,11 +94,11 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
-    private static final ServiceListing<QuotaFileStorageListener> EMPTY_LISTENERS = new ServiceListing<QuotaFileStorageListener>() {
+    private static final class EmptyServiceListeners<E> implements ServiceListing<E> {
 
         @Override
-        public Iterator<QuotaFileStorageListener> iterator() {
-            return new Iterator<QuotaFileStorageListener>() {
+        public Iterator<E> iterator() {
+            return new Iterator<E>() {
 
                 @Override
                 public boolean hasNext() {
@@ -104,7 +106,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                 }
 
                 @Override
-                public QuotaFileStorageListener next() {
+                public E next() {
                     throw new NoSuchElementException();
                 }
 
@@ -112,15 +114,25 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                 public void remove() {
                     // Ignore
                 }
-
             };
         }
 
         @Override
-        public List<QuotaFileStorageListener> getServiceList() {
+        public List<E> getServiceList() {
             return Collections.emptyList();
         }
-    };
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private static final ServiceListing EMPTY_LISTENERS = new EmptyServiceListeners<>();
+
+    @SuppressWarnings("unchecked")
+    private static final <T> ServiceListing<T> emptyServiceListing() {
+        return EMPTY_LISTENERS;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------
 
     private final int contextId;
     private final transient FileStorage fileStorage;
@@ -128,6 +140,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     private final int ownerId;
     private final URI uri;
     private final ServiceListing<QuotaFileStorageListener> listeners;
+
+    private final ServiceListing<QuotaUsageService> usageServices;
+
+    private final ServiceListing<QuotaLimitService> limitServices;
 
     /**
      * Initializes a new {@link DBQuotaFileStorage} for an owner.
@@ -139,14 +155,20 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
      * @param fs The file storage associated with the owner
      * @param uri The URI that fully qualifies this file storage
      * @param listeners The quota listeners
+     * @param usageServices The tracked usage services
+     * @param limitServices The tracked limit services
      * @throws OXException If initialization fails
      */
-    public DBQuotaFileStorage(int contextId, int ownerId, long quota, FileStorage fs, URI uri, ServiceListing<QuotaFileStorageListener> listeners) throws OXException {
+    public DBQuotaFileStorage(int contextId, int ownerId, long quota, FileStorage fs, URI uri, ServiceListing<QuotaFileStorageListener> listeners, ServiceListing<QuotaUsageService> usageServices, ServiceListing<QuotaLimitService> limitServices) throws OXException {
         super();
-        this.listeners = null == listeners ? EMPTY_LISTENERS : listeners;
         if (fs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
+
+        this.usageServices = null == usageServices ? DBQuotaFileStorage.<QuotaUsageService> emptyServiceListing() : usageServices;
+        this.limitServices = null == limitServices ? DBQuotaFileStorage.<QuotaLimitService> emptyServiceListing() : limitServices;
+        this.listeners = null == listeners ? DBQuotaFileStorage.<QuotaFileStorageListener> emptyServiceListing() : listeners;
+
         this.uri = uri;
         this.contextId = contextId;
         this.ownerId = ownerId;
@@ -156,6 +178,20 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     private DatabaseService getDatabaseService() throws OXException {
         return Services.requireService(DatabaseService.class);
+    }
+
+    private QuotaUsageService getHighestRankedUsageService() {
+        for (QuotaUsageService usageService : usageServices) {
+            return usageService;
+        }
+        return null;
+    }
+
+    private QuotaLimitService getHighestRankedLimitService() {
+        for (QuotaLimitService limitService : limitServices) {
+            return limitService;
+        }
+        return null;
     }
 
     @Override

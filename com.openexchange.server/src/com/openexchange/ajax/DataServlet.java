@@ -50,7 +50,7 @@
 package com.openexchange.ajax;
 
 import java.util.Date;
-import java.util.Enumeration;
+import java.util.Map;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
@@ -164,36 +164,27 @@ public abstract class DataServlet extends PermissionServlet {
     /**
      * Generates an appropriate JSON object from given request's parameters.
      *
-     * @param httpServletRequest The HTTP servlet request
+     * @param httpRequest The HTTP request
      * @return An appropriate JSON object
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
-        final JSONObject jsonObj = new JSONObject();
-        // final StringBuilder sb = new StringBuilder();
-        for (final Enumeration<?> e = httpServletRequest.getParameterNames(); e.hasMoreElements();) {
-            final String name = e.nextElement().toString();
-            final String value = httpServletRequest.getParameter(name);
-            if (AJAXServlet.PARAMETER_COLUMNS.equals(name)) {
-                jsonObj.put(name, SPLIT.matcher(value).replaceAll(","));
-                /*-
-                 * Previous code:
-                 *
-                final String[] sa = SPLIT.split(value, 0);
-                final int len = sa.length;
-                if (len > 0) {
-                    sb.setLength(0);
-                    sb.append(sa[0]);
-                    for (int a = 1; a < len; a++) {
-                        sb.append(',').append(sa[a]);
-                    }
-                    jsonObj.put(name, sb.toString());
+    public static JSONObject convertParameter2JSONObject(final HttpServletRequest httpRequest) throws JSONException {
+        @SuppressWarnings("unchecked")
+        Map<String, String[]> parameters = httpRequest.getParameterMap();
+        JSONObject jsonObj = new JSONObject(parameters.size());
+        for (Map.Entry<String,String[]> entry : parameters.entrySet()) {
+            String[] values = entry.getValue();
+            if (null != values && values.length > 0) {
+                // Grab first value
+                String value = values[0];
+
+                // Check parameter name
+                String name = entry.getKey();
+                if (AJAXServlet.PARAMETER_COLUMNS.equals(name) && value.indexOf(' ', 0) >= 0) {
+                    jsonObj.put(name, SPLIT.matcher(value).replaceAll(","));
                 } else {
-                    jsonObj.put(name, "");
+                    jsonObj.put(name, value);
                 }
-                */
-            } else {
-                jsonObj.put(name, value);
             }
         }
         return jsonObj;

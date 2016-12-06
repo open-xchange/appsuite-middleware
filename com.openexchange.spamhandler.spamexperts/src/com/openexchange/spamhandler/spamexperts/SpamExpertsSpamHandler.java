@@ -49,9 +49,9 @@
 
 package com.openexchange.spamhandler.spamexperts;
 
+import java.net.URI;
 import java.util.Properties;
 import javax.mail.MessagingException;
-import javax.mail.URLName;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +62,11 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
-import com.openexchange.spamhandler.spamexperts.osgi.Services;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -79,24 +79,16 @@ public class SpamExpertsSpamHandler extends SpamHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(SpamExpertsSpamHandler.class);
 
-    private static final SpamExpertsSpamHandler instance = new SpamExpertsSpamHandler();
-
-    /**
-     * Gets the spam handler instance.
-     *
-     * @return The instance
-     */
-    public static SpamExpertsSpamHandler getInstance() {
-        return instance;
-    }
-
-    // ---------------------------------------------------------------------------------------------------
+    private final ServiceLookup services;
+    private final SpamExpertsConfig config;
 
     /**
      * Initializes a new {@link SpamExpertsSpamHandler}.
      */
-    private SpamExpertsSpamHandler() {
+    public SpamExpertsSpamHandler(SpamExpertsConfig config, ServiceLookup services) {
         super();
+        this.config = config;
+        this.services = services;
     }
 
     @Override
@@ -104,19 +96,28 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         return "SpamExperts";
     }
 
-    private void copyToSpamexpertsFolder(String folder, MailMessage[] messages) throws OXException {
-        SSLSocketFactoryProvider factoryProvider = Services.requireService(SSLSocketFactoryProvider.class);
-    final String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
-        final URLName imapUrl = SpamExpertsConfig.getInstance().getImapUrl();
+    private void copyToSpamexpertsFolder(String folder, MailMessage[] messages, Session session) throws OXException {
+        if (null == messages) {
+            throw SpamExpertsExceptionCode.UNABLE_TO_GET_MAILS.create();
+        }
+
+        SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
+        String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
+
+        URI imapUrl = config.getImapURL(session);
+
+        String imapUser = config.requireProperty(session, "com.openexchange.custom.spamexperts.imapuser");
+        String imapPassword = config.requireProperty(session, "com.openexchange.custom.spamexperts.imappassword");
+
         final Properties props = new Properties();
-        if( "imaps".equals(imapUrl.getProtocol())) {
+        if ("imaps".equals(imapUrl.getScheme())) {
             props.put("mail.imap.socketFactory.class", socketFactoryClass);
         } else {
             props.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
             props.put("mail.imap.starttls.enable", "true");
         }
 
-        props.put("mail.imap.socketFactory.port", imapUrl.getPort());
+        props.put("mail.imap.socketFactory.port", Integer.toString(imapUrl.getPort()));
         props.put("mail.imap.socketFactory.fallback", "false");
 
         javax.mail.Session imapSession = javax.mail.Session.getInstance(props, null);
@@ -124,23 +125,20 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         IMAPStore imapStore = null;
         try {
             imapStore = (IMAPStore) imapSession.getStore("imap");
-            if (null == messages) {
-                throw SpamExpertsExceptionCode.UNABLE_TO_GET_MAILS.create();
-            }
-            imapStore.connect(imapUrl.getHost(), imapUrl.getPort(), SpamExpertsConfig.getInstance().getImapUser(), SpamExpertsConfig.getInstance().getImappassword());
+            imapStore.connect(imapUrl.getHost(), imapUrl.getPort(), imapUser, imapPassword);
             IMAPFolder sf = (IMAPFolder) imapStore.getFolder(folder);
             if (!sf.exists()) {
                 throw SpamExpertsExceptionCode.FOLDER_DOES_NOT_EXIST.create(folder);
             }
 
             MimeMessage[] sfmesgs = new MimeMessage[messages.length];
-
-            int i = 0;
-            for (MailMessage mail : messages) {
+            for (int i = 0; i < messages.length; i++) {
+                MailMessage mail = messages[i];
                 if (null != mail) {
-                    sfmesgs[i++] = MimeMessageUtility.newMimeMessage(MimeMessageUtility.getStreamFromMailPart(mail), null);
+                    sfmesgs[i] = MimeMessageUtility.newMimeMessage(MimeMessageUtility.getStreamFromMailPart(mail), null);
                 }
             }
+
             sf.appendMessages(sfmesgs);
         } catch (MessagingException e) {
             LOG.error("", e);
@@ -168,18 +166,20 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         LOG.debug("accid: {}, spamfullname: {}, move: {}, session: {}", accountId, spamFullName, move, session.toString());
 
         // get access to internal mailstore
-        final MailService mailService = Services.optService(MailService.class);
+        MailService mailService = services.getOptionalService(MailService.class);
         if (null == mailService) {
             throw SpamExpertsExceptionCode.MAILSERVICE_MISSING.create();
         }
-        MailAccess<?, ?> mailAccess = null;
 
+        String trainHamFolder = config.requireProperty(session, "com.openexchange.custom.spamexperts.trainhamfolder");
+
+        MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = mailService.getMailAccess(session, accountId);
             mailAccess.connect();
-            final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(spamFullName, mailIDs, new MailField[]{MailField.FULL});
 
-            copyToSpamexpertsFolder(SpamExpertsConfig.getInstance().getTrainHamFolder(), mails);
+            MailMessage[] mails = mailAccess.getMessageStorage().getMessages(spamFullName, mailIDs, new MailField[]{MailField.FULL});
+            copyToSpamexpertsFolder(trainHamFolder, mails, session);
 
             if (move) {
                 /*
@@ -200,18 +200,20 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         LOG.debug("accid: {}, fullname: {}, move: {}, session: {}", accountId, fullName, move, session.toString());
 
         // get access to internal mailstore
-        final MailService mailService = Services.optService(MailService.class);
+        MailService mailService = services.getOptionalService(MailService.class);
         if (null == mailService) {
             throw SpamExpertsExceptionCode.MAILSERVICE_MISSING.create();
         }
-        MailAccess<?, ?> mailAccess = null;
 
+        String trainHamFolder = config.getPropertyFor(session, "com.openexchange.custom.spamexperts.trainspamfolder", "Spam", String.class).trim();
+
+        MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = mailService.getMailAccess(session, accountId);
             mailAccess.connect();
-            final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullName, mailIDs, new MailField[]{MailField.FULL});
 
-            copyToSpamexpertsFolder(SpamExpertsConfig.getInstance().getTrainSpamFolder(), mails);
+            MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullName, mailIDs, new MailField[]{MailField.FULL});
+            copyToSpamexpertsFolder(trainHamFolder, mails, session);
 
             if (move) {
                 /*
@@ -226,4 +228,5 @@ public class SpamExpertsSpamHandler extends SpamHandler {
             }
         }
     }
+
 }

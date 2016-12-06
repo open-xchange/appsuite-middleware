@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,38 +47,26 @@
  *
  */
 
-package com.openexchange.spamhandler.parallels;
+package com.openexchange.filestore;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.custom.parallels.impl.ParallelsOptions;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Configuration}
+ * {@link QuotaLimitService} - Provides methods to query the file storage limit.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class Configuration {
+public interface QuotaLimitService {
 
-    private final int port;
-    private final int xmlPort;
+    /**
+     * Gets the current limit for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The current limit for specified user
+     * @throws OXException If current limit cannot be returned
+     */
+    long getLimit(int userId, int contextId) throws OXException;
 
-    private Configuration(int port, int xmlPort) {
-        super();
-        this.port = port;
-        this.xmlPort = xmlPort;
-    }
-
-    public static Configuration getInstance(ConfigurationService configService) {
-        int port = configService.getIntProperty("com.openexchange.spamhandler.spamassassin.port", 783);
-        int xmlPort = configService.getIntProperty(ParallelsOptions.PROPERTY_ANTISPAM_XMLRPC_PORT, 3100);
-        return new Configuration(port, xmlPort);
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public int getXmlPort() {
-        return xmlPort;
-    }
 }

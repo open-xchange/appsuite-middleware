@@ -143,7 +143,7 @@ public class QuotaFileStorageTest extends TestCase {
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
         public TestQuotaFileStorage(final Context ctx, final com.openexchange.filestore.FileStorage fs) throws OXException {
-            super(ctx.getContextId(), -1, 0L, fs, null, null);
+            super(ctx.getContextId(), -1, 0L, fs, null, null, null, null);
         }
 
         private long usage;
