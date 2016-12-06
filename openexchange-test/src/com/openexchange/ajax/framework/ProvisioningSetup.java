@@ -151,8 +151,6 @@ public class ProvisioningSetup {
             try {
                 TestContext context = new TestContext(contextName, i);
                 context.setAdmin(new TestUser(oxadmin, contextName, password));
-                String userId1 = filter.get(prefix + USER1_IDENTIFIER).toString();
-                context.addUser(new TestUser(userId1, contextName, password));
                 String userId2 = filter.get(prefix + USER2_IDENTIFIER).toString();
                 context.addUser(new TestUser(userId2, contextName, password));
                 String userId3 = filter.get(prefix + USER3_IDENTIFIER).toString();
@@ -160,7 +158,10 @@ public class ProvisioningSetup {
                 String userId4 = filter.get(prefix + USER4_IDENTIFIER).toString();
                 context.addUser(new TestUser(userId4, contextName, password));
 
-                startSMTPMockServer(context);
+                String userId1 = filter.get(prefix + USER1_IDENTIFIER).toString();
+                TestUser testUser = new TestUser(userId1, contextName, password);
+                context.addUser(testUser);
+                startSMTPMockServer(testUser);
 
                 TestContextPool.addContext(context);
             } catch (Exception e) {
@@ -170,9 +171,9 @@ public class ProvisioningSetup {
         }
     }
 
-    private static void startSMTPMockServer(TestContext context) {
+    private static void startSMTPMockServer(TestUser user) {
         try {
-            AJAXClient client = new AJAXClient(context.acquireUser());
+            AJAXClient client = new AJAXClient(user);
             StartSMTPRequest request = new StartSMTPRequest(true);
             request.setUpdateNoReplyForContext(client.getValues().getContextId());
 

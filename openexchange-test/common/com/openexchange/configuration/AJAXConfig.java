@@ -80,7 +80,6 @@ public class AJAXConfig extends AbstractConfig {
      * @throws OXException if reading configuration fails.
      */
     public static void init() throws OXException {
-        ProvisioningSetup.init();
         TestConfig.init();
         if (null == singleton) {
             synchronized (AJAXConfig.class) {
@@ -90,6 +89,7 @@ public class AJAXConfig extends AbstractConfig {
                 }
             }
         }
+        ProvisioningSetup.init();
     }
 
     public static String getProperty(final Property key) {
