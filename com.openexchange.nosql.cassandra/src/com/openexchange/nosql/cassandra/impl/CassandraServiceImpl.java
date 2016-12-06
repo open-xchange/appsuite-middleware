@@ -105,9 +105,6 @@ public class CassandraServiceImpl implements CassandraService {
         CassandraServiceInitializer initializer = new CassandraServiceInitializer(services);
         cluster = Cluster.buildFrom(initializer);
         try {
-            // Initialise the cluster
-            cluster.init();
-
             // Register the query logger
             ConfigurationService configurationService = services.getService(ConfigurationService.class);
             boolean enableQueryLogger = configurationService.getBoolProperty(CassandraProperty.enableQueryLogger.getName(), CassandraProperty.enableQueryLogger.getDefaultValue(Boolean.class));
