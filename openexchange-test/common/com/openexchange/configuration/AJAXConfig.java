@@ -49,7 +49,6 @@
 
 package com.openexchange.configuration;
 
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
@@ -89,7 +88,6 @@ public class AJAXConfig extends AbstractConfig {
                 }
             }
         }
-        ProvisioningSetup.init();
     }
 
     public static String getProperty(final Property key) {
