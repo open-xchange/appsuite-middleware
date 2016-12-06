@@ -8,8 +8,9 @@ BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
-BuildRequires: open-xchange-core
-BuildRequires: open-xchange-freebusy
+BuildRequires: open-xchange-core >= @OXVERSION@
+BuildRequires: open-xchange-freebusy >= @OXVERSION@
+BuildRequires: open-xchange-pns-impl >= @OXVERSION@
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
@@ -27,6 +28,7 @@ Summary:       The Open-Xchange CardDAV and CalDAV implementation
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-freebusy >= @OXVERSION@
+Requires:      open-xchange-pns-impl >= @OXVERSION@
 Provides:      open-xchange-caldav = %{version}
 Obsoletes:     open-xchange-caldav < %{version}
 Provides:      open-xchange-carddav = %{version}
