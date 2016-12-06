@@ -13,5 +13,8 @@ Import-Package: com.google.common.util.concurrent;version="19.0.0",
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.java,
+ com.openexchange.osgi,
  com.openexchange.server,
- org.slf4j;version="1.7.5"
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.nosql.cassandra.osgi.CassandraActivator

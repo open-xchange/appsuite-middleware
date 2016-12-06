@@ -52,6 +52,7 @@ package com.openexchange.nosql.cassandra.impl;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.datastax.driver.core.Cluster.Initializer;
 import com.datastax.driver.core.Configuration;
@@ -137,7 +138,6 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public Collection<StateListener> getInitialListeners() {
-        Collection<StateListener> initialListeners = new ArrayList<>();
-        return initialListeners;
+        return Collections.emptyList();
     }
 }
