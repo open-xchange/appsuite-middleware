@@ -56,6 +56,7 @@ import java.util.List;
 import com.datastax.driver.core.Cluster.Initializer;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.openexchange.config.ConfigurationService;
@@ -120,9 +121,12 @@ class CassandraServiceInitializer implements Initializer {
         String rp = configurationService.getProperty(CassandraProperty.retryPolicy.getName());
         boolean logRetryPolicy = configurationService.getBoolProperty(CassandraProperty.logRetryPolicy.getName(), CassandraProperty.logRetryPolicy.getDefaultValue(Boolean.class));
         RetryPolicy retryPolicy = logRetryPolicy ? CassandraRetryPolicy.valueOf(rp).getLoggingRetryPolicy() : CassandraRetryPolicy.valueOf(rp).getRetryPolicy();
-        Policies policies = Policies.builder().withRetryPolicy(retryPolicy).build();
         // Load Balancing Policies
-        // TODO
+        String lbPolicy = configurationService.getProperty(CassandraProperty.loadBalancingPolicy.getName());
+        LoadBalancingPolicy loadBalancingPolicy = CassandraLoadBalancingPolicy.createLoadBalancingPolicy(lbPolicy);
+        // Build policies
+        Policies policies = Policies.builder().withRetryPolicy(retryPolicy).withLoadBalancingPolicy(loadBalancingPolicy).build();
+        // Build configuration
         return Configuration.builder().withPolicies(policies).build();
     }
 

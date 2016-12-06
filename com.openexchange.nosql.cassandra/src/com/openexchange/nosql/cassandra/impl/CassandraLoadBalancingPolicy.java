@@ -49,6 +49,10 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
 
 /**
  * {@link CassandraLoadBalancingPolicy}
@@ -56,5 +60,22 @@ package com.openexchange.nosql.cassandra.impl;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum CassandraLoadBalancingPolicy {
+    DCTokenAwareRoundRobin,
+    DCAwareRoundRobin,
+    RoundRobin,
+    ;
 
+    public static LoadBalancingPolicy createLoadBalancingPolicy(String policy) {
+        CassandraLoadBalancingPolicy p = CassandraLoadBalancingPolicy.valueOf(policy);
+        switch (p) {
+            case DCAwareRoundRobin:
+                return DCAwareRoundRobinPolicy.builder().build();
+            case DCTokenAwareRoundRobin:
+                return new TokenAwarePolicy(DCAwareRoundRobinPolicy.builder().build());
+            case RoundRobin:
+                return new RoundRobinPolicy();
+            default:
+                throw new IllegalArgumentException("Unknown policy '" + policy + "'");
+        }
+    }
 }
