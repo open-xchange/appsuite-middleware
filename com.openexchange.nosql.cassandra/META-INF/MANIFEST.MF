@@ -8,13 +8,21 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/cassandra-driver-core-3.1.2.jar,
  lib/cassandra-driver-extras-3.1.2.jar,
  lib/cassandra-driver-mapping-3.1.2.jar,
- .
-Import-Package: com.google.common.util.concurrent;version="19.0.0",
+ .,
+ lib/metrics-core-3.2.0.jar,
+ lib/netty-all-4.1.6.Final.jar
+Import-Package: com.google.common.base,
+ com.google.common.cache,
+ com.google.common.collect,
+ com.google.common.reflect,
+ com.google.common.util.concurrent,
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,
+ javax.management,
  org.osgi.framework,
- org.slf4j
+ org.slf4j,
+ sun.misc
 Bundle-Activator: com.openexchange.nosql.cassandra.osgi.CassandraActivator
