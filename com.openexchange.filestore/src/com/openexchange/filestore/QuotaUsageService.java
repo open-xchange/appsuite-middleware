@@ -69,4 +69,34 @@ public interface QuotaUsageService {
      */
     long getUsage(int userId, int contextId) throws OXException;
 
+    /**
+     * Increments the usage by the given value for specified user
+     *
+     * @param required The required bytes to increment by
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If usage cannot be updated
+     */
+    void incrementUsage(long required, int userId, int contextId) throws OXException;
+
+    /**
+     * Decrements the usage by the given value for specified user
+     *
+     * @param released The released bytes to decrement by
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If usage cannot be updated
+     */
+    void decrementUsage(long released, int userId, int contextId) throws OXException;
+
+    /**
+     * Checks if this usage service is applicable for given user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If applicability cannot be checked
+     */
+    boolean isApplicableFor(int userId, int contextId) throws OXException;
+
 }

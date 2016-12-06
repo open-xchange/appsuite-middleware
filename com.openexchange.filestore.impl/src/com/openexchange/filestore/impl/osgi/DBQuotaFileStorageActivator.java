@@ -121,16 +121,18 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
             {
                 ServiceTrackerCustomizer<CacheService, CacheService> customizer = new ServiceTrackerCustomizer<CacheService, CacheService>() {
 
-                    private final String regionName = "QuotaFileStorages";
+                    private final String[] regionNames = { "QuotaFileStorages", "SingleUserContext" };
 
                     @Override
                     public CacheService addingService(ServiceReference<CacheService> reference) {
-                        try {
-                            CacheService cacheService = context.getService(reference);
+                        CacheService cacheService = context.getService(reference);
 
-                            int idleSeconds = 7200; // 2 hours
-                            int shrinkInterval = 600; // Every 10 minutes
-                            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                        int idleSeconds = 7200; // 2 hours
+                        int shrinkInterval = 600; // Every 10 minutes
+
+                        for (String regionName : regionNames) {
+                            try {
+                                byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
                                 "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
                                 "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
                                 "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
@@ -144,17 +146,15 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
                                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-
-                            cacheService.loadConfiguration(new ByteArrayInputStream(ccf), true);
-                            addService(CacheService.class, cacheService);
-                            return cacheService;
-                        } catch (Exception e) {
-                            // Failed to initialize cache region
-                            logger.warn("Failed to initialize cache region {}", regionName, e);
+                                cacheService.loadConfiguration(new ByteArrayInputStream(ccf), true);
+                            } catch (Exception e) {
+                                // Failed to initialize cache region
+                                logger.warn("Failed to initialize cache region {}", regionName, e);
+                            }
                         }
 
-                        context.ungetService(reference);
-                        return null;
+                        addService(CacheService.class, cacheService);
+                        return cacheService;
                     }
 
                     @Override
@@ -164,10 +164,12 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
                     @Override
                     public void removedService(ServiceReference<CacheService> reference, CacheService service) {
-                        try {
-                            service.freeCache(regionName);
-                        } catch (Exception e) {
-                            // Ignore
+                        for (String regionName : regionNames) {
+                            try {
+                                service.freeCache(regionName);
+                            } catch (Exception e) {
+                                // Ignore
+                            }
                         }
                         removeService(CacheService.class);
                         context.ungetService(reference);

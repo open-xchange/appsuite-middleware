@@ -80,6 +80,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.EnumComponent;
@@ -810,7 +811,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
 
-        return storageService.getQuotaFileStorage(folderOwner, contextId);
+        return storageService.getQuotaFileStorage(folderOwner, contextId, Info.drive(folderOwner));
     }
 
     private Metadata[] nonNull(final DocumentMetadata document) {

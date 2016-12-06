@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,76 +47,45 @@
  *
  */
 
-package com.openexchange.consistency;
+package com.openexchange.filestore;
 
-import java.net.URI;
-import com.openexchange.exception.OXException;
-import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorage;
-import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.StorageInfo;
-import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
- * {@link SimQuotaFileStorageService}
+ * {@link Purpose} - The purpose for obtaining a file storage.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class SimQuotaFileStorageService implements QuotaFileStorageService {
-
-    private final InMemoryFileStorage fileStorage;
+public enum Purpose {
 
     /**
-     * Initialises a new {@link SimQuotaFileStorageService}.
+     * The special purpose signaling that file storage is used to perform administrative operations.
      */
-    public SimQuotaFileStorageService(InMemoryFileStorage fileStorage) {
-        super();
-        this.fileStorage = fileStorage;
+    ADMINISTRATIVE("administrative"),
+    /**
+     * Denotes the general purpose for context-associated files (Drive exclusive);<br>
+     * e.g. PIM attachments, vCards, signatures/snippets, resource cache, etc.
+     */
+    GENERAL("general"),
+    /**
+     * The special purpose for Drive (aka InfoStore)
+     */
+    DRIVE("drive"),
+    ;
+
+    private final String identifier;
+
+    private Purpose(String identifier) {
+        this.identifier = identifier;
     }
 
-    @Override
-    public QuotaFileStorage getUnlimitedQuotaFileStorage(URI baseUri, int optOwner, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public QuotaFileStorage getQuotaFileStorage(int contextId, Info info) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public QuotaFileStorage getQuotaFileStorage(int userId, int contextId, Info info) throws OXException {
-        return fileStorage;
-    }
-
-    @Override
-    public URI getFileStorageUriFor(int userId, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void invalidateCacheFor(int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void invalidateCacheFor(int userId, int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
-        return false;
-    }
-
-    @Override
-    public StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
-        return null;
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getIdentifier() {
+        return identifier;
     }
 
 }

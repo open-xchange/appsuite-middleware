@@ -91,6 +91,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.Purpose;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.image.ImageLocation;
@@ -162,8 +164,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return getService(IDGeneratorService.class);
     }
 
-    private static QuotaFileStorage getFileStorage(int contextId) throws OXException {
-        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId);
+    private static QuotaFileStorage getFileStorage(int contextId,int userId) throws OXException {
+        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.infoFor(userId, Purpose.GENERAL));
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
@@ -375,7 +377,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             {
                 InputStream in = null;
                 try {
-                    QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
+                    QuotaFileStorage fileStorage = getFileStorage(session.getContextId(), session.getUserId());
                     in = fileStorage.getFile(file);
                     mimeMessage = new MimeMessage(getDefaultSession(), in);
                 } catch (OXException e) {
@@ -549,7 +551,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             mimeMessage.removeHeader("Message-ID");
             mimeMessage.removeHeader("MIME-Version");
             // Save MIME content to file storage
-            QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
+            QuotaFileStorage fileStorage = getFileStorage(session.getContextId(), session.getUserId());
             String file;
             {
                 InputStream mimeStream = null;
@@ -614,7 +616,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
-        final QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
+        final QuotaFileStorage fileStorage = getFileStorage(session.getContextId(), session.getUserId());
         boolean error = true;
         String oldFile = null;
         String newFile = null;
@@ -1093,7 +1095,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 stmt = null;
             }
 
-            final QuotaFileStorage fileStorage = getFileStorage(contextId);
+            final QuotaFileStorage fileStorage = getFileStorage(contextId, userId);
             deleteSafe(file, fileStorage);
             stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
             int pos = 0;

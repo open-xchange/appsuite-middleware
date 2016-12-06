@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
@@ -165,8 +166,8 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
         try {
-            srcFileStorage = qfsf.getQuotaFileStorage(srcCtxId);
-            dstFileStorage = qfsf.getQuotaFileStorage(dstCtxId);
+            srcFileStorage = qfsf.getQuotaFileStorage(srcCtxId, Info.general());
+            dstFileStorage = qfsf.getQuotaFileStorage(dstCtxId, Info.general());
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
         }
