@@ -54,7 +54,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.jdom2.JDOMException;
-import com.openexchange.ajax.framework.pool.TestUser;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
 import com.openexchange.exception.OXException;

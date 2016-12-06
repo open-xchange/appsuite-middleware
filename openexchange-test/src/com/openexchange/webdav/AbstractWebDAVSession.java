@@ -51,9 +51,9 @@ package com.openexchange.webdav;
 
 import org.junit.After;
 import org.junit.Before;
-import com.openexchange.ajax.framework.pool.TestContext;
-import com.openexchange.ajax.framework.pool.TestContextPool;
-import com.openexchange.ajax.framework.pool.TestUser;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
 
 /**

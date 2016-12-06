@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.framework.pool;
+package com.openexchange.test.pool;
 
 import java.io.Serializable;
 import java.util.ArrayList;

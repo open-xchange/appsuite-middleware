@@ -51,7 +51,7 @@ package com.openexchange.ajax.framework;
 
 import java.io.IOException;
 import org.json.JSONException;
-import com.openexchange.ajax.framework.pool.TestUser;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LogoutRequest;

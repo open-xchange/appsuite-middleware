@@ -63,7 +63,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.pool.TestUser;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
 import com.openexchange.ajax.oauth.provider.protocol.OAuthParams;
 import com.openexchange.ajax.oauth.provider.protocol.Protocol;

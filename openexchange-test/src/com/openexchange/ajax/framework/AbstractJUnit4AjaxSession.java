@@ -53,8 +53,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
-import com.openexchange.ajax.framework.pool.TestContext;
-import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * {@link AbstractJUnit4AjaxSession}
