@@ -94,12 +94,12 @@ public class SubscribeTest extends AbstractAJAXSession {
         super.setUp();
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.CALENDAR);
-        appointmentFolder = client.getValues().getPrivateAppointmentFolder();
+        appointmentFolder = getClient().getValues().getPrivateAppointmentFolder();
         testFolder.setParentFolderID(appointmentFolder);
-        testFolder.setPermissions(PermissionTools.P(I(client.getValues().getUserId()), "a/a"));
+        testFolder.setPermissions(PermissionTools.P(I(getClient().getValues().getUserId()), "a/a"));
         testFolder.setFolderName("SubscribeTest-" + System.currentTimeMillis());
         final InsertRequest iReq = new InsertRequest(EnumAPI.OX_NEW, testFolder);
-        final InsertResponse iResp = client.execute(iReq);
+        final InsertResponse iResp = getClient().execute(iReq);
         iResp.fillObject(testFolder);
     }
 
@@ -119,7 +119,7 @@ public class SubscribeTest extends AbstractAJAXSession {
 
         final int[] columns = { FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY, 3040 };
         final ListRequest listRequest = new ListRequest(api, FolderStorage.ROOT_ID, columns, true);
-        final ListResponse listResponse = client.execute(listRequest);
+        final ListResponse listResponse = getClient().execute(listRequest);
 
         {
             boolean found = false;

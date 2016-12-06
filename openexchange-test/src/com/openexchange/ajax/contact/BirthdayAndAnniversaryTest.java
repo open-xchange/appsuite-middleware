@@ -92,31 +92,31 @@ public class BirthdayAndAnniversaryTest extends AbstractManagedContactTest {
         List<Contact> contacts;
 
         request = new SearchByBirthdayRequest(D("2013-01-01 00:00:00"), D("2013-09-01 00:00:00"), parentFolderID, columns, true);
-        response = client.execute(request);
+        response = getClient().execute(request);
         contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 2, contacts.size());
 
         request = new SearchByBirthdayRequest(D("2013-01-01 00:00:00"), D("2014-01-01 00:00:00"), parentFolderID, columns, true);
-        response = client.execute(request);
+        response = getClient().execute(request);
         contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 3, contacts.size());
 
         request = new SearchByBirthdayRequest(D("2013-06-01 00:00:00"), D("2014-01-01 00:00:00"), parentFolderID, columns, true);
-        response = client.execute(request);
+        response = getClient().execute(request);
         contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 2, contacts.size());
 
         request = new SearchByBirthdayRequest(D("2013-03-04 00:00:00"), D("2013-07-06 00:00:00"), parentFolderID, columns, true);
-        response = client.execute(request);
+        response = getClient().execute(request);
         contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 0, contacts.size());
 
         request = new SearchByBirthdayRequest(D("2085-03-03 00:00:00"), D("2085-03-03 01:01:00"), parentFolderID, columns, true);
-        response = client.execute(request);
+        response = getClient().execute(request);
         contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());

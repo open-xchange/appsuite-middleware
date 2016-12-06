@@ -108,7 +108,6 @@ import org.junit.Test;
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
 import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -137,16 +136,12 @@ public class Bug20758Test extends AbstractConversionTest {
     private String ical1;
     private String ical2;
 
-    public Bug20758Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
         client1 = getClient();
-        client2 = new AJAXClient(User.User1);
+        client2 = new AJAXClient(testContext.acquireUser());
 
         client1.getValues().setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 

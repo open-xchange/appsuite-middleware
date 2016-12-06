@@ -78,7 +78,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
-        CSVExportResponse csvExportResponse = client.execute(new CSVExportRequest(folderID, true));
+        CSVExportResponse csvExportResponse = getClient().execute(new CSVExportRequest(folderID, true));
         String csvStr = (String) csvExportResponse.getData();
 
         CSVParser csvParser = new CSVParser(csvStr);
@@ -92,7 +92,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
-        CSVExportResponse csvExportResponse = client.execute(new CSVExportRequest(folderID, false));
+        CSVExportResponse csvExportResponse = getClient().execute(new CSVExportRequest(folderID, false));
         String csvStr = (String) csvExportResponse.getData();
 
         CSVParser csvParser = new CSVParser(csvStr);
@@ -106,7 +106,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
-        VCardExportResponse vcardExportResponse = client.execute(new VCardExportRequest(folderID, false));
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false));
         String vcard = (String) vcardExportResponse.getData();
 
         assertFalse("Should not contain name of contact in list", vcard.contains("my displayname"));
@@ -121,7 +121,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
-        VCardExportResponse vcardExportResponse = client.execute(new VCardExportRequest(folderID, Boolean.FALSE, false));
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, Boolean.FALSE, false));
         String vcard = (String) vcardExportResponse.getData();
 
         assertFalse("Should not contain name of contact in list", vcard.contains("my displayname"));
@@ -136,7 +136,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
         manager.newAction(list);
-        VCardExportResponse vcardExportResponse = client.execute(new VCardExportRequest(folderID, Boolean.TRUE, true));
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, Boolean.TRUE, true));
         String vcard = (String) vcardExportResponse.getData();
 
         assertTrue("Should contain name of contact in list", vcard.contains("my displayname"));

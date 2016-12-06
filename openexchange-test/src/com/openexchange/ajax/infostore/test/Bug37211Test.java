@@ -77,9 +77,9 @@ public class Bug37211Test extends AbstractInfostoreTest {
         /*
          * create folder below trash
          */
-        int trashFolderID = client.getValues().getInfostoreTrashFolder();
+        int trashFolderID = getClient().getValues().getInfostoreTrashFolder();
         String name = UUIDs.getUnformattedStringFromRandom();
-        FolderObject folder = fMgr.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, client.getValues().getUserId());
+        FolderObject folder = fMgr.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, getClient().getValues().getUserId());
         folder = fMgr.insertFolderOnServer(folder);
         FolderObject reloadedFolder = fMgr.getFolderFromServer(folder.getObjectID());
         assertEquals("folder type wrong", FolderObject.TRASH, reloadedFolder.getType());

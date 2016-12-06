@@ -83,7 +83,7 @@ public class CopyMailWithManagerTest extends AbstractMailTest {
 
     @Test
     public void testShouldCopyFromSendToDrafts() throws OXException, JSONException, IOException, SAXException {
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         String destination = values.getDraftsFolder();
 
         TestMail myMail = new TestMail(values.getSendAddress(), values.getSendAddress(), "Testing copy with manager", "alternative", "Copying a mail we just sent and received vom the inbox to the draft folder");

@@ -84,7 +84,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         for (String id : SCENARIOS) {
             ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-            OnboardingTestResponse response = client.execute(req);
+            OnboardingTestResponse response = getClient().execute(req);
             assertNotNull("Response is empty!", response);
             // Expecting an sipgate authorization exception
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -105,7 +105,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         String id = SCENARIOS[0];
         ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-        OnboardingTestResponse response = client.execute(req);
+        OnboardingTestResponse response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -119,7 +119,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         String id = SCENARIOS[0];
         ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-        OnboardingTestResponse response = client.execute(req);
+        OnboardingTestResponse response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -128,7 +128,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         jsonString = "{\"sms\":\"abcde\"}";
         body = new JSONObject(jsonString);
         req = new ExecuteRequest(id, "sms", body, false);
-        response = client.execute(req);
+        response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -139,14 +139,14 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     public void testDownload() throws Exception {
         PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
 
-        String url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "mailsync", "apple.iphone");
-        helper.testMailDownload(url, client.getHostname());
+        String url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "mailsync", "apple.iphone");
+        helper.testMailDownload(url, getClient().getHostname());
 
-        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "eassync", "apple.iphone");
-        helper.testEASDownload(url, client.getHostname());
+        url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "eassync", "apple.iphone");
+        helper.testEASDownload(url, getClient().getHostname());
 
-        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "davsync", "apple.iphone");
-        helper.testDavDownload(url, client.getHostname());
+        url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "davsync", "apple.iphone");
+        helper.testDavDownload(url, getClient().getHostname());
     }
 
     public String getURL(int userId, int contextId, String scenario, String device) throws OXException, NoSuchAlgorithmException, UnsupportedEncodingException {

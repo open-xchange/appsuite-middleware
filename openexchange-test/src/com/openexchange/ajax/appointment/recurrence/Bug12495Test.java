@@ -18,7 +18,6 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -76,7 +75,7 @@ public class Bug12495Test extends AbstractAJAXSession {
     public void testShouldNotLoseRecurrenceDatePositionWhenOtherUserDeletesOneOccurrence() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         //setup
         AJAXClient client1 = getClient();
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         myLocalTimeZone = client1.getValues().getTimeZone();
         privateFolderOfUser1 = client1.getValues().getPrivateAppointmentFolder();
         privateFolderOfUser2 = client2.getValues().getPrivateAppointmentFolder();

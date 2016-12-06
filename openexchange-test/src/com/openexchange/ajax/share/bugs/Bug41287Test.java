@@ -82,20 +82,20 @@ public class Bug41287Test extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        parent = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        parent = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         subfolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, parent.getObjectID());
         remember(subfolder);
         remember(parent);
         target = new ShareTarget(FolderObject.INFOSTORE, String.valueOf(subfolder.getObjectID()));
         GetLinkRequest req = new GetLinkRequest(target);
-        client.execute(req);
+        getClient().execute(req);
     }
 
     @After
     public void tearDown() throws Exception {
         try {
             DeleteLinkRequest req = new DeleteLinkRequest(target, System.currentTimeMillis());
-            client.execute(req);
+            getClient().execute(req);
         } finally {
             super.tearDown();
         }
@@ -105,7 +105,7 @@ public class Bug41287Test extends ShareTest {
     public void testBug41287() throws Exception {
         ShareTarget t = new ShareTarget(FolderObject.INFOSTORE, String.valueOf(parent.getObjectID()));
         GetLinkRequest req = new GetLinkRequest(t);
-        GetLinkResponse resp = client.execute(req);
+        GetLinkResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         String url = resp.getShareLink().getShareURL();
         GuestClient guestClient = resolveShare(url);

@@ -77,7 +77,7 @@ public class AggregatingContactTest extends AbstractAJAXSession {
      * contactMgr = new AggregatingContactTestManager(client);
      * contactMgr.setFailOnError(true);
      * 
-     * UserValues values = client.getValues();
+     * UserValues values = getClient().getValues();
      * folder = folderMgr.generateFolder("aggregatedContactTest"+(new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
      * folderMgr.insertFolderOnServer(folder);
      * 
@@ -173,7 +173,7 @@ public class AggregatingContactTest extends AbstractAJAXSession {
      * 
      * TimeZone tz = TimeZone.getDefault();
      * 
-     * AJAXClient client2 = new AJAXClient(User.User2);
+     * AJAXClient client2 = new AJAXClient(testContext.acquireUser());
      * GetResponse getResponse = client2.execute(new GetContactByUIDRequest(aggregatorUUID, tz));
      * OXException exception = getResponse.getException();
      * assertNotNull("Should not be able to retrieve contact", exception);

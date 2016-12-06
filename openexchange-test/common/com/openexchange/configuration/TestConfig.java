@@ -72,6 +72,10 @@ public class TestConfig extends AbstractConfig {
          */
         AJAX_PROPS("ajaxPropertiesFile"),
         /**
+         * provisioning.properties
+         */
+        PROV_PROPS("provisioningFile"),
+        /**
          * mail.properties
          */
         MAIL_PROPS("mailPropertiesFile"),

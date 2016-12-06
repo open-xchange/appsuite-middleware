@@ -77,7 +77,10 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
@@ -103,26 +106,30 @@ public abstract class EndpointTest {
 
     public static final String REVOKE_ENDPOINT = "/ajax/" + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
 
-    protected static String hostname;
-    protected static String login;
-    protected static String password;
-
     protected DefaultHttpClient client;
 
     protected ClientDto oauthClient;
 
     protected String csrfState;
 
+    protected TestUser testUser;
+
+    protected static String hostname;
+
+    protected TestContext testContext;
+
     @BeforeClass
     public static void beforeClass() throws OXException {
+        ProvisioningSetup.init();
+
         AJAXConfig.init();
         hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        login = AJAXConfig.getProperty(User.User1.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(User.User1.getPassword());
     }
 
     @Before
     public void before() throws Exception {
+        testContext = TestContextPool.acquireContext();
+        testUser = testContext.acquireUser();
         // prepare http client
         client = new DefaultHttpClient(new BasicClientConnectionManager());
         HttpParams params = client.getParams();
@@ -144,9 +151,13 @@ public abstract class EndpointTest {
 
     @After
     public void after() throws Exception {
-        client.getConnectionManager().shutdown();
-        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
-        clientManagement.unregisterClient(oauthClient.getId(), AbstractOAuthTest.getMasterAdminCredentials());
+        try {
+            client.getConnectionManager().shutdown();
+            RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+            clientManagement.unregisterClient(oauthClient.getId(), AbstractOAuthTest.getMasterAdminCredentials());
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     protected void expectSecureRedirect(HttpUriRequest request, HttpResponse response) {

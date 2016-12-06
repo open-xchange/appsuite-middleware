@@ -103,7 +103,7 @@ public class Bug40993Test extends ShareTest {
         OCLPermission adminPermission = null;
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
             } else {
                 adminPermission = permission;
@@ -132,7 +132,7 @@ public class Bug40993Test extends ShareTest {
          */
         matchingPermission = null;
         for (OCLPermission permission : subfolder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

@@ -61,7 +61,6 @@ import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -106,8 +105,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        client1 = client;
-        client2 = new AJAXClient(User.User2);
+        client1 = getClient();
+        client2 = new AJAXClient(testContext.acquireUser());
         ctm = new CalendarTestManager(client1);
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 

@@ -66,7 +66,6 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -103,7 +102,7 @@ public class Bug17264Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = new AJAXClient(testContext.acquireUser());
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 17264", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
@@ -179,8 +178,8 @@ public class Bug17264Test extends AbstractAJAXSession {
 
     private void checkAlarm(AJAXClient client, int folderId, int alarm) throws Exception {
         GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
-        GetResponse getResponse = client.execute(getRequest);
-        Appointment app = getResponse.getAppointment(client.getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
+        Appointment app = getResponse.getAppointment(getClient().getValues().getTimeZone());
         assertEquals("Wrong alarm value", alarm, app.getAlarm());
     }
 

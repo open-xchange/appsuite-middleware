@@ -74,8 +74,10 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.basic.tasks.TaskType;
@@ -144,12 +146,7 @@ public class FindTasksTestEnvironment {
 
     private Map<Integer, Task> tasks = new HashMap<Integer, Task>();
 
-    /**
-     * Initializes a new {@link FindTasksTestEnvironment}.
-     */
-    public FindTasksTestEnvironment() {
-        super();
-    }
+    private TestContext testContext;
 
     /**
      * Get the instance of the test environment
@@ -181,10 +178,14 @@ public class FindTasksTestEnvironment {
      * Initialize the users
      */
     private final void initUsers() throws Exception {
-        clientA = new AJAXClient(User.User1);
+        testContext = TestContextPool.acquireContext();
+        TestUser user1 = testContext.acquireUser();
+
+        clientA = new AJAXClient(user1);
         userA = clientA.getValues();
 
-        clientB = new AJAXClient(User.User2);
+        TestUser user2 = testContext.acquireUser();
+        clientB = new AJAXClient(user2);
         userB = clientB.getValues();
     }
 
@@ -592,17 +593,22 @@ public class FindTasksTestEnvironment {
      * @throws Exception
      */
     public void cleanup() throws Exception {
-        if (cleanup) {
-            if (clientA == null || clientB == null)
-                initUsers();
-            clientA.execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
-            clientB.execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
+        try {
+            if (cleanup) {
+                if (clientA == null || clientB == null)
+                    initUsers();
+                clientA.execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
+                clientB.execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
 
-            cleanRootTasks(clientA, rootTasks.get(userA.getDefaultAddress()));
-            cleanRootTasks(clientB, rootTasks.get(userB.getDefaultAddress()));
+                cleanRootTasks(clientA, rootTasks.get(userA.getDefaultAddress()));
+                cleanRootTasks(clientB, rootTasks.get(userB.getDefaultAddress()));
 
-            logout();
+                logout();
+            }
+        } finally {
+            TestContextPool.backContext(testContext);
         }
+
     }
 
     /**

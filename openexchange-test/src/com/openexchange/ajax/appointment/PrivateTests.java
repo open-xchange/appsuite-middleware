@@ -67,7 +67,6 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -104,9 +103,9 @@ public class PrivateTests extends AbstractAJAXSession {
         super.setUp();
 
         client1 = getClient();
-        client2 = new AJAXClient(User.User2);
-        client3 = new AJAXClient(User.User3);
-        client4 = new AJAXClient(User.User4);
+        client2 = new AJAXClient(testContext.acquireUser());
+        client3 = new AJAXClient(testContext.acquireUser());
+        client4 = new AJAXClient(testContext.acquireUser());
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Private Test Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(client1.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(client2.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(client3.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         CommonInsertResponse response = client1.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));

@@ -60,7 +60,6 @@ import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -89,21 +88,21 @@ public class Bug41995Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
-        ctm1 = new CalendarTestManager(client);
+        client2 = new AJAXClient(testContext.acquireUser());
+        ctm1 = new CalendarTestManager(getClient());
         ctm1.setFailOnError(true);
         ctm2 = new CalendarTestManager(client2);
         ctm2.setFailOnError(true);
 
         GetRequest getRequest = new GetRequest(Tree.TimeZone);
-        GetResponse getResponse = client.execute(getRequest);
+        GetResponse getResponse = getClient().execute(getRequest);
         origtz1 = getResponse.getString();
         getRequest = new GetRequest(Tree.TimeZone);
-        getResponse = client.execute(getRequest);
+        getResponse = getClient().execute(getRequest);
         origtz2 = getResponse.getString();
 
         SetRequest setRequest = new SetRequest(Tree.TimeZone, "America/New_York");
-        client.execute(setRequest);
+        getClient().execute(setRequest);
         setRequest = new SetRequest(Tree.TimeZone, "Europe/Berlin");
         client2.execute(setRequest);
 
@@ -114,9 +113,9 @@ public class Bug41995Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setInterval(1);
         appointment.setDays(Appointment.TUESDAY);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        appointment.setParticipants(new Participant[] { new UserParticipant(client.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
+        appointment.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
 
         ctm1.insert(appointment);
     }
@@ -130,7 +129,7 @@ public class Bug41995Test extends AbstractAJAXSession {
         update.setAlarm(15);
         ctm2.update(update);
 
-        Appointment loaded = ctm1.get(client.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
+        Appointment loaded = ctm1.get(getClient().getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         assertEquals("Wrong start date.", appointment.getStartDate(), loaded.getStartDate());
         assertEquals("Wrong end date.", appointment.getEndDate(), loaded.getEndDate());
     }
@@ -138,7 +137,7 @@ public class Bug41995Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         SetRequest setRequest = new SetRequest(Tree.TimeZone, origtz1);
-        client.execute(setRequest);
+        getClient().execute(setRequest);
         setRequest = new SetRequest(Tree.TimeZone, origtz2);
         client2.execute(setRequest);
         ctm1.cleanUp();

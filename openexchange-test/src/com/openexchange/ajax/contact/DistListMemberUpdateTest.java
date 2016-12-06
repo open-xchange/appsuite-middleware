@@ -346,7 +346,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         JSONObject jsonObject = (JSONObject) request.getBody();
         jsonObject = setEmail(jsonObject, contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
         EmptyEmailUpdateRequest modifiedRequest = new EmptyEmailUpdateRequest(contact, jsonObject);
-        client.execute(modifiedRequest);
+        getClient().execute(modifiedRequest);
     }
 
     /**

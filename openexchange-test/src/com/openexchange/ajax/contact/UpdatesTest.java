@@ -75,7 +75,7 @@ public class UpdatesTest extends AbstractContactTest {
         final int objectId = insertContact(contactObj);
         try {
             final UpdatesRequest updatesRequest = new UpdatesRequest(contactFolderId, cols, -1, null, new Date(0));
-            final AbstractAJAXResponse response = client.execute(updatesRequest);
+            final AbstractAJAXResponse response = getClient().execute(updatesRequest);
             final JSONArray arr = (JSONArray) response.getResponse().getData();
 
             assertNotNull(arr);

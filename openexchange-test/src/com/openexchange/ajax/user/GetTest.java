@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.user.actions.GetRequest;
@@ -72,15 +71,15 @@ public class GetTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         // TODO check context admin, too. Currently this user does not have aliases until bug 14646 is fixed.
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         userId = client2.getValues().getUserId();
         client2.logout();
     }
 
     @Test
     public void testGet() throws Exception {
-        final GetRequest getRequest = new GetRequest(userId, client.getValues().getTimeZone());
-        final GetResponse getResponse = Executor.execute(client, getRequest);
+        final GetRequest getRequest = new GetRequest(userId, getClient().getValues().getTimeZone());
+        final GetResponse getResponse = Executor.execute(getClient(), getRequest);
 
         final JSONObject user = (JSONObject) getResponse.getData();
 

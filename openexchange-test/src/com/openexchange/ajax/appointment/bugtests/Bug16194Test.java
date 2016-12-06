@@ -68,7 +68,6 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.exception.OXException;
@@ -102,9 +101,9 @@ public class Bug16194Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        userId = client.getValues().getUserId();
-        timeZone = client.getValues().getTimeZone();
-        client2 = new AJAXClient(User.User2);
+        userId = getClient().getValues().getUserId();
+        timeZone = getClient().getValues().getTimeZone();
+        client2 = new AJAXClient(testContext.acquireUser());
         userId2 = client2.getValues().getUserId();
         timeZone2 = client2.getValues().getTimeZone();
         publicFolder = createPublicFolder();
@@ -118,7 +117,7 @@ public class Bug16194Test extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
         appointment.setParticipants(ParticipantTools.createParticipants(userId));
         InsertRequest request = new InsertRequest(appointment, timeZone);
-        AppointmentInsertResponse response = client.execute(request);
+        AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
     }
 
@@ -126,10 +125,10 @@ public class Bug16194Test extends AbstractAJAXSession {
         FolderObject folder = new FolderObject();
         folder.setModule(FolderObject.CALENDAR);
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        folder.setPermissions(PermissionTools.P(I(client.getValues().getUserId()), PermissionTools.ADMIN, I(userId2), PermissionTools.ADMIN));
+        folder.setPermissions(PermissionTools.P(I(getClient().getValues().getUserId()), PermissionTools.ADMIN, I(userId2), PermissionTools.ADMIN));
         folder.setFolderName("testFolder4Bug16194");
         com.openexchange.ajax.folder.actions.InsertRequest iReq = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
-        com.openexchange.ajax.folder.actions.InsertResponse iResp = client.execute(iReq);
+        com.openexchange.ajax.folder.actions.InsertResponse iResp = getClient().execute(iReq);
         iResp.fillObject(folder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         folder.setLastModified(new Date());
@@ -138,7 +137,7 @@ public class Bug16194Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(EnumAPI.OX_NEW, publicFolder));
+        getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, publicFolder));
         super.tearDown();
     }
 

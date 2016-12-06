@@ -134,7 +134,7 @@ public class ListTest extends AbstractContactTest {
         final int objectId = insertContact(contactObj);
         try {
             final ListRequest listRequest = new ListRequest(ListIDs.l(new int[] { contactFolderId, objectId }), cols, true);
-            final CommonListResponse response = Executor.execute(client, listRequest);
+            final CommonListResponse response = Executor.execute(getClient(), listRequest);
             final JSONArray arr = (JSONArray) response.getResponse().getData();
 
             assertNotNull(arr);
@@ -181,7 +181,7 @@ public class ListTest extends AbstractContactTest {
             distListObjectId = distList.getObjectID();
 
             GetRequest getRequest = new GetRequest(contactFolderId, distListObjectId, tz, false);
-            GetResponse getResponse = client.execute(getRequest);
+            GetResponse getResponse = getClient().execute(getRequest);
 
             Boolean markAsDistList = new Boolean(((JSONObject) getResponse.getData()).getBoolean("mark_as_distributionlist"));
             assertTrue(markAsDistList);
@@ -197,7 +197,7 @@ public class ListTest extends AbstractContactTest {
 
             // ASSERT
             GetRequest emptyGetRequest = new GetRequest(contactFolderId, distListObjectId, tz, false);
-            GetResponse emptyGetResponse = client.execute(emptyGetRequest);
+            GetResponse emptyGetResponse = getClient().execute(emptyGetRequest);
             Boolean emptyMarkAsDistList = new Boolean(((JSONObject) emptyGetResponse.getData()).getBoolean("mark_as_distributionlist"));
             assertTrue("Contact not marked as list", emptyMarkAsDistList);
 

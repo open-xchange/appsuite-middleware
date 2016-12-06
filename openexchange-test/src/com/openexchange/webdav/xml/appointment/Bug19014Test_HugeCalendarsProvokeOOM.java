@@ -70,11 +70,9 @@ import org.json.JSONException;
 import org.junit.Test;
 import com.meterware.httpunit.Base64;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
@@ -112,14 +110,11 @@ public class Bug19014Test_HugeCalendarsProvokeOOM extends ManagedAppointmentTest
 
     private HttpResponse makeTheCall(int folderId) throws OXException, JSONException, IOException {
         AJAXConfig.init();
-        String login = AJAXConfig.getProperty(User.User1.getLogin());
-        String context = AJAXConfig.getProperty(Property.CONTEXTNAME);
-        String password = AJAXConfig.getProperty(User.User1.getPassword());
 
         DefaultHttpClient rawClient = getClient().getSession().getHttpClient();
 
         HttpUriRequest icalRequest = new HttpGet("http://localhost/servlet/webdav.ical?calendarfolder=" + folderId);
-        icalRequest.addHeader("authorization", "Basic " + Base64.encode(login + "@" + context + ":" + password));
+        icalRequest.addHeader("authorization", "Basic " + Base64.encode(testUser.getUser() + "@" + testUser.getContext() + ":" + testUser.getPassword()));
 
         HttpResponse response = rawClient.execute(icalRequest);
         return response;

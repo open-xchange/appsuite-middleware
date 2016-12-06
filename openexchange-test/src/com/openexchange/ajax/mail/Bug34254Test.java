@@ -80,14 +80,14 @@ public class Bug34254Test extends AbstractMailTest {
         JSONObject mail = new JSONObject(composedMail);
         mail.put("flags", MailMessage.FLAG_DRAFT);
         NewMailRequestWithUploads newDraftRequest = new NewMailRequestWithUploads(mail);
-        MailReferenceResponse newDraftResponse = client.execute(newDraftRequest);
+        MailReferenceResponse newDraftResponse = getClient().execute(newDraftRequest);
         String draftReference = newDraftResponse.getMailReference();
         String draftFolder = newDraftResponse.getFolder();
         String draftMailID = newDraftResponse.getMailID();
-        assertEquals("Draft saved in wrong folder", client.getValues().getDraftsFolder(), draftFolder);
+        assertEquals("Draft saved in wrong folder", getClient().getValues().getDraftsFolder(), draftFolder);
 
         GetRequest getRequest = new GetRequest(draftFolder, draftMailID, View.HTML);
-        GetResponse getResponse = client.execute(getRequest);
+        GetResponse getResponse = getClient().execute(getRequest);
         MailMessage reloaded = getResponse.getMail(getTimeZone());
         assertEquals("Wrong mail reference", subject, reloaded.getSubject());
 
@@ -95,11 +95,11 @@ public class Bug34254Test extends AbstractMailTest {
         mail.put("msgref", draftReference);
         mail.put("sendtype", ComposeType.DRAFT_DELETE_ON_TRANSPORT.getType());
         NewMailRequestWithUploads sendDraftRequest = new NewMailRequestWithUploads(mail);
-        MailReferenceResponse sendDraftResponse = client.execute(sendDraftRequest);
-        assertEquals("Mail not stored in sent folder", client.getValues().getSentFolder(), sendDraftResponse.getFolder());
+        MailReferenceResponse sendDraftResponse = getClient().execute(sendDraftRequest);
+        assertEquals("Mail not stored in sent folder", getClient().getValues().getSentFolder(), sendDraftResponse.getFolder());
 
         getRequest = new GetRequest(draftFolder, draftMailID, false);
-        getResponse = client.execute(getRequest);
+        getResponse = getClient().execute(getRequest);
         assertNull("Draft was not deleted", getResponse.getData());
     }
 
@@ -109,14 +109,14 @@ public class Bug34254Test extends AbstractMailTest {
         JSONObject composedMail = createEMail(getSendAddress(), subject, "text/html", MAIL_TEXT_BODY);
         JSONObject mail = new JSONObject(composedMail);
         AutosaveRequest autosaveRequest = new AutosaveRequest(mail);
-        MailReferenceResponse autosaveResponse = client.execute(autosaveRequest);
+        MailReferenceResponse autosaveResponse = getClient().execute(autosaveRequest);
         String draftReference = autosaveResponse.getMailReference();
         String draftFolder = autosaveResponse.getFolder();
         String draftMailID = autosaveResponse.getMailID();
-        assertEquals("Draft saved in wrong folder", client.getValues().getDraftsFolder(), draftFolder);
+        assertEquals("Draft saved in wrong folder", getClient().getValues().getDraftsFolder(), draftFolder);
 
         GetRequest getRequest = new GetRequest(draftFolder, draftMailID, View.HTML);
-        GetResponse getResponse = client.execute(getRequest);
+        GetResponse getResponse = getClient().execute(getRequest);
         MailMessage reloaded = getResponse.getMail(getTimeZone());
         assertEquals("Wrong mail reference", subject, reloaded.getSubject());
 
@@ -124,11 +124,11 @@ public class Bug34254Test extends AbstractMailTest {
         mail.put("msgref", draftReference);
         mail.put("sendtype", ComposeType.DRAFT_DELETE_ON_TRANSPORT.getType());
         NewMailRequestWithUploads sendDraftRequest = new NewMailRequestWithUploads(mail);
-        MailReferenceResponse sendDraftResponse = client.execute(sendDraftRequest);
-        assertEquals("Mail not stored in sent folder", client.getValues().getSentFolder(), sendDraftResponse.getFolder());
+        MailReferenceResponse sendDraftResponse = getClient().execute(sendDraftRequest);
+        assertEquals("Mail not stored in sent folder", getClient().getValues().getSentFolder(), sendDraftResponse.getFolder());
 
         getRequest = new GetRequest(draftFolder, draftMailID, false);
-        getResponse = client.execute(getRequest);
+        getResponse = getClient().execute(getRequest);
         assertNull("Draft was not deleted", getResponse.getData());
     }
 

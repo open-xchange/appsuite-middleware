@@ -86,10 +86,10 @@ public class Bug42970Test extends AbstractMailFindTest {
     @Test
     public void testBccFieldIsIncludedInContacts() throws Exception {
         List<String> folders = new ArrayList<String>(4);
-        folders.add(client.getValues().getInboxFolder());
-        folders.add(client.getValues().getSentFolder());
-        folders.add(client.getValues().getDraftsFolder());
-        folders.add(client.getValues().getTrashFolder());
+        folders.add(getClient().getValues().getInboxFolder());
+        folders.add(getClient().getValues().getSentFolder());
+        folders.add(getClient().getValues().getDraftsFolder());
+        folders.add(getClient().getValues().getTrashFolder());
 
         for (String folder : folders) {
             assertBccFieldInFolder(folder);
@@ -105,7 +105,7 @@ public class Bug42970Test extends AbstractMailFindTest {
     private void assertBccFieldInFolder(String folder) throws Exception {
         String prefix = defaultAddress.substring(0, 3);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets(folder));
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         List<Facet> facets = autocompleteResponse.getFacets();
         DefaultFacet contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);
         assertNotNull(contactFacet);

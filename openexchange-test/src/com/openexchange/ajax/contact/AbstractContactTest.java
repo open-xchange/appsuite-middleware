@@ -137,9 +137,9 @@ public class AbstractContactTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        contactFolderId = client.getValues().getPrivateContactFolder();
-        userId = client.getValues().getUserId();
-        tz = client.getValues().getTimeZone();
+        contactFolderId = getClient().getValues().getPrivateContactFolder();
+        userId = getClient().getValues().getUserId();
+        tz = getClient().getValues().getTimeZone();
 
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -412,7 +412,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     public int insertContact(final Contact contactObj) throws Exception {
         final InsertRequest request = new InsertRequest(contactObj);
-        final InsertResponse response = client.execute(request);
+        final InsertResponse response = getClient().execute(request);
         response.fillObject(contactObj);
 
         return contactObj.getObjectID();
@@ -420,13 +420,13 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     public void updateContact(final Contact contactObj, final int inFolder) throws Exception {
         final UpdateRequest request = new UpdateRequest(inFolder, contactObj, true);
-        client.execute(request);
+        getClient().execute(request);
     }
 
     public void deleteContact(final int id, final int inFolder, final boolean ignoreFailure) throws Exception {
         try {
             final DeleteRequest request = new DeleteRequest(inFolder, id, ignoreFailure ? new Date(Long.MAX_VALUE) : new Date(), !ignoreFailure);
-            client.execute(request);
+            getClient().execute(request);
         } catch (final Exception e) {
             if (!ignoreFailure) {
                 throw e;
@@ -447,7 +447,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             request.setRightHandLimit(rightHandLimit);
         }
 
-        final CommonAllResponse response = client.execute(request);
+        final CommonAllResponse response = getClient().execute(request);
         return jsonArray2ContactArray((JSONArray) response.getData(), cols);
     }
 
@@ -457,7 +457,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     public Contact[] searchContact(final String searchpattern, final int inFolder, final int[] cols, final boolean startletter) throws OXException, Exception {
         final SearchRequest request = new SearchRequest(searchpattern, startletter, inFolder, cols, -1, null, true);
-        final SearchResponse response = client.execute(request);
+        final SearchResponse response = getClient().execute(request);
 
         return jsonArray2ContactArray((JSONArray) response.getData(), cols);
     }
@@ -468,7 +468,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     public Contact[] searchContactAdvanced(final ContactSearchObject cso, final int orderBy, final int[] cols) throws OXException, Exception {
         final SearchRequest request = new SearchRequest(cso, cols, orderBy, null, true);
-        final SearchResponse response = client.execute(request);
+        final SearchResponse response = getClient().execute(request);
 
         return jsonArray2ContactArray((JSONArray) response.getData(), cols);
     }
@@ -480,21 +480,21 @@ public class AbstractContactTest extends AbstractAJAXSession {
             identifier.add(new ListIDInt(element[1], element[0]));
         }
         final ListRequest request = new ListRequest(identifier, cols);
-        final CommonListResponse response = client.execute(request);
+        final CommonListResponse response = getClient().execute(request);
 
         return jsonArray2ContactArray((JSONArray) response.getData(), cols);
     }
 
     public Contact loadUser(final int userId) throws OXException, IOException, JSONException {
         final GetContactForUserRequest request = new GetContactForUserRequest(userId, true, tz);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
 
         return response.getContact();
     }
 
     public Contact loadContact(final int objectId, final int inFolder) throws Exception {
         final GetRequest request = new GetRequest(inFolder, objectId, tz);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
 
         return response.getContact();
     }
@@ -1168,7 +1168,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     public ContactUpdatesResponse listModifiedContacts(final int inFolder, int[] cols, final Date modified, Ignore ignore) throws Exception {
         final UpdatesRequest request = new UpdatesRequest(inFolder, cols, 0, null, modified, ignore);
-        final ContactUpdatesResponse response = client.execute(request);
+        final ContactUpdatesResponse response = getClient().execute(request);
         return response;
     }
 
@@ -1181,7 +1181,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             updateRequests[i] = new UpdateRequest(contact);
         }
         MultipleRequest<UpdateResponse> multipleUpdate = MultipleRequest.create(updateRequests);
-        MultipleResponse<UpdateResponse> multipleResponse = client.executeSafe(multipleUpdate);
+        MultipleResponse<UpdateResponse> multipleResponse = getClient().executeSafe(multipleUpdate);
         for (int i = 0; i < numContacts; i++) {
             contacts[i].setLastModified(multipleResponse.getResponse(i).getTimestamp());
         }
@@ -1195,7 +1195,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             deleteRequests[i] = new DeleteRequest(contact);
         }
         MultipleRequest<CommonDeleteResponse> multipleDelete = MultipleRequest.create(deleteRequests);
-        client.executeSafe(multipleDelete);
+        getClient().executeSafe(multipleDelete);
     }
 
     public MultipleResponse<InsertResponse> createMultipleInsertRequest(Contact[] newContacts) throws Exception {
@@ -1205,7 +1205,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             insertContactRequests.add(new InsertRequest(contact));
         }
         MultipleRequest<InsertResponse> multipleRequest = MultipleRequest.create(insertContactRequests.toArray(new InsertRequest[numberOfContacts]));
-        MultipleResponse<InsertResponse> multipleResponse = client.execute(multipleRequest);
+        MultipleResponse<InsertResponse> multipleResponse = getClient().execute(multipleRequest);
         return multipleResponse;
     }
 

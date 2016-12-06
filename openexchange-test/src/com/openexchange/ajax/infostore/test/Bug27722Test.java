@@ -93,7 +93,7 @@ public final class Bug27722Test extends AbstractInfostoreTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
+        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
         testFolder = fMgr.insertFolderOnServer(testFolder);
         items = new ArrayList<File>(TOTAL_ITEMS);
         for (int i = 0; i < TOTAL_ITEMS; i++) {

@@ -87,11 +87,11 @@ public class AddGuestUserToGroupTest extends ShareTest {
     @Test
     public void testAddGuestToGroup() throws Exception {
         OCLGuestPermission perm = randomGuestPermission(FolderObject.INFOSTORE);
-        FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), perm);
+        FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), perm);
         remember(folder);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -104,7 +104,7 @@ public class AddGuestUserToGroupTest extends ShareTest {
         group.setSimpleName("testAddGuest");
         group.setMember(new int[] { userId });
         CreateRequest req = new CreateRequest(group, false);
-        CreateResponse resp = client.execute(req);
+        CreateResponse resp = getClient().execute(req);
         assertTrue(resp.hasError());
         OXException e = resp.getException();
         assertTrue(GroupExceptionCodes.NO_GUEST_USER_IN_GROUP.equals(e));

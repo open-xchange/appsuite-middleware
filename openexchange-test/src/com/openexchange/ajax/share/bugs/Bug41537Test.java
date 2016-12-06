@@ -94,7 +94,7 @@ public class Bug41537Test extends ShareTest {
          * Create share
          */
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", randomUID());
-        FolderObject folder = insertSharedFolder(EnumAPI.OUTLOOK, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), guestPermission);
+        FolderObject folder = insertSharedFolder(EnumAPI.OUTLOOK, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), guestPermission);
         OCLPermission guestEntityPermission = findFirstGuestPermission(folder);
         assertNotNull(guestEntityPermission);
         ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OUTLOOK, FolderObject.INFOSTORE, folder.getObjectID(), guestEntityPermission.getEntity());
@@ -138,12 +138,12 @@ public class Bug41537Test extends ShareTest {
         /*
          * Try reload as sharing user
          */
-        reloadResponse = client.execute(new GetRequest(guestUserId, timeZone, true));
+        reloadResponse = getClient().execute(new GetRequest(guestUserId, timeZone, true));
         reloaded = reloadResponse.getContact();
         assertEquals("No image set in contact", 1, reloaded.getNumberOfImages());
         assertEquals("Wrong image content type set in contact", "image/png", reloaded.getImageContentType());
         assertNotNull("No image set in contact", reloadResponse.getImageUrl());
-        reloadedImageBytes = AbstractContactTest.loadImageByURL(client, reloadResponse.getImageUrl());
+        reloadedImageBytes = AbstractContactTest.loadImageByURL(getClient(), reloadResponse.getImageUrl());
         assertTrue("Wrong image set in contact", Arrays.equals(imageBytes, reloadedImageBytes));
     }
 

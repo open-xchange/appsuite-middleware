@@ -80,13 +80,13 @@ public class Bug26842Test extends AbstractAJAXSession {
 
     public void setUp() throws Exception {
         super.setUp();
-        ftm = new FolderTestManager(client);
-        ctm = new CalendarTestManager(client);
+        ftm = new FolderTestManager(getClient());
+        ctm = new CalendarTestManager(getClient());
         ctm.setFailOnError(true);
         folder = ftm.generatePublicFolder("26842-" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
         OCLPermission permission = new OCLPermission();
-        permission.setEntity(client.getValues().getUserId());
+        permission.setEntity(getClient().getValues().getUserId());
         permission.setGroupPermission(false);
         permission.setFolderAdmin(true);
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
@@ -107,7 +107,7 @@ public class Bug26842Test extends AbstractAJAXSession {
 
         ctm.insert(app);
         Appointment appointment = ctm.get(app.getParentFolderID(), app.getObjectID());
-        assertEquals("Wrong participants.", client.getValues().getUserId(), appointment.getParticipants()[0].getIdentifier());
+        assertEquals("Wrong participants.", getClient().getValues().getUserId(), appointment.getParticipants()[0].getIdentifier());
     }
 
     @After

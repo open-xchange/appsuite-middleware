@@ -53,12 +53,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 
 @RunWith(ConcurrentTestRunner.class)
 public abstract class AbstractAJAXSession {
 
-    protected AJAXClient client;
+    private AJAXClient client;
+    protected TestContext testContext;
+    protected TestUser admin;
+    protected TestUser testUser;
 
     /**
      * Default constructor.
@@ -67,6 +72,10 @@ public abstract class AbstractAJAXSession {
      */
     protected AbstractAJAXSession() {
         super();
+    }
+
+    protected final AJAXClient getClient() {
+        return client;
     }
 
     /**
@@ -80,24 +89,29 @@ public abstract class AbstractAJAXSession {
 
     @Before
     public void setUp() throws Exception {
+        ProvisioningSetup.init();
+
         String clientId = getClientId();
-        client = null == clientId ? new AJAXClient(User.User1) : new AJAXClient(User.User1, clientId);
+        testContext = TestContextPool.acquireContext();
+        testUser = testContext.acquireUser();
+        client = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);
+        admin = testContext.getAdmin();
     }
 
     @After
     public void tearDown() throws Exception {
-        if (client != null) {
-            // Client can be null if setUp() fails
-            client.logout();
-            client = null;
+        try {
+            if (client != null) {
+                // Client can be null if setUp() fails
+                client.logout();
+                client = null;
+            }
+        } finally {
+            TestContextPool.backContext(testContext);
         }
     }
 
     public AJAXSession getSession() {
         return client.getSession();
-    }
-
-    protected AJAXClient getClient() {
-        return client;
     }
 }

@@ -52,7 +52,7 @@ public class Bug16089Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         manager = new FolderTestManager(getClient());
-        timezone = client.getValues().getTimeZone();
+        timezone = getClient().getValues().getTimeZone();
         cal = Calendar.getInstance(timezone);
 
         // create a folder
@@ -63,7 +63,7 @@ public class Bug16089Test extends AbstractAJAXSession {
         folderObject1.setModule(FolderObject.CALENDAR);
         // create permissions
         final OCLPermission perm1 = new OCLPermission();
-        perm1.setEntity(client.getValues().getUserId());
+        perm1.setEntity(getClient().getValues().getUserId());
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
         perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -75,19 +75,19 @@ public class Bug16089Test extends AbstractAJAXSession {
 
     @Test
     public void testConfirmation() throws Exception {
-        GetResponse getAppointmentResp = client.execute(new GetRequest(appointment));
+        GetResponse getAppointmentResp = getClient().execute(new GetRequest(appointment));
         Appointment testApp = getAppointmentResp.getAppointment(timezone);
 
         Participant[] participants = testApp.getParticipants();
         boolean found = false;
         for (Participant p : participants) {
-            if (p.getIdentifier() == client.getValues().getUserId()) {
+            if (p.getIdentifier() == getClient().getValues().getUserId()) {
                 found = true;
                 ConfirmableParticipant[] confirmations = testApp.getConfirmations();
                 for (ConfirmableParticipant c : confirmations) {
-                    if (c.getIdentifier() == client.getValues().getUserId()) {
-                        int ctx = getContextID(client);
-                        int publicConfig = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx, client.getValues().getUserId());
+                    if (c.getIdentifier() == getClient().getValues().getUserId()) {
+                        int ctx = getContextID(getClient());
+                        int publicConfig = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx, getClient().getValues().getUserId());
                         assertEquals("Confirm status isn't equal with user setting.", c.getConfirm(), publicConfig);
                     }
                 }
@@ -100,9 +100,9 @@ public class Bug16089Test extends AbstractAJAXSession {
     }
 
     private int getContextID(AJAXClient client) throws IOException, SAXException {
-        String url = "http://" + client.getHostname() + "/ajax/config/context_id?session=" + client.getSession().getId();
+        String url = "http://" + getClient().getHostname() + "/ajax/config/context_id?session=" + getClient().getSession().getId();
         WebRequest request = new GetMethodWebRequest(url);
-        WebResponse response = client.getSession().getConversation().getResponse(request);
+        WebResponse response = getClient().getSession().getConversation().getResponse(request);
         String text = response.getText();
         String sub = text.substring(8, text.length() - 1); //TODO: exchange ugly hack for JSON parser
         return Integer.parseInt(sub);
@@ -110,7 +110,7 @@ public class Bug16089Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment, false));
+        getClient().execute(new DeleteRequest(appointment, false));
         manager.cleanUp();
         super.tearDown();
     }
@@ -129,7 +129,7 @@ public class Bug16089Test extends AbstractAJAXSession {
         app.setRecurrenceType(Appointment.NO_RECURRENCE);
 
         InsertRequest insApp = new InsertRequest(app, timezone, false);
-        AppointmentInsertResponse execute = client.execute(insApp);
+        AppointmentInsertResponse execute = getClient().execute(insApp);
 
         execute.fillAppointment(app);
 

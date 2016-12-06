@@ -104,8 +104,8 @@ public class FileStorageTransactionTest extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        itm = new InfostoreTestManager(client);
-        testFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder());
+        itm = new InfostoreTestManager(getClient());
+        testFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder());
         files = new ArrayList<DefaultFile>(TEST_FILES);
         long now = System.currentTimeMillis();
         for (int i = 0; i < TEST_FILES; i++) {
@@ -142,7 +142,7 @@ public class FileStorageTransactionTest extends ShareTest {
         }
 
         List<FileShare> fileShares = new ArrayList<FileShare>(sharedFiles.size());
-        List<FileShare> allShares = client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
+        List<FileShare> allShares = getClient().execute(new FileSharesRequest()).getShares(getClient().getValues().getTimeZone());
         for (DefaultFile file : sharedFiles) {
             for (FileShare share : allShares) {
                 if (share.getId().equals(file.getId())) {

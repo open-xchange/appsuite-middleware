@@ -80,7 +80,7 @@ public class Bug42018Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         ctm.setFailOnError(true);
         appointment = new Appointment();
         appointment.setTitle("Bug 42018 Test");
@@ -95,7 +95,7 @@ public class Bug42018Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setDays(Appointment.MONDAY);
         appointment.setInterval(1);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
     }
 

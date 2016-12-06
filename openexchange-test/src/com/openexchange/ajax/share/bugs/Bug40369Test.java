@@ -166,7 +166,7 @@ public class Bug40369Test extends ShareTest {
         assertEquals(2, folder.getPermissions().size());
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -210,7 +210,7 @@ public class Bug40369Test extends ShareTest {
                 @Override
                 public void run() {
                     try {
-                        responses[index] = client.execute(request);
+                        responses[index] = getClient().execute(request);
                     } catch (Exception e) {
                         fail(e.getMessage());
                     }

@@ -52,7 +52,6 @@ package com.openexchange.ajax.oauth.provider;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.provider.actions.AllRequest;
 import com.openexchange.ajax.oauth.provider.actions.AllResponse;
 import com.openexchange.ajax.oauth.provider.actions.RevokeRequest;
@@ -81,7 +80,7 @@ public class JSONApiTest extends AbstractOAuthTest {
 
     @Test
     public void testAllAndRevoke() throws Exception {
-        new OAuthClient(User.User1, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE));
+        new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE));
         AllResponse allResponse = ajaxClient.execute(new AllRequest());
         List<GrantView> grantViews = allResponse.getGrantViews();
         GrantView expected = null;

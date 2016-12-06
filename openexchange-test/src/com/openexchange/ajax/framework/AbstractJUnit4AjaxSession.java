@@ -53,7 +53,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
 
 /**
  * {@link AbstractJUnit4AjaxSession}
@@ -64,7 +65,8 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 @RunWith(ConcurrentTestRunner.class)
 public abstract class AbstractJUnit4AjaxSession {
 
-    protected AJAXClient client;
+    private AJAXClient client;
+    protected TestContext testContext;
 
     /**
      * Default constructor.
@@ -75,14 +77,20 @@ public abstract class AbstractJUnit4AjaxSession {
 
     @Before
     public void setUp() throws Exception {
-        client = new AJAXClient(User.User1);
+        testContext = TestContextPool.acquireContext();
+
+        client = new AJAXClient(testContext.acquireUser());
     }
 
     @After
     public void tearDown() throws Exception {
-        if (client != null) {
-            // Client can be null if setUp() fails
-            client.logout();
+        try {
+            if (client != null) {
+                // Client can be null if setUp() fails
+                client.logout();
+            }
+        } finally {
+            TestContextPool.backContext(testContext);
         }
     }
 

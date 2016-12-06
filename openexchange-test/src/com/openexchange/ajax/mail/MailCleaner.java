@@ -97,7 +97,7 @@ public class MailCleaner implements Cleanable {
         if (null != mail) {
             DeleteRequest request = new DeleteRequest(mail, true);
             request.ignoreError();
-            client.execute(request);
+            getClient().execute(request);
         }
     }
 

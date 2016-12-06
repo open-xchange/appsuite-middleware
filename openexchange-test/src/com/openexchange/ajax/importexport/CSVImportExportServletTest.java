@@ -92,8 +92,8 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
     }
 
     public void notestCSVRoundtrip() throws Exception {
-        client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-        CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
+        getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID));
 
         CSVParser parser = new CSVParser();
         List<List<String>> expected = parser.parse(CSV);
@@ -111,21 +111,21 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
     public void testUnknownFile() throws Exception {
         final String insertedCSV = "bla1\nbla2,bla3";
 
-        CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(insertedCSV.getBytes()), false));
+        CSVImportResponse importResponse = getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(insertedCSV.getBytes()), false));
         assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-0804", importResponse.getException().getErrorCode());
     }
 
     @Test
     public void testEmptyFileUploaded() throws Exception {
         final InputStream is = new ByteArrayInputStream("Given name,Email 1, Display name".getBytes());
-        CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, is, false));
+        CSVImportResponse importResponse = getClient().execute(new CSVImportRequest(folderID, is, false));
         assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-1315", importResponse.getException().getErrorCode());
     }
 
     public void notestDoubleImport() throws Exception {
-        client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-        client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-        CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
+        getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+        getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID));
 
         CSVParser parser = new CSVParser();
         List<List<String>> expected = parser.parse(CSV);

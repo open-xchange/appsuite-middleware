@@ -61,7 +61,6 @@ import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
@@ -93,7 +92,7 @@ public class Bug15354Test extends AbstractAJAXSession {
         assertNotNull("Aliases are null.", origAliases);
         Arrays.sort(origAliases);
         for (int i = 0; i < writer.length; i++) {
-            writer[i] = new BetaWriter(User.User1, true);
+            writer[i] = new BetaWriter(testUser, true);
             thread[i] = new Thread(writer[i]);
         }
         for (int i = 0; i < thread.length; i++) {

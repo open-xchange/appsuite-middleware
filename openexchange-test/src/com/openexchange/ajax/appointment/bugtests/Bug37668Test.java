@@ -92,7 +92,7 @@ public class Bug37668Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         timeZone = getClient().getValues().getTimeZone();
 
         appSimple = new Appointment();
@@ -101,7 +101,7 @@ public class Bug37668Test extends AbstractAJAXSession {
         appSimple.setRecurrenceType(Appointment.YEARLY);
         appSimple.setInterval(1);
         appSimple.setDayInMonth(22);
-        appSimple.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appSimple.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appSimple.setIgnoreConflicts(true);
         appSimple.setTimezone(timeZone.getID());
 
@@ -111,7 +111,7 @@ public class Bug37668Test extends AbstractAJAXSession {
         app23h.setRecurrenceType(Appointment.YEARLY);
         app23h.setInterval(1);
         app23h.setDayInMonth(22);
-        app23h.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app23h.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         app23h.setIgnoreConflicts(true);
         app23h.setTimezone(timeZone.getID());
 
@@ -121,7 +121,7 @@ public class Bug37668Test extends AbstractAJAXSession {
         app25h.setRecurrenceType(Appointment.YEARLY);
         app25h.setInterval(1);
         app25h.setDayInMonth(22);
-        app25h.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app25h.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         app25h.setIgnoreConflicts(true);
         app25h.setTimezone(timeZone.getID());
 
@@ -131,7 +131,7 @@ public class Bug37668Test extends AbstractAJAXSession {
         fulltime.setRecurrenceType(Appointment.YEARLY);
         fulltime.setInterval(1);
         fulltime.setDayInMonth(22);
-        fulltime.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        fulltime.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         fulltime.setIgnoreConflicts(true);
         fulltime.setTimezone(timeZone.getID());
         fulltime.setFullTime(true);
@@ -142,7 +142,7 @@ public class Bug37668Test extends AbstractAJAXSession {
         fulltime2days.setRecurrenceType(Appointment.YEARLY);
         fulltime2days.setInterval(1);
         fulltime2days.setDayInMonth(22);
-        fulltime2days.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        fulltime2days.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         fulltime2days.setIgnoreConflicts(true);
         fulltime2days.setTimezone(timeZone.getID());
         fulltime2days.setFullTime(true);

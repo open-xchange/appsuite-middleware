@@ -88,7 +88,7 @@ public class Bug9252Test extends AbstractTaskTest {
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(AJAXClient.User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
     }
 
     /**

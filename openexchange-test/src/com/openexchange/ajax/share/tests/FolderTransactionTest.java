@@ -154,7 +154,7 @@ public class FolderTransactionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : sharedFolder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

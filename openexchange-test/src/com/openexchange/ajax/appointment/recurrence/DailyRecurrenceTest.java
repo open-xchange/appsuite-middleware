@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
@@ -36,7 +35,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -95,7 +94,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -153,7 +152,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -211,7 +210,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setFullTime(true);
         appointmentObj.setIgnoreConflicts(true);

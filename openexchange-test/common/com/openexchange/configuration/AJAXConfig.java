@@ -76,7 +76,6 @@ public class AJAXConfig extends AbstractConfig {
 
     /**
      * Reads the configuration.
-     * 
      * @throws OXException if reading configuration fails.
      */
     public static void init() throws OXException {
@@ -107,6 +106,7 @@ public class AJAXConfig extends AbstractConfig {
 
     /**
      * Enumeration of all properties in the ajax.properties file.
+     * FIXME only required for unittests. do clean up their setup
      */
     public static enum Property {
         /**
@@ -191,9 +191,8 @@ public class AJAXConfig extends AbstractConfig {
 
         /**
          * Default constructor.
-         * 
          * @param propertyName Name of the property in the ajax.properties
-         *            file.
+         * file.
          */
         private Property(final String propertyName) {
             this.propertyName = propertyName;

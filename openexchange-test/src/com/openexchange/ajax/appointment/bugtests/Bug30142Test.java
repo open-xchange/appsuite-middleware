@@ -83,9 +83,9 @@ public class Bug30142Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
-        ftm = new FolderTestManager(client);
-        folder = ftm.generatePrivateFolder("Bug 30142 " + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId());
+        ctm = new CalendarTestManager(getClient());
+        ftm = new FolderTestManager(getClient());
+        folder = ftm.generatePrivateFolder("Bug 30142 " + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(folder);
 
         appointment = new Appointment();

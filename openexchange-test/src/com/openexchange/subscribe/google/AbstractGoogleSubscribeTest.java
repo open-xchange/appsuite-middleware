@@ -88,9 +88,9 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        calendarMgr = new CalendarTestManager(client);
-        contactMgr = new ContactTestManager(client);
-        folderMgr = new FolderTestManager(client);
+        calendarMgr = new CalendarTestManager(getClient());
+        contactMgr = new ContactTestManager(getClient());
+        folderMgr = new FolderTestManager(getClient());
     }
 
     /**

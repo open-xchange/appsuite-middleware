@@ -71,7 +71,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
@@ -128,8 +127,8 @@ public class MailNotificationTest extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        userValues = client.getValues();
-        infostoreTestManager = new InfostoreTestManager(client);
+        userValues = getClient().getValues();
+        infostoreTestManager = new InfostoreTestManager(getClient());
         testFolder1 = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userValues.getPrivateInfostoreFolder());
         publicDriveFolder = insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
         image1 = getFile(createFile(testFolder1, IMAGENAME1, IMAGETYPE1).getId());
@@ -139,8 +138,8 @@ public class MailNotificationTest extends ShareTest {
     }
 
     private void initUserConfig() throws OXException, IOException, JSONException {
-        com.openexchange.ajax.user.actions.GetRequest request = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
-        com.openexchange.ajax.user.actions.GetResponse response = client.execute(request);
+        com.openexchange.ajax.user.actions.GetRequest request = new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone());
+        com.openexchange.ajax.user.actions.GetResponse response = getClient().execute(request);
         clientContact = response.getContact();
         clientFullName = String.format("%1$s %2$s", clientContact.getGivenName(), clientContact.getSurName());
         clientEmail = clientContact.getEmail1();
@@ -162,9 +161,9 @@ public class MailNotificationTest extends ShareTest {
     //        InviteRequest inviteRequest = new InviteRequest();
     //        inviteRequest.addTarget(new ShareTarget(testFolder1.getModule(), Integer.toString(testFolder1.getObjectID())));
     //        inviteRequest.addRecipient(guestPermission.getRecipient());
-    //        client.execute(inviteRequest);
+    //        getClient().execute(inviteRequest);
     //
-    //        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+    //        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
     //        assertEquals(1, messages.size());
     //        Message message = messages.get(0);
     //
@@ -200,9 +199,9 @@ public class MailNotificationTest extends ShareTest {
     //        inviteRequest = new InviteRequest();
     //        inviteRequest.addTarget(new ShareTarget(testFolder2.getModule(), Integer.toString(testFolder2.getObjectID())));
     //        inviteRequest.addRecipient(guestPermission.getRecipient());
-    //        client.execute(inviteRequest);
+    //        getClient().execute(inviteRequest);
     //
-    //        messages = client.execute(new GetMailsRequest()).getMessages();
+    //        messages = getClient().execute(new GetMailsRequest()).getMessages();
     //        assertEquals(1, messages.size());
     //        message = messages.get(0);
     //
@@ -236,7 +235,7 @@ public class MailNotificationTest extends ShareTest {
     //        GetLinkRequest getLinkRequest = new GetLinkRequest(Collections.singletonList(new ShareTarget(testFolder1.getModule(), Integer.toString(testFolder1.getObjectID()))));
     //        getLinkRequest.setBits(permission.getPermissionBits());
     //        getLinkRequest.setPassword(password);
-    //        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+    //        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
     //
     //        /*
     //         * notify
@@ -244,8 +243,8 @@ public class MailNotificationTest extends ShareTest {
     //        String textMessage = randomUID();
     //        NotifyRequest notifyRequest = new NotifyRequest(getLinkResponse.getToken(), textMessage + "@example.com");
     //        notifyRequest.setMessage(textMessage);
-    //        client.execute(notifyRequest);
-    //        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+    //        getClient().execute(notifyRequest);
+    //        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
     //        assertEquals(1, messages.size());
     //        Message message = messages.get(0);
     //
@@ -404,7 +403,7 @@ public class MailNotificationTest extends ShareTest {
         ((AnonymousRecipient) permission.getRecipient()).setExpiryDate(expiryDate);
         share(testFolder, file, permission, shareMessage, true);
         ShareTarget target = new ShareTarget(testFolder.getModule(), Integer.toString(testFolder.getObjectID()), file == null ? null : file.getId());
-        client.execute(new SendLinkRequest(target, randomUID() + "@example.com", shareMessage));
+        getClient().execute(new SendLinkRequest(target, randomUID() + "@example.com", shareMessage));
         assertGotA(initialSubject, hasSharedString, viewItemString, shareMessage, password, expiryDate);
     }
 
@@ -475,14 +474,14 @@ public class MailNotificationTest extends ShareTest {
 
     @Test
     public void testUserGotNoNotification(FolderObject testFolder, File file) throws Exception {
-        AJAXClient secondClient = new AJAXClient(User.User2);
+        AJAXClient secondClient = new AJAXClient(testContext.acquireUser());
         int internalUserId = secondClient.getValues().getUserId();
         secondClient.logout();
         OCLPermission permission = new OCLPermission();
         permission.setEntity(internalUserId);
         permission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         share(testFolder, file, permission, null, false);
-        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(0, messages.size());
     }
 
@@ -499,7 +498,7 @@ public class MailNotificationTest extends ShareTest {
     }
 
     private Message assertAndGetMessage() throws JSONException, MessagingException, OXException, IOException {
-        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(1, messages.size());
         return messages.get(0);
     }

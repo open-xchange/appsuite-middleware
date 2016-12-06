@@ -101,7 +101,7 @@ public class MultipleGetTest extends AbstractMailTest {
     @After
     public void tearDown() throws Exception {
         for (String[][] fmid : fmids) {
-            client.execute(new DeleteRequest(fmid, true).ignoreError());
+            getClient().execute(new DeleteRequest(fmid, true).ignoreError());
         }
         super.tearDown();
     }
@@ -115,9 +115,9 @@ public class MultipleGetTest extends AbstractMailTest {
             sb.append(buf, 0, length);
         }
         streamReader.close();
-        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-        ImportMailResponse importResp = client.execute(importMailRequest);
+        ImportMailResponse importResp = getClient().execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
         fmids.add(importResp.getIds());
 

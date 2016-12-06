@@ -89,32 +89,32 @@ public final class Bug21264Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         app = new Appointment();
         app.setTitle("Test for bug 21264");
         final Calendar cal = TimeTools.createCalendar(timeZone);
         app.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 1);
         app.setEndDate(cal.getTime());
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        app.setParticipants(new Participant[] { new UserParticipant(client.getValues().getUserId()), new ExternalUserParticipant("user1@example.org") });
+        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        app.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new ExternalUserParticipant("user1@example.org") });
         app.setOrganizer("user2@example.org");
         app.setIgnoreConflicts(true);
-        final AppointmentInsertResponse response = client.execute(new com.openexchange.ajax.appointment.action.InsertRequest(app, timeZone));
+        final AppointmentInsertResponse response = getClient().execute(new com.openexchange.ajax.appointment.action.InsertRequest(app, timeZone));
         response.fillAppointment(app);
     }
 
     @After
     public void tearDown() throws Exception {
         if (null != app) {
-            client.execute(new DeleteRequest(app));
+            getClient().execute(new DeleteRequest(app));
         }
         super.tearDown();
     }
 
     @Test
     public void testDeleteAppointment() throws IOException, JSONException, OXException {
-        final CommonDeleteResponse response = client.execute(new DeleteRequest(app, false));
+        final CommonDeleteResponse response = getClient().execute(new DeleteRequest(app, false));
         assertFalse("Deleting appointment failed.", response.hasError());
         app = null;
     }

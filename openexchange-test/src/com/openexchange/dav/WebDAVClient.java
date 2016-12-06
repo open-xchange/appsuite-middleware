@@ -68,6 +68,7 @@ import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.junit.Assert;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
@@ -88,12 +89,13 @@ public class WebDAVClient {
 
     private String baseURI = null;
 
-    public WebDAVClient(String userAgent) throws OXException {
-        this(userAgent, null);
+    public WebDAVClient(TestUser testUser, String userAgent) throws OXException {
+        this(testUser, userAgent, null);
     }
 
-    public WebDAVClient(String userAgent, Grant oAuthGrant) throws OXException {
+    public WebDAVClient(TestUser testUser, String userAgent, Grant oAuthGrant) throws OXException {
         super();
+        
         this.useOAuth = oAuthGrant != null;
         /*
          * init web client
@@ -103,7 +105,7 @@ public class WebDAVClient {
             this.oauthGrant = oAuthGrant;
         } else {
             httpClient = newDefaultHTTPClient();
-            this.setCredentials(Config.getLogin(), Config.getPassword());
+            this.setCredentials(testUser.getLogin(), testUser.getPassword());
         }
         this.setBaseURI(Config.getBaseUri());
         this.setUserAgent(userAgent);

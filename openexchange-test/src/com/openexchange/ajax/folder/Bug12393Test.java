@@ -63,7 +63,6 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.FolderObject;
@@ -123,7 +122,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         perm.setGroupPermission(false);
         perm.setFolderAdmin(true);
         perm.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        final AJAXClient client2 = new AJAXClient(User.User2);
+        final AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         final int userId2 = client2.getValues().getUserId();
         client2.logout();
         final OCLPermission perm2 = new OCLPermission();

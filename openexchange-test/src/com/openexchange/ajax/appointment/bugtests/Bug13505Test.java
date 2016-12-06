@@ -121,7 +121,7 @@ public class Bug13505Test extends AbstractAJAXSession {
     public void testBug13505() throws Exception {
         SpecialUpdateRequest updateRequest = new SpecialUpdateRequest(updateAppointment, tz);
         try {
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
         } catch (Exception e) {
             fail(e.getMessage());

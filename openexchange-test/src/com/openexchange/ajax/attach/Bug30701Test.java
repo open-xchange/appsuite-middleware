@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.attach;
 
-import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -66,6 +65,8 @@ import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
@@ -86,9 +87,12 @@ public class Bug30701Test {
 
     private TimeZone tz;
 
+    private TestContext testContext;
+
     @Before
     public void setUp() throws Exception {
-        client = new AJAXClient(User1);
+        testContext = TestContextPool.acquireContext();
+        client = new AJAXClient(testContext.acquireUser());
         folderID = client.getValues().getPrivateContactFolder();
         tz = client.getValues().getTimeZone();
         contactA = new Contact();
@@ -106,8 +110,12 @@ public class Bug30701Test {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contactA));
-        client.logout();
+        try {
+            client.execute(new DeleteRequest(contactA));
+            client.logout();
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     @Test

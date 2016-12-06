@@ -74,7 +74,6 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
@@ -98,15 +97,6 @@ import edu.emory.mathcs.backport.java.util.Arrays;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class QueryTest extends ContactsFindTest {
-
-    /**
-     * Initializes a new {@link QueryTest}.
-     *
-     * @param name The test name
-     */
-    public QueryTest() {
-        super();
-    }
 
     @Test
     public void testFilterChaining() throws Exception {
@@ -188,7 +178,7 @@ public class QueryTest extends ContactsFindTest {
         assertNull("contact found", findByProperty(sharedFolderDocuments, "email1", contact.getEmail1()));
         List<PropDocument> publicFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderType.PUBLIC)));
         assertNull("contact found", findByProperty(publicFolderDocuments, "email1", contact.getEmail1()));
-        assertNotNull("user contact not found", findByProperty(publicFolderDocuments, "email1", client.getValues().getDefaultAddress()));
+        assertNotNull("user contact not found", findByProperty(publicFolderDocuments, "email1", getClient().getValues().getDefaultAddress()));
     }
 
     @Test
@@ -258,7 +248,7 @@ public class QueryTest extends ContactsFindTest {
 
     private void assertEmptyResults(List<ActiveFacet> facets) throws Exception {
         QueryRequest queryRequest = new QueryRequest(0, 10, facets, Module.CONTACTS.getIdentifier());
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<Document> documents = result.getDocuments();
         assertEquals("Documents were found", 0, documents.size());
@@ -266,14 +256,13 @@ public class QueryTest extends ContactsFindTest {
 
     @Test
     public void testFolderTypeFacet() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
         try {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
-            AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
+            AJAXClient[] clients = new AJAXClient[] { getClient(), getClient(), client2 };
             FolderObject[] folders = new FolderObject[3];
-            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.CONTACT, client.getValues().getPrivateContactFolder(), client.getValues().getUserId()));
-            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.CONTACT, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, client.getValues().getUserId()));
-            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.CONTACT, client.getValues().getPrivateContactFolder(), client.getValues().getUserId(), client2.getValues().getUserId()));
+            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId()));
+            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.CONTACT, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, getClient().getValues().getUserId()));
+            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId()));
 
             Contact[] contacts = new Contact[3];
             contacts[0] = manager.newAction(randomContact(folders[0].getObjectID()));
@@ -328,7 +317,7 @@ public class QueryTest extends ContactsFindTest {
 
     @Test
     public void testPaging() throws Exception {
-        int numberOfContacts = client.execute(new AllRequest(6, AllRequest.GUI_COLUMNS)).getArray().length - 1;
+        int numberOfContacts = getClient().execute(new AllRequest(6, AllRequest.GUI_COLUMNS)).getArray().length - 1;
         Set<Integer> names = new HashSet<Integer>();
         ActiveFacet folderFacet = createActiveFacet(CommonFacetType.FOLDER, 6, Filter.NO_FILTER);
 
@@ -372,7 +361,7 @@ public class QueryTest extends ContactsFindTest {
 
     protected List<PropDocument> query(List<ActiveFacet> facets, int start, int size, Map<String, String> options) throws Exception {
         QueryRequest queryRequest = new QueryRequest(true, start, size, facets, options, Module.CONTACTS.getIdentifier(), null);
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();

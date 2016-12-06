@@ -69,7 +69,6 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -100,9 +99,9 @@ public class AggregateSharesTest extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
-        clientsAndFolders.put(client, new ArrayList<Integer>());
+        clientsAndFolders.put(getClient(), new ArrayList<Integer>());
         clientsAndFolders.put(client2, new ArrayList<Integer>());
     }
 
@@ -111,7 +110,7 @@ public class AggregateSharesTest extends ShareTest {
         if (null != clientsAndFolders) {
             for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
                 deleteFoldersSilently(entry.getKey(), entry.getValue());
-                if (false == entry.getKey().equals(client)) {
+                if (false == entry.getKey().equals(getClient())) {
                     entry.getKey().logout();
                 }
             }

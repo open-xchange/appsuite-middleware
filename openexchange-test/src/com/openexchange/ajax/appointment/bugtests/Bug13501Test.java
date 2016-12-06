@@ -86,19 +86,19 @@ public class Bug13501Test extends AbstractAJAXSession {
     @Test
     public void testBug13501() throws Exception {
         final InsertRequest request = new InsertRequest(appointment, tz);
-        final CommonInsertResponse response = client.execute(request);
+        final CommonInsertResponse response = getClient().execute(request);
         appointment.setObjectID(response.getId());
         appointment.setLastModified(response.getTimestamp());
         update.setObjectID(response.getId());
         update.setLastModified(response.getTimestamp());
         // System.out.println(appointment.getObjectID());
 
-        UpdateRequest updateRequest = new UpdateRequest(update, client.getValues().getTimeZone());
-        UpdateResponse updateResponse = client.execute(updateRequest);
+        UpdateRequest updateRequest = new UpdateRequest(update, getClient().getValues().getTimeZone());
+        UpdateResponse updateResponse = getClient().execute(updateRequest);
         appointment.setLastModified(updateResponse.getTimestamp());
 
-        AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), columns, startSearch, endSearch, TimeZone.getTimeZone("UTC"), false);
-        CommonAllResponse allResponse = client.execute(allRequest);
+        AllRequest allRequest = new AllRequest(getClient().getValues().getPrivateAppointmentFolder(), columns, startSearch, endSearch, TimeZone.getTimeZone("UTC"), false);
+        CommonAllResponse allResponse = getClient().execute(allRequest);
         Object[][] objects = allResponse.getArray();
         int count = 0;
         for (Object[] object : objects) {
@@ -109,9 +109,9 @@ public class Bug13501Test extends AbstractAJAXSession {
 
         assertEquals("Wrong number of occurrences in this view.", 3, count);
 
-        GetRequest getRequest = new GetRequest(client.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
-        GetResponse getResponse = client.execute(getRequest);
-        Appointment sequenceApp = getResponse.getAppointment(client.getValues().getTimeZone());
+        GetRequest getRequest = new GetRequest(getClient().getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
+        GetResponse getResponse = getClient().execute(getRequest);
+        Appointment sequenceApp = getResponse.getAppointment(getClient().getValues().getTimeZone());
 
         assertEquals("Wrong occurrences value", 5, sequenceApp.getOccurrence());
     }
@@ -135,7 +135,7 @@ public class Bug13501Test extends AbstractAJAXSession {
 
         appointment = new Appointment();
         appointment.setTitle("bug 13501 test");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
         appointment.setStartDate(start.getTime());
         appointment.setEndDate(end.getTime());
@@ -169,7 +169,7 @@ public class Bug13501Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         if (appointment.getObjectID() > 0) {
-            client.execute(new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
+            getClient().execute(new DeleteRequest(appointment.getObjectID(), getClient().getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
         }
         super.tearDown();
     }

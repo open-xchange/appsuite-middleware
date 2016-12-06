@@ -64,7 +64,7 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.pool.TestUserRegistry;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
@@ -80,50 +80,42 @@ import com.openexchange.mailaccount.MailAccountDescription;
 
 public class AdminListTest extends AbstractMailFilterTest {
 
-    private AJAXClient userClient;
-
-    private AJAXClient adminClient;
-
     private Rule rule;
     private int rid = -1;
-
-    public AdminListTest() {
-        super();
-    }
+    private AJAXClient adminClient;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        adminClient = new AJAXClient(User.OXAdmin);
-        Context ctx = new Context(adminClient.getValues().getContextId());
+        adminClient = new AJAXClient(admin);
+        Context ctx = new Context(testContext.getId());
         ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "true");
 
-        Credentials credentials = new Credentials(AJAXConfig.getProperty(Property.OX_ADMIN_MASTER), AJAXConfig.getProperty(Property.OX_ADMIN_MASTER_PWD));
+        Credentials credentials = new Credentials(admin.getLogin(), admin.getPassword());
         OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
         ctxInterface.change(ctx, credentials);
 
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
         Set<String> cap = new HashSet<String>(1);
         cap.add("webmail");
-        Credentials userCreds = new Credentials(AJAXConfig.getProperty(User.OXAdmin.getLogin()), AJAXConfig.getProperty(User.OXAdmin.getPassword()));
         OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         Set<String> emptySet = Collections.emptySet();
-        usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, cap, emptySet, emptySet, userCreds);
+        usrInterface.changeCapabilities(new Context(testContext.getId()), user, cap, emptySet, emptySet, credentials);
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            Context ctx = new Context(adminClient.getValues().getContextId());
+            Context ctx = new Context(testContext.getId());
             ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "false");
-            Credentials credentials = new Credentials(AJAXConfig.getProperty(Property.OX_ADMIN_MASTER), AJAXConfig.getProperty(Property.OX_ADMIN_MASTER_PWD));
+            Credentials credentials = new Credentials(TestUserRegistry.getMasterUser(), TestUserRegistry.getMasterPassword());
             OXContextInterface iface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
             iface.change(ctx, credentials);
 
             com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
             Set<String> cap = new HashSet<String>(1);
             cap.add("webmail");
-            Credentials userCreds = new Credentials(AJAXConfig.getProperty(User.OXAdmin.getLogin()), AJAXConfig.getProperty(User.OXAdmin.getPassword()));
+            Credentials userCreds = new Credentials(admin.getLogin(), admin.getPassword());
             OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
             Set<String> emptySet = Collections.emptySet();
             usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, emptySet, cap, emptySet, userCreds);
@@ -139,8 +131,6 @@ public class AdminListTest extends AbstractMailFilterTest {
 
     @Test
     public void testUserHasAccessToOtherUsersRules() throws Exception {
-        userClient = getClient();
-
         // Insert new rule as user
         rule = new Rule();
         rule.setName("testUserHasAccessToOtherUsersRules");
@@ -155,7 +145,7 @@ public class AdminListTest extends AbstractMailFilterTest {
 
         // Get rules of user as admin
         MailAccountGetRequest getMailAcc = new MailAccountGetRequest(0, false);
-        MailAccountGetResponse response = userClient.execute(getMailAcc);
+        MailAccountGetResponse response = getClient().execute(getMailAcc);
         MailAccountDescription description = response.getAsDescription();
         final String userImapLogin = description.getLogin();
 

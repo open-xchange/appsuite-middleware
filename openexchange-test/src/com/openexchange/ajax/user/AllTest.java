@@ -32,7 +32,7 @@ public class AllTest extends AbstractAJAXSession {
     public void testAllSimple() throws Exception {
 
         final AllRequest request = new AllRequest(null);
-        final AllResponse response = Executor.execute(client, request);
+        final AllResponse response = Executor.execute(getClient(), request);
 
         final JSONArray users = (JSONArray) response.getData();
 
@@ -44,7 +44,7 @@ public class AllTest extends AbstractAJAXSession {
 
         final AllRequest request = new AllRequest(new int[] { 615 });
         request.setSortColumn(I(615)); // logininfo
-        final AllResponse response = Executor.execute(client, request);
+        final AllResponse response = Executor.execute(getClient(), request);
 
         final JSONArray users = (JSONArray) response.getData();
 
@@ -58,7 +58,7 @@ public class AllTest extends AbstractAJAXSession {
 
         final AllRequest request = new AllRequest(new int[] { 555 });
         request.setSortColumn(I(555)); // email1
-        final AllResponse response = Executor.execute(client, request);
+        final AllResponse response = Executor.execute(getClient(), request);
 
         final JSONArray users = (JSONArray) response.getData();
 

@@ -82,14 +82,14 @@ public class Bug16515Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        tz = client.getValues().getTimeZone();
+        tz = getClient().getValues().getTimeZone();
         contact = createContact();
     }
 
     @Test
     public void testFileAs() throws Exception {
         GetRequest getContactReq = new GetRequest(contact.getParentFolderID(), contact.getObjectID(), tz);
-        GetResponse getContactResp = client.execute(getContactReq);
+        GetResponse getContactResp = getClient().execute(getContactReq);
         final Contact toCompare = getContactResp.getContact();
 
         assertEquals("File as has changed after creating contact.", contact.getFileAs(), toCompare.getFileAs());
@@ -98,7 +98,7 @@ public class Bug16515Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         DeleteRequest deleteContactReq = new DeleteRequest(contact, false);
-        client.execute(deleteContactReq);
+        getClient().execute(deleteContactReq);
     }
 
     public Contact createContact() throws Exception {
@@ -114,11 +114,11 @@ public class Bug16515Test extends AbstractAJAXSession {
         contact.setTelephoneBusiness1("+49112233445566");
         contact.setCompany("Internal Test AG");
         contact.setEmail1("hebert.meier@open-xchange.com");
-        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setFileAs(FILE_AS_VALUE);
 
         InsertRequest insertContactReq = new InsertRequest(contact);
-        InsertResponse insertContactResp = client.execute(insertContactReq);
+        InsertResponse insertContactResp = getClient().execute(insertContactReq);
         insertContactResp.fillObject(contact);
 
         return contact;

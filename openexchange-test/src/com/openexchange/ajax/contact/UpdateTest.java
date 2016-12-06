@@ -37,7 +37,7 @@ public class UpdateTest extends AbstractContactTest {
         final int objectId = createContactWithDistributionList("testUpdateWithDistributionList", contactEntry);
 
         GetRequest getRequest = new GetRequest(contactFolderId, objectId, tz, false);
-        GetResponse getResponse = client.execute(getRequest);
+        GetResponse getResponse = getClient().execute(getRequest);
         Date lastModified = new Date(((JSONObject) getResponse.getData()).getLong("last_modified"));
 
         final Contact contactObj = new Contact();
@@ -64,13 +64,13 @@ public class UpdateTest extends AbstractContactTest {
         final int objectId = insertContact(contactObj);
 
         final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
         final String imageUrl = response.getImageUrl();
         if (imageUrl == null) {
             fail("Contact contains no image URL.");
         }
 
-        final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
+        final byte[] b = loadImageByURL(getClient().getProtocol(), getClient().getHostname(), imageUrl);
 
         OXTestToolkit.assertImageBytesEqualsAndNotNull("image", contactObj.getImage1(), b);
     }
@@ -86,13 +86,13 @@ public class UpdateTest extends AbstractContactTest {
         updateContact(contactObj, contactFolderId);
 
         final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
         final String imageUrl = response.getImageUrl();
         if (imageUrl == null) {
             fail("Contact contains no image URL.");
         }
 
-        final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
+        final byte[] b = loadImageByURL(getClient().getProtocol(), getClient().getHostname(), imageUrl);
 
         OXTestToolkit.assertImageBytesEqualsAndNotNull("image", contactObj.getImage1(), b);
     }

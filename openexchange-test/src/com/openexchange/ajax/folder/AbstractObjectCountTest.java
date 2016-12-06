@@ -57,7 +57,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -88,7 +87,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
 
         ContentTypeRegistry ctr = ContentTypeRegistry.getInstance();
         ServiceRegistry.getInstance().addService(ContentTypeRegistry.class, ctr);

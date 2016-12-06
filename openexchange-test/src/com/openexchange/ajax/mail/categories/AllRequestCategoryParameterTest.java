@@ -82,8 +82,7 @@ public class AllRequestCategoryParameterTest extends AbstractMailCategoriesTest 
 
     @Test
     public void testAllRequest() throws Exception {
-
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         MailMessage[] messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_GENERAL);

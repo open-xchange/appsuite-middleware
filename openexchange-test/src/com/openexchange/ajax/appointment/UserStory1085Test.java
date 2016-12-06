@@ -64,7 +64,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -95,8 +94,8 @@ public class UserStory1085Test extends AppointmentTest {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
-        clientC = new AJAXClient(User.User3);
+        clientB = new AJAXClient(testContext.acquireUser());
+        clientC = new AJAXClient(testContext.acquireUser());
         userIdA = clientA.getValues().getUserId();
         userIdB = clientB.getValues().getUserId();
         userIdC = clientC.getValues().getUserId();

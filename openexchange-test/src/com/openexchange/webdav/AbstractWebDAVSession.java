@@ -51,8 +51,10 @@ package com.openexchange.webdav;
 
 import org.junit.After;
 import org.junit.Before;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
 
 /**
  *
@@ -61,13 +63,17 @@ import com.openexchange.webdav.xml.framework.WebDAVClient.User;
 public abstract class AbstractWebDAVSession {
 
     private WebDAVClient client;
+    protected TestContext testContext;
+    protected TestUser testUser;
 
     /**
      * {@inheritDoc}
      */
     @Before
     public void setUp() throws Exception {
-        client = new WebDAVClient(User.User1);
+        testContext = TestContextPool.acquireContext();
+        testUser = testContext.acquireUser();
+        client = new WebDAVClient(testUser);
     }
 
     /**
@@ -75,8 +81,12 @@ public abstract class AbstractWebDAVSession {
      */
     @After
     protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
+        try {
+            client.logout();
+            client = null;
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     /**

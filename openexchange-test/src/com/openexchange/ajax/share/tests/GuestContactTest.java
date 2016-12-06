@@ -105,7 +105,7 @@ public class GuestContactTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -122,8 +122,8 @@ public class GuestContactTest extends ShareTest {
         GetRequest guestGetRequest = new GetRequest(guest.getEntity(), guestClient.getValues().getTimeZone());
         GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
         Contact guestContact = guestGetResponse.getContact();
-        GetRequest getRequest = new GetRequest(guest.getEntity(), client.getValues().getTimeZone());
-        GetResponse getResponse = client.execute(getRequest);
+        GetRequest getRequest = new GetRequest(guest.getEntity(), getClient().getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
         Contact contact = getResponse.getContact();
         assertEquals("Contacts does not match", contact, guestContact);
         assertNotNull("Contact is null.", contact);
@@ -147,7 +147,7 @@ public class GuestContactTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -175,8 +175,8 @@ public class GuestContactTest extends ShareTest {
         /*
          * check guest
          */
-        GetRequest getRequest = new GetRequest(guest.getEntity(), client.getValues().getTimeZone());
-        GetResponse getResponse = client.execute(getRequest);
+        GetRequest getRequest = new GetRequest(guest.getEntity(), getClient().getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
         Contact contact = getResponse.getContact();
         assertEquals("Display name was not updated", guestName + "_modified", contact.getDisplayName());
         /*
@@ -184,7 +184,7 @@ public class GuestContactTest extends ShareTest {
          */
         contact.setDisplayName(guestName);
         UpdateRequest updateRequest2 = new UpdateRequest(guestContact, guestUser, false);
-        UpdateResponse updateResponse2 = client.execute(updateRequest2);
+        UpdateResponse updateResponse2 = getClient().execute(updateRequest2);
         assertTrue("Client was able to update foreign contact.", updateResponse2.hasError());
         assertEquals(ContactExceptionCodes.NO_CHANGE_PERMISSION.getNumber(), updateResponse2.getException().getCode());
     }
@@ -204,7 +204,7 @@ public class GuestContactTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -220,7 +220,7 @@ public class GuestContactTest extends ShareTest {
         /*
          * get guest contact as other user
          */
-        AJAXClient secondClient = new AJAXClient(AJAXClient.User.User2);
+        AJAXClient secondClient = new AJAXClient(testContext.acquireUser());
         GetRequest getRequest = new GetRequest(guest.getEntity(), secondClient.getValues().getTimeZone());
         GetResponse getResponse = secondClient.execute(getRequest);
         assertFalse("Contact could not be loaded.", getResponse.hasError());

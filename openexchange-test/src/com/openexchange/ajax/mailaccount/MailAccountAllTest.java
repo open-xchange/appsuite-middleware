@@ -57,9 +57,7 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
 import com.openexchange.exception.OXException;
@@ -71,7 +69,6 @@ import com.openexchange.mailaccount.MailAccountDescription;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@RunWith(ConcurrentTestRunner.class)
 public class MailAccountAllTest extends AbstractMailAccountTest {
 
     public MailAccountAllTest() {

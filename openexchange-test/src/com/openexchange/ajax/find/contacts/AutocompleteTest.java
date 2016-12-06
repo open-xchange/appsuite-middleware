@@ -68,19 +68,10 @@ import com.openexchange.java.util.TimeZones;
  */
 public class AutocompleteTest extends ContactsFindTest {
 
-    /**
-     * Initializes a new {@link AutocompleteTest}.
-     *
-     * @param name The test name
-     */
-    public AutocompleteTest() {
-        super();
-    }
-
     @Test
     public void testAutocompleteCurrentUser() throws Exception {
-        String defaultAddress = client.getValues().getDefaultAddress();
-        Contact ownContact = client.execute(new GetRequest(client.getValues().getUserId(), TimeZones.UTC)).getContact();
+        String defaultAddress = getClient().getValues().getDefaultAddress();
+        Contact ownContact = getClient().execute(new GetRequest(getClient().getValues().getUserId(), TimeZones.UTC)).getContact();
         ComplexDisplayItem displayItem = DisplayItems.convert(ownContact);
         assertFoundFacetInAutocomplete(defaultAddress.substring(0, 3), displayItem.getDisplayName());
     }
@@ -97,7 +88,7 @@ public class AutocompleteTest extends ContactsFindTest {
 
     private FacetValue assertFoundFacetInAutocomplete(String prefix, String expectedEmail1) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), expectedEmail1);
         assertNotNull("no facet value found for: " + expectedEmail1, foundFacetValue);
         return foundFacetValue;

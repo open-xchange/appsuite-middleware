@@ -74,18 +74,14 @@ public class ChangeTimeZoneTest extends AbstractAJAXSession {
     private CalendarTestManager ctm;
     private Appointment app;
 
-    public ChangeTimeZoneTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         app = new Appointment();
         app.setTitle("ChangeTimeZoneTest");
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         app.setStartDate(D("01.04.2015 08:00", UTC));
         app.setEndDate(D("01.04.2015 09:00", UTC));
         app.setTimezone("Europe/Berlin");
@@ -99,7 +95,7 @@ public class ChangeTimeZoneTest extends AbstractAJAXSession {
         app.setTimezone("US/Eastern");
         ctm.update(app);
 
-        Appointment loaded = ctm.get(client.getValues().getPrivateAppointmentFolder(), app.getObjectID());
+        Appointment loaded = ctm.get(getClient().getValues().getPrivateAppointmentFolder(), app.getObjectID());
         assertEquals("Wrong tmezone.", "US/Eastern", loaded.getTimezone());
         assertTrue(true);
     }

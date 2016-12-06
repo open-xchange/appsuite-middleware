@@ -91,10 +91,10 @@ public class Bug38079Test extends AbstractAJAXSession {
         GetResponse getResponse = getClient().execute(getRequest);
         origTimeZone = getResponse.getString();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         appointment = new Appointment();
         appointment.setTitle("Bug 38079 Test");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setRecurrenceType(Appointment.YEARLY);
         appointment.setInterval(1);
         appointment.setDayInMonth(16);

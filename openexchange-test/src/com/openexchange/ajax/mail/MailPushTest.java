@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.actions.MailReferenceResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequestWithUploads;
 import com.openexchange.mail.MailJSONField;
@@ -95,9 +94,9 @@ public class MailPushTest extends AbstractMailTest {
 
     @Test
     public void testSocketIO() throws Exception {
-        String sessionId = client.getSession().getId();
-        String hostname = client.getHostname();
-        String protocol = client.getProtocol();
+        String sessionId = getClient().getSession().getId();
+        String hostname = getClient().getHostname();
+        String protocol = getClient().getProtocol();
 
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Exception> ref = new AtomicReference<>();
@@ -109,7 +108,7 @@ public class MailPushTest extends AbstractMailTest {
             public void run() {
                 AJAXClient client2 = null;
                 try {
-                    client2 = new AJAXClient(User.User2);
+                    client2 = new AJAXClient(testContext.acquireUser());
 
                     String eml = "    Date: Tue, 1 Jul 2014 17:37:28 +0200 (CEST)\n" + "    From: from foo <from@example.tld>\n" + "    Reply-To: rto foo <bar@example.tld>\n" + "    To: to bar <to@example.tld>\n" + "    Cc: cc bar <cc@example.tld>\n" + "    Bcc: bcc bar <bcc@example.tld>\n" + "    Message-ID: <11140339.1095068.1404229048881.JavaMail.www@wwinf8905>\n" + "    Subject: plain text\n" + "    MIME-Version: 1.0\n" + "    Content-Type: text/plain; charset=UTF-8\n" + "    Content-Transfer-Encoding: 7bit\n" + "\n" + "    plain text\n" + "\n" + "    A test signature";
 

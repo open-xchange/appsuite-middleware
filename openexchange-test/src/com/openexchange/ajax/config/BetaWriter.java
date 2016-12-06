@@ -52,7 +52,7 @@ package com.openexchange.ajax.config;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Random;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 
@@ -69,11 +69,11 @@ public final class BetaWriter extends AttributeWriter {
 
     private final boolean ignoreConcurrentModification;
 
-    public BetaWriter(User user) {
+    public BetaWriter(TestUser user) {
         this(user, false);
     }
 
-    public BetaWriter(User user, boolean ignoreConcurrentModification) {
+    public BetaWriter(TestUser user, boolean ignoreConcurrentModification) {
         super(Tree.Beta, user);
         rand = new Random(System.currentTimeMillis());
         this.ignoreConcurrentModification = ignoreConcurrentModification;

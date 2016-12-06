@@ -98,11 +98,11 @@ public class Bug40826Test extends ShareTest {
         /*
          * try and create folder shared to guest user
          */
-        FolderObject folder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId(), guestPermission);
+        FolderObject folder = Create.createPrivateFolder(randomUID(), module, getClient().getValues().getUserId(), guestPermission);
         folder.setParentFolderID(getDefaultFolder(module));
-        InsertRequest insertRequest = new InsertRequest(randomFolderAPI(), folder, client.getValues().getTimeZone());
+        InsertRequest insertRequest = new InsertRequest(randomFolderAPI(), folder, getClient().getValues().getTimeZone());
         insertRequest.setFailOnError(false);
-        InsertResponse insertResponse = client.execute(insertRequest);
+        InsertResponse insertResponse = getClient().execute(insertRequest);
         assertNotNull(insertResponse);
         assertTrue("No error in response", insertResponse.hasError());
         assertNotNull("No error in response", insertResponse.getException());

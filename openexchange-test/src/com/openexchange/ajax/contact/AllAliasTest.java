@@ -52,13 +52,11 @@ package com.openexchange.ajax.contact;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonAllResponse;
 
 /**
@@ -82,10 +80,9 @@ public class AllAliasTest extends ContactTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
+        client = new AJAXClient(testContext.acquireUser());
     }
 
-    @After
     @Test
     public void testAllAlias() throws Exception {
         final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateContactFolder(), "all");

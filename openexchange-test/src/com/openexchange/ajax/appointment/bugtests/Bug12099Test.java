@@ -63,7 +63,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -152,7 +151,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
     public void testSeriesChangedFromIsZero2() throws Throwable {
         final AJAXClient clientA = getClient();
         final int userIdA = clientA.getValues().getUserId();
-        final AJAXClient clientB = new AJAXClient(User.User2);
+        final AJAXClient clientB = new AJAXClient(testContext.acquireUser());
         final FolderObject folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 12099 - " + String.valueOf(System.currentTimeMillis()), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(userIdA, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         {
             final CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
@@ -160,7 +159,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
         }
         final Appointment appointment = new Appointment();
         try {
-            final AJAXClient clientC = new AJAXClient(User.User3);
+            final AJAXClient clientC = new AJAXClient(testContext.acquireUser());
             final int userIdC = clientC.getValues().getUserId();
             final TimeZone tzB = clientB.getValues().getTimeZone();
             {

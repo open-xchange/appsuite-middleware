@@ -64,7 +64,6 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
 import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -106,7 +105,7 @@ public class IMipImportTest extends AbstractConversionTest {
         super.setUp();
 
         client1 = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
 
         uuid = UUID.randomUUID().toString();
 
@@ -119,7 +118,7 @@ public class IMipImportTest extends AbstractConversionTest {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(objectId, folder, new Date(Long.MAX_VALUE)));
+        getClient().execute(new DeleteRequest(objectId, folder, new Date(Long.MAX_VALUE)));
 
         super.tearDown();
     }
@@ -135,8 +134,8 @@ public class IMipImportTest extends AbstractConversionTest {
         objectId = Integer.valueOf(folderIdFirst[0][1]);
 
         GetRequest getRequest = new GetRequest(folder, objectId);
-        GetResponse getResponse = client.execute(getRequest);
-        Appointment appointment = getResponse.getAppointment(client.getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
+        Appointment appointment = getResponse.getAppointment(getClient().getValues().getTimeZone());
 
         boolean foundFirst = false;
         boolean foundSecond = false;

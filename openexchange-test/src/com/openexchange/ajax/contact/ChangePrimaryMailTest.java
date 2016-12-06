@@ -84,9 +84,9 @@ public class ChangePrimaryMailTest extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         timeZone = getClient().getValues().getTimeZone();
-        GetResponse response = client.execute(new GetRequest(client.getValues().getUserId(), timeZone));
+        GetResponse response = getClient().execute(new GetRequest(getClient().getValues().getUserId(), timeZone));
         userContact = response.getContact();
-        contactId = client.execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
+        contactId = getClient().execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
     }
 
     @Test
@@ -97,6 +97,6 @@ public class ChangePrimaryMailTest extends AbstractAJAXSession {
         testContact.setLastModified(userContact.getLastModified());
         testContact.setEmail1("fummel@fummel.de");
         UpdateRequest updateRequest = new UpdateRequest(testContact);
-        client.execute(updateRequest);
+        getClient().execute(updateRequest);
     }
 }

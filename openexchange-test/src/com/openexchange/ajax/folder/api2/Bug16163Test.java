@@ -66,7 +66,6 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.PathRequest;
 import com.openexchange.ajax.folder.actions.PathResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -89,7 +88,7 @@ public class Bug16163Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.CALENDAR);
         appointmentFolder = client.getValues().getPrivateAppointmentFolder();

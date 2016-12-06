@@ -63,7 +63,6 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.ResourceTest;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.exception.OXException;
@@ -82,10 +81,6 @@ public class NewTest extends AppointmentTest {
     private int objectId2;
     private int folderId;
     private int folderId2;
-
-    public NewTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -115,7 +110,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSimple");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -145,7 +140,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -177,7 +172,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -221,7 +216,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime rounds down");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -271,7 +266,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime rounds down");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -422,7 +417,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSpecialCharacters - \u00F6\u00E4\u00FC-:,;.#?!\u00A7$%&/()=\"<>");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -442,7 +437,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testPrivateFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -463,7 +458,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testPrivateFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -492,7 +487,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSharedFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -519,7 +514,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testDailyRecurrence");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
@@ -549,7 +544,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testWeeklyRecurrence");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.WEEKLY);
@@ -579,7 +574,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testMonthlyRecurrenceDayInMonth");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.MONTHLY);
@@ -609,7 +604,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testMonthlyRecurrenceDays");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.MONTHLY);
@@ -640,7 +635,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testYearlyRecurrenceDayInMonth");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.YEARLY);
@@ -671,7 +666,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testYearlyRecurrenceDays");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.YEARLY);

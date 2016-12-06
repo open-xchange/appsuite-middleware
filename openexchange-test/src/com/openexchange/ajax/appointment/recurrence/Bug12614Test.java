@@ -68,7 +68,6 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -117,8 +116,8 @@ public final class Bug12614Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         boss = getClient();
-        secretary = new AJAXClient(User.User2);
-        thirdUser = new AJAXClient(User.User3);
+        secretary = new AJAXClient(testContext.acquireUser());
+        thirdUser = new AJAXClient(testContext.acquireUser());
         secTZ = secretary.getValues().getTimeZone();
         bossSharesPrivateFolder();
         secretaryCreatesSeries();

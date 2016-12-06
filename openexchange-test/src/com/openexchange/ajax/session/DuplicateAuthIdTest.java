@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.session;
 
-import static com.openexchange.ajax.framework.AJAXClient.User.User1;
-import static com.openexchange.ajax.framework.AJAXClient.User.User2;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.After;
@@ -58,10 +56,13 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
 
@@ -73,59 +74,50 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 public class DuplicateAuthIdTest {
 
     private String sameAuthId;
-
-    private AJAXClient client1;
-
-    private String login1;
-
-    private String password1;
-
-    private AJAXSession session2;
-
+    private TestContext testContext;
+    private TestUser testUser;
+    private TestUser testUser2;
     private AJAXClient client2;
-
-    private String login2;
-
-    private String password2;
-
-    public DuplicateAuthIdTest() {
-        super();
-    }
+    private AJAXClient client;
+    private AJAXSession session2;
 
     @Before
     public void setUp() throws Exception {
+        ProvisioningSetup.init();
+        testContext = TestContextPool.acquireContext();
+        testUser = testContext.acquireUser();
+        testUser2 = testContext.acquireUser();
+
         AJAXConfig.init();
         sameAuthId = LoginTools.generateAuthId();
         final AJAXSession session1 = new AJAXSession();
-        client1 = new AJAXClient(session1, false); // explicit logout in tearDown
-        login1 = AJAXConfig.getProperty(User1.getLogin()) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password1 = AJAXConfig.getProperty(User1.getPassword());
-        LoginResponse response = client1.execute(new LoginRequest(login1, password1, sameAuthId, LoginTest.class.getName(), "6.15.0"));
+        client = new AJAXClient(testUser);
+        LoginResponse response = client.execute(new LoginRequest(testUser.getLogin(), testUser.getPassword(), sameAuthId, LoginTest.class.getName(), "6.15.0"));
 
         session1.setId(response.getSessionId());
+
+        client2 = new AJAXClient(testUser2);
+
         session2 = new AJAXSession();
         session2.getConversation().putCookie("JSESSIONID", session1.getConversation().getCookieValue("JSESSIONID"));
         client2 = new AJAXClient(session2, false); // explicit logout in test method
-        login2 = AJAXConfig.getProperty(User2.getLogin()) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        ;
-        password2 = AJAXConfig.getProperty(User2.getPassword());
     }
 
     @After
-    public void tearDown() throws Exception {
-        client1.logout();
+    public void tearDown() {
+        TestContextPool.backContext(testContext);
     }
 
     @Test
     public void testDuplicateAuthId() throws Throwable {
-        LoginResponse response = client2.execute(new LoginRequest(login2, password2, sameAuthId, LoginTest.class.getName(), "6.15.0", false));
+        LoginResponse response = client2.execute(new LoginRequest(testUser2.getLogin(), testUser2.getPassword(), sameAuthId, LoginTest.class.getName(), "6.15.0", false));
         if (!response.hasError()) {
             session2.setId(response.getSessionId());
             client2.logout();
             fail("Duplicate authId not detected.");
         } else {
             OXException e = response.getException();
-            OXException se = SessionExceptionCodes.DUPLICATE_AUTHID.create(login1, login2);
+            OXException se = SessionExceptionCodes.DUPLICATE_AUTHID.create(testUser.getLogin(), testUser2.getLogin());
             assertTrue("Found wrong exception.", se.similarTo(e));
         }
     }

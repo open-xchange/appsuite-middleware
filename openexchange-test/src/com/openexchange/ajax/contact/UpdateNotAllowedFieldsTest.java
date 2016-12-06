@@ -107,7 +107,7 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
     }
 
     private Contact[] getContactsToUpdate() throws Exception {
-        return new Contact[] { client.execute(new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone())).getContact(), manager.getAction(manager.newAction(generateContact())) };
+        return new Contact[] { getClient().execute(new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone())).getContact(), manager.getAction(manager.newAction(generateContact())) };
     }
 
     private static class DeltaUpdateRequest extends UpdateRequest {

@@ -153,14 +153,14 @@ public class UpdateMailTest extends AbstractMailTest {
                 fo.setModule(FolderObject.MAIL);
 
                 final OCLPermission oclP = new OCLPermission();
-                oclP.setEntity(client.getValues().getUserId());
+                oclP.setEntity(getClient().getValues().getUserId());
                 oclP.setGroupPermission(false);
                 oclP.setFolderAdmin(true);
                 oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
                 final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
-                final InsertResponse response = client.execute(request);
+                final InsertResponse response = getClient().execute(request);
 
                 newId = (String) response.getResponse().getData();
             }
@@ -209,7 +209,7 @@ public class UpdateMailTest extends AbstractMailTest {
                 // Delete folder
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
-                    client.execute(deleteRequest);
+                    getClient().execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }
@@ -236,14 +236,14 @@ public class UpdateMailTest extends AbstractMailTest {
                 fo.setModule(FolderObject.MAIL);
 
                 final OCLPermission oclP = new OCLPermission();
-                oclP.setEntity(client.getValues().getUserId());
+                oclP.setEntity(getClient().getValues().getUserId());
                 oclP.setGroupPermission(false);
                 oclP.setFolderAdmin(true);
                 oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
                 final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
-                final InsertResponse response = client.execute(request);
+                final InsertResponse response = getClient().execute(request);
 
                 newId = (String) response.getResponse().getData();
             }
@@ -290,7 +290,7 @@ public class UpdateMailTest extends AbstractMailTest {
                 // Delete folder
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
-                    client.execute(deleteRequest);
+                    getClient().execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }

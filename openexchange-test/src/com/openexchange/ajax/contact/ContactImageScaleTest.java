@@ -81,13 +81,13 @@ public class ContactImageScaleTest extends AbstractContactTest {
             contactObj.setImageContentType("image/png");
             final int objectId = insertContact(contactObj);
             final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
-            final GetResponse response = client.execute(request);
+            final GetResponse response = getClient().execute(request);
             final String imageUrl = response.getImageUrl();
             if (imageUrl == null) {
                 fail("Contact contains no image URL.");
             }
 
-            final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
+            final byte[] b = loadImageByURL(getClient().getProtocol(), getClient().getHostname(), imageUrl);
             assertTrue("Wrong or no scaling", b.length < bigImage.length);
         } finally {
             if (input != null) {
@@ -113,13 +113,13 @@ public class ContactImageScaleTest extends AbstractContactTest {
             updateContact(contactObj, contactFolderId);
 
             final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
-            final GetResponse response = client.execute(request);
+            final GetResponse response = getClient().execute(request);
             final String imageUrl = response.getImageUrl();
             if (imageUrl == null) {
                 fail("Contact contains no image URL.");
             }
 
-            final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
+            final byte[] b = loadImageByURL(getClient().getProtocol(), getClient().getHostname(), imageUrl);
             assertTrue("Wrong or no scaling", b.length < bigImage.length);
         } finally {
             if (input != null) {

@@ -55,7 +55,7 @@ public class Bug32200Test extends AbstractManagedContactTest {
         Contact contact = generateContact(getClass().getName());
         contact.setCategories(categories);
         manager.newAction(contact);
-        CSVExportResponse csvExportResponse = client.execute(new CSVExportRequest(folderID));
+        CSVExportResponse csvExportResponse = getClient().execute(new CSVExportRequest(folderID));
         String csv = String.valueOf(csvExportResponse.getData());
         assertNotNull("no data exported", csv);
         assertTrue("categories not exported", csv.contains(categories));

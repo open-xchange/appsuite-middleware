@@ -82,24 +82,24 @@ public class Bug15937Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         contact = new Contact();
-        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setDisplayName("Test for bug 15937");
         contact.setNumberOfAttachments(42);
         InsertRequest request = new InsertRequest(contact);
-        InsertResponse response = client.execute(request);
+        InsertResponse response = getClient().execute(request);
         response.fillObject(contact);
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contact));
+        getClient().execute(new DeleteRequest(contact));
         super.tearDown();
     }
 
     @Test
     public void testNumberOfAttachments() throws Throwable {
-        GetRequest request = new GetRequest(contact, client.getValues().getTimeZone());
-        GetResponse response = client.execute(request);
+        GetRequest request = new GetRequest(contact, getClient().getValues().getTimeZone());
+        GetResponse response = getClient().execute(request);
         Contact testContact = response.getContact();
         assertTrue("Number of attachments should be send.", testContact.containsNumberOfAttachments());
         assertEquals("Number of attachments must be zero.", 0, testContact.getNumberOfAttachments());

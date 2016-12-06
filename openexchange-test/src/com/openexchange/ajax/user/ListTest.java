@@ -74,10 +74,10 @@ public class ListTest extends AbstractAJAXSession {
 
     @Test
     public void testListUser() throws Exception {
-        final int[] userIdArray = { client.getValues().getUserId() };
+        final int[] userIdArray = { getClient().getValues().getUserId() };
         final int[] cols = { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME };
         final ListRequest request = new ListRequest(userIdArray, cols);
-        final ListResponse response = client.execute(request);
+        final ListResponse response = getClient().execute(request);
         final Contact[] contactArray = response.getUsers();
         assertEquals("check response array", userIdArray.length, contactArray.length);
     }

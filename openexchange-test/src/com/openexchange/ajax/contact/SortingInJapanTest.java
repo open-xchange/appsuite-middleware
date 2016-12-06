@@ -76,17 +76,17 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        originalLocale = client.execute(new GetRequest(Tree.Language)).getString();
+        originalLocale = getClient().execute(new GetRequest(Tree.Language)).getString();
         if (Strings.isEmpty(originalLocale)) {
             fail("no locale found");
         }
-        client.execute(new SetRequest(Tree.Language, "ja-JP"));
+        getClient().execute(new SetRequest(Tree.Language, "ja-JP"));
     }
 
     @After
     public void tearDown() throws Exception {
         if (null != originalLocale) {
-            client.execute(new SetRequest(Tree.Language, originalLocale));
+            getClient().execute(new SetRequest(Tree.Language, originalLocale));
         }
         super.tearDown();
     }

@@ -70,6 +70,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CustomizedParser;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
@@ -86,11 +87,7 @@ import com.openexchange.oauth.provider.resourceserver.scope.Scope;
  */
 public class OAuthClient extends AJAXClient {
 
-    public OAuthClient(String clientId, String clientSecret, String redirectURI, Scope scope) throws Exception {
-        this(User.User1, clientId, clientSecret, redirectURI, scope);
-    }
-
-    public OAuthClient(User user, String clientId, String clientSecret, String redirectURI, Scope scope) throws Exception {
+    public OAuthClient(TestUser user, String clientId, String clientSecret, String redirectURI, Scope scope) throws Exception {
         super(new OAuthSession(user, clientId, clientSecret, redirectURI, scope), false);
     }
 

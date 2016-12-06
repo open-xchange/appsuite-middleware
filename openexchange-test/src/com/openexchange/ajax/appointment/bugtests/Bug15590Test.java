@@ -20,7 +20,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -53,20 +52,20 @@ public class Bug15590Test extends AbstractAJAXSession {
         super.setUp();
 
         // Create 2. User
-        secondClient = new AJAXClient(User.User2);
+        secondClient = new AJAXClient(testContext.acquireUser());
         secondUserValues = secondClient.getValues();
 
         // Create Folder and share it to 2. User
-        testFolder = Create.createPrivateFolder("bug15590folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getUserId());
-        testFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        testFolder = Create.createPrivateFolder("bug15590folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getUserId());
+        testFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
 
         com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, testFolder);
-        InsertResponse folderInsertResponse = client.execute(insFolder);
+        InsertResponse folderInsertResponse = getClient().execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());
         // Only necessary because new folder API missed the time stamps.
-        testFolder.setLastModified(client.execute(new GetRequest(EnumAPI.OX_NEW, testFolder.getObjectID())).getTimestamp());
+        testFolder.setLastModified(getClient().execute(new GetRequest(EnumAPI.OX_NEW, testFolder.getObjectID())).getTimestamp());
 
-        FolderTools.shareFolder(client, EnumAPI.OX_NEW, testFolder.getObjectID(), secondUserValues.getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        FolderTools.shareFolder(getClient(), EnumAPI.OX_NEW, testFolder.getObjectID(), secondUserValues.getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
         // Create an Appointment as User B
         testAppointment = new Appointment();
@@ -127,7 +126,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         // Delete testFolder
         if (testFolder != null) {
             final DeleteRequest delFolder = new DeleteRequest(EnumAPI.OX_NEW, testFolder);
-            client.execute(delFolder);
+            getClient().execute(delFolder);
         }
 
         super.tearDown();

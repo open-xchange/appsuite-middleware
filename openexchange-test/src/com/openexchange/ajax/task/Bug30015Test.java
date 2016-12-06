@@ -123,7 +123,7 @@ public final class Bug30015Test extends AbstractAJAXSession {
         first.setDateCompleted(cal.getTime());
         first.setLastModified(client1.execute(new UpdateRequest(first, timeZone)).getTimestamp());
         second = Bug21026Test.findNextOccurrence(client1, client1.execute(new GetRequest(first)).getTask(timeZone));
-        second = client.execute(new GetRequest(second)).getTask(timeZone);
+        second = getClient().execute(new GetRequest(second)).getTask(timeZone);
         Assert.assertFalse("Next occurrence of task must not contain the attribute 'date completed'.", second.containsDateCompleted());
         assertNull("Next occurrence of task must not contain the attribute 'date completed'.", second.getDateCompleted());
     }

@@ -55,7 +55,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.AbstractWebDAVSession;
@@ -80,7 +79,7 @@ public class Bug15051Test extends AbstractWebDAVSession {
         super.setUp();
         client = getClient();
         folder = client.getFolderTools().getDefaultContactFolder();
-        client2 = new AJAXClient(User.User1);
+        client2 = new AJAXClient(testContext.acquireUser());
         contact = new Contact();
         contact.setParentFolderID(folder.getObjectID());
         contact.setDisplayName("Test for bug 15051");

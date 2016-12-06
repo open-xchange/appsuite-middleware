@@ -94,7 +94,7 @@ public class Bug30903Test extends AbstractMailTest {
     @After
     public void tearDown() throws Exception {
         DeleteRequest delReq = new DeleteRequest(fmids, true);
-        client.execute(delReq);
+        getClient().execute(delReq);
         super.tearDown();
     }
 
@@ -107,10 +107,10 @@ public class Bug30903Test extends AbstractMailTest {
      */
     @Test
     public void testDeleteDraft() throws OXException, IOException, JSONException {
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
         //Save draft
         NewMailRequest newMailReq = new NewMailRequest(values.getDraftsFolder(), mail.replaceAll("#ADDR#", values.getSendAddress()), MailFlag.DRAFT.getValue());
-        NewMailResponse newMailResp = client.execute(newMailReq);
+        NewMailResponse newMailResp = getClient().execute(newMailReq);
         assertNotNull(newMailResp);
         String draftID = newMailResp.getId();
         fmids[0][0] = values.getDraftsFolder();
@@ -118,7 +118,7 @@ public class Bug30903Test extends AbstractMailTest {
 
         //Get draft
         GetRequest getReq = new GetRequest(values.getDraftsFolder(), draftID);
-        GetResponse getResp = client.execute(getReq);
+        GetResponse getResp = getClient().execute(getReq);
         assertNotNull(getResp);
 
         //Edit draft
@@ -143,13 +143,13 @@ public class Bug30903Test extends AbstractMailTest {
 
         //Send mail
         SendRequest sendRequest = new SendRequest(jsonMail.toString());
-        SendResponse sendResponse = client.execute(sendRequest);
+        SendResponse sendResponse = getClient().execute(sendRequest);
         assertNotNull(sendResponse);
         fmids[1] = sendResponse.getFolderAndID();
 
         //Verify 'Drafts' folder
         AllRequest allReq = new AllRequest(values.getDraftsFolder(), COLUMNS_FOLDER_ID, 0, Order.ASCENDING, true);
-        AllResponse allResp = client.execute(allReq);
+        AllResponse allResp = getClient().execute(allReq);
         assertNotNull(allResp);
         Object[][] objArray = allResp.getArray();
         for (Object o[] : objArray) {

@@ -98,9 +98,9 @@ public class Bug16141Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        values = client.getValues();
+        values = getClient().getValues();
         folder = values.getInboxFolder();
-        address = client.getValues().getSendAddress();
+        address = getClient().getValues().getSendAddress();
         testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
     }
 
@@ -109,7 +109,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         InputStream[] is = createABunchOfMails();
 
         final ImportMailRequest importReq = new ImportMailRequest(folder, MailFlag.SEEN.getValue(), is);
-        final ImportMailResponse importResp = client.execute(importReq);
+        final ImportMailResponse importResp = getClient().execute(importReq);
         JSONArray json = (JSONArray) importResp.getData();
 
         int err = 0;
@@ -155,7 +155,7 @@ public class Bug16141Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         if (ids != null) {
-            client.execute(new DeleteRequest(ids));
+            getClient().execute(new DeleteRequest(ids));
         }
         super.tearDown();
     }

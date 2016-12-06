@@ -62,7 +62,6 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.capabilities.actions.AllRequest;
 import com.openexchange.ajax.capabilities.actions.AllResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -99,7 +98,7 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
 
     @Before
     public void setUp() throws Exception {
-        AJAXClient configClient = new AJAXClient(User.User1);
+        AJAXClient configClient = getClient();
         setUpConfiguration(configClient, true);
         super.setUp();
         AllResponse response = getClient().execute(new AllRequest());
@@ -163,8 +162,8 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
         return getSendAddress(getClient());
     }
 
-    protected static String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
-        return client.getValues().getSendAddress();
+    protected String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
+        return getClient().getValues().getSendAddress();
     }
 
     protected String getInboxFolder() throws OXException, IOException, SAXException, JSONException {

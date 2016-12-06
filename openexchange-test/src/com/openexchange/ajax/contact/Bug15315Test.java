@@ -83,7 +83,7 @@ public class Bug15315Test extends AbstractAJAXSession {
         final Random rand = new Random(System.currentTimeMillis());
         for (int i = 1; i <= RANGE; i++) {
             GetRequest request = new GetRequest(rand.nextInt(), i, tz, false);
-            GetResponse response = client.execute(request);
+            GetResponse response = getClient().execute(request);
             if (!response.hasError()) {
                 fail("Contacts can be read without respect to the folder identifier.");
             }

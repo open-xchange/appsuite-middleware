@@ -84,14 +84,14 @@ public class ListAliasTest extends AbstractMailTest {
 
     @Test
     public void testListAlias() throws Exception {
-        final String[][] folderAndIds = getFolderAndIDs(client.getValues().getInboxFolder());
+        final String[][] folderAndIds = getFolderAndIDs(getClient().getValues().getInboxFolder());
 
         final ListRequest aliasRequest = new ListRequest(folderAndIds, "list");
-        final CommonListResponse aliasResponse = client.execute(aliasRequest);
+        final CommonListResponse aliasResponse = getClient().execute(aliasRequest);
         final Object[][] aliasMails = aliasResponse.getArray();
 
         final ListRequest request = new ListRequest(folderAndIds, new int[] { 600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102 });
-        final CommonListResponse response = client.execute(request);
+        final CommonListResponse response = getClient().execute(request);
         final Object[][] mails = response.getArray();
 
         assertEquals("Arrays' sizes are not equal.", aliasMails.length, mails.length);

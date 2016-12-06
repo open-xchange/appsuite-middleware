@@ -64,7 +64,6 @@ import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.actions.SetAttributeRequest;
 import com.openexchange.ajax.user.actions.SetAttributeResponse;
@@ -111,9 +110,9 @@ public final class Bug26354Test extends AbstractAJAXSession {
         origBetaValue = client.execute(new GetRequest(Tree.Beta)).getBoolean();
         origTimeZoneValue = client.execute(new GetRequest(Tree.TimeZone)).getString();
 
-        writer[0] = new BetaWriter(User.User1);
+        writer[0] = new BetaWriter(testUser);
         thread[0] = new Thread(writer[0]);
-        writer[1] = new AttributeWriter(Tree.TimeZone, User.User1) {
+        writer[1] = new AttributeWriter(Tree.TimeZone, testUser) {
 
             private final Random r = new Random();
 

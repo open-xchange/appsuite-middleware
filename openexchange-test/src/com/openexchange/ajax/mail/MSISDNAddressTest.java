@@ -101,10 +101,9 @@ public class MSISDNAddressTest extends AbstractMailTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        userValues = client.getValues();
+        userValues = getClient().getValues();
         // get the current contactData and
-        GetResponse response = client.execute(new GetRequest(userValues.getUserId(), userValues.getTimeZone()));
+        GetResponse response = getClient().execute(new GetRequest(userValues.getUserId(), userValues.getTimeZone()));
         contactData = response.getContact();
         originalCellPhoneNumber = contactData.getCellularTelephone1();
         setCellularNumberOfContact(validTestCellPhoneNumber);
@@ -124,7 +123,7 @@ public class MSISDNAddressTest extends AbstractMailTest {
         changedContactData.setCellularTelephone1(validTestCellPhoneNumber);
         changedContactData.setLastModified(new Date());
         UpdateRequest updateRequest = new UpdateRequest(changedContactData, null);
-        UpdateResponse updateResponse = client.execute(updateRequest);
+        UpdateResponse updateResponse = getClient().execute(updateRequest);
         // successful update returns only a timestamp
         Date timestamp = updateResponse.getTimestamp();
         assertNotNull(timestamp);
@@ -135,10 +134,10 @@ public class MSISDNAddressTest extends AbstractMailTest {
      */
     @Test
     public void testValidFromAddress() throws OXException, IOException, JSONException, SAXException {
-        JSONObject createEMail = createEMail(getSendAddress(client), "MSISDNSubject", MailContentType.PLAIN.name(), "Testing MSISDN as sender address");
+        JSONObject createEMail = createEMail(getSendAddress(getClient()), "MSISDNSubject", MailContentType.PLAIN.name(), "Testing MSISDN as sender address");
         createEMail.put(MailJSONField.FROM.getKey(), validTestCellPhoneNumber);
         SendRequest request = new SendRequest(createEMail.toString());
-        SendResponse response = client.execute(request);
+        SendResponse response = getClient().execute(request);
         assertTrue("Send request failed", response.getFolderAndID() != null && response.getFolderAndID().length > 0);
     }
 
@@ -148,7 +147,7 @@ public class MSISDNAddressTest extends AbstractMailTest {
         JSONObject createEMail = createEMail(getSendAddress(getClient()), "MSISDNSubject", MailContentType.PLAIN.name(), "Testing MSISDN as sender address");
         createEMail.put(MailJSONField.FROM.getKey(), invalidTestCellPhoneNumber);
         SendRequest request = new SendRequest(createEMail.toString(), false);
-        SendResponse response = client.execute(request);
+        SendResponse response = getClient().execute(request);
         assertTrue(response.getException() != null);
         assertEquals(OXException.CATEGORY_USER_INPUT, response.getException().getCategory());
         assertEquals(response.getErrorMessage(), "MSG-0056", response.getException().getErrorCode());

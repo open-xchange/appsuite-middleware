@@ -44,8 +44,8 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        defaultAddress = client.getValues().getSendAddress();
-        contactManager = new ContactTestManager(client);
+        defaultAddress = getClient().getValues().getSendAddress();
+        contactManager = new ContactTestManager(getClient());
     }
 
     @After
@@ -55,7 +55,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
     }
 
     protected List<ActiveFacet> prepareFacets() throws OXException, IOException, JSONException {
-        return prepareFacets(client.getValues().getInboxFolder());
+        return prepareFacets(getClient().getValues().getInboxFolder());
     }
 
     protected List<ActiveFacet> prepareFacets(String folder) {
@@ -94,8 +94,8 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
     }
 
     protected FacetValue detectContact(List<Facet> facets) throws OXException, IOException, JSONException {
-        GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
-        GetResponse getResponse = client.execute(getRequest);
+        GetRequest getRequest = new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
         Contact contact = getResponse.getContact();
         FacetValue found = findByDisplayName(facets, DisplayItems.convert(contact).getDisplayName());
         return found;
@@ -152,7 +152,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
         }
 
         ImportMailRequest request = new ImportMailRequest(folder, 0, true, true, streams);
-        ImportMailResponse response = client.execute(request);
+        ImportMailResponse response = getClient().execute(request);
         return response.getIds();
     }
 
@@ -164,7 +164,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
         String mail = MAIL.replaceAll("#FROM#", fromHeader).replaceAll("#TO#", toHeader).replaceAll("#DATE#", DateUtils.toStringRFC822(received, TimeZones.UTC)).replaceAll("#SUBJECT#", subject).replaceAll("#BODY#", body);
         ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest request = new ImportMailRequest(folder, 0, true, true, new ByteArrayInputStream[] { mailStream });
-        ImportMailResponse response = client.execute(request);
+        ImportMailResponse response = getClient().execute(request);
         return response.getIds();
     }
 

@@ -85,10 +85,6 @@ import com.openexchange.test.OXTestToolkit;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
 
-    public AbstractAttachmentTest() {
-        super();
-    }
-
     protected int attachedId = -1;
     protected int folderId = -1;
 

@@ -57,7 +57,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.AutologinRequest;
 import com.openexchange.ajax.session.actions.AutologinRequest.AutologinParameters;
@@ -104,7 +103,7 @@ public class GuestAutologinTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -153,7 +152,7 @@ public class GuestAutologinTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -181,7 +180,6 @@ public class GuestAutologinTest extends ShareTest {
             assertEquals(OXJSONExceptionCodes.INVALID_COOKIE.getNumber(), response.getException().getCode());
         } finally {
             sharedSession.setId(oldSessionID);
-            super.client = new AJAXClient(User.User1); // for teardown
         }
     }
 

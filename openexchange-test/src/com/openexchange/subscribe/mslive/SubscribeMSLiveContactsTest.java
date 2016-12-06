@@ -78,8 +78,8 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         MSLiveSubscribeTestEnvironment.getInstance().init();
-        folderMgr = new FolderTestManager(client);
-        contactMgr = new ContactTestManager(client);
+        folderMgr = new FolderTestManager(getClient());
+        contactMgr = new ContactTestManager(getClient());
     }
 
     @After

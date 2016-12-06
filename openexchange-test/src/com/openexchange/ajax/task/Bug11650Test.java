@@ -54,7 +54,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -92,7 +91,7 @@ public class Bug11650Test extends AbstractTaskTest {
     public void testSearchInSharedFolder() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
-        final AJAXClient berta = new AJAXClient(User.User2);
+        final AJAXClient berta = new AJAXClient(testContext.acquireUser());
         final FolderObject folder = createFolder(anton.getValues().getUserId(), berta.getValues().getUserId());
         folder.setParentFolderID(antonFID);
         // Share a folder.

@@ -65,7 +65,6 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -92,10 +91,10 @@ public class Bug16151Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         timeZone2 = client2.getValues().getTimeZone();
         // client2 shares folder
-        FolderTools.shareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        FolderTools.shareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         // client creates appointment
         appointment = new Appointment();
         appointment.setTitle("Appointment for bug 16151");
@@ -106,7 +105,7 @@ public class Bug16151Test extends AbstractAJAXSession {
         calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
         InsertRequest request = new InsertRequest(appointment, timeZone2);
-        AppointmentInsertResponse response = client.execute(request);
+        AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
     }
 
@@ -114,9 +113,9 @@ public class Bug16151Test extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         // client deletes appointment
         appointment.setLastModified(new Date(Long.MAX_VALUE));
-        client.execute(new DeleteRequest(appointment));
+        getClient().execute(new DeleteRequest(appointment));
         // client2 unshares folder
-        FolderTools.unshareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId());
+        FolderTools.unshareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         super.tearDown();
     }
 
@@ -125,19 +124,19 @@ public class Bug16151Test extends AbstractAJAXSession {
         // client moves from shared folder to private folder
         Appointment moveMe = new Appointment();
         moveMe.setObjectID(appointment.getObjectID());
-        moveMe.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        moveMe.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         moveMe.setLastModified(appointment.getLastModified());
         moveMe.setIgnoreConflicts(true);
-        TimeZone timeZone = client.getValues().getTimeZone();
+        TimeZone timeZone = getClient().getValues().getTimeZone();
         UpdateRequest uReq = new UpdateRequest(appointment.getParentFolderID(), moveMe, timeZone, true);
-        UpdateResponse uResp = client.execute(uReq);
+        UpdateResponse uResp = getClient().execute(uReq);
         appointment.setLastModified(uResp.getTimestamp());
         appointment.setParentFolderID(moveMe.getParentFolderID());
         // client loads appointment from private folder
         GetRequest gReq = new GetRequest(moveMe.getParentFolderID(), moveMe.getObjectID());
-        GetResponse gResp = client.execute(gReq);
+        GetResponse gResp = getClient().execute(gReq);
         // assert participants
         Appointment testAppointment = gResp.getAppointment(timeZone);
-        ParticipantTools.assertParticipants(testAppointment.getParticipants(), client.getValues().getUserId());
+        ParticipantTools.assertParticipants(testAppointment.getParticipants(), getClient().getValues().getUserId());
     }
 }

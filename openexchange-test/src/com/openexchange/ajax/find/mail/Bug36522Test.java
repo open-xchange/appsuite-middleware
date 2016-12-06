@@ -15,14 +15,10 @@ public class Bug36522Test extends AbstractMailFindTest {
 
     private Contact contact;
 
-    public Bug36522Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        contact = randomContact(UUIDs.getUnformattedStringFromRandom(), client.getValues().getPrivateContactFolder());
+        contact = randomContact(UUIDs.getUnformattedStringFromRandom(), getClient().getValues().getPrivateContactFolder());
         /*
          * The empty string was formerly returned as query of the contacts filter.
          * This leads to a match-all behavior on certain mail backends

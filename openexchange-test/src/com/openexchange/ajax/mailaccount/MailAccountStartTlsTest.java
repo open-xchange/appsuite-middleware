@@ -86,7 +86,7 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
     public void tearDown() throws Exception {
         if (null != mailAccount) {
             MailAccountDeleteRequest req = new MailAccountDeleteRequest(mailAccount.getId());
-            client.execute(req);
+            getClient().execute(req);
         }
         super.tearDown();
     }
@@ -98,12 +98,12 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
         acc.setMailStartTls(true);
         acc.setTransportStartTls(true);
         MailAccountInsertRequest req = new MailAccountInsertRequest(acc, false);
-        MailAccountInsertResponse resp = client.execute(req);
+        MailAccountInsertResponse resp = getClient().execute(req);
         assertFalse(resp.getErrorMessage(), resp.hasError());
         resp.fillObject(acc);
 
         MailAccountGetRequest getReq = new MailAccountGetRequest(acc.getId());
-        MailAccountGetResponse getResp = client.execute(getReq);
+        MailAccountGetResponse getResp = getClient().execute(getReq);
         assertFalse(getResp.getErrorMessage(), getResp.hasError());
         mailAccount = getResp.getAsDescription();
         assertTrue(mailAccount.isMailStartTls());
@@ -143,12 +143,12 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
         MailAccountDescription acc = createMailAccountObject();
         acc.setName(UUID.randomUUID().toString());
         MailAccountInsertRequest req = new MailAccountInsertRequest(acc, false);
-        MailAccountInsertResponse resp = client.execute(req);
+        MailAccountInsertResponse resp = getClient().execute(req);
         assertFalse(resp.getErrorMessage(), resp.hasError());
         resp.fillObject(acc);
 
         MailAccountGetRequest getReq = new MailAccountGetRequest(acc.getId());
-        MailAccountGetResponse getResp = client.execute(getReq);
+        MailAccountGetResponse getResp = getClient().execute(getReq);
         assertFalse(getResp.getErrorMessage(), getResp.hasError());
         mailAccount = getResp.getAsDescription();
         assertFalse(mailAccount.isMailStartTls());

@@ -100,9 +100,9 @@ public class TrashTest extends AbstractInfostoreTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
+        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
         testFolder = fMgr.insertFolderOnServer(testFolder);
-        trashFolderID = client.getValues().getInfostoreTrashFolder();
+        trashFolderID = getClient().getValues().getInfostoreTrashFolder();
     }
 
     @After
@@ -250,7 +250,7 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * delete file again
          */
-        file.setFolderId(String.valueOf(client.getValues().getInfostoreTrashFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getInfostoreTrashFolder()));
         deleteFile(file, null);
         /*
          * check source & trash folder contents
@@ -285,7 +285,7 @@ public class TrashTest extends AbstractInfostoreTest {
         Date timestamp = null != folder.getLastModified() ? folder.getLastModified() : new Date(Long.MAX_VALUE);
         DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), timestamp);
         deleteRequest.setHardDelete(hardDelete);
-        CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
+        CommonDeleteResponse deleteResponse = getClient().execute(deleteRequest);
         JSONArray json = (JSONArray) deleteResponse.getData();
         assertEquals("folder not deleted", 0, json.length());
         folder.setLastModified(deleteResponse.getTimestamp());
@@ -296,7 +296,7 @@ public class TrashTest extends AbstractInfostoreTest {
         DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(file.getId(), file.getFolderId(), timestamp);
         deleteRequest.setHardDelete(hardDelete);
         deleteRequest.setFailOnError(true);
-        DeleteInfostoreResponse deleteResponse = client.execute(deleteRequest);
+        DeleteInfostoreResponse deleteResponse = getClient().execute(deleteRequest);
         JSONArray json = (JSONArray) deleteResponse.getData();
         assertEquals("file not deleted", 0, json.length());
         file.setLastModified(deleteResponse.getTimestamp());
@@ -304,7 +304,7 @@ public class TrashTest extends AbstractInfostoreTest {
             // lookup file in trash folder to get new object ID
             // TODO: delete response should be extended to include the new object id (soft delete is a move)
             AllInfostoreRequest allRequest = new AllInfostoreRequest(trashFolderID, COLUMNS, Metadata.ID, Order.ASCENDING);
-            AbstractColumnsResponse allResponse = client.execute(allRequest);
+            AbstractColumnsResponse allResponse = getClient().execute(allRequest);
             for (Object[] object : allResponse) {
                 if (null != object[1] && String.valueOf(object[1]).equals(file.getFileName())) {
                     file.setId(object[0].toString());
@@ -316,7 +316,7 @@ public class TrashTest extends AbstractInfostoreTest {
 
     private void assertFileExistsInFolder(int folderID, String objectID) throws Exception {
         AllInfostoreRequest allRequest = new AllInfostoreRequest(folderID, COLUMNS, Metadata.ID, Order.ASCENDING);
-        AbstractColumnsResponse allResponse = client.execute(allRequest);
+        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
         for (Object[] object : allResponse) {
             String id = object[0].toString();
             if (objectID.equals(id)) {
@@ -338,7 +338,7 @@ public class TrashTest extends AbstractInfostoreTest {
 
     private void assertFileNotExistsInFolder(int folderID, String objectID) throws Exception {
         AllInfostoreRequest allRequest = new AllInfostoreRequest(folderID, COLUMNS, Metadata.ID, Order.ASCENDING);
-        AbstractColumnsResponse allResponse = client.execute(allRequest);
+        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
         for (Object[] object : allResponse) {
             String id = object[0].toString();
             assertFalse("File " + objectID + " found in folder: " + folderID, objectID.equals(id));
@@ -357,7 +357,7 @@ public class TrashTest extends AbstractInfostoreTest {
     }
 
     private FolderObject createRandomFolder(int folderID, String foldername) throws Exception {
-        FolderObject folder = fMgr.generatePrivateFolder(foldername, FolderObject.INFOSTORE, folderID, client.getValues().getUserId());
+        FolderObject folder = fMgr.generatePrivateFolder(foldername, FolderObject.INFOSTORE, folderID, getClient().getValues().getUserId());
         folder = fMgr.insertFolderOnServer(folder);
         return folder;
     }
@@ -374,7 +374,7 @@ public class TrashTest extends AbstractInfostoreTest {
         InputStream data = null;
         try {
             data = Streams.newByteArrayInputStream(UUIDs.toByteArray(UUID.randomUUID()));
-            NewInfostoreResponse newResponse = client.execute(new NewInfostoreRequest(file, data));
+            NewInfostoreResponse newResponse = getClient().execute(new NewInfostoreRequest(file, data));
             file.setId(newResponse.getID());
             file.setLastModified(newResponse.getTimestamp());
             infoMgr.getCreatedEntities().add(file);

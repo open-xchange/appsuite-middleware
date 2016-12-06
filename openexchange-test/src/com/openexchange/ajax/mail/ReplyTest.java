@@ -57,7 +57,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.exception.OXException;
 
@@ -77,7 +76,7 @@ public class ReplyTest extends AbstractReplyTest {
         AJAXClient client2 = null;
         try {
             // note: doesn't work the other way around on the dev system, because only the first account is set up correctly.
-            client2 = new AJAXClient(User.User2);
+            client2 = new AJAXClient(testContext.acquireUser());
             String mail2 = client2.getValues().getSendAddress();
 
             JSONObject mySentMail = createEMail(client2, getSendAddress(), "Reply test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);

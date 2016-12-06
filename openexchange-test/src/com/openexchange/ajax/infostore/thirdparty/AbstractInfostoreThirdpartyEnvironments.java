@@ -55,7 +55,8 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
 import com.openexchange.ajax.infostore.fileaccount.actions.DeleteFileaccountRequest;
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountRequest;
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountResponse;
@@ -80,6 +81,8 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
     private List<Integer> accountIds;
 
     private String filestoreId;
+
+    private TestContext testContext;
 
     /**
      * Initializes a new {@link AbstractSubscribeTestEnvironment} for
@@ -129,19 +132,23 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
      * @throws Exception
      */
     public void cleanup() throws Exception {
-        if (authProviders != null && false == authProviders.isEmpty()) {
-            for (OAuthService auth : authProviders) {
-                deleteFilestorageFor(auth);
+        try {
+            if (authProviders != null && false == authProviders.isEmpty()) {
+                for (OAuthService auth : authProviders) {
+                    deleteFilestorageFor(auth);
+                }
             }
-        }
 
-        if (accountIds != null && false == accountIds.isEmpty()) {
-            for (int accountId : accountIds) {
-                deleteOAuthAccount(accountId);
+            if (accountIds != null && false == accountIds.isEmpty()) {
+                for (int accountId : accountIds) {
+                    deleteOAuthAccount(accountId);
+                }
             }
-        }
 
-        logout();
+            logout();
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     /**
@@ -152,7 +159,8 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
      * @throws IOException
      */
     private void initAJAXClient() throws OXException, IOException, JSONException {
-        ajaxClient = new AJAXClient(User.User1);
+        testContext = TestContextPool.acquireContext();
+        ajaxClient = new AJAXClient(testContext.acquireUser());
     }
 
     /**

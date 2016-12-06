@@ -85,9 +85,9 @@ public class Bug15937Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         appointment = new Appointment();
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setTitle("Test for bug 15937");
         appointment.setIgnoreConflicts(true);
         final Calendar calendar = TimeTools.createCalendar(timeZone);
@@ -96,20 +96,20 @@ public class Bug15937Test extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
         appointment.setNumberOfAttachments(42);
         InsertRequest request = new InsertRequest(appointment, timeZone);
-        AppointmentInsertResponse response = client.execute(request);
+        AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
+        getClient().execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
     @Test
     public void testNumberOfAttachments() throws Throwable {
         GetRequest request = new GetRequest(appointment);
-        GetResponse response = client.execute(request);
+        GetResponse response = getClient().execute(request);
         Appointment testAppointment = response.getAppointment(timeZone);
         assertTrue("Number of attachments should be send.", testAppointment.containsNumberOfAttachments());
         assertEquals("Number of attachments must be zero.", 0, testAppointment.getNumberOfAttachments());

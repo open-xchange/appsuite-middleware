@@ -57,7 +57,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             //Update appointment with until = null
             appointment.removeOccurrence();
             UpdateRequest updateRequest = new UntilNullAppointmentUpdateRequest(appointment, tz);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
             lastModified = appointment.getLastModified();
 
@@ -80,7 +80,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             //Update appointment with until = null
             appointment.removeOccurrence();
             UpdateRequest updateRequest = new UntilNullAppointmentUpdateRequest(appointment, tz);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
             lastModified = appointment.getLastModified();
 
@@ -144,7 +144,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             //Update appointment with occurrences = null
             appointment.removeOccurrence();
             UpdateRequest updateRequest = new OccurrencesNullAppointmentUpdateRequest(appointment, tz);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
             lastModified = appointment.getLastModified();
 
@@ -168,7 +168,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             appointment.removeOccurrence();
             appointment.removeUntil();
             UpdateRequest updateRequest = new OccurrencesNullAppointmentUpdateRequest(appointment, tz);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
             lastModified = appointment.getLastModified();
 
@@ -212,7 +212,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             appointment.removeOccurrence();
             appointment.setIgnoreConflicts(true);
             UpdateRequest updateRequest = new UntilNullAppointmentUpdateRequest(appointment, tz);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
             lastModified = appointment.getLastModified();
 
@@ -257,7 +257,7 @@ public class Bug12264Test extends AbstractAJAXSession {
 
     private void insertAppointment() throws Throwable {
         final InsertRequest request = new InsertRequest(appointment, tz);
-        final CommonInsertResponse response = client.execute(request);
+        final CommonInsertResponse response = getClient().execute(request);
         appointment.setObjectID(response.getId());
         appointment.setLastModified(response.getTimestamp());
         objectId = appointment.getObjectID();
@@ -266,7 +266,7 @@ public class Bug12264Test extends AbstractAJAXSession {
 
     private UpdateResponse updateAppointment(boolean failOnError) throws Throwable {
         final UpdateRequest updateRequest = new UpdateRequest(appointment, tz, failOnError);
-        final UpdateResponse updateResponse = client.execute(updateRequest);
+        final UpdateResponse updateResponse = getClient().execute(updateRequest);
         if (updateResponse.getTimestamp() != null) {
             appointment.setLastModified(updateResponse.getTimestamp());
         }
@@ -276,14 +276,14 @@ public class Bug12264Test extends AbstractAJAXSession {
 
     private void getAppointment() throws Throwable {
         final GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
-        final GetResponse getResponse = client.execute(getRequest);
+        final GetResponse getResponse = getClient().execute(getRequest);
         appointment = getResponse.getAppointment(tz);
     }
 
     private void prepareWithOccurrences(String title) throws Throwable {
         client = getClient();
-        tz = client.getValues().getTimeZone();
-        folderId = client.getValues().getPrivateAppointmentFolder();
+        tz = getClient().getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
 
         appointment = new Appointment();
         appointment.setTitle(title);
@@ -302,8 +302,8 @@ public class Bug12264Test extends AbstractAJAXSession {
 
     private void prepareWithUntil(String title) throws Throwable {
         client = getClient();
-        tz = client.getValues().getTimeZone();
-        folderId = client.getValues().getPrivateAppointmentFolder();
+        tz = getClient().getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
 
         appointment = new Appointment();
         appointment.setTitle(title);
@@ -329,7 +329,7 @@ public class Bug12264Test extends AbstractAJAXSession {
     private void cleanUp() throws Throwable {
         if (objectId != 0 && folderId != 0 && lastModified != null && client != null) {
             DeleteRequest deleteRequest = new DeleteRequest(objectId, folderId, lastModified);
-            client.execute(deleteRequest);
+            getClient().execute(deleteRequest);
         }
         client = null;
         objectId = 0;

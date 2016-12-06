@@ -91,22 +91,22 @@ public class Bug15608Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
-        folder = client.getValues().getInboxFolder();
-        address = client.getValues().getSendAddress();
+        timeZone = getClient().getValues().getTimeZone();
+        folder = getClient().getValues().getInboxFolder();
+        address = getClient().getValues().getSendAddress();
         final String mail = TestMails.replaceAddresses(TestMails.UMLAUT_MAIL, address);
         final ByteArrayInputStream[] massMails = new ByteArrayInputStream[100];
         for (int i = 0; i < massMails.length; i++) {
             massMails[i] = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         }
         final ImportMailRequest request = new ImportMailRequest(folder, ORIG_FLAGS, massMails);
-        final ImportMailResponse response = client.execute(request);
+        final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds();
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(ids, true));
+        getClient().execute(new DeleteRequest(ids, true));
         super.tearDown();
     }
 
@@ -114,7 +114,7 @@ public class Bug15608Test extends AbstractAJAXSession {
     public void testFlags() throws Throwable {
         {
             final ListRequest request = new ListRequest(ids, ATTRIBUTES);
-            final CommonListResponse response = client.execute(request);
+            final CommonListResponse response = getClient().execute(request);
             final int flagsPos = response.getColumnPos(FLAGS.getField());
             for (final Object[] mail : response) {
                 final int testFlags = ((Integer) mail[flagsPos]).intValue();
@@ -126,7 +126,7 @@ public class Bug15608Test extends AbstractAJAXSession {
             if (null != mailId) {
                 final GetRequest request = new GetRequest(folder, mailId);
                 request.setUnseen(true);
-                final GetResponse response = client.execute(request);
+                final GetResponse response = getClient().execute(request);
                 final MailMessage mail = response.getMail(timeZone);
                 final int testFlags = mail.getFlags();
                 assertEquals("Wanted flags are not set.", ORIG_FLAGS, testFlags);

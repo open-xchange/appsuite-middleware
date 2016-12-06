@@ -79,7 +79,7 @@ public class Bug37198Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
 
         app = new Appointment();
         app.setTitle("Bug 37198 Test");
@@ -90,7 +90,7 @@ public class Bug37198Test extends AbstractAJAXSession {
         app.setRecurrenceType(Appointment.DAILY);
         app.setUntil(TimeTools.D("13.03.2015 00:00", utc));
         app.setInterval(1);
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         app.setIgnoreConflicts(true);
     }
 

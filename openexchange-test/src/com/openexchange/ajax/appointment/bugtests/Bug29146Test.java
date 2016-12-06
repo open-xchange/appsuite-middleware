@@ -79,15 +79,15 @@ public class Bug29146Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
 
         appointment = new Appointment();
         appointment.setStartDate(D("18.11.2013 08:00"));
         appointment.setEndDate(D("18.11.2013 09:00"));
         appointment.setTitle("Test Bug 29146");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        UserParticipant user = new UserParticipant(client.getValues().getUserId());
+        UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
         appointment.setParticipants(new Participant[] { user });
         appointment.setUsers(new UserParticipant[] { user });

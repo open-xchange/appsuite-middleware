@@ -88,7 +88,7 @@ public class Bug38782Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         task = new Task();
         task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
         task.setTitle("Test for bug 38782");

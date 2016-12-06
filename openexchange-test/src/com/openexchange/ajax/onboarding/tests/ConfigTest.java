@@ -78,7 +78,7 @@ public class ConfigTest extends AbstractAJAXSession {
     @Test
     public void testGetConfig() throws Exception {
         ConfigRequest req = new ConfigRequest(false);
-        ConfigResponse resp = client.execute(req);
+        ConfigResponse resp = getClient().execute(req);
         assertFalse(resp.getErrorMessage(), resp.hasError());
         List<Device> devices = resp.getDevices();
         assertTrue(devices.containsAll(EXPECTED_DEVICES));

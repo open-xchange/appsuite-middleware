@@ -59,7 +59,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -96,9 +95,9 @@ public final class Bug27708Test extends AbstractMailTest {
         super.setUp();
         clients = new AJAXClient[NUM_THREADS];
         clients[0] = getClient();
-        clients[1] = new AJAXClient(User.User2);
-        clients[2] = new AJAXClient(User.User3);
-        clients[3] = new AJAXClient(User.User4);
+        clients[1] = new AJAXClient(testContext.acquireUser());
+        clients[2] = new AJAXClient(testContext.acquireUser());
+        clients[3] = new AJAXClient(testContext.acquireUser());
         recipient = getClient().getValues().getSendAddress();
         // Unique identifier for all threads, to be able to detect own and foreign content in mail body.
         identifier = new String[NUM_THREADS];
@@ -130,7 +129,7 @@ public final class Bug27708Test extends AbstractMailTest {
         if (null != clients) {
             for (AJAXClient client : clients) {
                 if (null != client)
-                    client.logout();
+                    getClient().logout();
             }
             clients = null;
         }

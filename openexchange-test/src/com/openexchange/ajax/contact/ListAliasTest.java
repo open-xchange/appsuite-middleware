@@ -52,13 +52,10 @@ package com.openexchange.ajax.contact;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.json.JSONArray;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ListRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
@@ -70,35 +67,18 @@ import com.openexchange.ajax.framework.ListIDs;
  */
 public class ListAliasTest extends ContactTest {
 
-    private AJAXClient client;
-
-    /**
-     * Initializes a new {@link ListAliasTest}.
-     *
-     * @param name
-     */
-    public ListAliasTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = new AJAXClient(User.User1);
-    }
-
     @Test
     public void testListAlias() throws Exception {
-        final AllRequest allRequest = new AllRequest(client.getValues().getPrivateContactFolder(), new int[] { 20, 1 });
-        final CommonAllResponse allResponse = client.execute(allRequest);
+        final AllRequest allRequest = new AllRequest(getClient().getValues().getPrivateContactFolder(), new int[] { 20, 1 });
+        final CommonAllResponse allResponse = getClient().execute(allRequest);
         final ListIDs ids = allResponse.getListIDs();
 
         final ListRequest aliasRequest = new ListRequest(ids, "list");
-        final CommonListResponse aliasResponse = client.execute(aliasRequest);
+        final CommonListResponse aliasResponse = getClient().execute(aliasRequest);
         final Object[][] aliasContacts = aliasResponse.getArray();
 
         final ListRequest request = new ListRequest(ids, new int[] { 20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 });
-        final CommonListResponse response = client.execute(request);
+        final CommonListResponse response = getClient().execute(request);
         final Object[][] contacts = response.getArray();
 
         assertEquals("Arrays' sizes are not equal.", aliasContacts.length, contacts.length);

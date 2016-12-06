@@ -95,8 +95,8 @@ public class TestSnippetSignature extends AbstractAJAXSession {
         String mfID2 = uploadFile("ox_logo_sml.jpg");
 
         final StringBuilder builder = new StringBuilder();
-        builder.append("<img alt=\"\" width=\"120\" src=\"").append("/ajax/file?action=get&id=").append(mfID1).append("&session=").append(client.getSession().getId()).append("\" />");
-        builder.append("<img alt=\"\" width=\"50\" src=\"").append("/ajax/file?action=get&id=").append(mfID2).append("&session=").append(client.getSession().getId()).append("\" />");
+        builder.append("<img alt=\"\" width=\"120\" src=\"").append("/ajax/file?action=get&id=").append(mfID1).append("&session=").append(getClient().getSession().getId()).append("\" />");
+        builder.append("<img alt=\"\" width=\"50\" src=\"").append("/ajax/file?action=get&id=").append(mfID2).append("&session=").append(getClient().getSession().getId()).append("\" />");
 
         JSONObject misc = new JSONObject();
         misc.put("insertion", "below");
@@ -105,7 +105,7 @@ public class TestSnippetSignature extends AbstractAJAXSession {
         JSONObject body = new JSONObject();
         body.put("type", "signature");
         body.put("misc", misc);
-        body.put("createdby", client.getValues().getUserId());
+        body.put("createdby", getClient().getValues().getUserId());
         body.put("content", "<h1>my test signature</h1>" + builder.toString());
         body.put("accountid", 0);
         body.put("displayname", "DisplayName of signatures");
@@ -113,14 +113,14 @@ public class TestSnippetSignature extends AbstractAJAXSession {
 
         // New signature
         NewSnippetRequest req = new NewSnippetRequest(body);
-        NewSnippetResponse resp = client.execute(req);
+        NewSnippetResponse resp = getClient().execute(req);
         Object data = resp.getData();
         assertNotNull(data);
         int signId = Integer.parseInt((String) data);
         JSONArray array = new JSONArray();
         array.put(signId);
         ListSnippetRequest listReq = new ListSnippetRequest(array, true);
-        ListSnippetResponse listResp = client.execute(listReq);
+        ListSnippetResponse listResp = getClient().execute(listReq);
         assertNotNull(listResp);
         data = listResp.getData();
         JSONArray json = (JSONArray) data;
@@ -135,7 +135,7 @@ public class TestSnippetSignature extends AbstractAJAXSession {
          */
 
         GetPictureManagedFileRequest getPicReq = new GetPictureManagedFileRequest(mfID1);
-        GetPictureManagedFileResponse getPicResp = client.execute(getPicReq);
+        GetPictureManagedFileResponse getPicResp = getClient().execute(getPicReq);
         Object o = getPicResp.getData();
 
         //assertEquals("images not equal", file, o);
@@ -144,7 +144,7 @@ public class TestSnippetSignature extends AbstractAJAXSession {
     private String uploadFile(String filename) throws OXException, IOException, JSONException {
         byte[] file = readFile(filename);
         NewManagedFileRequest newMFReq = new NewManagedFileRequest("snippet", "image", file);
-        NewManagedFileResponse newMFResp = client.execute(newMFReq);
+        NewManagedFileResponse newMFResp = getClient().execute(newMFReq);
         Object data = newMFResp.getData();
         assertTrue("Response not a JSONArray", data instanceof JSONArray);
         JSONArray array = (JSONArray) data;

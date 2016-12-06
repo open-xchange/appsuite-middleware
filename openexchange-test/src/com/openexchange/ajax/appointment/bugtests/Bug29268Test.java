@@ -32,20 +32,20 @@ public class Bug29268Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
 
         appointment = new Appointment();
         appointment.setTitle("Bug 29268 Test");
-        Calendar start = TimeTools.createCalendar(client.getValues().getTimeZone());
+        Calendar start = TimeTools.createCalendar(getClient().getValues().getTimeZone());
         start.add(Calendar.DAY_OF_MONTH, 1);
         start.set(Calendar.HOUR_OF_DAY, 8);
-        Calendar end = TimeTools.createCalendar(client.getValues().getTimeZone());
+        Calendar end = TimeTools.createCalendar(getClient().getValues().getTimeZone());
         end.add(Calendar.DAY_OF_MONTH, 1);
         end.set(Calendar.HOUR_OF_DAY, 9);
         appointment.setStartDate(start.getTime());
         appointment.setEndDate(end.getTime());
         appointment.setAlarm(0);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
         ctm.insert(appointment);
     }

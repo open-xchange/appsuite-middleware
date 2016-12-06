@@ -12,7 +12,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
@@ -32,14 +31,14 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         folderName = "ChangePermissionsTest Folder" + System.currentTimeMillis();
-        client2 = new AJAXClient(User.User2);
-        ftm1 = new FolderTestManager(client);
+        client2 = new AJAXClient(testContext.acquireUser());
+        ftm1 = new FolderTestManager(getClient());
     }
 
     public void notestChangePermissionsSuccess() throws Exception {
-        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), new int[] { client.getValues().getUserId() });
+        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), new int[] { getClient().getValues().getUserId() });
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
-        final InsertResponse insertFolderResp = client.execute(insertFolderReq);
+        final InsertResponse insertFolderResp = getClient().execute(insertFolderReq);
 
         assertNull("Inserting folder caused exception.", insertFolderResp.getException());
         insertFolderResp.fillObject(folder);
@@ -48,7 +47,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
             ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
             {
                 OCLPermission permissions = new OCLPermission();
-                permissions.setEntity(client.getValues().getUserId());
+                permissions.setEntity(getClient().getValues().getUserId());
                 permissions.setGroupPermission(false);
                 permissions.setFolderAdmin(true);
                 permissions.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -71,9 +70,9 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
 
     @Test
     public void testChangePermissionsFail() throws Exception {
-        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, client.getValues().getInfostoreTrashFolder(), new int[] { client.getValues().getUserId() });
+        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getInfostoreTrashFolder(), new int[] { getClient().getValues().getUserId() });
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
-        final InsertResponse insertFolderResp = client.execute(insertFolderReq);
+        final InsertResponse insertFolderResp = getClient().execute(insertFolderReq);
 
         assertNull("Inserting folder caused exception.", insertFolderResp.getException());
         insertFolderResp.fillObject(folder);
@@ -82,7 +81,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
             ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
             {
                 OCLPermission permissions = new OCLPermission();
-                permissions.setEntity(client.getValues().getUserId());
+                permissions.setEntity(getClient().getValues().getUserId());
                 permissions.setGroupPermission(false);
                 permissions.setFolderAdmin(true);
                 permissions.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

@@ -77,12 +77,12 @@ public class Bug34552Test extends AbstractJSlobTest {
 
     @Test
     public void testUpdateIsVisibleImmediately() throws Exception {
-        client.execute(new SetRequest("io.ox/portal", WIDGETS));
+        getClient().execute(new SetRequest("io.ox/portal", WIDGETS));
 
         /*
          * As we set the above JSlob, none of the subsequent JSON function calls must fail.
          */
-        List<JSlob> jslobs = client.execute(new ListRequest("io.ox/portal")).getJSlobs();
+        List<JSlob> jslobs = getClient().execute(new ListRequest("io.ox/portal")).getJSlobs();
         JSONObject json = jslobs.get(0).getJsonObject();
         JSONObject userWidgets = json.getJSONObject("widgets").getJSONObject("user");
         JSONObject tasksWidget = userWidgets.getJSONObject("tasks_0");
@@ -100,8 +100,8 @@ public class Bug34552Test extends AbstractJSlobTest {
         mailWidget.put("index", 3);
         birthdayWidget.put("index", 1);
 
-        client.execute(new SetRequest("io.ox/portal", json.toString()));
-        jslobs = client.execute(new ListRequest("io.ox/portal")).getJSlobs();
+        getClient().execute(new SetRequest("io.ox/portal", json.toString()));
+        jslobs = getClient().execute(new ListRequest("io.ox/portal")).getJSlobs();
         JSONObject reloaded = jslobs.get(0).getJsonObject();
         userWidgets = reloaded.getJSONObject("widgets").getJSONObject("user");
         tasksWidget = userWidgets.getJSONObject("tasks_0");

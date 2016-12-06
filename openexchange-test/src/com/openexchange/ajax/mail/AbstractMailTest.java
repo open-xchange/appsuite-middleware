@@ -91,7 +91,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      * @throws JSONException If a JSON error occurs
      */
     public int count(final String folder) throws OXException, IOException, JSONException {
-        final JSONObject data = (JSONObject) client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
+        final JSONObject data = (JSONObject) getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
         return data.getInt(FolderField.TOTAL.getName());
     }
 
@@ -234,7 +234,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     }
 
     protected String[] sendMail(final String mail) throws OXException, IOException, JSONException {
-        return sendMail(client, mail);
+        return sendMail(getClient(), mail);
     }
 
     protected static String[] sendMail(final AJAXClient client, final String mail) throws OXException, IOException, JSONException {

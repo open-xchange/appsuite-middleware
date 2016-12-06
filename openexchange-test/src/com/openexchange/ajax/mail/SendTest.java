@@ -92,7 +92,7 @@ public final class SendTest extends AbstractMailTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, false);
+        manager = new MailTestManager(getClient(), false);
     }
 
     @After
@@ -134,7 +134,7 @@ public final class SendTest extends AbstractMailTest {
 
     @Test
     public void testSendWithManager() throws OXException, IOException, SAXException, JSONException {
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
 
         TestMail mail = new TestMail();
         mail.setSubject("Test sending with manager");

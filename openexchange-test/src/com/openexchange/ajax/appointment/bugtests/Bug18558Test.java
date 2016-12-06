@@ -68,7 +68,6 @@ import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -104,9 +103,9 @@ public class Bug18558Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
-        clientC = new AJAXClient(User.User3);
-        clientD = new AJAXClient(User.User4);
+        clientB = new AJAXClient(testContext.acquireUser());
+        clientC = new AJAXClient(testContext.acquireUser());
+        clientD = new AJAXClient(testContext.acquireUser());
 
         FolderObject folderA = new FolderObject();
         folderA.setObjectID(clientA.getValues().getPrivateAppointmentFolder());

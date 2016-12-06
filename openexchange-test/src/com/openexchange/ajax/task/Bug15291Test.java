@@ -102,7 +102,7 @@ public class Bug15291Test extends AbstractAJAXSession {
         CreateResponse response = client1.execute(new CreateRequest(group));
         response.fillGroup(group);
 
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         task = Create.createWithDefaults(client1.getValues().getPrivateTaskFolder(), "Test for bug 15291");
         task.addParticipant(participant);
         client1.execute(new InsertRequest(task, timeZone, true)).fillTask(task);

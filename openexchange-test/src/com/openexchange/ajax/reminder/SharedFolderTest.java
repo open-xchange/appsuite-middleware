@@ -69,7 +69,6 @@ import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
@@ -111,7 +110,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
 
         client = getClient();
         tz = client.getValues().getTimeZone();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder

@@ -102,7 +102,7 @@ public final class ListTest extends AbstractMailTest {
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
             LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
@@ -158,7 +158,7 @@ public final class ListTest extends AbstractMailTest {
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
             LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*

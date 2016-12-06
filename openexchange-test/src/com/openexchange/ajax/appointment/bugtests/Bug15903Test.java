@@ -57,7 +57,6 @@ import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.CalendarTestManagerTest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -85,7 +84,7 @@ public class Bug15903Test extends CalendarTestManagerTest {
         // create appointment with 2 participants
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int firstUserId = getClient().getValues().getUserId();
         int secondUserId = client2.getValues().getUserId();
         appointment.addParticipant(new UserParticipant(secondUserId));

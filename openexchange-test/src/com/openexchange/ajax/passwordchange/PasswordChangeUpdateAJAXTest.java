@@ -55,8 +55,6 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 
 /**
@@ -91,7 +89,7 @@ public final class PasswordChangeUpdateAJAXTest extends AbstractPasswordChangeAJ
         /*
          * Perform update request
          */
-        final String oldPassword = AJAXConfig.getProperty(Property.PASSWORD);
+        final String oldPassword = testUser.getPassword();
         Executor.execute(getSession(), new PasswordChangeUpdateRequest(oldPassword, oldPassword, true));
     }
 }

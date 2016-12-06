@@ -94,12 +94,12 @@ public class LoginScreenTest extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder());
+        folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder());
     }
 
     @After
     public void tearDown() throws Exception {
-        deleteFoldersSilently(client, Collections.singletonList(folder.getObjectID()));
+        deleteFoldersSilently(getClient(), Collections.singletonList(folder.getObjectID()));
         super.tearDown();
     }
 
@@ -114,7 +114,7 @@ public class LoginScreenTest extends ShareTest {
         folder = updateFolder(EnumAPI.OX_NEW, folder, Transport.MAIL);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -157,12 +157,12 @@ public class LoginScreenTest extends ShareTest {
          * Create link and set password
          */
         ShareTarget target = new ShareTarget(folder.getModule(), Integer.toString(folder.getObjectID()));
-        ShareLink shareLink = client.execute(new GetLinkRequest(target)).getShareLink();
+        ShareLink shareLink = getClient().execute(new GetLinkRequest(target)).getShareLink();
         assertTrue(shareLink.isNew());
         UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, System.currentTimeMillis());
         String newPW = UUIDs.getUnformattedStringFromRandom();
         updateLinkRequest.setPassword(newPW);
-        client.execute(updateLinkRequest);
+        getClient().execute(updateLinkRequest);
         /*
          * Login and check params
          */

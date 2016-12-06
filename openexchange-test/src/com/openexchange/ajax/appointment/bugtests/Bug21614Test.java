@@ -65,7 +65,6 @@ import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -96,7 +95,7 @@ public class Bug21614Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = new AJAXClient(testContext.acquireUser());
 
         List<Participant> participants = new ArrayList<Participant>();
         Participant p = new UserParticipant(clientB.getValues().getUserId());

@@ -67,15 +67,6 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug33576Test extends ContactsFindTest {
 
-    /**
-     * Initializes a new {@link Bug33576Test}.
-     *
-     * @param name The test name
-     */
-    public Bug33576Test() {
-        super();
-    }
-
     @Test
     public void testAutocompleteContactWithoutEMailAddress() throws Exception {
         Contact contact = randomContact();
@@ -83,7 +74,7 @@ public class Bug33576Test extends ContactsFindTest {
         contact = manager.newAction(contact);
         String prefix = contact.getGivenName().substring(0, 6);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), DisplayItems.convert(contact).getDisplayName());
         assertNotNull("no facet value found for: " + contact.getGivenName(), foundFacetValue);
     }

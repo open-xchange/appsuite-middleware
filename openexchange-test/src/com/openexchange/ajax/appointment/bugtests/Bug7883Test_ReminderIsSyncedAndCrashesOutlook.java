@@ -57,7 +57,6 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 
@@ -69,7 +68,7 @@ public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends ManagedAppoin
 
     @Test
     public void testIt() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
 
         UserParticipant other = new UserParticipant(client2.getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);

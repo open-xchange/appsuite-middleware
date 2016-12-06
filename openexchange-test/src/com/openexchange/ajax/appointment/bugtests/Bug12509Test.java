@@ -62,7 +62,6 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.participant.ParticipantTools;
@@ -90,7 +89,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = new AJAXClient(testContext.acquireUser());
 
         folder = new FolderObject();
         folder.setFolderName("Bug 12509 Test Folder" + System.currentTimeMillis());

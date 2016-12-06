@@ -94,16 +94,16 @@ public class Bug13960Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         contact = new Contact();
-        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
-        InsertResponse response = client.execute(new InsertRequest(contact));
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
+        InsertResponse response = getClient().execute(new InsertRequest(contact));
         response.fillObject(contact);
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contact));
+        getClient().execute(new DeleteRequest(contact));
         super.tearDown();
     }
 
@@ -111,7 +111,7 @@ public class Bug13960Test extends AbstractAJAXSession {
     public void testJSONValues() throws Throwable {
         {
             GetRequest request = new GetRequest(contact, timeZone);
-            GetResponse response = client.execute(request);
+            GetResponse response = getClient().execute(request);
             JSONObject json = (JSONObject) response.getData();
             assertFalse("'Default address' should not be contained if not set.", json.has(ContactFields.DEFAULT_ADDRESS));
             assertFalse("'File as should' not be contained if not set.", json.has(ContactFields.FILE_AS));
@@ -120,7 +120,7 @@ public class Bug13960Test extends AbstractAJAXSession {
         }
         {
             UpdatesRequest request = new UpdatesRequest(contact.getParentFolderID(), COLUMNS, 0, Order.ASCENDING, new Date(contact.getLastModified().getTime() - 1));
-            ContactUpdatesResponse response = client.execute(request);
+            ContactUpdatesResponse response = getClient().execute(request);
             int row = 0;
             while (row < response.size()) {
                 if (response.getValue(row, Contact.OBJECT_ID).equals(I(contact.getObjectID()))) {

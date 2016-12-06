@@ -68,14 +68,10 @@ public class Bug22389Test extends AbstractAJAXSession {
     private static final String EXPRESSION = "[67]\\.[0-9]+\\.[0-9]-Rev[0-9]+";
     private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
 
-    public Bug22389Test() {
-        super();
-    }
-
     @Test
     public void testVersion() throws Exception {
         GetRequest request = new GetRequest(Tree.ServerVersion);
-        GetResponse response = client.execute(request);
+        GetResponse response = getClient().execute(request);
         String version = response.getString();
         LOG.trace("Server reported version: \"" + version + "\".");
         assertTrue("Server version does not match required pattern: \"" + version + "\"", PATTERN.matcher(version).matches());

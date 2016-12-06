@@ -121,7 +121,7 @@ public class EmptyEmailTest extends AbstractContactTest {
         jsonObject = setEmail(jsonObject, email1, email2, email3);
         // and create new InsertRequest with modified body
         final InsertRequest modifiedRequest = new InsertRequest(jsonObject.toString());
-        final InsertResponse response = client.execute(modifiedRequest);
+        final InsertResponse response = getClient().execute(modifiedRequest);
         response.fillObject(contactObj);
         return contactObj.getObjectID();
     }
@@ -142,7 +142,7 @@ public class EmptyEmailTest extends AbstractContactTest {
         JSONObject jsonObject = (JSONObject) request.getBody();
         jsonObject = setEmail(jsonObject, email1, email2, email3);
         EmptyEmailUpdateRequest modifiedRequest = new EmptyEmailUpdateRequest(contactObj, jsonObject);
-        client.execute(modifiedRequest);
+        getClient().execute(modifiedRequest);
     }
 
     /**

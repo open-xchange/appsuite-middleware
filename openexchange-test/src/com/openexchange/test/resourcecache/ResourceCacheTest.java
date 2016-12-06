@@ -347,7 +347,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
 
     private <T extends AbstractAJAXResponse> T executeTyped(AbstractResourceCacheRequest<T> request, String cacheType) throws OXException, IOException, JSONException {
         request.setCacheType(cacheType);
-        return client.execute(request);
+        return getClient().execute(request);
     }
 
     private byte[] prepareFile(int length) {

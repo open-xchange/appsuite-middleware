@@ -55,7 +55,6 @@ import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.FileShare;
@@ -101,7 +100,7 @@ public class ListFileSharesTest extends ShareTest {
 
     @Test
     public void testListSharedFilesToUser() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
         client2.logout();
         testListSharedFiles(new DefaultFileStorageObjectPermission(userId, false, FileStorageObjectPermission.WRITE));
@@ -119,7 +118,7 @@ public class ListFileSharesTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission objectPermission : file.getObjectPermissions()) {
-            if (objectPermission.getEntity() != client.getValues().getUserId()) {
+            if (objectPermission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = objectPermission;
                 break;
             }
@@ -147,7 +146,7 @@ public class ListFileSharesTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -158,7 +157,7 @@ public class ListFileSharesTest extends ShareTest {
          * check if share appears in user shared files
          */
         FileShare matchingShare = null;
-        List<FileShare> shares = client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
+        List<FileShare> shares = getClient().execute(new FileSharesRequest()).getShares(getClient().getValues().getTimeZone());
         for (FileShare share : shares) {
             if (share.getId().equals(file.getId())) {
                 matchingShare = share;
@@ -183,7 +182,7 @@ public class ListFileSharesTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -194,7 +193,7 @@ public class ListFileSharesTest extends ShareTest {
          * check if share appears in user shared files
          */
         FileShare matchingShare = null;
-        List<FileShare> shares = client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
+        List<FileShare> shares = getClient().execute(new FileSharesRequest()).getShares(getClient().getValues().getTimeZone());
         for (FileShare share : shares) {
             if (share.getId().equals(file.getId())) {
                 matchingShare = share;

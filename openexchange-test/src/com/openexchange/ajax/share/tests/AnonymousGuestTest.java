@@ -87,7 +87,7 @@ public class AnonymousGuestTest extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         remember(folder);
         file = insertFile(folder.getObjectID());
         remember(file);
@@ -176,7 +176,7 @@ public class AnonymousGuestTest extends ShareTest {
         FolderObject updated = addPermissions(folder, guestPermission);
         OCLPermission entityPermission = findAndCheckPermission(updated);
 
-        FolderObject newFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        FolderObject newFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         remember(newFolder);
 
         boolean thrown = false;
@@ -292,7 +292,7 @@ public class AnonymousGuestTest extends ShareTest {
         File updated = addPermissions(file, guestPermission);
         FileStorageObjectPermission entityPermission = findAndCheckPermission(updated);
 
-        File newFile = insertFile(client.getValues().getPrivateInfostoreFolder());
+        File newFile = insertFile(getClient().getValues().getPrivateInfostoreFolder());
         remember(newFile);
 
         boolean thrown = false;
@@ -393,7 +393,7 @@ public class AnonymousGuestTest extends ShareTest {
 
         OCLPermission matchingPermission = null;
         for (OCLPermission p : permissions) {
-            if (p.getEntity() != client.getValues().getUserId()) {
+            if (p.getEntity() != getClient().getValues().getUserId()) {
                 Assert.assertTrue(p.isFolderVisible());
                 Assert.assertTrue(p.canReadOwnObjects());
                 Assert.assertTrue(p.canReadAllObjects());
@@ -418,7 +418,7 @@ public class AnonymousGuestTest extends ShareTest {
 
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission p : permissions) {
-            if (p.getEntity() != client.getValues().getUserId()) {
+            if (p.getEntity() != getClient().getValues().getUserId()) {
                 Assert.assertTrue(p.canRead());
                 Assert.assertFalse(p.canWrite());
                 Assert.assertFalse(p.canDelete());

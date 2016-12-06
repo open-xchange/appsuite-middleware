@@ -57,7 +57,6 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -93,7 +92,7 @@ public final class Bug10836Test extends AbstractAJAXSession {
     @Test
     public void testVulnerability() throws Throwable {
         final AJAXClient clientA = getClient();
-        final AJAXClient clientB = new AJAXClient(User.User2);
+        final AJAXClient clientB = new AJAXClient(testContext.acquireUser());
         final int folderA = clientA.getValues().getPrivateAppointmentFolder();
         final int folderB = clientB.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = clientA.getValues().getTimeZone();

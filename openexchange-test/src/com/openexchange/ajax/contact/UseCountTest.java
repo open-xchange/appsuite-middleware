@@ -58,8 +58,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.jslob.actions.SetRequest;
 import com.openexchange.ajax.mail.MailTestManager;
@@ -78,31 +76,21 @@ import com.openexchange.test.FolderTestManager;
  */
 public class UseCountTest extends ContactTest {
 
-    private AJAXClient client;
     private ContactTestManager ctm;
     private FolderTestManager ftm;
     private MailTestManager mtm;
     private String address;
     private int folderId;
 
-    /**
-     * Initializes a new {@link UseCountTest}.
-     * 
-     * @param name
-     */
-    public UseCountTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
-        ftm = new FolderTestManager(client);
-        FolderObject folder = ftm.generatePrivateFolder("useCountTest", Module.CONTACTS.getFolderConstant(), client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
+        
+        ftm = new FolderTestManager(getClient());
+        FolderObject folder = ftm.generatePrivateFolder("useCountTest", Module.CONTACTS.getFolderConstant(), getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
         folderId = folder.getObjectID();
-        ctm = new ContactTestManager(client);
+        ctm = new ContactTestManager(getClient());
         Contact c1 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
         c1.setEmail1("useCount1@ox.invalid");
         c1 = ctm.newAction(c1);
@@ -110,13 +98,12 @@ public class UseCountTest extends ContactTest {
         c2.setEmail1("useCount2@ox.invalid");
         c2 = ctm.newAction(c2);
 
-        AJAXClient client = new AJAXClient(User.User1);
         SetRequest req = new SetRequest("io.ox/mail", "{\"contactCollectOnMailTransport\": true}", true);
-        client.execute(req);
+        getClient().execute(req);
 
-        mtm = new MailTestManager(client);
+        mtm = new MailTestManager(getClient());
         address = c2.getEmail1();
-        mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test"));
+        mtm.send(new TestMail(getClient().getValues().getDefaultAddress(), address, "Test", "text/plain", "Test"));
     }
 
     @After
@@ -129,16 +116,15 @@ public class UseCountTest extends ContactTest {
 
     @Test
     public void testUseCount() throws Exception {
-        AJAXClient client = new AJAXClient(User.User1);
         AutocompleteRequest req = new AutocompleteRequest("UseCount", false, String.valueOf(folderId), CONTACT_FIELDS, false);
-        CommonSearchResponse resp = client.execute(req);
+        CommonSearchResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         JSONArray json = (JSONArray) resp.getData();
         assertNotNull(json);
         assertEquals(2, json.length());
         Contact[] contacts = jsonArray2ContactArray(json, CONTACT_FIELDS);
         assertEquals(address, contacts[0].getEmail1());
-        client.logout();
+        getClient().logout();
     }
 
 }

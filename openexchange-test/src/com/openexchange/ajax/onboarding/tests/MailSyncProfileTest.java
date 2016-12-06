@@ -74,11 +74,11 @@ public class MailSyncProfileTest extends AbstractAJAXSession {
     @Test
     public void testIMAPSyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();
-        body.put("email", client.getValues().getDefaultAddress());
+        body.put("email", getClient().getValues().getDefaultAddress());
         ExecuteRequest req = new ExecuteRequest("apple.mac/mailsync", "email", body, false);
-        client.execute(req);
+        getClient().execute(req);
         GetMailsRequest mailReq = new GetMailsRequest();
-        GetMailsResponse mailResp = client.execute(mailReq);
+        GetMailsResponse mailResp = getClient().execute(mailReq);
         List<Message> messages = mailResp.getMessages();
         assertNotNull(messages);
         assertEquals(1, messages.size());
@@ -87,7 +87,7 @@ public class MailSyncProfileTest extends AbstractAJAXSession {
     @Test
     public void testIMAPSyncProfileViaDisplay() throws Exception {
         ExecuteRequest req = new ExecuteRequest("apple.mac/mailmanual", "display", null, false);
-        OnboardingTestResponse resp = client.execute(req);
+        OnboardingTestResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         JSONObject json = (JSONObject) resp.getData();
         assertTrue(json.hasAndNotNull("imapLogin"));

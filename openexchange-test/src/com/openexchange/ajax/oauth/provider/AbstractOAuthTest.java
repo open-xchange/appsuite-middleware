@@ -56,7 +56,11 @@ import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
+import com.openexchange.ajax.framework.pool.TestUserRegistry;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -85,28 +89,39 @@ public abstract class AbstractOAuthTest {
 
     protected Scope scope;
 
+    protected TestContext testContext;
+
+    protected TestUser testUser;
+
     protected AbstractOAuthTest(Scope scope) throws OXException {
         super();
+        ProvisioningSetup.init();
         AJAXConfig.init();
         this.scope = scope;
     }
 
     @Before
     public void before() throws Exception {
+        testContext = TestContextPool.acquireContext();
         // register client application
         clientApp = registerTestClient();
         if (scope == null) {
             scope = Scope.parseScope(clientApp.getDefaultScope());
         }
-        client = new OAuthClient(User.User1, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
-        ajaxClient = new AJAXClient(User.User1);
+        testUser = testContext.acquireUser();
+        client = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
+        ajaxClient = new AJAXClient(testUser);
     }
 
     @After
     public void after() throws Exception {
-        ajaxClient.logout();
-        client.logout();
-        unregisterTestClient(clientApp);
+        try {
+            ajaxClient.logout();
+            client.logout();
+            unregisterTestClient(clientApp);
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     public static ClientDto registerTestClient() throws Exception {
@@ -136,8 +151,8 @@ public abstract class AbstractOAuthTest {
     }
 
     public static Credentials getMasterAdminCredentials() {
-        String username = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER);
-        String password = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER_PWD);
+        String username = TestUserRegistry.getMasterUser();
+        String password = TestUserRegistry.getMasterPassword();
         return new Credentials(username, password);
     }
 

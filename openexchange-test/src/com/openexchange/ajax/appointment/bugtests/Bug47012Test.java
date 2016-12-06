@@ -77,7 +77,7 @@ public class Bug47012Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         app = new Appointment();
         app.setTitle("Bug 47012 Test");
         app.setStartDate(TimeTools.D("07.07.2016 08:00"));
@@ -86,7 +86,7 @@ public class Bug47012Test extends AbstractAJAXSession {
         app.setDays(Appointment.THURSDAY);
         app.setInterval(1);
         app.setIgnoreConflicts(true);
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm.insert(app);
     }
 

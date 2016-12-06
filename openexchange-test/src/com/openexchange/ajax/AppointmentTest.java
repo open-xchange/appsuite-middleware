@@ -115,10 +115,6 @@ import com.openexchange.tools.URLParameter;
  */
 public class AppointmentTest extends AbstractAJAXTest {
 
-    public AppointmentTest() {
-        super();
-    }
-
     public static final int[] APPOINTMENT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, CalendarObject.START_DATE, CalendarObject.END_DATE, Appointment.LOCATION, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS, Appointment.RECURRENCE_START, Appointment.ORGANIZER, Appointment.UID, Appointment.SEQUENCE };
 
     protected static final String APPOINTMENT_URL = "/ajax/calendar";
@@ -1099,10 +1095,6 @@ public class AppointmentTest extends AbstractAJAXTest {
             final DeleteRequest delete = new DeleteRequest(appointment);
             client.execute(delete);
         }
-    }
-
-    protected AJAXClient getClient() throws JSONException, IOException, OXException {
-        return new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
     }
 
     protected Appointment link(final Appointment base, final Appointment update) {

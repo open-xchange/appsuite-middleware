@@ -89,12 +89,12 @@ public class Bug40651Test extends ShareTest {
 
     @Test
     public void testShareFileLinkAndSearchForItAsGuest() throws Exception {
-        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
 
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(folder.getObjectID()), file.getId());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
-        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, getClient().getValues().getTimeZone());
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getShareLink().getShareURL();
 
         GuestClient guestClient = resolveShare(url);
@@ -111,12 +111,12 @@ public class Bug40651Test extends ShareTest {
 
     @Test
     public void testShareFolderLinkAndSearchForContainedItemAsGuest() throws Exception {
-        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
 
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(folder.getObjectID()));
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
-        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, getClient().getValues().getTimeZone());
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getShareLink().getShareURL();
 
         GuestClient guestClient = resolveShare(url);

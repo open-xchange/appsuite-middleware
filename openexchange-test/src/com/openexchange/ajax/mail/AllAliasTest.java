@@ -77,12 +77,12 @@ public class AllAliasTest extends AbstractMailTest {
     @Test
     public void testAllAlias() throws Exception {
         final AJAXClient client = getClient();
-        final AllRequest allAliasRequest = new AllRequest(client.getValues().getInboxFolder(), "all", 0, Order.ASCENDING, true);
-        final AllResponse allAliasResponse = client.execute(allAliasRequest);
+        final AllRequest allAliasRequest = new AllRequest(getClient().getValues().getInboxFolder(), "all", 0, Order.ASCENDING, true);
+        final AllResponse allAliasResponse = getClient().execute(allAliasRequest);
         final Object[][] aliasMails = allAliasResponse.getArray();
 
-        final AllRequest allRequest = new AllRequest(client.getValues().getInboxFolder(), new int[] { 600, 601 }, 0, Order.ASCENDING, true);
-        final AllResponse allResponse = client.execute(allRequest);
+        final AllRequest allRequest = new AllRequest(getClient().getValues().getInboxFolder(), new int[] { 600, 601 }, 0, Order.ASCENDING, true);
+        final AllResponse allResponse = getClient().execute(allRequest);
         final Object[][] mails = allResponse.getArray();
 
         assertEquals("Arrays' sizes are not equal.", aliasMails.length, mails.length);

@@ -61,7 +61,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
  * Tests the action formLogin of the login servlet.
@@ -81,8 +80,6 @@ public class FormLoginTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
     }
 
     @After

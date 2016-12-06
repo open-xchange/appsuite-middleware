@@ -62,8 +62,8 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
 import org.junit.Assert;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
 import com.openexchange.ajax.oauth.provider.protocol.OAuthParams;
 import com.openexchange.ajax.oauth.provider.protocol.Protocol;
@@ -92,7 +92,7 @@ public class OAuthSession extends AJAXSession {
     /**
      * Initializes a new {@link OAuthSession}.
      */
-    public OAuthSession(User user, String clientId, String clientSecret, String redirectURI, Scope scope) {
+    public OAuthSession(TestUser user, String clientId, String clientSecret, String redirectURI, Scope scope) {
         super(newWebConversation(), newOAuthHttpClient(), null);
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -121,10 +121,10 @@ public class OAuthSession extends AJAXSession {
         return client;
     }
 
-    private void obtainAccess(User user, HttpClient client) throws Exception {
+    private void obtainAccess(TestUser user, HttpClient client) throws Exception {
         String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        String login = AJAXConfig.getProperty(user.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
-        String password = AJAXConfig.getProperty(user.getPassword());
+        String login = user.getLogin();
+        String password = user.getPassword();
         String state = UUIDs.getUnformattedStringFromRandom();
 
         OAuthParams params = new OAuthParams().setHostname(hostname).setClientId(clientId).setClientSecret(clientSecret).setRedirectURI(redirectURI).setScope(scope.toString()).setState(state);

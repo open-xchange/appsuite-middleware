@@ -91,7 +91,7 @@ public class ExamineTest extends AbstractMailTest {
     public void tearDown() throws Exception {
         if (subFolder != null) {
             com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
-            client.execute(fDel);
+            getClient().execute(fDel);
         }
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
@@ -103,7 +103,7 @@ public class ExamineTest extends AbstractMailTest {
     public void testExamineTest() throws OXException, IOException, JSONException {
 
         AJAXClient client = getClient();
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
         String folder = values.getInboxFolder();
 
         String name = "examineTest" + System.currentTimeMillis();
@@ -111,7 +111,7 @@ public class ExamineTest extends AbstractMailTest {
         subFolder = Create.createPrivateFolder(name, FolderObject.MAIL, values.getUserId());
         subFolder.setFullName(fullName);
         InsertRequest subFolderReq = new InsertRequest(EnumAPI.OX_NEW, subFolder, true);
-        client.execute(subFolderReq);
+        getClient().execute(subFolderReq);
         subFolder.setLastModified(new Date(0));
 
         StringBuilder sb = new StringBuilder(8192);
@@ -128,32 +128,32 @@ public class ExamineTest extends AbstractMailTest {
             }
         }
 
-        InputStream inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest importMailRequest = new ImportMailRequest(subFolder.getFullName(), MailFlag.SEEN.getValue(), inputStream);
-        ImportMailResponse importResp = client.execute(importMailRequest);
+        ImportMailResponse importResp = getClient().execute(importMailRequest);
         String[] id1 = importResp.getIds()[0];
 
         ExamineRequest examineReq = new ExamineRequest(subFolder.getFullName(), true);
-        ExamineResponse examineRes = client.execute(examineReq);
+        ExamineResponse examineRes = getClient().execute(examineReq);
         JSONObject jValidity = (JSONObject) examineRes.getData();
         String validity1 = jValidity.getString("validity");
 
         com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
-        client.execute(fDel);
+        getClient().execute(fDel);
 
         subFolder = Create.createPrivateFolder(name, FolderObject.MAIL, values.getUserId());
         subFolder.setFullName(fullName);
         subFolderReq = new InsertRequest(EnumAPI.OX_NEW, subFolder, true);
-        client.execute(subFolderReq);
+        getClient().execute(subFolderReq);
         subFolder.setLastModified(new Date(0));
 
-        inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         importMailRequest = new ImportMailRequest(subFolder.getFullName(), MailFlag.SEEN.getValue(), inputStream);
-        importResp = client.execute(importMailRequest);
+        importResp = getClient().execute(importMailRequest);
         String[] id2 = importResp.getIds()[0];
 
         examineReq = new ExamineRequest(subFolder.getFullName(), true);
-        examineRes = client.execute(examineReq);
+        examineRes = getClient().execute(examineReq);
         jValidity = (JSONObject) examineRes.getData();
         String validity2 = jValidity.getString("validity");
         if (validity1.equals(validity2)) {

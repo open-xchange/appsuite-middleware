@@ -69,7 +69,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
@@ -118,16 +117,16 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
-        ftm = new FolderTestManager(client);
+        client2 = new AJAXClient(testContext.acquireUser());
+        ftm = new FolderTestManager(getClient());
         String folderName = "InfostoreObjectPermissionTest_" + System.currentTimeMillis();
-        testFolder = ftm.generatePrivateFolder(folderName, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
+        testFolder = ftm.generatePrivateFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
         testFolder = ftm.insertFolderOnServer(testFolder);
 
         allFiles = new HashMap<String, File>();
         shareStates = new HashMap<String, Boolean>();
 
-        itm = new InfostoreTestManager(client);
+        itm = new InfostoreTestManager(getClient());
         itm.setFailOnError(true);
         java.io.File upload = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "contact_image.png");
         Random r = new Random();
@@ -245,7 +244,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         /*
          * The file creator must not see the files within folder 10
          */
-        allResp = client.execute(new AllInfostoreRequest(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING));
+        allResp = getClient().execute(new AllInfostoreRequest(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING));
         for (Object[] doc : allResp.getArray()) {
             int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
             assertFalse(allFiles.containsKey(docId));
@@ -256,7 +255,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), id.toString()));
         }
 
-        listResp = client.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
+        listResp = getClient().execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
         for (Object[] doc : listResp.getArray()) {
             int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
             assertFalse(allFiles.containsKey(docId));

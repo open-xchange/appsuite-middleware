@@ -86,17 +86,17 @@ public class Bug16087Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        folder = client.getValues().getInboxFolder();
-        address = client.getValues().getSendAddress();
+        folder = getClient().getValues().getInboxFolder();
+        address = getClient().getValues().getSendAddress();
         final String mail = TestMails.replaceAddresses(TestMails.UMLAUT_MAIL, address);
         final ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
-        final ImportMailResponse response = client.execute(request);
+        final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds()[0];
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(ids, true));
+        getClient().execute(new DeleteRequest(ids, true));
         super.tearDown();
     }
 
@@ -107,11 +107,11 @@ public class Bug16087Test extends AbstractAJAXSession {
             request.setUnseen(true);
             request.setSource(true);
             request.setSave(true);
-            client.execute(request);
+            getClient().execute(request);
         }
         {
             final ListRequest request = new ListRequest(new String[][] { ids }, ATTRIBUTES);
-            final CommonListResponse response = client.execute(request);
+            final CommonListResponse response = getClient().execute(request);
             final int flagsPos = response.getColumnPos(FLAGS.getField());
             for (final Object[] mail : response) {
                 final int testFlags = ((Integer) mail[flagsPos]).intValue();

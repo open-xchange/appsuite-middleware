@@ -65,7 +65,6 @@ import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.SearchResponse;
@@ -97,7 +96,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
         userId1 = client.getValues().getUserId();
         folder = Create.createPrivateFolder("test for bug 16724_" + System.currentTimeMillis(), FolderObject.TASK, client.getValues().getUserId());
         folder.setParentFolderID(client.getValues().getPrivateTaskFolder());
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         folder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
         InsertResponse response = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         response.fillObject(folder);

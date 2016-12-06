@@ -87,10 +87,10 @@ public class ShowSharedFilesFolderTest extends ShareTest {
     public void setUp() throws Exception {
         super.setUp();
         perm = randomGuestObjectPermission();
-        file = insertSharedFile(client.getValues().getPrivateInfostoreFolder(), perm);
+        file = insertSharedFile(getClient().getValues().getPrivateInfostoreFolder(), perm);
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -105,7 +105,7 @@ public class ShowSharedFilesFolderTest extends ShareTest {
 
     @After
     public void tearDown() throws Exception {
-        deleteFilesSilently(client, Collections.singletonList(file));
+        deleteFilesSilently(getClient(), Collections.singletonList(file));
         super.tearDown();
     }
 

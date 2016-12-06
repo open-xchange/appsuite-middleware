@@ -60,8 +60,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -79,7 +79,7 @@ import com.openexchange.test.TestManager;
  */
 public class MoveTestNew extends AbstractAppointmentTest {
 
-    private User userA, userB, userC;
+    private TestUser userA, userB, userC;
 
     private AJAXClient clientA, clientB, clientC;
 
@@ -107,9 +107,8 @@ public class MoveTestNew extends AbstractAppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        userA = User.User1;
-        userB = User.User2;
-        userC = User.User3;
+        userB = testContext.acquireUser();
+        userC = testContext.acquireUser();
 
         clientA = client;
         clientB = new AJAXClient(userB);

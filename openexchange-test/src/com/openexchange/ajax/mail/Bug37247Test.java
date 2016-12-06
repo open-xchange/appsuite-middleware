@@ -127,7 +127,7 @@ public class Bug37247Test extends AbstractMailTest {
             mail.put("sendtype", ComposeType.DRAFT_EDIT.getType());
 
             NewMailRequestWithUploads sendDraftRequest = new NewMailRequestWithUploads(mail);
-            MailReferenceResponse sendDraftResponse = client.execute(sendDraftRequest);
+            MailReferenceResponse sendDraftResponse = getClient().execute(sendDraftRequest);
             assertNotNull(sendDraftResponse);
 
             GetRequest gReq = new GetRequest(folderId, mailId);
@@ -174,7 +174,7 @@ public class Bug37247Test extends AbstractMailTest {
             mail.put("sendtype", ComposeType.DRAFT_EDIT.getType());
 
             NewMailRequestWithUploads sendDraftRequest = new NewMailRequestWithUploads(mail);
-            MailReferenceResponse sendDraftResponse = client.execute(sendDraftRequest);
+            MailReferenceResponse sendDraftResponse = getClient().execute(sendDraftRequest);
             assertNotNull(sendDraftResponse);
 
             GetRequest gReq = new GetRequest(folderId, mailId);

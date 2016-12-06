@@ -62,7 +62,6 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.PermissionTools;
@@ -84,25 +83,21 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
 
     private FolderObject createdSharedFolder;
 
-    public VisibleFoldersTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = new AJAXClient(testContext.acquireUser());
 
         {
             createdPrivateFolder = new FolderObject();
             createdPrivateFolder.setModule(FolderObject.CALENDAR);
-            createdPrivateFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+            createdPrivateFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
             createdPrivateFolder.setType(FolderObject.PRIVATE);
             createdPrivateFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN));
             createdPrivateFolder.setFolderName("testPrivateCalendarFolder" + System.currentTimeMillis());
             final InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdPrivateFolder);
-            final InsertResponse iResp = client.execute(iReq);
+            final InsertResponse iResp = getClient().execute(iReq);
             iResp.fillObject(createdPrivateFolder);
         }
 
@@ -114,7 +109,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
             createdPublicFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN));
             createdPublicFolder.setFolderName("testPublicCalendarFolder" + System.currentTimeMillis());
             final InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdPublicFolder);
-            final InsertResponse iResp = client.execute(iReq);
+            final InsertResponse iResp = getClient().execute(iReq);
             iResp.fillObject(createdPublicFolder);
         }
 
@@ -143,7 +138,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
     @Test
     public void testForVisibleFolders() throws Throwable {
         final VisibleFoldersRequest req = new VisibleFoldersRequest(EnumAPI.OUTLOOK, "calendar");
-        final VisibleFoldersResponse resp = client.execute(req);
+        final VisibleFoldersResponse resp = getClient().execute(req);
         /*
          * Iterate private folder and look-up previously created private folder
          */
@@ -194,7 +189,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
     @Test
     public void testFindingGlobalAddressbook() throws Exception {
         final VisibleFoldersRequest req = new VisibleFoldersRequest(EnumAPI.OUTLOOK, "contacts");
-        final VisibleFoldersResponse resp = client.execute(req);
+        final VisibleFoldersResponse resp = getClient().execute(req);
         final Iterator<FolderObject> publicFolders = resp.getPublicFolders();
 
         boolean globalAddressBookFound = false;

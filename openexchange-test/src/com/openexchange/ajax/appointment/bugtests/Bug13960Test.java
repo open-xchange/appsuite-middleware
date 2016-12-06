@@ -98,23 +98,23 @@ public class Bug13960Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         appointment = new Appointment();
         appointment.setTitle("Appointment for bug 13960");
         appointment.setIgnoreConflicts(true);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Calendar calendar = TimeTools.createCalendar(timeZone);
         appointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
         InsertRequest request = new InsertRequest(appointment, timeZone);
-        AppointmentInsertResponse response = client.execute(request);
+        AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
+        getClient().execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
@@ -122,14 +122,14 @@ public class Bug13960Test extends AbstractAJAXSession {
     public void testJSONValues() throws Throwable {
         {
             GetRequest request = new GetRequest(appointment);
-            GetResponse response = client.execute(request);
+            GetResponse response = getClient().execute(request);
             JSONObject json = (JSONObject) response.getData();
             assertFalse(json.has(AppointmentFields.RECURRENCE_ID));
             assertFalse(json.has(AppointmentFields.RECURRENCE_POSITION));
         }
         {
             UpdatesRequest request = new UpdatesRequest(appointment.getParentFolderID(), COLUMNS, new Date(appointment.getLastModified().getTime() - 1), true);
-            AppointmentUpdatesResponse response = client.execute(request);
+            AppointmentUpdatesResponse response = getClient().execute(request);
             int idPos = response.getColumnPos(Appointment.OBJECT_ID);
             int row = 0;
             while (row < response.getArray().length) {
@@ -146,7 +146,7 @@ public class Bug13960Test extends AbstractAJAXSession {
         }
         {
             ListRequest request = new ListRequest(ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID() }), COLUMNS);
-            CommonListResponse response = client.execute(request);
+            CommonListResponse response = getClient().execute(request);
             JSONArray array = ((JSONArray) response.getData()).getJSONArray(0);
             int recurrenceIdPos = response.getColumnPos(Appointment.RECURRENCE_ID);
             assertEquals(JSONObject.NULL, array.get(recurrenceIdPos));
@@ -155,7 +155,7 @@ public class Bug13960Test extends AbstractAJAXSession {
         }
         {
             AllRequest request = new AllRequest(appointment.getParentFolderID(), COLUMNS, appointment.getStartDate(), appointment.getEndDate(), timeZone);
-            CommonAllResponse response = client.execute(request);
+            CommonAllResponse response = getClient().execute(request);
             int idPos = response.getColumnPos(Appointment.OBJECT_ID);
             int row = 0;
             while (row < response.getArray().length) {

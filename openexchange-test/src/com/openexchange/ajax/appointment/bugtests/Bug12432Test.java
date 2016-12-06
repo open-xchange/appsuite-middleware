@@ -31,8 +31,8 @@ public class Bug12432Test extends AbstractAJAXSession {
 
         try {
             client = getClient();
-            int folderId = client.getValues().getPrivateAppointmentFolder();
-            TimeZone tz = client.getValues().getTimeZone();
+            int folderId = getClient().getValues().getPrivateAppointmentFolder();
+            TimeZone tz = getClient().getValues().getTimeZone();
 
             appointmentReserved = createAppointment("Bug12432Test - reserved", Appointment.RESERVED, folderId, tz);
             // Prevent conflicting with other objects.
@@ -42,12 +42,12 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentFree.setIgnoreConflicts(false);
 
             InsertRequest request = new InsertRequest(appointmentReserved, tz);
-            AppointmentInsertResponse response = client.execute(request);
+            AppointmentInsertResponse response = getClient().execute(request);
             appointmentReserved.setObjectID(response.getId());
             appointmentReserved.setLastModified(response.getTimestamp());
 
             request = new InsertRequest(appointmentFree, tz, false);
-            response = client.execute(request);
+            response = getClient().execute(request);
             assertFalse(response.hasConflicts());
             appointmentFree.setObjectID(response.getId());
             appointmentFree.setLastModified(response.getTimestamp());
@@ -65,8 +65,8 @@ public class Bug12432Test extends AbstractAJAXSession {
 
         try {
             client = getClient();
-            int folderId = client.getValues().getPrivateAppointmentFolder();
-            TimeZone tz = client.getValues().getTimeZone();
+            int folderId = getClient().getValues().getPrivateAppointmentFolder();
+            TimeZone tz = getClient().getValues().getTimeZone();
 
             appointmentReserved = createAppointment("Bug12432Test - reserved", Appointment.RESERVED, folderId, tz);
             // Prevent conflicting with other objects.
@@ -76,12 +76,12 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentFree.setIgnoreConflicts(false);
 
             InsertRequest request = new InsertRequest(appointmentFree, tz);
-            AppointmentInsertResponse response = client.execute(request);
+            AppointmentInsertResponse response = getClient().execute(request);
             appointmentFree.setObjectID(response.getId());
             appointmentFree.setLastModified(response.getTimestamp());
 
             request = new InsertRequest(appointmentReserved, tz, false);
-            response = client.execute(request);
+            response = getClient().execute(request);
             assertFalse(response.hasConflicts());
             appointmentReserved.setObjectID(response.getId());
             appointmentReserved.setLastModified(response.getTimestamp());
@@ -99,8 +99,8 @@ public class Bug12432Test extends AbstractAJAXSession {
 
         try {
             client = getClient();
-            int folderId = client.getValues().getPrivateAppointmentFolder();
-            TimeZone tz = client.getValues().getTimeZone();
+            int folderId = getClient().getValues().getPrivateAppointmentFolder();
+            TimeZone tz = getClient().getValues().getTimeZone();
 
             appointmentReserved = createAppointment("Bug12432Test - reserved", Appointment.RESERVED, folderId, tz);
             // Prevent conflicting with other objects.
@@ -110,12 +110,12 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentFree.setIgnoreConflicts(true);
 
             InsertRequest request = new InsertRequest(appointmentReserved, tz);
-            AppointmentInsertResponse response = client.execute(request);
+            AppointmentInsertResponse response = getClient().execute(request);
             appointmentReserved.setObjectID(response.getId());
             appointmentReserved.setLastModified(response.getTimestamp());
 
             request = new InsertRequest(appointmentFree, tz, false);
-            response = client.execute(request);
+            response = getClient().execute(request);
             appointmentFree.setObjectID(response.getId());
             appointmentFree.setLastModified(response.getTimestamp());
 
@@ -134,7 +134,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             updateAppointment.setIgnoreConflicts(false);
 
             UpdateRequest updateRequest = new UpdateRequest(updateAppointment, tz);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             assertFalse("Update on free Appointment should not conflict.", updateResponse.hasConflicts());
 
             appointmentFree.setLastModified(updateResponse.getTimestamp());
@@ -152,8 +152,8 @@ public class Bug12432Test extends AbstractAJAXSession {
 
         try {
             client = getClient();
-            int folderId = client.getValues().getPrivateAppointmentFolder();
-            TimeZone tz = client.getValues().getTimeZone();
+            int folderId = getClient().getValues().getPrivateAppointmentFolder();
+            TimeZone tz = getClient().getValues().getTimeZone();
 
             appointmentReserved = createAppointment("Bug12432Test - reserved", Appointment.RESERVED, folderId, tz);
             // Prevent conflicting with other objects.
@@ -163,12 +163,12 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentFree.setIgnoreConflicts(true);
 
             InsertRequest request = new InsertRequest(appointmentReserved, tz);
-            AppointmentInsertResponse response = client.execute(request);
+            AppointmentInsertResponse response = getClient().execute(request);
             appointmentReserved.setObjectID(response.getId());
             appointmentReserved.setLastModified(response.getTimestamp());
 
             request = new InsertRequest(appointmentFree, tz, false);
-            response = client.execute(request);
+            response = getClient().execute(request);
             appointmentFree.setObjectID(response.getId());
             appointmentFree.setLastModified(response.getTimestamp());
 
@@ -187,7 +187,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             updateAppointment.setIgnoreConflicts(false);
 
             UpdateRequest updateRequest = new UpdateRequest(updateAppointment, tz);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             if (updateResponse.hasConflicts()) {
                 for (ConflictObject conflict : updateResponse.getConflicts()) {
                     assertFalse("Update on Appointment should not conflict with free Appointment.", conflict.getId() == appointmentFree.getObjectID());
@@ -209,8 +209,8 @@ public class Bug12432Test extends AbstractAJAXSession {
 
         try {
             client = getClient();
-            int folderId = client.getValues().getPrivateAppointmentFolder();
-            TimeZone tz = client.getValues().getTimeZone();
+            int folderId = getClient().getValues().getPrivateAppointmentFolder();
+            TimeZone tz = getClient().getValues().getTimeZone();
 
             //Step 1
             appointmentA = createAppointment("Just-for-Info", Appointment.FREE, folderId, tz);
@@ -223,7 +223,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentA.setIgnoreConflicts(true);
 
             InsertRequest request = new InsertRequest(appointmentA, tz, false);
-            AppointmentInsertResponse response = client.execute(request);
+            AppointmentInsertResponse response = getClient().execute(request);
             appointmentA.setObjectID(response.getId());
             appointmentA.setLastModified(response.getTimestamp());
 
@@ -238,7 +238,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             appointmentB.setIgnoreConflicts(true);
 
             request = new InsertRequest(appointmentB, tz);
-            response = client.execute(request);
+            response = getClient().execute(request);
             appointmentB.setObjectID(response.getId());
             appointmentB.setLastModified(response.getTimestamp());
 
@@ -253,7 +253,7 @@ public class Bug12432Test extends AbstractAJAXSession {
             updateAppointmentA.setIgnoreConflicts(false);
 
             UpdateRequest updateRequest = new UpdateRequest(updateAppointmentA, tz);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             assertFalse("Update on free Appointment should not conflict.", updateResponse.hasConflicts());
 
             appointmentA.setLastModified(updateResponse.getTimestamp());
@@ -279,8 +279,8 @@ public class Bug12432Test extends AbstractAJAXSession {
 
     private void deleteAppointment(Appointment appointment, AJAXClient client) throws Throwable {
         if (client != null && appointment.getObjectID() != 0 && appointment.getLastModified() != null) {
-            DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
-            client.execute(deleteRequest);
+            DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), getClient().getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
+            getClient().execute(deleteRequest);
         }
     }
 

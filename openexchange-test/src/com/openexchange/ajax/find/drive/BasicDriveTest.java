@@ -72,7 +72,6 @@ import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
@@ -122,28 +121,19 @@ public class BasicDriveTest extends AbstractFindTest {
     private static final String SEARCH = "BasicDriveTest";
     private static final String SUBFOLDER_SEARCH = "jpg";
 
-    /**
-     * Initializes a new {@link BasicDriveTest}.
-     *
-     * @param name
-     */
-    public BasicDriveTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
+//        client = new AJAXClient(testContext.acquireUser());
         MailConfig.init();
         String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
         java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
 
         String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
-        testFolder = folderManager.generatePrivateFolder(folderName, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
+        testFolder = folderManager.generatePrivateFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
         testFolder = folderManager.insertFolderOnServer(testFolder);
 
-        manager = new InfostoreTestManager(client);
+        manager = new InfostoreTestManager(getClient());
         metadata = new DefaultFile();
         metadata.setFileName(file.getName());
         metadata.setTitle(file.getName());
@@ -156,7 +146,9 @@ public class BasicDriveTest extends AbstractFindTest {
 
     @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
+        if (manager != null) {
+            manager.cleanUp();
+        }
         super.tearDown();
     }
 
@@ -165,7 +157,7 @@ public class BasicDriveTest extends AbstractFindTest {
         verifyDocumentExists();
         ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(Collections.singletonList(Constants.FIELD_FILE_NAME), SEARCH));
         QueryRequest request = new QueryRequest(0, 10, Arrays.asList(ACCOUNT_FACET, fileNameFacet), Module.DRIVE.getIdentifier());
-        QueryResponse response = client.execute(request);
+        QueryResponse response = getClient().execute(request);
         SearchResult result = response.getSearchResult();
         assertTrue("Nothing found in BasicDriveTest", result.getSize() > 0);
     }
@@ -179,7 +171,7 @@ public class BasicDriveTest extends AbstractFindTest {
         final int num_of_subfolders = 3;
         files = new LinkedList<File>();
         for (int x = 0; x < num_of_subfolders; x++) {
-            FolderObject subfolder = folderManager.generatePrivateFolder("findApiDriveTestFolder_" + System.currentTimeMillis(), FolderObject.INFOSTORE, parentId, client.getValues().getUserId());
+            FolderObject subfolder = folderManager.generatePrivateFolder("findApiDriveTestFolder_" + System.currentTimeMillis(), FolderObject.INFOSTORE, parentId, getClient().getValues().getUserId());
             subfolder = folderManager.insertFolderOnServer(subfolder);
             parentId = subfolder.getObjectID();
 
@@ -210,7 +202,7 @@ public class BasicDriveTest extends AbstractFindTest {
         facetList.add(fileNameFacet);
         facetList.add(fileNameFacet2);
         QueryRequest request = new QueryRequest(0, 10, facetList, Module.DRIVE.getIdentifier());
-        QueryResponse response = client.execute(request);
+        QueryResponse response = getClient().execute(request);
         SearchResult result = response.getSearchResult();
         assertTrue("Found " + result.getSize() + " instead of " + files.size() + " files.", result.getSize() == files.size());
     }
@@ -220,7 +212,7 @@ public class BasicDriveTest extends AbstractFindTest {
         verifyDocumentExists();
         ActiveFacet fileSizeFacet = new ActiveFacet(DriveFacetType.FILE_SIZE, FileSize.MB1.getSize(), new Filter(Collections.singletonList(Constants.FIELD_FILE_SIZE), FileSize.MB1.getSize()));
         QueryRequest request = new QueryRequest(0, 10, Arrays.asList(ACCOUNT_FACET, fileSizeFacet), Module.DRIVE.getIdentifier());
-        QueryResponse response = client.execute(request);
+        QueryResponse response = getClient().execute(request);
         SearchResult result = response.getSearchResult();
         assertNotNull("No search result", result);
         assertTrue("Nothing found in file size test", result.getSize() > 0);
@@ -232,7 +224,7 @@ public class BasicDriveTest extends AbstractFindTest {
 
     private void verifyDocumentExists() throws Exception {
         int[] columns = new int[] { 1, 20, 700 }; // id, folder, title
-        SearchInfostoreResponse verificationResponse = client.execute(new SearchInfostoreRequest(testFolder.getObjectID(), metadata.getTitle(), columns));
+        SearchInfostoreResponse verificationResponse = getClient().execute(new SearchInfostoreRequest(testFolder.getObjectID(), metadata.getTitle(), columns));
         JSONArray foundFiles = (JSONArray) verificationResponse.getData();
         assertEquals("Wrong number of documents found via conventional search", 1, foundFiles.length());
         JSONArray desiredFile = foundFiles.getJSONArray(0);
@@ -312,7 +304,7 @@ public class BasicDriveTest extends AbstractFindTest {
 
         ListInfostoreRequest listRequest = new ListInfostoreRequest(intColumns);
         listRequest.addItem(new ListItem(metadata));
-        ListInfostoreResponse listResponse = client.execute(listRequest);
+        ListInfostoreResponse listResponse = getClient().execute(listRequest);
         Object[] listDocument = listResponse.getArray()[0];
 
         // Search the same item and compare fields
@@ -326,7 +318,7 @@ public class BasicDriveTest extends AbstractFindTest {
         } else {
             queryRequest = new QueryRequest(0, 10, facets, Module.DRIVE.getIdentifier());
         }
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         PropDocument queryDocument = (PropDocument) queryResponse.getSearchResult().getDocuments().get(0);
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -347,7 +339,7 @@ public class BasicDriveTest extends AbstractFindTest {
         facets.add(createActiveFacet(CommonFacetType.FOLDER, testFolder.getObjectID(), Filter.NO_FILTER));
         facets.add(createFolderTypeFacet(FolderType.PRIVATE));
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest("", Module.DRIVE.getIdentifier(), facets, (Map<String, String>) null, false);
-        AutocompleteResponse resp = client.execute(autocompleteRequest);
+        AutocompleteResponse resp = getClient().execute(autocompleteRequest);
         assertTrue("Wrong exception", FindExceptionCode.FACET_CONFLICT.equals(resp.getException()));
     }
 
@@ -371,14 +363,14 @@ public class BasicDriveTest extends AbstractFindTest {
 
     @Test
     public void testFolderTypeFacet() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         try {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
-            AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
+            AJAXClient[] clients = new AJAXClient[] { getClient(), getClient(), client2 };
             FolderObject[] folders = new FolderObject[3];
-            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId()));
-            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.INFOSTORE, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, client.getValues().getUserId()));
-            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId(), client2.getValues().getUserId()));
+            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId()));
+            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.INFOSTORE, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, getClient().getValues().getUserId()));
+            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId()));
 
             File[] documents = new File[3];
             documents[0] = new DefaultFile(metadata);
@@ -442,14 +434,14 @@ public class BasicDriveTest extends AbstractFindTest {
 
     @Test
     public void testDeletedFilesAreIgnored() throws Exception {
-        FolderObject deletedFolder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId()));
+        FolderObject deletedFolder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId()));
         File deletedDocument = new DefaultFile(metadata);
         deletedDocument.setTitle(randomUID());
         deletedDocument.setFolderId(String.valueOf(deletedFolder.getObjectID()));
         manager.newAction(deletedDocument);
         folderManager.deleteFolderOnServer(deletedFolder);
-        Folder reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getStorageFolder();
-        FolderObject trashFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentID())).getFolder();
+        Folder reloadedFolder = getClient().execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getStorageFolder();
+        FolderObject trashFolder = getClient().execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentID())).getFolder();
         assertEquals("Wrong type", FolderObject.TRASH, trashFolder.getType());
 
         List<Facet> autocompleteResponse = autocomplete(deletedDocument.getTitle(), Collections.singletonList(ACCOUNT_FACET));
@@ -464,14 +456,14 @@ public class BasicDriveTest extends AbstractFindTest {
         facets.add(ACCOUNT_FACET);
         facets.add(fileNameFacet);
         facets.add(createActiveFacet(CommonFacetType.FOLDER, reloadedFolder.getID(), Filter.NO_FILTER));
-        List<PropDocument> documents = query(client, facets);
+        List<PropDocument> documents = query(getClient(), facets);
         assertEquals("Wrong number of documents", 1, documents.size());
         assertEquals("Wrong document", deletedDocument.getTitle(), (String) documents.get(0).getProps().get("title"));
 
         facets.clear();
         facets.add(ACCOUNT_FACET);
         facets.add(fileNameFacet);
-        documents = query(client, facets);
+        documents = query(getClient(), facets);
         assertEquals("Wrong number of documents", 0, documents.size());
 
         for (int i = 0; i < 3; i++) {
@@ -479,7 +471,7 @@ public class BasicDriveTest extends AbstractFindTest {
             facets.add(ACCOUNT_FACET);
             facets.add(fileNameFacet);
             facets.add(folderTypeFacets[i]);
-            documents = query(client, facets);
+            documents = query(getClient(), facets);
             assertEquals("Wrong number of documents. Document found in " + folderTypeFacets[i].getValueId() + " folder.", 0, documents.size());
         }
 

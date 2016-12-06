@@ -94,13 +94,13 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(AJAXClient.User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         manager2 = new ContactTestManager(client2);
         folderManager2 = new FolderTestManager(client2);
         /*
          * create a shared folder as user 2
          */
-        sharedFolder = folderManager.generateSharedFolder("DistListTest_" + UUID.randomUUID().toString(), Module.CONTACTS.getFolderConstant(), client2.getValues().getPrivateContactFolder(), new int[] { client2.getValues().getUserId(), client.getValues().getUserId() });
+        sharedFolder = folderManager.generateSharedFolder("DistListTest_" + UUID.randomUUID().toString(), Module.CONTACTS.getFolderConstant(), client2.getValues().getPrivateContactFolder(), new int[] { client2.getValues().getUserId(), getClient().getValues().getUserId() });
         sharedFolder = folderManager2.insertFolderOnServer(sharedFolder);
         /*
          * create two contacts in that folder

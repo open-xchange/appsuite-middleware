@@ -80,14 +80,13 @@ public class Bug30835Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         comp = new JSONComparator();
     }
 
     @Test
     public void testBug30835() throws Exception {
         ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
+        ConfigResponse response = getClient().execute(request);
         JSONArray json = response.getConfig().getJSONArray("languages");
         assertFalse("Response contains no languages", json.isEmpty());
         assertTrue("Response is not ordered", isOrdered(json, comp));

@@ -97,9 +97,9 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         contact1.setGivenName("Herbert");
         contact1.setDisplayName("Herbert Meier");
         contact1.setEmail1("herbert.meier@example.com");
-        contact1.setParentFolderID(client.getValues().getPrivateContactFolder());
+        contact1.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         InsertRequest insertContact1 = new InsertRequest(contact1);
-        InsertResponse insertResponse = client.execute(insertContact1);
+        InsertResponse insertResponse = getClient().execute(insertContact1);
         insertResponse.fillObject(contact1);
         //create a contact in the new folder
         contact2 = new Contact();
@@ -109,7 +109,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         contact2.setEmail1("herbert.mueller@example.com");
         contact2.setParentFolderID(newFolder.getObjectID());
         InsertRequest insertContact2 = new InsertRequest(contact2);
-        insertResponse = client.execute(insertContact2);
+        insertResponse = getClient().execute(insertContact2);
         insertResponse.fillObject(contact2);
     }
 
@@ -117,12 +117,12 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         //delete the two contacts
         DeleteRequest contactDeleteRequest = new DeleteRequest(contact1);
-        client.execute(contactDeleteRequest);
+        getClient().execute(contactDeleteRequest);
         contactDeleteRequest = new DeleteRequest(contact2);
-        client.execute(contactDeleteRequest);
+        getClient().execute(contactDeleteRequest);
         //delete the new folder
         com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, newFolder);
-        client.execute(folderDeleteRequest);
+        getClient().execute(folderDeleteRequest);
         super.tearDown();
     }
 
@@ -136,7 +136,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         cso.setGivenName("Herbert");
         SearchRequest searchRequest = new SearchRequest(cso, columns, true);
 
-        SearchResponse searchResponse = client.execute(searchRequest);
+        SearchResponse searchResponse = getClient().execute(searchRequest);
         assertFoundContacts(searchResponse);
     }
 
@@ -153,7 +153,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         cso.setEmailAutoComplete(true);
         cso.setOrSearch(true);
         SearchRequest request = new SearchRequest(cso, columns, Contact.USE_COUNT_GLOBAL_FIRST, null);
-        SearchResponse response = client.execute(request);
+        SearchResponse response = getClient().execute(request);
 
         assertFoundContacts(response);
     }

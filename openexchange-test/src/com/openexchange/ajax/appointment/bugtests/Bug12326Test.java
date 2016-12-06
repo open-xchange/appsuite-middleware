@@ -95,8 +95,8 @@ public final class Bug12326Test extends AbstractAJAXSession {
     @Test
     public void testAppointmentException() throws Throwable {
         final AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = client.getValues().getTimeZone();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = getClient().getValues().getTimeZone();
         final Appointment series = new Appointment();
         final Calendar calendar = TimeTools.createCalendar(tz);
         {
@@ -115,7 +115,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
         }
         {
             final InsertRequest request = new InsertRequest(series, tz);
-            final CommonInsertResponse response = client.execute(request);
+            final CommonInsertResponse response = getClient().execute(request);
             series.setObjectID(response.getId());
             series.setLastModified(response.getTimestamp());
         }
@@ -125,7 +125,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
             final Appointment occurence;
             {
                 final GetRequest request = new GetRequest(folderId, series.getObjectID(), recurrence_position);
-                final GetResponse response = client.execute(request);
+                final GetResponse response = getClient().execute(request);
                 occurence = response.getAppointment(tz);
                 assertEquals("Occurence must have a recurrence position.", recurrence_position, occurence.getRecurrencePosition());
             }
@@ -144,14 +144,14 @@ public final class Bug12326Test extends AbstractAJAXSession {
                 calendar.add(Calendar.HOUR, 1);
                 exception.setEndDate(calendar.getTime());
                 final UpdateRequest request = new UpdateRequest(exception, tz);
-                final UpdateResponse response = client.execute(request);
+                final UpdateResponse response = getClient().execute(request);
                 exceptionId = response.getId();
                 series.setLastModified(response.getTimestamp());
             }
             // Check exception in get response
             {
                 final GetRequest request = new GetRequest(folderId, exceptionId);
-                final GetResponse response = client.execute(request);
+                final GetResponse response = getClient().execute(request);
                 final Appointment exception = response.getAppointment(tz);
                 series.setLastModified(exception.getLastModified());
                 // Check exception
@@ -163,7 +163,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
             {
                 final ListIDs ids = ListIDs.l(new int[] { folderId, exceptionId });
                 final ListRequest request = new ListRequest(ids, columns);
-                final CommonListResponse response = client.execute(request);
+                final CommonListResponse response = getClient().execute(request);
                 final Object[] data = response.getArray()[0];
                 assertEquals("Exception is still a series.", Integer.valueOf(Appointment.NO_RECURRENCE), data[2]);
                 assertEquals("Exception must have a recurrence position.", Integer.valueOf(occurence.getRecurrencePosition()), data[3]);
@@ -171,7 +171,7 @@ public final class Bug12326Test extends AbstractAJAXSession {
                 series.setLastModified(response.getTimestamp());
             }
         } finally {
-            client.execute(new DeleteRequest(series.getObjectID(), folderId, series.getLastModified()));
+            getClient().execute(new DeleteRequest(series.getObjectID(), folderId, series.getLastModified()));
         }
     }
 }

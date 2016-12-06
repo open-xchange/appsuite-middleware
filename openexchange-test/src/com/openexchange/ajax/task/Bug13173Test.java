@@ -79,9 +79,9 @@ public class Bug13173Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folderId = client.getValues().getPrivateTaskFolder();
-        timezone = client.getValues().getTimeZone();
-        ttm = new TaskTestManager(client);
+        folderId = getClient().getValues().getPrivateTaskFolder();
+        timezone = getClient().getValues().getTimeZone();
+        ttm = new TaskTestManager(getClient());
 
         testTask = new Task();
 
@@ -89,7 +89,7 @@ public class Bug13173Test extends AbstractAJAXSession {
         testTask.setParentFolderID(folderId);
         testTask.setStartDate(new Date());
         testTask.setEndDate(new Date());
-        testTask.setCreatedBy(client.getValues().getUserId());
+        testTask.setCreatedBy(getClient().getValues().getUserId());
 
         testTask.setRecurrenceType(Task.DAILY);
         testTask.setInterval(1);

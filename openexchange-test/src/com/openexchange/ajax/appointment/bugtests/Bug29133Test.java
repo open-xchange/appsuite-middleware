@@ -8,7 +8,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -42,7 +41,7 @@ public class Bug29133Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = new AJAXClient(testContext.acquireUser());
         ctmA = new CalendarTestManager(clientA);
         ctmB = new CalendarTestManager(clientB);
 

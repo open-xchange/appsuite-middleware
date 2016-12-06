@@ -83,15 +83,15 @@ public class Bug15317Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        tz = client.getValues().getTimeZone();
-        contactId = client.execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
-        GetResponse response = client.execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));
+        tz = getClient().getValues().getTimeZone();
+        contactId = getClient().execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
+        GetResponse response = getClient().execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));
         userContact = response.getContact();
     }
 
     @Test
     public void testDeleteUserContact() throws Throwable {
-        CommonDeleteResponse response = client.execute(new DeleteRequest(userContact, false));
+        CommonDeleteResponse response = getClient().execute(new DeleteRequest(userContact, false));
         assertTrue("Delete was not denied.", response.hasError());
     }
 }

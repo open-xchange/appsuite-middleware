@@ -120,7 +120,7 @@ public final class PasswordResetServletTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -160,12 +160,12 @@ public final class PasswordResetServletTest extends ShareTest {
         }
         DefaultHttpClient httpClient = getSession().getHttpClient();
         // http://localhost/ajax/share/reset/password?share=1100ba1e0f0652b8849d7f3f066049e390589313a77026ef&confirm=FIMvTtnmQ7Dv_N97CRENJy6rTYw
-        HttpGet getConfirmationMail = new HttpGet(new URIBuilder().setScheme(client.getProtocol()).setHost(client.getHostname()).setPath("/ajax/share/reset/password").setParameter("share", token).build());
+        HttpGet getConfirmationMail = new HttpGet(new URIBuilder().setScheme(getClient().getProtocol()).setHost(getClient().getHostname()).setPath("/ajax/share/reset/password").setParameter("share", token).build());
         HttpResponse getConfirmationMailResponse = httpClient.execute(getConfirmationMail);
         EntityUtils.consume(getConfirmationMailResponse.getEntity());
 
         PWResetData resetData = getConfirmationToken();
-        HttpPost confirmPWReset = new HttpPost(new URIBuilder().setScheme(client.getProtocol()).setHost(client.getHostname()).setPath("/ajax/share/reset/password").build());
+        HttpPost confirmPWReset = new HttpPost(new URIBuilder().setScheme(getClient().getProtocol()).setHost(getClient().getHostname()).setPath("/ajax/share/reset/password").build());
         String newPW = UUIDs.getUnformattedStringFromRandom();
         List<BasicNameValuePair> params = new ArrayList<>(3);
         params.add(new BasicNameValuePair("share", resetData.shareToken));
@@ -198,7 +198,7 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     private PWResetData getConfirmationToken() throws Exception {
-        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(1, messages.size());
         Message message = messages.get(0);
         String url = message.getHeaders().get("X-Open-Xchange-Share-Reset-PW-URL");

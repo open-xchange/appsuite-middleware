@@ -96,9 +96,9 @@ public class Bug18490Test extends AbstractMailFilterTest {
     @Test
     public void testBug18490() throws Exception {
         client = getClient();
-        folder = Create.createPrivateFolder("Bug18490 test F\u00f6lder", FolderObject.MAIL, client.getValues().getUserId());
-        folder.setFullName(client.getValues().getInboxFolder() + "/Bug18490 test F\u00f6lder");
-        final InsertResponse folderInsertResponse = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+        folder = Create.createPrivateFolder("Bug18490 test F\u00f6lder", FolderObject.MAIL, getClient().getValues().getUserId());
+        folder.setFullName(getClient().getValues().getInboxFolder() + "/Bug18490 test F\u00f6lder");
+        final InsertResponse folderInsertResponse = getClient().execute(new InsertRequest(EnumAPI.OX_NEW, folder));
         folderInsertResponse.fillObject(folder);
 
         final Rule rule = new Rule();
@@ -122,8 +122,8 @@ public class Bug18490Test extends AbstractMailFilterTest {
         // Send Mail to myself
         final TestMail testMail = new TestMail();
         testMail.setSubject("Bug18490 testmail");
-        testMail.setTo(Arrays.asList(new String[] { client.getValues().getSendAddress() }));
-        testMail.setFrom(client.getValues().getSendAddress());
+        testMail.setTo(Arrays.asList(new String[] { getClient().getValues().getSendAddress() }));
+        testMail.setFrom(getClient().getValues().getSendAddress());
         testMail.setContentType(MailContentType.PLAIN.toString());
         testMail.setBody("Move me...");
         testMail.sanitize();
@@ -138,7 +138,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
     @After
     public void tearDown() throws Exception {
         if (folder != null) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
+            getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
         }
 
         super.tearDown();

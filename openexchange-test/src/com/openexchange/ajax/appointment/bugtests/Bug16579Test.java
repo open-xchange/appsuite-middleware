@@ -97,10 +97,10 @@ public class Bug16579Test extends AbstractAJAXSession {
         appointment.setDays(Appointment.MONDAY);
         appointment.setInterval(1);
         appointment.setUntil(D("23.08.2010 00:00"));
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        InsertRequest request = new InsertRequest(appointment, client.getValues().getTimeZone());
-        AppointmentInsertResponse insertResponse = client.execute(request);
+        InsertRequest request = new InsertRequest(appointment, getClient().getValues().getTimeZone());
+        AppointmentInsertResponse insertResponse = getClient().execute(request);
         insertResponse.fillObject(appointment);
 
         updateAppointment = new Appointment();
@@ -116,12 +116,12 @@ public class Bug16579Test extends AbstractAJAXSession {
 
     @Test
     public void testBug16579() throws Exception {
-        UpdateResponse updateResponse = client.execute(new UpdateRequest(updateAppointment, client.getValues().getTimeZone()));
+        UpdateResponse updateResponse = getClient().execute(new UpdateRequest(updateAppointment, getClient().getValues().getTimeZone()));
         appointment.setLastModified(updateResponse.getTimestamp());
 
         int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.START_DATE, Appointment.END_DATE };
-        AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), columns, D("01.09.2010 00:00"), D("01.10.2010 00:00"), client.getValues().getTimeZone(), false);
-        CommonAllResponse allResponse = client.execute(allRequest);
+        AllRequest allRequest = new AllRequest(getClient().getValues().getPrivateAppointmentFolder(), columns, D("01.09.2010 00:00"), D("01.10.2010 00:00"), getClient().getValues().getTimeZone(), false);
+        CommonAllResponse allResponse = getClient().execute(allRequest);
         JSONArray json = (JSONArray) allResponse.getData();
         int count = 0;
         for (int i = 0; i < json.length(); i++) {

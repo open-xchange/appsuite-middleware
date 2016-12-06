@@ -76,10 +76,10 @@ public final class Bug12372Test extends AbstractAJAXSession {
     @Test
     public void testDeleteOfStrangeApp() throws Throwable {
         final AJAXClient client = getClient();
-        final TimeZone tz = client.getValues().getTimeZone();
+        final TimeZone tz = getClient().getValues().getTimeZone();
         final Appointment appointment = new Appointment();
         appointment.setTitle("bug 12372 test");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
         final Calendar calendar = TimeTools.createCalendar(tz);
         calendar.set(Calendar.HOUR_OF_DAY, 11);
@@ -95,8 +95,8 @@ public final class Bug12372Test extends AbstractAJAXSession {
         appointment.setOccurrence(7);
         appointment.setRecurrenceID(1868);
         final InsertRequest request = new InsertRequest(appointment, tz);
-        final CommonInsertResponse response = client.execute(request);
+        final CommonInsertResponse response = getClient().execute(request);
         response.fillObject(appointment);
-        client.execute(new DeleteRequest(appointment));
+        getClient().execute(new DeleteRequest(appointment));
     }
 }

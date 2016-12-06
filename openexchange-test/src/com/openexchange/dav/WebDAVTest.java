@@ -92,8 +92,11 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.ajax.oauth.provider.AbstractOAuthTest;
 import com.openexchange.ajax.oauth.provider.OAuthSession;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
@@ -130,6 +133,7 @@ public abstract class WebDAVTest {
     @BeforeClass
     public static void prepareFramework() throws OXException {
         AJAXConfig.init();
+        ProvisioningSetup.init();
     }
 
     // --- BEGIN: Optional OAuth Configuration ------------------------------------------------------------------------------
@@ -144,6 +148,10 @@ public abstract class WebDAVTest {
 
     @Parameter(value = 0)
     public String authMethod;
+
+    protected TestContext testContext;
+
+    protected TestUser testUser;
 
     protected static Iterable<Object[]> availableAuthMethods() {
         if (false == AUTODISCOVER_AUTH) {
@@ -176,7 +184,6 @@ public abstract class WebDAVTest {
         return authMethods;
     }
 
-    @Before
     public void prepareOAuthClient() throws Exception {
         /*
          * Lazy initialization - static (BeforeClass) is not possible because the testOAuth()
@@ -188,7 +195,7 @@ public abstract class WebDAVTest {
             DefaultHttpClient client = OAuthSession.newOAuthHttpClient();
             String state = UUIDs.getUnformattedStringFromRandom();
             OAuthParams params = new OAuthParams().setHostname(Config.getHostname()).setClientId(oAuthClientApp.getId()).setClientSecret(oAuthClientApp.getSecret()).setRedirectURI(oAuthClientApp.getRedirectURIs().get(0)).setScope("carddav caldav").setState(state);
-            oAuthGrant = Protocol.obtainAccess(client, params, Config.getLogin(), Config.getPassword());
+            oAuthGrant = Protocol.obtainAccess(client, params, testUser.getLogin(), testUser.getPassword());
         }
     }
 
@@ -213,7 +220,10 @@ public abstract class WebDAVTest {
 
     @Before
     public void before() throws Exception {
-        client = new AJAXClient(User.User1);
+        testContext = TestContextPool.acquireContext();
+        testUser = testContext.acquireUser();
+
+        client = new AJAXClient(testUser);
 
         this.webDAVClients = new HashMap<Long, WebDAVClient>();
         getAJAXClient().setHostname(getHostname());
@@ -223,10 +233,14 @@ public abstract class WebDAVTest {
 
     @After
     public void after() throws Exception {
-        if (null != client) {
-            cleanupFolders();
-            client.logout();
-            client = null;
+        try {
+            if (null != client) {
+                cleanupFolders();
+                client.logout();
+                client = null;
+            }
+        } finally {
+            TestContextPool.backContext(testContext);
         }
     }
 
@@ -243,7 +257,7 @@ public abstract class WebDAVTest {
     protected WebDAVClient getWebDAVClient() throws Exception {
         Long threadID = Long.valueOf(Thread.currentThread().getId());
         if (false == this.webDAVClients.containsKey(threadID)) {
-            WebDAVClient webDAVClient = new WebDAVClient(getDefaultUserAgent(), oAuthGrant);
+            WebDAVClient webDAVClient = new WebDAVClient(testUser, getDefaultUserAgent(), oAuthGrant);
             this.webDAVClients.put(threadID, webDAVClient);
             return webDAVClient;
         } else {
@@ -396,22 +410,6 @@ public abstract class WebDAVTest {
         return getProtocol() + "://" + getHostname();
     }
 
-    protected static User getUser() {
-        return User.User1;
-    }
-
-    protected static String getLogin() throws OXException {
-        return getLogin(getUser());
-    }
-
-    protected static String getUsername() throws OXException {
-        return getUsername(getUser());
-    }
-
-    protected static String getPassword() throws OXException {
-        return getPassword(getUser());
-    }
-
     protected static String getHostname() throws OXException {
         final String hostname = AJAXConfig.getProperty(Property.HOSTNAME);
         if (null == hostname) {
@@ -426,38 +424,6 @@ public abstract class WebDAVTest {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(Property.PROTOCOL.getPropertyName());
         }
         return hostname;
-    }
-
-    protected static String getLogin(final User user) throws OXException {
-        final String login = AJAXConfig.getProperty(user.getLogin());
-        if (null == login) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getLogin().getPropertyName());
-        } else if (login.contains("@")) {
-            return login;
-        } else {
-            final String context = AJAXConfig.getProperty(Property.CONTEXTNAME);
-            if (null == context) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(Property.CONTEXTNAME.getPropertyName());
-            }
-            return login + "@" + context;
-        }
-    }
-
-    protected static String getUsername(final User user) throws OXException {
-        final String username = AJAXConfig.getProperty(user.getLogin());
-        if (null == username) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getLogin().getPropertyName());
-        } else {
-            return username.contains("@") ? username.substring(0, username.indexOf("@")) : username;
-        }
-    }
-
-    protected static String getPassword(final User user) throws OXException {
-        final String password = AJAXConfig.getProperty(user.getPassword());
-        if (null == password) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getPassword().getPropertyName());
-        }
-        return password;
     }
 
     protected static void release(HttpMethodBase method) {

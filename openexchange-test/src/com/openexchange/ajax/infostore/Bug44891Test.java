@@ -87,7 +87,7 @@ public class Bug44891Test extends AbstractInfostoreTest {
         super.setUp();
         folder = generateInfostoreFolder("TestBug44891");
         InsertRequest req = new InsertRequest(EnumAPI.OX_NEW, folder);
-        InsertResponse resp = client.execute(req);
+        InsertResponse resp = getClient().execute(req);
         resp.fillObject(folder);
     }
 
@@ -95,7 +95,7 @@ public class Bug44891Test extends AbstractInfostoreTest {
     public void tearDown() throws Exception {
         if (null != folder) {
             DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, folder);
-            client.execute(req);
+            getClient().execute(req);
         }
         super.tearDown();
     }
@@ -104,7 +104,7 @@ public class Bug44891Test extends AbstractInfostoreTest {
     public void testBug44891() throws Exception {
         folder.setFolderName("shouldFail<>");
         UpdateRequest req = new UpdateRequest(EnumAPI.OX_NEW, folder, false);
-        InsertResponse resp = client.execute(req);
+        InsertResponse resp = getClient().execute(req);
         assertTrue(resp.hasError());
         assertEquals(FileStorageExceptionCodes.ILLEGAL_CHARACTERS.getNumber(), resp.getException().getCode());
     }

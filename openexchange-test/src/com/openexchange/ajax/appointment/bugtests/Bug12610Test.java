@@ -27,8 +27,8 @@ public class Bug12610Test extends AbstractAJAXSession {
 
         try {
             client = getClient();
-            int folderId = client.getValues().getPrivateAppointmentFolder();
-            TimeZone tz = client.getValues().getTimeZone();
+            int folderId = getClient().getValues().getPrivateAppointmentFolder();
+            TimeZone tz = getClient().getValues().getTimeZone();
 
             appointment.setTitle("Bug12610Test");
             appointment.setParentFolderID(folderId);
@@ -56,7 +56,7 @@ public class Bug12610Test extends AbstractAJAXSession {
             appointment.setUntil(until.getTime());
 
             final InsertRequest request = new InsertRequest(appointment, tz);
-            final CommonInsertResponse response = client.execute(request);
+            final CommonInsertResponse response = getClient().execute(request);
             appointment.setObjectID(response.getId());
             appointment.setLastModified(response.getTimestamp());
 
@@ -66,12 +66,12 @@ public class Bug12610Test extends AbstractAJAXSession {
             appointment.setUntil(until.getTime());
 
             final UpdateRequest updateRequest = new UpdateRequest(appointment, tz);
-            final UpdateResponse updateResponse = client.execute(updateRequest);
+            final UpdateResponse updateResponse = getClient().execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
         } finally {
             if (client != null && appointment.getObjectID() != 0 && appointment.getLastModified() != null) {
-                DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
-                client.execute(deleteRequest);
+                DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), getClient().getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
+                getClient().execute(deleteRequest);
             }
         }
     }

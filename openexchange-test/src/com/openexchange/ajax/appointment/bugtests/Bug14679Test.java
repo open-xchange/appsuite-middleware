@@ -36,7 +36,7 @@ public class Bug14679Test extends AbstractAJAXSession {
 
         appointment = new Appointment();
         appointment.setTitle("Bug 14679 Test");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setStartDate(D("19.10.2009 12:30", TimeZone.getTimeZone("UTC")));
         appointment.setEndDate(D("19.10.2009 13:30", TimeZone.getTimeZone("UTC")));
         appointment.setRecurrenceType(Appointment.WEEKLY);
@@ -62,15 +62,15 @@ public class Bug14679Test extends AbstractAJAXSession {
 
     @Test
     public void testBug() throws Exception {
-        UpdateRequest updateRequest = new UpdateRequest(update, client.getValues().getTimeZone());
-        UpdateResponse updateResponse = client.execute(updateRequest);
+        UpdateRequest updateRequest = new UpdateRequest(update, getClient().getValues().getTimeZone());
+        UpdateResponse updateResponse = getClient().execute(updateRequest);
         appointment.setLastModified(updateResponse.getTimestamp());
 
         int[] columns = new int[] { Appointment.OBJECT_ID };
 
-        AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), columns, D("01.11.2009 00:00", TimeZone.getTimeZone("UTC")), D("01.12.2009 00:00", TimeZone.getTimeZone("UTC")), TimeZone.getTimeZone("UTC"), false);
+        AllRequest allRequest = new AllRequest(getClient().getValues().getPrivateAppointmentFolder(), columns, D("01.11.2009 00:00", TimeZone.getTimeZone("UTC")), D("01.12.2009 00:00", TimeZone.getTimeZone("UTC")), TimeZone.getTimeZone("UTC"), false);
 
-        CommonAllResponse allResponse = client.execute(allRequest);
+        CommonAllResponse allResponse = getClient().execute(allRequest);
         Object[][] objects = allResponse.getArray();
         int count = 0;
         for (Object[] object : objects) {

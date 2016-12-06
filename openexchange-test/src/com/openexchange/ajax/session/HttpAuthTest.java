@@ -57,11 +57,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.configuration.AJAXConfig;
@@ -72,26 +72,16 @@ import com.openexchange.configuration.AJAXConfig.Property;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class HttpAuthTest {
+public class HttpAuthTest extends AbstractAJAXSession {
 
     private String protocol;
     private String hostname;
-    private String login;
-    private String password;
 
     @Before
     public void setUp() throws Exception {
         AJAXConfig.init();
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        login = null;
-        password = null;
     }
 
     @Test
@@ -109,7 +99,7 @@ public class HttpAuthTest {
         try {
             session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
             // Create session.
-            HttpAuthResponse response = myClient.execute(new HttpAuthRequest(login, password));
+            HttpAuthResponse response = myClient.execute(new HttpAuthRequest(testUser.getLogin(), testUser.getPassword()));
             String location = response.getLocation();
             assertNotNull("Location is missing in response.", location);
             int sessionStart = location.indexOf("session=");

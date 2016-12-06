@@ -88,19 +88,19 @@ public class Bug15986Test extends AbstractAJAXSession {
         appointment = new Appointment();
         appointment.setTitle("Appointment for bug 15986");
         appointment.setIgnoreConflicts(true);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Calendar calendar = TimeTools.createCalendar(timeZone);
         appointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
         InsertRequest request = new InsertRequest(appointment, timeZone);
-        AppointmentInsertResponse response = client.execute(request);
+        AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
+        getClient().execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
@@ -113,7 +113,7 @@ public class Bug15986Test extends AbstractAJAXSession {
         changed.setNote("Beschreibung");
         changed.setShownAs(Appointment.TEMPORARY);
         UpdateRequest request = new UpdateRequest(changed, timeZone);
-        UpdateResponse response = client.execute(request);
+        UpdateResponse response = getClient().execute(request);
         assertFalse(response.hasError());
         response.fillObject(appointment);
     }

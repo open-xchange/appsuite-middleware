@@ -102,28 +102,28 @@ public class Bug13931Test extends AbstractAJAXSession {
         AAA = new Contact();
         AAA.setParentFolderID(folderId);
         AAA.setSurName("AAA");
-        client.execute(new InsertRequest(AAA)).fillObject(AAA);
+        getClient().execute(new InsertRequest(AAA)).fillObject(AAA);
 
         BBB = new Contact();
         BBB.setParentFolderID(folderId);
         BBB.setSurName("BBB");
-        client.execute(new InsertRequest(BBB)).fillObject(BBB);
+        getClient().execute(new InsertRequest(BBB)).fillObject(BBB);
 
         aaa = new Contact();
         aaa.setParentFolderID(folderId);
         aaa.setSurName("aaa");
-        client.execute(new InsertRequest(aaa)).fillObject(aaa);
+        getClient().execute(new InsertRequest(aaa)).fillObject(aaa);
 
         bbb = new Contact();
         bbb.setParentFolderID(folderId);
         bbb.setSurName("bbb");
-        client.execute(new InsertRequest(bbb)).fillObject(bbb);
+        getClient().execute(new InsertRequest(bbb)).fillObject(bbb);
     }
 
     @Test
     public void testBug13931() throws Exception {
         final AllRequest allRequest = new AllRequest(folderId, columns);
-        final CommonAllResponse allResponse = client.execute(allRequest);
+        final CommonAllResponse allResponse = getClient().execute(allRequest);
         final JSONArray jsonArray = (JSONArray) allResponse.getResponse().getData();
         assertNotNull("No result", jsonArray);
         assertEquals("Wrong amount of results", 4, jsonArray.length());

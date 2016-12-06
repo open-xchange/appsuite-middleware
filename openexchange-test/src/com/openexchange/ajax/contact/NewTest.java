@@ -92,12 +92,12 @@ public class NewTest extends AbstractContactTest {
 
         InputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
         AttachRequest request1 = new AttachRequest(contactObj, System.currentTimeMillis() + "test1.txt", byteArrayInputStream, "plain/text");
-        client.execute(request1);
+        getClient().execute(request1);
         contactObj.setNumberOfAttachments(1);
 
         byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
         AttachRequest request2 = new AttachRequest(contactObj, System.currentTimeMillis() + "test1.txt", byteArrayInputStream, "plain/text");
-        client.execute(request2);
+        getClient().execute(request2);
         contactObj.setNumberOfAttachments(2);
 
         final Contact loadContact = loadContact(objectId, contactFolderId);

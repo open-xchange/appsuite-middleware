@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -51,7 +50,7 @@ public class MoveTest extends AppointmentTest {
         appointmentObj.setTitle("testMove2PrivateFolder" + date);
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setShownAs(Appointment.RESERVED);
@@ -74,7 +73,7 @@ public class MoveTest extends AppointmentTest {
         appointmentObj.setTitle("testMove2PublicFolder" + date);
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setShownAs(Appointment.RESERVED);

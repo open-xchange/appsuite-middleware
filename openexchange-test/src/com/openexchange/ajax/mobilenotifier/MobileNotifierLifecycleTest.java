@@ -84,19 +84,19 @@ public class MobileNotifierLifecycleTest extends AbstractAJAXSession {
         String newToken = "ACCCDDDDEEEAAA000111155";
 
         MobileNotifierSubscribeRequest msReq = new MobileNotifierSubscribeRequest(serviceId, providerId, startToken, true);
-        AbstractAJAXResponse msResp = client.execute(msReq);
+        AbstractAJAXResponse msResp = getClient().execute(msReq);
         assertNotNull(msResp);
         assertEmptyJson(msResp);
 
         MobileNotifierUpdateTokenRequest utReq = new MobileNotifierUpdateTokenRequest(serviceId, startToken, newToken, true);
         msResp = null;
-        msResp = client.execute(utReq);
+        msResp = getClient().execute(utReq);
         assertNotNull(msResp);
         assertEmptyJson(msResp);
 
         MobileNotifierUnsubscribeRequest musReq = new MobileNotifierUnsubscribeRequest(serviceId, providerId, newToken, true);
         msResp = null;
-        msResp = client.execute(musReq);
+        msResp = getClient().execute(musReq);
         assertNotNull(msResp);
         assertEmptyJson(msResp);
 

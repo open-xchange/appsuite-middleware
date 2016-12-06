@@ -64,7 +64,6 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
@@ -82,21 +81,17 @@ import com.openexchange.java.util.TimeZones;
  */
 public class ExcludeContextAdminTest extends AbstractFindTest {
 
-    public ExcludeContextAdminTest() {
-        super();
-    }
-
     /*
      * Perform autocomplete and query on contacts with showAdmin=false and
      * expect the context admin to be excluded.
      */
     @Test
     public void testAdminIsExcluded() throws Exception {
-        AJAXClient adminClient = new AJAXClient(User.OXAdmin);
+        AJAXClient adminClient = new AJAXClient(admin);
         int adminId = adminClient.getValues().getUserId();
         adminClient.logout();
 
-        Contact adminContact = client.execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
+        Contact adminContact = getClient().execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
         assertNotNull("admin contact was null", adminContact);
 
         String prefix = adminContact.getDisplayName().substring(0, 3);
@@ -117,11 +112,11 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
      */
     @Test
     public void testAdminIsIncluded() throws Exception {
-        AJAXClient adminClient = new AJAXClient(User.OXAdmin);
+        AJAXClient adminClient = new AJAXClient(admin);
         int adminId = adminClient.getValues().getUserId();
         adminClient.logout();
 
-        Contact adminContact = client.execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
+        Contact adminContact = getClient().execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
         assertNotNull("admin contact was null", adminContact);
 
         String prefix = adminContact.getDisplayName().substring(0, 3);
@@ -140,7 +135,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
         Map<String, String> options = new HashMap<String, String>();
         options.put("admin", Boolean.toString(showAdmin));
         QueryRequest queryRequest = new QueryRequest(true, 0, Integer.MAX_VALUE, facets, options, Module.CONTACTS.getIdentifier(), null);
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -154,7 +149,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
         Map<String, String> options = new HashMap<String, String>();
         options.put("admin", Boolean.toString(showAdmin));
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier(), options);
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
 

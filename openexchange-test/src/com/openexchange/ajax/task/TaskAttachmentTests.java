@@ -92,25 +92,25 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folderId = client.getValues().getPrivateTaskFolder();
-        tz = client.getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateTaskFolder();
+        tz = getClient().getValues().getTimeZone();
         task = Create.createWithDefaults(folderId, "Test task for testing attachments");
-        client.execute(new InsertRequest(task, tz)).fillTask(task);
-        attachmentId = client.execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain")).getId();
-        com.openexchange.ajax.attach.actions.GetResponse response = client.execute(new com.openexchange.ajax.attach.actions.GetRequest(task, attachmentId));
+        getClient().execute(new InsertRequest(task, tz)).fillTask(task);
+        attachmentId = getClient().execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain")).getId();
+        com.openexchange.ajax.attach.actions.GetResponse response = getClient().execute(new com.openexchange.ajax.attach.actions.GetRequest(task, attachmentId));
         long timestamp = response.getAttachment().getCreationDate().getTime();
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
+        getClient().execute(new DeleteRequest(task));
         super.tearDown();
     }
 
     @Test
     public void testLastModifiedOfNewestAttachmentWithGet() throws Throwable {
-        GetResponse response = client.execute(new GetRequest(task.getParentFolderID(), task.getObjectID()));
+        GetResponse response = getClient().execute(new GetRequest(task.getParentFolderID(), task.getObjectID()));
         task.setLastModified(response.getTimestamp());
         Task test = response.getTask(tz);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
@@ -118,7 +118,7 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
 
     @Test
     public void testLastModifiedOfNewestAttachmentWithAll() throws Throwable {
-        CommonAllResponse response = client.execute(new AllRequest(task.getParentFolderID(), new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, Task.OBJECT_ID, Order.ASCENDING));
+        CommonAllResponse response = getClient().execute(new AllRequest(task.getParentFolderID(), new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, Task.OBJECT_ID, Order.ASCENDING));
         task.setLastModified(response.getTimestamp());
         Task test = null;
         int objectIdPos = response.getColumnPos(Task.OBJECT_ID);
@@ -136,7 +136,7 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
 
     @Test
     public void testLastModifiedOfNewestAttachmentWithList() throws Throwable {
-        CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() }), new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
+        CommonListResponse response = getClient().execute(new ListRequest(ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() }), new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
         task.setLastModified(response.getTimestamp());
         Task test = null;
         int objectIdPos = response.getColumnPos(Task.OBJECT_ID);

@@ -57,6 +57,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.mysql.jdbc.AssertionFailedException;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.databaseold.Database;
@@ -78,7 +82,6 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
@@ -92,6 +95,9 @@ public class DowngradeTest {
     private User user;
     private User secondUser;
     private Session session;
+    private TestContext testContext;
+    private TestUser testUser;
+    private TestUser testUser2;
 
     private static String getUsername(final String un) {
         final int pos = un.indexOf('@');
@@ -102,24 +108,30 @@ public class DowngradeTest {
     public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
+        ProvisioningSetup.init();
 
-        final TestConfig config = new TestConfig();
-        final String userName = config.getUser();
+        testContext = TestContextPool.acquireContext();
+        testUser = testContext.acquireUser();
+
         final TestContextToolkit tools = new TestContextToolkit();
-        final String ctxName = config.getContextName();
+        final String ctxName = testContext.getName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        user = UserToolkit.getUser(getUsername(testUser.getLogin()), ctx);
 
-        user = UserToolkit.getUser(getUsername(userName), ctx);
-
-        final String secondUserName = AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER);
-        secondUser = UserToolkit.getUser(getUsername(secondUserName), ctx);
+        testUser2 = testContext.acquireUser();
+        secondUser = UserToolkit.getUser(getUsername(testUser2.getLogin()), ctx);
 
         session = SessionObjectWrapper.createSessionObject(user.getId(), ctx, "DowngradeTest");
     }
 
     @After
     public void tearDown() throws Exception {
-        Init.stopServer();
+        try {
+            Init.stopServer();
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
+
     }
 
     @Test

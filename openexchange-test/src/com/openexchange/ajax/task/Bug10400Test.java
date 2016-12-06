@@ -53,7 +53,6 @@ import static org.junit.Assert.assertFalse;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -91,7 +90,7 @@ public class Bug10400Test extends AbstractTaskTest {
     public void testRemoveDelegateAddCreator() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
-        final AJAXClient berta = new AJAXClient(User.User2);
+        final AJAXClient berta = new AJAXClient(testContext.acquireUser());
         final TimeZone bertaTZ = berta.getValues().getTimeZone();
         Task task = Create.createWithDefaults();
         task.setTitle("Bug10400Test1");
@@ -147,7 +146,7 @@ public class Bug10400Test extends AbstractTaskTest {
     public void testRemoveDelegate() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
-        final AJAXClient berta = new AJAXClient(User.User2);
+        final AJAXClient berta = new AJAXClient(testContext.acquireUser());
         final TimeZone bertaTZ = berta.getValues().getTimeZone();
         Task task = Create.createWithDefaults();
         task.setTitle("Bug10400Test2");

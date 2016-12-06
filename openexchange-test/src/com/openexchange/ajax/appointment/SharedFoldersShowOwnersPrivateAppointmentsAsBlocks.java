@@ -67,11 +67,11 @@ import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -110,7 +110,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        User user2 = AJAXClient.User.User2;
+        TestUser user2 = testContext.acquireUser();
         client2 = new AJAXClient(user2);
         UserValues values = client1.getValues();
         int module = Module.CALENDAR.getFolderConstant();

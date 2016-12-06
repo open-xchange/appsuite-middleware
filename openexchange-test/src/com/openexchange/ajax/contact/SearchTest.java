@@ -106,7 +106,7 @@ public class SearchTest extends AbstractContactTest {
         try {
 
             final SearchRequest searchRequest = new SearchRequest("*", contactFolderId, cols, true);
-            final SearchResponse response = Executor.execute(client, searchRequest);
+            final SearchResponse response = Executor.execute(getClient(), searchRequest);
             final JSONArray arr = (JSONArray) response.getResponse().getData();
 
             assertNotNull(arr);
@@ -127,7 +127,7 @@ public class SearchTest extends AbstractContactTest {
         int[] contactIds = new int[] {};
         try {
             int collectFolderId = -1;
-            final GetResponse getResponse = client.execute(new GetRequest(Tree.ContactCollectFolder));
+            final GetResponse getResponse = getClient().execute(new GetRequest(Tree.ContactCollectFolder));
             if (getResponse.hasValue()) {
                 if (getResponse.hasInteger()) {
                     collectFolderId = getResponse.getInteger();
@@ -161,7 +161,7 @@ public class SearchTest extends AbstractContactTest {
             parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, Contact.USE_COUNT_GLOBAL_FIRST));
             parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, "ASC"));
             final com.openexchange.ajax.user.actions.SearchRequest request = new com.openexchange.ajax.user.actions.SearchRequest(searchObject, columns, true, parameters);
-            final com.openexchange.ajax.user.actions.SearchResponse response = Executor.execute(client, request);
+            final com.openexchange.ajax.user.actions.SearchResponse response = Executor.execute(getClient(), request);
 
             final Contact[] result = jsonArray2ContactArray((JSONArray) response.getData(), columns);
 
@@ -236,7 +236,7 @@ public class SearchTest extends AbstractContactTest {
 
             final SearchRequest search = new SearchRequest(cso, new int[] { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.GIVEN_NAME }, true);
 
-            final SearchResponse result = client.execute(search);
+            final SearchResponse result = getClient().execute(search);
             final Object[][] rows = result.getArray();
 
             assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);
@@ -265,7 +265,7 @@ public class SearchTest extends AbstractContactTest {
 
             final SearchRequest search = new SearchRequest(cso, new int[] { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.GIVEN_NAME }, true);
 
-            final SearchResponse result = client.execute(search);
+            final SearchResponse result = getClient().execute(search);
             final Object[][] rows = result.getArray();
 
             assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);

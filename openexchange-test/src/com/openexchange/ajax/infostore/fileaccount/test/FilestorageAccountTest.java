@@ -87,7 +87,7 @@ public final class FilestorageAccountTest extends AbstractAJAXSession {
 
         AJAXClient client = getClient();
 
-        GetFileaccountResponse response = client.execute(new GetFileaccountRequest("infostore", "com.openexchange.infostore"));
+        GetFileaccountResponse response = getClient().execute(new GetFileaccountRequest("infostore", "com.openexchange.infostore"));
         assertNotNull("Response is empty!", response);
         Object data = response.getData();
         assertNotNull("Response is empty!", data);
@@ -113,7 +113,7 @@ public final class FilestorageAccountTest extends AbstractAJAXSession {
 
         AJAXClient client = getClient();
 
-        AllFileaccountResponse response = client.execute(new AllFileaccountRequest(null));
+        AllFileaccountResponse response = getClient().execute(new AllFileaccountRequest(null));
         assertNotNull("Response is empty!", response);
         Object data = response.getData();
         assertNotNull("Response is empty!", data);

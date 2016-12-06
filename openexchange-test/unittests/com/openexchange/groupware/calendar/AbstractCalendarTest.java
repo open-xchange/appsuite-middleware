@@ -1,8 +1,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,8 +9,6 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -29,8 +25,9 @@ import com.openexchange.setuptools.TestFolderToolkit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
+import junit.framework.TestCase;
 
-public abstract class AbstractCalendarTest {
+public abstract class AbstractCalendarTest extends TestCase {
 
     protected final List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
     protected final List<FolderObject> cleanFolders = new ArrayList<FolderObject>();
@@ -58,14 +55,39 @@ public abstract class AbstractCalendarTest {
     protected Session session2;
     protected Session session3;
     protected Session session4;
-    protected static final int[] ACTION_ALL_FIELDS = { CalendarObject.OBJECT_ID, CalendarObject.CREATED_BY, CalendarObject.CREATION_DATE, CalendarObject.LAST_MODIFIED, CalendarObject.MODIFIED_BY, CalendarObject.FOLDER_ID, CalendarObject.PRIVATE_FLAG, CalendarObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.RECURRENCE_POSITION, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, CalendarDataObject.TIMEZONE
-    };
+    protected static final int[] ACTION_ALL_FIELDS = {
+        	CalendarObject.OBJECT_ID,
+    		CalendarObject.CREATED_BY,
+    		CalendarObject.CREATION_DATE,
+    		CalendarObject.LAST_MODIFIED,
+    		CalendarObject.MODIFIED_BY,
+    		CalendarObject.FOLDER_ID,
+    		CalendarObject.PRIVATE_FLAG,
+    		CalendarObject.CATEGORIES,
+    		CalendarObject.TITLE,
+    		Appointment.LOCATION,
+    		CalendarObject.START_DATE,
+    		CalendarObject.END_DATE,
+    		CalendarObject.NOTE,
+    		CalendarObject.RECURRENCE_TYPE,
+    		CalendarObject.RECURRENCE_CALCULATOR,
+    		CalendarObject.RECURRENCE_ID,
+    		CalendarObject.RECURRENCE_POSITION,
+    		CalendarObject.PARTICIPANTS,
+    		CalendarObject.USERS,
+    		Appointment.SHOWN_AS,
+    		Appointment.DELETE_EXCEPTIONS,
+    		Appointment.CHANGE_EXCEPTIONS,
+    		Appointment.FULL_TIME,
+    		Appointment.COLOR_LABEL,
+    		CalendarDataObject.TIMEZONE
+    	};
 
     protected static Date applyTimeZone2Date(final long utcTime, final TimeZone timeZone) {
-        return new Date(utcTime - timeZone.getOffset(utcTime));
+    	return new Date(utcTime - timeZone.getOffset(utcTime));
     }
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         Init.startServer();
 
@@ -113,16 +135,16 @@ public abstract class AbstractCalendarTest {
         session4 = tools.getSessionForUser(fourthUser, ctx);
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         appointments.removeAll(user, clean);
         folders.removeAll(session, cleanFolders);
         Init.stopServer();
     }
 
-    protected JSONObject json(final Object... objects) throws JSONException {
+    protected JSONObject json(final Object...objects) throws JSONException {
         final JSONObject jsonObject = new JSONObject();
-        for (int i = 0; i < objects.length; i++) {
+        for(int i = 0; i < objects.length; i++) {
             jsonObject.put(objects[i++].toString(), objects[i]);
         }
         return jsonObject;
@@ -130,109 +152,105 @@ public abstract class AbstractCalendarTest {
 
     protected void assertContains(final SearchIterator iter, final CalendarDataObject cdao) throws OXException {
         boolean found = false;
-        while (iter.hasNext()) {
-            final CalendarDataObject cdao2 = (CalendarDataObject) iter.next();
+        while(iter.hasNext()) {
+            final CalendarDataObject cdao2 = (CalendarDataObject)iter.next();
             found = found || cdao.getObjectID() == cdao2.getObjectID();
         }
         assertTrue(found);
     }
 
     protected void assertContains(final JSONArray arr, final CalendarDataObject cdao) throws JSONException {
-        for (int i = 0, size = arr.length(); i < size; i++) {
+        for(int i = 0, size = arr.length(); i < size; i++) {
             final JSONArray row = arr.getJSONArray(i);
-            if (row.getInt(0) == cdao.getObjectID()) {
+            if(row.getInt(0) == cdao.getObjectID()) {
                 return;
             }
         }
-        fail("Could not find appointment in respone: " + arr);
+        fail("Could not find appointment in respone: "+arr);
     }
 
     protected void assertContainsAsJSONObject(final JSONArray arr, final CalendarDataObject cdao) throws JSONException {
-        for (int i = 0, size = arr.length(); i < size; i++) {
+        for(int i = 0, size = arr.length(); i < size; i++) {
             final JSONObject row = arr.getJSONObject(i);
-            if (row.getInt("id") == cdao.getObjectID()) {
+            if(row.getInt("id") == cdao.getObjectID()) {
                 return;
             }
         }
-        fail("Could not find appointment in respone: " + arr);
+        fail("Could not find appointment in respone: "+arr);
     }
 
     protected static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
-        switch (calendarDAY_OF_WEEK) {
-            case Calendar.SUNDAY:
-                return CalendarDataObject.SUNDAY;
-            case Calendar.MONDAY:
-                return CalendarDataObject.MONDAY;
-            case Calendar.TUESDAY:
-                return CalendarDataObject.TUESDAY;
-            case Calendar.WEDNESDAY:
-                return CalendarDataObject.WEDNESDAY;
-            case Calendar.THURSDAY:
-                return CalendarDataObject.THURSDAY;
-            case Calendar.FRIDAY:
-                return CalendarDataObject.FRIDAY;
-            case Calendar.SATURDAY:
-                return CalendarDataObject.SATURDAY;
-            default:
-                return -1;
-        }
+    	switch (calendarDAY_OF_WEEK) {
+    	case Calendar.SUNDAY:
+    		return CalendarDataObject.SUNDAY;
+    	case Calendar.MONDAY:
+    		return CalendarDataObject.MONDAY;
+    	case Calendar.TUESDAY:
+    		return CalendarDataObject.TUESDAY;
+    	case Calendar.WEDNESDAY:
+    		return CalendarDataObject.WEDNESDAY;
+    	case Calendar.THURSDAY:
+    		return CalendarDataObject.THURSDAY;
+    	case Calendar.FRIDAY:
+    		return CalendarDataObject.FRIDAY;
+    	case Calendar.SATURDAY:
+    		return CalendarDataObject.SATURDAY;
+    	default:
+    		return -1;
+    	}
     }
 
     public static interface Verifyer {
-
-        public void verify(TestCalendarListener listener);
-    }
+            public void verify(TestCalendarListener listener);
+        }
 
     public static final class TestCalendarListener implements CalendarListener {
+            private String called;
+            List<Object> args = new ArrayList<Object>();
+            private Verifyer verifyer;
 
-        private String called;
-        List<Object> args = new ArrayList<Object>();
-        private Verifyer verifyer;
+            @Override
+            public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException,final int inFolder, final ServerSession session) {
+                this.called = "createdChangeExceptionInRecurringAppointment";
+                this.args.add(master);
+                this.args.add(changeException);
+                this.args.add(session);
+                verifyer.verify(this);
+            }
 
-        @Override
-        public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException, final int inFolder, final ServerSession session) {
-            this.called = "createdChangeExceptionInRecurringAppointment";
-            this.args.add(master);
-            this.args.add(changeException);
-            this.args.add(session);
-            verifyer.verify(this);
+            public void clear() {
+                called = null;
+                args.clear();
+            }
+
+            public String getCalledMethodName() {
+                return called;
+            }
+
+            public List<Object> getArgs() {
+                return args;
+            }
+
+            public boolean wasCalled() {
+                return called != null;
+            }
+
+            public Object getArg(final int i) {
+                return args.get(i);
+            }
+
+            public Verifyer getVerifyer() {
+                return verifyer;
+            }
+
+            public void setVerifyer(final Verifyer verifyer) {
+                this.verifyer = verifyer;
+            }
         }
-
-        public void clear() {
-            called = null;
-            args.clear();
-        }
-
-        public String getCalledMethodName() {
-            return called;
-        }
-
-        public List<Object> getArgs() {
-            return args;
-        }
-
-        public boolean wasCalled() {
-            return called != null;
-        }
-
-        public Object getArg(final int i) {
-            return args.get(i);
-        }
-
-        public Verifyer getVerifyer() {
-            return verifyer;
-        }
-
-        public void setVerifyer(final Verifyer verifyer) {
-            this.verifyer = verifyer;
-        }
-    }
 
     protected List<Appointment> read(final SearchIterator<Appointment> si) throws OXException {
         final List<Appointment> appointments = new ArrayList<Appointment>();
-        while (si.hasNext()) {
-            appointments.add(si.next());
-        }
+        while(si.hasNext()) { appointments.add( si.next() ); }
         return appointments;
     }
 
@@ -241,7 +259,7 @@ public abstract class AbstractCalendarTest {
     }
 
     public AbstractCalendarTest(final String name) {
-        super();
+        super(name);
     }
 
     protected CalendarCollection getTools() {

@@ -65,7 +65,6 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.participant.ParticipantTools;
@@ -97,7 +96,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
     public void testParticipantsLost() throws Throwable {
         final AJAXClient clientA = getClient();
         final int userIdA = clientA.getValues().getUserId();
-        final AJAXClient clientB = new AJAXClient(User.User2);
+        final AJAXClient clientB = new AJAXClient(testContext.acquireUser());
         final FolderObject folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 10154", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(userIdA, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         {
             final CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));

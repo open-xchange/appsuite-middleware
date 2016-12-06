@@ -64,7 +64,7 @@ public class UnreadTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testUnreadCount() throws Exception {
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         assertTrue("Unread count is not 1.", manager.getUnreadCount(CAT_GENERAL) == 1);
         assertTrue("Unread count is not 0.", manager.getUnreadCount(CAT_1) == 0);

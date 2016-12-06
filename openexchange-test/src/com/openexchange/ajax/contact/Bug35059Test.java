@@ -94,7 +94,7 @@ public class Bug35059Test extends AbstractManagedContactTest {
         /*
          * get distribution list again
          */
-        GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
+        GetResponse response = getClient().execute(new GetRequest(contact, getClient().getValues().getTimeZone()));
         contact = response.getContact();
         DistributionListEntryObject[] list = contact.getDistributionList();
         assertNotNull("No distribution list", list);

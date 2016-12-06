@@ -88,7 +88,7 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         c1.setSurName("User");
         c1.setDisplayName("Test 1 User");
         c1.setEmail1("testuser1@example.org");
-        c1.setParentFolderID(client.getValues().getPrivateContactFolder());
+        c1.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         c1.setCreationDate(new Date());
 
         c2 = new Contact();
@@ -96,7 +96,7 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         c2.setSurName("User");
         c2.setDisplayName("Test 2 User");
         c2.setEmail1("testuser2@example.org");
-        c2.setParentFolderID(client.getValues().getPrivateContactFolder());
+        c2.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         c2.setCreationDate(new Date());
 
         c3 = new Contact();
@@ -104,27 +104,27 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         c3.setSurName("User");
         c3.setDisplayName("Test 3 User");
         c3.setEmail1("testuser3@example.org");
-        c3.setParentFolderID(client.getValues().getPrivateContactFolder());
+        c3.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         c3.setCreationDate(new Date());
 
         InsertRequest in1 = new InsertRequest(c1);
-        InsertResponse res1 = client.execute(in1);
+        InsertResponse res1 = getClient().execute(in1);
         res1.fillObject(c1);
 
         InsertRequest in2 = new InsertRequest(c2);
-        InsertResponse res2 = client.execute(in2);
+        InsertResponse res2 = getClient().execute(in2);
         res2.fillObject(c2);
 
         InsertRequest in3 = new InsertRequest(c3);
-        InsertResponse res3 = client.execute(in3);
+        InsertResponse res3 = getClient().execute(in3);
         res3.fillObject(c3);
     }
 
     @Test
     public void testDeleteMultipleContacts() throws Exception {
         int[] cids = new int[] { c1.getObjectID(), c2.getObjectID(), c3.getObjectID() };
-        DeleteRequest delReq = new DeleteRequest(client.getValues().getPrivateContactFolder(), cids, new Date());
-        CommonDeleteResponse delRes = client.execute(delReq);
+        DeleteRequest delReq = new DeleteRequest(getClient().getValues().getPrivateContactFolder(), cids, new Date());
+        CommonDeleteResponse delRes = getClient().execute(delReq);
         assertFalse("Delete of multiple contacts failed: " + delRes.getErrorMessage(), delRes.hasError());
         needCleanup = false;
     }
@@ -134,11 +134,11 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         if (needCleanup) {
             try {
                 DeleteRequest delReq = new DeleteRequest(c1);
-                client.execute(delReq);
+                getClient().execute(delReq);
                 delReq = new DeleteRequest(c2);
-                client.execute(delReq);
+                getClient().execute(delReq);
                 delReq = new DeleteRequest(c3);
-                client.execute(delReq);
+                getClient().execute(delReq);
             } catch (Exception e) {
 
             }

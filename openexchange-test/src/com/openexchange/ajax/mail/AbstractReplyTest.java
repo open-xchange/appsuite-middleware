@@ -85,7 +85,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         super.setUp();
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
-        this.contactManager = new ContactTestManager(client);
+        this.contactManager = new ContactTestManager(getClient());
     }
 
     @After
@@ -108,24 +108,21 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
     protected JSONObject getReplyEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ReplyRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
-        client = getClient();
-        ReplyResponse response = client.execute(reply);
+        ReplyResponse response = getClient().execute(reply);
         return (JSONObject) response.getData();
     }
 
     protected JSONObject getReplyAllEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ReplyAllRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
-        client = getClient();
-        ReplyAllResponse response = (ReplyAllResponse) client.execute(reply);
+        ReplyAllResponse response = (ReplyAllResponse) getClient().execute(reply);
         return (JSONObject) response.getData();
     }
 
     protected JSONObject getForwardMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ForwardRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
-        client = getClient();
-        ForwardResponse response = (ForwardResponse) client.execute(reply);
+        ForwardResponse response = (ForwardResponse) getClient().execute(reply);
         return (JSONObject) response.getData();
     }
 

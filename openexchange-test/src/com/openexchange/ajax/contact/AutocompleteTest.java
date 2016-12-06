@@ -82,7 +82,7 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         String[] queries = new String[] { "Otto", "Heinz", "Heinz Otto", "\"Otto, Heinz\"" };
         for (String query : queries) {
             AutocompleteRequest request = new AutocompleteRequest(query, false, parentFolderID, Contact.ALL_COLUMNS, true);
-            CommonSearchResponse response = client.execute(request);
+            CommonSearchResponse response = getClient().execute(request);
             List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
             assertNotNull(contacts);
             assertEquals("wrong number of results", 1, contacts.size());
@@ -112,7 +112,7 @@ public class AutocompleteTest extends AbstractManagedContactTest {
          */
         String parentFolderID = String.valueOf(contact.getParentFolderID());
         AutocompleteRequest request = new AutocompleteRequest("Heinz Otto", false, parentFolderID, Contact.ALL_COLUMNS, true);
-        CommonSearchResponse response = client.execute(request);
+        CommonSearchResponse response = getClient().execute(request);
         List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());
@@ -133,7 +133,7 @@ public class AutocompleteTest extends AbstractManagedContactTest {
          * expect in auto-complete response
          */
         AutocompleteRequest request = new AutocompleteRequest(distributionList.getGivenName(), false, Integer.toString(folderID), Contact.ALL_COLUMNS, true);
-        CommonSearchResponse response = client.execute(request);
+        CommonSearchResponse response = getClient().execute(request);
         List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());

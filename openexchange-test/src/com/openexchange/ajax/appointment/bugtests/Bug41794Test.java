@@ -58,11 +58,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Appointment;
@@ -94,10 +92,10 @@ public class Bug41794Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
-        client3 = new AJAXClient(User.User3);
-        groupParticipant = AJAXConfig.getProperty(AJAXConfig.Property.GROUP_PARTICIPANT);
-        ctm1 = new CalendarTestManager(client);
+        client2 = new AJAXClient(testContext.acquireUser());
+        client3 = new AJAXClient(testContext.acquireUser());
+        groupParticipant = testContext.acquireGroupParticipant();
+        ctm1 = new CalendarTestManager(getClient());
         ctm2 = new CalendarTestManager(client2);
         ctm3 = new CalendarTestManager(client3);
 
@@ -105,10 +103,10 @@ public class Bug41794Test extends AbstractAJAXSession {
         appointment.setTitle(this.getClass().getSimpleName());
         appointment.setStartDate(D("01.11.2015 08:00"));
         appointment.setEndDate(D("01.11.2015 09:00"));
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
 
-        UserParticipant up = new UserParticipant(client.getValues().getUserId());
+        UserParticipant up = new UserParticipant(getClient().getValues().getUserId());
         GroupParticipant gp = getGroupParticipant(groupParticipant);
         appointment.setParticipants(new Participant[] { up, gp });
     }
@@ -120,7 +118,7 @@ public class Bug41794Test extends AbstractAJAXSession {
         appointment.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
         ctm2.delete(appointment);
 
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Appointment loadedAppointment = ctm1.get(appointment);
         for (UserParticipant up : loadedAppointment.getUsers()) {
             if (up.getIdentifier() == client2.getValues().getUserId()) {
@@ -135,7 +133,7 @@ public class Bug41794Test extends AbstractAJAXSession {
         ctm3.confirm(loadedAppointment, Appointment.ACCEPT, "message");
         ctm3.update(loadedAppointment);
 
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         loadedAppointment = ctm1.get(appointment);
         for (UserParticipant up : loadedAppointment.getUsers()) {
             if (up.getIdentifier() == client2.getValues().getUserId()) {

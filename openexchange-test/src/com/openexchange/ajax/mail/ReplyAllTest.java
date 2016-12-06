@@ -59,10 +59,8 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -89,13 +87,13 @@ public class ReplyAllTest extends AbstractReplyTest {
     @Test
     public void testDummy() throws Exception {
         // Disabled test below because sending mails do not cover an estimateable time frame
-        final String mail1 = new AJAXClient(User.User1).getValues().getSendAddress();
+        final String mail1 = getClient().getValues().getSendAddress();
         assertTrue(mail1.length() > 0);
     }
 
     public void no_testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException {
-        final AJAXClient client1 = new AJAXClient(User.User1);
-        final AJAXClient client2 = new AJAXClient(User.User2);
+        final AJAXClient client1 = getClient();
+        final AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         {
             String folder = client2.getValues().getInboxFolder();
             Executor.execute(client2.getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
@@ -109,7 +107,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         List<Contact> otherContacts;
         {
             ContactSearchObject searchObject = new ContactSearchObject();
-            searchObject.setEmail1("*" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME) + "*");
+            searchObject.setEmail1("*" + testContext.getName() + "*");
             searchObject.addFolder(6);
             otherContacts = extract(2, contactManager.searchAction(searchObject), Arrays.asList(mail1, mail2));
             if (otherContacts.isEmpty()) {
@@ -121,14 +119,12 @@ public class ReplyAllTest extends AbstractReplyTest {
         }
         assertTrue("Precondition: This test needs at least two other contacts in the global address book to work, but has " + otherContacts.size(), otherContacts.size() > 1);
 
-        this.client = client2;
         final String anotherMail = otherContacts.get(0).getEmail1();
         final String yetAnotherMail = otherContacts.get(1).getEmail1();
 
-        final JSONObject mySentMail = createEMail(adresses(mail1, anotherMail, yetAnotherMail), "ReplyAll test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
-        sendMail(mySentMail.toString());
+        final JSONObject mySentMail = createEMail(client2, adresses(mail1, anotherMail, yetAnotherMail), "ReplyAll test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
+        sendMail(client2, mySentMail.toString());
 
-        this.client = client1;
         final JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());
         final TestMail myReplyMail = new TestMail(getReplyAllEMail(new TestMail(myReceivedMail)));
 

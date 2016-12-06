@@ -82,7 +82,7 @@ public final class Send2Test extends AbstractMailTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, false);
+        manager = new MailTestManager(getClient(), false);
     }
 
     @After
@@ -100,7 +100,7 @@ public final class Send2Test extends AbstractMailTest {
     public void testSend() throws Throwable {
         // Create JSON mail object
         final JSONObject jMail = new JSONObject(16);
-        jMail.put(MailJSONField.FROM.getKey(), getSendAddress(client));
+        jMail.put(MailJSONField.FROM.getKey(), getSendAddress(getClient()));
         jMail.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
         jMail.put(MailJSONField.RECIPIENT_CC.getKey(), "");
         jMail.put(MailJSONField.RECIPIENT_BCC.getKey(), "");

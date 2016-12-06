@@ -73,8 +73,8 @@ public class Bug42225Test extends AbstractManagedContactTest {
 
     @Test
     public void testBug42225() throws Exception {
-        AutocompleteRequest req = new AutocompleteRequest("", false, String.valueOf(client.getValues().getPrivateContactFolder()), new int[] { 500 }, false);
-        CommonSearchResponse resp = client.execute(req);
+        AutocompleteRequest req = new AutocompleteRequest("", false, String.valueOf(getClient().getValues().getPrivateContactFolder()), new int[] { 500 }, false);
+        CommonSearchResponse resp = getClient().execute(req);
         assertFalse("Response has error.", resp.hasError());
     }
 }

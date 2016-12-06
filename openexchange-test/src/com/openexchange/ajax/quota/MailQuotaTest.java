@@ -77,7 +77,7 @@ public class MailQuotaTest extends AbstractAJAXSession {
          * get filestore usage quota
          */
         MailQuotaRequest request = new MailQuotaRequest();
-        MailQuotaResponse response = client.execute(request);
+        MailQuotaResponse response = getClient().execute(request);
         JSONObject jsonQuota = (JSONObject) response.getData();
         assertNotNull("No response data", jsonQuota);
         assertTrue("No use found", jsonQuota.hasAndNotNull("use"));

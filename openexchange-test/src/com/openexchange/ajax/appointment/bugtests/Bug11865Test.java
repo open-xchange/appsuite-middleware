@@ -68,7 +68,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -113,8 +112,8 @@ public final class Bug11865Test extends AbstractAJAXSession {
     @Test
     public void testAppointmentException() throws Throwable {
         final AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = client.getValues().getTimeZone();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = getClient().getValues().getTimeZone();
         final Appointment series = new Appointment();
         final Calendar calendar = TimeTools.createCalendar(tz);
         {
@@ -133,7 +132,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         }
         {
             final InsertRequest request = new InsertRequest(series, tz);
-            final CommonInsertResponse response = client.execute(request);
+            final CommonInsertResponse response = getClient().execute(request);
             response.fillObject(series);
         }
         try {
@@ -142,7 +141,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
             final Appointment occurence;
             {
                 final GetRequest request = new GetRequest(folderId, series.getObjectID(), recurrence_position);
-                final GetResponse response = client.execute(request);
+                final GetResponse response = getClient().execute(request);
                 occurence = response.getAppointment(tz);
             }
             // Try to create exception series
@@ -160,7 +159,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
                 exception.setEndDate(calendar.getTime());
                 // Exception must be again a series.
                 final UpdateRequest request = new UpdateRequest(exception, tz);
-                final UpdateResponse response = client.execute(request);
+                final UpdateResponse response = getClient().execute(request);
                 exception.setObjectID(response.getId());
                 exception.setLastModified(response.getTimestamp());
                 series.setLastModified(response.getTimestamp());
@@ -180,11 +179,11 @@ public final class Bug11865Test extends AbstractAJAXSession {
                 calendar.add(Calendar.HOUR, 1);
                 exception2.setEndDate(calendar.getTime());
                 final UpdateRequest request = new UpdateRequest(exception2, tz, false);
-                final UpdateResponse response = client.execute(request);
+                final UpdateResponse response = getClient().execute(request);
                 assertTrue("Exception expected for creating exception from exception.", response.hasError());
             }
         } finally {
-            client.execute(new DeleteRequest(series.getObjectID(), folderId, series.getLastModified()));
+            getClient().execute(new DeleteRequest(series.getObjectID(), folderId, series.getLastModified()));
         }
     }
 
@@ -195,8 +194,8 @@ public final class Bug11865Test extends AbstractAJAXSession {
         int folderId = 0;
 
         client = getClient();
-        final TimeZone tz = client.getValues().getTimeZone();
-        folderId = client.getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = getClient().getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
 
         //Create an objectId, which does not longer exist in the database.
         final Appointment dummyAppointment = new Appointment();
@@ -213,14 +212,14 @@ public final class Bug11865Test extends AbstractAJAXSession {
         dummyAppointment.setEndDate(calendar.getTime());
 
         InsertRequest request = new InsertRequest(dummyAppointment, tz);
-        CommonInsertResponse response = client.execute(request);
+        CommonInsertResponse response = getClient().execute(request);
         dummyAppointment.setObjectID(response.getId());
         dummyAppointment.setLastModified(response.getTimestamp());
 
         final int dummyId = dummyAppointment.getObjectID();
 
         DeleteRequest deleteRequest = new DeleteRequest(dummyAppointment.getObjectID(), folderId, dummyAppointment.getLastModified());
-        client.execute(deleteRequest);
+        getClient().execute(deleteRequest);
 
         //Create an Appointment
         final Appointment appointment = new Appointment();
@@ -237,7 +236,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
 
         request = new InsertRequest(appointment, tz);
-        response = client.execute(request);
+        response = getClient().execute(request);
         appointment.setObjectID(response.getId());
         appointment.setLastModified(response.getTimestamp());
 
@@ -246,7 +245,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Manipulate Database to invalidate the appointment
         calendar = TimeTools.createCalendar(TimeZone.getTimeZone("GMT"));
         final ContextStorage ctxStorage = ContextStorage.getInstance();
-        final String context = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
+        final String context = testContext.getName();
         final int contextId = ctxStorage.getContextId(context);
         final Connection writeCon = Database.get(contextId, true);
         final String sql = "UPDATE prg_dates SET intfield02 = ?, field08 = ? WHERE intfield01 = ?";
@@ -261,7 +260,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Try to delete the appointment
         deleteRequest = new DeleteRequest(appointment.getObjectID(), folderId, appointment.getLastModified());
         try {
-            client.execute(deleteRequest);
+            getClient().execute(deleteRequest);
         } catch (final Exception e) {
             fail("Exception during deletion of corrupted appointment.");
         }
@@ -269,7 +268,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Check if appointment still exists
         final GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID(), false);
         // No call with failOnError=true
-        final GetResponse getResponse = client.execute(getRequest);
+        final GetResponse getResponse = getClient().execute(getRequest);
         final Response r = getResponse.getResponse();
         assertTrue(r.hasError());
         assertTrue(r.getErrorMessage().contains("Object not found"));

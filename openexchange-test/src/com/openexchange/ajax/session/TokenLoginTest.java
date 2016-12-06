@@ -57,8 +57,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.apache.http.client.params.ClientPNames;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -71,8 +69,6 @@ import com.openexchange.ajax.session.actions.TokenLoginRequest;
 import com.openexchange.ajax.session.actions.TokenLoginResponse;
 import com.openexchange.ajax.session.actions.TokensRequest;
 import com.openexchange.ajax.session.actions.TokensResponse;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -85,31 +81,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class TokenLoginTest extends AbstractAJAXSession {
 
-    private String login;
-
-    private String password;
-
-    @Before
-    public void setUp() throws Exception {
-        AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        login = null;
-        password = null;
-        super.tearDown();
-    }
-
     @Test
     public void testTokenLogin() throws Exception {
         final AJAXSession session = new AJAXSession();
         session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
         final AJAXClient myClient = new AJAXClient(session, false);
         try {
-            TokenLoginResponse response = myClient.execute(new TokenLoginRequest(login, password));
+            TokenLoginResponse response = myClient.execute(new TokenLoginRequest(testUser.getLogin(), testUser.getPassword()));
             assertNotNull("Path of redirect response is not found.", response.getPath());
             assertNotNull("Server side token not found as fragment.", response.getServerToken());
             assertNotNull("Login string was not found as fragment.", response.getLogin());
@@ -131,7 +109,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         final AJAXSession session = new AJAXSession();
         final AJAXClient myClient = new AJAXClient(session, false);
         try {
-            TokenLoginResponse response = myClient.execute(new TokenLoginRequest(login, password));
+            TokenLoginResponse response = myClient.execute(new TokenLoginRequest(testUser.getLogin(), testUser.getPassword()));
             assertNotNull("Path of redirect response is not found.", response.getPath());
             assertNotNull("Server side token not found as fragment.", response.getServerToken());
             assertNotNull("Login string was not found as fragment.", response.getLogin());
@@ -156,7 +134,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
         final AJAXClient myClient = new AJAXClient(session, false);
         try {
-            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(login, password, false, true));
+            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(testUser.getLogin(), testUser.getPassword(), false, true));
 
             assertNotNull(response);
             assertTrue("Error expected.", response.hasError());
@@ -173,7 +151,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
         final AJAXClient myClient = new AJAXClient(session, false);
         try {
-            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(login, password, true));
+            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(testUser.getLogin(), testUser.getPassword(), true));
             JSONObject json = response.getResponse().getJSON();
             assertNotNull(json);
             assertNotNull(json.get("jsessionid"));
@@ -192,7 +170,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
         final AJAXClient myClient = new AJAXClient(session, false);
         try {
-            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(login, password, true, true));
+            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(testUser.getLogin(), testUser.getPassword(), true, true));
 
             JSONObject json = response.getResponse().getJSON();
             assertNotNull(json);

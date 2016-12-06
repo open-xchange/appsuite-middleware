@@ -92,7 +92,7 @@ public class AppendDocumentTest extends AbstractInfostoreTest {
         /*
          * prepare chunks to upload
          */
-        String folderId = String.valueOf(client.getValues().getPrivateInfostoreFolder());
+        String folderId = String.valueOf(getClient().getValues().getPrivateInfostoreFolder());
         long expectedLength = 0;
         List<byte[]> chunks = new ArrayList<byte[]>();
         for (int i = 0; i < 10; i++) {
@@ -183,7 +183,7 @@ public class AppendDocumentTest extends AbstractInfostoreTest {
         /*
          * prepare chunks to upload
          */
-        String folderId = String.valueOf(client.getValues().getPrivateInfostoreFolder());
+        String folderId = String.valueOf(getClient().getValues().getPrivateInfostoreFolder());
         long expectedLength = 0;
         List<byte[]> chunks = new ArrayList<byte[]>();
         for (int i = 0; i < 10; i++) {

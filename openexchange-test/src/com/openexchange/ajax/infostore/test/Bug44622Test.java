@@ -93,24 +93,24 @@ public class Bug44622Test extends AbstractInfostoreTest {
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         DefaultFile file = new DefaultFile();
         file.setFileName("Bug 44622 Test");
-        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         NewInfostoreRequest req = new NewInfostoreRequest(file, upload);
-        NewInfostoreResponse resp = client.execute(req);
+        NewInfostoreResponse resp = getClient().execute(req);
         fileID = resp.getID();
     }
 
     @After
     public void tearDown() throws Exception {
-        DeleteInfostoreRequest req = new DeleteInfostoreRequest(fileID, String.valueOf(client.getValues().getPrivateInfostoreFolder()), new Date());
-        client.execute(req);
+        DeleteInfostoreRequest req = new DeleteInfostoreRequest(fileID, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
+        getClient().execute(req);
         super.tearDown();
     }
 
     @Test
     public void testBug44622() throws Exception {
-        GetDocumentRequest req = new GetDocumentRequest(String.valueOf(client.getValues().getPrivateInfostoreFolder()), fileID);
+        GetDocumentRequest req = new GetDocumentRequest(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), fileID);
         req.setAdditionalParameters(new Parameter("content_disposition", ""));
-        GetDocumentResponse resp = client.execute(req);
+        GetDocumentResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         HttpResponse httpResp = resp.getHttpResponse();
         Header[] headers = httpResp.getHeaders("Content-Disposition");

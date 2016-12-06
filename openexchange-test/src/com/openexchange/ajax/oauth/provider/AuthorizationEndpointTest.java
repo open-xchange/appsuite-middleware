@@ -76,7 +76,6 @@ import org.junit.Test;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.provider.protocol.GETRequest;
 import com.openexchange.ajax.oauth.provider.protocol.GETResponse;
 import com.openexchange.ajax.oauth.provider.protocol.HttpTools;
@@ -167,7 +166,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
     private void testPOSTWithMissingOrInvalidReferer(boolean omit) throws Exception {
         GETRequest getLoginForm = new GETRequest().setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState).setScope(getScope().toString());
         GETResponse loginFormResponse = getLoginForm.execute(client);
-        POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(login).setPassword(password).setHeader(HttpHeaders.REFERER, null);
+        POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(testUser.getLogin()).setPassword(testUser.getPassword()).setHeader(HttpHeaders.REFERER, null);
         POSTResponse loginResponse = loginRequest.submit(client);
         String content = loginResponse.getBodyAsString();
         assertEquals(HttpStatus.SC_BAD_REQUEST, loginResponse.getStatusCode());
@@ -248,7 +247,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
     private void testPOSTWithInvalidParameter(String param, ResponseType responseType, boolean omitParam, String errorCode) throws Exception {
         GETRequest getLoginForm = new GETRequest().setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState);
         GETResponse loginFormResponse = getLoginForm.execute(client);
-        POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(login).setPassword(password);
+        POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(testUser.getLogin()).setPassword(testUser.getPassword());
 
         // Invalidate param
         if (omitParam) {
@@ -291,9 +290,9 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testPOSTTriggersMail() throws Exception {
-        ajaxClient = new AJAXClient(User.User1);
+        ajaxClient = new AJAXClient(testUser);
             // Obtain access
-            new OAuthSession(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScope());
+            new OAuthSession(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());
 
             // Test notification mail
             List<Message> messages = ajaxClient.execute(new GetMailsRequest()).getMessages();

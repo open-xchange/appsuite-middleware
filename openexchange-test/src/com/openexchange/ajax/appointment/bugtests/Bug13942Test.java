@@ -67,7 +67,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.exception.OXException;
@@ -86,10 +85,6 @@ public class Bug13942Test extends AbstractAJAXSession {
     private int userIdA, userIdB, userIdC;
 
     private AJAXClient clientB, clientC;
-
-    public Bug13942Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -149,14 +144,14 @@ public class Bug13942Test extends AbstractAJAXSession {
 
     private AJAXClient getClientB() throws OXException, OXException, IOException, SAXException, JSONException {
         if (clientB == null) {
-            clientB = new AJAXClient(User.User2);
+            clientB = new AJAXClient(testContext.acquireUser());
         }
         return clientB;
     }
 
     private AJAXClient getClientC() throws OXException, OXException, IOException, SAXException, JSONException {
         if (clientC == null) {
-            clientC = new AJAXClient(User.User3);
+            clientC = new AJAXClient(testContext.acquireUser());
         }
         return clientC;
     }

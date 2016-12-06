@@ -105,7 +105,7 @@ public class Bug36333Test extends AbstractMailTest {
     @After
     public void tearDown() throws Exception {
         if (null != fmid) {
-            client.execute(new DeleteRequest(fmid, true).ignoreError());
+            getClient().execute(new DeleteRequest(fmid, true).ignoreError());
         }
         super.tearDown();
     }
@@ -120,9 +120,9 @@ public class Bug36333Test extends AbstractMailTest {
             sb.append(buf, 0, length);
         }
         streamReader.close();
-        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-        final ImportMailResponse importResp = client.execute(importMailRequest);
+        final ImportMailResponse importResp = getClient().execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
         fmid = importResp.getIds();
 
@@ -162,7 +162,7 @@ public class Bug36333Test extends AbstractMailTest {
         }
 
         if ((folderID != null) && (mailID != null)) {
-            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }
@@ -177,9 +177,9 @@ public class Bug36333Test extends AbstractMailTest {
             sb.append(buf, 0, length);
         }
         streamReader.close();
-        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-        final ImportMailResponse importResp = client.execute(importMailRequest);
+        final ImportMailResponse importResp = getClient().execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
         fmid = importResp.getIds();
 
@@ -219,7 +219,7 @@ public class Bug36333Test extends AbstractMailTest {
         }
 
         if ((folderID != null) && (mailID != null)) {
-            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }
@@ -236,9 +236,9 @@ public class Bug36333Test extends AbstractMailTest {
                 sb.append(buf, 0, length);
             }
             streamReader.close();
-            InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+            InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
             final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-            final ImportMailResponse importResp = client.execute(importMailRequest);
+            final ImportMailResponse importResp = getClient().execute(importMailRequest);
             json = (JSONArray) importResp.getData();
             fmid = importResp.getIds();
         }
@@ -285,7 +285,7 @@ public class Bug36333Test extends AbstractMailTest {
         }
 
         if ((folderID != null) && (mailID != null)) {
-            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }

@@ -90,7 +90,7 @@ public class Bug31253Test extends AbstractMailFilterTest {
     @After
     public void tearDown() throws Exception {
         if (folder != null) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
+            getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
         }
 
         super.tearDown();
@@ -99,10 +99,10 @@ public class Bug31253Test extends AbstractMailFilterTest {
     @Test
     public void testBug31253() throws Exception {
         client = getClient();
-        folder = Create.createPrivateFolder("Test for Bug31253", FolderObject.MAIL, client.getValues().getUserId());
-        folder.setFullName(client.getValues().getInboxFolder() + "/Test for Bug31253");
+        folder = Create.createPrivateFolder("Test for Bug31253", FolderObject.MAIL, getClient().getValues().getUserId());
+        folder.setFullName(getClient().getValues().getInboxFolder() + "/Test for Bug31253");
 
-        final InsertResponse folderInsertResponse = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+        final InsertResponse folderInsertResponse = getClient().execute(new InsertRequest(EnumAPI.OX_NEW, folder));
         folderInsertResponse.fillObject(folder);
 
         final Rule rule = new Rule();

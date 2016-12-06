@@ -68,7 +68,6 @@ import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -99,15 +98,15 @@ public class Bug17327Test extends AbstractAJAXSession {
         super.setUp();
 
         client = getClient();
-        tz = client.getValues().getTimeZone();
+        tz = getClient().getValues().getTimeZone();
         System.out.println(tz);
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder
-        sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
-        sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
+        sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, getClient().getValues().getUserId());
+        sharedFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        InsertResponse folderInsertResponse = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
         folderInsertResponse.fillObject(sharedFolder);
         FolderTools.shareFolder(client, EnumAPI.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
@@ -117,7 +116,7 @@ public class Bug17327Test extends AbstractAJAXSession {
 
     @Test
     public void testAlarmInAllRequest() throws Exception {
-        AppointmentInsertResponse insertResponse = client.execute(new InsertRequest(appointment, tz, true));
+        AppointmentInsertResponse insertResponse = getClient().execute(new InsertRequest(appointment, tz, true));
         insertResponse.fillAppointment(appointment);
 
         // Get appointment via AllRequest
@@ -136,7 +135,7 @@ public class Bug17327Test extends AbstractAJAXSession {
 
         // Update alarm
         appointment.setAlarm(15);
-        UpdateResponse updateResponse = client.execute(new UpdateRequest(appointment, tz));
+        UpdateResponse updateResponse = getClient().execute(new UpdateRequest(appointment, tz));
         appointment.setLastModified(updateResponse.getTimestamp());
 
         // Get appointment via AllRequest
@@ -155,8 +154,8 @@ public class Bug17327Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
+        getClient().execute(new DeleteRequest(appointment));
+        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
         client2.logout();
 
         super.tearDown();

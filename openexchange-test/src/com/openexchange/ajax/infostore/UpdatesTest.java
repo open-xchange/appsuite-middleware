@@ -98,9 +98,9 @@ public class UpdatesTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        itm = new InfostoreTestManager(client);
-        ftm = new FolderTestManager(client);
-        testFolder = ftm.generatePrivateFolder(UUIDs.getUnformattedString(UUID.randomUUID()), FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
+        itm = new InfostoreTestManager(getClient());
+        ftm = new FolderTestManager(getClient());
+        testFolder = ftm.generatePrivateFolder(UUIDs.getUnformattedString(UUID.randomUUID()), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(testFolder);
 
         knowledgeDoc = new DefaultFile();
@@ -127,7 +127,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     @Test
     public void testBasic() throws Exception {
         AllInfostoreRequest allReq = new AllInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.FOLDER_ID }, Metadata.ID, Order.ASCENDING);
-        AbstractColumnsResponse allResp = client.execute(allReq);
+        AbstractColumnsResponse allResp = getClient().execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
 
         File updateDoc = new DefaultFile();
@@ -136,7 +136,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         itm.updateAction(updateDoc, new File.Field[] { File.Field.TITLE }, timestamp);
 
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.TITLE }, Metadata.ID, Order.ASCENDING, Ignore.NONE, timestamp, true);
-        UpdatesInfostoreResponse resp = client.execute(req);
+        UpdatesInfostoreResponse resp = getClient().execute(req);
         JSONArray modifiedValues = resp.getNewAndModified().iterator().next();
         assertEquals("Wrong number of modified documents", 1, resp.getNewAndModified().size());
         assertEquals("Wrong number of deleted documents", 0, resp.getDeleted().size());
@@ -148,7 +148,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         itm.deleteAction(urlDoc.getId(), String.valueOf(testFolder.getObjectID()), timestamp);
 
         req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID }, Metadata.ID, Order.ASCENDING, Ignore.NONE, timestamp, true);
-        resp = client.execute(req);
+        resp = getClient().execute(req);
         assertEquals("Wrong number of modified documents", 0, resp.getNewAndModified().size());
         assertEquals("Wrong number of deleted documents", 2, resp.getDeleted().size());
         int found = 0;
@@ -163,7 +163,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     @Test
     public void testRemovedVersionForcesUpdate() throws Exception {
         AllInfostoreRequest allReq = new AllInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.FOLDER_ID }, Metadata.ID, Order.ASCENDING);
-        AbstractColumnsResponse allResp = client.execute(allReq);
+        AbstractColumnsResponse allResp = getClient().execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
 
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -182,11 +182,11 @@ public class UpdatesTest extends AbstractAJAXSession {
         timestamp = itm.getLastResponse().getTimestamp();
 
         DetachInfostoreRequest detachReq = new DetachInfostoreRequest(updateDoc.getId(), testFolder.getObjectID(), Collections.singleton("3"), timestamp);
-        DetachInfostoreResponse detachResp = client.execute(detachReq);
+        DetachInfostoreResponse detachResp = getClient().execute(detachReq);
         assertEquals("Version was not deleted", 0, detachResp.getNotDeleted().length);
 
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.TITLE, Metadata.DESCRIPTION }, Metadata.ID, Order.ASCENDING, Ignore.NONE, timestamp, true);
-        UpdatesInfostoreResponse resp = client.execute(req);
+        UpdatesInfostoreResponse resp = getClient().execute(req);
         assertEquals("Wrong number of modified documents", 1, resp.getNewAndModified().size());
     }
 
@@ -201,7 +201,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     //Bug 4269
     private void virtualFolderTest(int folderId) throws Exception {
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(folderId, new int[] { Metadata.ID }, Metadata.ID, Order.ASCENDING, Ignore.NONE, new Date(0L), true);
-        UpdatesInfostoreResponse resp = client.execute(req);
+        UpdatesInfostoreResponse resp = getClient().execute(req);
         assertEquals("Wrong number of modified documents", 0, resp.getNewAndModified().size() + resp.getDeleted().size());
     }
 
@@ -209,7 +209,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     @Test
     public void testLastModifiedUTC() throws Exception {
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.LAST_MODIFIED_UTC }, Metadata.LAST_MODIFIED_UTC, Order.ASCENDING, Ignore.NONE, new Date(0L), true);
-        UpdatesInfostoreResponse resp = client.execute(req);
+        UpdatesInfostoreResponse resp = getClient().execute(req);
         assertTrue("Wrong number of modified documents", resp.getNewAndModified().size() + resp.getDeleted().size() > 0);
     }
 
@@ -223,7 +223,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         itm.updateAction(updateDoc, upload, new File.Field[] { File.Field.DESCRIPTION }, new Date(Long.MAX_VALUE));
 
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.NUMBER_OF_VERSIONS }, Metadata.ID, Order.ASCENDING, Ignore.NONE, new Date(0L), true);
-        UpdatesInfostoreResponse resp = client.execute(req);
+        UpdatesInfostoreResponse resp = getClient().execute(req);
 
         boolean found = false;
         for (JSONArray modified : resp.getNewAndModified()) {

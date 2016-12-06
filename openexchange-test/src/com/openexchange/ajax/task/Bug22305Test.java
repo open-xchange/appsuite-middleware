@@ -56,7 +56,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
@@ -87,7 +86,7 @@ public class Bug22305Test extends AbstractTaskTest {
         super.setUp();
         anton = getClient();
         antonId = anton.getValues().getUserId();
-        berta = new AJAXClient(User.User2);
+        berta = new AJAXClient(testContext.acquireUser());
         bertaId = berta.getValues().getUserId();
         bertaTZ = berta.getValues().getTimeZone();
         task = Create.createWithDefaults(getPrivateFolder(), "Task to test for bug 22305");

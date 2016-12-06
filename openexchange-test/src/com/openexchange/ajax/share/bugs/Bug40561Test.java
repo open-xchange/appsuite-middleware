@@ -58,7 +58,6 @@ import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
@@ -89,7 +88,7 @@ public class Bug40561Test extends ShareTest {
 
     @Test
     public void testShareFileAndSearchForItAsGuest() throws Exception {
-        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
 
         String guestEmailAddress = randomUID() + "@example.com";
@@ -102,7 +101,7 @@ public class Bug40561Test extends ShareTest {
         tmp.setFolderId(sharedFolderID);
         String sharedFileID = tmp.toUniqueID();
 
-        GuestClient guestClient = resolveShare(discoverInvitationLink(client, guestEmailAddress));
+        GuestClient guestClient = resolveShare(discoverInvitationLink(getClient(), guestEmailAddress));
         guestClient.checkFileAccessible(sharedFolderID, sharedFileID, guestPermission);
 
         List<Facet> facets = AbstractFindTest.autocomplete(guestClient, Module.DRIVE, "tests");
@@ -115,9 +114,9 @@ public class Bug40561Test extends ShareTest {
 
     @Test
     public void testShareFileInternallyAndSearchForIt() throws Exception {
-        AJAXClient shareClient = new AJAXClient(User.User2);
+        AJAXClient shareClient = new AJAXClient(testUser);
         try {
-            FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+            FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
             DefaultFileStorageObjectPermission sharePermission = new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ);
             File file = insertSharedFile(folder.getObjectID(), "Tests.zip", sharePermission);
 

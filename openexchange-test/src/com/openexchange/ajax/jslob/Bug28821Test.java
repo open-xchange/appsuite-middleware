@@ -82,25 +82,25 @@ public final class Bug28821Test extends AbstractJSlobTest {
             final CountDownLatch finishedLatch = new CountDownLatch(length);
 
             {
-                final ListAction listAction = new ListAction(startLatch, finishedLatch, client, "io.ox/portal", "io.ox/mail", "io.ox/contacts");
+                final ListAction listAction = new ListAction(startLatch, finishedLatch, getClient(), "io.ox/portal", "io.ox/mail", "io.ox/contacts");
                 actions[0] = listAction;
                 final Thread thread = new Thread(listAction);
                 thread.start();
             }
             {
-                final ListAction listAction = new ListAction(startLatch, finishedLatch, client, "io.ox/settings/configjump", "io.ox/calendar");
+                final ListAction listAction = new ListAction(startLatch, finishedLatch, getClient(), "io.ox/settings/configjump", "io.ox/calendar");
                 actions[1] = listAction;
                 final Thread thread = new Thread(listAction);
                 thread.start();
             }
             {
-                final ListAction listAction = new ListAction(startLatch, finishedLatch, client, "io.ox/files");
+                final ListAction listAction = new ListAction(startLatch, finishedLatch, getClient(), "io.ox/files");
                 actions[2] = listAction;
                 final Thread thread = new Thread(listAction);
                 thread.start();
             }
             {
-                final ListAction listAction = new ListAction(startLatch, finishedLatch, client, "io.ox/core", "io.ox/core/updates");
+                final ListAction listAction = new ListAction(startLatch, finishedLatch, getClient(), "io.ox/core", "io.ox/core/updates");
                 actions[3] = listAction;
                 final Thread thread = new Thread(listAction);
                 thread.start();

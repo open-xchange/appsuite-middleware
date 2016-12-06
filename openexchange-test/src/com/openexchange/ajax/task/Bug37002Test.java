@@ -57,7 +57,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInParametersRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -89,10 +88,10 @@ public class Bug37002Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         Participant participant = new UserParticipant(client2.getValues().getUserId());
 
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         task = Create.createWithDefaults(client1.getValues().getPrivateTaskFolder(), "Test for bug 37002");
         task.addParticipant(participant);
         client1.execute(new InsertRequest(task, timeZone, true)).fillTask(task);

@@ -107,9 +107,9 @@ public class GetALinkTest extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        itm = new InfostoreTestManager(client);
+        itm = new InfostoreTestManager(getClient());
 
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
         infostore = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
 
         long now = System.currentTimeMillis();
@@ -135,8 +135,8 @@ public class GetALinkTest extends ShareTest {
          * Get a link for the new drive subfolder
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()));
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
-        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, getClient().getValues().getTimeZone());
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getShareLink().getShareURL();
         /*
          * Resolve the link and check read permission for folder
@@ -152,10 +152,10 @@ public class GetALinkTest extends ShareTest {
          */
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, client.getValues().getTimeZone(), getLinkResponse.getTimestamp().getTime());
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, getClient().getValues().getTimeZone(), getLinkResponse.getTimestamp().getTime());
         updateLinkRequest.setExpiryDate(newExpiry);
         updateLinkRequest.setPassword(newPassword);
-        UpdateLinkResponse updateLinkResponse = client.execute(updateLinkRequest);
+        UpdateLinkResponse updateLinkResponse = getClient().execute(updateLinkRequest);
         /*
          * Resolve link with new credentials and check expiry
          */
@@ -167,11 +167,11 @@ public class GetALinkTest extends ShareTest {
         /*
          * Delete link and verify that share and folder permission are gone
          */
-        client.execute(new DeleteLinkRequest(target, updateLinkResponse.getTimestamp().getTime()));
+        getClient().execute(new DeleteLinkRequest(target, updateLinkResponse.getTimestamp().getTime()));
         assertNull("Share was not deleted", discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, infostore.getObjectID(), guestId));
         List<OCLPermission> reloadedFolderPermissions = getFolder(EnumAPI.OX_NEW, infostore.getObjectID()).getPermissions();
         assertEquals("Permission was not deleted", 1, reloadedFolderPermissions.size());
-        assertEquals("Permission was not deleted", client.getValues().getUserId(), reloadedFolderPermissions.get(0).getEntity());
+        assertEquals("Permission was not deleted", getClient().getValues().getUserId(), reloadedFolderPermissions.get(0).getEntity());
     }
 
     @Test
@@ -180,8 +180,8 @@ public class GetALinkTest extends ShareTest {
          * Get a link for the file
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
-        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, getClient().getValues().getTimeZone());
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getShareLink().getShareURL();
         /*
          * Resolve the link and check read permission for file
@@ -195,10 +195,10 @@ public class GetALinkTest extends ShareTest {
          */
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, client.getValues().getTimeZone(), getLinkResponse.getTimestamp().getTime());
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, getClient().getValues().getTimeZone(), getLinkResponse.getTimestamp().getTime());
         updateLinkRequest.setExpiryDate(newExpiry);
         updateLinkRequest.setPassword(newPassword);
-        UpdateLinkResponse updateLinkResponse = client.execute(updateLinkRequest);
+        UpdateLinkResponse updateLinkResponse = getClient().execute(updateLinkRequest);
         /*
          * Resolve link with new credentials and check permission and expiry
          */
@@ -211,9 +211,9 @@ public class GetALinkTest extends ShareTest {
         /*
          * Delete link and verify that share and object permission are gone
          */
-        client.execute(new DeleteLinkRequest(target, updateLinkResponse.getTimestamp().getTime()));
+        getClient().execute(new DeleteLinkRequest(target, updateLinkResponse.getTimestamp().getTime()));
         assertNull("Share was not deleted", discoverGuestEntity(file.getFolderId(), file.getId(), guestId));
-        List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
+        List<FileStorageObjectPermission> objectPermissions = getClient().execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
         assertTrue("Permission was not deleted", null == objectPermissions || 0 == objectPermissions.size());
     }
 
@@ -224,8 +224,8 @@ public class GetALinkTest extends ShareTest {
          * it will not work anymore.
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
-        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, getClient().getValues().getTimeZone());
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getShareLink().getShareURL();
         /*
          * Resolve the link and check read permission for file
@@ -241,7 +241,7 @@ public class GetALinkTest extends ShareTest {
         DefaultFile toUpdate = new DefaultFile();
         toUpdate.setId(file.getId());
         toUpdate.setLastModified(new Date());
-        toUpdate.setFolderId(Integer.toString(client.getValues().getPrivateInfostoreFolder()));
+        toUpdate.setFolderId(Integer.toString(getClient().getValues().getPrivateInfostoreFolder()));
         File reloaded = updateFile(toUpdate, new Field[] { Field.FOLDER_ID });
         assertTrue(reloaded.getObjectPermissions().isEmpty());
     }

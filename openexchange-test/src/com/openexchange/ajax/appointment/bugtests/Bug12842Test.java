@@ -227,8 +227,8 @@ public class Bug12842Test extends AbstractAJAXSession {
 
         try {
             client = getClient();
-            final int folderId = client.getValues().getPrivateAppointmentFolder();
-            final TimeZone tz = client.getValues().getTimeZone();
+            final int folderId = getClient().getValues().getPrivateAppointmentFolder();
+            final TimeZone tz = getClient().getValues().getTimeZone();
 
             // Sequence
             appointment = new Appointment();
@@ -261,7 +261,7 @@ public class Bug12842Test extends AbstractAJAXSession {
             }
 
             InsertRequest request = new InsertRequest(appointment, tz);
-            CommonInsertResponse response = client.execute(request);
+            CommonInsertResponse response = getClient().execute(request);
             response.fillObject(appointment);
 
             // Conflicting appointment
@@ -295,7 +295,7 @@ public class Bug12842Test extends AbstractAJAXSession {
             calendar.set(Calendar.HOUR_OF_DAY, conflictEnd);
             conflictAppointment.setEndDate(calendar.getTime());
             request = new InsertRequest(conflictAppointment, tz, false);
-            response = client.execute(request);
+            response = getClient().execute(request);
 
             if (shouldConflict) {
                 if (!response.hasConflicts()) {
@@ -316,12 +316,12 @@ public class Bug12842Test extends AbstractAJAXSession {
             }
         } finally {
             if (client != null && conflictAppointment.getObjectID() != 0 && conflictAppointment.getLastModified() != null) {
-                final DeleteRequest deleteRequest = new DeleteRequest(conflictAppointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), conflictAppointment.getLastModified());
-                client.execute(deleteRequest);
+                final DeleteRequest deleteRequest = new DeleteRequest(conflictAppointment.getObjectID(), getClient().getValues().getPrivateAppointmentFolder(), conflictAppointment.getLastModified());
+                getClient().execute(deleteRequest);
             }
             if (client != null && appointment.getObjectID() != 0 && appointment.getLastModified() != null) {
-                final DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), client.getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
-                client.execute(deleteRequest);
+                final DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), getClient().getValues().getPrivateAppointmentFolder(), appointment.getLastModified());
+                getClient().execute(deleteRequest);
             }
         }
     }

@@ -59,7 +59,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -72,8 +71,6 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug31779Test extends AbstractAJAXSession {
-
-    private AJAXClient client1;
 
     private AJAXClient client2;
 
@@ -92,9 +89,8 @@ public class Bug31779Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = client;
-        client2 = new AJAXClient(User.User2);
-        ctm1 = new CalendarTestManager(client1);
+        client2 = new AJAXClient(testContext.acquireUser());
+        ctm1 = new CalendarTestManager(getClient());
         ctm2 = new CalendarTestManager(client2);
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
@@ -105,8 +101,8 @@ public class Bug31779Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setIgnoreConflicts(true);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        UserParticipant user1 = new UserParticipant(client1.getValues().getUserId());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
         UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
@@ -126,7 +122,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
-        exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm1.delete(ctm1.createIdentifyingCopy(exception));
         exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
         Appointment loadedException = ctm2.get(exception);
@@ -148,10 +144,10 @@ public class Bug31779Test extends AbstractAJAXSession {
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
         ctm2.delete(ctm2.createIdentifyingCopy(exception));
-        exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Appointment loadedException = ctm1.get(exception);
         assertNotNull("Object expected.", loadedException);
-        assertEquals("Wrong creator.", client1.getValues().getUserId(), loadedException.getCreatedBy());
+        assertEquals("Wrong creator.", getClient().getValues().getUserId(), loadedException.getCreatedBy());
         assertEquals("Wrong changer.", client2.getValues().getUserId(), loadedException.getModifiedBy());
     }
 

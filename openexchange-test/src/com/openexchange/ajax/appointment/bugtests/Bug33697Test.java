@@ -61,8 +61,8 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.appointment.AbstractAppointmentTest;
 import com.openexchange.ajax.appointment.AppointmentRangeGenerator.AppointmentRange;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -79,7 +79,7 @@ public class Bug33697Test extends AbstractAppointmentTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(Bug33697Test.class);
 
-    private User userX, userY, userZ;
+    private TestUser userX, userY, userZ;
     private AJAXClient clientX, clientY, clientZ;
     private UserValues userValuesX, userValuesY, userValuesZ;
     private Appointment bug33697Appointment;
@@ -97,11 +97,10 @@ public class Bug33697Test extends AbstractAppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        userX = User.User1;
-        userY = User.User2;
-        userZ = User.User3;
+        userY = testContext.acquireUser();
+        userZ = testContext.acquireUser();
 
-        clientX = client;
+        clientX = getClient();
         clientY = new AJAXClient(userY);
         clientZ = new AJAXClient(userZ);
 

@@ -145,7 +145,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        mailFilterAPI = new MailFilterAPI(client);
+        mailFilterAPI = new MailFilterAPI(getClient());
 
         hostname = AjaxInit.getAJAXProperty(HOSTNAME);
 

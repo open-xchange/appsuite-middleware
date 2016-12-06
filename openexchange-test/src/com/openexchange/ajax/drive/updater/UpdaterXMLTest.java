@@ -79,8 +79,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -93,40 +91,15 @@ import com.openexchange.java.Strings;
  */
 public class UpdaterXMLTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    private String userName;
-
-    private String password;
-
     private String hostname;
 
-    private String context;
-
-    private String login;
-
     private HttpHost targetHost;
-
-    /**
-     * Initializes a new {@link UpdaterXMLTest}.
-     *
-     * @param name
-     */
-    public UpdaterXMLTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        User user = User.User1;
-        userName = AJAXConfig.getProperty(user.getLogin());
-        context = AJAXConfig.getProperty(Property.CONTEXTNAME);
-        login = userName + '@' + context;
-        password = AJAXConfig.getProperty(user.getPassword());
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);
         targetHost = new HttpHost(hostname, 80);
-        this.client = new AJAXClient(user);
     }
 
     @Test
@@ -140,7 +113,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
             EntityUtils.consume(entity);
             assertEquals(401, response.getStatusLine().getStatusCode());
 
-            httpClient.getCredentialsProvider().setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()), new UsernamePasswordCredentials(login, password));
+            httpClient.getCredentialsProvider().setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()), new UsernamePasswordCredentials(testUser.getLogin(), testUser.getPassword()));
             response = httpClient.execute(targetHost, getXML);
             entity = response.getEntity();
             EntityUtils.consume(entity);
@@ -169,10 +142,10 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
 
     @Test
     public void testUpdateXML() throws Exception {
-        DefaultHttpClient httpClient = client.getSession().getHttpClient();
-        httpClient.getCredentialsProvider().setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()), new UsernamePasswordCredentials(login, password));
+        DefaultHttpClient httpClient = getClient().getSession().getHttpClient();
+        httpClient.getCredentialsProvider().setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()), new UsernamePasswordCredentials(testUser.getLogin(), testUser.getPassword()));
         UpdateXMLRequest request = new UpdateXMLRequest();
-        UpdateXMLResponse response = client.execute(request);
+        UpdateXMLResponse response = getClient().execute(request);
 
         SAXBuilder builder = new SAXBuilder();
         String xml = response.getXML();
@@ -191,7 +164,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
 
             for (String url : filesToGet.keySet()) {
                 FileRequest fileRequest = new FileRequest(extractFileName(url));
-                FileResponse fileResponse = client.execute(fileRequest);
+                FileResponse fileResponse = getClient().execute(fileRequest);
                 byte[] fileBytes = fileResponse.getFileBytes();
                 String md5 = calculateMD5(new ByteArrayInputStream(fileBytes));
 
@@ -206,13 +179,13 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
     @Test
     public void testAgainWithChangedLocale() throws Exception {
         SetRequest setRequest = new SetRequest(Tree.Language, "wx_YZ");
-        client.execute(setRequest);
+        getClient().execute(setRequest);
 
         try {
             testUpdateXML();
         } finally {
             SetRequest setBackRequest = new SetRequest(Tree.Language, "en_US");
-            client.execute(setBackRequest);
+            getClient().execute(setBackRequest);
         }
     }
 

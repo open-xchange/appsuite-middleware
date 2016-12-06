@@ -72,8 +72,8 @@ public class MoveTest extends AbstractContactTest {
         objectId = insertContact(contactObj);
 
         folder = Create.createPrivateFolder("testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, userId);
-        folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-        final InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
+        folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
+        final InsertResponse folderCreateResponse = getClient().execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
 
         targetFolder = folder.getObjectID();
@@ -93,8 +93,8 @@ public class MoveTest extends AbstractContactTest {
         objectId = insertContact(contactObj);
 
         folder = Create.createPrivateFolder("testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, userId);
-        folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-        final InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
+        folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
+        final InsertResponse folderCreateResponse = getClient().execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
 
         targetFolder = folder.getObjectID();
@@ -109,7 +109,7 @@ public class MoveTest extends AbstractContactTest {
     @After
     public void tearDown() throws Exception {
         deleteContact(objectId, targetFolder, true);
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
+        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
 
         super.tearDown();
     }

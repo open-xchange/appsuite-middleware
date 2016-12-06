@@ -94,27 +94,27 @@ public class Bug15901Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        folder = client.getValues().getInboxFolder();
-        address = client.getValues().getSendAddress();
+        folder = getClient().getValues().getInboxFolder();
+        address = getClient().getValues().getSendAddress();
         final String testmail = TestMails.replaceAddresses(TestMails.DDDTDL_MAIL, address);
         final byte[] buf = testmail.getBytes();
         final ByteArrayInputStream mail = new ByteArrayInputStream(buf);
         final ImportMailRequest request = new ImportMailRequest(folder, 32, mail);
-        final ImportMailResponse response = client.execute(request);
+        final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds();
     }
 
     @After
     public void tearDown() throws Exception {
         final DeleteRequest del = new DeleteRequest(ids);
-        client.execute(del);
+        getClient().execute(del);
         super.tearDown();
     }
 
     @Test
     public void testBug15901() throws Throwable {
         final GetRequest request = new GetRequest(folder, ids[0][1], false);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
 
         final JSONArray attachmentArray = response.getAttachments();
 

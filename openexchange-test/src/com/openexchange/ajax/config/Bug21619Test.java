@@ -58,8 +58,8 @@ import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.pool.TestUser;
 
 /**
  * If 2 threads have been writing the same configuration value the internal compare and set method failed and entered an endless loop. This
@@ -85,7 +85,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
         client = getClient();
         origValue = client.execute(new GetRequest(Tree.TaskUIConfiguration)).getString();
         for (int i = 0; i < writers.length; i++) {
-            writers[i] = new ValueWriter();
+            writers[i] = new ValueWriter(testUser);
         }
     }
 
@@ -119,9 +119,11 @@ public final class Bug21619Test extends AbstractAJAXSession {
 
         private boolean run = true;
         private Throwable t;
+        private TestUser testUser;
 
-        ValueWriter() {
+        ValueWriter(TestUser testUser) {
             super();
+            this.testUser = testUser;
         }
 
         public void stop() {
@@ -136,7 +138,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
         public void run() {
             AJAXClient client = null;
             try {
-                client = new AJAXClient(User.User1);
+                client = new AJAXClient(testUser);
                 HttpConnectionParams.setConnectionTimeout(client.getSession().getHttpClient().getParams(), 10000);
                 int value = 1;
                 while (run) {

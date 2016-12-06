@@ -56,7 +56,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -91,20 +90,20 @@ public class Bug48149Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
-        client3 = new AJAXClient(User.User3);
-        ctm = new CalendarTestManager(client);
+        client2 = new AJAXClient(testContext.acquireUser());
+        client3 = new AJAXClient(testContext.acquireUser());
+        ctm = new CalendarTestManager(getClient());
         ctm2 = new CalendarTestManager(client2);
         ctm3 = new CalendarTestManager(client3);
-        ftm1 = new FolderTestManager(client);
+        ftm1 = new FolderTestManager(getClient());
         ftm2 = new FolderTestManager(client2);
 
         // Remove all permissions
-        FolderObject privateFolder1 = ftm1.getFolderFromServer(client.getValues().getPrivateAppointmentFolder());
+        FolderObject privateFolder1 = ftm1.getFolderFromServer(getClient().getValues().getPrivateAppointmentFolder());
         Iterator<OCLPermission> i = privateFolder1.getPermissions().iterator();
         while (i.hasNext()) {
             OCLPermission permission = i.next();
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 i.remove();
             }
         }
@@ -123,7 +122,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         ftm2.updateFolderOnServer(privateFolder2);
 
         // Add new shared folder.
-        sharedFolder1 = ftm1.generateSharedFolder("Shared Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), client3.getValues().getUserId());
+        sharedFolder1 = ftm1.generateSharedFolder("Shared Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), client3.getValues().getUserId());
         ftm1.insertFolderOnServer(sharedFolder1);
 
         // Appointments not visible for user 3.
@@ -132,7 +131,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         app1.setStartDate(TimeTools.D("07.08.2016 08:00"));
         app1.setEndDate(TimeTools.D("07.08.2016 09:00"));
         app1.setIgnoreConflicts(true);
-        app1.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app1.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm.insert(app1);
 
         app2 = new Appointment();

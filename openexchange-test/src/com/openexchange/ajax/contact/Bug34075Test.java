@@ -87,7 +87,7 @@ public class Bug34075Test extends AbstractManagedContactTest {
         /*
          * copy contact
          */
-        CopyResponse copyResponse = client.execute(new CopyRequest(contact.getObjectID(), contact.getParentFolderID(), contact.getParentFolderID(), true));
+        CopyResponse copyResponse = getClient().execute(new CopyRequest(contact.getObjectID(), contact.getParentFolderID(), contact.getParentFolderID(), true));
         assertNotNull("No response", copyResponse);
         assertFalse("Errors in response", copyResponse.hasError());
         JSONObject data = (JSONObject) copyResponse.getData();

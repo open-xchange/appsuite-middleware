@@ -3,20 +3,14 @@ package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import java.io.IOException;
 import javax.mail.internet.InternetAddress;
-import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -31,11 +25,6 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
     protected String folder;
     String mailObject_25kb;
-
-    public AllRequestAndResponseTest() throws OXException, IOException, SAXException, JSONException {
-        super();
-        this.client = new AJAXClient(User.User1);
-    }
 
     @Before
     public void setUp() throws Exception {

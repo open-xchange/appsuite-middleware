@@ -63,7 +63,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -93,9 +92,9 @@ public class Bug24682Test extends CalDAVTest {
          * setup managers for other users
          */
         managers = new CalendarTestManager[3];
-        managers[0] = new CalendarTestManager(new AJAXClient(User.User2));
-        managers[1] = new CalendarTestManager(new AJAXClient(User.User3));
-        managers[2] = new CalendarTestManager(new AJAXClient(User.User4));
+        managers[0] = new CalendarTestManager(new AJAXClient(testUser));
+        managers[1] = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
+        managers[2] = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
         for (CalendarTestManager manager : managers) {
             manager.setFailOnError(true);
         }

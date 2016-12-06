@@ -71,15 +71,11 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
     private Appointment series;
     private Appointment exception;
 
-    public CreateExceptionWithBadDate() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         series = new Appointment();
         series.setTitle("Bug 48165 Test - series");
         series.setStartDate(TimeTools.D("01.08.2016 09:00"));
@@ -87,7 +83,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
         series.setRecurrenceType(Appointment.DAILY);
         series.setInterval(1);
         series.setIgnoreConflicts(true);
-        series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm.insert(series);
 
         exception = new Appointment();

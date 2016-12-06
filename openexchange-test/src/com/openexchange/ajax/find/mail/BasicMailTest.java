@@ -113,7 +113,7 @@ public class BasicMailTest extends AbstractMailFindTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        String inboxFolder = client.getValues().getInboxFolder();
+        String inboxFolder = getClient().getValues().getInboxFolder();
         String folderName = "findApiMailTestFolder_" + System.currentTimeMillis();
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.MAIL);
@@ -127,8 +127,8 @@ public class BasicMailTest extends AbstractMailFindTest {
         /*
          * Set an image for autocomplete tests
          */
-        GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
-        GetResponse getResponse = client.execute(getRequest);
+        GetRequest getRequest = new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
         Contact ownContact = getResponse.getContact();
         Contact modified = new Contact();
         modified.setObjectID(ownContact.getObjectID());
@@ -145,7 +145,7 @@ public class BasicMailTest extends AbstractMailFindTest {
          * Create a distribution list
          */
         Contact distributionList = new Contact();
-        distributionList.setParentFolderID(client.getValues().getPrivateContactFolder());
+        distributionList.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         distributionList.setSurName(randomUID());
         distributionList.setGivenName(randomUID());
         distributionList.setDisplayName(distributionList.getGivenName() + " " + distributionList.getSurName());
@@ -158,7 +158,7 @@ public class BasicMailTest extends AbstractMailFindTest {
          */
         String prefix = defaultAddress.substring(0, 3);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         List<Facet> facets = autocompleteResponse.getFacets();
         FacetValue found = detectContact(facets);
         assertNotNull("own contact was missing in response", found);
@@ -424,7 +424,7 @@ public class BasicMailTest extends AbstractMailFindTest {
 
     @Test
     public void testPrefixItemIsLastInContactsFacet() throws Exception {
-        FolderObject contactFolder = folderManager.generatePrivateFolder("findApiMailTestFolder_" + System.currentTimeMillis(), FolderObject.CONTACT, client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
+        FolderObject contactFolder = folderManager.generatePrivateFolder("findApiMailTestFolder_" + System.currentTimeMillis(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
 
         contactFolder = folderManager.insertFolderOnServer(contactFolder);
         List<Contact> contacts = new LinkedList<Contact>();
@@ -552,7 +552,7 @@ public class BasicMailTest extends AbstractMailFindTest {
          * time zone is specified in the requests. We override explicitly with a
          * different one to compare the date conversion between get and search responses.
          */
-        TimeZone userTimeZone = client.getValues().getTimeZone();
+        TimeZone userTimeZone = getClient().getValues().getTimeZone();
         TimeZone clientTimeZone = TimeZones.UTC;
         if (userTimeZone.equals(clientTimeZone)) {
             clientTimeZone = TimeZones.PST;
@@ -562,7 +562,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         String[][] mailIDs = importMail(testFolder.getFullName(), defaultAddress, subject, subject);
         com.openexchange.ajax.mail.actions.GetRequest getMailReq = new com.openexchange.ajax.mail.actions.GetRequest(mailIDs[0][0], mailIDs[0][1]);
         getMailReq.setTimeZone(clientTimeZone);
-        com.openexchange.ajax.mail.actions.GetResponse getMailResp = client.execute(getMailReq);
+        com.openexchange.ajax.mail.actions.GetResponse getMailResp = getClient().execute(getMailReq);
         long origReceivedDate = getMailResp.getMail(clientTimeZone).getReceivedDate().getTime();
 
         List<Facet> possibleFacets = autocomplete(subject);

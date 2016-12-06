@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 
 public class DeleteTest extends AppointmentTest {
@@ -52,7 +51,7 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
@@ -65,9 +64,9 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setTitle("testDeleteRecurrenceWithPosition - exception");
         appointmentObj.setStartDate(new Date(startTime + 60 * 60 * 1000));
         appointmentObj.setEndDate(new Date(endTime + 60 * 60 * 1000));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
@@ -110,7 +109,7 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);

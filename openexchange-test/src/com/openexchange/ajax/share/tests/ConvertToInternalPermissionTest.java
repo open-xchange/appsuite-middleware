@@ -55,9 +55,9 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -83,34 +83,34 @@ public class ConvertToInternalPermissionTest extends ShareTest {
 
     @Test
     public void testConvertToInternalPermissionRandomly() throws Exception {
-        testConvertToInternalPermission(randomFolderAPI(), randomModule(), AJAXClient.User.User3);
+        testConvertToInternalPermission(randomFolderAPI(), randomModule(), testUser);
     }
 
     public void noTestConvertToInternalPermissionExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
-                testConvertToInternalPermission(api, module, AJAXClient.User.User3);
+                testConvertToInternalPermission(api, module, testUser);
             }
         }
     }
 
     @Test
     public void testConvertToInternalObjectPermissionRandomly() throws Exception {
-        testConvertToInternalObjectPermission(randomFolderAPI(), AJAXClient.User.User3);
+        testConvertToInternalObjectPermission(randomFolderAPI(), testUser);
     }
 
-    private void testConvertToInternalPermission(EnumAPI api, int module, AJAXClient.User user) throws Exception {
+    private void testConvertToInternalPermission(EnumAPI api, int module, TestUser user) throws Exception {
         testConvertToInternalPermission(api, module, getDefaultFolder(module), user);
     }
 
-    private void testConvertToInternalPermission(EnumAPI api, int module, int parent, AJAXClient.User user) throws Exception {
+    private void testConvertToInternalPermission(EnumAPI api, int module, int parent, TestUser user) throws Exception {
         /*
          * prepare guest permission with e-mail address of other other internal user
          */
         AJAXClient userClient = new AJAXClient(user);
         String email = userClient.getValues().getDefaultAddress();
         int userID = userClient.getValues().getUserId();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(email, "", AJAXConfig.getProperty(user.getPassword()));
+        OCLGuestPermission guestPermission = createNamedGuestPermission(email, "", user.getPassword());
         userClient.logout();
         /*
          * create folder shared to guest user
@@ -135,18 +135,18 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         assertEquals(RecipientType.USER, entity.getType());
     }
 
-    private void testConvertToInternalObjectPermission(EnumAPI api, AJAXClient.User user) throws Exception {
+    private void testConvertToInternalObjectPermission(EnumAPI api, TestUser user) throws Exception {
         testConvertToInternalObjectPermission(api, getDefaultFolder(FolderObject.INFOSTORE), user);
     }
 
-    private void testConvertToInternalObjectPermission(EnumAPI api, int parent, AJAXClient.User user) throws Exception {
+    private void testConvertToInternalObjectPermission(EnumAPI api, int parent, TestUser user) throws Exception {
         /*
          * prepare guest permission with e-mail address of other other internal user
          */
         AJAXClient userClient = new AJAXClient(user);
         String email = userClient.getValues().getDefaultAddress();
         int userID = userClient.getValues().getUserId();
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(email, "", AJAXConfig.getProperty(user.getPassword())));
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(email, "", user.getPassword()));
         userClient.logout();
         /*
          * create folder and a shared file inside

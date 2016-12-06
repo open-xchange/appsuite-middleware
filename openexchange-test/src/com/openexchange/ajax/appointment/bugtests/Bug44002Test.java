@@ -82,7 +82,7 @@ public class Bug44002Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         conflict = new Appointment();
         series = new Appointment();
 
@@ -102,7 +102,7 @@ public class Bug44002Test extends AbstractAJAXSession {
         series.setRecurrenceType(Appointment.WEEKLY);
         series.setDays(Appointment.THURSDAY);
         series.setInterval(1);
-        series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         series.setIgnoreConflicts(true);
         series.setAlarm(15);
 
@@ -112,7 +112,7 @@ public class Bug44002Test extends AbstractAJAXSession {
         c.add(Calendar.HOUR_OF_DAY, 1);
         conflict.setEndDate(new Date(c.getTimeInMillis()));
         conflict.setIgnoreConflicts(true);
-        conflict.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        conflict.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         conflict.setAlarm(15);
 
         ctm.insert(series);

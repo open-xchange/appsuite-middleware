@@ -112,7 +112,7 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
 
     public String createFolder(ProviderIdMapper filestore, String folderName) throws Exception {
         CreateFolderRequest cfReq = new CreateFolderRequest(filestore.getInfostoreId(), folderName);
-        CreateFolderResponse cfResp = client.execute(cfReq);
+        CreateFolderResponse cfResp = getClient().execute(cfReq);
         assertNotNull("Folder was not successfully created: ", cfResp);
         String folderId = (String) cfResp.getData();
         return folderId;
@@ -120,7 +120,7 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
 
     public String uploadFile(String folderId, byte[] bytesToUpload) throws Exception {
         NewFileRequest nfReq = new NewFileRequest(bytesToUpload, setFolderId(folderId), "application/octet-stream");
-        NewFileResponse nfResp = client.execute(nfReq);
+        NewFileResponse nfResp = getClient().execute(nfReq);
         assertNotNull("File was not successfully uploaded");
         String fileId = (String) nfResp.getData();
         assertFalse("File id is empty", Strings.isEmpty(fileId));
@@ -129,13 +129,13 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
 
     public void deleteFile(String folderId, String fileId) throws Exception {
         DeleteFileRequest dfReq = new DeleteFileRequest(fileId, folderId);
-        DeleteFileResponse dfResp = client.execute(dfReq);
+        DeleteFileResponse dfResp = getClient().execute(dfReq);
         assertNotNull(dfResp);
     }
 
     public void deleteFolder(String folderID) throws Exception {
         DeleteFolderRequest dfReq = new DeleteFolderRequest(folderID, 1);
-        DeleteFolderResponse dfResp = client.execute(dfReq);
+        DeleteFolderResponse dfResp = getClient().execute(dfReq);
         assertNotNull(dfResp);
     }
 }

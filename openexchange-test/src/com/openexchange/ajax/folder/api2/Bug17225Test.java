@@ -63,7 +63,6 @@ import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -89,7 +88,7 @@ public final class Bug17225Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         userId1 = client.getValues().getUserId();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         int folderId = client.getValues().getPrivateAppointmentFolder();
         GetResponse getR = client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
         FolderObject oldFolder = getR.getFolder();

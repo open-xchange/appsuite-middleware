@@ -72,9 +72,13 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.AjaxInit;
@@ -121,10 +125,20 @@ public abstract class AbstractAJAXTest {
 
     protected static final int APPEND_MODIFIED = 1000000;
 
+    protected TestContext testContext;
+
+    private AJAXClient client;
+
+    protected TestUser testUser;
+
     @Before
     public void setUp() throws Exception {
         try {
             AJAXConfig.init();
+
+            testContext = TestContextPool.acquireContext();
+            testUser = testContext.acquireUser();
+            client = new AJAXClient(testUser);
         } catch (final OXException ex) {
             ex.printStackTrace();
         }
@@ -135,7 +149,11 @@ public abstract class AbstractAJAXTest {
      */
     @After
     public void tearDown() throws Exception {
-        logout();
+        try {
+            logout();
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     protected String getAJAXProperty(final String key) {
@@ -388,5 +406,9 @@ public abstract class AbstractAJAXTest {
 
     public static final void putTestArg(final String arg, final String value) {
         testArgsMap.put(arg, value);
+    }
+
+    public AJAXClient getClient() {
+        return client;
     }
 }

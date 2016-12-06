@@ -9,7 +9,6 @@ import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetContactForUserRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -19,7 +18,7 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int user2id = client2.getValues().getUserId();
         GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();
@@ -83,7 +82,7 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatchesAfterUpdateToo() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int user2id = client2.getValues().getUserId();
         GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();

@@ -56,7 +56,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.FolderShare;
@@ -103,7 +102,7 @@ public class ListFolderSharesTest extends ShareTest {
 
     @Test
     public void testListSharedFoldersToUser() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
         client2.logout();
         OCLPermission permission = new OCLPermission(userId, 0);
@@ -121,7 +120,7 @@ public class ListFolderSharesTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission oclPermission : folder.getPermissions()) {
-            if (oclPermission.getEntity() != client.getValues().getUserId()) {
+            if (oclPermission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = oclPermission;
                 break;
             }
@@ -150,7 +149,7 @@ public class ListFolderSharesTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission oclPermission : folder.getPermissions()) {
-            if (oclPermission.getEntity() != client.getValues().getUserId()) {
+            if (oclPermission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = oclPermission;
                 break;
             }
@@ -161,7 +160,7 @@ public class ListFolderSharesTest extends ShareTest {
          * check if share appears in user shared folders
          */
         FolderShare matchingShare = null;
-        List<FolderShare> shares = getFolderShares(client, EnumAPI.OX_NEW, module);
+        List<FolderShare> shares = getFolderShares(getClient(), EnumAPI.OX_NEW, module);
         for (FolderShare share : shares) {
             if (share.getObjectID() == folder.getObjectID()) {
                 matchingShare = share;
@@ -189,7 +188,7 @@ public class ListFolderSharesTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission oclPermission : subfolder.getPermissions()) {
-            if (oclPermission.getEntity() != client.getValues().getUserId()) {
+            if (oclPermission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = oclPermission;
                 break;
             }
@@ -200,7 +199,7 @@ public class ListFolderSharesTest extends ShareTest {
          * check if share appears in user shared folders
          */
         FolderShare matchingShare = null;
-        List<FolderShare> shares = getFolderShares(client, EnumAPI.OX_NEW, module);
+        List<FolderShare> shares = getFolderShares(getClient(), EnumAPI.OX_NEW, module);
         for (FolderShare share : shares) {
             if (share.getObjectID() == subfolder.getObjectID()) {
                 matchingShare = share;

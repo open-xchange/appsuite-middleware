@@ -106,7 +106,7 @@ public class BasicAuthTest extends ShareTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        calendarManager = new CalendarTestManager(client);
+        calendarManager = new CalendarTestManager(getClient());
     }
 
     @After
@@ -118,7 +118,7 @@ public class BasicAuthTest extends ShareTest {
         }
 
         if (null != folder) {
-            client.execute(new DeleteRequest(EnumAPI.OX_OLD, false, folder).setFailOnErrorParam(Boolean.FALSE));
+            getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, false, folder).setFailOnErrorParam(Boolean.FALSE));
             folder = null;
         }
 
@@ -138,7 +138,7 @@ public class BasicAuthTest extends ShareTest {
         // Check permissions
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -163,7 +163,7 @@ public class BasicAuthTest extends ShareTest {
                 appointment.setParentFolderID(folder.getObjectID());
                 appointment.setIgnoreConflicts(true);
 
-                UserParticipant user = new UserParticipant(client.getValues().getUserId());
+                UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
                 UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
@@ -182,7 +182,7 @@ public class BasicAuthTest extends ShareTest {
                 appointment.setParentFolderID(folder.getObjectID());
                 appointment.setIgnoreConflicts(true);
 
-                UserParticipant user = new UserParticipant(client.getValues().getUserId());
+                UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
                 UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
@@ -201,7 +201,7 @@ public class BasicAuthTest extends ShareTest {
                 appointment.setParentFolderID(folder.getObjectID());
                 appointment.setIgnoreConflicts(true);
 
-                UserParticipant user = new UserParticipant(client.getValues().getUserId());
+                UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
                 UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
@@ -220,7 +220,7 @@ public class BasicAuthTest extends ShareTest {
                 appointment.setParentFolderID(folder.getObjectID());
                 appointment.setIgnoreConflicts(true);
 
-                UserParticipant user = new UserParticipant(client.getValues().getUserId());
+                UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
                 UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);

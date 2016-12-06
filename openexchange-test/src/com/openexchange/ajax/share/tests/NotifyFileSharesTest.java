@@ -53,7 +53,6 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.NotifyFileRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
@@ -109,14 +108,14 @@ public class NotifyFileSharesTest extends ShareTest {
 
     private void testNotifyGroup(int parent) throws Exception {
         DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ);
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         testNotify(parent, permission, emailAddress);
     }
 
     private void testNotifyUser(int parent) throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
@@ -135,7 +134,7 @@ public class NotifyFileSharesTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission objectPermission : file.getObjectPermissions()) {
-            if (objectPermission.getEntity() != client.getValues().getUserId()) {
+            if (objectPermission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = objectPermission;
                 break;
             }
@@ -145,12 +144,12 @@ public class NotifyFileSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        client.execute(new GetMailsRequest());
-        client.execute(new NotifyFileRequest(file.getId(), matchingPermission.getEntity()));
+        getClient().execute(new GetMailsRequest());
+        getClient().execute(new NotifyFileRequest(file.getId(), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(client, emailAddress);
+        Message notificationMessage = discoverInvitationMessage(getClient(), emailAddress);
         assertNotNull(notificationMessage);
     }
 

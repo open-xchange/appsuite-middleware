@@ -100,7 +100,7 @@ public class Bug12409Test extends AbstractMailTest {
         // convert it to a string for the SaveRequest
         final String mailObject_string = mailObject.toString();
 
-        folderAndID = client.execute(new SendRequest(mailObject_string)).getFolderAndID();
+        folderAndID = getClient().execute(new SendRequest(mailObject_string)).getFolderAndID();
 
     }
 
@@ -120,7 +120,7 @@ public class Bug12409Test extends AbstractMailTest {
         final AJAXClient client = getClient();
         // load the email to edit it again
         GetResponse response;
-        response = client.execute(new GetRequest(folderAndID[0], folderAndID[1]));
+        response = getClient().execute(new GetRequest(folderAndID[0], folderAndID[1]));
         // verify that the delivery receipt option is still set
         assertTrue("Disposition notification was not saved.", response.getMail(getTimeZone()).getDispositionNotification().toString().equals("testmail@example.invalid"));
     }

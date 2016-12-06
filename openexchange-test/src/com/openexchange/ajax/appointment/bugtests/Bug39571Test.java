@@ -87,10 +87,10 @@ public class Bug39571Test extends AbstractAJAXSession {
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
-        UserParticipant up1 = new UserParticipant(client.getValues().getUserId());
-        ResourceParticipant resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(client));
+        UserParticipant up1 = new UserParticipant(getClient().getValues().getUserId());
+        ResourceParticipant resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(getClient()));
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         series = new Appointment();
         series.setTitle("Bug 39571 Series");
         series.setStartDate(TimeTools.D("01.08." + nextYear + " 08:00"));
@@ -100,7 +100,7 @@ public class Bug39571Test extends AbstractAJAXSession {
         series.setOccurrence(3);
         series.setParticipants(new Participant[] { up1, resourceParticipant });
         series.setIgnoreConflicts(true);
-        series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm.insert(series);
 
         single = new Appointment();
@@ -109,7 +109,7 @@ public class Bug39571Test extends AbstractAJAXSession {
         single.setEndDate(TimeTools.D("02.08." + nextYear + " 09:30"));
         single.setParticipants(new Participant[] { up1, resourceParticipant });
         single.setIgnoreConflicts(true);
-        single.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm.insert(single);
     }
 

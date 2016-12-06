@@ -84,14 +84,14 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
         JSONObject body = new JSONObject(jsonString);
 
         ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-        OnboardingTestResponse response = client.execute(req);
+        OnboardingTestResponse response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
         assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
 
         // Expecting an SENT_QUOTA_EXCEEDED exeption
-        response = client.execute(req);
+        response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
@@ -100,7 +100,7 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
         // Wait until user should be able to send sms again 
         Thread.sleep(11000);
 
-        response = client.execute(req);
+        response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception

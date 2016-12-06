@@ -151,7 +151,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -216,7 +216,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -241,7 +241,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
         if (hardDelete) {
             deleteRequest.setHardDelete(Boolean.TRUE);
         }
-        client.execute(deleteRequest);
+        getClient().execute(deleteRequest);
         if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
             /*
              * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
@@ -283,7 +283,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -349,7 +349,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

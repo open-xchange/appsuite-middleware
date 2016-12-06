@@ -80,14 +80,14 @@ public class Bug31810Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         single = new Appointment();
         single.setTitle("Bug 31810 appointment.");
         single.setStartDate(D("03.03." + nextYear + " 08:00"));
         single.setEndDate(D("03.03." + nextYear + " 09:00"));
         single.setIgnoreConflicts(true);
-        single.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm.insert(single);
 
         conflict = new Appointment();
@@ -96,7 +96,7 @@ public class Bug31810Test extends AbstractAJAXSession {
         conflict.setEndDate(D("03.03." + nextYear + " 09:00"));
         conflict.setIgnoreConflicts(false);
         conflict.setShownAs(Appointment.FREE);
-        conflict.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        conflict.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm.insert(conflict);
     }
 

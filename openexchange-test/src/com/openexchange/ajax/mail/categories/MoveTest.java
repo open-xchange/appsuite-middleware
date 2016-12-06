@@ -71,7 +71,7 @@ public class MoveTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testShouldMoveToAnotherCategory() throws OXException, IOException, SAXException, JSONException {
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         TestMail myMail = new TestMail(getFirstMailInFolder(origin));
@@ -85,7 +85,7 @@ public class MoveTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testShouldNotMoveToNonExistentCategory() throws OXException, IOException, SAXException, JSONException {
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         TestMail myMail = new TestMail(getFirstMailInFolder(origin));

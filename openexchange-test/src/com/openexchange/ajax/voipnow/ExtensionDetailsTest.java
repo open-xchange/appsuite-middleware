@@ -53,7 +53,6 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.voipnow.actions.ExtensionDetailsRequest;
@@ -74,14 +73,14 @@ public class ExtensionDetailsTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         // TODO check context admin, too. Currently this user does not have aliases until bug 14646 is fixed.
-        final AJAXClient client2 = new AJAXClient(User.User2);
+        final AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         client2.logout();
     }
 
     @Test
     public void testExtensionDetails() throws Exception {
         final ExtensionDetailsRequest detailsRequest = new ExtensionDetailsRequest(20, "thorben.betten");
-        final ExtensionDetailsResponse detailsResponse = Executor.execute(client, detailsRequest);
+        final ExtensionDetailsResponse detailsResponse = Executor.execute(getClient(), detailsRequest);
 
         final Object body = detailsResponse.getData();
 

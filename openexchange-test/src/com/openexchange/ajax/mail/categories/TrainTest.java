@@ -75,7 +75,7 @@ public class TrainTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testTrain() throws Exception {
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         manager.trainCategory(CAT_1, false, true, getSendAddress());
@@ -92,7 +92,7 @@ public class TrainTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testReorganize() throws Exception {
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         manager.trainCategory(CAT_1, true, false, getSendAddress());
@@ -104,7 +104,7 @@ public class TrainTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testDuplicateTrain() throws Exception {
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         manager.trainCategory(CAT_1, false, true, getSendAddress());

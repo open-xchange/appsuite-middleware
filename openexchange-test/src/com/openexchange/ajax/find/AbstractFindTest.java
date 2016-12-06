@@ -64,7 +64,6 @@ import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.find.actions.TestDisplayItem;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
@@ -111,13 +110,14 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         random = new Random();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         folderManager = new FolderTestManager(getClient());
         folderManager2 = new FolderTestManager(client2);
     }
 
     @After
     public void tearDown() throws Exception {
+//        testContext.reset();
         folderManager.cleanUp();
         super.tearDown();
     }
@@ -132,7 +132,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets) throws Exception {
         QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier());
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -153,7 +153,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets, Map<String, String> options) throws Exception {
         QueryRequest queryRequest = new QueryRequest(true, 0, Integer.MAX_VALUE, facets, options, module.getIdentifier(), null);
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -175,7 +175,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets, int start, int size) throws Exception {
         QueryRequest queryRequest = new QueryRequest(start, size, facets, module.getIdentifier());
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -203,7 +203,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
             }
         }
         QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier(), strColumns);
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -223,7 +223,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<Facet> autocomplete(Module module, String prefix) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, module.getIdentifier());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
 
@@ -238,7 +238,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<Facet> autocomplete(Module module, String prefix, List<ActiveFacet> facets) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, module.getIdentifier(), facets);
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
 

@@ -81,7 +81,7 @@ public final class ManyAttachmentsSendTest extends AbstractMailTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, false);
+        manager = new MailTestManager(getClient(), false);
     }
 
     @After

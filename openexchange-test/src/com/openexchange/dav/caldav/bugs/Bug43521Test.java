@@ -61,7 +61,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -83,7 +82,7 @@ public class Bug43521Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        manager2 = new CalendarTestManager(new AJAXClient(testUser));
         manager2.setFailOnError(true);
     }
 
@@ -119,7 +118,7 @@ public class Bug43521Test extends CalDAVTest {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(new AJAXClient(testUser).getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
         Date clientLastModified = manager2.getLastModification();
@@ -133,7 +132,7 @@ public class Bug43521Test extends CalDAVTest {
         exception.setLastModified(clientLastModified);
         exception.setParentFolderID(appointment.getParentFolderID());
         exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        exception.addParticipant(new UserParticipant(new AJAXClient(testUser).getValues().getUserId()));
         exception.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         manager2.update(exception);
         clientLastModified = getManager().getLastModification();

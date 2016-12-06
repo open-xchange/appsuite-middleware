@@ -62,7 +62,7 @@ public class DeleteTest extends InfostoreAJAXTest {
         clean.clear();
 
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), sessionId), false);
-        String infostoreTrashFolder = String.valueOf(client.getValues().getInfostoreTrashFolder());
+        String infostoreTrashFolder = String.valueOf(getClient().getValues().getInfostoreTrashFolder());
         notDeletedExpect = new HashSet<String>();
         for (int i = 0; i < toDelete.length; i++) {
             FileID fileID = new FileID(toDelete[i][1]);

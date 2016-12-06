@@ -147,7 +147,7 @@ public class AddGuestPermissionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -203,7 +203,7 @@ public class AddGuestPermissionTest extends ShareTest {
             assertNotNull("No permissions fround for folder " + folder.getObjectID(), permissions);
             assertEquals("Wrong number of permissions on folder " + folder.getObjectID(), 2, permissions.size());
             for (OCLPermission permission : permissions) {
-                if (permission.getEntity() != client.getValues().getUserId()) {
+                if (permission.getEntity() != getClient().getValues().getUserId()) {
                     matchingPermission = permission;
                     break;
                 }
@@ -256,7 +256,7 @@ public class AddGuestPermissionTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

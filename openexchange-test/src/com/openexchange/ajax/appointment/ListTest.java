@@ -65,7 +65,6 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
@@ -92,14 +91,10 @@ public class ListTest extends AppointmentTest {
 
     private FolderObject folder;
 
-    public ListTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = new AJAXClient(User.User1);
+        client1 = new AJAXClient(testContext.acquireUser());
 
         ctm1 = new CalendarTestManager(client1);
         ctm1.setFailOnError(true);

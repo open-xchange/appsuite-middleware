@@ -70,7 +70,6 @@ import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.find.Module;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
@@ -92,15 +91,6 @@ import com.openexchange.groupware.container.UserParticipant;
  */
 public class QueryTest extends CalendarFindTest {
 
-    /**
-     * Initializes a new {@link QueryTest}.
-     *
-     * @param name The test name
-     */
-    public QueryTest() {
-        super();
-    }
-
     @Test
     public void testFilterChaining() throws Exception {
         Appointment appointment = randomPrivateAppointment();
@@ -111,7 +101,7 @@ public class QueryTest extends CalendarFindTest {
         facets.add(createActiveFacet(RANGE, "one_month", "range", "one_month"));
         facets.add(createActiveFacet(STATUS, "accepted", "status", "accepted"));
         facets.add(createActiveFacet(RECURRING_TYPE, "single", "type", "single"));
-        facets.add(createActiveFacet(PARTICIPANT, String.valueOf(client.getValues().getUserId()), "users", String.valueOf(client.getValues().getUserId())));
+        facets.add(createActiveFacet(PARTICIPANT, String.valueOf(getClient().getValues().getUserId()), "users", String.valueOf(getClient().getValues().getUserId())));
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(facets);
         assertTrue("no appointments found", 0 < documents.size());
@@ -256,7 +246,7 @@ public class QueryTest extends CalendarFindTest {
 
     @Test
     public void testFilterUsers() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
         client2.logout();
         UserParticipant userParticipant = new UserParticipant(userId);
@@ -275,7 +265,7 @@ public class QueryTest extends CalendarFindTest {
          * time zone than the one used when the appointment was created. Afterwards
          * we expect the dates in the response object to match the requested time zone.
          */
-        TimeZone userTimeZone = client.getValues().getTimeZone();
+        TimeZone userTimeZone = getClient().getValues().getTimeZone();
         TimeZone responseTimeZone = TimeZone.getTimeZone("America/New York");
         if (responseTimeZone.getRawOffset() == userTimeZone.getRawOffset()) { // we need different time zones for creation and query response
             responseTimeZone = TimeZone.getTimeZone("Europe/Berlin");
@@ -330,9 +320,9 @@ public class QueryTest extends CalendarFindTest {
     public void testFolderTypeFacet() throws Exception {
         FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
         FolderObject[] folders = new FolderObject[3];
-        folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId()));
-        folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, client.getValues().getUserId()));
-        folders[2] = folderManager2.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.CALENDAR, client2.getValues().getPrivateAppointmentFolder(), client2.getValues().getUserId(), client.getValues().getUserId()));
+        folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId()));
+        folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, getClient().getValues().getUserId()));
+        folders[2] = folderManager2.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.CALENDAR, client2.getValues().getPrivateAppointmentFolder(), client2.getValues().getUserId(), getClient().getValues().getUserId()));
 
         Appointment[] appointments = new Appointment[3];
         appointments[0] = manager.insert(randomAppointment(folders[0].getObjectID()));

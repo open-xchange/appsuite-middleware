@@ -98,7 +98,7 @@ public class Bug7377Test extends AbstractTaskTest {
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(AJAXClient.User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         tz1 = client1.getValues().getTimeZone();
         tz2 = client2.getValues().getTimeZone();
         folder1 = client1.getValues().getPrivateTaskFolder();

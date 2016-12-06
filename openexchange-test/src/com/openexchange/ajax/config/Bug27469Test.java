@@ -80,7 +80,7 @@ public class Bug27469Test extends AbstractAJAXSession {
     @Test
     public void testSetAliases() throws Exception {
         GetRequest request = new GetRequest(Tree.MailAddresses);
-        GetResponse response = client.execute(request);
+        GetResponse response = getClient().execute(request);
         JSONArray allAddresses = (JSONArray) response.getData();
         int numberOfAddresses = allAddresses.length();
         assertTrue(numberOfAddresses > 1);
@@ -94,13 +94,13 @@ public class Bug27469Test extends AbstractAJAXSession {
 
     private void setSendAddress(String newAddress) throws Exception {
         SetRequest setRequest = new SetRequest(Tree.SendAddress, newAddress);
-        SetResponse setResponse = client.execute(setRequest);
+        SetResponse setResponse = getClient().execute(setRequest);
         assertFalse(setResponse.hasError());
     }
 
     private String getSendAddress() throws Exception {
         GetRequest request = new GetRequest(Tree.SendAddress);
-        GetResponse response = client.execute(request);
+        GetResponse response = getClient().execute(request);
         String sendAddress = response.getString();
         return sendAddress;
     }

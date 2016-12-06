@@ -115,7 +115,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxS
             }
             if (!map.isEmpty()) {
                 ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, "server", getReloadables());
-                ChangePropertiesResponse response = client.execute(req);
+                ChangePropertiesResponse response = getClient().execute(req);
                 oldData = ResponseWriter.getJSON(response.getResponse());
             }
         }

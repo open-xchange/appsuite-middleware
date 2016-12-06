@@ -56,19 +56,14 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.java.Strings;
 
 /**
  * Session count steadily grows with usage of form login
@@ -76,34 +71,12 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug32695Test extends AbstractAJAXSession {
-
-    private AJAXClient client;
-    private String login;
-    private String password;
-
-    /**
-     * Initializes a new {@link Bug32695Test}.
-     *
-     * @param name The test name
-     */
-    public Bug32695Test() {
-        super();
-    }
+    
+    private TestUser testUser2;
 
     @Before
-    public void setUp() throws Exception {
-        AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
-        client = new AJAXClient(new AJAXSession(), true);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (null != client && false == Strings.isEmpty(client.getSession().getId())) {
-            client.logout();
-        }
-        super.tearDown();
+    public void setUp() {
+        testUser2 = testContext.acquireUser();
     }
 
     @Test
@@ -115,9 +88,9 @@ public class Bug32695Test extends AbstractAJAXSession {
         /*
          * perform second form login
          */
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(login, password);
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser.getLogin(), testUser.getPassword());
         secondLoginRequest.setCookiesNeeded(false);
-        FormLoginResponse secondLoginResponse = client.execute(secondLoginRequest);
+        FormLoginResponse secondLoginResponse = getClient().execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();
         assertNotNull("No session ID", secondSessionID);
         assertEquals("Different session IDs", firstSessionID, secondSessionID);
@@ -132,14 +105,12 @@ public class Bug32695Test extends AbstractAJAXSession {
         /*
          * perform second form login
          */
-        String secondLogin = AJAXConfig.getProperty(Property.SECONDUSER) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        String secondPassword = AJAXConfig.getProperty(Property.PASSWORD);
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(secondLogin, secondPassword);
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser2.getLogin(), testUser2.getPassword());
         secondLoginRequest.setCookiesNeeded(false);
-        FormLoginResponse secondLoginResponse = client.execute(secondLoginRequest);
+        FormLoginResponse secondLoginResponse = getClient().execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();
         assertFalse("Same session ID", firstSessionID.equals(secondSessionID));
-        client.getSession().setId(secondSessionID);
+        getClient().getSession().setId(secondSessionID);
     }
 
     @Test
@@ -151,11 +122,11 @@ public class Bug32695Test extends AbstractAJAXSession {
         /*
          * perform second form login with wrong credentials
          */
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(login, "wrongpassword");
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser.getLogin(), "wrongpassword");
         secondLoginRequest.setCookiesNeeded(false);
         AssertionError expectedError = null;
         try {
-            client.execute(secondLoginRequest);
+            getClient().execute(secondLoginRequest);
         } catch (AssertionError e) {
             expectedError = e;
         }
@@ -172,12 +143,12 @@ public class Bug32695Test extends AbstractAJAXSession {
          * perform second form login with wrong secret cookie
          */
         findCookie(LoginServlet.SECRET_PREFIX).setValue("wrongsecret");
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(login, password);
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser.getLogin(), testUser.getPassword());
         secondLoginRequest.setCookiesNeeded(false);
-        FormLoginResponse secondLoginResponse = client.execute(secondLoginRequest);
+        FormLoginResponse secondLoginResponse = getClient().execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();
         assertFalse("Same session ID", firstSessionID.equals(secondSessionID));
-        client.getSession().setId(secondSessionID);
+        getClient().getSession().setId(secondSessionID);
     }
 
     @Test
@@ -190,12 +161,12 @@ public class Bug32695Test extends AbstractAJAXSession {
          * perform second form login with wrong secret cookie
          */
         findCookie(LoginServlet.SESSION_PREFIX).setValue("wrongsession");
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(login, password);
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser.getLogin(), testUser.getPassword());
         secondLoginRequest.setCookiesNeeded(false);
-        FormLoginResponse secondLoginResponse = client.execute(secondLoginRequest);
+        FormLoginResponse secondLoginResponse = getClient().execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();
         assertFalse("Same session ID", firstSessionID.equals(secondSessionID));
-        client.getSession().setId(secondSessionID);
+        getClient().getSession().setId(secondSessionID);
     }
 
     @Test
@@ -207,27 +178,27 @@ public class Bug32695Test extends AbstractAJAXSession {
         /*
          * perform second form login
          */
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(login, password);
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser.getLogin(), testUser.getPassword());
         secondLoginRequest.setCookiesNeeded(false);
-        FormLoginResponse secondLoginResponse = client.execute(secondLoginRequest);
+        FormLoginResponse secondLoginResponse = getClient().execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();
         assertFalse("Same session ID", firstSessionID.equals(secondSessionID));
-        client.getSession().setId(secondSessionID);
+        getClient().getSession().setId(secondSessionID);
     }
 
     private String firstFormLogin(boolean store) throws Exception {
-        FormLoginResponse loginResponse = client.execute(new FormLoginRequest(login, password));
+        FormLoginResponse loginResponse = getClient().execute(new FormLoginRequest(testUser.getLogin(), testUser.getPassword()));
         String sessionID = loginResponse.getSessionId();
         assertNotNull("No session ID", sessionID);
-        client.getSession().setId(sessionID);
+        getClient().getSession().setId(sessionID);
         if (store) {
-            client.execute(new StoreRequest(sessionID));
+            getClient().execute(new StoreRequest(sessionID));
         }
         return sessionID;
     }
 
     private BasicClientCookie findCookie(String prefix) {
-        List<Cookie> cookies = client.getSession().getHttpClient().getCookieStore().getCookies();
+        List<Cookie> cookies = getClient().getSession().getHttpClient().getCookieStore().getCookies();
         for (int i = 0; i < cookies.size(); i++) {
             if (cookies.get(i).getName().startsWith(prefix)) {
                 return (BasicClientCookie) cookies.get(i);

@@ -80,7 +80,6 @@ import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
@@ -217,7 +216,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         ftm.insertFoldersOnServer(new FolderObject[] { privateSubfolder, publicSubfolder });
 
         // prepare shared folders
-        ajaxClient2 = new AJAXClient(User.User2);
+        ajaxClient2 = new AJAXClient(testContext.acquireUser());
         ftm2 = new FolderTestManager(ajaxClient2);
         // remove any non-private permissions from client2s private folder
         OCLPermission adminPermission = new OCLPermission();
@@ -233,7 +232,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         ftm2.insertFoldersOnServer(new FolderObject[] { sharedSubfolder });
 
         client.logout();
-        client = new OAuthClient(clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
+        client = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
     }
 
     @Test

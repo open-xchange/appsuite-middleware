@@ -109,20 +109,20 @@ public class MailTest extends AbstractMailTest {
 
     private void checkContacts(final int folderId) throws Exception {
         final int[] cols = new int[] { Contact.OBJECT_ID, Contact.EMAIL1 };
-        final Contact[] contacts = ContactTest.listContact(client.getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), client.getSession().getId());
+        final Contact[] contacts = ContactTest.listContact(getClient().getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), getClient().getSession().getId());
         assertEquals("Number of collected Contacts not correct.", 1, contacts.length);
         assertEquals("Email does not match.", getSendAddress(), contacts[0].getEmail1());
     }
 
     private FolderObject createContactFolder() throws OXException, IOException, SAXException, JSONException {
-        final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, client.getValues().getUserId());
-        folder.setParentFolderID(client.getValues().getPrivateContactFolder());
+        final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, getClient().getValues().getUserId());
+        folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         final CommonInsertResponse response = Executor.execute(client, new InsertRequest(EnumAPI.OX_OLD, folder));
         folder.setObjectID(response.getId());
         folder.setLastModified(response.getTimestamp());
 
-        client.execute(new SetRequest(Tree.ContactCollectEnabled, B(true)));
-        client.execute(new SetRequest(Tree.ContactCollectFolder, I(folder.getObjectID())));
+        getClient().execute(new SetRequest(Tree.ContactCollectEnabled, B(true)));
+        getClient().execute(new SetRequest(Tree.ContactCollectFolder, I(folder.getObjectID())));
         return folder;
     }
 

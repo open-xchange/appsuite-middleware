@@ -62,11 +62,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Appointment;
@@ -111,12 +109,12 @@ public class Bug33242Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(User.User3);
+        client2 = new AJAXClient(testContext.acquireUser());
 
         ctm = new CalendarTestManager(client1);
         ctm2 = new CalendarTestManager(client2);
 
-        groupParticipant = AJAXConfig.getProperty(AJAXConfig.Property.GROUP_PARTICIPANT);
+        groupParticipant = testContext.acquireGroupParticipant();
 
         prepareSeries();
         prepareSingle();

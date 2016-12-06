@@ -66,7 +66,6 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -83,22 +82,17 @@ public class Bug16303Test extends AbstractAJAXSession {
     private AJAXClient clientB;
     private FolderObject createdFolder;
 
-    public Bug16303Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = new AJAXClient(testContext.acquireUser());
         createdFolder = new FolderObject();
         createdFolder.setModule(FolderObject.CALENDAR);
-        createdFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        createdFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         createdFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN, I(clientB.getValues().getUserId()), "arawada"));
         createdFolder.setFolderName("testFolder4Bug16303");
         InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdFolder);
-        InsertResponse iResp = client.execute(iReq);
+        InsertResponse iResp = getClient().execute(iReq);
         iResp.fillObject(createdFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         createdFolder.setLastModified(new Date());

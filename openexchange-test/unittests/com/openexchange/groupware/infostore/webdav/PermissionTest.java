@@ -18,6 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -75,6 +79,7 @@ public class PermissionTest implements SessionHolder {
     private InfostoreWebdavFactory factory;
 
     private final List<FolderObject> clean = new ArrayList<FolderObject>();
+    private TestContext testContext;
 
     private static String getUsername(final String un) {
         final int pos = un.indexOf('@');
@@ -84,7 +89,12 @@ public class PermissionTest implements SessionHolder {
     @Before
     public void setUp() throws Exception {
         Init.startServer();
+        ProvisioningSetup.init();
         AJAXConfig.init();
+
+        testContext = TestContextPool.acquireContext();
+        TestUser testUser = testContext.acquireUser();
+        TestUser testUser2 = testContext.acquireUser();
 
         final TestConfig config = new TestConfig();
         final TestContextToolkit tools = new TestContextToolkit();
@@ -94,11 +104,11 @@ public class PermissionTest implements SessionHolder {
         final UserStorage userStorage = UserStorage.getInstance();
         final UserPermissionBitsStorage userConfigStorage = UserPermissionBitsStorage.getInstance();
 
-        session1 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN)), ctx), ctx, getClass().getName());
+        session1 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(testUser.getLogin()), ctx), ctx, getClass().getName());
         user1 = userStorage.getUser(session1.getUserId(), ctx);
         permissionBits1 = userConfigStorage.getUserPermissionBits(user1.getId(), ctx);
 
-        session2 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER)), ctx), ctx, getClass().getName());
+        session2 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(testUser2.getLogin()), ctx), ctx, getClass().getName());
         user2 = userStorage.getUser(session2.getUserId(), ctx);
         permissionBits2 = userConfigStorage.getUserPermissionBits(user2.getId(), ctx);
 
@@ -116,15 +126,18 @@ public class PermissionTest implements SessionHolder {
 
     @After
     public void tearDown() throws Exception {
-        switchUser(cleanupUser);
-        Collections.reverse(clean);
-        for (final FolderObject folderobject : clean) {
-            rm(folderobject.getObjectID());
+        try {
+            switchUser(cleanupUser);
+            Collections.reverse(clean);
+            for (final FolderObject folderobject : clean) {
+                rm(folderobject.getObjectID());
+            }
+            clean.clear();
+            factory.endRequest(200);
+            Init.stopServer();
+        } finally {
+            TestContextPool.backContext(testContext);
         }
-        clean.clear();
-        factory.endRequest(200);
-        Init.stopServer();
-
     }
 
     // Bug 10395

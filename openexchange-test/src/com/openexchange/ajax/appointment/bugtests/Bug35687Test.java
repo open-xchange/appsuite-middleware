@@ -58,7 +58,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
@@ -87,11 +86,11 @@ public class Bug35687Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
 
-        ctm = new CalendarTestManager(client);
-        ftm = new FolderTestManager(client);
-        folder = ftm.generateSharedFolder("Bug35687Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), client2.getValues().getUserId());
+        ctm = new CalendarTestManager(getClient());
+        ftm = new FolderTestManager(getClient());
+        folder = ftm.generateSharedFolder("Bug35687Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
 
         ctm.setClient(client2);

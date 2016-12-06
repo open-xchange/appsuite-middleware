@@ -73,7 +73,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.provider.actions.RevokeRequest;
 import com.openexchange.ajax.oauth.provider.protocol.GETRequest;
 import com.openexchange.ajax.oauth.provider.protocol.GETResponse;
@@ -101,7 +100,7 @@ public class ProtocolFlowTest extends EndpointTest {
     public void testFlow() throws Exception {
         GETRequest getLoginForm = new GETRequest().setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState);
         GETResponse loginFormResponse = getLoginForm.execute(client);
-        POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(login).setPassword(password);
+        POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(testUser.getLogin()).setPassword(testUser.getPassword());
         POSTResponse loginResponse = loginRequest.submit(client);
         GETResponse getAuthForm = loginResponse.followRedirect(client);
         POSTRequest authRequest = getAuthForm.preparePOSTRequest();
@@ -114,7 +113,7 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testRedeemRefreshToken() throws Exception {
-        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
+        OAuthClient oauthClient = new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());
         oauthClient.assertAccess();
         OAuthSession session = (OAuthSession) oauthClient.getSession();
         String accessToken = session.getAccessToken();
@@ -156,7 +155,7 @@ public class ProtocolFlowTest extends EndpointTest {
     @Test
     public void testRedeemIsDeniedWhenRedirectURIChanges() throws Exception {
         OAuthParams params = new OAuthParams().setHostname(hostname).setClientId(getClientId()).setClientSecret(getClientSecret()).setRedirectURI(getRedirectURI()).setScope(getScope().toString());
-        String sessionId = Protocol.login(client, params, login, password);
+        String sessionId = Protocol.login(client, params, testUser.getLogin(), testUser.getPassword());
         String authCode = Protocol.authorize(client, params, sessionId);
 
         LinkedList<NameValuePair> redeemAuthCodeParams = new LinkedList<>();
@@ -192,7 +191,7 @@ public class ProtocolFlowTest extends EndpointTest {
     @Test
     public void testAuthCodeReplay() throws Exception {
         OAuthParams params = new OAuthParams().setHostname(hostname).setClientId(getClientId()).setClientSecret(getClientSecret()).setRedirectURI(getRedirectURI()).setScope(getScope().toString());
-        String sessionId = Protocol.login(client, params, login, password);
+        String sessionId = Protocol.login(client, params, testUser.getLogin(), testUser.getPassword());
         String authCode = Protocol.authorize(client, params, sessionId);
         Protocol.redeemAuthCode(client, params, authCode);
 
@@ -225,14 +224,14 @@ public class ProtocolFlowTest extends EndpointTest {
         try {
             // acquire one token per client
             for (ClientDto client : clients) {
-                OAuthClient c = new OAuthClient(User.User1, client.getId(), client.getSecret(), client.getRedirectURIs().get(0), getScope());
+                OAuthClient c = new OAuthClient(testUser, client.getId(), client.getSecret(), client.getRedirectURIs().get(0), getScope());
                 c.assertAccess();
             }
 
             // now the max + 1 try with the default client
             boolean error = false;
             try {
-                OAuthClient c = new OAuthClient(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScope());
+                OAuthClient c = new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());
                 c.assertAccess();
             } catch (AssertionError e) {
                 error = true;
@@ -242,10 +241,10 @@ public class ProtocolFlowTest extends EndpointTest {
             // revoke access for one client and assure we can now grant access to another one
             Iterator<ClientDto> it = clients.iterator();
             ClientDto client2 = it.next();
-            AJAXClient ajaxClient = new AJAXClient(User.User1);
+            AJAXClient ajaxClient = new AJAXClient(testUser);
             ajaxClient.execute(new RevokeRequest(client2.getId()));
 
-            OAuthClient c = new OAuthClient(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScope());
+            OAuthClient c = new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());
             c.assertAccess();
         } finally {
             for (ClientDto client : clients) {
@@ -264,7 +263,7 @@ public class ProtocolFlowTest extends EndpointTest {
         List<OAuthClient> clients = new ArrayList<>();
         for (int i = 0; i < OAuthGrantStorage.MAX_GRANTS_PER_CLIENT; i++) {
             // obtains a fresh access token
-            clients.add(new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope()));
+            clients.add(new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope()));
             LockSupport.parkNanos(1000000);  // last modified is used to delete old entries and has milliseconds granularity
         }
 
@@ -273,7 +272,7 @@ public class ProtocolFlowTest extends EndpointTest {
         }
 
         // max + 1 should replace the oldest one
-        clients.add(new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope()));
+        clients.add(new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope()));
         boolean error = false;
         try {
             clients.get(0).assertAccess();

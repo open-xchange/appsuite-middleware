@@ -54,6 +54,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.jdom2.JDOMException;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
 import com.openexchange.exception.OXException;
@@ -83,11 +84,11 @@ public class WebDAVClient {
         this.session = session;
     }
 
-    public WebDAVClient(final User user) throws OXException {
+    public WebDAVClient(final TestUser user) throws OXException {
         this(new WebDAVSession());
         WebDAVConfig.init();
-        final String login = WebDAVConfig.getProperty(user.getLogin());
-        final String password = WebDAVConfig.getProperty(user.getPassword());
+        final String login = user.getLogin();
+        final String password = user.getPassword();
         setAuth(login, password);
     }
 

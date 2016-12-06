@@ -27,7 +27,7 @@ public class ICalTaskExportTest extends ManagedTaskTest {
 
         manager.insertTaskOnServer(taskObj);
 
-        ICalExportResponse response = client.execute(new ICalExportRequest(folderID));
+        ICalExportResponse response = getClient().execute(new ICalExportRequest(folderID));
 
         String iCal = response.getICal();
 

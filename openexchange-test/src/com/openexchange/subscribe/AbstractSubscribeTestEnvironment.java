@@ -58,7 +58,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.pool.TestContext;
+import com.openexchange.ajax.framework.pool.TestContextPool;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountResponse;
 import com.openexchange.ajax.oauth.actions.DeleteOAuthAccountRequest;
@@ -90,6 +91,8 @@ public abstract class AbstractSubscribeTestEnvironment {
     private final String serviceId;
 
     private int accountId = -1;
+
+    private TestContext testContext;
 
     /**
      * Initializes a new {@link AbstractSubscribeTestEnvironment}.
@@ -124,7 +127,8 @@ public abstract class AbstractSubscribeTestEnvironment {
      * @throws IOException
      */
     private void initAJAXClient() throws OXException, IOException, JSONException {
-        ajaxClient = new AJAXClient(User.User1);
+        testContext = TestContextPool.acquireContext();
+        ajaxClient = new AJAXClient(testContext.acquireUser());
     }
 
     private void initManagers() throws OXException, IOException, SAXException, JSONException {
@@ -288,11 +292,16 @@ public abstract class AbstractSubscribeTestEnvironment {
      * @throws JSONException
      */
     public void cleanup() throws OXException, IOException, JSONException {
-        if (folderMgr != null) {
-            folderMgr.cleanUp();
+        try {
+            if (folderMgr != null) {
+                folderMgr.cleanUp();
+            }
+            deleteOAuthAccount();
+            logout();
+        } finally {
+            TestContextPool.backContext(testContext);
         }
-        deleteOAuthAccount();
-        logout();
+
     }
 
     /**

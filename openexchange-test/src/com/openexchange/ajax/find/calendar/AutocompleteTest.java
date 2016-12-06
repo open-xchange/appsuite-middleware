@@ -71,7 +71,7 @@ public class AutocompleteTest extends CalendarFindTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        contactManager = new ContactTestManager(client);
+        contactManager = new ContactTestManager(getClient());
     }
 
     @After
@@ -90,13 +90,13 @@ public class AutocompleteTest extends CalendarFindTest {
     }
 
     public void noTestAutocompleteCurrentUser() throws Exception {
-        String defaultAddress = client.getValues().getDefaultAddress();
+        String defaultAddress = getClient().getValues().getDefaultAddress();
         assertFoundFacetInAutocomplete(defaultAddress.substring(0, 3), defaultAddress);
     }
 
     public void noTestAutocompleteOtherContact() throws Exception {
         Contact contact = new Contact();
-        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setSurName(randomUID());
         contact.setGivenName(randomUID());
         contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
@@ -115,7 +115,7 @@ public class AutocompleteTest extends CalendarFindTest {
 
     private FacetValue assertFoundFacetInAutocomplete(String prefix, String expectedEmail1) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CALENDAR.getIdentifier());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), expectedEmail1);
         assertNotNull("no facet value found for: " + expectedEmail1, foundFacetValue);
         return foundFacetValue;

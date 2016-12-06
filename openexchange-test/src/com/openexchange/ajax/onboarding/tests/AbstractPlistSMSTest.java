@@ -78,9 +78,9 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        setUpConfiguration(client, false);
-        SetAttributeRequest req = new SetAttributeRequest(client.getValues().getUserId(), "user_sms_link_secret", UID, false);
-        SetAttributeResponse response = client.execute(req);
+        setUpConfiguration(getClient(), false);
+        SetAttributeRequest req = new SetAttributeRequest(getClient().getValues().getUserId(), "user_sms_link_secret", UID, false);
+        SetAttributeResponse response = getClient().execute(req);
         assertNotNull(response);
     }
 

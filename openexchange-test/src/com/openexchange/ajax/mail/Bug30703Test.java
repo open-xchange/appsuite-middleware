@@ -83,14 +83,14 @@ public class Bug30703Test extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         try {
             StopPOP3ServerRequest stopReq = new StopPOP3ServerRequest();
-            client.execute(stopReq);
+            getClient().execute(stopReq);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
             if (mailAccountDescription != null) {
-                client.execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
+                getClient().execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -103,7 +103,7 @@ public class Bug30703Test extends AbstractAJAXSession {
     public void testProtocolError() throws Exception {
         setupServerAndAccount(true, false);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());
-        ListResponse listResponse = client.execute(listRequest);
+        ListResponse listResponse = getClient().execute(listRequest);
         assertException(ResponseWriter.getJSON(listResponse.getResponse()), MimeMailExceptionCode.CONNECT_ERROR);
     }
 
@@ -111,7 +111,7 @@ public class Bug30703Test extends AbstractAJAXSession {
     public void testWrongCredentials() throws Exception {
         setupServerAndAccount(false, true);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());
-        ListResponse listResponse = client.execute(listRequest);
+        ListResponse listResponse = getClient().execute(listRequest);
         assertException(ResponseWriter.getJSON(listResponse.getResponse()), MimeMailExceptionCode.INVALID_CREDENTIALS_EXT);
     }
 
@@ -119,7 +119,7 @@ public class Bug30703Test extends AbstractAJAXSession {
     public void testServerOffline() throws Exception {
         setupAccount("localhost", 1234);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());
-        ListResponse listResponse = client.execute(listRequest);
+        ListResponse listResponse = getClient().execute(listRequest);
         assertException(ResponseWriter.getJSON(listResponse.getResponse()), MimeMailExceptionCode.CONNECT_ERROR);
     }
 
@@ -135,7 +135,7 @@ public class Bug30703Test extends AbstractAJAXSession {
 
     private void setupServerAndAccount(boolean failOnConnect, boolean failOnAuth) throws Exception {
         StartPOP3ServerRequest startReq = new StartPOP3ServerRequest(failOnConnect, failOnAuth);
-        StartPOP3ServerResponse startResp = client.execute(startReq);
+        StartPOP3ServerResponse startResp = getClient().execute(startReq);
         String host = startResp.getHost();
         int port = startResp.getPort();
         setupAccount(host, port);
@@ -159,7 +159,7 @@ public class Bug30703Test extends AbstractAJAXSession {
         mailAccountDescription.setTrash("Trash");
         mailAccountDescription.setSpam("Spam");
         mailAccountDescription.setSpamHandler("NoSpamHandler");
-        MailAccountInsertResponse response = client.execute(new MailAccountInsertRequest(mailAccountDescription));
+        MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
         assertFalse("Warning during account creation: " + response.getResponse().getWarnings().toString(), response.hasWarnings());
         response.fillObject(mailAccountDescription);
     }

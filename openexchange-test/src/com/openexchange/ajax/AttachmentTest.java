@@ -74,10 +74,6 @@ import com.openexchange.test.TestInit;
 
 public class AttachmentTest extends AbstractAJAXTest {
 
-    public AttachmentTest() {
-        super();
-    }
-
     protected String sessionId = null;
     protected File testFile = null;
     protected File testFile2 = null;

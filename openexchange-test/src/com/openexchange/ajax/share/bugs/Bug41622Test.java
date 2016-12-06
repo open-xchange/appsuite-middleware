@@ -66,7 +66,6 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -99,9 +98,9 @@ public class Bug41622Test extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
-        clientsAndFolders.put(client, new ArrayList<Integer>());
+        clientsAndFolders.put(getClient(), new ArrayList<Integer>());
         clientsAndFolders.put(client2, new ArrayList<Integer>());
     }
 
@@ -110,7 +109,7 @@ public class Bug41622Test extends ShareTest {
         if (null != clientsAndFolders) {
             for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
                 deleteFoldersSilently(entry.getKey(), entry.getValue());
-                if (false == entry.getKey().equals(client)) {
+                if (false == entry.getKey().equals(getClient())) {
                     entry.getKey().logout();
                 }
             }
@@ -130,14 +129,14 @@ public class Bug41622Test extends ShareTest {
          * as user 1 with client 1, create folder A shared to guest user
          */
         int module1 = randomModule();
-        FolderObject folderA = Create.createPrivateFolder(randomUID(), module1, client.getValues().getUserId(), guestPermission);
-        folderA.setParentFolderID(getDefaultFolder(client, module1));
+        FolderObject folderA = Create.createPrivateFolder(randomUID(), module1, getClient().getValues().getUserId(), guestPermission);
+        folderA.setParentFolderID(getDefaultFolder(getClient(), module1));
         InsertRequest insertRequest1 = new InsertRequest(api, folderA);
         insertRequest1.setNotifyPermissionEntities(Transport.MAIL);
-        InsertResponse insertResponse1 = client.execute(insertRequest1);
+        InsertResponse insertResponse1 = getClient().execute(insertRequest1);
         insertResponse1.fillObject(folderA);
-        clientsAndFolders.get(client).add(Integer.valueOf(folderA.getObjectID()));
-        GetResponse getResponse1 = client.execute(new GetRequest(api, folderA.getObjectID()));
+        clientsAndFolders.get(getClient()).add(Integer.valueOf(folderA.getObjectID()));
+        GetResponse getResponse1 = getClient().execute(new GetRequest(api, folderA.getObjectID()));
         folderA = getResponse1.getFolder();
         folderA.setLastModified(getResponse1.getTimestamp());
         /*
@@ -145,7 +144,7 @@ public class Bug41622Test extends ShareTest {
          */
         OCLPermission matchingPermissionA = null;
         for (OCLPermission permission : folderA.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermissionA = permission;
                 break;
             }
@@ -155,9 +154,9 @@ public class Bug41622Test extends ShareTest {
         /*
          * discover & check guest
          */
-        ExtendedPermissionEntity guestA = discoverGuestEntity(client, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
+        ExtendedPermissionEntity guestA = discoverGuestEntity(getClient(), api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(client, guestA);
+        String shareURLA = discoverShareURL(getClient(), guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -205,9 +204,9 @@ public class Bug41622Test extends ShareTest {
         /*
          * check if both sharing users can be resolved
          */
-        com.openexchange.groupware.ldap.User expectedUser1 = client.execute(new com.openexchange.ajax.user.actions.GetRequest(client.getValues().getUserId(), TimeZones.UTC, true)).getUser();
+        com.openexchange.groupware.ldap.User expectedUser1 = getClient().execute(new com.openexchange.ajax.user.actions.GetRequest(getClient().getValues().getUserId(), TimeZones.UTC, true)).getUser();
         com.openexchange.groupware.ldap.User expectedUser2 = client2.execute(new com.openexchange.ajax.user.actions.GetRequest(client2.getValues().getUserId(), TimeZones.UTC, true)).getUser();
-        com.openexchange.groupware.ldap.User actualUser1 = guestClientA.execute(new com.openexchange.ajax.user.actions.GetRequest(client.getValues().getUserId(), TimeZones.UTC, true)).getUser();
+        com.openexchange.groupware.ldap.User actualUser1 = guestClientA.execute(new com.openexchange.ajax.user.actions.GetRequest(getClient().getValues().getUserId(), TimeZones.UTC, true)).getUser();
         com.openexchange.groupware.ldap.User actualUser2 = guestClientA.execute(new com.openexchange.ajax.user.actions.GetRequest(client2.getValues().getUserId(), TimeZones.UTC, true)).getUser();
         assertEquals(expectedUser1.getDisplayName(), actualUser1.getDisplayName());
         assertEquals(expectedUser1.getGivenName(), actualUser1.getGivenName());
@@ -226,7 +225,7 @@ public class Bug41622Test extends ShareTest {
         /*
          * check if both sharing users can be resolved
          */
-        actualUser1 = guestClientB.execute(new com.openexchange.ajax.user.actions.GetRequest(client.getValues().getUserId(), TimeZones.UTC, true)).getUser();
+        actualUser1 = guestClientB.execute(new com.openexchange.ajax.user.actions.GetRequest(getClient().getValues().getUserId(), TimeZones.UTC, true)).getUser();
         actualUser2 = guestClientB.execute(new com.openexchange.ajax.user.actions.GetRequest(client2.getValues().getUserId(), TimeZones.UTC, true)).getUser();
         assertEquals(expectedUser1.getDisplayName(), actualUser1.getDisplayName());
         assertEquals(expectedUser1.getGivenName(), actualUser1.getGivenName());

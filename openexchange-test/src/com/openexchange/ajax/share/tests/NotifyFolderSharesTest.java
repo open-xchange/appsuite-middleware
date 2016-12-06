@@ -54,7 +54,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.NotifyFolderRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
@@ -112,14 +111,14 @@ public class NotifyFolderSharesTest extends ShareTest {
         OCLPermission permission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, 0);
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         permission.setGroupPermission(true);
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         testNotify(module, parent, permission, emailAddress);
     }
 
     private void testNotifyUser(int module, int parent) throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
@@ -138,7 +137,7 @@ public class NotifyFolderSharesTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission oclPermission : folder.getPermissions()) {
-            if (oclPermission.getEntity() != client.getValues().getUserId()) {
+            if (oclPermission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = oclPermission;
                 break;
             }
@@ -148,12 +147,12 @@ public class NotifyFolderSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        client.execute(new GetMailsRequest());
-        client.execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), matchingPermission.getEntity()));
+        getClient().execute(new GetMailsRequest());
+        getClient().execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(client, emailAddress);
+        Message notificationMessage = discoverInvitationMessage(getClient(), emailAddress);
         assertNotNull(notificationMessage);
     }
 

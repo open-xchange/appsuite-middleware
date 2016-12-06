@@ -99,10 +99,10 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
         SetRequest setRequest = new SetRequest(Tree.TimeZone, tz.getID());
         getClient().execute(setRequest);
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         appointment = new Appointment();
         appointment.setTitle("hiliowequhe234123.3");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setIgnoreConflicts(true);

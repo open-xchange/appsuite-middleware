@@ -56,7 +56,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.reminder.actions.DeleteRequest;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
@@ -91,7 +90,7 @@ public class DeleteMultipleReminderTest extends ReminderTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
+        client = new AJAXClient(testUser);
         timeZone = client.getValues().getTimeZone();
 
         task = new Task();

@@ -57,14 +57,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginRequest.TokenLoginParameters;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.session.actions.TokenLoginV2Request;
 import com.openexchange.ajax.session.actions.TokenLoginV2Response;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.tokenlogin.TokenLoginExceptionCodes;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -78,10 +76,6 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
     private static final String SECRET_1 = "1234";
 
     private static final String SECRET_2 = "4321";
-
-    public TokenLoginV2Test() {
-        super();
-    }
 
     @Test
     public void testAcquire() throws Exception {
@@ -103,7 +97,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         LoginRequest login = new LoginRequest(new TokenLoginParameters(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"));
         AJAXClient client = new AJAXClient();
         LoginResponse loginResponse = client.execute(login);
-        assertEquals("Wrong password.", AJAXConfig.getProperty(User.User1.getPassword()), loginResponse.getPassword());
+        assertEquals("Wrong password.", testUser.getPassword(), loginResponse.getPassword());
 
         Thread.sleep(500);
         login = new LoginRequest(new TokenLoginParameters(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
@@ -176,9 +170,9 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
 
     @Test
     public void testRedirect() throws Exception {
-        final String REDIRECT = client.getHostname() + "/tokenRedirectTest";
+        final String REDIRECT = getClient().getHostname() + "/tokenRedirectTest";
         AcquireTokenRequest request = new AcquireTokenRequest();
-        AcquireTokenResponse response = client.execute(request);
+        AcquireTokenResponse response = getClient().execute(request);
         String token = response.getToken();
         assertNotNull("Missing token.", token);
         assertFalse("Invalid token.", token.equals(""));
@@ -196,7 +190,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         String token = response.getToken();
 
         LoginRequest login = new LoginRequest(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0", false, true);
-        LoginResponse loginResponse = client.execute(login);
+        LoginResponse loginResponse = getClient().execute(login);
 
         assertTrue("Error expected.", loginResponse.hasError());
         assertEquals("Wrong error.", AjaxExceptionCodes.NOT_ALLOWED_URI_PARAM.getNumber(), loginResponse.getException().getCode());

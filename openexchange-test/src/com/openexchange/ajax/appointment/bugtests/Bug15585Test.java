@@ -88,32 +88,32 @@ public class Bug15585Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         appointment = new Appointment();
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setTitle("Test for bug 15585");
         appointment.setIgnoreConflicts(true);
         final Calendar calendar = TimeTools.createCalendar(timeZone);
         appointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
-        appointment.addParticipant(new ResourceParticipant(ResourceTools.getSomeResource(client)));
+        appointment.addParticipant(new ResourceParticipant(ResourceTools.getSomeResource(getClient())));
         appointment2 = appointment.clone();
         InsertRequest request = new InsertRequest(appointment, timeZone);
-        AppointmentInsertResponse response = client.execute(request);
+        AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
     }
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
+        getClient().execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
     @Test
     public void testConflictTitle() throws Throwable {
         InsertRequest request = new InsertRequest(appointment2, timeZone);
-        AppointmentInsertResponse response = client.execute(request);
+        AppointmentInsertResponse response = getClient().execute(request);
         assertTrue("Resource hard conflict expected.", response.hasConflicts());
         response.getConflicts();
         ConflictObject conflict = ConflictTools.findById(response.getConflicts(), appointment.getObjectID());

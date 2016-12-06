@@ -68,7 +68,7 @@ public class RevokeTokensTest extends EndpointTest {
 
     @Test
     public void testRevokeAccessToken() throws Exception {
-        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
+        OAuthClient oauthClient = new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());
         oauthClient.assertAccess();
 
         HttpGet revoke = new HttpGet(new URIBuilder().setScheme("https").setHost(hostname).setPath(REVOKE_ENDPOINT).setParameter("access_token", ((OAuthSession) oauthClient.getSession()).getAccessToken()).build());
@@ -80,7 +80,7 @@ public class RevokeTokensTest extends EndpointTest {
 
     @Test
     public void testRevokeRefreshToken() throws Exception {
-        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
+        OAuthClient oauthClient = new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());
         oauthClient.assertAccess();
 
         HttpGet revoke = new HttpGet(new URIBuilder().setScheme("https").setHost(hostname).setPath(REVOKE_ENDPOINT).setParameter("refresh_token", ((OAuthSession) oauthClient.getSession()).getRefreshToken()).build());

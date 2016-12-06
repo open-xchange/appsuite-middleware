@@ -73,14 +73,6 @@ import com.openexchange.groupware.tasks.Task;
 public abstract class AbstractFindTasksTest extends AbstractFindTest {
 
     /**
-     * Initializes a new {@link AbstractFindTasksTest}.
-     */
-    public AbstractFindTasksTest() {
-        super();
-
-    }
-
-    /**
      * Fetch the results from the QueryResponse
      * 
      * @param qr the QueryResponse
@@ -121,7 +113,7 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
         facets.add(FindTasksTestEnvironment.createGlobalFacet());
         facets.addAll(f);
-        final QueryResponse queryResponse = client.execute(new QueryRequest(start, size, facets, "tasks"));
+        final QueryResponse queryResponse = getClient().execute(new QueryRequest(start, size, facets, "tasks"));
         assertNotNull(queryResponse);
         JSONArray results = getResults(queryResponse);
         int actualResultCount = results.asList().size();

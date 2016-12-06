@@ -35,14 +35,14 @@ public class CopyTest extends AbstractContactTest {
         objectId1 = insertContact(contactObj);
 
         folder = Create.createPrivateFolder("testCopy", FolderObject.CONTACT, userId);
-        folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-        final InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
+        folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
+        final InsertResponse folderCreateResponse = getClient().execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
 
         targetFolder = folder.getObjectID();
 
         final CopyRequest request = new CopyRequest(objectId1, contactFolderId, targetFolder, true);
-        final CopyResponse response = client.execute(request);
+        final CopyResponse response = getClient().execute(request);
 
         if (response.hasError()) {
             fail("json error: " + response.getErrorMessage());
@@ -58,11 +58,11 @@ public class CopyTest extends AbstractContactTest {
         }
 
         final GetRequest getFirstContactRequest = new GetRequest(contactFolderId, objectId1, tz);
-        final GetResponse firstContactResponse = client.execute(getFirstContactRequest);
+        final GetResponse firstContactResponse = getClient().execute(getFirstContactRequest);
         final Contact firstContact = firstContactResponse.getContact();
         ts1 = firstContactResponse.getResponse().getTimestamp().getTime();
         final GetRequest getSecondContactRequest = new GetRequest(targetFolder, objectId2, tz);
-        final GetResponse seconContactResponse = client.execute(getSecondContactRequest);
+        final GetResponse seconContactResponse = getClient().execute(getSecondContactRequest);
         final Contact secondContact = seconContactResponse.getContact();
         secondContact.setObjectID(objectId1);
         secondContact.setParentFolderID(contactFolderId);
@@ -73,11 +73,11 @@ public class CopyTest extends AbstractContactTest {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contactFolderId, objectId1, new Date(ts1), false));
+        getClient().execute(new DeleteRequest(contactFolderId, objectId1, new Date(ts1), false));
         if (objectId2 > 0) {
-            client.execute(new DeleteRequest(targetFolder, objectId2, new Date(ts2), false));
+            getClient().execute(new DeleteRequest(targetFolder, objectId2, new Date(ts2), false));
         }
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
+        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
 
         super.tearDown();
     }

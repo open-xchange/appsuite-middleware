@@ -93,7 +93,7 @@ public class Bug31993Test extends AbstractManagedContactTest {
         List<Contact> contacts;
 
         request = new SearchByBirthdayRequest(new Date(1397088000000L), new Date(1404345600000L), parentFolderID, columns, true);
-        response = client.execute(request);
+        response = getClient().execute(request);
         contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 3, contacts.size());

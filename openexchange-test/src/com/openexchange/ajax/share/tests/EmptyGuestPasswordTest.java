@@ -85,7 +85,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
 
     @After
     public void tearDown() throws Exception {
-        deleteFoldersSilently(client, Collections.singletonList(folder.getObjectID()));
+        deleteFoldersSilently(getClient(), Collections.singletonList(folder.getObjectID()));
         super.tearDown();
     }
 
@@ -93,10 +93,10 @@ public class EmptyGuestPasswordTest extends ShareTest {
     public void testEmptyPassword() throws Exception {
         long now = System.currentTimeMillis();
         OCLGuestPermission perm = createNamedGuestPermission("testGuestPasswordInit" + now + "@example.org", "Test " + now);
-        folder = insertSharedFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder(), perm);
+        folder = insertSharedFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder(), perm);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

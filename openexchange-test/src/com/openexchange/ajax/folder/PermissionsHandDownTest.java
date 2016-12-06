@@ -65,7 +65,6 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -79,17 +78,10 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
 
     private AJAXClient client2;
 
-    /**
-     * Initializes a new {@link PermissionsHandDownTest}.
-     */
-    public PermissionsHandDownTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
     }
 
     @After
@@ -120,39 +112,39 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
         final List<DeleteInfo> deletees = new LinkedList<DeleteInfo>();
         try {
             final String name = "permissions-hand-down_" + System.currentTimeMillis();
-            FolderObject folder = Create.createPrivateFolder(name, FolderObject.TASK, client.getValues().getUserId());
+            FolderObject folder = Create.createPrivateFolder(name, FolderObject.TASK, getClient().getValues().getUserId());
             Date timestamp = null;
             {
-                folder.setParentFolderID(client.getValues().getPrivateTaskFolder());
-                final InsertResponse response = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
+                folder.setParentFolderID(getClient().getValues().getPrivateTaskFolder());
+                final InsertResponse response = getClient().execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
                 response.fillObject(folder);
-                final GetResponse response2 = client.execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID()));
+                final GetResponse response2 = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID()));
                 timestamp = response2.getTimestamp();
                 folder.setLastModified(timestamp);
                 deletees.add(new DeleteInfo(folder.getObjectID(), timestamp.getTime()));
             }
 
             final int objectId = folder.getObjectID();
-            folder = Create.createPrivateFolder("sub-permissions-hand-down_" + System.currentTimeMillis(), FolderObject.TASK, client.getValues().getUserId());
+            folder = Create.createPrivateFolder("sub-permissions-hand-down_" + System.currentTimeMillis(), FolderObject.TASK, getClient().getValues().getUserId());
             {
                 folder.setParentFolderID(objectId);
-                final InsertResponse response = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
+                final InsertResponse response = getClient().execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
                 response.fillObject(folder);
-                final GetResponse response2 = client.execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID()));
+                final GetResponse response2 = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID()));
                 folder.setLastModified(response2.getTimestamp());
                 deletees.add(new DeleteInfo(folder.getObjectID(), response2.getTimestamp().getTime()));
             }
 
             final int childObjectId = folder.getObjectID();
-            folder = Create.createPrivateFolder(name, FolderObject.TASK, client.getValues().getUserId());
+            folder = Create.createPrivateFolder(name, FolderObject.TASK, getClient().getValues().getUserId());
             folder.setObjectID(objectId);
             {
                 folder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
                 folder.setLastModified(timestamp);
-                client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder).setHandDown(true));
+                getClient().execute(new UpdateRequest(EnumAPI.OUTLOOK, folder).setHandDown(true));
             }
 
-            final GetResponse getResponse = client.execute(new GetRequest(EnumAPI.OUTLOOK, childObjectId));
+            final GetResponse getResponse = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, childObjectId));
             final List<OCLPermission> permissions = getResponse.getFolder().getPermissions();
 
             final int pSize = permissions.size();
@@ -160,7 +152,7 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
 
             boolean found = false;
             for (int i = 0; !found && i < pSize; i++) {
-                found = permissions.get(i).getEntity() == client.getValues().getUserId();
+                found = permissions.get(i).getEntity() == getClient().getValues().getUserId();
             }
             assertTrue("Folder creator not found in permissions", found);
 
@@ -174,7 +166,7 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
             if (!deletees.isEmpty()) {
                 Collections.reverse(deletees);
                 for (final DeleteInfo deleteInfo : deletees) {
-                    client.execute(new DeleteRequest(EnumAPI.OUTLOOK, deleteInfo.fuid, new Date(deleteInfo.lastModified)));
+                    getClient().execute(new DeleteRequest(EnumAPI.OUTLOOK, deleteInfo.fuid, new Date(deleteInfo.lastModified)));
                 }
             }
         }

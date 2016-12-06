@@ -80,9 +80,9 @@ public class Bug32004Test extends AbstractInfostoreTest {
         /*
          * create folder below trash
          */
-        int trashFolderID = client.getValues().getInfostoreTrashFolder();
+        int trashFolderID = getClient().getValues().getInfostoreTrashFolder();
         String name = UUID.randomUUID().toString();
-        FolderObject folder = fMgr.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, client.getValues().getUserId());
+        FolderObject folder = fMgr.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, getClient().getValues().getUserId());
         folder = fMgr.insertFolderOnServer(folder);
         /*
          * reload folder in different trees and check name
@@ -97,7 +97,7 @@ public class Bug32004Test extends AbstractInfostoreTest {
 
     private FolderObject loadFolder(EnumAPI api, int folderID) throws Exception {
         GetRequest request = new GetRequest(api, String.valueOf(folderID), FolderObject.ALL_COLUMNS);
-        return client.execute(request).getFolder();
+        return getClient().execute(request).getFolder();
     }
 
 }

@@ -86,7 +86,7 @@ public class MaxMailSizeTest extends AbstractMailTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, true);
+        manager = new MailTestManager(getClient(), true);
     }
 
     @After
@@ -97,7 +97,7 @@ public class MaxMailSizeTest extends AbstractMailTest {
 
     @Test
     public void testSendWithManager() throws OXException, IOException, SAXException, JSONException {
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
 
         // Should work
         TestMail mail = new TestMail();

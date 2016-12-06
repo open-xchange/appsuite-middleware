@@ -65,7 +65,7 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
@@ -133,7 +133,7 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
 
     @Test
     public void testTokenizedQuery() throws Exception {
-        TaskTestManager manager = new TaskTestManager(client);
+        TaskTestManager manager = new TaskTestManager(getClient());
         try {
             String t1 = randomUID();
             String t2 = randomUID();
@@ -141,17 +141,17 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
             Task task = manager.insertTaskOnServer(manager.newTask(t1 + " " + t2 + " " + t3));
 
             SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, t1 + " " + t3));
-            List<PropDocument> documents = query(client, Collections.singletonList(createActiveFacet(globalFacet)));
+            List<PropDocument> documents = query(getClient(), Collections.singletonList(createActiveFacet(globalFacet)));
             assertTrue("no task found", 0 < documents.size());
             assertNotNull("task not found", findByProperty(documents, "title", task.getTitle()));
 
             globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, "\"" + t1 + " " + t2 + "\""));
-            documents = query(client, Collections.singletonList(createActiveFacet(globalFacet)));
+            documents = query(getClient(), Collections.singletonList(createActiveFacet(globalFacet)));
             assertTrue("no task found", 0 < documents.size());
             assertNotNull("task not found", findByProperty(documents, "title", task.getTitle()));
 
             globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, "\"" + t1 + " " + t3 + "\""));
-            documents = query(client, Collections.singletonList(createActiveFacet(globalFacet)));
+            documents = query(getClient(), Collections.singletonList(createActiveFacet(globalFacet)));
             assertTrue("task found", 0 == documents.size());
         } finally {
             manager.cleanUp();
@@ -160,15 +160,16 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
 
     @Test
     public void testFolderTypeFacet() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
-        TaskTestManager manager = new TaskTestManager(client);
+        TestUser testUser2 = testContext.acquireUser();
+        AJAXClient client2 = new AJAXClient(testUser2);
+        TaskTestManager manager = new TaskTestManager(getClient());
         try {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
-            AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
+            AJAXClient[] clients = new AJAXClient[] { getClient(), getClient(), client2 };
             FolderObject[] folders = new FolderObject[3];
-            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.TASK, client.getValues().getPrivateTaskFolder(), client.getValues().getUserId()));
-            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.TASK, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, client.getValues().getUserId()));
-            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.TASK, client.getValues().getPrivateTaskFolder(), client.getValues().getUserId(), client2.getValues().getUserId()));
+            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.TASK, getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId()));
+            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.TASK, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, getClient().getValues().getUserId()));
+            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.TASK, getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId()));
 
             Task[] tasks = new Task[3];
             tasks[0] = manager.insertTaskOnServer(manager.newTask(randomUID(), folders[0].getObjectID()));
@@ -217,6 +218,7 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
                 }
             }
         } finally {
+            testContext.backUser(testUser2);
             manager.cleanUp();
             client2.logout();
         }

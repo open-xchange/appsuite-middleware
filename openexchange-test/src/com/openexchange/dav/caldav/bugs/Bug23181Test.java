@@ -61,7 +61,7 @@ import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.pool.TestUser;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -83,11 +83,14 @@ import com.openexchange.test.CalendarTestManager;
 public class Bug23181Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
+    private TestUser testUser2;
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        manager2 = new CalendarTestManager(new AJAXClient(testUser));
         manager2.setFailOnError(true);
+        testUser2 = testContext.acquireUser();
+
     }
 
     @After
@@ -197,8 +200,8 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = super.getLogin(User.User1);
-        String userB = super.getLogin(User.User2);
+        String userA = testUser.getLogin();
+        String userB = testUser2.getLogin();
         String uid = randomUID();
         String summary = "Bug23181Test2";
         String location = "tbd";
@@ -225,8 +228,8 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = super.getLogin(User.User1);
-        String userB = super.getLogin(User.User2);
+        String userA = testUser.getLogin();
+        String userB = testUser2.getLogin();
         String uid = randomUID();
         String summary = "Bug23181Test3";
         String location = "tbd";

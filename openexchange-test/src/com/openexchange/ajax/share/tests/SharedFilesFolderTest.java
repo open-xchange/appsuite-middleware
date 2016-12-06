@@ -58,7 +58,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
@@ -98,14 +97,14 @@ public class SharedFilesFolderTest extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         file = insertFile(folder.getObjectID(), randomUID());
     }
 
     @Test
     public void testReShareNotPossibleForInternals() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
-        AJAXClient client3 = new AJAXClient(User.User3);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client3 = new AJAXClient(testContext.acquireUser());
         try {
             List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(1);
             permissions.add(new DefaultFileStorageObjectPermission(client2.getValues().getUserId(), false, FileStorageObjectPermission.WRITE));
@@ -144,7 +143,7 @@ public class SharedFilesFolderTest extends ShareTest {
         file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
         String sharedFileId = sharedFileId(file.getId());
 
-        String invitationLink = discoverInvitationLink(client, guestEmail);
+        String invitationLink = discoverInvitationLink(getClient(), guestEmail);
         GuestClient guestClient = resolveShare(invitationLink);
         guestPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFileAccessible(sharedFileId, guestPermission);

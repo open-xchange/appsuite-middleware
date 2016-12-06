@@ -97,7 +97,7 @@ public final class GetTest extends AbstractMailTest {
          * Create mail
          */
         final String eml = ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: #ADDR#\n" + "To: #ADDR#\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
-        NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+        NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
         String folder = newMailResponse.getFolder();
         String id = newMailResponse.getId();
         final String[] folderAndID = new String[] { folder, id };
@@ -128,7 +128,7 @@ public final class GetTest extends AbstractMailTest {
 
         String[] folderAndID = null;
         try {
-            NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
             String folder = newMailResponse.getFolder();
             String id = newMailResponse.getId();
             folderAndID = new String[] { folder, id };

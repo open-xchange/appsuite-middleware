@@ -11,7 +11,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -30,11 +29,11 @@ public class Bug17261Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         folderName = "Bug17621 Folder" + System.currentTimeMillis();
-        client2 = new AJAXClient(User.User2);
-        ftm1 = new FolderTestManager(client);
-        folder = ftm1.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] { client.getValues().getUserId() });
+        client2 = new AJAXClient(testContext.acquireUser());
+        ftm1 = new FolderTestManager(getClient());
+        folder = ftm1.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] { getClient().getValues().getUserId() });
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
-        final InsertResponse insertFolderResp = client.execute(insertFolderReq);
+        final InsertResponse insertFolderResp = getClient().execute(insertFolderReq);
 
         assertNull("Inserting folder caused exception.", insertFolderResp.getException());
         insertFolderResp.fillObject(folder);
@@ -55,7 +54,7 @@ public class Bug17261Test extends AbstractAJAXSession {
 
     @Test
     public void testMakeFirstFolderVisibleAndTryAgain() throws Exception {
-        FolderTools.shareFolder(client, EnumAPI.OUTLOOK, folder.getObjectID(), client2.getValues().getUserId(), OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        FolderTools.shareFolder(getClient(), EnumAPI.OUTLOOK, folder.getObjectID(), client2.getValues().getUserId(), OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 
         ftm2 = new FolderTestManager(client2);
         secondFolder = ftm2.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] { client2.getValues().getUserId() });
@@ -70,7 +69,7 @@ public class Bug17261Test extends AbstractAJAXSession {
 
     @Test
     public void testInsertingFolderCauseException() throws Exception {
-        secondFolder = ftm1.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] { client.getValues().getUserId() });
+        secondFolder = ftm1.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] { getClient().getValues().getUserId() });
         final InsertRequest insertSecondFolderReq = new InsertRequest(EnumAPI.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
 
