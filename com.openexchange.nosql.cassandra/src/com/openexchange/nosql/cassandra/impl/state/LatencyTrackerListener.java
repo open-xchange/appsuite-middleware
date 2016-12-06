@@ -49,6 +49,8 @@
 
 package com.openexchange.nosql.cassandra.impl.state;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.LatencyTracker;
@@ -60,6 +62,8 @@ import com.datastax.driver.core.Statement;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class LatencyTrackerListener implements LatencyTracker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LatencyTrackerListener.class);
 
     /**
      * Initialises a new {@link LatencyTrackerListener}.
@@ -75,8 +79,11 @@ public class LatencyTrackerListener implements LatencyTracker {
      */
     @Override
     public void update(Host host, Statement statement, Exception exception, long newLatencyNanos) {
-        // TODO Auto-generated method stub
-
+        if (exception != null) {
+            LOGGER.error("The statement '{}' failed to execute on host '{}'. Reason: {}", statement.toString(), host.getAddress().getHostAddress(), exception.getMessage(), exception);
+        } else {
+            LOGGER.debug("The statement '{}' that was performed on host '{}' was executed in {} msec.", newLatencyNanos * 1000);
+        }
     }
 
     /*
@@ -86,8 +93,7 @@ public class LatencyTrackerListener implements LatencyTracker {
      */
     @Override
     public void onRegister(Cluster cluster) {
-        // TODO Auto-generated method stub
-
+        LOGGER.info("This node is registered with the cluster '{}'", cluster.getClusterName());
     }
 
     /*
@@ -97,8 +103,7 @@ public class LatencyTrackerListener implements LatencyTracker {
      */
     @Override
     public void onUnregister(Cluster cluster) {
-        // TODO Auto-generated method stub
-
+        LOGGER.info("This node was unregistered from the cluster '{}'", cluster.getClusterName());
     }
 
 }
