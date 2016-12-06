@@ -56,6 +56,8 @@ import java.util.List;
 import com.datastax.driver.core.Cluster.Initializer;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
+import com.datastax.driver.core.policies.Policies;
+import com.datastax.driver.core.policies.RetryPolicy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -67,10 +69,7 @@ import com.openexchange.server.ServiceLookup;
  */
 class CassandraServiceInitializer implements Initializer {
 
-    private final String clusterName;
-    private final List<InetSocketAddress> contactPoints;
-    private final Configuration configuration;
-    private final Collection<StateListener> initialListeners;
+    private final ConfigurationService configurationService;
 
     /**
      * Initialises a new {@link CassandraServiceInitializer}.
@@ -79,29 +78,7 @@ class CassandraServiceInitializer implements Initializer {
      */
     public CassandraServiceInitializer(ServiceLookup services) {
         super();
-        ConfigurationService configurationService = services.getService(ConfigurationService.class);
-
-        clusterName = configurationService.getProperty(CassandraProperty.clusterName.getName());
-
-        configuration = Configuration.builder().build();
-        contactPoints = new ArrayList<>();
-        initialListeners = new ArrayList<>();
-
-        initialiseContactPoints(configurationService);
-        initialiseListeners(configurationService);
-    }
-
-    private void initialiseContactPoints(ConfigurationService configurationService) {
-        int port = configurationService.getIntProperty(CassandraProperty.port.getName(), CassandraProperty.port.getDefaultValue(Integer.class));
-        String cps = configurationService.getProperty(CassandraProperty.clusterContactPoints.getName());
-        String[] cpsSplit = Strings.splitByComma(cps);
-        for (String contactPoint : cpsSplit) {
-            contactPoints.add(new InetSocketAddress(contactPoint, port));
-        }
-    }
-
-    private void initialiseListeners(ConfigurationService configurationService) {
-
+        configurationService = services.getService(ConfigurationService.class);
     }
 
     /*
@@ -111,7 +88,7 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public String getClusterName() {
-        return clusterName;
+        return configurationService.getProperty(CassandraProperty.clusterName.getName());
     }
 
     /*
@@ -121,6 +98,14 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public List<InetSocketAddress> getContactPoints() {
+        int port = configurationService.getIntProperty(CassandraProperty.port.getName(), CassandraProperty.port.getDefaultValue(Integer.class));
+        String cps = configurationService.getProperty(CassandraProperty.clusterContactPoints.getName());
+        String[] cpsSplit = Strings.splitByComma(cps);
+
+        List<InetSocketAddress> contactPoints = new ArrayList<>();
+        for (String contactPoint : cpsSplit) {
+            contactPoints.add(new InetSocketAddress(contactPoint, port));
+        }
         return contactPoints;
     }
 
@@ -131,7 +116,14 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public Configuration getConfiguration() {
-        return configuration;
+        // Retry Policies
+        String rp = configurationService.getProperty(CassandraProperty.retryPolicy.getName());
+        boolean logRetryPolicy = configurationService.getBoolProperty(CassandraProperty.logRetryPolicy.getName(), CassandraProperty.logRetryPolicy.getDefaultValue(Boolean.class));
+        RetryPolicy retryPolicy = logRetryPolicy ? CassandraRetryPolicy.valueOf(rp).getLoggingRetryPolicy() : CassandraRetryPolicy.valueOf(rp).getRetryPolicy();
+        Policies policies = Policies.builder().withRetryPolicy(retryPolicy).build();
+        // Load Balancing Policies
+        // TODO
+        return Configuration.builder().withPolicies(policies).build();
     }
 
     /*
@@ -141,6 +133,7 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public Collection<StateListener> getInitialListeners() {
+        Collection<StateListener> initialListeners = new ArrayList<>();
         return initialListeners;
     }
 }

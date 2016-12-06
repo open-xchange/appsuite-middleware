@@ -49,50 +49,47 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+import com.datastax.driver.core.policies.FallthroughRetryPolicy;
+import com.datastax.driver.core.policies.LoggingRetryPolicy;
+import com.datastax.driver.core.policies.RetryPolicy;
+
 /**
- * {@link CassandraProperty}
+ * {@link CassandraRetryPolicy}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum CassandraProperty {
-    clusterName("ox"),
-    clusterContactPoints("127.0.0.1"),
-    port(9042),
-    loadBalancingPolicy("dc-token-aware"),
-    retryPolicy("defaultRetryPolicy"),
-    logRetryPolicy(false)
+public enum CassandraRetryPolicy {
+    defaultRetryPolicy(DefaultRetryPolicy.INSTANCE),
+    downgradingConsistencyRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE),
+    fallthroughRetryPolicy(FallthroughRetryPolicy.INSTANCE),
     ;
 
-    private Object defaultValue;
-
-    private static final String PREFIX = "com.openexchange.nosql.cassandra.";
+    private final RetryPolicy retryPolicy;
 
     /**
-     * Initialises a new {@link CassandraProperty}.
+     * Initialises a new {@link CassandraRetryPolicy}.
      */
-    private CassandraProperty(Object defaultValue) {
-        this.defaultValue = defaultValue;
+    private CassandraRetryPolicy(RetryPolicy retryPolicy) {
+        this.retryPolicy = retryPolicy;
     }
 
     /**
-     * Returns the fully qualified name for the property
-     * 
-     * @return the fully qualified name for the property
-     */
-    public String getName() {
-        return PREFIX + name();
-    }
-
-    /**
-     * Returns the default value of this property
+     * Gets the retryPolicy
      *
-     * @return the default value of this property
+     * @return The retryPolicy
      */
-    public <T extends Object> T getDefaultValue(Class<T> cls) {
-        if (defaultValue.getClass().isAssignableFrom(cls)) {
-            return cls.cast(defaultValue);
-        } else {
-            throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
-        }
+    public RetryPolicy getRetryPolicy() {
+        return retryPolicy;
+    }
+
+    /**
+     * Gets a logging retry policy
+     * 
+     * @return A logging retry policy
+     */
+    public RetryPolicy getLoggingRetryPolicy() {
+        return new LoggingRetryPolicy(retryPolicy);
     }
 }
