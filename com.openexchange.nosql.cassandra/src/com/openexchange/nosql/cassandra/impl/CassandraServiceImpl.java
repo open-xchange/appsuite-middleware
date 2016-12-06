@@ -211,32 +211,34 @@ public class CassandraServiceImpl implements CassandraService {
      * Shutdown the service
      */
     public void shutdown() {
-        if (cluster != null && !cluster.isClosed()) {
-            // Close synchronous session
-            for (Session session : synchronousSessions.values()) {
-                session.close();
-            }
-            // Close asynchronous sessions
-            for (ListenableFuture<Session> session : asynchronousSessions.values()) {
-                Session futureSession = null;
-                try {
-                    boolean canceled = session.cancel(false);
-                    if (canceled) {
-                        futureSession = session.get();
-                    }
-                } catch (InterruptedException e) {
-                    LOGGER.warn("{}", e.getMessage(), e);
-                } catch (ExecutionException e) {
-                    LOGGER.warn("{}", e.getMessage(), e);
-                } catch (CancellationException e) {
-                    LOGGER.warn("{}", e.getMessage(), e);
-                }
-                if (futureSession != null) {
-                    futureSession.close();
-                }
-            }
-            // Close the cluster
-            cluster.close();
+        if (cluster == null || cluster.isClosed()) {
+            return;
         }
+
+        // Close synchronous session
+        for (Session session : synchronousSessions.values()) {
+            session.close();
+        }
+        // Close asynchronous sessions
+        for (ListenableFuture<Session> session : asynchronousSessions.values()) {
+            Session futureSession = null;
+            try {
+                boolean canceled = session.cancel(false);
+                if (canceled) {
+                    futureSession = session.get();
+                }
+            } catch (InterruptedException e) {
+                LOGGER.warn("{}", e.getMessage(), e);
+            } catch (ExecutionException e) {
+                LOGGER.warn("{}", e.getMessage(), e);
+            } catch (CancellationException e) {
+                LOGGER.warn("{}", e.getMessage(), e);
+            }
+            if (futureSession != null) {
+                futureSession.close();
+            }
+        }
+        // Close the cluster
+        cluster.close();
     }
 }
