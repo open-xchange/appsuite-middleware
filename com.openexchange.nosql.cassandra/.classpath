@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/netty-all-4.0.37.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/metrics-core-3.2.0.jar" sourcepath="lib/source/metrics-core-3.2.0-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/netty-all-4.1.6.Final.jar" sourcepath="lib/source/netty-all-4.1.6.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cassandra-driver-core-3.1.2.jar" sourcepath="lib/source/cassandra-driver-core-3.1.2-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/cassandra-driver-extras-3.1.2.jar" sourcepath="lib/source/cassandra-driver-extras-3.1.2-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/cassandra-driver-mapping-3.1.2.jar" sourcepath="lib/source/cassandra-driver-mapping-3.1.2-src.zip"/>

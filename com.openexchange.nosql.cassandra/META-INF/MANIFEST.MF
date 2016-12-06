@@ -10,7 +10,7 @@ Bundle-ClassPath: lib/cassandra-driver-core-3.1.2.jar,
  lib/cassandra-driver-mapping-3.1.2.jar,
  .,
  lib/metrics-core-3.2.0.jar,
- lib/netty-all-4.1.6.Final.jar
+ lib/netty-all-4.0.37.Final.jar
 Import-Package: com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
@@ -22,6 +22,7 @@ Import-Package: com.google.common.base,
  com.openexchange.osgi,
  com.openexchange.server,
  javax.management,
+ javax.security.cert,
  org.osgi.framework,
  org.slf4j,
  sun.misc
