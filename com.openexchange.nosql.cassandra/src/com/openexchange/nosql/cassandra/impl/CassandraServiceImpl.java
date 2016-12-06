@@ -103,6 +103,7 @@ public class CassandraServiceImpl implements CassandraService {
         CassandraServiceInitializer initializer = new CassandraServiceInitializer(services);
         cluster = Cluster.buildFrom(initializer);
         try {
+            // Initialise the cluster
             cluster.init();
         } catch (NoHostAvailableException e) {
             throw CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.create(e, initializer.getContactPoints());
