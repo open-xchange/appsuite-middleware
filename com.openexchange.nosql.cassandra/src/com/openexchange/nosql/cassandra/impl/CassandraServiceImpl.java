@@ -219,6 +219,8 @@ public class CassandraServiceImpl implements CassandraService {
         for (Session session : synchronousSessions.values()) {
             session.close();
         }
+        synchronousSessions.clear();
+
         // Close asynchronous sessions
         for (ListenableFuture<Session> session : asynchronousSessions.values()) {
             Session futureSession = null;
@@ -238,6 +240,8 @@ public class CassandraServiceImpl implements CassandraService {
                 futureSession.close();
             }
         }
+        asynchronousSessions.clear();
+
         // Close the cluster
         cluster.close();
     }
