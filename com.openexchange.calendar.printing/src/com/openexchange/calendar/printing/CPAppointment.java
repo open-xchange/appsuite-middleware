@@ -82,6 +82,8 @@ public class CPAppointment {
 
     private final Context context;
 
+    private int colorLabel;
+
     public CPAppointment() {
         super();
         this.cal = null;
@@ -102,6 +104,15 @@ public class CPAppointment {
         setStartDate(mother.getStartDate());
         setEndDate(mother.getEndDate());
         setOriginal(mother);
+        setColorLabel(mother.getLabel());
+    }
+
+    private void setColorLabel(int label) {
+        this.colorLabel = label;
+    }
+    
+    public String getColorLabel() {
+        return StringEscapeUtils.escapeHtml(Integer.toString(colorLabel));
     }
 
     public String getTitle() {

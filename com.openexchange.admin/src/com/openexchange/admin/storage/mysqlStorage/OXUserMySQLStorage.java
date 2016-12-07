@@ -1289,14 +1289,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
                         cache.invalidateGroup(ctx.getId().toString());
                         cache = cacheService.getCache("QuotaFileStorages");
-                        cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                        if (null != quotaAffectedUserIDs) {
-                            List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
-                            for (Integer userID : quotaAffectedUserIDs) {
-                                keys.add(userID);
-                            }
-                            cache.removeFromGroup(keys, String.valueOf(ctx.getId()));
-                        }
+                        cache.invalidateGroup(Integer.toString(contextId));
                         if (displayNameUpdate) {
                             final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
                             if (fuid > 0) {
@@ -3039,7 +3032,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
                             cache = cacheService.getCache("QuotaFileStorages");
-                            cache.removeFromGroup(user.getId(), ctx.getId().toString());
+                            cache.invalidateGroup(Integer.toString(contextId));
                         } catch (final OXException e) {
                             log.error("", e);
                         }
@@ -3212,7 +3205,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
                             cache = cacheService.getCache("QuotaFileStorages");
-                            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
+                            cache.invalidateGroup(Integer.toString(contextId));
                         }
                     } catch (final OXException e) {
                         log.error("", e);

@@ -1,0 +1,13 @@
+array:
+  - data:
+      Key: com.openexchange.spamhandler.name
+      Description: >
+Specifies the name of the spam handler to use for the primary mail account. The special name "NoSpamHandler" explicitly sets no spam handler
+If such a setting is not specified, the spam handler as configured through the mail bundle is used;
+e.g. "com.openexchange.imap.spamHandler" in file 'imap.properties'
+      Default: false
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: 
+      File: spamhandler.properties
