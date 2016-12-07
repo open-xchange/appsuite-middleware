@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -64,7 +65,7 @@ public class TestContextPool {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TestContextPool.class);
 
-    private static volatile BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>();
+    private static volatile BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(10);
 
     public static void addContext(TestContext context) {
         contexts.add(context);
@@ -73,7 +74,7 @@ public class TestContextPool {
     public static TestContext acquireContext() {
         synchronized (TestContextPool.class) {
             try {
-                TestContext poll = contexts.take();
+                TestContext poll = contexts.poll(60L, TimeUnit.SECONDS);
                 return poll;
             } catch (InterruptedException e) {
                 // should not happen

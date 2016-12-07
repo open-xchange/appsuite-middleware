@@ -59,15 +59,15 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.config.util.PropertyHelper;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
 import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.TestConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link ProvisioningSetup}
@@ -111,11 +111,6 @@ public class ProvisioningSetup {
 
                 createProvisionedContext(contextsAndUsers);
                 createOXAdminMaster(contextsAndUsers);
-
-                // TODO 
-                // read user data and create TestUser/TestContext
-
-                // fill TestContextRegistry appropriately
 
                 initialized.compareAndSet(false, true);
             }
@@ -164,6 +159,7 @@ public class ProvisioningSetup {
                 startSMTPMockServer(testUser);
 
                 TestContextPool.addContext(context);
+                LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
             } catch (Exception e) {
                 LOG.warn("Unable to add context {} to context registry.", contextName, e);
                 // TODO: handle exception

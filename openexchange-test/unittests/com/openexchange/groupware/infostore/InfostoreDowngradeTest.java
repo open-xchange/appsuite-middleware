@@ -61,9 +61,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.event.Event;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -101,19 +98,15 @@ public class InfostoreDowngradeTest {
     private UserPermissionBits userConfig;
 
     private final List<DocumentMetadata> clean = new ArrayList<DocumentMetadata>();
-    private TestContext testContext;
 
     @Before
     public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
 
-        testContext = TestContextPool.acquireContext();
-        TestUser testUser = testContext.acquireUser();
-
         final TestConfig config = new TestConfig();
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(config.getContextName()));
-        userId = UserStorage.getInstance().getUserId(testUser.getLogin(), ctx);
+        userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
         userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
 
         final OXFolderAccess access = new OXFolderAccess(ctx);
@@ -131,12 +124,8 @@ public class InfostoreDowngradeTest {
 
     @After
     public void tearDown() throws Exception {
-        try {
-            deleteAll();
-            Init.stopServer();
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
+        deleteAll();
+        Init.stopServer();
     }
 
     private void runDelete() {

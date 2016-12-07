@@ -61,9 +61,6 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.configuration.AJAXConfig;
@@ -107,14 +104,11 @@ public class CalendarDowngradeUserTest {
         Init.startServer();
         AJAXConfig.init();
 
-        testContext = TestContextPool.acquireContext();
-        TestUser testUser = testContext.acquireUser();
-        TestUser testUser2 = testContext.acquireUser();
         TestEventAdmin.getInstance().clearEvents();
 
         ctx = tools.getDefaultContext();
-        user = tools.resolveUser(testUser.getLogin(), ctx);
-        other_user = tools.resolveUser(testUser2.getLogin(), ctx);
+        user = tools.resolveUser(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
+        other_user = tools.resolveUser(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER), ctx);
 
         session = SessionObjectWrapper.createSessionObject(user, ctx, "calendarDeleteUserDataTest");
 
@@ -122,12 +116,8 @@ public class CalendarDowngradeUserTest {
 
     @After
     public void tearDown() throws Exception {
-        try {
-            deleteAll();
-            Init.stopServer();
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
+        deleteAll();
+        Init.stopServer();
     }
 
     private void runDelete(final int user) {
@@ -179,7 +169,6 @@ public class CalendarDowngradeUserTest {
 
     private final List<CalendarDataObject> clean = new LinkedList<CalendarDataObject>();
     private final List<FolderObject> cleanFolders = new LinkedList<FolderObject>();
-    private TestContext testContext;
 
     private void deleteAll() {
         final CalendarSql calendars = new CalendarSql(session);
