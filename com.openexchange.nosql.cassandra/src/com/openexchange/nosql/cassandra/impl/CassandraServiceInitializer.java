@@ -136,9 +136,15 @@ class CassandraServiceInitializer implements Initializer {
         int maxLocal = configurationService.getIntProperty(CassandraProperty.maximumLocalConnectionsPerNode.getName(), CassandraProperty.maximumLocalConnectionsPerNode.getDefaultValue(Integer.class));
         int minRemote = configurationService.getIntProperty(CassandraProperty.minimumRemoteConnectionsPerNode.getName(), CassandraProperty.minimumRemoteConnectionsPerNode.getDefaultValue(Integer.class));
         int maxRemote = configurationService.getIntProperty(CassandraProperty.maximumRemoteConnectionsPerNode.getName(), CassandraProperty.maximumRemoteConnectionsPerNode.getDefaultValue(Integer.class));
+        int idleTimeoutSeconds = configurationService.getIntProperty(CassandraProperty.idleConnectionTrashTimeout.getName(), CassandraProperty.idleConnectionTrashTimeout.getDefaultValue(Integer.class));
+        int localMaxRequests = configurationService.getIntProperty(CassandraProperty.maximumRequestsPerLocalConnection.getName(), CassandraProperty.maximumRequestsPerLocalConnection.getDefaultValue(Integer.class));
+        int remoteMaxRequests = configurationService.getIntProperty(CassandraProperty.maximumRequestsPerRemoteConnection.getName(), CassandraProperty.maximumRequestsPerRemoteConnection.getDefaultValue(Integer.class));
         poolingOptions.setHeartbeatIntervalSeconds(heartbeatInterval);
         poolingOptions.setConnectionsPerHost(HostDistance.LOCAL, minLocal, maxLocal);
         poolingOptions.setConnectionsPerHost(HostDistance.REMOTE, minRemote, maxRemote);
+        poolingOptions.setIdleTimeoutSeconds(idleTimeoutSeconds);
+        poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, localMaxRequests);
+        poolingOptions.setMaxRequestsPerConnection(HostDistance.REMOTE, remoteMaxRequests);
         // Build configuration
         return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).build();
     }

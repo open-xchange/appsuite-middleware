@@ -130,7 +130,7 @@ public enum CassandraProperty {
      * at most a maximum number. These values can be configured independently by host distance (the distance
      * is determined by your LoadBalancingPolicy, and will generally indicate whether a host is in the same
      * datacenter or not).
-     * 
+     * <p/>
      * Defaults to minimum 4 and maximum 10 for local nodes (i.e. in the same datacenter) and minimum 2 and
      * maximum 4 for remote nodes
      */
@@ -138,6 +138,34 @@ public enum CassandraProperty {
     maximumLocalConnectionsPerNode(10),
     minimumRemoteConnectionsPerNode(2),
     maximumRemoteConnectionsPerNode(4),
+    /**
+     * When activity goes down, the driver will "trash" connections if the maximum number of requests
+     * in a 10 second time period can be satisfied by less than the number of connections opened. Trashed
+     * connections are kept open but do not accept new requests. After the given timeout, trashed connections
+     * are closed and removed. If during that idle period activity increases again, those connections will be
+     * resurrected back into the active pool and reused.
+     * <p/>
+     * Defaults to 120 seconds
+     */
+    idleConnectionTrashTimeout(120),
+    /**
+     * Defines the throttling of concurrent requests per connection on local (on the same datacenter)
+     * and remote nodes (on a different datacenter).
+     * <p/>
+     * For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle.
+     * It should be set to 128 (the max)
+     * <p/>
+     * For Cassandra clusters that use a protocol v3 and up, it is set by default to 1024 for LOCAL hosts,
+     * and to 256 for REMOTE hosts. These low defaults were chosen so that the default configuration
+     * for protocol v2 and v3 allow the same total number of simultaneous requests (to avoid bad surprises
+     * when clients migrate from v2 to v3). This threshold can be raised, or even set it to the max which is
+     * 32768 for LOCAL nodes and 2000 for REMOTE nodes
+     * <p/>
+     * Note that that high values will give clients more bandwidth and therefore put more pressure on
+     * the cluster. This might require some tuning, especially with many clients.
+     */
+    maximumRequestsPerLocalConnection(1024),
+    maximumRequestsPerRemoteConnection(256),
     ;
 
     private Object defaultValue;
