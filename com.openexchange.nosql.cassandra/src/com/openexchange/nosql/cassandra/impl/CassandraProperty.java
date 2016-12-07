@@ -49,6 +49,10 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
+import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import com.openexchange.nosql.cassandra.CassandraService;
+
 /**
  * {@link CassandraProperty}
  *
@@ -168,6 +172,20 @@ public enum CassandraProperty {
      */
     maximumRequestsPerLocalConnection(1024),
     maximumRequestsPerRemoteConnection(256),
+    /**
+     * When the {@link CassandraService} tries to send a request to a host, it will first try to acquire
+     * a connection from this host's pool. If the pool is busy (i.e. all connections are already handling
+     * their maximum number of in flight requests), the acquisition attempt gets enqueued until a
+     * connection becomes available again.
+     * <p/>
+     * The size of that queue is controlled by {@link PoolingOptions#setMaxQueueSize}. If the queue has
+     * already reached its limit, further attempts to acquire a connection will be rejected immediately:
+     * the {@link CassandraService} will move on and try to acquire a connection from the next host's
+     * pool. The limit can be set to 0 to disable queueing entirely.
+     * <p/>
+     * If all hosts are busy with a full queue, the request will fail with a {@link NoHostAvailableException}.
+     */
+    acquisitionQueueMaxSize(256),
     ;
 
     private Object defaultValue;
