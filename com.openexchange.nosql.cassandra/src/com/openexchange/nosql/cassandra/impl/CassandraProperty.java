@@ -55,13 +55,66 @@ package com.openexchange.nosql.cassandra.impl;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum CassandraProperty {
+    /**
+     * Defines the name of the Cassandra cluster. Technically this name does not correlate
+     * with the name configured in the real Cassandra cluster, but it's rather used to distinguish
+     * exposed JMX metrics when multiple Cluster instances live in the same JVM
+     */
     clusterName("ox"),
+    /**
+     * Defines the Cassandra seed node(s) as a comma separated list
+     */
     clusterContactPoints("127.0.0.1"),
+    /**
+     * Defines the port on which the Cassandra server is running.
+     * <p/>
+     * Defaults to <code>9042</code>
+     */
     port(9042),
-    loadBalancingPolicy("dc-token-aware"),
-    retryPolicy("defaultRetryPolicy"),
+    /**
+     * Defines load balancing policy to use for the cluster. There are three
+     * load balancing policies to choose from:
+     * <ul>
+     * <li>{@link CassandraLoadBalancingPolicy#RoundRobin}</li>
+     * <li>{@link CassandraLoadBalancingPolicy#DCAwareRoundRobin}</li>
+     * <li>{@link CassandraLoadBalancingPolicy#DCTokenAwareRoundRobin}</li>
+     * </ul>
+     * <p/>
+     * Defaults to {@link CassandraLoadBalancingPolicy#RoundRobin}
+     */
+    loadBalancingPolicy(CassandraLoadBalancingPolicy.RoundRobin.name()),
+    /**
+     * A policy that defines a default behaviour to adopt when a request fails. There are three
+     * retry policies to choose from:
+     * <ul>
+     * <li>{@link CassandraRetryPolicy#defaultRetryPolicy}</li>
+     * <li>{@link CassandraRetryPolicy#downgradingConsistencyRetryPolicy}</li>
+     * <li>{@link CassandraRetryPolicy#fallthroughRetryPolicy}</li>
+     * </ul>
+     * <p/>
+     * 
+     * Defaults to {@link CassandraRetryPolicy#defaultRetryPolicy}
+     */
+    retryPolicy(CassandraRetryPolicy.defaultRetryPolicy.name()),
+    /**
+     * Logs the retry decision of the policy.
+     * <p/>
+     * Defaults to <code>false</code>
+     */
     logRetryPolicy(false),
+    /**
+     * Enables the query logger which logs all executed statements
+     * <p/>
+     * Defatuls to <code>false</code>
+     */
     enableQueryLogger(false),
+    /**
+     * Defines the latency threshold in milliseconds beyond which queries are considered 'slow'
+     * and logged as such by the Cassandra service. Used in conjunction with the 'enableQueryLogger'
+     * property.
+     * <p/>
+     * Defaults to <code>5000</code> msec.
+     */
     queryLatencyThreshold(5000),
     ;
 

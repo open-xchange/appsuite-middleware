@@ -61,7 +61,7 @@ import com.datastax.driver.core.policies.TokenAwarePolicy;
  */
 public enum CassandraLoadBalancingPolicy {
     /**
-     * Same as the {@link #DCTokenAwareRoundRobin} load balancing policy but with
+     * Same as the {@link #DCAwareRoundRobin} load balancing policy but with
      * added token awareness.
      */
     DCTokenAwareRoundRobin,

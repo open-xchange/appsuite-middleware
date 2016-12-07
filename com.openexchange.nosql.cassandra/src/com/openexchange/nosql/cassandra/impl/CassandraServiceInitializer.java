@@ -90,7 +90,7 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public String getClusterName() {
-        return configurationService.getProperty(CassandraProperty.clusterName.getName());
+        return configurationService.getProperty(CassandraProperty.clusterName.getName(), CassandraProperty.clusterName.getDefaultValue(String.class));
     }
 
     /*
@@ -101,7 +101,7 @@ class CassandraServiceInitializer implements Initializer {
     @Override
     public List<InetSocketAddress> getContactPoints() {
         int port = configurationService.getIntProperty(CassandraProperty.port.getName(), CassandraProperty.port.getDefaultValue(Integer.class));
-        String cps = configurationService.getProperty(CassandraProperty.clusterContactPoints.getName());
+        String cps = configurationService.getProperty(CassandraProperty.clusterContactPoints.getName(), CassandraProperty.clusterContactPoints.getDefaultValue(String.class));
         String[] cpsSplit = Strings.splitByComma(cps);
 
         List<InetSocketAddress> contactPoints = new ArrayList<>();
@@ -119,11 +119,11 @@ class CassandraServiceInitializer implements Initializer {
     @Override
     public Configuration getConfiguration() {
         // Retry Policies
-        String rp = configurationService.getProperty(CassandraProperty.retryPolicy.getName());
+        String rp = configurationService.getProperty(CassandraProperty.retryPolicy.getName(), CassandraProperty.retryPolicy.getDefaultValue(String.class));
         boolean logRetryPolicy = configurationService.getBoolProperty(CassandraProperty.logRetryPolicy.getName(), CassandraProperty.logRetryPolicy.getDefaultValue(Boolean.class));
         RetryPolicy retryPolicy = logRetryPolicy ? CassandraRetryPolicy.valueOf(rp).getLoggingRetryPolicy() : CassandraRetryPolicy.valueOf(rp).getRetryPolicy();
         // Load Balancing Policies
-        String lbPolicy = configurationService.getProperty(CassandraProperty.loadBalancingPolicy.getName());
+        String lbPolicy = configurationService.getProperty(CassandraProperty.loadBalancingPolicy.getName(), CassandraProperty.loadBalancingPolicy.getDefaultValue(String.class));
         LoadBalancingPolicy loadBalancingPolicy = CassandraLoadBalancingPolicy.createLoadBalancingPolicy(lbPolicy);
         // Build policies
         Policies policies = Policies.builder().withRetryPolicy(retryPolicy).withLoadBalancingPolicy(loadBalancingPolicy).build();

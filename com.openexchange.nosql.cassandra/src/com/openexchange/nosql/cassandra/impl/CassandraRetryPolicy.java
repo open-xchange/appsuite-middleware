@@ -61,8 +61,39 @@ import com.datastax.driver.core.policies.RetryPolicy;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum CassandraRetryPolicy {
+    /**
+     * The default retry policy.
+     * <p/>
+     * This policy retries queries in only two cases:
+     * <ul>
+     * <li>On a read timeout, if enough replicas replied but data was not retrieved.</li>
+     * <li>On a write timeout, if we timeout while writing the distributed log used by batch statements.</li>
+     * </ul>
+     * <p/>
+     * This retry policy is conservative in that it will never retry with a
+     * different consistency level than the one of the initial operation.
+     * <p/>
+     * In some cases, it may be convenient to use a more aggressive retry policy
+     * like {@link #downgradingConsistencyRetryPolicy}.
+     */
     defaultRetryPolicy(DefaultRetryPolicy.INSTANCE),
+    /**
+     * A retry policy that sometimes retries with a lower consistency level than
+     * the one initially requested.
+     * <p/>
+     * <b>BEWARE</b>: this policy may retry queries using a lower consistency
+     * level than the one initially requested. By doing so, it may break
+     * consistency guarantees. In other words, if you use this retry policy,
+     * there are cases (for more information see {@link DowngradingConsistencyRetryPolicy})
+     * where a read at {@code QUORUM} <b>may not</b> see a preceding write at
+     * {@code QUORUM}. Do not use this policy unless you have understood the cases
+     * where this can happen and are ok with that. It is also highly recommended to
+     * always enable the logRetryPolicy to log the occurrences of such consistency breaks.
+     */
     downgradingConsistencyRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE),
+    /**
+     * A retry policy that never retries (nor ignores).
+     */
     fallthroughRetryPolicy(FallthroughRetryPolicy.INSTANCE),
     ;
 
