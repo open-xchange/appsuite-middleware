@@ -98,12 +98,14 @@ public interface WebdavRequest {
     Map<String, Object> getUserInfo();
 
     /**
-     * Gets a value indicating whether the WebDAV <code>Brief</code> header was present in the request and set to <code>t</code>.
-     * <p/
+     * Gets a value indicating whether the WebDAV <code>Brief</code> header was present in the request and set to <code>t</code>, or,
+     * if the <code>Prefer</code> header was present and set to <code>return=minimal</code>.
+     * <p/>
      * The WebDAV Brief header is used to reduce the verbosity of DAV responses by omitting portions of the response that may be implied
      * by the absence of a response. The Brief header may be used in the PROPFIND Method, the BPROPFIND Method, the PROPPATCH Method, and
      * the BPROPPATCH Method. Using it in any other method will have no effect.
-     *
+     *<p/>
+     * https://tools.ietf.org/html/draft-murchison-webdav-prefer
      * @return <code>true</code> if the header was set to <code>t</code>, <code>false</code>, otherwise
      */
     boolean isBrief();
