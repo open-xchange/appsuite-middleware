@@ -178,7 +178,7 @@ h1 {
             <td class="appointmentsDay">
               <div class="wrapper">
                 <#list day.wholeDayAppointments as appointment>
-                <div class="appointmentDayStartEnd">${appointment.title}</div>
+                <div class="appointmentDayStartEnd colorLabel-${appointment.colorLabel}">${appointment.title}</div>
                 </#list>
               </div>
             </td>
@@ -201,7 +201,7 @@ h1 {
                 <div style="position: relative; ">
                   <#assign appointmentWidth = 100 / day.columns?size>
                   <#list day.getAppointmentsStartingBetween(hour * 60, (hour + 1) * 60) as appointment>
-                  <div style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; min-height: 30px; margin-left: ${day.getColumn(appointment) * appointmentWidth}%; height: ${appointment.durationInMinutes}px; width: ${appointmentWidth}%; ">
+                  <div class="colorLabel-${appointment.colorLabel}" style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; min-height: 30px; margin-left: ${day.getColumn(appointment) * appointmentWidth}%; height: ${appointment.durationInMinutes}px; width: ${appointmentWidth}%; ">
                     <div style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px; border: 1px solid #000;">
                       <div class="appointment" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
                         <div>${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</div>
