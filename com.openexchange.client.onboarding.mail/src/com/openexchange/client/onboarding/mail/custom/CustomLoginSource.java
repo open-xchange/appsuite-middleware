@@ -47,50 +47,30 @@
  *
  */
 
-package com.openexchange.client.onboarding.mail.osgi;
+package com.openexchange.client.onboarding.mail.custom;
 
-import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
-import com.openexchange.client.onboarding.mail.custom.CustomLoginSource;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.user.UserService;
+import com.openexchange.session.Session;
 
 /**
- * {@link MailOnboardingConfigurationActivator}
+ * {@link CustomLoginSource} provides the imap and smtp login name for the {@link MailOnboardingProvider}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public class MailOnboardingConfigurationActivator extends HousekeepingActivator {
+public interface CustomLoginSource {
 
     /**
-     * Initializes a new {@link MailOnboardingConfigurationActivator}.
+     * Provides the imap login for the {@link MailOnboardingProvider}
+     * @param session The session
+     * @return the imap login
      */
-    public MailOnboardingConfigurationActivator() {
-        super();
-    }
+    public String getImapLogin(Session session);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserService.class, MailService.class, MailAccountStorageService.class, SessiondService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        trackService(CustomLoginSource.class);
-        registerService(OnboardingProvider.class, new MailOnboardingProvider(this));
-        openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        closeTrackers();
-    }
-
+    /**
+     * Provides the smtp login for the {@link MailOnboardingProvider}
+     * @param session The session
+     * @return the smtp login
+     */
+    public String getSmtpLogin(Session session);
 }
