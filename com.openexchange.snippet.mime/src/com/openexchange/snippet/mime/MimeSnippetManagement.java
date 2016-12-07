@@ -129,6 +129,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class MimeSnippetManagement implements SnippetManagement {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
+
     /**
      * The file storage reference type identifier: <b><code>1</code></b>.
      */
@@ -235,6 +237,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
+
+                    LOGGER.warn("Missing file for snippet {} for user {} in context {}. Maybe file storage is (temporary) not available.", id, userId, contextId, e);
                 }
             }
             return list;
