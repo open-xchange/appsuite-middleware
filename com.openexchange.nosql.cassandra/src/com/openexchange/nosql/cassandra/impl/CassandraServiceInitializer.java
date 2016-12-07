@@ -57,6 +57,7 @@ import java.util.List;
 import com.datastax.driver.core.Cluster.Initializer;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
+import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
 import com.datastax.driver.core.policies.RetryPolicy;
@@ -127,8 +128,12 @@ class CassandraServiceInitializer implements Initializer {
         LoadBalancingPolicy loadBalancingPolicy = CassandraLoadBalancingPolicy.createLoadBalancingPolicy(lbPolicy);
         // Build policies
         Policies policies = Policies.builder().withRetryPolicy(retryPolicy).withLoadBalancingPolicy(loadBalancingPolicy).build();
+        // Build pooling options
+        PoolingOptions poolingOptions = new PoolingOptions();
+        int heartbeatInterval = configurationService.getIntProperty(CassandraProperty.poolingHeartbeat.getName(), CassandraProperty.poolingHeartbeat.getDefaultValue(Integer.class));
+        poolingOptions.setHeartbeatIntervalSeconds(heartbeatInterval);
         // Build configuration
-        return Configuration.builder().withPolicies(policies).build();
+        return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).build();
     }
 
     /*

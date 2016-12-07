@@ -116,6 +116,14 @@ public enum CassandraProperty {
      * Defaults to <code>5000</code> msec.
      */
     queryLatencyThreshold(5000),
+    /**
+     * Defines the amount of time (in seconds) for connection keepalive in the form of a heartbeat.
+     * When a connection has been idle for the given amount of time, the Cassandra service will
+     * simulate activity by writing a dummy request to it (by sending an <code>OPTIONS</code> message).
+     * 
+     * Defaults to 30 seconds
+     */
+    poolingHeartbeat(30),
     ;
 
     private Object defaultValue;
