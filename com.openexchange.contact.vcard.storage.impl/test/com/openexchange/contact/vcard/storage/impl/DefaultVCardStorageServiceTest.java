@@ -70,6 +70,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.tools.file.SaveFileAction;
@@ -120,7 +121,7 @@ public class DefaultVCardStorageServiceTest {
 
         PowerMockito.mockStatic(FileStorages.class);
         PowerMockito.when(FileStorages.getQuotaFileStorageService()).thenReturn(quotaFileStorageService);
-        PowerMockito.when(quotaFileStorageService.getQuotaFileStorage(Matchers.anyInt())).thenReturn(quotaFileStorage);
+        PowerMockito.when(quotaFileStorageService.getQuotaFileStorage(Matchers.anyInt(), (Info) Matchers.anyObject())).thenReturn(quotaFileStorage);
     }
 
     @Test(expected = OXException.class)

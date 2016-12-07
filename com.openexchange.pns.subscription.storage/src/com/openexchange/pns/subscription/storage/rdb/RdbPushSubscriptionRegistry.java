@@ -562,28 +562,32 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 }
             }
 
-            // Check for already existing subscription
-            byte[] id = getSubscriptionId(subscription.getUserId(), subscription.getContextId(), subscription.getToken(), subscription.getClient(), con);
-            if (null != id) {
-                // Already exists...
-                updateLastModified(subscription, con);
-            } else {
-                // Generate random UUID
-                id = UUIDs.toByteArray(UUID.randomUUID());
+            // Insert new or update existing subscription
+            long lastModified = System.currentTimeMillis();
+            byte[] id = UUIDs.toByteArray(UUID.randomUUID());
+            stmt = con.prepareStatement(
+                "INSERT INTO pns_subscription (id,cid,user,token,client,transport,all_flag,last_modified) " +
+                "VALUES (?,?,?,?,?,?,?,?) " +
+                "ON DUPLICATE KEY UPDATE transport=?, all_flag=?, last_modified=?;"
+            );
+            stmt.setBytes(1, id);
+            stmt.setInt(2, subscription.getContextId());
+            stmt.setInt(3, subscription.getUserId());
+            stmt.setString(4, subscription.getToken());
+            stmt.setString(5, subscription.getClient());
+            stmt.setString(6, subscription.getTransportId());
+            stmt.setInt(7, isAll ? 1 : 0);
+            stmt.setLong(8, lastModified);
+            stmt.setString(9, subscription.getTransportId());
+            stmt.setInt(10, isAll ? 1 : 0);
+            stmt.setLong(11, lastModified);
+            int updated = stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
 
-                // Insert into pns_subscription
-                stmt = con.prepareStatement("INSERT INTO pns_subscription (id, cid, user, token, client, transport, all_flag, last_modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                stmt.setBytes(1, id);
-                stmt.setInt(2, subscription.getContextId());
-                stmt.setInt(3, subscription.getUserId());
-                stmt.setString(4, subscription.getToken());
-                stmt.setString(5, subscription.getClient());
-                stmt.setString(6, subscription.getTransportId());
-                stmt.setInt(7, isAll ? 1 : 0);
-                stmt.setLong(8, System.currentTimeMillis());
-                stmt.executeUpdate();
-                Databases.closeSQLStuff(stmt);
-                stmt = null;
+            if (1 != updated) {
+                // Already exists, so take over existing subscription identifier
+                id = getSubscriptionId(subscription.getUserId(), subscription.getContextId(), subscription.getToken(), subscription.getClient(), con);
             }
 
             // Insert individual topics / topic wild-cards (if subscription is not interested in all)
@@ -898,32 +902,6 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             }
 
             return updated;
-        } catch (SQLException e) {
-            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
-
-    /**
-     * Updates specified subscription's last-modified time stamp.
-     *
-     * @param subscription The subscription to update
-     * @param con The connection to use
-     * @return <code>true</code> if such a subscription has been updated; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If update fails
-     */
-    private boolean updateLastModified(PushSubscription subscription, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE pns_subscription SET last_modified=? WHERE cid=? AND user=? AND token=? AND client=?");
-            stmt.setLong(1, System.currentTimeMillis());
-            stmt.setInt(2, subscription.getContextId());
-            stmt.setInt(3, subscription.getUserId());
-            stmt.setString(4, subscription.getToken());
-            stmt.setString(5, subscription.getClient());
-            int rows = stmt.executeUpdate();
-            return rows > 0;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

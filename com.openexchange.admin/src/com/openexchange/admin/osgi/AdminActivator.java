@@ -83,6 +83,7 @@ import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.admin.tools.filestore.osgi.FilestoreDataMoveListenerTracker;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
@@ -184,6 +185,11 @@ public class AdminActivator extends HousekeepingActivator {
             PluginInterfaces.setInstance(builder.build());
         }
 
+        // FilestoreDataMoveListener
+        FilestoreDataMoveListenerTracker dataMoveListenerTracker = new FilestoreDataMoveListenerTracker(context);
+        rememberTracker(dataMoveListenerTracker);
+        com.openexchange.admin.tools.filestore.FilestoreDataMover.setListeners(dataMoveListenerTracker);
+
         track(FileLocationHandler.class, new FilestoreLocationUpdaterCustomizer(context));
 
         log.info("Starting Admindaemon...");
@@ -284,6 +290,7 @@ public class AdminActivator extends HousekeepingActivator {
             }
         }
 
+        com.openexchange.admin.tools.filestore.FilestoreDataMover.setListeners(null);
         PluginInterfaces.setInstance(null);
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         log.info("Stopping RMI...");

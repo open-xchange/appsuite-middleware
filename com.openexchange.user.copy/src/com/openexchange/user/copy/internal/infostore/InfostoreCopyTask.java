@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
@@ -181,8 +182,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         final Map<DocumentMetadata, List<DocumentMetadata>> originDocuments = loadInfostoreDocumentsFromDB(infostoreFolders, srcCon, i(srcCtxId));
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
-        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId(), srcCtxId);
-        dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId);
+        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId(), srcCtxId, Info.drive(copyTools.getSourceUserId()));
+        dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId, Info.drive(dstUsrId));
 
         copyFiles(originDocuments, srcFileStorage, dstFileStorage);
         exchangeFolderIds(originDocuments, folderMapping, dstCon, i(dstCtxId));

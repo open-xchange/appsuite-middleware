@@ -49,6 +49,7 @@
 
 package com.openexchange.spamhandler.parallels;
 
+import static com.openexchange.custom.parallels.impl.ParallelsOptions.PROPERTY_ANTISPAM_XMLRPC_PORT;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -66,14 +67,16 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import com.openexchange.context.ContextService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamassassin.api.SpamdProvider;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 public class ParallelsSpamdService implements SpamdService {
@@ -82,15 +85,28 @@ public class ParallelsSpamdService implements SpamdService {
 
     private static final String POA_SPAM_PROVIDER_ATTRIBUTE_NAME = "POA_SPAM_PROVIDER";
 
-    private final Configuration config;
-    private final ContextService contextService;
+    private final ConfigViewFactory factory;
     private final UserService userService;
 
-    public ParallelsSpamdService(Configuration config, ContextService contextService, UserService userService) {
+    public ParallelsSpamdService(ConfigViewFactory factory, UserService userService) {
         super();
-        this.config = config;
-        this.contextService = contextService;
+        this.factory = factory;
         this.userService = userService;
+    }
+
+    private <V> V getPropertyFor(Session session, String propertyName, V defaultValue, Class<V> clazz) throws OXException {
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<V> property = view.property(propertyName, clazz);
+        return (null != property && property.isDefined()) ? property.get() : defaultValue;
+    }
+
+    private int getPort(Session session) throws OXException {
+        return getPropertyFor(session, "com.openexchange.spamhandler.spamassassin.port", Integer.valueOf(783), Integer.class).intValue();
+    }
+
+    private int getXmlPort(Session session) throws OXException {
+        return getPropertyFor(session, PROPERTY_ANTISPAM_XMLRPC_PORT, Integer.valueOf(3100), Integer.class).intValue();
     }
 
     @Override
@@ -201,7 +217,7 @@ public class ParallelsSpamdService implements SpamdService {
         try {
 
             // spamd port from configuration
-            int spamd_provider_port = config.getPort();
+            int spamd_provider_port = getPort(session);
             LOG.debug("Using port {} for connections to spamd service", spamd_provider_port);
 
             // get the user object from the OX API to retrieve users primary mail address
@@ -212,7 +228,7 @@ public class ParallelsSpamdService implements SpamdService {
 
             final java.net.URI tp = new java.net.URI(oxuser.getSmtpServer());// this will always be the smtp://host:port of the user
             final String xmlrpc_server = tp.getHost();
-            int xml_rpc_port = config.getXmlPort();
+            int xml_rpc_port = getXmlPort(session);
             LOG.debug("Using port {} for connections to xmlrpc service", xml_rpc_port);
 
             final String URL_to_xmlrpc = "http://" +xmlrpc_server+":"+xml_rpc_port;
@@ -316,8 +332,11 @@ public class ParallelsSpamdService implements SpamdService {
     }
 
     private User getUser(Session session) throws OXException {
-        Context context = contextService.getContext(session.getContextId());
-        return userService.getUser(session.getUserId(), context);
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+
+        return userService.getUser(session.getUserId(), session.getContextId());
     }
 
     private static String getXmlRpcRequestBody(final String primary_mail){

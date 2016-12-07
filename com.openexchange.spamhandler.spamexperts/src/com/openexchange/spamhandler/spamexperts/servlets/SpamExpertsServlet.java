@@ -1,3 +1,4 @@
+
 package com.openexchange.spamhandler.spamexperts.servlets;
 
 /*
@@ -58,9 +59,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
+import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -77,58 +77,59 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class SpamExpertsServlet extends DataServlet {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -8914926421736440078L;
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsServlet.class);
+    private static final long serialVersionUID = -8914926421736440078L;
 
-	public SpamExpertsServlet() {
-		super();
-	}
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsServlet.class);
 
-	@Override
-	protected boolean hasModulePermission(final ServerSession session) {
-		return true;
-	}
+    private final SpamExpertsConfig config;
 
-	@Override
-    protected void doGet(final HttpServletRequest req,
-			final HttpServletResponse resp) throws ServletException,
-			IOException {
+    /**
+     * Initializes a new {@link SpamExpertsServlet}.
+     *
+     * @param config The configuration to use
+     */
+    public SpamExpertsServlet(SpamExpertsConfig config) {
+        super();
+        this.config = config;
+    }
 
-		final Response response = new Response();
-		final Session session = getSessionObject(req);
+    @Override
+    protected boolean hasModulePermission(final ServerSession session) {
+        return true;
+    }
 
-		try {
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        Session session = getSessionObject(req);
 
-			final String action = parseMandatoryStringParameter(req,PARAMETER_ACTION);
-			JSONObject jsonObj;
+        Response response = new Response();
+        try {
+            String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
 
-			try {
-				jsonObj = convertParameter2JSONObject(req);
-			} catch (final JSONException e) {
-				LOG.error("", e);
-				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-				writeResponse(response, resp, session);
-				return;
-			}
-			final Context ctx = ContextStorage.getInstance().getContext(session);
-			final SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, ctx);
-			final Object responseObj = proRequest.action(action, jsonObj);
-			response.setData(responseObj);
+            JSONObject jsonObj;
+            try {
+                jsonObj = convertParameter2JSONObject(req);
+            } catch (final JSONException e) {
+                LOG.error("", e);
+                response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
+                writeResponse(response, resp, session);
+                return;
+            }
 
-		} catch (final OXException e) {
-			LOG.error("", e);
-			response.setException(e);
-		} catch (final JSONException e) {
-			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error("", oje);
-			response.setException(oje);
-		}
+            SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, config);
+            Object responseObj = proRequest.action(action, jsonObj);
+            response.setData(responseObj);
+        } catch (final OXException e) {
+            LOG.error("", e);
+            response.setException(e);
+        } catch (final JSONException e) {
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            LOG.error("", oje);
+            response.setException(oje);
+        }
 
-		writeResponse(response, resp, session);
+        writeResponse(response, resp, session);
 
-	}
+    }
 
 }

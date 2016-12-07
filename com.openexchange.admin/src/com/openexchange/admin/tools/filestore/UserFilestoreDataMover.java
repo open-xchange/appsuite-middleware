@@ -73,6 +73,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.osgi.ServiceListing;
 
 /**
  * {@link UserFilestoreDataMover} - The implementation to move files from one storage to another for a single user.
@@ -89,8 +90,8 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
     /**
      * Initializes a new {@link UserFilestoreDataMover}.
      */
-    protected UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
-        super(srcFilestore, dstFilestore, ctx);
+    protected UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx, ServiceListing<FilestoreDataMoveListener> listeners) {
+        super(srcFilestore, dstFilestore, ctx, listeners);
         this.user = user;
     }
 
@@ -114,11 +115,24 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
         // rsync can be used in case both file storages are disk-based storages
         boolean useRsync = "file".equalsIgnoreCase(srcBaseUri.getScheme()) && "file".equalsIgnoreCase(dstBaseUri.getScheme());
 
+        URI srcFullUri;
+        URI dstFullUri;
+
         int contextId = ctx.getId().intValue();
         int userId = user.getId().intValue();
         if (useRsync) {
             // Invoke rsync process
-            URI srcFullUri = getFullyQualifyingUriForUser(userId, contextId, srcBaseUri);
+            srcFullUri = getFullyQualifyingUriForUser(userId, contextId, srcBaseUri);
+            dstFullUri = getFullyQualifyingUriForUser(userId, contextId, dstBaseUri);
+
+            try {
+                for (FilestoreDataMoveListener listener : getListeners()) {
+                    listener.onBeforeUserDataMove(contextId, userId, srcFullUri, dstFullUri);
+                }
+            } catch (OXException e) {
+                throw new StorageException(e);
+            }
+
             File fsDirectory = new File(srcFullUri);
             if (fsDirectory.exists()) {
                 ArrayOutput output = new ShellExecutor().executeprocargs(new String[] {
@@ -130,10 +144,14 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
             }
         } else {
             // Not possible to use rsync; e.g. move from HDD to S3
-            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, srcBaseUri));
-            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, dstBaseUri));
+            srcFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, srcBaseUri));
+            dstFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, dstBaseUri));
 
             try {
+                for (FilestoreDataMoveListener listener : getListeners()) {
+                    listener.onBeforeUserDataMove(contextId, userId, srcFullUri, dstFullUri);
+                }
+
                 // Grab associated file storages
                 FileStorage srcStorage = getFileStorageService().getFileStorage(srcFullUri);
                 FileStorage dstStorage = getFileStorageService().getFileStorage(dstFullUri);
@@ -173,6 +191,10 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             Filestore2UserUtil.replaceFilestore2UserEntry(contextId, user.getId().intValue(), dstFilestore.getId().intValue(), ClientAdminThreadExtended.cache);
             oxcox.changeFilestoreDataFor(user, ctx);
+
+            for (FilestoreDataMoveListener listener : getListeners()) {
+                listener.onAfterUserDataMoved(contextId, userId, srcFullUri, dstFullUri);
+            }
 
             CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             Cache cache = cacheService.getCache("Filestore");

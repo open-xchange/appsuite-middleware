@@ -60,6 +60,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.quota.AccountQuota;
@@ -134,7 +135,7 @@ public class AttachmentQuotaProvider implements QuotaProvider {
     }
 
     Quota getSizeQuota(Session session) throws OXException {
-        QuotaFileStorage quotaFileStorage = fsFactory.getQuotaFileStorage(session.getContextId());
+        QuotaFileStorage quotaFileStorage = fsFactory.getQuotaFileStorage(session.getContextId(), Info.general());
         long limit = quotaFileStorage.getQuota();
         long usage = quotaFileStorage.getUsage();
         return new Quota(QuotaType.SIZE, limit, usage);

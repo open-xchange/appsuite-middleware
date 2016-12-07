@@ -26,7 +26,6 @@ Summary:        The Open-Xchange SpamAssassin Handler
 Autoreqprov:   no
 Requires:       open-xchange-core
 Provides:	open-xchange-spamhandler
-Conflicts:      open-xchange-spamhandler-default
 
 %description
 The Open-Xchange SpamAssassin Handler

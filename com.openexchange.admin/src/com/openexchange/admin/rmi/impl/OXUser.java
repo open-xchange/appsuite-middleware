@@ -1787,6 +1787,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 final Cache folderCache = cacheService.getCache("OXFolderCache");
                 cacheKey = cacheService.newCacheKey(ctx.getId().intValue(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
                 folderCache.remove(cacheKey);
+
+                final Cache singleUserContextCache = cacheService.getCache("SingleUserContext");
+                singleUserContextCache.remove(ctx.getId());
             } catch (final OXException e) {
                 LOGGER.error("", e);
             }

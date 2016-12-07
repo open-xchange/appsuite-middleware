@@ -55,6 +55,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.attach.AttachmentConfig;
@@ -149,7 +150,7 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
         if (null == storageService) {
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
-        return storageService.getQuotaFileStorage(userId, contextId);
+        return storageService.getQuotaFileStorage(userId, contextId, Info.drive(userId));
     }
 
     @Override

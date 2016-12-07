@@ -70,8 +70,8 @@ import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.osgi.ServiceListing;
 
 /**
  * {@link User2ContextFilestoreDataMover} - The implementation to move files from a user's storage to context's storage.
@@ -86,8 +86,8 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
     /**
      * Initializes a new {@link User2ContextFilestoreDataMover}.
      */
-    protected User2ContextFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
-        super(srcFilestore, dstFilestore, ctx);
+    protected User2ContextFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx, ServiceListing<FilestoreDataMoveListener> listeners) {
+        super(srcFilestore, dstFilestore, ctx, listeners);
         this.user = user;
     }
 
@@ -111,6 +111,9 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
         final int contextId = ctx.getId().intValue();
         final int userId = user.getId().intValue();
 
+        final QuotaFileStorage srcStorage;
+        QuotaFileStorage dstStorage;
+
         Runnable finalTask = null;
         Reverter reverter = null;
         try {
@@ -120,8 +123,12 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
             }
 
             // Grab associated quota-aware file storages
-            final QuotaFileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, userId, contextId);
-            FileStorage dstStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, -1, contextId);
+            srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, userId, contextId);
+            dstStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, -1, contextId);
+
+            for (FilestoreDataMoveListener listener : getListeners()) {
+                listener.onBeforeUserToContextDataMove(contextId, userId, srcStorage, dstStorage);
+            }
 
             // Copy each file from source to destination
             final Set<String> srcFiles = srcStorage.getFileList();
@@ -240,6 +247,10 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
             oxcox.changeFilestoreDataFor(user, ctx);
             Filestore2UserUtil.removeFilestore2UserEntry(contextId, user.getId().intValue(), ClientAdminThreadExtended.cache);
             error = false;
+
+            for (FilestoreDataMoveListener listener : getListeners()) {
+                listener.onAfterUserToContextDataMoved(contextId, userId, srcStorage, dstStorage);
+            }
 
             try {
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);

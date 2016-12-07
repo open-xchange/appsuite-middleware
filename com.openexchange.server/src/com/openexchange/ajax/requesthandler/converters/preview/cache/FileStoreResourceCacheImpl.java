@@ -75,6 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
@@ -95,7 +96,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
     private static FileStorage getFileStorage(int contextId, boolean quotaAware) throws OXException {
         QuotaFileStorageService qfss = FileStorages.getQuotaFileStorageService();
         if (quotaAware) {
-            return qfss.getQuotaFileStorage(contextId);
+            return qfss.getQuotaFileStorage(contextId, Info.general());
         }
 
         URI uri = qfss.getFileStorageUriFor(0, contextId);

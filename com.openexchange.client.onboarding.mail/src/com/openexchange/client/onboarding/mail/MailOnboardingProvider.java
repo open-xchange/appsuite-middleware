@@ -65,6 +65,7 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.client.onboarding.mail.custom.CustomLoginSource;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.exception.OXException;
@@ -210,7 +211,15 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             if (null == imapSecure) {
                 imapSecure = Boolean.valueOf(imapConfig.isSecure());
             }
-            String imapLogin = imapConfig.getLogin();
+
+            Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.imap.login.customsource", false, session);
+            String imapLogin;
+
+            if (customSource) {
+                imapLogin = services.getService(CustomLoginSource.class).getImapLogin(session);
+            } else {
+                imapLogin = imapConfig.getLogin();
+            }
             String imapPassword = imapConfig.getPassword();
             imapConfiguration = new Configuration(imapServer, imapPort.intValue(), imapSecure.booleanValue(), imapLogin, imapPassword);
         }
@@ -232,8 +241,17 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             if (null == smtpSecure) {
                 smtpSecure = Boolean.valueOf(smtpConfig.isSecure());
             }
-            String smtpLogin = smtpConfig.getLogin();
             String smtpPassword = smtpConfig.getPassword();
+
+            Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.smtp.login.customsource", false, session);
+            String smtpLogin;
+
+            if (customSource) {
+                smtpLogin = services.getService(CustomLoginSource.class).getSmtpLogin(session);
+            } else {
+                smtpLogin = smtpConfig.getLogin();
+            }
+
             if ((smtpConfig instanceof TransportAuthSupportAware) && (false == ((TransportAuthSupportAware) smtpConfig).isAuthSupported())) {
                 smtpLogin = null;
                 smtpPassword = null;

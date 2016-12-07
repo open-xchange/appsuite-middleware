@@ -57,7 +57,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.filestore.QuotaLimitService;
+import com.openexchange.filestore.QuotaUsageService;
 import com.openexchange.filestore.impl.DBQuotaFileStorageService;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
  * {@link DBQuotaFileStorageRegisterer} - Registers the {@link QuotaFileStorageService} service if all required services are available.
@@ -71,6 +74,8 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
     private final Lock lock = new ReentrantLock();
 
     private final QuotaFileStorageListenerTracker listenerTracker;
+    private final RankingAwareNearRegistryServiceTracker<QuotaUsageService> usageServices;
+    private final RankingAwareNearRegistryServiceTracker<QuotaLimitService> limitServices;
 
     private ServiceRegistration<QuotaFileStorageService> registration;
     boolean isRegistered = false;
@@ -80,8 +85,10 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
      *
      * @param context The bundle context
      */
-    public DBQuotaFileStorageRegisterer(QuotaFileStorageListenerTracker listenerTracker, BundleContext context) {
+    public DBQuotaFileStorageRegisterer(RankingAwareNearRegistryServiceTracker<QuotaUsageService> usageServices, RankingAwareNearRegistryServiceTracker<QuotaLimitService> limitServices, QuotaFileStorageListenerTracker listenerTracker, BundleContext context) {
         super();
+        this.usageServices = usageServices;
+        this.limitServices = limitServices;
         this.listenerTracker = listenerTracker;
         this.context = context;
     }
@@ -98,7 +105,7 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
                 isRegistered = true;
             }
             if (needsRegistration) {
-                QuotaFileStorageService qfss = new DBQuotaFileStorageService(listenerTracker, service);
+                QuotaFileStorageService qfss = new DBQuotaFileStorageService(usageServices, limitServices, listenerTracker, service);
                 registration = context.registerService(QuotaFileStorageService.class, qfss, null);
                 return service;
             }

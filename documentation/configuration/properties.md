@@ -532,6 +532,20 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
+## SpamHandler 
+
+| Key | <span style="font-weight:normal">com.openexchange.spamhandler.name</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the name of the spam handler to use for the primary mail account. The special name "NoSpamHandler" explicitly sets no spam handler<br>If such a setting is not specified, the spam handler as configured through the mail bundle is used;<br>e.g. "com.openexchange.imap.spamHandler" in file 'imap.properties'<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | spamhandler.properties  |
+
+---
+
+
 ## SSL 
 
 | Key | <span style="font-weight:normal">com.openexchange.net.ssl.default.truststore.enabled</span> |

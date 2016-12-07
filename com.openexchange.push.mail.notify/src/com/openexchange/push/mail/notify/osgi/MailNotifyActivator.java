@@ -73,7 +73,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link MailNotifyActivator} - The push activator.
@@ -139,7 +138,6 @@ public final class MailNotifyActivator extends HousekeepingActivator {
             this.registry = registry;
 
             // Track optional services
-            trackService(UserPermissionService.class);
             trackService(PushNotificationService.class);
             openTrackers();
 

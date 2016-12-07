@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.mail.osgi;
 
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
+import com.openexchange.client.onboarding.mail.custom.CustomLoginSource;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
@@ -81,12 +82,15 @@ public class MailOnboardingConfigurationActivator extends HousekeepingActivator 
 
     @Override
     protected void startBundle() throws Exception {
+        trackService(CustomLoginSource.class);
         registerService(OnboardingProvider.class, new MailOnboardingProvider(this));
+        openTrackers();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         unregisterServices();
+        closeTrackers();
     }
 
 }
