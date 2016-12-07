@@ -160,6 +160,7 @@ public final class MALPollActivator extends HousekeepingActivator {
                     new RegistryServiceTrackerCustomizer<SessiondService>(context, getServiceRegistry(), SessiondService.class);
                 track(SessiondService.class, trackerCustomizer);
             }
+            openTrackers();
             /*
              * Read configuration
              */

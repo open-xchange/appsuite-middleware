@@ -83,6 +83,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.api.TransactionallyCachingCalendar;
 import com.openexchange.calendar.cache.Attribute;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
@@ -92,6 +93,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
@@ -5319,7 +5321,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private final void triggerDeleteEvent(final Connection con, final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
-        final CalendarDataObject ao;
+        CalendarDataObject ao;
         if (edao == null) {
             // fix for bug 48598 where we previously sent a shallow CalenderDataObject that only
             // contained the objectID and parentFolderID (as of the setters invoked below), but that
@@ -5329,8 +5331,9 @@ public class CalendarMySQL implements CalendarSqlImp {
             final AppointmentSQLInterface calendarSql = FACTORY_REF.get().createAppointmentSql(so);
             try {
                 ao = calendarSql.getObjectById(oid, fid);
-            } catch (final SQLException e) {
-                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+            } catch (Exception e) {
+                LOG.warn("Unable to load appointment for event. Fallback to empty Object.", e);
+                ao = new CalendarDataObject();
             }
         } else {
             ao = edao.clone();

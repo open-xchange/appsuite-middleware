@@ -136,6 +136,9 @@ public final class MailNotifyActivator extends HousekeepingActivator {
             MailNotifyPushListenerRegistry registry = new MailNotifyPushListenerRegistry(config.useOXLogin, config.useEmailAddress);
             this.registry = registry;
 
+            // Track optional services
+            openTrackers();
+
             // Register push manager
             registerService(PushManagerService.class, new MailNotifyPushManagerService(registry), null);
 

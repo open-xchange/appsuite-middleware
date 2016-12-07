@@ -122,6 +122,16 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
                     sb.append("inline");
                     DownloadUtility.appendFilenameParameter(fileHolder.getName(), fileHolder.getContentType(), requestData.getUserAgent(), sb);
                     requestData.setResponseHeader("Content-Disposition", sb.toString());
+
+                    String eTag = picture.getEtag();
+                    long expires = Tools.getDefaultImageExpiry();
+                    if (null == eTag) {
+                        if (expires > 0) {
+                            Tools.setExpires(expires, requestData.optHttpServletResponse());
+                        }
+                    } else {
+                        Tools.setETag(eTag, expires > 0 ? expires : -1L, requestData.optHttpServletResponse());
+                    }
                 }
 
                 // Write image file

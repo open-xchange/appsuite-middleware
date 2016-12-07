@@ -60,18 +60,18 @@ import com.openexchange.groupware.delete.DeleteListener;
  */
 public final class ImapIdleDeleteListener implements DeleteListener {
 
-    public ImapIdleDeleteListener() {
-        super();
-    }
+	public ImapIdleDeleteListener() {
+		super();
+	}
 
-    @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER == event.getType()) {
-            ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
-            if (null != instance) {
-                instance.stopListener(false, true, event.getId(), event.getContext().getContextId());
-            }
-        }
-    }
+	@Override
+	public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+		if (DeleteEvent.TYPE_USER == event.getType()) {
+			ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
+			if (null != instance) {
+				instance.stopListener(false, true, event.getId(), event.getContext().getContextId());
+			}
+		}
+	}
 
 }
