@@ -57,6 +57,7 @@ import java.util.List;
 import com.datastax.driver.core.Cluster.Initializer;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
+import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
@@ -131,7 +132,13 @@ class CassandraServiceInitializer implements Initializer {
         // Build pooling options
         PoolingOptions poolingOptions = new PoolingOptions();
         int heartbeatInterval = configurationService.getIntProperty(CassandraProperty.poolingHeartbeat.getName(), CassandraProperty.poolingHeartbeat.getDefaultValue(Integer.class));
+        int minLocal = configurationService.getIntProperty(CassandraProperty.minimumLocalConnectionsPerNode.getName(), CassandraProperty.minimumLocalConnectionsPerNode.getDefaultValue(Integer.class));
+        int maxLocal = configurationService.getIntProperty(CassandraProperty.maximumLocalConnectionsPerNode.getName(), CassandraProperty.maximumLocalConnectionsPerNode.getDefaultValue(Integer.class));
+        int minRemote = configurationService.getIntProperty(CassandraProperty.minimumRemoteConnectionsPerNode.getName(), CassandraProperty.minimumRemoteConnectionsPerNode.getDefaultValue(Integer.class));
+        int maxRemote = configurationService.getIntProperty(CassandraProperty.maximumRemoteConnectionsPerNode.getName(), CassandraProperty.maximumRemoteConnectionsPerNode.getDefaultValue(Integer.class));
         poolingOptions.setHeartbeatIntervalSeconds(heartbeatInterval);
+        poolingOptions.setConnectionsPerHost(HostDistance.LOCAL, minLocal, maxLocal);
+        poolingOptions.setConnectionsPerHost(HostDistance.REMOTE, minRemote, maxRemote);
         // Build configuration
         return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).build();
     }

@@ -124,6 +124,20 @@ public enum CassandraProperty {
      * Defaults to 30 seconds
      */
     poolingHeartbeat(30),
+    /**
+     * The Cassandra service's connection pools have a variable size, which gets adjusted automatically
+     * depending on the current load. There will always be at least a minimum number of connections, and
+     * at most a maximum number. These values can be configured independently by host distance (the distance
+     * is determined by your LoadBalancingPolicy, and will generally indicate whether a host is in the same
+     * datacenter or not).
+     * 
+     * Defaults to minimum 4 and maximum 10 for local nodes (i.e. in the same datacenter) and minimum 2 and
+     * maximum 4 for remote nodes
+     */
+    minimumLocalConnectionsPerNode(4),
+    maximumLocalConnectionsPerNode(10),
+    minimumRemoteConnectionsPerNode(2),
+    maximumRemoteConnectionsPerNode(4),
     ;
 
     private Object defaultValue;
