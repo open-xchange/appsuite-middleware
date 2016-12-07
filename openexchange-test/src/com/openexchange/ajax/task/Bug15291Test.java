@@ -110,9 +110,12 @@ public class Bug15291Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client1.execute(new DeleteRequest(task));
-        client1.execute(new com.openexchange.ajax.group.actions.DeleteRequest(group));
-        super.tearDown();
+        try {
+            client1.execute(new DeleteRequest(task));
+            client1.execute(new com.openexchange.ajax.group.actions.DeleteRequest(group));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

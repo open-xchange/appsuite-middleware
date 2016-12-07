@@ -154,11 +154,14 @@ public class Bug17327Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(appointment));
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
-        client2.logout();
+        try {
+            getClient().execute(new DeleteRequest(appointment));
+            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
+            client2.logout();
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     public Appointment createAppointment() throws Exception {

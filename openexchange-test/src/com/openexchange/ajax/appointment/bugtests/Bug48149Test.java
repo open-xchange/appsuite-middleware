@@ -167,12 +167,15 @@ public class Bug48149Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        ctm.cleanUp();
-        ctm2.cleanUp();
-        ctm3.cleanUp();
-        ftm1.cleanUp();
-        ftm2.cleanUp();
-        super.tearDown();
+        try {
+            ctm.cleanUp();
+            ctm2.cleanUp();
+            ctm3.cleanUp();
+            ftm1.cleanUp();
+            ftm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

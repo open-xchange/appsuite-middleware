@@ -90,10 +90,13 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        contactManager.cleanUp();
-        super.tearDown();
+        try {
+            clearFolder(getInboxFolder());
+            clearFolder(getSentFolder());
+            contactManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected boolean contains(List<String> from, String string) {

@@ -97,8 +97,12 @@ public class Bug16515Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        DeleteRequest deleteContactReq = new DeleteRequest(contact, false);
-        getClient().execute(deleteContactReq);
+        try {
+            DeleteRequest deleteContactReq = new DeleteRequest(contact, false);
+            getClient().execute(deleteContactReq);
+        } finally {
+            super.tearDown();
+        }
     }
 
     public Contact createContact() throws Exception {

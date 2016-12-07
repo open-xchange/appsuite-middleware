@@ -93,11 +93,14 @@ public class Bug44891Test extends AbstractInfostoreTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != folder) {
-            DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, folder);
-            getClient().execute(req);
+        try {
+            if (null != folder) {
+                DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, folder);
+                getClient().execute(req);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

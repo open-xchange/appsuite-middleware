@@ -90,8 +90,11 @@ public class Bug15051Test extends AbstractWebDAVSession {
 
     @After
     public void tearDown() throws Exception {
-        client2.execute(new DeleteRequest(contact));
-        super.tearDown();
+        try {
+            client2.execute(new DeleteRequest(contact));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

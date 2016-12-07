@@ -94,9 +94,12 @@ public abstract class AbstractPublicationTest extends AbstractPubSubTest {
 
     @After
     public void tearDown() throws Exception {
-        pubMgr.cleanUp();
-        cMgr.cleanUp();
-        fMgr.cleanUp();
-        super.tearDown();
+        try {
+            pubMgr.cleanUp();
+            cMgr.cleanUp();
+            fMgr.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 }

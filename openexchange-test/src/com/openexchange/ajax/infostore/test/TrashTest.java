@@ -56,7 +56,6 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.UUID;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -105,19 +104,22 @@ public class TrashTest extends AbstractInfostoreTest {
         trashFolderID = getClient().getValues().getInfostoreTrashFolder();
     }
 
-    @After
     @Test
     public void testHardDeleteFolder() throws Exception {
-        /*
-         * hard-delete folder
-         */
-        FolderObject folder = createRandomFolder(testFolder.getObjectID());
-        deleteFolder(folder, Boolean.TRUE);
-        /*
-         * check source & trash folder contents
-         */
-        assertFolderNotExistsInFolder(testFolder.getObjectID(), folder.getObjectID());
-        assertFolderNotExistsInFolder(trashFolderID, folder.getObjectID());
+        try {
+            /*
+             * hard-delete folder
+             */
+            FolderObject folder = createRandomFolder(testFolder.getObjectID());
+            deleteFolder(folder, Boolean.TRUE);
+            /*
+             * check source & trash folder contents
+             */
+            assertFolderNotExistsInFolder(testFolder.getObjectID(), folder.getObjectID());
+            assertFolderNotExistsInFolder(trashFolderID, folder.getObjectID());
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -97,9 +97,12 @@ public class Bug15672Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        DeleteRequest request = new DeleteRequest(EnumAPI.OUTLOOK, folder);
-        client.execute(request);
-        super.tearDown();
+        try {
+            DeleteRequest request = new DeleteRequest(EnumAPI.OUTLOOK, folder);
+            client.execute(request);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

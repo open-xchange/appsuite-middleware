@@ -129,10 +129,13 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdPrivateFolder));
-        clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdPublicFolder));
-        clientB.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdSharedFolder));
-        super.tearDown();
+        try {
+            clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdPrivateFolder));
+            clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdPublicFolder));
+            clientB.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdSharedFolder));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

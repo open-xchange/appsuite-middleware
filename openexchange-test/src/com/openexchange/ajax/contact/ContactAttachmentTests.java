@@ -104,8 +104,11 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(contact));
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(contact));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

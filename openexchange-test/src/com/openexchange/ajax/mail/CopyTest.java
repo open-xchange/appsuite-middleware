@@ -54,7 +54,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -94,18 +93,6 @@ public class CopyTest extends AbstractMailTest {
          * Create JSON mail object
          */
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        /*
-         * Clean everything
-         */
-        // clearFolder(getInboxFolder());
-        // clearFolder(getSentFolder());
-        // clearFolder(getTrashFolder());
-        // clearFolder(getDraftsFolder());
-        super.tearDown();
     }
 
     @Test

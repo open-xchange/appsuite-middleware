@@ -82,21 +82,23 @@ public class Bug30703Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            StopPOP3ServerRequest stopReq = new StopPOP3ServerRequest();
-            getClient().execute(stopReq);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (mailAccountDescription != null) {
-                getClient().execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
+            try {
+                StopPOP3ServerRequest stopReq = new StopPOP3ServerRequest();
+                getClient().execute(stopReq);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        super.tearDown();
+            try {
+                if (mailAccountDescription != null) {
+                    getClient().execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

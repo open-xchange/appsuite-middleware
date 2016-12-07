@@ -144,17 +144,20 @@ public class Bug14111Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        // Delete the exception.
-        final com.openexchange.ajax.appointment.action.DeleteRequest delReq1 = new com.openexchange.ajax.appointment.action.DeleteRequest(exception, false);
-        client.execute(delReq1);
+        try {
+            // Delete the exception.
+            final com.openexchange.ajax.appointment.action.DeleteRequest delReq1 = new com.openexchange.ajax.appointment.action.DeleteRequest(exception, false);
+            client.execute(delReq1);
 
-        // Delete the series.
-        final GetRequest getApp = new GetRequest(appointment, false);
-        final GetResponse getAppResp = client.execute(getApp);
-        final Appointment toDelete = getAppResp.getAppointment(tz);
-        final com.openexchange.ajax.appointment.action.DeleteRequest delReq2 = new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete, false);
-        client.execute(delReq2);
-        super.tearDown();
+            // Delete the series.
+            final GetRequest getApp = new GetRequest(appointment, false);
+            final GetResponse getAppResp = client.execute(getApp);
+            final Appointment toDelete = getAppResp.getAppointment(tz);
+            final com.openexchange.ajax.appointment.action.DeleteRequest delReq2 = new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete, false);
+            client.execute(delReq2);
+        } finally {
+            super.tearDown();
+        }
     }
 
     private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {

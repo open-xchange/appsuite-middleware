@@ -61,7 +61,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -69,6 +68,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestManager;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link MoveTestNew} This test describes the current status of the calendar implementation. It does not cover any user stories or expected
@@ -178,8 +178,12 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        for (TestManager manager : tm) {
-            manager.cleanUp();
+        try {
+            for (TestManager manager : tm) {
+                manager.cleanUp();
+            }
+        } finally {
+            super.tearDown();
         }
     }
 

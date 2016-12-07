@@ -255,7 +255,7 @@ public class BasicTest extends CardDAVTest {
          */
         List<String> expectedCollections = new ArrayList<String>();
         VisibleFoldersRequest foldersRequest = new VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME });
-        VisibleFoldersResponse foldersResponse = client.execute(foldersRequest);
+        VisibleFoldersResponse foldersResponse = getClient().execute(foldersRequest);
         Iterator<FolderObject> folders = foldersResponse.getPrivateFolders();
         while (folders.hasNext()) {
             expectedCollections.add("/carddav/" + folders.next().getObjectID() + '/');

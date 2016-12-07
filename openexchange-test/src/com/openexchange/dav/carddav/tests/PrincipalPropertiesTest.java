@@ -96,7 +96,7 @@ public class PrincipalPropertiesTest extends CardDAVTest {
         final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/principals/users/" + getClient().getValues().getUserId() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         final GetRequest getRequest = new GetRequest(super.getAJAXClient().getValues().getUserId(), super.getAJAXClient().getValues().getTimeZone());
-        final GetResponse getResponse = Executor.execute(client, getRequest);
+        final GetResponse getResponse = Executor.execute(getClient(), getRequest);
         final Contact contact = getResponse.getContact();
         final String expectedDisplayName = contact.getDisplayName();
         assertEquals(PropertyNames.DISPLAYNAME + " wrong", expectedDisplayName, super.extractTextContent(PropertyNames.DISPLAYNAME, response));

@@ -50,12 +50,11 @@
 package com.openexchange.test.pool;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.java.ConcurrentHashSet;
 
 /**
  * {@link TestContext}
@@ -76,11 +75,11 @@ public class TestContext implements Serializable {
 
     private final int id;
 
-    private volatile List<TestUser> acquiredUsers = Collections.synchronizedList(new ArrayList<TestUser>()); //required for reset
+    private volatile ConcurrentHashSet<TestUser> acquiredUsers = new ConcurrentHashSet<TestUser>(); //required for reset
 
     private volatile BlockingQueue<TestUser> users = new LinkedBlockingQueue<>();
 
-    private volatile List<String> acquiredGroupParticipants = Collections.synchronizedList(new ArrayList<String>()); //required for reset
+    private volatile ConcurrentHashSet<String> acquiredGroupParticipants = new ConcurrentHashSet<String>(); //required for reset
 
     private volatile BlockingQueue<String> groupParticipants = new LinkedBlockingQueue<>();
 
@@ -106,7 +105,7 @@ public class TestContext implements Serializable {
 
     public String acquireGroupParticipant() {
         try {
-            String participant = groupParticipants.take();
+            String participant = groupParticipants.poll(10L, TimeUnit.SECONDS);
             acquiredGroupParticipants.add(participant);
             return participant;
         } catch (InterruptedException e) {

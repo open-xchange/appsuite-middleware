@@ -98,9 +98,11 @@ public class Bug15897Test extends AbstractTaskTest {
 
     @After
     public void tearDown() throws Exception {
-        DeleteRequest request = new DeleteRequest(task);
-        client.execute(request);
-        super.tearDown();
+        try {
+            client.execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

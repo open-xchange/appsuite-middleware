@@ -106,9 +106,11 @@ public class CreatedByTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

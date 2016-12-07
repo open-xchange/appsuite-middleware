@@ -113,9 +113,12 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        ctm.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
+        try {
+            ctm.cleanUp();
+            ftm.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

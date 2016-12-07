@@ -108,8 +108,11 @@ public final class Bug12470Test extends AbstractAJAXSession {
      */
     @After
     public void tearDown() throws Exception {
-        deleteTask();
-        super.tearDown();
+        try {
+            deleteTask();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

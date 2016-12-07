@@ -97,10 +97,13 @@ public final class Bug35992Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (task.containsObjectID()) {
-            client1.execute(new DeleteRequest(task));
+        try {
+            if (task.containsObjectID()) {
+                client1.execute(new DeleteRequest(task));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

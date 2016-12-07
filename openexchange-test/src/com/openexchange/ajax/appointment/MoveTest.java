@@ -34,13 +34,16 @@ public class MoveTest extends AppointmentTest {
 
     @After
     public void tearDown() throws Exception {
+        try {
         if (0 != objectId) {
             deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
         }
         if (0 != targetFolder) {
             com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password, context);
         }
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

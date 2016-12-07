@@ -92,9 +92,12 @@ public class CalendarFindTest extends AbstractFindTest {
 
     @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
-        manager2.cleanUp();
-        super.tearDown();
+        try {
+            manager.cleanUp();
+            manager2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

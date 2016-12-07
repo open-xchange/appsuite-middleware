@@ -39,8 +39,11 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
+        try {
         clearFolder(folder);
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

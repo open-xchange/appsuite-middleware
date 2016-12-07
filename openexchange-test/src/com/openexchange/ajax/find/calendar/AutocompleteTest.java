@@ -76,8 +76,11 @@ public class AutocompleteTest extends CalendarFindTest {
 
     @After
     public void tearDown() throws Exception {
-        contactManager.cleanUp();
-        super.tearDown();
+        try {
+            contactManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

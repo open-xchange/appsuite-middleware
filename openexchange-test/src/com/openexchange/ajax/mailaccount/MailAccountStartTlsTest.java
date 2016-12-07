@@ -84,11 +84,14 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != mailAccount) {
-            MailAccountDeleteRequest req = new MailAccountDeleteRequest(mailAccount.getId());
-            getClient().execute(req);
+        try {
+            if (null != mailAccount) {
+                MailAccountDeleteRequest req = new MailAccountDeleteRequest(mailAccount.getId());
+                getClient().execute(req);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

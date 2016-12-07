@@ -104,8 +104,11 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(task));
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

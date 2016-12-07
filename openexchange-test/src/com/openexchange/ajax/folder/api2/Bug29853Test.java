@@ -92,10 +92,13 @@ public class Bug29853Test extends AbstractFolderTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != folder) {
-            super.deleteFolders(true, folder);
+        try {
+            if (null != folder) {
+                super.deleteFolders(true, folder);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

@@ -121,9 +121,12 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
 
     @After
     public void tearDown() throws Exception {
-        manager2.cleanUp();
-        folderManager2.cleanUp();
-        super.tearDown();
+        try {
+            manager2.cleanUp();
+            folderManager2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -90,18 +90,24 @@ public class Bug44309Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         manager2 = new CalendarTestManager(new AJAXClient(testUser));
         manager2.setFailOnError(true);
     }
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
+        try {
+            if (null != this.manager2) {
+                this.manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    manager2.getClient().logout();
+                }
             }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test

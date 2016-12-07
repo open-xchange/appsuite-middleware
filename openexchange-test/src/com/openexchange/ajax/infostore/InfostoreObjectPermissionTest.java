@@ -146,16 +146,19 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (itm != null) {
-            itm.cleanUp();
+        try {
+            if (itm != null) {
+                itm.cleanUp();
+            }
+            if (ftm != null) {
+                ftm.cleanUp();
+            }
+            if (client2 != null) {
+                client2.logout();
+            }
+        } finally {
+            super.tearDown();
         }
-        if (ftm != null) {
-            ftm.cleanUp();
-        }
-        if (client2 != null) {
-            client2.logout();
-        }
-        super.tearDown();
     }
 
     @Test

@@ -89,18 +89,11 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
 
     protected String EML;
 
-    /**
-     * Initializes a new {@link AbstractMailCategoriesTest}.
-     *
-     * @param name
-     */
-    public AbstractMailCategoriesTest() {}
-
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         AJAXClient configClient = getClient();
         setUpConfiguration(configClient, true);
-        super.setUp();
         AllResponse response = getClient().execute(new AllRequest());
         Assume.assumeTrue("User does not have the mail_categories capability. Probably the mailserver does not support imap4flags.", response.getCapabilities().contains("mail_categories"));
         values = getClient().getValues();
@@ -110,12 +103,15 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
 
     @After
     public void tearDown() throws Exception {
-        if (values != null) {
-            clearFolder(values.getSentFolder());
-            clearFolder(values.getInboxFolder());
-            clearFolder(values.getDraftsFolder());
+        try {
+            if (values != null) {
+                clearFolder(values.getSentFolder());
+                clearFolder(values.getInboxFolder());
+                clearFolder(values.getDraftsFolder());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Override

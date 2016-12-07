@@ -96,9 +96,12 @@ public class AbstractPubSubRoundtripTest extends AbstractPubSubTest {
 
     @After
     public void tearDown() throws Exception {
-        getSubscribeManager().cleanUp();
-        getPublishManager().cleanUp();
-        super.tearDown();
+        try {
+            getSubscribeManager().cleanUp();
+            getPublishManager().cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected void assertNoDataMessedUpMinimumRequirements(Contact expected, Contact actual) {

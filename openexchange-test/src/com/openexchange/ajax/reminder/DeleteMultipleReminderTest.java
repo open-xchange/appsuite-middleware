@@ -127,14 +127,15 @@ public class DeleteMultipleReminderTest extends ReminderTest {
 
     @After
     public void tearDown() throws Exception {
-        appointment.setLastModified(new Date(Long.MAX_VALUE));
-        com.openexchange.ajax.appointment.action.DeleteRequest aDelReq = new com.openexchange.ajax.appointment.action.DeleteRequest(appointment);
-        client.execute(aDelReq);
+        try {
+            appointment.setLastModified(new Date(Long.MAX_VALUE));
+            com.openexchange.ajax.appointment.action.DeleteRequest aDelReq = new com.openexchange.ajax.appointment.action.DeleteRequest(appointment);
+            client.execute(aDelReq);
 
-        com.openexchange.ajax.task.actions.DeleteRequest tDelReq = new com.openexchange.ajax.task.actions.DeleteRequest(task);
-        //        client.execute(tDelReq);
-
-        super.tearDown();
+            com.openexchange.ajax.task.actions.DeleteRequest tDelReq = new com.openexchange.ajax.task.actions.DeleteRequest(task);
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

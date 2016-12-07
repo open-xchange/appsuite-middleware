@@ -128,7 +128,8 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     @Before
-    public void setUpFixtures() throws Exception {
+    public void setUp() throws Exception {
+        super.setUp();
         /*
          * init
          */
@@ -139,9 +140,13 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     @After
-    public void closeTestManager() throws Exception {
-        if (null != this.getManager()) {
-            this.getManager().cleanUp();
+    public void tearDown() throws Exception {
+        try {
+            if (null != this.getManager()) {
+                this.getManager().cleanUp();
+            }
+        } finally {
+            super.tearDown();
         }
     }
 
@@ -339,7 +344,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected VCardResource getGlobalAddressbookVCard() throws Exception {
-        GetResponse response = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, getGABFolderID()));
+        GetResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, getGABFolderID()));
         String gabFolderName = response.getFolder().getFolderName();
         return getGroupVCard(gabFolderName);
     }

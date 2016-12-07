@@ -85,10 +85,13 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != originalLocale) {
-            getClient().execute(new SetRequest(Tree.Language, originalLocale));
+        try {
+            if (null != originalLocale) {
+                getClient().execute(new SetRequest(Tree.Language, originalLocale));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

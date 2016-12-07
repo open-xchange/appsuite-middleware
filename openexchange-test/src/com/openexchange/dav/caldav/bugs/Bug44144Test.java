@@ -97,7 +97,7 @@ public class Bug44144Test extends CalDAVTest {
          */
         int parentFolderID = Integer.parseInt(getDefaultFolderID());
         ICalImportRequest importRequest = new ICalImportRequest(parentFolderID, Streams.newByteArrayInputStream(iCal.getBytes(Charsets.UTF_8)));
-        ICalImportResponse importResponse = client.execute(importRequest);
+        ICalImportResponse importResponse = getClient().execute(importRequest);
         ImportResult[] importResult = importResponse.getImports();
         assertNotNull("No import result", importResult);
         assertEquals("Unexpected number of import results", 1, importResult.length);

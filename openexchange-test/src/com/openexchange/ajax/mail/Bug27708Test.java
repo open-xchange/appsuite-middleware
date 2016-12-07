@@ -112,28 +112,31 @@ public final class Bug27708Test extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        // Delete sent mails.
-        for (int i = 0; i < clients.length; i++) {
-            clients[i].execute(new DeleteRequest(sentMails[i].toArray(new String[sentMails[i].size()][]), true));
-        }
-        // Delete received mails.
-        String inboxFolder = getClient().getValues().getInboxFolder();
-        AllRequest request = new AllRequest(inboxFolder, new int[] { 600 }, -1, null, true);
-        AllResponse response = getClient().execute(request);
-        final String[][] folderAndIDs = new String[response.size()][2];
-        for (int i = 0; i < response.size(); i++) {
-            folderAndIDs[i] = new String[] { inboxFolder, (String) response.getValue(i, 600) };
-        }
-        getClient().execute(new DeleteRequest(folderAndIDs, true));
-        // Logout clients.
-        if (null != clients) {
-            for (AJAXClient client : clients) {
-                if (null != client)
-                    getClient().logout();
+        try {
+            // Delete sent mails.
+            for (int i = 0; i < clients.length; i++) {
+                clients[i].execute(new DeleteRequest(sentMails[i].toArray(new String[sentMails[i].size()][]), true));
             }
-            clients = null;
+            // Delete received mails.
+            String inboxFolder = getClient().getValues().getInboxFolder();
+            AllRequest request = new AllRequest(inboxFolder, new int[] { 600 }, -1, null, true);
+            AllResponse response = getClient().execute(request);
+            final String[][] folderAndIDs = new String[response.size()][2];
+            for (int i = 0; i < response.size(); i++) {
+                folderAndIDs[i] = new String[] { inboxFolder, (String) response.getValue(i, 600) };
+            }
+            getClient().execute(new DeleteRequest(folderAndIDs, true));
+            // Logout clients.
+            if (null != clients) {
+                for (AJAXClient client : clients) {
+                    if (null != client)
+                        getClient().logout();
+                }
+                clients = null;
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

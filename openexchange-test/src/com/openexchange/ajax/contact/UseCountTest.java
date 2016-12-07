@@ -85,7 +85,7 @@ public class UseCountTest extends ContactTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        
+
         ftm = new FolderTestManager(getClient());
         FolderObject folder = ftm.generatePrivateFolder("useCountTest", Module.CONTACTS.getFolderConstant(), getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
@@ -108,10 +108,13 @@ public class UseCountTest extends ContactTest {
 
     @After
     public void tearDown() throws Exception {
-        mtm.cleanUp();
-        ctm.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
+        try {
+            mtm.cleanUp();
+            ctm.cleanUp();
+            ftm.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

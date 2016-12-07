@@ -86,8 +86,11 @@ public class MailSearchTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        clearFolder(folder);
-        super.tearDown();
+        try {
+            clearFolder(folder);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

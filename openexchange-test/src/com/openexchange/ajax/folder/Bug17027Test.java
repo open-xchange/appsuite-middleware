@@ -98,10 +98,13 @@ public class Bug17027Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (!folderDeleted) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
+        try {
+            if (!folderDeleted) {
+                client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

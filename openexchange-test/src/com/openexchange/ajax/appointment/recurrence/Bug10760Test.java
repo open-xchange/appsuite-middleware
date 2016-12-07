@@ -75,9 +75,12 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 
     @After
     public void tearDown() throws Exception {
-        super.tearDown();
-        if (objectId != -1) {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        try {
+            if (objectId != -1) {
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+            }
+        } finally {
+            super.tearDown();
         }
     }
 

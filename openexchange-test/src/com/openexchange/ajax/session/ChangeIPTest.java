@@ -86,8 +86,11 @@ public final class ChangeIPTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
+        try {
         client = null;
+    } finally {
         super.tearDown();
+    }
     }
 
     @Test

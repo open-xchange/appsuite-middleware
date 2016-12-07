@@ -93,9 +93,12 @@ public class Bug30903Test extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        DeleteRequest delReq = new DeleteRequest(fmids, true);
-        getClient().execute(delReq);
-        super.tearDown();
+        try {
+            DeleteRequest delReq = new DeleteRequest(fmids, true);
+            getClient().execute(delReq);
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

@@ -106,13 +106,16 @@ public final class Bug28089Test extends AbstractTaskTest {
 
     @After
     public void tearDown() throws Exception {
-        GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder.getObjectID(), false));
-        if (!response.hasError()) {
-            client1.execute(new DeleteRequest(task));
-            folder.setLastModified(response.getTimestamp());
-            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
+        try {
+            GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder.getObjectID(), false));
+            if (!response.hasError()) {
+                client1.execute(new DeleteRequest(task));
+                folder.setLastModified(response.getTimestamp());
+                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

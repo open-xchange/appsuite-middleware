@@ -119,9 +119,12 @@ public class UpdatesTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        itm.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
+        try {
+            itm.cleanUp();
+            ftm.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

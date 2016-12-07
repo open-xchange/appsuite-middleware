@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -312,14 +311,17 @@ public class Bug33242Test extends AbstractAJAXSession {
         ctm.delete(single);
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        single.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        ctm.cleanUp();
-        ctm2.cleanUp();
-        super.tearDown();
+        try {
+            series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+            exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+            single.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+            ctm.cleanUp();
+            ctm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

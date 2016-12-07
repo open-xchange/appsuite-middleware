@@ -162,8 +162,11 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
 
     @After
     public void tearDown() throws Exception {
-        removeFolder(folderId);
-        super.tearDown();
+        try {
+            removeFolder(folderId);
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

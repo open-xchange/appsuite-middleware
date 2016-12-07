@@ -111,9 +111,12 @@ public class MSISDNAddressTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        // reset to original Number if tests expect this
-        setCellularNumberOfContact(originalCellPhoneNumber);
-        super.tearDown();
+        try {
+            // reset to original Number if tests expect this
+            setCellularNumberOfContact(originalCellPhoneNumber);
+        } finally {
+            super.tearDown();
+        }
     }
 
     private void setCellularNumberOfContact(String cellPhoneNumber) throws OXException, IOException, JSONException {

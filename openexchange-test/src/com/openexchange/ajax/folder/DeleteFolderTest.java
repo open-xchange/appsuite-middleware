@@ -111,20 +111,23 @@ public class DeleteFolderTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        // Delete testFolder
-        if (testFolder != null) {
-            secondClient.execute(new DeleteRequest(EnumAPI.OX_OLD, testFolder));
-            testFolder = null;
-            parentId = -1;
-        }
+        try {
+            // Delete testFolder
+            if (testFolder != null) {
+                secondClient.execute(new DeleteRequest(EnumAPI.OX_OLD, testFolder));
+                testFolder = null;
+                parentId = -1;
+            }
 
-        if (secondClient != null) {
-            secondClient.logout();
-            secondClient = null;
-            secondUserValues = null;
-        }
+            if (secondClient != null) {
+                secondClient.logout();
+                secondClient = null;
+                secondUserValues = null;
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

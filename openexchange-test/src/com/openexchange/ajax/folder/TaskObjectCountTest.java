@@ -72,10 +72,6 @@ public final class TaskObjectCountTest extends AbstractObjectCountTest {
 
     private static final Random rand = new Random(System.currentTimeMillis());
 
-    public TaskObjectCountTest() {
-        super();
-    }
-
     @Test
     public void testCountInPrivateFolder() throws Exception {
         FolderTestManager ftm = new FolderTestManager(client1);

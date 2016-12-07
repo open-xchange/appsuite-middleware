@@ -101,8 +101,11 @@ public class ResourceCacheTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        clearCache();
-        super.tearDown();
+        try {
+            clearCache();
+        } finally {
+            super.tearDown();
+        }
     }
 
     private void clearCache() throws OXException, IOException, JSONException {

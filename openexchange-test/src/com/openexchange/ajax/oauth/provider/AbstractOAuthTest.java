@@ -111,7 +111,7 @@ public abstract class AbstractOAuthTest {
     }
 
     @After
-    public void after() throws Exception {
+    public void tearDown() throws Exception {
         try {
             ajaxClient.logout();
             client.logout();

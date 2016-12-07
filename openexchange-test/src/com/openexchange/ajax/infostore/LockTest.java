@@ -125,10 +125,11 @@ public class LockTest extends InfostoreAJAXTest {
 
     @After
     public void tearDown() throws Exception {
-
-        FolderTest.deleteFolders(getWebConversation(), getHostName(), sessionId, new int[] { folderId }, Long.MAX_VALUE, false);
-        super.tearDown();
-
+        try {
+            FolderTest.deleteFolders(getWebConversation(), getHostName(), sessionId, new int[] { folderId }, Long.MAX_VALUE, false);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

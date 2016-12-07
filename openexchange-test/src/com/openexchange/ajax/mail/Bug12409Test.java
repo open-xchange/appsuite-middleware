@@ -106,9 +106,12 @@ public class Bug12409Test extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        // clean the drafts folder
-        clearFolder(getDraftsFolder());
-        super.tearDown();
+        try {
+            // clean the drafts folder
+            clearFolder(getDraftsFolder());
+        } finally {
+            super.tearDown();
+        }
     }
 
     public Bug12409Test() {

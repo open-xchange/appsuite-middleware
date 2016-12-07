@@ -77,16 +77,6 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
 
     private CalendarTestManager ctm2;
 
-    /**
-     * Initializes a new {@link AppointmentObjectCountTest}.
-     * 
-     * @param name
-     */
-    public AppointmentObjectCountTest() {
-        super();
-    }
-
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -161,10 +151,13 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
 
     @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ctm2.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
+        try {
+            ctm1.cleanUp();
+            ctm2.cleanUp();
+            ftm.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /*

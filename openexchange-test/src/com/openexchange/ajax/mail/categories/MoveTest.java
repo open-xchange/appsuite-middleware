@@ -67,8 +67,6 @@ import com.openexchange.exception.OXException;
  */
 public class MoveTest extends AbstractMailCategoriesTest {
 
-    public MoveTest() {}
-
     @Test
     public void testShouldMoveToAnotherCategory() throws OXException, IOException, SAXException, JSONException {
         MailTestManager manager = new MailTestManager(getClient(), false);

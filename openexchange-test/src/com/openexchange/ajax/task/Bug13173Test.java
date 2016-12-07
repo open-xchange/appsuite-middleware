@@ -102,9 +102,12 @@ public class Bug13173Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        ttm.cleanUp();
-        deleteDuplicates(duplicates);
-        super.tearDown();
+        try {
+            ttm.cleanUp();
+            deleteDuplicates(duplicates);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

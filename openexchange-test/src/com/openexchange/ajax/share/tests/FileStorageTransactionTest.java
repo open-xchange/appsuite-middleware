@@ -120,10 +120,13 @@ public class FileStorageTransactionTest extends ShareTest {
 
     @After
     public void tearDown() throws Exception {
-        if (itm != null) {
-            itm.cleanUp();
+        try {
+            if (itm != null) {
+                itm.cleanUp();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

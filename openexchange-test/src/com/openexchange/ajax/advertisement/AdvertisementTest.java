@@ -73,11 +73,11 @@ import com.openexchange.ajax.advertisement.actions.SetConfigRequest;
 import com.openexchange.ajax.advertisement.actions.SetConfigResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link AdvertisementTest}
@@ -149,23 +149,26 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     @After
     public void after() throws Exception {
-
-        switch (packageScheme) {
-            case "Global":
-                //nothing to do
-                break;
-            case "AccessCombinations":
-                //nothing to do
-                break;
-            case "TaxonomyTypes":
-                // Change to old taxonomy types
-                if (old != null) {
-                    TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
-                    Credentials credentials = new Credentials(oxAdminMaster.getLogin(), oxAdminMaster.getPassword());
-                    OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
-                    ctxInterface.change(old, credentials);
-                }
-                break;
+        try {
+            switch (packageScheme) {
+                case "Global":
+                    //nothing to do
+                    break;
+                case "AccessCombinations":
+                    //nothing to do
+                    break;
+                case "TaxonomyTypes":
+                    // Change to old taxonomy types
+                    if (old != null) {
+                        TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
+                        Credentials credentials = new Credentials(oxAdminMaster.getLogin(), oxAdminMaster.getPassword());
+                        OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
+                        ctxInterface.change(old, credentials);
+                    }
+                    break;
+            }
+        } finally {
+            super.tearDown();
         }
     }
 

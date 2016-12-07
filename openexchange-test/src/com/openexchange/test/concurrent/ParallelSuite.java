@@ -47,59 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.test.concurrent;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import org.junit.runners.Suite;
+import org.junit.runners.model.RunnerBuilder;
+import org.junit.runners.model.RunnerScheduler;
 
 /**
- * {@link AbstractJUnit4AjaxSession}
+ * {@link ParallelSuite}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.3
  */
-@RunWith(ConcurrentTestRunner.class)
-public abstract class AbstractJUnit4AjaxSession {
+public class ParallelSuite extends Suite {
+    public ParallelSuite(Class<?> klass, RunnerBuilder builder) throws org.junit.runners.model.InitializationError {
 
-    private AJAXClient client;
-    protected TestContext testContext;
+        super(klass, builder);
 
-    /**
-     * Default constructor.
-     * 
-     * @param name name of the test.
-     */
-    protected AbstractJUnit4AjaxSession() {}
+        setScheduler(new RunnerScheduler() {
 
-    @Before
-    public void setUp() throws Exception {
-        testContext = TestContextPool.acquireContext();
+            private final ExecutorService service = Executors.newFixedThreadPool(10);
 
-        client = new AJAXClient(testContext.acquireUser());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (client != null) {
-                // Client can be null if setUp() fails
-                client.logout();
+            public void schedule(Runnable childStatement) {
+                service.submit(childStatement);
             }
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
-    }
 
-    public AJAXSession getSession() {
-        return client.getSession();
+            public void finished() {
+                try {
+                    service.shutdown();
+                    service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace(System.err);
+                }
+            }
+        });
     }
-
-    protected AJAXClient getClient() {
-        return client;
-    }
-
 }

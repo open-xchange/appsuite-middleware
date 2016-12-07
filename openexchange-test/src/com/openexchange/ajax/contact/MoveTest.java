@@ -108,9 +108,11 @@ public class MoveTest extends AbstractContactTest {
 
     @After
     public void tearDown() throws Exception {
-        deleteContact(objectId, targetFolder, true);
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
-
-        super.tearDown();
+        try {
+            deleteContact(objectId, targetFolder, true);
+            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
+        } finally {
+            super.tearDown();
+        }
     }
 }

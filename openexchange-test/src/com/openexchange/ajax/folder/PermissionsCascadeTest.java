@@ -98,12 +98,15 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (CLEANUP) {
-            getClient().execute(new DeleteRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID(), rootFolder.getLastModified()));
-            getClient().execute(new ClearRequest(EnumAPI.OUTLOOK, getClient().getValues().getInfostoreTrashFolder()));
-        }
+        try {
+            if (CLEANUP) {
+                getClient().execute(new DeleteRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID(), rootFolder.getLastModified()));
+                getClient().execute(new ClearRequest(EnumAPI.OUTLOOK, getClient().getValues().getInfostoreTrashFolder()));
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

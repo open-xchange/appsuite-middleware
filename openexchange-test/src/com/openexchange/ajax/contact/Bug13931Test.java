@@ -135,9 +135,11 @@ public class Bug13931Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-
-        super.tearDown();
+        try {
+            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

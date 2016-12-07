@@ -109,8 +109,11 @@ public abstract class ContactsFindTest extends AbstractFindTest {
 
     @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

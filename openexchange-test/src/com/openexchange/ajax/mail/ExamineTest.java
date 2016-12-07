@@ -89,14 +89,17 @@ public class ExamineTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        if (subFolder != null) {
-            com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
-            getClient().execute(fDel);
+        try {
+            if (subFolder != null) {
+                com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
+                getClient().execute(fDel);
+            }
+            clearFolder(getInboxFolder());
+            clearFolder(getSentFolder());
+            clearFolder(getTrashFolder());
+        } finally {
+            super.tearDown();
         }
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-        super.tearDown();
     }
 
     @Test

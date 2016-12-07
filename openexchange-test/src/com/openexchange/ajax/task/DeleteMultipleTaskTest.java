@@ -109,21 +109,23 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        final GetRequest getReq1 = new GetRequest(task1.getParentFolderID(), task1.getObjectID(), false);
-        final GetResponse getRes1 = getClient().execute(getReq1);
-        if (!getRes1.hasError()) {
-            final DeleteRequest delReq = new DeleteRequest(task1, false);
-            getClient().execute(delReq);
-        }
+        try {
+            final GetRequest getReq1 = new GetRequest(task1.getParentFolderID(), task1.getObjectID(), false);
+            final GetResponse getRes1 = getClient().execute(getReq1);
+            if (!getRes1.hasError()) {
+                final DeleteRequest delReq = new DeleteRequest(task1, false);
+                getClient().execute(delReq);
+            }
 
-        final GetRequest getReq2 = new GetRequest(task2.getParentFolderID(), task2.getObjectID(), false);
-        final GetResponse getRes2 = getClient().execute(getReq2);
-        if (!getRes2.hasError()) {
-            final DeleteRequest delReq = new DeleteRequest(task2, false);
-            getClient().execute(delReq);
+            final GetRequest getReq2 = new GetRequest(task2.getParentFolderID(), task2.getObjectID(), false);
+            final GetResponse getRes2 = getClient().execute(getReq2);
+            if (!getRes2.hasError()) {
+                final DeleteRequest delReq = new DeleteRequest(task2, false);
+                getClient().execute(delReq);
+            }
+        } finally {
+            super.tearDown();
         }
-
-        super.tearDown();
     }
 
     @Test

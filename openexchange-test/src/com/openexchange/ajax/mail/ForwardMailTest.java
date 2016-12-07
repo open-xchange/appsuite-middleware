@@ -81,8 +81,11 @@ public class ForwardMailTest extends AbstractReplyTest {
 
     @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

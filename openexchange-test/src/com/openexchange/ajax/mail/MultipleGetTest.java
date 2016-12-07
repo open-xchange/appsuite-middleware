@@ -100,10 +100,13 @@ public class MultipleGetTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        for (String[][] fmid : fmids) {
-            getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+        try {
+            for (String[][] fmid : fmids) {
+                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     private void importMail(String emlName) throws OXException, IOException, JSONException {

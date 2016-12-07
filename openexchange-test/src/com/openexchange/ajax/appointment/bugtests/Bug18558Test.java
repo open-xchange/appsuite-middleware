@@ -171,10 +171,13 @@ public class Bug18558Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        appointment.setLastModified(new Date(Long.MAX_VALUE));
-        if (appointment.getObjectID() > 0) {
-            clientC.execute(new DeleteRequest(appointment));
+        try {
+            appointment.setLastModified(new Date(Long.MAX_VALUE));
+            if (appointment.getObjectID() > 0) {
+                clientC.execute(new DeleteRequest(appointment));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 }

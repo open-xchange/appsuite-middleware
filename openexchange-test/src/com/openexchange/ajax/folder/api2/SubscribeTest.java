@@ -105,8 +105,11 @@ public class SubscribeTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(EnumAPI.EAS_FOLDERS, testFolder));
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(EnumAPI.EAS_FOLDERS, testFolder));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

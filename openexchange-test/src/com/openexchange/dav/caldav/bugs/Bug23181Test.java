@@ -61,7 +61,6 @@ import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -72,6 +71,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link Bug23181Test}
@@ -87,6 +87,7 @@ public class Bug23181Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         manager2 = new CalendarTestManager(new AJAXClient(testUser));
         manager2.setFailOnError(true);
         testUser2 = testContext.acquireUser();
@@ -95,11 +96,15 @@ public class Bug23181Test extends CalDAVTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
+        try {
+            if (null != this.manager2) {
+                this.manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    manager2.getClient().logout();
+                }
             }
+        } finally {
+            super.tearDown();
         }
     }
 
@@ -112,7 +117,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = client.execute(new GetRequest(Tree.DefaultAddress)).getString();
+        String userA = getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
         String userB = manager2.getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
         String uid = randomUID();
         String summary = "Bug23181Test";

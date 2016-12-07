@@ -88,6 +88,7 @@ public class Bug24682Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         /*
          * setup managers for other users
          */
@@ -111,37 +112,42 @@ public class Bug24682Test extends CalDAVTest {
 
     @After
     public void tearDown() throws Exception {
-        /*
-         * cleanup
-         */
-        if (null != managers) {
-            for (CalendarTestManager manager : managers) {
-                if (null != manager) {
-                    manager.cleanUp();
+        try {
+            /*
+             * cleanup
+             */
+            if (null != managers) {
+                for (CalendarTestManager manager : managers) {
+                    if (null != manager) {
+                        manager.cleanUp();
+                    }
                 }
             }
-        }
-        /*
-         * unshare user C's calendar
-         */
-        if (null != userC && null != userC.getClient()) {
-            if (null != userA && null != userA.getClient()) {
-                FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userA.getClient().getValues().getUserId());
-            }
-            if (null != userB && null != userB.getClient()) {
-                FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userB.getClient().getValues().getUserId());
-            }
-        }
-        /*
-         * close managers
-         */
-        if (null != managers) {
-            for (CalendarTestManager manager : managers) {
-                if (null != manager && null != manager.getClient()) {
-                    manager.getClient().logout();
+            /*
+             * unshare user C's calendar
+             */
+            if (null != userC && null != userC.getClient()) {
+                if (null != userA && null != userA.getClient()) {
+                    FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userA.getClient().getValues().getUserId());
+                }
+                if (null != userB && null != userB.getClient()) {
+                    FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userB.getClient().getValues().getUserId());
                 }
             }
+            /*
+             * close managers
+             */
+            if (null != managers) {
+                for (CalendarTestManager manager : managers) {
+                    if (null != manager && null != manager.getClient()) {
+                        manager.getClient().logout();
+                    }
+                }
+            }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test

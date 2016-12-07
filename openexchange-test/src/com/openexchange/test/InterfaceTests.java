@@ -62,13 +62,15 @@ import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Test suite for all AJAX interface tests.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
+//@RunWith(Suite.class)
 @Suite.SuiteClasses({
     com.openexchange.SmokeTestSuite.class,
     com.openexchange.ajax.FolderTest.class,

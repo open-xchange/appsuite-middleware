@@ -150,13 +150,15 @@ public class Bug13826Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (appointment != null && lastModified != null) {
-            appointment.setLastModified(lastModified);
-            getClient().execute(new DeleteRequest(appointment.getObjectID(), currentFolder, lastModified));
+        try {
+            if (appointment != null && lastModified != null) {
+                appointment.setLastModified(lastModified);
+                getClient().execute(new DeleteRequest(appointment.getObjectID(), currentFolder, lastModified));
+            }
+            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        } finally {
+            super.tearDown();
         }
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-
-        super.tearDown();
     }
 
     private void setCurrentValues(Appointment appointment) {

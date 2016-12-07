@@ -117,9 +117,12 @@ public class Bug18204Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task, true));
+        try {
+            client.execute(new DeleteRequest(task, true));
+        } finally {
+            super.tearDown();
+        }
 
-        super.tearDown();
     }
 
     private Task createTask() throws Exception {

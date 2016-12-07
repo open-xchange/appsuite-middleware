@@ -144,10 +144,13 @@ public class Bug41794Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ctm2.cleanUp();
-        ctm3.cleanUp();
-        super.tearDown();
+        try {
+            ctm1.cleanUp();
+            ctm2.cleanUp();
+            ctm3.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     private GroupParticipant getGroupParticipant(String groupParticipant) throws OXException, IOException, JSONException {

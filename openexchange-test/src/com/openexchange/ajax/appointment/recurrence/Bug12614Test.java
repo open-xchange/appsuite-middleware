@@ -126,11 +126,14 @@ public final class Bug12614Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        secretaryDeletesSeries();
-        bossUnsharesPrivateFolder();
-        thirdUser.logout();
-        secretary.logout();
-        super.tearDown();
+        try {
+            secretaryDeletesSeries();
+            bossUnsharesPrivateFolder();
+            thirdUser.logout();
+            secretary.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -73,12 +73,14 @@ public class CopyTest extends AbstractContactTest {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(contactFolderId, objectId1, new Date(ts1), false));
-        if (objectId2 > 0) {
-            getClient().execute(new DeleteRequest(targetFolder, objectId2, new Date(ts2), false));
+        try {
+            getClient().execute(new DeleteRequest(contactFolderId, objectId1, new Date(ts1), false));
+            if (objectId2 > 0) {
+                getClient().execute(new DeleteRequest(targetFolder, objectId2, new Date(ts2), false));
+            }
+            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
+        } finally {
+            super.tearDown();
         }
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
-
-        super.tearDown();
     }
 }

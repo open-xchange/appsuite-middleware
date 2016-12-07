@@ -97,8 +97,11 @@ public final class SendTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

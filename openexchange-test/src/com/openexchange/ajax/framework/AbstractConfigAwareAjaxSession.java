@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
+import org.junit.After;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -64,7 +65,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxSession {
+public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link AbstractConfigAwareAjaxSession}.
@@ -97,10 +98,9 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxS
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        super.setUp();
-
+        try {
         if (oldData != null) {
             // change back to old value if present
             Map<String, Object> map = oldData.asMap();
@@ -118,6 +118,9 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxS
                 ChangePropertiesResponse response = getClient().execute(req);
                 oldData = ResponseWriter.getJSON(response.getResponse());
             }
+        }
+        } finally {
+            super.tearDown();
         }
     }
 

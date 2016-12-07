@@ -36,6 +36,7 @@ public class Bug4395Test extends AppointmentTest {
                 FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
             }
         }
+        
     }
 
     @Test

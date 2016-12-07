@@ -84,10 +84,13 @@ public class MoveMailTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        clearFolder(values.getSentFolder());
-        clearFolder(values.getInboxFolder());
-        clearFolder(values.getDraftsFolder());
-        super.tearDown();
+        try {
+            clearFolder(values.getSentFolder());
+            clearFolder(values.getInboxFolder());
+            clearFolder(values.getDraftsFolder());
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

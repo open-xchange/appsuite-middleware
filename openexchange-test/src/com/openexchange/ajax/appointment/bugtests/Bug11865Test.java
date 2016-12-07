@@ -101,8 +101,11 @@ public final class Bug11865Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        super.tearDown();
-        Init.stopServer();
+        try {
+            Init.stopServer();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

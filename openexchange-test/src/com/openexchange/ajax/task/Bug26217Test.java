@@ -113,9 +113,12 @@ public final class Bug26217Test extends AbstractTaskTest {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, moveTo));
-        super.tearDown();
+        try {
+            client.execute(new DeleteRequest(task));
+            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, moveTo));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -93,8 +93,11 @@ public class FunctionTests extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client2.logout();
-        super.tearDown();
+        try {
+            client2.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

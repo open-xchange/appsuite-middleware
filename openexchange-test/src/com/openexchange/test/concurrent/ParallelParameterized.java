@@ -47,25 +47,29 @@
  *
  */
 
-package com.openexchange.concurrent;
+package com.openexchange.test.concurrent;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.junit.runners.Suite;
-import org.junit.runners.model.InitializationError;
-import org.junit.runners.model.RunnerBuilder;
+import org.junit.runners.Parameterized;
 import org.junit.runners.model.RunnerScheduler;
 
-public class ParallelSuiteRunner extends Suite {
+/**
+ * {@link ParallelParameterized}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.3
+ */
+public class ParallelParameterized extends Parameterized {
 
-    public ParallelSuiteRunner(Class<?> klass, RunnerBuilder builder) throws InitializationError {
+    public ParallelParameterized(Class<?> arg0) throws Throwable {
 
-        super(klass, builder);
+        super(arg0);
 
         setScheduler(new RunnerScheduler() {
 
-            private final ExecutorService service = Executors.newFixedThreadPool(4);
+            private final ExecutorService service = Executors.newFixedThreadPool(20);
 
             public void schedule(Runnable childStatement) {
                 service.submit(childStatement);

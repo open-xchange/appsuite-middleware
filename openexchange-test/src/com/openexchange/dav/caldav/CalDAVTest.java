@@ -118,7 +118,8 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     @Before
-    public void setUpFixtures() throws Exception {
+    public void setUp() throws Exception {
+        super.setUp();
         this.folderId = this.getAJAXClient().getValues().getPrivateAppointmentFolder();
         this.testManager = new CalendarTestManager(this.getAJAXClient());
         this.testManager.setFailOnError(true);
@@ -126,15 +127,19 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     @After
-    public void cleanUp() throws Exception {
-        if (null != createdFolders && 0 < createdFolders.size()) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolders.toArray(new FolderObject[0])));
-        }
-        if (null != this.getManager()) {
-            this.getManager().cleanUp();
-        }
-        if (null != taskTestManager) {
-            taskTestManager.cleanUp();
+    public void tearDown() throws Exception {
+        try {
+            if (null != createdFolders && 0 < createdFolders.size()) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolders.toArray(new FolderObject[0])));
+            }
+            if (null != this.getManager()) {
+                this.getManager().cleanUp();
+            }
+            if (null != taskTestManager) {
+                taskTestManager.cleanUp();
+            }
+        } finally {
+            super.tearDown();
         }
     }
 
@@ -505,10 +510,10 @@ public abstract class CalDAVTest extends WebDAVTest {
         FolderObject folder = new FolderObject();
         folder.setModule(FolderObject.CALENDAR);
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        folder.setPermissions(PermissionTools.P(Integer.valueOf(client.getValues().getUserId()), PermissionTools.ADMIN));
+        folder.setPermissions(PermissionTools.P(Integer.valueOf(getClient().getValues().getUserId()), PermissionTools.ADMIN));
         folder.setFolderName(name);
         com.openexchange.ajax.folder.actions.InsertRequest request = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
-        com.openexchange.ajax.folder.actions.InsertResponse response = client.execute(request);
+        com.openexchange.ajax.folder.actions.InsertResponse response = getClient().execute(request);
         response.fillObject(folder);
         folder.setLastModified(new Date());
         createdFolders.add(folder);

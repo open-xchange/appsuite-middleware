@@ -110,11 +110,14 @@ public class Bug19827Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (null != contact) {
-            contact.setLastModified(new Date(Long.MAX_VALUE));
-            getClient().execute(new DeleteRequest(contact));
+        try {
+            if (null != contact) {
+                contact.setLastModified(new Date(Long.MAX_VALUE));
+                getClient().execute(new DeleteRequest(contact));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

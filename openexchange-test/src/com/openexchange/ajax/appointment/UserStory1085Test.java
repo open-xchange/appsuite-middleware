@@ -139,12 +139,14 @@ public class UserStory1085Test extends AppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        clientB.execute(new DeleteRequest(appointmenShare));
-        clientC.execute(new DeleteRequest(appointmentPrivate));
-        clientC.execute(new DeleteRequest(appointmentNormal));
-        clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-
-        super.tearDown();
+        try {
+            clientB.execute(new DeleteRequest(appointmenShare));
+            clientC.execute(new DeleteRequest(appointmentPrivate));
+            clientC.execute(new DeleteRequest(appointmentNormal));
+            clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -109,8 +109,12 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        DeleteRequest req = new DeleteRequest(task);
-        client.execute(req);
+        try {
+            DeleteRequest req = new DeleteRequest(task);
+            client.execute(req);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -99,15 +99,18 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
 
     @After
     public void tearDown() throws Exception {
-        if (ids != null) {
-            for (String id : ids) {
-                DeleteInfostoreRequest req = new DeleteInfostoreRequest(id, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
-                req.setHardDelete(true);
-                getClient().execute(req);
+        try {
+            if (ids != null) {
+                for (String id : ids) {
+                    DeleteInfostoreRequest req = new DeleteInfostoreRequest(id, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
+                    req.setHardDelete(true);
+                    getClient().execute(req);
+                }
             }
+            ids = null;
+        } finally {
+            super.tearDown();
         }
-        ids = null;
-        super.tearDown();
     }
 
     @Test

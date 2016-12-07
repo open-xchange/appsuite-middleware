@@ -109,27 +109,30 @@ public class Bug15590Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        // Delete testAppointment
-        if (movedAppointment != null) {
-            movedAppointment.setLastModified(new Date(Long.MAX_VALUE));
-            secondClient.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(movedAppointment));
-        } else if (testAppointment != null) {
-            testAppointment.setLastModified(new Date(Long.MAX_VALUE));
-            final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(testAppointment.getObjectID(), testFolder.getObjectID(), testAppointment.getLastModified());
-            secondClient.execute(delApp);
-        }
+        try {
+            // Delete testAppointment
+            if (movedAppointment != null) {
+                movedAppointment.setLastModified(new Date(Long.MAX_VALUE));
+                secondClient.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(movedAppointment));
+            } else if (testAppointment != null) {
+                testAppointment.setLastModified(new Date(Long.MAX_VALUE));
+                final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(testAppointment.getObjectID(), testFolder.getObjectID(), testAppointment.getLastModified());
+                secondClient.execute(delApp);
+            }
 
-        if (secondClient != null) {
-            secondClient.logout();
-        }
+            if (secondClient != null) {
+                secondClient.logout();
+            }
 
-        // Delete testFolder
-        if (testFolder != null) {
-            final DeleteRequest delFolder = new DeleteRequest(EnumAPI.OX_NEW, testFolder);
-            getClient().execute(delFolder);
-        }
+            // Delete testFolder
+            if (testFolder != null) {
+                final DeleteRequest delFolder = new DeleteRequest(EnumAPI.OX_NEW, testFolder);
+                getClient().execute(delFolder);
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
 
     }
 }

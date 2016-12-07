@@ -101,21 +101,24 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        GetRequest getReq1 = new GetRequest(appointment1, false);
-        GetResponse getRes1 = getClient().execute(getReq1);
-        if (!getRes1.hasError()) {
-            DeleteRequest delReq = new DeleteRequest(appointment1);
-            getClient().execute(delReq);
-        }
+        try {
+            GetRequest getReq1 = new GetRequest(appointment1, false);
+            GetResponse getRes1 = getClient().execute(getReq1);
+            if (!getRes1.hasError()) {
+                DeleteRequest delReq = new DeleteRequest(appointment1);
+                getClient().execute(delReq);
+            }
 
-        GetRequest getReq2 = new GetRequest(appointment2, false);
-        GetResponse getRes2 = getClient().execute(getReq2);
-        if (!getRes2.hasError()) {
-            DeleteRequest delReq = new DeleteRequest(appointment2);
-            getClient().execute(delReq);
-        }
+            GetRequest getReq2 = new GetRequest(appointment2, false);
+            GetResponse getRes2 = getClient().execute(getReq2);
+            if (!getRes2.hasError()) {
+                DeleteRequest delReq = new DeleteRequest(appointment2);
+                getClient().execute(delReq);
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

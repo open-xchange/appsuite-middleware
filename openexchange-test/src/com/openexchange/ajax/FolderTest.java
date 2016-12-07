@@ -588,8 +588,11 @@ public class FolderTest extends AbstractAJAXTest {
 
     @After
     public void tearDown() throws Exception {
-        logout();
-        super.tearDown();
+        try {
+            logout();
+        } finally {
+            super.tearDown();
+        }
 
     }
 

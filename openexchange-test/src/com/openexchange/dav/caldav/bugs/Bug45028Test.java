@@ -88,12 +88,13 @@ public class Bug45028Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         manager2 = new CalendarTestManager(new AJAXClient(testUser));
         manager2.setFailOnError(true);
         FolderObject folder = new FolderObject();
         folder.setModule(FolderObject.CALENDAR);
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        folder.setPermissions(PermissionTools.P(Integer.valueOf(manager2.getClient().getValues().getUserId()), PermissionTools.ADMIN, Integer.valueOf(client.getValues().getUserId()), "vr"));
+        folder.setPermissions(PermissionTools.P(Integer.valueOf(manager2.getClient().getValues().getUserId()), PermissionTools.ADMIN, Integer.valueOf(getClient().getValues().getUserId()), "vr"));
         folder.setFolderName(randomUID());
         com.openexchange.ajax.folder.actions.InsertRequest request = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
         com.openexchange.ajax.folder.actions.InsertResponse response = manager2.getClient().execute(request);
@@ -104,15 +105,20 @@ public class Bug45028Test extends CalDAVTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != manager2) {
-            manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                if (null != publicFolder) {
-                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, false, publicFolder));
+        try {
+            if (null != manager2) {
+                manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    if (null != publicFolder) {
+                        manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, false, publicFolder));
+                    }
+                    manager2.getClient().logout();
                 }
-                manager2.getClient().logout();
             }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test
@@ -133,7 +139,7 @@ public class Bug45028Test extends CalDAVTest {
         appointment.setEndDate(TimeTools.D("next monday at 16:30"));
         appointment.setParentFolderID(publicFolder.getObjectID());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(client.getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         manager2.insert(appointment);
         /*
          * synchronize the public calendar as user A

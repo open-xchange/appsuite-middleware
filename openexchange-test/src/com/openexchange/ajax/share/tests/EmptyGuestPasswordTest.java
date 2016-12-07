@@ -85,8 +85,11 @@ public class EmptyGuestPasswordTest extends ShareTest {
 
     @After
     public void tearDown() throws Exception {
-        deleteFoldersSilently(getClient(), Collections.singletonList(folder.getObjectID()));
-        super.tearDown();
+        try {
+            deleteFoldersSilently(getClient(), Collections.singletonList(folder.getObjectID()));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

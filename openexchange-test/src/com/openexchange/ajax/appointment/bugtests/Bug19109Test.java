@@ -52,7 +52,6 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -127,11 +126,5 @@ public class Bug19109Test extends AbstractAJAXSession {
         }
 
         assertTrue("Expected Appointment Occurrence", found);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        //getClient().execute(new DeleteRequest(appointment));
-        super.tearDown();
     }
 }

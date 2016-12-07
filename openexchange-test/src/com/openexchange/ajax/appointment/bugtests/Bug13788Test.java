@@ -112,10 +112,12 @@ public class Bug13788Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-        getClient().execute(appointmentDeleteRequest);
-
-        super.tearDown();
+        try {
+            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
+            getClient().execute(appointmentDeleteRequest);
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

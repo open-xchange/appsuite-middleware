@@ -92,9 +92,12 @@ public class AllAliasTest extends AbstractTaskTest {
 
     @After
     public void tearDown() throws Exception {
-        final DeleteRequest delete = new DeleteRequest(task);
-        client.execute(delete);
-        super.tearDown();
+        try {
+            final DeleteRequest delete = new DeleteRequest(task);
+            client.execute(delete);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

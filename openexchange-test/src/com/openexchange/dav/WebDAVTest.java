@@ -93,9 +93,6 @@ import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.ajax.oauth.provider.AbstractOAuthTest;
 import com.openexchange.ajax.oauth.provider.OAuthSession;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
@@ -110,6 +107,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link WebDAVTest} - Common base class for WebDAV tests
@@ -127,7 +127,7 @@ public abstract class WebDAVTest {
 
     private Map<Long, WebDAVClient> webDAVClients;
 
-    protected AJAXClient client;
+    private AJAXClient client;
 
     @BeforeClass
     public static void prepareFramework() throws OXException {
@@ -217,7 +217,7 @@ public abstract class WebDAVTest {
     // --- END: Optional OAuth Configuration --------------------------------------------------------------------------------
 
     @Before
-    public void before() throws Exception {
+    public void setUp() throws Exception {
         testContext = TestContextPool.acquireContext();
         testUser = testContext.acquireUser();
 
@@ -230,7 +230,7 @@ public abstract class WebDAVTest {
     }
 
     @After
-    public void after() throws Exception {
+    public void tearDown() throws Exception {
         try {
             if (null != client) {
                 cleanupFolders();

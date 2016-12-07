@@ -98,10 +98,13 @@ public class Bug31855Test extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != fmid) {
-            getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+        try {
+            if (null != fmid) {
+                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

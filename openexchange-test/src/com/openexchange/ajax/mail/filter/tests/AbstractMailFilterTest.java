@@ -213,10 +213,11 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        // cleanup
-        mailFilterAPI.purge();
-
-        super.tearDown();
+        try {
+            mailFilterAPI.purge();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

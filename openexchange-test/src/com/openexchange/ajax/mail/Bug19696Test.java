@@ -91,8 +91,11 @@ public final class Bug19696Test extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(ids, true));
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(ids, true));
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

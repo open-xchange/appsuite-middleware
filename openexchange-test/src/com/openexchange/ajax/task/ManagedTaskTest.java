@@ -33,9 +33,12 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
-        fManager.cleanUp();
-        super.tearDown();
+        try {
+            manager.cleanUp();
+            fManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     public Task generateTask(String title) {

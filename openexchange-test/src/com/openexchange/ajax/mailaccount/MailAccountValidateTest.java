@@ -75,10 +75,13 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
-            deleteMailAccount();
+        try {
+            if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
+                deleteMailAccount();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

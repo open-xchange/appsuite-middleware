@@ -166,11 +166,14 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (appointment != null) {
-            appointment.setLastModified(new Date(Long.MAX_VALUE));
-            getClient().execute(new DeleteRequest(appointment));
+        try {
+            if (appointment != null) {
+                appointment.setLastModified(new Date(Long.MAX_VALUE));
+                getClient().execute(new DeleteRequest(appointment));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
 }

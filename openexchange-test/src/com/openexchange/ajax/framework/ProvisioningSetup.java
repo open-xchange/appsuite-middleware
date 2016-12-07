@@ -157,9 +157,10 @@ public class ProvisioningSetup {
                 TestUser testUser = new TestUser(userId1, contextName, password);
                 context.addUser(testUser);
                 startSMTPMockServer(testUser);
+                
+                context.addGroupParticipant(filter.get(prefix + GROUP_PARTICIPANT_IDENTIFIER).toString());
 
                 TestContextPool.addContext(context);
-                LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
             } catch (Exception e) {
                 LOG.warn("Unable to add context {} to context registry.", contextName, e);
                 // TODO: handle exception

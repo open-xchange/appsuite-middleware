@@ -86,11 +86,14 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (null != client2) {
-            client2.logout();
-            client2 = null;
+        try {
+            if (null != client2) {
+                client2.logout();
+                client2 = null;
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     /**

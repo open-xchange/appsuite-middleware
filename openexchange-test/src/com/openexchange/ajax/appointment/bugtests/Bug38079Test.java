@@ -302,10 +302,13 @@ public class Bug38079Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        ctm.cleanUp();
-        SetRequest setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
-        getClient().execute(setRequest);
-        super.tearDown();
+        try {
+            ctm.cleanUp();
+            SetRequest setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
+            getClient().execute(setRequest);
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

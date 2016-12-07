@@ -92,16 +92,19 @@ public class NewTest extends AppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        if (0 != objectId) {
-            deleteAppointment(getWebConversation(), objectId, folderId, PROTOCOL + getHostName(), getSessionId(), false);
+        try {
+            if (0 != objectId) {
+                deleteAppointment(getWebConversation(), objectId, folderId, PROTOCOL + getHostName(), getSessionId(), false);
+            }
+            if (0 != objectId2) {
+                deleteAppointment(getWebConversation(), objectId2, folderId2, PROTOCOL + getHostName(), getSessionId(), false);
+            }
+            if (0 != targetFolder) {
+                com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+            }
+        } finally {
+            super.tearDown();
         }
-        if (0 != objectId2) {
-            deleteAppointment(getWebConversation(), objectId2, folderId2, PROTOCOL + getHostName(), getSessionId(), false);
-        }
-        if (0 != targetFolder) {
-            com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
-        }
-        super.tearDown();
     }
 
     @Test

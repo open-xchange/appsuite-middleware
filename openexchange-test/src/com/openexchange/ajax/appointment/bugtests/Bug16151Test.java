@@ -111,12 +111,15 @@ public class Bug16151Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        // client deletes appointment
-        appointment.setLastModified(new Date(Long.MAX_VALUE));
-        getClient().execute(new DeleteRequest(appointment));
-        // client2 unshares folder
-        FolderTools.unshareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
-        super.tearDown();
+        try {
+            // client deletes appointment
+            appointment.setLastModified(new Date(Long.MAX_VALUE));
+            getClient().execute(new DeleteRequest(appointment));
+            // client2 unshares folder
+            FolderTools.unshareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

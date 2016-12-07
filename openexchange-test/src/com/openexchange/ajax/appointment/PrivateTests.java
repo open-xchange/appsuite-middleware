@@ -227,9 +227,12 @@ public class PrivateTests extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client1.execute(new DeleteRequest(app));
-        client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, folder));
-        super.tearDown();
+        try {
+            client1.execute(new DeleteRequest(app));
+            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, folder));
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

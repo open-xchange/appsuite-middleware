@@ -143,8 +143,11 @@ public class Bug16249Test extends AttachmentTest {
 
     @After
     public void tearDown() throws Exception {
-        deleteAppointment(getWebConversation(), appointmentId, folderId, getHostName(), getSessionId());
-        super.tearDown();
+        try {
+            deleteAppointment(getWebConversation(), appointmentId, folderId, getHostName(), getSessionId());
+        } finally {
+            super.tearDown();
+        }
     }
 
     public int insertAppointment(final WebConversation webCon, final Appointment appointmentObj, final TimeZone userTimeZone, String host, final String session) throws OXException, Exception, OXException {

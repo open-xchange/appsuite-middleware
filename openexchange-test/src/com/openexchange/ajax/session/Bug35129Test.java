@@ -75,16 +75,20 @@ public class Bug35129Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         AJAXConfig.init();
+        super.setUp();
         myClient = new AJAXClient(new AJAXSession(), true);
         myClient.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }
 
     @After
     public void tearDown() throws Exception {
-        if (null != myClient && false == Strings.isEmpty(myClient.getSession().getId())) {
-            myClient.logout();
+        try {
+            if (null != myClient && false == Strings.isEmpty(myClient.getSession().getId())) {
+                myClient.logout();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

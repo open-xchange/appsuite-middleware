@@ -32,9 +32,12 @@ public class Bug4409Test extends ContactTest {
 
     @After
     public void tearDown() throws Exception {
-        super.tearDown();
-        if (objectId != -1) {
-            deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
+        try {
+            if (objectId != -1) {
+                deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
+            }
+        } finally {
+            super.tearDown();
         }
     }
 

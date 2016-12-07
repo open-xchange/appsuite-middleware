@@ -91,9 +91,12 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
 
     @After
     public void tearDown() throws Exception {
-        cMgr.cleanUp();
-        fMgr.cleanUp();
-        super.tearDown();
+        try {
+            cMgr.cleanUp();
+            fMgr.cleanUp();
+        } finally {
+            super.tearDown();
+        }
 
     }
 

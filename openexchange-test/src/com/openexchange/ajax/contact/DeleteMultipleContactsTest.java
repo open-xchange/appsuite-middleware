@@ -131,19 +131,22 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
 
     @After
     public void tearDown() throws Exception {
-        if (needCleanup) {
-            try {
-                DeleteRequest delReq = new DeleteRequest(c1);
-                getClient().execute(delReq);
-                delReq = new DeleteRequest(c2);
-                getClient().execute(delReq);
-                delReq = new DeleteRequest(c3);
-                getClient().execute(delReq);
-            } catch (Exception e) {
+        try {
+            if (needCleanup) {
+                try {
+                    DeleteRequest delReq = new DeleteRequest(c1);
+                    getClient().execute(delReq);
+                    delReq = new DeleteRequest(c2);
+                    getClient().execute(delReq);
+                    delReq = new DeleteRequest(c3);
+                    getClient().execute(delReq);
+                } catch (Exception e) {
 
+                }
             }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
 }

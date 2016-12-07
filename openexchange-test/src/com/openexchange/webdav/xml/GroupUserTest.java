@@ -37,10 +37,6 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 
     public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
 
-    public GroupUserTest() {
-        super();
-    }
-
     @Test
     public void testSearchUser() throws Exception {
         final Contact[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password, context);

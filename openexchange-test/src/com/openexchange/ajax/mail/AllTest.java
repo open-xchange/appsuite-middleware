@@ -92,13 +92,16 @@ public final class AllTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        /*
-         * Clean everything
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-        super.tearDown();
+        try {
+            /*
+             * Clean everything
+             */
+            clearFolder(getInboxFolder());
+            clearFolder(getSentFolder());
+            clearFolder(getTrashFolder());
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

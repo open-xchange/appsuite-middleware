@@ -117,9 +117,11 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-//        testContext.reset();
-        folderManager.cleanUp();
-        super.tearDown();
+        try {
+            folderManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

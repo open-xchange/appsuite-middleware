@@ -93,11 +93,14 @@ public class Bug44895Test extends AbstractFolderTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != calendarFolder) {
-            DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, calendarFolder);
-            client.execute(req);
+        try {
+            if (null != calendarFolder) {
+                DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, calendarFolder);
+                client.execute(req);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

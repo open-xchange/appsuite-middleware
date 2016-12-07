@@ -100,8 +100,11 @@ public class Bug7276Test extends AbstractTaskTest {
      */
     @After
     public void tearDown() throws Exception {
-        client2.logout();
-        super.tearDown();
+        try {
+            client2.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

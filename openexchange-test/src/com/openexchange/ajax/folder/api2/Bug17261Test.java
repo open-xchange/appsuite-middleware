@@ -83,10 +83,12 @@ public class Bug17261Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        ftm1.deleteFolderOnServer(folder);
-        client2.logout();
-
-        super.tearDown();
+        try {
+            ftm1.deleteFolderOnServer(folder);
+            client2.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

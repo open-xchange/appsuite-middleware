@@ -118,7 +118,11 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

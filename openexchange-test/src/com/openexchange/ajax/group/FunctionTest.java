@@ -107,10 +107,13 @@ public final class FunctionTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        for (int id : groupsToDelete) {
-            getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
+        try {
+            for (int id : groupsToDelete) {
+                getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

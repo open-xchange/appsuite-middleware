@@ -87,7 +87,11 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
 
     @After
     public void tearDown() throws Exception {
-        ThirdpartyTestEnvironment.getInstance().cleanup();
+        try {
+            ThirdpartyTestEnvironment.getInstance().cleanup();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Before

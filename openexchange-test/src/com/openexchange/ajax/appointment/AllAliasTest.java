@@ -103,9 +103,12 @@ public class AllAliasTest extends AppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        final DeleteRequest deleteRequest = new DeleteRequest(appointment);
-        client.execute(deleteRequest);
-        super.tearDown();
+        try {
+            final DeleteRequest deleteRequest = new DeleteRequest(appointment);
+            client.execute(deleteRequest);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

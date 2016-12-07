@@ -103,18 +103,21 @@ public class Bug15354Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        for (int i = 0; i < writer.length; i++) {
-            writer[i].stop();
+        try {
+            for (int i = 0; i < writer.length; i++) {
+                writer[i].stop();
+            }
+            for (int i = 0; i < thread.length; i++) {
+                thread[i].join();
+            }
+            for (int i = 0; i < writer.length; i++) {
+                final Throwable throwable = writer[i].getThrowable();
+                assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
+            }
+            client.execute(new SetRequest(Tree.Beta, B(origValue)));
+        } finally {
+            super.tearDown();
         }
-        for (int i = 0; i < thread.length; i++) {
-            thread[i].join();
-        }
-        for (int i = 0; i < writer.length; i++) {
-            final Throwable throwable = writer[i].getThrowable();
-            assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
-        }
-        client.execute(new SetRequest(Tree.Beta, B(origValue)));
-        super.tearDown();
     }
 
     @Test

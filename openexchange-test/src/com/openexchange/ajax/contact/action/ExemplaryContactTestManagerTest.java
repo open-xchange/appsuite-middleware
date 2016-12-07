@@ -110,8 +110,12 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        contactManager.cleanUp();
-        folderManager.cleanUp();
+        try {
+            contactManager.cleanUp();
+            folderManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

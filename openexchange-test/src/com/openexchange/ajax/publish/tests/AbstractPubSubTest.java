@@ -125,10 +125,13 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        getContactManager().cleanUp();
-        getInfostoreManager().cleanUp();
-        getFolderManager().cleanUp();
-        super.tearDown();
+        try {
+            getContactManager().cleanUp();
+            getInfostoreManager().cleanUp();
+            getFolderManager().cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected Contact generateContact(String firstname, String lastname) {

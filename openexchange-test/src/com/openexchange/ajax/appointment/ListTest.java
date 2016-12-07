@@ -310,9 +310,12 @@ public class ListTest extends AppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ftm.cleanUp();
-        client1.logout();
-        super.tearDown();
+        try {
+            ctm1.cleanUp();
+            ftm.cleanUp();
+            client1.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 }

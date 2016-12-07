@@ -50,8 +50,11 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
 
     @After
     public void tearDown() throws Exception {
-        contactManager.cleanUp();
-        super.tearDown();
+        try {
+            contactManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected List<ActiveFacet> prepareFacets() throws OXException, IOException, JSONException {

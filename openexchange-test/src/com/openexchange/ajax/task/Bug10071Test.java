@@ -123,8 +123,11 @@ public class Bug10071Test extends AbstractTaskTest {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
-        super.tearDown();
+        try {
+            client.execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

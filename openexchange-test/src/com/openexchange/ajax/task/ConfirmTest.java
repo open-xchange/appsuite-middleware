@@ -97,9 +97,12 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
 
     @After
     public void tearDown() throws Exception {
-        task.setLastModified(new Date(Long.MAX_VALUE));
-        manager.cleanUp();
-        super.tearDown();
+        try {
+            task.setLastModified(new Date(Long.MAX_VALUE));
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -154,10 +154,13 @@ public class Bug16141Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
+        try {
         if (ids != null) {
             getClient().execute(new DeleteRequest(ids));
         }
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

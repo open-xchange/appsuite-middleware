@@ -84,9 +84,12 @@ public class FormLoginTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        login = null;
-        password = null;
-        super.tearDown();
+        try {
+            login = null;
+            password = null;
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

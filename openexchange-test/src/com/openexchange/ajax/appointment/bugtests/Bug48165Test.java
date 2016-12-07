@@ -140,9 +140,12 @@ public class Bug48165Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ctm2.cleanUp();
-        super.tearDown();
+        try {
+            ctm1.cleanUp();
+            ctm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

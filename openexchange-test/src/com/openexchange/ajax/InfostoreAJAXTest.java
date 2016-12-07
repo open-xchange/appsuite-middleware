@@ -97,6 +97,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         this.sessionId = getSessionId();
         final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), sessionId);
         this.folderId = createFolderForTest(userId);
@@ -122,11 +123,15 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
     @After
     public void tearDown() throws Exception {
         try {
-            removeDocumentsAndFolders();
-        } catch (Exception x) {
-            // Ignore: We don't want exceptions thrown in tearDown to override test failures.
+            try {
+                removeDocumentsAndFolders();
+            } catch (Exception x) {
+                // Ignore: We don't want exceptions thrown in tearDown to override test failures.
+            }
+            this.logout();
+        } finally {
+            super.tearDown();
         }
-        this.logout();
 
         //assertEquals("Couldn't delete "+j(notDeleted),0,notDeleted.length);
     }

@@ -115,15 +115,18 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        //delete the two contacts
-        DeleteRequest contactDeleteRequest = new DeleteRequest(contact1);
-        getClient().execute(contactDeleteRequest);
-        contactDeleteRequest = new DeleteRequest(contact2);
-        getClient().execute(contactDeleteRequest);
-        //delete the new folder
-        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, newFolder);
-        getClient().execute(folderDeleteRequest);
-        super.tearDown();
+        try {
+            //delete the two contacts
+            DeleteRequest contactDeleteRequest = new DeleteRequest(contact1);
+            getClient().execute(contactDeleteRequest);
+            contactDeleteRequest = new DeleteRequest(contact2);
+            getClient().execute(contactDeleteRequest);
+            //delete the new folder
+            com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, newFolder);
+            getClient().execute(folderDeleteRequest);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

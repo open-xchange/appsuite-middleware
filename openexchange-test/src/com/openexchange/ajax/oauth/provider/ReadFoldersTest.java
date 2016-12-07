@@ -498,16 +498,20 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     @After
     public void tearDown() throws Exception {
-        if (ftm != null) {
-            ftm.cleanUp();
-        }
+        try {
+            if (ftm != null) {
+                ftm.cleanUp();
+            }
 
-        if (ftm2 != null) {
-            ftm2.cleanUp();
-        }
+            if (ftm2 != null) {
+                ftm2.cleanUp();
+            }
 
-        if (ajaxClient2 != null) {
-            ajaxClient2.logout();
+            if (ajaxClient2 != null) {
+                ajaxClient2.logout();
+            }
+        } finally {
+            super.tearDown();
         }
     }
 

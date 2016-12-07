@@ -184,30 +184,32 @@ public class Bug16211Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        // Delete Appointment
-        final GetRequest toDeleteReq = new GetRequest(personalAppointmentFolder.getObjectID(), appointment.getObjectID());
-        final GetResponse toDeleteResp = getClient().execute(toDeleteReq);
-        final Appointment toDelete = toDeleteResp.getAppointment(tz);
-        if (null != toDelete) {
-            getClient().execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
-        }
+        try {
+            // Delete Appointment
+            final GetRequest toDeleteReq = new GetRequest(personalAppointmentFolder.getObjectID(), appointment.getObjectID());
+            final GetResponse toDeleteResp = getClient().execute(toDeleteReq);
+            final Appointment toDelete = toDeleteResp.getAppointment(tz);
+            if (null != toDelete) {
+                getClient().execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
+            }
 
-        // Delete folders
-        if (null != personalAppointmentFolder) {
-            getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
-        }
-        if (null != sharedAppointmentFolder) {
-            client2.execute(new DeleteRequest(EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
-        }
+            // Delete folders
+            if (null != personalAppointmentFolder) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
+            }
+            if (null != sharedAppointmentFolder) {
+                client2.execute(new DeleteRequest(EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
+            }
 
-        if (null != client2) {
-            client2.logout();
+            if (null != client2) {
+                client2.logout();
+            }
+            if (null != client3) {
+                client3.logout();
+            }
+        } finally {
+            super.tearDown();
         }
-        if (null != client3) {
-            client3.logout();
-        }
-
-        super.tearDown();
     }
 
     private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {

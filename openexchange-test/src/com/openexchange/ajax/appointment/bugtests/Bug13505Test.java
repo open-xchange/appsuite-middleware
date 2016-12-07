@@ -133,9 +133,11 @@ public class Bug13505Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected class SpecialUpdateRequest extends UpdateRequest {

@@ -106,9 +106,12 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
     @After
     public void tearDown() throws Exception {
-        removeAttachments();
-        removeAttachable(folderId, attachedId, sessionId);
-        super.tearDown();
+        try {
+            removeAttachments();
+            removeAttachable(folderId, attachedId, sessionId);
+        } finally {
+            super.tearDown();
+        }
     }
 
     public abstract int createExclusiveWritableAttachable(String sessionId, int folderId) throws Exception;

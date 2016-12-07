@@ -96,9 +96,12 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        calendarMgr.cleanUp();
-        folderMgr.cleanUp();
-        super.tearDown();
+        try {
+            calendarMgr.cleanUp();
+            folderMgr.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected Appointment generateAppointment() {

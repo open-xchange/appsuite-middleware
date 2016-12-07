@@ -120,10 +120,13 @@ public class Bug14357Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-        getClient().execute(appointmentDeleteRequest);
+        try {
+            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
+            getClient().execute(appointmentDeleteRequest);
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     private void checkYear(int position, int year, int expectedDay) throws Exception {

@@ -89,8 +89,11 @@ public class AttachmentTest extends AbstractAJAXTest {
 
     @After
     public void tearDown() throws Exception {
-        removeAttachments();
-        super.tearDown();
+        try {
+            removeAttachments();
+        } finally {
+            super.tearDown();
+        }
     }
 
     public void removeAttachments() throws Exception {

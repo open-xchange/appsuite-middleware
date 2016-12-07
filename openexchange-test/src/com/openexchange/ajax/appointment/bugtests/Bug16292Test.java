@@ -202,16 +202,18 @@ public class Bug16292Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        // Delete Appointment
-        getClient().execute(new DeleteRequest(appointment, false));
+        try {
+            // Delete Appointment
+            getClient().execute(new DeleteRequest(appointment, false));
 
-        // Delete Task
-        getClient().execute(new com.openexchange.ajax.task.actions.DeleteRequest(task, false));
+            // Delete Task
+            getClient().execute(new com.openexchange.ajax.task.actions.DeleteRequest(task, false));
 
-        // Delete Contact
-        getClient().execute(new com.openexchange.ajax.contact.action.DeleteRequest(contact, false));
-
-        super.tearDown();
+            // Delete Contact
+            getClient().execute(new com.openexchange.ajax.contact.action.DeleteRequest(contact, false));
+        } finally {
+            super.tearDown();
+        }
     }
 
     private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {

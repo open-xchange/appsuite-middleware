@@ -82,8 +82,11 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
 
     @After
     public void tearDown() throws Exception {
-        subMgr.cleanUp();
-        super.tearDown();
+        try {
+            subMgr.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Override

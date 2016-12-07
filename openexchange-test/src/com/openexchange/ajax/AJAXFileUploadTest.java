@@ -90,12 +90,17 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         sessionId = getSessionId();
     }
 
     @After
     public void tearDown() throws Exception {
-        logout();
+        try {
+            logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     private static final String getUploadedFile(final WebConversation conversation, final String hostname, final String sessionId, final String id) throws IOException, SAXException {

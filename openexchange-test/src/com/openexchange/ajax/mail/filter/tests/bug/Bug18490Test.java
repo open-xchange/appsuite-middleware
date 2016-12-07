@@ -137,11 +137,13 @@ public class Bug18490Test extends AbstractMailFilterTest {
 
     @After
     public void tearDown() throws Exception {
-        if (folder != null) {
-            getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
+        try {
+            if (folder != null) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
+            }
+        } finally {
+            super.tearDown();
         }
-
-        super.tearDown();
     }
 
 }

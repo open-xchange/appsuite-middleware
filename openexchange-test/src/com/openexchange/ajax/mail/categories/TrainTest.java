@@ -64,13 +64,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class TrainTest extends AbstractMailCategoriesTest {
 
-    /**
-     * Initializes a new {@link TrainTest}.
-     * 
-     * @param name
-     */
-    public TrainTest() {}
-
     private static final int[] COLUMNS = new int[] { 102, 600, 601, 602, 603, 604, 605, 606, 607, 608, 610, 611, 614, 652 };
 
     @Test

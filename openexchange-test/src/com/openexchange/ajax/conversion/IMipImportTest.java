@@ -118,9 +118,11 @@ public class IMipImportTest extends AbstractConversionTest {
 
     @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(objectId, folder, new Date(Long.MAX_VALUE)));
-
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(objectId, folder, new Date(Long.MAX_VALUE)));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

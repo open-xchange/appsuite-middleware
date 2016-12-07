@@ -62,11 +62,11 @@ import com.openexchange.ajax.appointment.AbstractAppointmentTest;
 import com.openexchange.ajax.appointment.AppointmentRangeGenerator.AppointmentRange;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.java.util.Pair;
+import com.openexchange.test.pool.TestUser;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -120,13 +120,17 @@ public class Bug33697Test extends AbstractAppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        deleteAppointments(clientX, getAppointment(clientX, userValuesX.getPrivateAppointmentFolder(), bug33697Appointment.getObjectID()));
-        deleteCalendarFolder(clientX, bug33697SubfolderX);
-        deleteCalendarFolder(clientY, bug33697SubfolderY);
-        deleteCalendarFolder(clientZ, bug33697SubfolderZ);
-        clientX.logout();
-        clientY.logout();
-        clientZ.logout();
+        try {
+            deleteAppointments(clientX, getAppointment(clientX, userValuesX.getPrivateAppointmentFolder(), bug33697Appointment.getObjectID()));
+            deleteCalendarFolder(clientX, bug33697SubfolderX);
+            deleteCalendarFolder(clientY, bug33697SubfolderY);
+            deleteCalendarFolder(clientZ, bug33697SubfolderZ);
+            clientX.logout();
+            clientY.logout();
+            clientZ.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /*

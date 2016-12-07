@@ -84,11 +84,14 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (folderMgr != null) {
-            folderMgr.cleanUp();
+        try {
+            if (folderMgr != null) {
+                folderMgr.cleanUp();
+            }
+            MSLiveSubscribeTestEnvironment.getInstance().cleanup();
+        } finally {
+            super.tearDown();
         }
-        MSLiveSubscribeTestEnvironment.getInstance().cleanup();
-        super.tearDown();
     }
 
     private int getContactTestFolderID() {

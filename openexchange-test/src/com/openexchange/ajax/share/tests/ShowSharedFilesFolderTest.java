@@ -105,8 +105,11 @@ public class ShowSharedFilesFolderTest extends ShareTest {
 
     @After
     public void tearDown() throws Exception {
-        deleteFilesSilently(getClient(), Collections.singletonList(file));
-        super.tearDown();
+        try {
+            deleteFilesSilently(getClient(), Collections.singletonList(file));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

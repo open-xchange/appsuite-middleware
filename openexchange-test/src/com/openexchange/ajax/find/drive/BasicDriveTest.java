@@ -124,7 +124,6 @@ public class BasicDriveTest extends AbstractFindTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-//        client = new AJAXClient(testContext.acquireUser());
         MailConfig.init();
         String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
         java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
@@ -146,10 +145,13 @@ public class BasicDriveTest extends AbstractFindTest {
 
     @After
     public void tearDown() throws Exception {
-        if (manager != null) {
-            manager.cleanUp();
+        try {
+            if (manager != null) {
+                manager.cleanUp();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

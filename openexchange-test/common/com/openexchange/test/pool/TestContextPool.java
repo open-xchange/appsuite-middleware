@@ -65,17 +65,19 @@ public class TestContextPool {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TestContextPool.class);
 
-    private static volatile BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(10);
+    private static volatile BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(50);
 
     public static void addContext(TestContext context) {
         contexts.add(context);
+        LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
     }
 
     public static TestContext acquireContext() {
         synchronized (TestContextPool.class) {
             try {
-                TestContext poll = contexts.poll(60L, TimeUnit.SECONDS);
-                return poll;
+                TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
+//                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());
+                return context;
             } catch (InterruptedException e) {
                 // should not happen
                 LOG.error("", e);

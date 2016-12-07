@@ -83,6 +83,7 @@ public class Bug25160Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         manager2 = new CalendarTestManager(new AJAXClient(testUser));
         manager2.setFailOnError(true);
         FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
@@ -109,15 +110,20 @@ public class Bug25160Test extends CalDAVTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            if (null != subfolder) {
-                manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+        try {
+            if (null != this.manager2) {
+                if (null != subfolder) {
+                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+                }
+                this.manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    manager2.getClient().logout();
+                }
             }
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
-            }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test

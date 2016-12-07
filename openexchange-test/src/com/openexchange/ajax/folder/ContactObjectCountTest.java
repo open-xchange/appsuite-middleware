@@ -67,10 +67,6 @@ public final class ContactObjectCountTest extends AbstractObjectCountTest {
 
     private static final Random rand = new Random(System.currentTimeMillis());
 
-    public ContactObjectCountTest() {
-        super();
-    }
-
     @Test
     public void testCountInPrivateFolder() throws Exception {
         FolderTestManager ftm = new FolderTestManager(client1);

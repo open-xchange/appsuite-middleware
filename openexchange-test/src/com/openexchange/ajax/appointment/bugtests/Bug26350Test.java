@@ -74,7 +74,6 @@ import com.openexchange.test.FolderTestManager;
  */
 public class Bug26350Test extends AbstractAJAXSession {
 
-
     private CalendarTestManager ctm1;
 
     private final int cycles = 3;
@@ -137,10 +136,13 @@ public class Bug26350Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ftm.cleanUp();
-        getClient().logout();
-        super.tearDown();
+        try {
+            ctm1.cleanUp();
+            ftm.cleanUp();
+            getClient().logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

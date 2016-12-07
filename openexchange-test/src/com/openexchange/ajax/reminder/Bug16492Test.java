@@ -143,11 +143,14 @@ public class Bug16492Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        Appointment toDelete = client.execute(new GetRequest(appointment, false)).getAppointment(timezone);
-        client.execute(new DeleteRequest(toDelete, false));
-        toDelete = client.execute(new GetRequest(pastAppointment, false)).getAppointment(timezone);
-        client.execute(new DeleteRequest(toDelete, false));
-        super.tearDown();
+        try {
+            Appointment toDelete = client.execute(new GetRequest(appointment, false)).getAppointment(timezone);
+            client.execute(new DeleteRequest(toDelete, false));
+            toDelete = client.execute(new GetRequest(pastAppointment, false)).getAppointment(timezone);
+            client.execute(new DeleteRequest(toDelete, false));
+        } finally {
+            super.tearDown();
+        }
     }
 
     private Appointment createSeriesInThePast() throws Exception {

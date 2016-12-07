@@ -97,10 +97,13 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest {
 
     @After
     public void tearDown() throws Exception {
-        if (resource != null) {
-            Executor.execute(getSession(), new ResourceDeleteRequest(resource));
+        try {
+            if (resource != null) {
+                Executor.execute(getSession(), new ResourceDeleteRequest(resource));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     private boolean containsResource(List<Resource> resources, int resourceId) {

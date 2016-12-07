@@ -221,10 +221,12 @@ public class SharedFolderTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
-        client2.logout();
-
-        super.tearDown();
+        try {
+            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
+            client2.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     public Appointment createAppointment() throws Exception {

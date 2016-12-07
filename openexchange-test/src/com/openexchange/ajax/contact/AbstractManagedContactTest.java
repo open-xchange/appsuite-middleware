@@ -88,9 +88,12 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
-        folderManager.cleanUp();
-        super.tearDown();
+        try {
+            manager.cleanUp();
+            folderManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected Contact generateContact(String lastname) {

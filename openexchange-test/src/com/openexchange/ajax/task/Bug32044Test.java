@@ -145,18 +145,21 @@ public final class Bug32044Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        task = client1.execute(new GetRequest(task)).getTask(timeZone1);
-        client1.execute(new DeleteRequest(task));
-        GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder2.getObjectID(), false));
-        if (!response.hasError()) {
-            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder2));
+        try {
+            task = client1.execute(new GetRequest(task)).getTask(timeZone1);
+            client1.execute(new DeleteRequest(task));
+            GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder2.getObjectID(), false));
+            if (!response.hasError()) {
+                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder2));
+            }
+            response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder1.getObjectID(), false));
+            if (!response.hasError()) {
+                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder1));
+            }
+            client2.logout();
+        } finally {
+            super.tearDown();
         }
-        response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder1.getObjectID(), false));
-        if (!response.hasError()) {
-            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder1));
-        }
-        client2.logout();
-        super.tearDown();
     }
 
     @Test

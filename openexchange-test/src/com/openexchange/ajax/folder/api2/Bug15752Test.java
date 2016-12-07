@@ -108,13 +108,16 @@ public class Bug15752Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (null != mailIds) {
-            client.execute(new DeleteRequest(mailIds, true));
+        try {
+            if (null != mailIds) {
+                client.execute(new DeleteRequest(mailIds, true));
+            }
+            if (null != testFolder) {
+                client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, testFolder));
+            }
+        } finally {
+            super.tearDown();
         }
-        if (null != testFolder) {
-            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, testFolder));
-        }
-        super.tearDown();
     }
 
     @Test

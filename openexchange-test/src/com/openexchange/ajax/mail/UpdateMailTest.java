@@ -102,10 +102,13 @@ public class UpdateMailTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        clearFolder(getSentFolder());
-        clearFolder(getInboxFolder());
-        clearFolder(getTrashFolder());
-        super.tearDown();
+        try {
+            clearFolder(getSentFolder());
+            clearFolder(getInboxFolder());
+            clearFolder(getTrashFolder());
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

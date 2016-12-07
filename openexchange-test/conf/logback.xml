@@ -69,6 +69,6 @@
     <!-- Debug if POParser takes so much time to load PO files. -->
     <logger name="com.openexchange.i18n.impl.POTranslationsDiscoverer" level="TRACE"/>
     
-    <logger name="com.openexchange.ajax.framework.ProvisioningSetup" level="INFO"/>
+    <logger name="com.openexchange.test.pool.TestContextPool" level="INFO"/>
 
 </configuration>

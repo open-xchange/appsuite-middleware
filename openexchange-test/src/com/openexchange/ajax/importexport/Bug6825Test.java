@@ -94,10 +94,13 @@ public class Bug6825Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (null != folderTestManager) {
-            folderTestManager.cleanUp();
+        try {
+            if (null != folderTestManager) {
+                folderTestManager.cleanUp();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

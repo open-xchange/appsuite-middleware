@@ -11,6 +11,7 @@ import java.io.InputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.attach.SimpleAttachmentTest;
@@ -82,17 +83,19 @@ public class SaveAsTest extends InfostoreAJAXTest {
 
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
+        super.setUp();
         attachmentTest.setUp();
         attachmentTest.upload();
-        super.setUp();
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
-        attachmentTest.tearDown();
-        super.tearDown();
+        try {
+            attachmentTest.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 }

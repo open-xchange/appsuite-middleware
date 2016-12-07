@@ -107,15 +107,18 @@ public class AggregateSharesTest extends ShareTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != clientsAndFolders) {
-            for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
-                deleteFoldersSilently(entry.getKey(), entry.getValue());
-                if (false == entry.getKey().equals(getClient())) {
-                    entry.getKey().logout();
+        try {
+            if (null != clientsAndFolders) {
+                for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
+                    deleteFoldersSilently(entry.getKey(), entry.getValue());
+                    if (false == entry.getKey().equals(getClient())) {
+                        entry.getKey().logout();
+                    }
                 }
             }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     private AJAXClient randomClient() {

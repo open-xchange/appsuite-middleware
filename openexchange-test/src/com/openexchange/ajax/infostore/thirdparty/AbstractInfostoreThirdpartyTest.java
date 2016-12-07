@@ -87,8 +87,11 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        fMgr.cleanUp();
-        super.tearDown();
+        try {
+            fMgr.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

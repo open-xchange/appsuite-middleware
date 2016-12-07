@@ -168,9 +168,13 @@ public class Bug13501Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (appointment.getObjectID() > 0) {
-            getClient().execute(new DeleteRequest(appointment.getObjectID(), getClient().getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
+        try {
+            if (appointment.getObjectID() > 0) {
+                getClient().execute(new DeleteRequest(appointment.getObjectID(), getClient().getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
+
     }
 }

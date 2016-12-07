@@ -91,8 +91,11 @@ public final class Bug21619Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new SetRequest(Tree.TaskUIConfiguration, origValue));
-        super.tearDown();
+        try {
+            client.execute(new SetRequest(Tree.TaskUIConfiguration, origValue));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

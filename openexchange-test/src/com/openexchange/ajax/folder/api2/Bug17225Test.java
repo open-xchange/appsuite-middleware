@@ -103,9 +103,12 @@ public final class Bug17225Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(userId1, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
-        client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
-        super.tearDown();
+        try {
+            folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(userId1, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

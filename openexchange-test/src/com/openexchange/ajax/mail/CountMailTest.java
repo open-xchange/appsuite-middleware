@@ -69,8 +69,11 @@ public class CountMailTest extends AbstractMailTest {
 
     @After
     public void tearDown() throws Exception {
-        clearFolder(getInboxFolder());
-        super.tearDown();
+        try {
+            clearFolder(getInboxFolder());
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -128,8 +128,11 @@ public class ConfirmationsTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
-        super.tearDown();
+        try {
+            client.execute(new DeleteRequest(appointment));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

@@ -88,8 +88,11 @@ public class Bug15995Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new SetRequest(Tree.Language, locale));
-        super.tearDown();
+        try {
+            client.execute(new SetRequest(Tree.Language, locale));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

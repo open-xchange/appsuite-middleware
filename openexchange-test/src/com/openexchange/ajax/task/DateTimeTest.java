@@ -110,21 +110,24 @@ public final class DateTimeTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (null != client && null != tasksToDelete) {
-            int folderID = client.getValues().getPrivateTaskFolder();
-            Set<Integer> ids = new HashSet<Integer>();
-            for (Task task : tasksToDelete) {
-                if (folderID != task.getParentFolderID()) {
-                    client.execute(new DeleteRequest(task));
-                } else {
-                    ids.add(Integer.valueOf(task.getObjectID()));
+        try {
+            if (null != client && null != tasksToDelete) {
+                int folderID = client.getValues().getPrivateTaskFolder();
+                Set<Integer> ids = new HashSet<Integer>();
+                for (Task task : tasksToDelete) {
+                    if (folderID != task.getParentFolderID()) {
+                        client.execute(new DeleteRequest(task));
+                    } else {
+                        ids.add(Integer.valueOf(task.getObjectID()));
+                    }
+                }
+                if (0 < ids.size()) {
+                    client.execute(new DeleteRequest(folderID, I2i(ids), new Date(Long.MAX_VALUE), false));
                 }
             }
-            if (0 < ids.size()) {
-                client.execute(new DeleteRequest(folderID, I2i(ids), new Date(Long.MAX_VALUE), false));
-            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

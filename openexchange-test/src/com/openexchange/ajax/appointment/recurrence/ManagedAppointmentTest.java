@@ -138,18 +138,11 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
     public void tearDown() throws Exception {
         try {
             calendarManager.cleanUp();
+            folderManager.cleanUp();
+            resourceManager.cleanUp();
         } finally {
-            try {
-                folderManager.cleanUp();
-            } finally {
-                try {
-                    resourceManager.cleanUp();
-                } finally {
-                    super.tearDown();
-                }
-            }
+            super.tearDown();
         }
-
     }
 
     protected Appointment generateDailyAppointment() {

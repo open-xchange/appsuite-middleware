@@ -46,10 +46,13 @@ public class CopyTest extends AppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        if (0 != targetFolderId) {
-            com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolderId }, PROTOCOL + getHostName(), login, password, context);
+        try {
+            if (0 != targetFolderId) {
+                com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolderId }, PROTOCOL + getHostName(), login, password, context);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

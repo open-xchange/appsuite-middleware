@@ -154,12 +154,15 @@ public class Bug12509Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-        clientA.execute(appointmentDeleteRequest);
-        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder);
-        clientA.execute(folderDeleteRequest);
+        try {
+            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
+            clientA.execute(appointmentDeleteRequest);
+            com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder);
+            clientA.execute(folderDeleteRequest);
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

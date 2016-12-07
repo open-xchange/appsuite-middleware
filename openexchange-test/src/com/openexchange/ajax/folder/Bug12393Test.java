@@ -140,18 +140,20 @@ public class Bug12393Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        final AJAXClient myClient = getClient();
-        // reload the parent folder (it has been changed since its creation by the modification of permissions)
-        final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
-        final GetResponse getResponse = myClient.execute(getRequest);
-        parentFolderObject = getResponse.getFolder();
-        // lastModified has to be set separately
-        parentFolderObject.setLastModified(getResponse.getTimestamp());
-        //delete the parent folder and with it the subfolder
-        final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, parentFolderObject);
-        myClient.execute(folderDeleteRequest);
-
-        super.tearDown();
+        try {
+            final AJAXClient myClient = getClient();
+            // reload the parent folder (it has been changed since its creation by the modification of permissions)
+            final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
+            final GetResponse getResponse = myClient.execute(getRequest);
+            parentFolderObject = getResponse.getFolder();
+            // lastModified has to be set separately
+            parentFolderObject.setLastModified(getResponse.getTimestamp());
+            //delete the parent folder and with it the subfolder
+            final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, parentFolderObject);
+            myClient.execute(folderDeleteRequest);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

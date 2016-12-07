@@ -101,9 +101,12 @@ public class Bug44622Test extends AbstractInfostoreTest {
 
     @After
     public void tearDown() throws Exception {
-        DeleteInfostoreRequest req = new DeleteInfostoreRequest(fileID, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
-        getClient().execute(req);
-        super.tearDown();
+        try {
+            DeleteInfostoreRequest req = new DeleteInfostoreRequest(fileID, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
+            getClient().execute(req);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

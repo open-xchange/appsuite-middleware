@@ -106,10 +106,13 @@ public final class FunambolTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        for (Appointment app : toDelete) {
-            client.execute(new DeleteRequest(app));
+        try {
+            for (Appointment app : toDelete) {
+                client.execute(new DeleteRequest(app));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

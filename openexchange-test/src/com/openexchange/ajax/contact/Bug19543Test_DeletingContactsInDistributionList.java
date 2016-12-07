@@ -28,8 +28,11 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
 
     @After
     public void tearDown() throws Exception {
-        super.tearDown();
-        manager.setSleep(500);
+        try {
+            manager.setSleep(500);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

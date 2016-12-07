@@ -105,9 +105,12 @@ public class Bug16006Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
-        client.execute(new SetRequest(Tree.TimeZone, origTimeZone.getID()));
-        super.tearDown();
+        try {
+            client.execute(new DeleteRequest(task));
+            client.execute(new SetRequest(Tree.TimeZone, origTimeZone.getID()));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

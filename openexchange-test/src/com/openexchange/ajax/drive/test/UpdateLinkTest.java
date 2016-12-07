@@ -220,8 +220,11 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
 
     @After
     public void tearDown() throws Exception {
-        itm.cleanUp();
-        super.tearDown();
+        try {
+            itm.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

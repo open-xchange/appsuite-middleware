@@ -106,20 +106,22 @@ public class ShareFolderTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (secondClient != null) {
-            secondClient.logout();
-            secondClient = null;
-            secondUserValues = null;
-        }
+        try {
+            if (secondClient != null) {
+                secondClient.logout();
+                secondClient = null;
+                secondUserValues = null;
+            }
 
-        // Delete testFolder
-        if (testFolder != null) {
-            getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, testFolder));
-            testFolder = null;
-            parentId = -1;
+            // Delete testFolder
+            if (testFolder != null) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, testFolder));
+                testFolder = null;
+                parentId = -1;
+            }
+        } finally {
+            super.tearDown();
         }
-
-        super.tearDown();
     }
 
     @Test

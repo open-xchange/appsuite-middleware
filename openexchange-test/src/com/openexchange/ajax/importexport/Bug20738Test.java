@@ -79,11 +79,13 @@ public final class Bug20738Test extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        // cleanup
-        for (final DeleteRequest deleteRequest : this.toDelete) {
-            super.getClient().execute(deleteRequest);
+        try {
+            for (final DeleteRequest deleteRequest : this.toDelete) {
+                super.getClient().execute(deleteRequest);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

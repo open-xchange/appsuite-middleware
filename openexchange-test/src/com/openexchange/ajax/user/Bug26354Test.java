@@ -131,20 +131,23 @@ public final class Bug26354Test extends AbstractAJAXSession {
     @Override
     @After
     public void tearDown() throws Exception {
-        for (int i = 0; i < writer.length; i++) {
-            writer[i].stop();
+        try {
+            for (int i = 0; i < writer.length; i++) {
+                writer[i].stop();
+            }
+            for (int i = 0; i < thread.length; i++) {
+                thread[i].join();
+            }
+            for (int i = 0; i < writer.length; i++) {
+                final Throwable throwable = writer[i].getThrowable();
+                assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
+            }
+            client.execute(new SetRequest(Tree.Beta, B(origBetaValue)));
+            client.execute(new SetRequest(Tree.TimeZone, origTimeZoneValue));
+            assertTrue("Deleting the test attribute failed.", client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, null, false)).isSuccess());
+        } finally {
+            super.tearDown();
         }
-        for (int i = 0; i < thread.length; i++) {
-            thread[i].join();
-        }
-        for (int i = 0; i < writer.length; i++) {
-            final Throwable throwable = writer[i].getThrowable();
-            assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
-        }
-        client.execute(new SetRequest(Tree.Beta, B(origBetaValue)));
-        client.execute(new SetRequest(Tree.TimeZone, origTimeZoneValue));
-        assertTrue("Deleting the test attribute failed.", client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, null, false)).isSuccess());
-        super.tearDown();
     }
 
     @Test

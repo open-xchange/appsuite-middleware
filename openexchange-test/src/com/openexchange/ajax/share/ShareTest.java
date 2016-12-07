@@ -156,11 +156,14 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     @After
     public void tearDown() throws Exception {
-        if (null != getClient()) {
-            deleteFoldersSilently(getClient(), foldersToDelete);
-            deleteFilesSilently(getClient(), filesToDelete.values());
+        try {
+            if (null != getClient()) {
+                deleteFoldersSilently(getClient(), foldersToDelete);
+                deleteFilesSilently(getClient(), filesToDelete.values());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     /**

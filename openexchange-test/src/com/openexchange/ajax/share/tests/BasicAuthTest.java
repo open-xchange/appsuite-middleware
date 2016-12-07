@@ -111,18 +111,20 @@ public class BasicAuthTest extends ShareTest {
 
     @After
     public void tearDown() throws Exception {
-        CalendarTestManager calendarManager = this.calendarManager;
-        if (null != calendarManager) {
-            calendarManager.cleanUp();
-            this.calendarManager = null;
-        }
+        try {
+            CalendarTestManager calendarManager = this.calendarManager;
+            if (null != calendarManager) {
+                calendarManager.cleanUp();
+                this.calendarManager = null;
+            }
 
-        if (null != folder) {
-            getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, false, folder).setFailOnErrorParam(Boolean.FALSE));
-            folder = null;
+            if (null != folder) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, false, folder).setFailOnErrorParam(Boolean.FALSE));
+                folder = null;
+            }
+        } finally {
+            super.tearDown();
         }
-
-        super.tearDown();
     }
 
     @Test
