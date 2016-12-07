@@ -120,7 +120,9 @@ public enum CassandraProperty {
      * Defines the amount of time (in seconds) for connection keepalive in the form of a heartbeat.
      * When a connection has been idle for the given amount of time, the Cassandra service will
      * simulate activity by writing a dummy request to it (by sending an <code>OPTIONS</code> message).
-     * 
+     * <p/>
+     * To disable heartbeat, set the interval to 0.
+     * <p/>
      * Defaults to 30 seconds
      */
     poolingHeartbeat(30),
