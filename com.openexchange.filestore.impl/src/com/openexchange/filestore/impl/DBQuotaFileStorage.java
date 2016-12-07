@@ -221,7 +221,6 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             return 0;
         }
 
-        boolean dedicatedStorage = ownerId > 0;
         int singleUser = isSingleUserContext(contextId);
         boolean isSingleUserContext = singleUser > 0;
 
@@ -232,6 +231,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         }
 
         // No single-user context, but maybe a dedicated storage
+        boolean dedicatedStorage = ownerId > 0;
         if (dedicatedStorage && requestingUserId > 0 && requestingUserId == ownerId) {
             // User-associated storage is valid for Drive or if everything is accounted to the single user
             if (isSingleUserContext || purpose == Purpose.DRIVE) {
