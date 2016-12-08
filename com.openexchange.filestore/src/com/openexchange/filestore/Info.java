@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,76 +47,85 @@
  *
  */
 
-package com.openexchange.consistency;
+package com.openexchange.filestore;
 
-import java.net.URI;
-import com.openexchange.exception.OXException;
-import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorage;
-import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.StorageInfo;
-import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
- * {@link SimQuotaFileStorageService}
+ * {@link Info} - The info passed along with obtaining a certain file storage.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class SimQuotaFileStorageService implements QuotaFileStorageService {
+public class Info {
 
-    private final InMemoryFileStorage fileStorage;
+    private static final Info INFO_ADMINISTRATIVE = new Info(0, Purpose.ADMINISTRATIVE);
+    private static final Info INFO_GENERAL = new Info(0, Purpose.GENERAL);
 
     /**
-     * Initialises a new {@link SimQuotaFileStorageService}.
+     * Gets the administrative info
+     *
+     * @return The administrative info
      */
-    public SimQuotaFileStorageService(InMemoryFileStorage fileStorage) {
+    public static Info administrative() {
+        return INFO_ADMINISTRATIVE;
+    }
+
+    /**
+     * Gets the general (context-only) info
+     *
+     * @return The general (context-only) info
+     */
+    public static Info general() {
+        return INFO_GENERAL;
+    }
+
+    /**
+     * Gets the Drive info for specified user
+     *
+     * @param userId The user identifier
+     * @return The Drive info
+     */
+    public static Info drive(int userId) {
+        return new Info(userId, Purpose.DRIVE);
+    }
+
+    /**
+     * Gets the info for specified arguments
+     *
+     * @param userId The user identifier
+     * @param purpose The purpose
+     * @return The info
+     */
+    public static Info infoFor(int userId, Purpose purpose) {
+        return new Info(userId, purpose);
+    }
+
+    // -------------------------------------------------------------
+
+    private final int userId;
+    private final Purpose purpose;
+
+    private Info(int userId, Purpose purpose) {
         super();
-        this.fileStorage = fileStorage;
+        this.userId = userId;
+        this.purpose = purpose;
     }
 
-    @Override
-    public QuotaFileStorage getUnlimitedQuotaFileStorage(URI baseUri, int optOwner, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    /**
+     * Gets the purpose
+     *
+     * @return The purpose
+     */
+    public Purpose getPurpose() {
+        return purpose;
     }
 
-    @Override
-    public QuotaFileStorage getQuotaFileStorage(int contextId, Info info) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    /**
+     * Gets the user identifier (if any)
+     *
+     * @return The user identifier or <code>0</code>
+     */
+    public int getUserId() {
+        return userId;
     }
-
-    @Override
-    public QuotaFileStorage getQuotaFileStorage(int userId, int contextId, Info info) throws OXException {
-        return fileStorage;
-    }
-
-    @Override
-    public URI getFileStorageUriFor(int userId, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void invalidateCacheFor(int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void invalidateCacheFor(int userId, int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
-        return false;
-    }
-
-    @Override
-    public StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
-        return null;
-    }
-
 }

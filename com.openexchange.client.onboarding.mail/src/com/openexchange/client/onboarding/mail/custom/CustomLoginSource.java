@@ -47,76 +47,30 @@
  *
  */
 
-package com.openexchange.consistency;
+package com.openexchange.client.onboarding.mail.custom;
 
-import java.net.URI;
-import com.openexchange.exception.OXException;
-import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorage;
-import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.StorageInfo;
-import com.openexchange.tools.file.InMemoryFileStorage;
+import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
+import com.openexchange.session.Session;
 
 /**
- * {@link SimQuotaFileStorageService}
+ * {@link CustomLoginSource} provides the imap and smtp login name for the {@link MailOnboardingProvider}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public class SimQuotaFileStorageService implements QuotaFileStorageService {
-
-    private final InMemoryFileStorage fileStorage;
+public interface CustomLoginSource {
 
     /**
-     * Initialises a new {@link SimQuotaFileStorageService}.
+     * Provides the imap login for the {@link MailOnboardingProvider}
+     * @param session The session
+     * @return the imap login
      */
-    public SimQuotaFileStorageService(InMemoryFileStorage fileStorage) {
-        super();
-        this.fileStorage = fileStorage;
-    }
+    public String getImapLogin(Session session);
 
-    @Override
-    public QuotaFileStorage getUnlimitedQuotaFileStorage(URI baseUri, int optOwner, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public QuotaFileStorage getQuotaFileStorage(int contextId, Info info) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public QuotaFileStorage getQuotaFileStorage(int userId, int contextId, Info info) throws OXException {
-        return fileStorage;
-    }
-
-    @Override
-    public URI getFileStorageUriFor(int userId, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void invalidateCacheFor(int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void invalidateCacheFor(int userId, int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
-        return false;
-    }
-
-    @Override
-    public StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
-        return null;
-    }
-
+    /**
+     * Provides the smtp login for the {@link MailOnboardingProvider}
+     * @param session The session
+     * @return the smtp login
+     */
+    public String getSmtpLogin(Session session);
 }

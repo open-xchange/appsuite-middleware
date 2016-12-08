@@ -117,6 +117,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -2918,7 +2919,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         if (owner <= 0 || owner == userId) {
                             // Delete file storage
                             QuotaFileStorageService qfsService = FileStorages.getQuotaFileStorageService();
-                            QuotaFileStorage quotaFileStorage = qfsService.getQuotaFileStorage(userId, contextId);
+                            QuotaFileStorage quotaFileStorage = qfsService.getQuotaFileStorage(userId, contextId, Info.administrative());
 
                             try {
                                 quotaFileStorage.remove();
@@ -3033,6 +3034,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
                             cache = cacheService.getCache("QuotaFileStorages");
                             cache.invalidateGroup(Integer.toString(contextId));
+                            cache = cacheService.getCache("SingleUserContext");
+                            cache.remove(Integer.valueOf(contextId));
                         } catch (final OXException e) {
                             log.error("", e);
                         }

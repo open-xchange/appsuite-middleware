@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,53 +47,28 @@
  *
  */
 
-package com.openexchange.dav.push.gcm;
+package com.openexchange.admin.tools.filestore.osgi;
 
-import java.util.Collection;
-import com.openexchange.dav.push.DAVPushUtility;
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushMatch;
-import com.openexchange.pns.PushNotification;
-import com.openexchange.pns.PushNotificationTransport;
+import org.osgi.framework.BundleContext;
+import com.openexchange.admin.tools.filestore.FilestoreDataMoveListener;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+
 
 /**
- * {@link DavPushTransport}
+ * {@link FilestoreDataMoveListenerTracker} - The tracker for registered {@link FilestoreDataMoveListener} instances.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class DavPushTransport implements PushNotificationTransport {
+public class FilestoreDataMoveListenerTracker extends RankingAwareNearRegistryServiceTracker<FilestoreDataMoveListener> {
 
-    private final PushTransportOptions transportOptions;
-
-    public DavPushTransport(PushTransportOptions transportOptions) {
-        super();
-        this.transportOptions = transportOptions;
-    }
-
-    @Override
-    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
-        return true;
-    }
-
-    @Override
-    public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
-
-
-
-
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public String getId() {
-        return transportOptions.getTransportID();
-    }
-
-    @Override
-    public boolean servesClient(String client) throws OXException {
-        return DAVPushUtility.CLIENT_CALDAV.equals(client) || DAVPushUtility.CLIENT_CARDDAV.equals(client);
+    /**
+     * Initializes a new {@link FilestoreDataMoveListenerTracker}.
+     *
+     * @param context The bundle context
+     */
+    public FilestoreDataMoveListenerTracker(BundleContext context) {
+        super(context, FilestoreDataMoveListener.class);
     }
 
 }

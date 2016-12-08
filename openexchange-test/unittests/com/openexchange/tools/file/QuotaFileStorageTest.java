@@ -58,6 +58,7 @@ import junit.framework.TestCase;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.impl.DBQuotaFileStorage;
 import com.openexchange.filestore.impl.LocalFileStorage;
 import com.openexchange.groupware.contexts.Context;
@@ -143,7 +144,7 @@ public class QuotaFileStorageTest extends TestCase {
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
         public TestQuotaFileStorage(final Context ctx, final com.openexchange.filestore.FileStorage fs) throws OXException {
-            super(ctx.getContextId(), -1, 0L, fs, null, null, null, null);
+            super(ctx.getContextId(), Info.administrative(), -1, 0L, fs, null, null, null, null);
         }
 
         private long usage;

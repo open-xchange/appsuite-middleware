@@ -77,6 +77,7 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -1074,7 +1075,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 throw AttachmentExceptionCodes.FILESTORE_DOWN.create();
             }
 
-            return storageService.getQuotaFileStorage(ctx.getContextId());
+            return storageService.getQuotaFileStorage(ctx.getContextId(), Info.general());
         } catch (final OXException e) {
             throw AttachmentExceptionCodes.FILESTORE_DOWN.create(e);
         }

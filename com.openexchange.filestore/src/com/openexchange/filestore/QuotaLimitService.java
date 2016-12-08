@@ -69,4 +69,14 @@ public interface QuotaLimitService {
      */
     long getLimit(int userId, int contextId) throws OXException;
 
+    /**
+     * Checks if this limit service is applicable for given user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If applicability cannot be checked
+     */
+    boolean isApplicableFor(int userId, int contextId) throws OXException;
+
 }

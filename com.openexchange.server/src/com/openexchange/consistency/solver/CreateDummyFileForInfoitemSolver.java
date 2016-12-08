@@ -55,6 +55,7 @@ import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
@@ -72,11 +73,11 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
 
     private final DatabaseImpl database;
 
-    private User admin;
+    private final User admin;
 
     /**
      * Initialises a new {@link CreateDummyFileForInfoitemSolver}.
-     * 
+     *
      * @param database The database
      * @param storage
      * @param admin
@@ -103,7 +104,7 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
                         fsOwner = admin.getId();
                     }
 
-                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId());
+                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive(fsOwner));
                     String identifier = createDummyFile(storage);
                     database.startTransaction();
                     int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", context);

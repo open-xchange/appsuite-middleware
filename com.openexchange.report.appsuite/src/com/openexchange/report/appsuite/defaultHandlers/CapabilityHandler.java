@@ -70,6 +70,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
@@ -117,7 +118,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             if (null == storageService) {
                 throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
             }
-            QuotaFileStorage userStorage = storageService.getQuotaFileStorage(ctx.getContextId());
+            QuotaFileStorage userStorage = storageService.getQuotaFileStorage(ctx.getContextId(), Info.administrative());
             long quota = userStorage.getQuota();
             contextReport.set(Report.MACDETAIL_QUOTA, Report.QUOTA, quota);
         } catch (OXException e) {
@@ -214,7 +215,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // Retrieve the quota
         boolean storeCapS = false;
         long quota = contextReport.get(Report.MACDETAIL_QUOTA, Report.QUOTA, 0l, Long.class);
-        Collection<Object> reportValues = ((Map<String, Object>) report.getNamespace(Report.MACDETAIL)).values();
+        Collection<Object> reportValues = report.getNamespace(Report.MACDETAIL).values();
         if (reportValues.size() >= ReportProperties.getMaxChunkSize()) {
             storeCapS = true;
         }

@@ -1471,11 +1471,13 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public int[] listAllUser(Connection con, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+        DatabaseService databaseService = null;
         boolean closeCon = false;
         if (con == null) {
             try {
                 closeCon = true;
-                con = ServerServiceRegistry.getServize(DatabaseService.class, true).getReadOnly(contextID);
+                databaseService = ServerServiceRegistry.getServize(DatabaseService.class, true);
+                con = databaseService.getReadOnly(contextID);
             } catch (final Exception e) {
                 throw UserExceptionCode.NO_CONNECTION.create(e);
             }
@@ -1483,8 +1485,8 @@ public class RdbUserStorage extends UserStorage {
         try {
             return listAllUser(contextID, con, includeGuests, excludeUsers);
         } finally {
-            if (closeCon) {
-                ServerServiceRegistry.getServize(DatabaseService.class, true).backReadOnly(contextID, con);
+            if (closeCon && null != databaseService) {
+                databaseService.backReadOnly(contextID, con);
             }
         }
     }
