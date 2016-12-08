@@ -52,9 +52,9 @@ package com.openexchange.dav.push.mixins;
 import java.util.List;
 import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.dav.push.gcm.DavPushGateway;
-import com.openexchange.dav.push.gcm.PushTransportOptions;
 import com.openexchange.dav.push.subscribe.PushSubscribeFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.SingleResourcePropertyMixin;
@@ -82,8 +82,8 @@ public class SupportedTransportSet extends SingleResourcePropertyMixin {
     @Override
     protected WebdavProperty getProperty(WebdavResource resource) throws OXException {
         if (null != DAVPushUtility.getPushKey(resource)) {
-            String value = getValue();
-            if (null != value) {
+            String value = getValue(DAVPushUtility.getClientId(resource));
+            if (Strings.isNotEmpty(value)) {
                 WebdavProperty property = prepareProperty(true);
                 property.setValue(value);
                 return property;
@@ -92,20 +92,21 @@ public class SupportedTransportSet extends SingleResourcePropertyMixin {
         return null;
     }
 
-    private String getValue() {
+    private String getValue(String clientID) throws OXException {
         List<DavPushGateway> pushGateways = factory.getGateways();
         if (null == pushGateways || pushGateways.isEmpty()) {
             return null;
         }
         StringBuilder stringBuilder = new StringBuilder();
         for (DavPushGateway gateway : pushGateways) {
-            PushTransportOptions transportOptions = gateway.getOptions();
-            stringBuilder
-                .append("<transport>")
-                .append(  "<transport-uri>" + transportOptions.getTransportURI() + "</transport-uri>")
-                .append(  "<refresh-interval>" + transportOptions.getRefreshInterval() + "</refresh-interval>")
-                .append("</transport>")
-            ;
+            if (gateway.servesClient(clientID)) {
+                stringBuilder
+                    .append("<transport>")
+                    .append(  "<transport-uri>" + gateway.getOptions().getTransportURI() + "</transport-uri>")
+                    .append(  "<refresh-interval>" + gateway.getOptions().getRefreshInterval() + "</refresh-interval>")
+                    .append("</transport>")
+                ;
+            }
         }
         return stringBuilder.toString();
     }

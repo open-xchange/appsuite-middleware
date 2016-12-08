@@ -62,6 +62,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVServlet;
 import com.openexchange.dav.push.DAVPushEventHandler;
 import com.openexchange.dav.push.DAVPushUtility;
@@ -101,7 +102,7 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class };
+        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class };
     }
 
     @Override
