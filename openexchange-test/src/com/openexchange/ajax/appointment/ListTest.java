@@ -94,7 +94,7 @@ public class ListTest extends AppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = new AJAXClient(testContext.acquireUser());
+        client1 = new AJAXClient(testUser);
 
         ctm1 = new CalendarTestManager(client1);
         ctm1.setFailOnError(true);

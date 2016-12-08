@@ -50,6 +50,7 @@
 package com.openexchange.ajax.framework;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -93,6 +94,7 @@ public abstract class AbstractAJAXSession {
 
         String clientId = getClientId();
         testContext = TestContextPool.acquireContext();
+        Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();
         client = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);
         admin = testContext.getAdmin();

@@ -56,9 +56,6 @@ import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -70,6 +67,9 @@ import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.tasks.json.TaskActionFactory;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link AbstractOAuthTest}
@@ -149,7 +149,7 @@ public abstract class AbstractOAuthTest {
 
     public static Credentials getMasterAdminCredentials() {
         TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
-        return new Credentials(oxAdminMaster.getLogin(), oxAdminMaster.getPassword());
+        return new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
     }
 
     public static void unregisterTestClient(ClientDto oAuthClientApp) throws Exception {

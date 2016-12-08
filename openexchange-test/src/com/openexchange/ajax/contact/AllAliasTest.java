@@ -80,7 +80,7 @@ public class AllAliasTest extends ContactTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(testContext.acquireUser());
+        client = new AJAXClient(testUser);
     }
 
     @Test

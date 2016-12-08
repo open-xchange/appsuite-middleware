@@ -90,6 +90,7 @@ public class Bug34928Test extends AbstractAJAXSession {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         AJAXConfig.init();
         getClient().getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }

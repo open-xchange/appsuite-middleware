@@ -82,6 +82,7 @@ public class AttachmentTest extends AbstractAJAXTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         sessionId = getSessionId();
         testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         testFile2 = new File(TestInit.getTestProperty("webdavPropertiesFile"));

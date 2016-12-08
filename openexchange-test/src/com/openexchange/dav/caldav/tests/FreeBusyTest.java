@@ -98,6 +98,7 @@ public class FreeBusyTest extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         this.scheduleOutboxURL = getScheduleOutboxURL();
     }
 
