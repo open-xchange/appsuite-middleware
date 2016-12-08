@@ -52,7 +52,7 @@ package com.openexchange.nosql.cassandra;
 import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
- * {@link CassandraNodeMBean}
+ * {@link CassandraNodeMBean} - Provides monitoring information for a Cassandra node
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
