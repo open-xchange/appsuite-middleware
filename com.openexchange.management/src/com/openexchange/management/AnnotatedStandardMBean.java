@@ -64,6 +64,7 @@ import org.slf4j.Logger;
  * {@link AnnotatedStandardMBean} - The extension of {@link StandardMBean} that will automatically provide JMX meta-data through annotations.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  * @see MBeanMethodAnnotation
  */
