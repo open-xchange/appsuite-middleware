@@ -260,7 +260,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 rememberTracker(tracker);
             }
 
-            if (true || grizzlyConfig.isShutdownFast()) {
+            if (grizzlyConfig.isShutdownFast()) {
                 registerService(HttpService.class.getName(), httpServiceFactory);
                 log.info("Registered OSGi HttpService for Grizzly server.");
             }
