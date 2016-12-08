@@ -49,6 +49,8 @@
 
 package com.openexchange.nosql.cassandra;
 
+import com.openexchange.management.MBeanMethodAnnotation;
+
 /**
  * {@link CassandraNodeMBean}
  *
@@ -64,6 +66,7 @@ public interface CassandraNodeMBean {
      * 
      * @return the Cassandra node's full qualified name
      */
+    @MBeanMethodAnnotation(description = "Returns the Cassandra node's full qualified name", parameters = {}, parameterDescriptions = {})
     String getNodeName();
 
     /**
@@ -71,6 +74,7 @@ public interface CassandraNodeMBean {
      * 
      * @return the amount of active connections to the node
      */
+    @MBeanMethodAnnotation(description = "Returns the amount of active connections to the node", parameters = {}, parameterDescriptions = {})
     int getConnections();
 
     /**
@@ -80,6 +84,7 @@ public interface CassandraNodeMBean {
      * 
      * @return the amount of the in flight queries
      */
+    @MBeanMethodAnnotation(description = "Returns the amount of in flight queries, i.e. the amount of queries that are written to the connection and are still being processed by the cluster", parameters = {}, parameterDescriptions = {})
     int getInFlightQueries();
 
     /**
@@ -87,6 +92,7 @@ public interface CassandraNodeMBean {
      * 
      * @return the maximum connection load for this node
      */
+    @MBeanMethodAnnotation(description = "Returns the maximum connection load for this node", parameters = {}, parameterDescriptions = {})
     int getMaxLoad();
 
     /**
@@ -94,6 +100,7 @@ public interface CassandraNodeMBean {
      * 
      * @return the node's state
      */
+    @MBeanMethodAnnotation(description = "Returns the node's state. Possible return values: UP, DOWN, ADDED", parameters = {}, parameterDescriptions = {})
     String getState();
 
     /**
@@ -101,5 +108,6 @@ public interface CassandraNodeMBean {
      * 
      * @return the Cassandra version for the specific node
      */
+    @MBeanMethodAnnotation(description = "Returns the Cassandra version for the specific node", parameters = {}, parameterDescriptions = {})
     String getCassandraVersion();
 }
