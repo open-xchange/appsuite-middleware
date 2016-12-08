@@ -71,11 +71,19 @@ public interface CassandraService {
     Cluster getCluster() throws OXException;
 
     /**
-     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified name and for the specified keyspace
+     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}
+     * 
+     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified keyspace
+     * @throws OXException if the Cassandra {@link Session} cannot be returned
+     */
+    Session getSession() throws OXException;
+
+    /**
+     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}
      * 
      * @param keyspace The keyspace name
-     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified name and for the specified keyspace
-     * @throws OXException if there is no such Cassandra {@link Cluster} or keyspace or if the Cassandra {@link Session} cannot be returned
+     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified keyspace
+     * @throws OXException if there is no such Cassandra keyspace or if the Cassandra {@link Session} cannot be returned
      */
     Session getSession(String keyspace) throws OXException;
 

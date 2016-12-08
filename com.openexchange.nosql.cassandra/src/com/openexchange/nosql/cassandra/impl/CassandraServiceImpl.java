@@ -91,6 +91,11 @@ public class CassandraServiceImpl implements CassandraService {
      * Local Cassandra asynchronous {@link Session}s cache; one per keyspace
      */
     private final ConcurrentMap<String, ListenableFuture<Session>> asynchronousSessions;
+    /**
+     * A multipurpose global keyspace-less Cassandra {@link Session}. Used for
+     * retrieving statistics for the {@link Cluster}
+     */
+    private final Session globalSession;
 
     /**
      * Initialises a new {@link CassandraServiceImpl}.
@@ -115,6 +120,8 @@ public class CassandraServiceImpl implements CassandraService {
                 QueryLogger queryLogger = QueryLogger.builder().withConstantThreshold(slowQueryLatencyThresholdMillis).build();
                 cluster.register(queryLogger);
             }
+            //Initialise the global session
+            globalSession = cluster.connect();
         } catch (NoHostAvailableException e) {
             throw CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.create(e, initializer.getContactPoints());
         } catch (AuthenticationException e) {
@@ -133,6 +140,16 @@ public class CassandraServiceImpl implements CassandraService {
     @Override
     public Cluster getCluster() throws OXException {
         return cluster;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraService#getSession()
+     */
+    @Override
+    public Session getSession() throws OXException {
+        return globalSession;
     }
 
     /*
@@ -240,6 +257,11 @@ public class CassandraServiceImpl implements CassandraService {
             }
         }
         asynchronousSessions.clear();
+
+        // Close the global session
+        if (globalSession != null && !globalSession.isClosed()) {
+            globalSession.close();
+        }
 
         // Close the cluster
         cluster.close();
