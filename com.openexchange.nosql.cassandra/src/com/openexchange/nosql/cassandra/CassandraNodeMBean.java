@@ -47,70 +47,59 @@
  *
  */
 
-package com.openexchange.nosql.cassandra.osgi;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.nosql.cassandra.CassandraService;
-import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.nosql.cassandra;
 
 /**
- * {@link CassandraActivator}
+ * {@link CassandraNodeMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CassandraActivator extends HousekeepingActivator {
+public interface CassandraNodeMBean {
+
+    static final String DOMAIN = "com.openxchange.nosql.cassandra";
+    static final String NAME = "Cassandra Node Monitoring Bean";
 
     /**
-     * Initialises a new {@link CassandraActivator}.
-     */
-    public CassandraActivator() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Returns the Cassandra node's full qualified name
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @return the Cassandra node's full qualified name
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ManagementService.class };
-    }
+    String getNodeName();
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the amount of active connections to the node
      * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @return the amount of active connections to the node
      */
-    @Override
-    protected void startBundle() throws Exception {
-        CassandraService cassandraService = new CassandraServiceImpl(this);
-        registerService(CassandraService.class, cassandraService);
-        trackService(CassandraService.class);
-        openTrackers();
+    int getConnections();
 
-        final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
-        logger.info("Cassandra service was successfully registered");
-    }
-
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the amount of in flight queries, i.e. the amount of queries
+     * that are written to the connection and are still being processed by
+     * the cluster
      * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     * @return the amount of the in flight queries
      */
-    @Override
-    protected void stopBundle() throws Exception {
-        CassandraService cassandraService = getService(CassandraService.class);
-        if (cassandraService == null) {
-            return;
-        }
-        ((CassandraServiceImpl) cassandraService).shutdown();
+    int getInFlightQueries();
 
-        final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
-        logger.info("Cassandra service was successfully shutdown and unregistered");
-    }
+    /**
+     * Returns the maximum connection load for this node
+     * 
+     * @return the maximum connection load for this node
+     */
+    int getMaxLoad();
+
+    /**
+     * Returns the node's state. Possible return values: UP, DOWN, ADDED
+     * 
+     * @return the node's state
+     */
+    String getState();
+
+    /**
+     * Returns the Cassandra version for the specific node
+     * 
+     * @return the Cassandra version for the specific node
+     */
+    String getCassandraVersion();
 }

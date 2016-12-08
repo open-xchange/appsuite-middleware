@@ -74,6 +74,7 @@ import com.openexchange.server.ServiceLookup;
 class CassandraServiceInitializer implements Initializer {
 
     private final ConfigurationService configurationService;
+    private ServiceLookup services;
 
     /**
      * Initialises a new {@link CassandraServiceInitializer}.
@@ -82,6 +83,7 @@ class CassandraServiceInitializer implements Initializer {
      */
     public CassandraServiceInitializer(ServiceLookup services) {
         super();
+        this.services = services;
         configurationService = services.getService(ConfigurationService.class);
     }
 
@@ -158,6 +160,7 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public Collection<StateListener> getInitialListeners() {
-        return Collections.emptyList();
+        StateListener sl = new MBeanHostStateListener(services);
+        return Collections.singletonList(sl);
     }
 }
