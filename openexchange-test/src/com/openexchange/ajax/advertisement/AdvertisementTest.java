@@ -137,7 +137,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 Context ctx = new Context(getClient().getValues().getContextId());
                 ctx.setUserAttribute("taxonomy", "types", taxonomyTypes);
                 TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
-                Credentials credentials = new Credentials(oxAdminMaster.getLogin(), oxAdminMaster.getPassword());
+                Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
                 OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
                 old = ctxInterface.getData(ctx, credentials);
                 ctxInterface.change(ctx, credentials);
@@ -161,7 +161,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                     // Change to old taxonomy types
                     if (old != null) {
                         TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
-                        Credentials credentials = new Credentials(oxAdminMaster.getLogin(), oxAdminMaster.getPassword());
+                        Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
                         OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
                         ctxInterface.change(old, credentials);
                     }

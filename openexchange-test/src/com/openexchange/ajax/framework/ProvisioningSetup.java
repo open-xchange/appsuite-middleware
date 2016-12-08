@@ -111,6 +111,8 @@ public class ProvisioningSetup {
 
                 createProvisionedContext(contextsAndUsers);
                 createOXAdminMaster(contextsAndUsers);
+                
+//                TestContextPool.startWatcher();
 
                 initialized.compareAndSet(false, true);
             }
