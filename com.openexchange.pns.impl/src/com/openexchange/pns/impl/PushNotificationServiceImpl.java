@@ -50,7 +50,8 @@
 package com.openexchange.pns.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +60,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
-import com.google.common.collect.Iterators;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedBufferingQueue;
@@ -257,7 +257,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                     int userId = notification.getUserId();
                     int contextId = notification.getContextId();
                     try {
-                        doHandle(Iterators.singletonIterator(notification), notification.getTopic(), 1, userId, contextId);
+                        doHandle(Collections.singleton(notification), notification.getTopic(), 1, userId, contextId);
                     } catch (Exception e) {
                         LOGGER.error("Failed to handle notification with topic {} for user {} in context {}", notification.getTopic(), I(userId), I(contextId), e);
                     }
@@ -368,7 +368,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             PushNotification first = polled.get(0);
             int userId = first.getUserId();
             int contextId = first.getContextId();
-            NotificationsHandler task = new NotificationsHandler(Iterators.singletonIterator(first), first.getTopic(), 1, userId, contextId);
+            NotificationsHandler task = new NotificationsHandler(Collections.singleton(first), first.getTopic(), 1, userId, contextId);
             if (false == tryExecuteTask(task, userId, contextId)) {
                 // Processor rejected task execution. Perform with current thread.
                 task.run();
@@ -382,7 +382,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             for (Map.Entry<UserAndTopicKey, List<PushNotification>> entry : polledNotifications.entrySet()) {
                 UserAndTopicKey key = entry.getKey();
                 List<PushNotification> nots = entry.getValue();
-                NotificationsHandler task = new NotificationsHandler(nots.iterator(), key.topic, nots.size(), key.userId, key.contextId);
+                NotificationsHandler task = new NotificationsHandler(nots, key.topic, nots.size(), key.userId, key.contextId);
                 if (false == tryExecuteTask(task, key.userId, key.contextId)) {
                     // Processor rejected task execution. Perform with current thread.
                     task.run();
@@ -415,7 +415,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
      * @param contextId The context identifier (for all notifications)
      * @throws OXException If handling fails
      */
-    protected void doHandle(Iterator<PushNotification> notifications, String topic, int numOfNotifications, int userId, int contextId) throws OXException {
+    protected void doHandle(Collection<PushNotification> notifications, String topic, int numOfNotifications, int userId, int contextId) throws OXException {
         // Query appropriate hits
         Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
         if (null == hits || hits.isEmpty()) {
@@ -433,8 +433,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 LOGGER.info("No such transport '{}' for client '{}' to publish notification \"{}\" from user {} in context {}", transportId, client, topic, I(userId), I(contextId));
             } else {
                 if (isTransportAllowed(transport, topic, client, userId, contextId)) {
-                    while (notifications.hasNext()) {
-                        PushNotification notification = notifications.next();
+                    for (PushNotification notification : notifications) {
                         LOGGER.debug("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
                         try {
                             transport.transport(notification, hit.getMatches());
@@ -468,7 +467,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
     private final class NotificationsHandler implements Runnable {
 
-        private final Iterator<PushNotification> notifications;
+        private final Collection<PushNotification> notifications;
         private final String topic;
         private final int userId;
         private final int contextId;
@@ -477,7 +476,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         /**
          * Initializes a new {@link PushNotificationServiceImpl.NotificationsHandler}.
          */
-        NotificationsHandler(Iterator<PushNotification> notifications, String topic, int numOfNotifications, int userId, int contextId) {
+        NotificationsHandler(Collection<PushNotification> notifications, String topic, int numOfNotifications, int userId, int contextId) {
             super();
             this.notifications = notifications;
             this.topic = topic;

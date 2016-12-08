@@ -47,24 +47,69 @@
  *
  */
 
-package com.openexchange.startup.impl;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.startup.SignalStartedService;
-
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateConcurrency;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link SignalStartedServiceImpl} - The singleton started service implementation.
+ * {@link MailAccountExtendPasswordTask} - Extends "password" column of the mail/transport account tables.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.0
  */
-public final class SignalStartedServiceImpl implements SignalStartedService {
+public final class MailAccountExtendPasswordTask extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link SignalStartedServiceImpl}.
-     */
-    public SignalStartedServiceImpl() {
+    public MailAccountExtendPasswordTask() {
         super();
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(UpdateConcurrency.BLOCKING);
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { MailAccountAddArchiveTask.class.getName() };
+    }
+
+    @Override
+    public void perform(final PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+        Connection con = Database.getNoTimeout(contextId, true);
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            if (128 == Tools.getVarcharColumnSize("password", "user_mail_account", con)) {
+                Tools.changeVarcharColumnSize("password", 256, "user_mail_account", con);
+            }
+
+            if (128 == Tools.getVarcharColumnSize("password", "user_transport_account", con)) {
+                Tools.changeVarcharColumnSize("password", 256, "user_transport_account", con);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Database.backNoTimeout(contextId, true, con);
+        }
     }
 
 }
