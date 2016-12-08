@@ -59,7 +59,6 @@ tr,th,td {
 }
 
 .appointmentDayStartEnd {
-    background: #6cb8e1;
     overflow: hidden;
     margin: 1px 0;
     padding: 1px 2px;
@@ -145,7 +144,6 @@ h1 {
 #calendarWeek .appointment {
     padding: 2px 2px 0px 2px;
     overflow: hidden;
-    background-color: #6cb8e1;
 }
 </style>
 <title>${documentTitle} ${i18n.tr("Calendar")}: ${dateFormatter.formatDate(days?first.time)} -  ${dateFormatter.formatDate(days?last.time)}</title>
@@ -201,9 +199,9 @@ h1 {
                 <div style="position: relative; ">
                   <#assign appointmentWidth = 100 / day.columns?size>
                   <#list day.getAppointmentsStartingBetween(hour * 60, (hour + 1) * 60) as appointment>
-                  <div class="colorLabel-${appointment.colorLabel}" style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; min-height: 30px; margin-left: ${day.getColumn(appointment) * appointmentWidth}%; height: ${appointment.durationInMinutes}px; width: ${appointmentWidth}%; ">
+                  <div style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; min-height: 30px; margin-left: ${day.getColumn(appointment) * appointmentWidth}%; height: ${appointment.durationInMinutes}px; width: ${appointmentWidth}%; ">
                     <div style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px; border: 1px solid #000;">
-                      <div class="appointment" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
+                      <div class="appointment colorLabel-${appointment.colorLabel}" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
                         <div>${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</div>
                         <#if appointment.location?has_content>
                         ${appointment.location}
