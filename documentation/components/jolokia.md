@@ -2,13 +2,14 @@
 Title: Jolokia - OX munin scripts
 ---
 
-#How to install Munin scripts for Open-Xchange
+# How to install Munin scripts for Open-Xchange
 
-##Installation on OX App Suite
+## Installation on OX App Suite
 
-###Debian GNU/Linux 7.0 (valid until v7.8.2)
+### Debian GNU/Linux 7.0 (valid until v7.8.2)
 
 Add the following entry to /etc/apt/sources.list.d/open-xchange.list if not already present:
+
 ```
 deb https://software.open-xchange.com/products/appsuite/7.8.2/backend/DebianWheezy/ /
 
@@ -17,6 +18,7 @@ deb https://software.open-xchange.com/products/appsuite/7.8.2/backend/DebianWhee
 \# packages get installed
 \# deb https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/7.8.2/backend/updates/DebianWheezy/ /
 ```	
+
 and run 
 
 ```
@@ -27,6 +29,7 @@ $ apt-get install open-xchange-munin-scripts
 ### Debian GNU/Linux 8.0
 
 Add the following entry to /etc/apt/sources.list.d/open-xchange.list if not already present:
+
 ```
 deb https://software.open-xchange.com/products/appsuite/stable/backend/DebianJessie/ /
 
@@ -35,6 +38,7 @@ deb https://software.open-xchange.com/products/appsuite/stable/backend/DebianJes
 \# packages get installed
 \# deb https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/stable/backend/updates/DebianJessie/ /
 ```	
+
 and run 
 
 ```
@@ -44,9 +48,11 @@ $ apt-get install open-xchange-munin-scripts
 
 ### SUSE Linux Enterprise Server 11 (valid until v7.8.2)
 Add the package repository using zypper if not already present:
+
 ```
 $ zypper ar https://software.open-xchange.com/products/appsuite/7.8.2/backend/SLES11 ox
 ```
+
 If you have a valid maintenance subscription, please run the following command and add the ldb account data to the url so that the most recent packages get installed:
 
 ```
@@ -80,9 +86,10 @@ $ zypper ref
 $ zypper in open-xchange-munin-scripts
 ```
 
-###RedHat Enterprise Linux 6
+### RedHat Enterprise Linux 6
 
 Start a console and create a software repository file if not already present:
+
 ```
 $ vim /etc/yum.repos.d/ox.repo
 
@@ -113,9 +120,10 @@ $ yum update
 $ yum install open-xchange-munin-scripts
 ```
 
-###RedHat Enterprise Linux 7
+### RedHat Enterprise Linux 7
 
 Start a console and create a software repository file if not already present:
+
 ```
 $ vim /etc/yum.repos.d/ox.repo
 
@@ -146,7 +154,7 @@ $ yum update
 $ yum install open-xchange-munin-scripts
 ```
 
-###CentOS 6
+### CentOS 6
 
 Start a console and create a software repository file if not already present:
 
@@ -229,12 +237,10 @@ rpm
 * perl-libwww-perl
 
 
-#How to interact with Jolokia for Open-Xchange
+# How to interact with Jolokia for Open-Xchange
 
 Open-Xchange does support Jolokia as a remote JMX-Bridge over HTTP. By Version 7.4.0 ongoing, it is located inside Open-Xchange Bundle and configured by jolokia.properties. Additional information can be found at [jolokia.org](http://www.jolokia.org/). 
 This has been done to get less overhead and speak with the corresponding JMX-beans directly.
-
-
 
 ## Set configuration by user id and context id
 
@@ -286,7 +292,7 @@ env.oxJolokiaUrl http://localhost:8008/monitoring/jolokia
 See this [article](http://oxpedia.org/wiki/index.php?title=AppSuite:DocumentsMonitoring) for more details.
 
 
-##Supplementary notes for distributed munin clients
+## Supplementary notes for distributed munin clients
 
 ### Munin node
 
@@ -316,7 +322,7 @@ Allow from localhost 127.0.0.0/8 ::1    # the default setting
 Allow from 10.99.0.0/8                  # added network
 ```
 
-The munin webpage is located at ``http://yourhost_where_munin_is_running.org/munin``.
+The munin webpage is located at [http://yourhost_where_munin_is_running.org/munin](http://yourhost_where_munin_is_running.org/munin).
 
 
 # Running Jolokia
@@ -331,11 +337,11 @@ and can be changed by either setting it to false or providing a ``jolokia-access
 
 For further information how to setup this file, [http://www.jolokia.org/reference/html/security.html](http://www.jolokia.org/reference/html/security.html) is a good start as all those settings are usable.
 
-##Jolokia with Grizzly
+## Jolokia with Grizzly
 
 When using Grizzly and munin scripts on the same machine, you can connect to jolokia directly with the servers address, e.g.: ``http://localhost:8009/monitoring/jolokia``. When connecting through another machine, a best practise is to use the same forwarding as described below.
 
-#Example
+# Example
 
 For a more detailed example, see [Jolokia login counter HOWTO](https://oxpedia.org/wiki/index.php?title=Jolokia_LoginCounter_HOWTO)
 
