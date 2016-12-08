@@ -78,13 +78,14 @@ public class CassandraNodeMBeanImpl extends AnnotatedStandardMBean implements Ca
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraNodeMBeanImpl.class);
 
     private ServiceLookup services;
-    
+
     private Host host;
     private int connections;
     private int inFlightQueries;
     private int maxLoad;
     private String hostState;
     private String cassandraVersion;
+    private int trashedConnections;
 
     /**
      * Initialises a new {@link CassandraNodeMBeanImpl}.
@@ -113,6 +114,7 @@ public class CassandraNodeMBeanImpl extends AnnotatedStandardMBean implements Ca
         HostDistance distance = loadBalancingPolicy.distance(host);
 
         connections = state.getOpenConnections(host);
+        trashedConnections = state.getTrashedConnections(host);
         inFlightQueries = state.getInFlightQueries(host);
         maxLoad = connections * poolingOptions.getMaxRequestsPerConnection(distance);
         hostState = host.getState();
@@ -201,5 +203,14 @@ public class CassandraNodeMBeanImpl extends AnnotatedStandardMBean implements Ca
     public String getCassandraVersion() {
         return cassandraVersion;
     }
-    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraNodeMBean#getTrashedConnections()
+     */
+    @Override
+    public int getTrashedConnections() {
+        return trashedConnections;
+    }
 }

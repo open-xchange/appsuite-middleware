@@ -78,6 +78,15 @@ public interface CassandraNodeMBean {
     int getConnections();
 
     /**
+     * Returns the amount of trashed connections for the node
+     * 
+     * @return the amount of trashed connections for the node
+     */
+    @MBeanMethodAnnotation(description = "Returns the amount of trashed connections for the node", parameters = {}, parameterDescriptions = {})
+
+    int getTrashedConnections();
+
+    /**
      * Returns the amount of in flight queries, i.e. the amount of queries
      * that are written to the connection and are still being processed by
      * the cluster
