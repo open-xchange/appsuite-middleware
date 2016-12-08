@@ -154,7 +154,8 @@ public class HttpServiceImpl implements HttpServiceExtension {
             final String alias, final Servlet servlet, final Dictionary initparams, HttpContext httpContext)
             throws ServletException, NamespaceException {
 
-        LOG.info("Registering servlet: {}, under: {}, with: {} and context: {}", servlet, alias, initparams, httpContext);
+        // LOG.info("Registering servlet: {}, under: {}, with: {} and context: {}", servlet, alias, initparams, httpContext);
+        LOG.info("Registering servlet: {}, under: {} and context: {}", servlet, alias, httpContext);
 
         mainHttpHandler.registerServletHandler(alias, servlet, initparams, httpContext, this);
     }
