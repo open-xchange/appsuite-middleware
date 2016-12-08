@@ -218,6 +218,13 @@ public class MBeanHostStateListener implements StateListener {
      * @throws MalformedObjectNameException if the {@link ObjectName} does not have the right format.
      */
     private ObjectName createObjectName(Host host) throws MalformedObjectNameException {
-        return new ObjectName(CassandraNodeMBean.DOMAIN + ":00=" + host.getDatacenter() + ",01=" + host.getRack() + ",name=" + host.getAddress().getHostAddress());
+        StringBuilder sb = new StringBuilder(CassandraNodeMBean.DOMAIN);
+        // Append datacenter
+        sb.append(":00=").append(host.getDatacenter());
+        // Append rack
+        sb.append(",01=").append(host.getRack());
+        // Append hostname
+        sb.append(",name=").append(host.getAddress().getHostAddress());
+        return new ObjectName(sb.toString());
     }
 }
