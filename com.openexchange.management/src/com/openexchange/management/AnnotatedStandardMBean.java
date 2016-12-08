@@ -58,7 +58,6 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import org.slf4j.Logger;
 
 /**
  * {@link AnnotatedStandardMBean} - The extension of {@link StandardMBean} that will automatically provide JMX meta-data through annotations.
@@ -69,8 +68,6 @@ import org.slf4j.Logger;
  * @see MBeanMethodAnnotation
  */
 public class AnnotatedStandardMBean extends StandardMBean {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AnnotatedStandardMBean.class);
 
     private final Map<String, String> methodDescriptions;
     private final Map<String, String[]> methodParameters;
@@ -93,8 +90,8 @@ public class AnnotatedStandardMBean extends StandardMBean {
         methodParameterDescriptions = new HashMap<String, String[]>();
 
         Class<?>[] interfaces = this.getClass().getInterfaces();
-        if (interfaces.length == 1) { // just in case, should always be equals to 1
-            Method[] methods = interfaces[0].getMethods();
+        for (Class<?> iface : interfaces) {
+            Method[] methods = iface.getMethods();
             for (Method m : methods) {
                 if (m.isAnnotationPresent(MBeanMethodAnnotation.class)) {
                     MBeanMethodAnnotation a = m.getAnnotation(MBeanMethodAnnotation.class);
@@ -103,8 +100,6 @@ public class AnnotatedStandardMBean extends StandardMBean {
                     methodParameterDescriptions.put(m.getName(), a.parameterDescriptions());
                 }
             }
-        } else {
-            LOG.error("Cannot initialize annotations");
         }
     }
 
@@ -147,5 +142,4 @@ public class AnnotatedStandardMBean extends StandardMBean {
         }
         return v[sequence];
     }
-
 }
