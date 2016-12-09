@@ -73,8 +73,6 @@ import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.http.server.util.HtmlHelper;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.localization.LogMessages;
-import org.glassfish.grizzly.monitoring.DefaultMonitoringConfig;
-import org.glassfish.grizzly.monitoring.MonitoringConfig;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.http.grizzly.GrizzlyConfig;
@@ -138,19 +136,6 @@ public class OXHttpServerFilter extends HttpServerFilter {
      * The number of requests, which are currently in process.
      */
     private final AtomicInteger activeRequestsCounter = new AtomicInteger();
-
-    /**
-     * Web server probes
-     */
-    protected final DefaultMonitoringConfig<HttpServerProbe> monitoringConfig =
-            new DefaultMonitoringConfig<HttpServerProbe>(HttpServerProbe.class) {
-
-                @Override
-                public Object createManagementObject() {
-                    return createJmxManagementObject();
-                }
-
-            };
 
     private final GrizzlyConfig grizzlyConfig;
 
@@ -336,15 +321,6 @@ public class OXHttpServerFilter extends HttpServerFilter {
 
 
     // ---------------------------------------------------------- Public Methods
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MonitoringConfig<HttpServerProbe> getMonitoringConfig() {
-        return monitoringConfig;
-    }
 
     /**
      * Method, which might be optionally called to prepare the filter for
