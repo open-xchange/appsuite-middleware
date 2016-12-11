@@ -54,6 +54,8 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -65,10 +67,16 @@ public class TestContextPool {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TestContextPool.class);
 
-    private static volatile BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(50);
+    private static BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(50);
 
-    public static void addContext(TestContext context) {
+    //    private TestContextWatcher contextWatcher = new TestContextWatcher(contexts);
+    private static AtomicReference<TestContextWatcher> contextWatcher = new AtomicReference<>();
+
+    private static AtomicBoolean watcherInitialized = new AtomicBoolean(false);
+
+    public static synchronized void addContext(TestContext context) {
         contexts.add(context);
+        startWatcher();
         LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
     }
 
@@ -76,7 +84,8 @@ public class TestContextPool {
         synchronized (TestContextPool.class) {
             try {
                 TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
-//                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());
+                contextWatcher.get().contextInUse(context);
+                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());
                 return context;
             } catch (InterruptedException e) {
                 // should not happen
@@ -90,6 +99,7 @@ public class TestContextPool {
         try {
             context.reset();
             contexts.put(context);
+            contextWatcher.get().contextSuccessfullyReturned(context);
         } catch (InterruptedException e) {
             // should not happen
             LOG.error("", e);
@@ -113,5 +123,14 @@ public class TestContextPool {
 
     public static void setOxAdminMaster(TestUser oxAdminMaster) {
         TestContextPool.oxAdminMaster = oxAdminMaster;
+    }
+
+    public static void startWatcher() {
+        if (!watcherInitialized.getAndSet(true)) {
+            TestContextWatcher contextWatcherTask = new TestContextWatcher();
+            contextWatcher.compareAndSet(null, contextWatcherTask);
+            Thread contextWatcher = new Thread(contextWatcherTask, "TestContextWatcher");
+            contextWatcher.start();
+        }
     }
 }
