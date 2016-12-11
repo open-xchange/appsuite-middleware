@@ -63,9 +63,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.ajax.oauth.actions.AllOAuthServicesRequest;
 import com.openexchange.ajax.oauth.actions.GetOAuthServiceRequest;
 import com.openexchange.ajax.oauth.actions.OAuthServicesResponse;
@@ -73,6 +70,9 @@ import com.openexchange.ajax.oauth.types.OAuthService;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * Instances of com.openexchange.oauth.OAuthServiceMetaData should be invisible if their according
@@ -101,7 +101,7 @@ public class OAuthServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         oxadmin = testContext.getAdmin();
         client2 = new AJAXClient(testContext.acquireUser());
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());

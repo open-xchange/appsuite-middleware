@@ -101,7 +101,7 @@ public abstract class AbstractOAuthTest {
 
     @Before
     public void before() throws Exception {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         // register client application
         clientApp = registerTestClient();
         if (scope == null) {

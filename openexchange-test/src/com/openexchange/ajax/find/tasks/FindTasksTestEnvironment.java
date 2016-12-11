@@ -75,9 +75,6 @@ import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.basic.tasks.TaskType;
@@ -93,6 +90,9 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link FindTasksTestEnvironment}
@@ -178,7 +178,7 @@ public class FindTasksTestEnvironment {
      * Initialize the users
      */
     private final void initUsers() throws Exception {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         TestUser user1 = testContext.acquireUser();
 
         clientA = new AJAXClient(user1);

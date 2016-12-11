@@ -65,10 +65,10 @@ import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * {@link Bug30701Test}
@@ -91,7 +91,7 @@ public class Bug30701Test {
 
     @Before
     public void setUp() throws Exception {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         client = new AJAXClient(testContext.acquireUser());
         folderID = client.getValues().getPrivateContactFolder();
         tz = client.getValues().getTimeZone();

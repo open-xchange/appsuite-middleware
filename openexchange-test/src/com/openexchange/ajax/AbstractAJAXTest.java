@@ -76,12 +76,12 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUploadParser;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * This class implements inheritable methods for AJAX tests.
@@ -136,7 +136,7 @@ public abstract class AbstractAJAXTest {
         try {
             AJAXConfig.init();
 
-            testContext = TestContextPool.acquireContext();
+            testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
             testUser = testContext.acquireUser();
             client = new AJAXClient(testUser);
         } catch (final OXException ex) {

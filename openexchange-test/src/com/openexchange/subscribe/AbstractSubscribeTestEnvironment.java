@@ -58,8 +58,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountResponse;
 import com.openexchange.ajax.oauth.actions.DeleteOAuthAccountRequest;
@@ -73,6 +71,8 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
@@ -127,7 +127,7 @@ public abstract class AbstractSubscribeTestEnvironment {
      * @throws IOException
      */
     private void initAJAXClient() throws OXException, IOException, JSONException {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         ajaxClient = new AJAXClient(testContext.acquireUser());
     }
 

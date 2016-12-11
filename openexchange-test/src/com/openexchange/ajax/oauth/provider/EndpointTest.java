@@ -127,7 +127,7 @@ public abstract class EndpointTest {
 
     @Before
     public void before() throws Exception {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         testUser = testContext.acquireUser();
         // prepare http client
         client = new DefaultHttpClient(new BasicClientConnectionManager());

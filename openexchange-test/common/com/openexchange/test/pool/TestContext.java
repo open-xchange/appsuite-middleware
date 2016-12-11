@@ -75,6 +75,8 @@ public class TestContext implements Serializable {
 
     private final int id;
 
+    private String acquiredBy;
+
     private volatile ConcurrentHashSet<TestUser> acquiredUsers = new ConcurrentHashSet<TestUser>(); //required for reset
 
     private volatile BlockingQueue<TestUser> users = new LinkedBlockingQueue<>();
@@ -151,6 +153,8 @@ public class TestContext implements Serializable {
      * Resets the context and adds all acquired users back to the pool
      */
     protected void reset() {
+        setAcquiredBy(null);
+        
         if (!acquiredUsers.isEmpty()) {
             users.addAll(acquiredUsers);
             acquiredUsers.clear();
@@ -167,5 +171,13 @@ public class TestContext implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public String getAcquiredBy() {
+        return acquiredBy;
+    }
+
+    public void setAcquiredBy(String acquiredBy) {
+        this.acquiredBy = acquiredBy;
     }
 }

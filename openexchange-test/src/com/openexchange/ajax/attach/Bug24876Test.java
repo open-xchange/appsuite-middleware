@@ -63,11 +63,11 @@ import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.MultipleRequest;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * {@link Bug24876Test}
@@ -89,7 +89,7 @@ public final class Bug24876Test {
 
     @Before
     public void setUp() throws Exception {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         client = new AJAXClient(testContext.acquireUser());
         tz = client.getValues().getTimeZone();
         int folderId = client.getValues().getPrivateContactFolder();

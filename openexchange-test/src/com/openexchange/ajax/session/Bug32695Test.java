@@ -60,10 +60,10 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * Session count steadily grows with usage of form login
@@ -75,7 +75,8 @@ public class Bug32695Test extends AbstractAJAXSession {
     private TestUser testUser2;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         testUser2 = testContext.acquireUser();
     }
 

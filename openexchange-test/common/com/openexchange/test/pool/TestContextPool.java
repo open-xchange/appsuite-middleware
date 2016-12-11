@@ -80,12 +80,13 @@ public class TestContextPool {
         LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
     }
 
-    public static TestContext acquireContext() {
+    public static TestContext acquireContext(String acquiredBy) {
         synchronized (TestContextPool.class) {
             try {
                 TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
+                context.setAcquiredBy(acquiredBy);
                 contextWatcher.get().contextInUse(context);
-                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());
+//                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());
                 return context;
             } catch (InterruptedException e) {
                 // should not happen

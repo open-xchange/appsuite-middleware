@@ -218,7 +218,7 @@ public abstract class WebDAVTest {
 
     @Before
     public void setUp() throws Exception {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         testUser = testContext.acquireUser();
 
         client = new AJAXClient(testUser);

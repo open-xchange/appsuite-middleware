@@ -65,12 +65,12 @@ import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * {@link Bug26544Test}
@@ -89,7 +89,7 @@ public class Bug26544Test {
 
     @Before
     public void setUp() throws Exception {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         client = new AJAXClient(testContext.acquireUser());
         tz = client.getValues().getTimeZone();
         int folderId = client.getValues().getPrivateContactFolder();

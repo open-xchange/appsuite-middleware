@@ -93,7 +93,7 @@ public abstract class AbstractAJAXSession {
         ProvisioningSetup.init();
 
         String clientId = getClientId();
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();
         client = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);

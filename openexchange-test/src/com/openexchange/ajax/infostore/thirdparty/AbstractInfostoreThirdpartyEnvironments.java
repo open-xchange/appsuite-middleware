@@ -55,8 +55,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.ajax.infostore.fileaccount.actions.DeleteFileaccountRequest;
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountRequest;
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountResponse;
@@ -66,6 +64,8 @@ import com.openexchange.ajax.oauth.client.actions.InitOAuthAccountResponse;
 import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * {@link AbstractInfostoreThirdpartyEnvironments}
@@ -159,7 +159,7 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
      * @throws IOException
      */
     private void initAJAXClient() throws OXException, IOException, JSONException {
-        testContext = TestContextPool.acquireContext();
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         ajaxClient = new AJAXClient(testContext.acquireUser());
     }
 

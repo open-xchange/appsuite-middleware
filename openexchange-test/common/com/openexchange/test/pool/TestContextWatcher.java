@@ -67,13 +67,6 @@ public class TestContextWatcher implements Runnable {
 
     private final ConcurrentHashMap<TestContext, Long> contextsInUse = new ConcurrentHashMap<>();
 
-//    private BlockingQueue<TestContext> contextsPool;
-
-//    public TestContextWatcher(BlockingQueue<TestContext> contextsPool) {
-        public TestContextWatcher() {
-//        this.contextsPool = contextsPool;
-    }
-
     @Override
     public void run() {
         while (true) {
@@ -89,7 +82,6 @@ public class TestContextWatcher implements Runnable {
             long inUse = current - acquired;
             if (inUse > MAX_TIME_TO_USE) {
                 moveContextBackToPool(contextToCheck.getKey());
-//                contextsInUse.remove(contextToCheck); will be called from TestContextPool.backContext(..)
             }
         }
     }
@@ -111,6 +103,7 @@ public class TestContextWatcher implements Runnable {
     }
 
     private void moveContextBackToPool(TestContext context) {
+        LOG.info("Context {} has not been returned in time from class {}. Move it back to pool. ", context.getName(), context.getAcquiredBy());
         TestContextPool.backContext(context);
     }
 
