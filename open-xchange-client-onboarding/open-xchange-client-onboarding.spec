@@ -83,6 +83,11 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     # SoftwareChange_Request-3414
     sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
 
+    # SoftwareChange_Request-3823
+    pfile=/opt/open-xchange/etc/client-onboarding-mail.properties
+    ox_add_property com.openexchange.client.onboarding.mail.imap.login.customsource false ${pfile}
+    ox_add_property com.openexchange.client.onboarding.mail.smtp.login.customsource false ${pfile}
+
 fi
 
 %clean
