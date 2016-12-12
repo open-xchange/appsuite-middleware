@@ -151,6 +151,7 @@ public class MBeanSchemaChangeListener extends SchemaChangeListenerBase {
 
             ManagementService managementService = services.getService(ManagementService.class);
             managementService.registerMBean(objectName, mbean);
+            LOGGER.info("Registered MBean for keyspace '{}'", keyspaceMetadata.getName());
         } catch (NotCompliantMBeanException | MalformedObjectNameException | OXException e) {
             LOGGER.error("Error registering MBean for keyspace '{}'", keyspaceMetadata.getName(), e);
         }
@@ -168,6 +169,7 @@ public class MBeanSchemaChangeListener extends SchemaChangeListenerBase {
             ManagementService managementService = services.getService(ManagementService.class);
             ObjectName objectName = createObjectName(keyspaceMetadata);
             managementService.unregisterMBean(objectName);
+            LOGGER.info("Unregistered MBean for keyspace '{}'", keyspaceMetadata.getName());
         } catch (MalformedObjectNameException | OXException e) {
             LOGGER.error("Error unregistering MBean for keyspace '{}'", keyspaceMetadata.getName(), e);
         }
