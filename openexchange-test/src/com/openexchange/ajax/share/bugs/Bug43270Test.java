@@ -325,7 +325,7 @@ public class Bug43270Test extends ShareTest {
     }
 
     private void setReadCreateSharedFolders(boolean readCreateSharedFolders) throws Exception {
-        Credentials credentials = new Credentials(admin.getLogin(), admin.getPassword());
+        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface userInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
         com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(client2.getValues().getContextId());
@@ -343,7 +343,7 @@ public class Bug43270Test extends ShareTest {
     }
 
     private void changeCapability(String capability, Boolean value) throws Exception {
-        Credentials credentials = new Credentials(admin.getLogin(), admin.getPassword());
+        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface userInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
         com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(client2.getValues().getContextId());

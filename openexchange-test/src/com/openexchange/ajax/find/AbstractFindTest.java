@@ -119,6 +119,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         try {
             folderManager.cleanUp();
+            folderManager2.cleanUp();
         } finally {
             super.tearDown();
         }

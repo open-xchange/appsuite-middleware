@@ -92,7 +92,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         Context ctx = new Context(testContext.getId());
         ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "true");
 
-        Credentials credentials = new Credentials(admin.getLogin(), admin.getPassword());
+        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
         ctxInterface.change(ctx, credentials);
 
@@ -117,7 +117,7 @@ public class AdminListTest extends AbstractMailFilterTest {
             com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
             Set<String> cap = new HashSet<String>(1);
             cap.add("webmail");
-            Credentials userCreds = new Credentials(admin.getLogin(), admin.getPassword());
+            Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
             OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
             Set<String> emptySet = Collections.emptySet();
             usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, emptySet, cap, emptySet, userCreds);

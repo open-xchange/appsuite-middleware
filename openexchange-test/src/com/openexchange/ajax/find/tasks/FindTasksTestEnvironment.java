@@ -74,7 +74,9 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.basic.tasks.TaskType;
@@ -165,6 +167,8 @@ public class FindTasksTestEnvironment {
      */
     public void init() {
         try {
+            AJAXConfig.init();
+            ProvisioningSetup.init();
             initUsers();
             createFolderStructure();
             createAndInsertTasks();
