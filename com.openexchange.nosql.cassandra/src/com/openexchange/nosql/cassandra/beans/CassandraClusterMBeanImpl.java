@@ -58,6 +58,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Metrics;
 import com.datastax.driver.core.Metrics.Errors;
+import com.datastax.driver.core.TokenRange;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraClusterMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
@@ -119,6 +120,30 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
             hosts.add(host.getAddress().getHostAddress());
         }
         return hosts;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#geTokenRanges()
+     */
+    @Override
+    public Set<String> getTokenRanges() {
+        Set<TokenRange> tokenRanges = cluster.getMetadata().getTokenRanges();
+        Set<String> tr = new HashSet<>(tokenRanges.size());
+        StringBuilder sb = new StringBuilder();
+        for (TokenRange tokenRange : tokenRanges) {
+            sb.append("DataType: ").append(tokenRange.getStart().getType().getName());
+            sb.append(" [");
+            sb.append(tokenRange.getStart().getValue());
+            sb.append(" - ");
+            sb.append(tokenRange.getEnd().getValue());
+            sb.append("]");
+            tr.add(sb.toString());
+            sb.setLength(0);
+        }
+
+        return tr;
     }
 
     /*

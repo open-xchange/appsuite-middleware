@@ -51,6 +51,7 @@ package com.openexchange.nosql.cassandra;
 
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
+import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
 
@@ -69,6 +70,17 @@ public interface CassandraClusterMBean extends CassandraMBean {
      * @return the known nodes of this cluster.
      */
     Set<String> getNodes();
+
+    /**
+     * Returns the token ranges that define data distribution in the ring.
+     * 
+     * Note that this information is refreshed asynchronously by the control connection,
+     * when schema or ring topology changes. It might occasionally be stale.
+     * 
+     * @return the token ranges. Note that the result might be stale or empty if metadata
+     *         was explicitly disabled with {@link QueryOptions#setMetadataEnabled(boolean)}.
+     */
+    Set<String> getTokenRanges();
 
     /**
      * Returns the name of the cluster
