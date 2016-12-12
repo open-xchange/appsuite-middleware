@@ -140,6 +140,7 @@ public final class CopyAction extends AppointmentAction {
                 appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
                 jsonConflictArray.put(jsonAppointmentObj);
             }
+            jsonResponseObj.put("conflicts", jsonConflictArray);
         } else {
             jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
