@@ -55,6 +55,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -63,6 +66,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.objectusecount.AbstractArguments;
+import com.openexchange.objectusecount.BatchIncrementArguments;
+import com.openexchange.objectusecount.BatchIncrementArguments.ObjectAndFolder;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.SetArguments;
@@ -198,13 +203,18 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                         incrementObjectUseCount(object2folder, session.getUserId(), session.getContextId(), arguments.getCon());
                     }
 
-                    int objectId = arguments.getObjectId();
-                    int folderId = arguments.getFolderId();
-                    if (objectId > 0 && folderId > 0) {
-                        // By object/folder identifier
-                        TIntIntMap object2folder = new TIntIntHashMap(2);
-                        object2folder.put(objectId, folderId);
-                        incrementObjectUseCount(object2folder, session.getUserId(), session.getContextId(), arguments.getCon());
+                    if (arguments instanceof BatchIncrementArguments) {
+                        BatchIncrementArguments batchArguments = (BatchIncrementArguments) arguments;
+                        batchIncrementObjectUseCount(batchArguments.getCounts(), session.getUserId(), session.getContextId(), arguments.getCon());
+                    } else {
+                        int objectId = arguments.getObjectId();
+                        int folderId = arguments.getFolderId();
+                        if (objectId > 0 && folderId > 0) {
+                            // By object/folder identifier
+                            TIntIntMap object2folder = new TIntIntHashMap(2);
+                            object2folder.put(objectId, folderId);
+                            incrementObjectUseCount(object2folder, session.getUserId(), session.getContextId(), arguments.getCon());
+                        }
                     }
 
                     return null;
@@ -235,6 +245,70 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             }
 
             LOG.debug("Failed to increment object use count", e);
+        }
+    }
+
+    private void batchIncrementObjectUseCount(Map<ObjectAndFolder, Integer> counts, int userId, int contextId) throws OXException {
+        if (null == counts || counts.isEmpty()) {
+            return;
+        }
+
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        if (null == dbService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class);
+        }
+        Connection con = dbService.getWritable(contextId);
+        try {
+            batchIncrementObjectUseCount(counts, userId, contextId, con);
+        } finally {
+            dbService.backWritable(contextId, con);
+        }
+    }
+
+    void batchIncrementObjectUseCount(Map<ObjectAndFolder, Integer> counts, int userId, int contextId, Connection con) throws OXException {
+        if (null == con) {
+            batchIncrementObjectUseCount(counts, userId, contextId);
+            return;
+        }
+
+        if (null == counts || counts.isEmpty()) {
+            return;
+        }
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO object_use_count (cid, user, folder, object, value) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=value + ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+
+            Iterator<Entry<ObjectAndFolder, Integer>> iterator = counts.entrySet().iterator();
+            int size = counts.size();
+            if (size > 1) {
+                for (int i = size; i-- > 0;) {
+                    Map.Entry<ObjectAndFolder, Integer> entry = iterator.next();
+                    ObjectAndFolder key = entry.getKey();
+                    int count = entry.getValue().intValue();
+                    stmt.setInt(3, key.getFolderId());
+                    stmt.setInt(4, key.getObjectId());
+                    stmt.setInt(5, count);
+                    stmt.setInt(6, count);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            } else {
+                Map.Entry<ObjectAndFolder, Integer> entry = iterator.next();
+                ObjectAndFolder key = entry.getKey();
+                int count = entry.getValue().intValue();
+                stmt.setInt(3, key.getFolderId());
+                stmt.setInt(4, key.getObjectId());
+                stmt.setInt(5, count);
+                stmt.setInt(6, count);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 

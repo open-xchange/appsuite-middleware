@@ -5,9 +5,17 @@ Bundle-SymbolicName: com.openexchange.objectusecount
 Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.exception,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.session
+ com.openexchange.session,
+ gnu.trove,
+ gnu.trove.iterator,
+ gnu.trove.map,
+ gnu.trove.map.hash,
+ gnu.trove.procedure
 Export-Package: com.openexchange.objectusecount
