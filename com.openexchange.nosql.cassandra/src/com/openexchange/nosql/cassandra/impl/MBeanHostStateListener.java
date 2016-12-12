@@ -212,7 +212,7 @@ public class MBeanHostStateListener implements StateListener {
      * Creates a new {@link ObjectName} for the specified Cassandra {@link Host}. The created
      * {@link ObjectName} has the format:
      * 
-     * <code>com.openexchange.nosql.cassandra:00=DATACENTER,01=Rack,name=HOSTNAME</code>
+     * <code>com.openexchange.nosql.cassandra:00=Cassandra Node Monitoring Tool,01=DATACENTER,02=RACK,name=HOSTNAME</code>
      * 
      * @param host The {@link Host}
      * @return The new {@link ObjectName}
@@ -220,10 +220,11 @@ public class MBeanHostStateListener implements StateListener {
      */
     private ObjectName createObjectName(Host host) throws MalformedObjectNameException {
         StringBuilder sb = new StringBuilder(CassandraNodeMBean.DOMAIN);
+        sb.append(":00=").append(CassandraNodeMBean.NAME);
         // Append datacenter
-        sb.append(":00=").append(host.getDatacenter());
+        sb.append(",01=").append(host.getDatacenter());
         // Append rack
-        sb.append(",01=").append(host.getRack());
+        sb.append(",02=").append(host.getRack());
         // Append hostname
         sb.append(",name=").append(host.getAddress().getHostAddress());
         return new ObjectName(sb.toString());
