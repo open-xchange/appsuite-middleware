@@ -69,7 +69,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CassandraNodeMBeanImpl extends AbstractCassandraMBean {
+public class CassandraNodeMBeanImpl extends AbstractCassandraMBean implements CassandraNodeMBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraNodeMBeanImpl.class);
 

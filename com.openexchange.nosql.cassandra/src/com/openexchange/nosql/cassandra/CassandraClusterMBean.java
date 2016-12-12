@@ -47,62 +47,55 @@
  *
  */
 
-package com.openexchange.nosql.cassandra.beans;
+package com.openexchange.nosql.cassandra;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import com.openexchange.management.AnnotatedStandardMBean;
-import com.openexchange.server.ServiceLookup;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * {@link AbstractCassandraMBean}
+ * {@link CassandraClusterMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractCassandraMBean extends AnnotatedStandardMBean implements DynamicMBean {
-
-    protected final ServiceLookup services;
-
-    /**
-     * Initialises a new {@link AbstractCassandraMBean}.
-     * 
-     * @param services The {@link ServiceLookup} instance
-     * @param description The description of this MBean
-     * @param mbeanInterface The Class
-     * @throws NotCompliantMBeanException
-     */
-    public AbstractCassandraMBean(ServiceLookup services, String description, Class<?> mbeanInterface) throws NotCompliantMBeanException {
-        super(description, mbeanInterface);
-        this.services = services;
-    }
+public interface CassandraClusterMBean {
+    
+    static final String DOMAIN = "com.openxchange.nosql.cassandra";
+    static final String NAME = "Cassandra Cluster Monitoring Bean";
 
     /**
-     * Performs a refresh of the metrics/statistics if necessary
-     */
-    void refresh() {
-        // Override this method to add refresh logic
-    }
-
-    /*
-     * (non-Javadoc)
+     * Returns the name of the cluster
      * 
-     * @see javax.management.StandardMBean#getAttributes(java.lang.String[])
+     * @return the name of the cluster
      */
-    @Override
-    public AttributeList getAttributes(String[] attributes) {
-        // Refresh information (if necessary)
-        refresh();
+    String getClusterName();
 
-        AttributeList list = new AttributeList(attributes.length);
-        try {
-            for (String attribute : attributes) {
-                list.add(new Attribute(attribute, getAttribute(attribute)));
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-        return list;
-    }
+    /**
+     * Returns the total amount of connections that this OX node has to the Cassandra cluster
+     * 
+     * @return the total amount of connections that this OX node has to the Cassandra cluster
+     */
+    int getOpenConnections();
+
+    /**
+     * Returns the total amount of trashed connections
+     * 
+     * @return the total amount of trashed connections
+     */
+    int getTrashedConnections();
+
+    /**
+     * Returns the number of queued up tasks in the internal {@link CassandraService} executor
+     * 
+     * @return the number of queued up tasks in the internal CassandraService executor, or <code>-1</code>
+     *         if the internal executor is not accessible or not an instance of {@link ThreadPoolExecutor}
+     */
+    int getQueuedTasks();
+
+    /**
+     * Returns the number of queued up tasks in the internal blocking executor of the {@link CassandraService}
+     * 
+     * @return the number of queued up tasks in the internal blocking executor of the {@link CassandraService}
+     *         ,or <code>-1</code> if the internal executor is not accessible or not an instance of
+     *         {@link ThreadPoolExecutor}
+     */
+    int getBlockingExecutorQueueTasks();
 }

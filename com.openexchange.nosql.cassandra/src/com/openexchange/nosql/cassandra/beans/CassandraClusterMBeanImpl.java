@@ -47,84 +47,106 @@
  *
  */
 
-package com.openexchange.nosql.cassandra.osgi;
+package com.openexchange.nosql.cassandra.beans;
 
-import javax.management.ObjectName;
+import javax.management.NotCompliantMBeanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.management.ManagementService;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Metrics;
+import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraClusterMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
-import com.openexchange.nosql.cassandra.beans.CassandraClusterMBeanImpl;
-import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CassandraActivator}
+ * {@link CassandraClusterMBeanImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CassandraActivator extends HousekeepingActivator {
+public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements CassandraClusterMBean {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraClusterMBeanImpl.class);
+
+    private Metrics metrics;
+    private String clusterName;
 
     /**
-     * Initialises a new {@link CassandraActivator}.
+     * Initialises a new {@link CassandraClusterMBeanImpl}.
+     * 
+     * @param services
+     * @param description
+     * @param mbeanInterface
+     * @throws NotCompliantMBeanException
      */
-    public CassandraActivator() {
-        super();
+    public CassandraClusterMBeanImpl(ServiceLookup services) throws NotCompliantMBeanException {
+        super(services, CassandraClusterMBean.NAME, CassandraClusterMBean.class);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.openexchange.nosql.cassandra.beans.AbstractCassandraMBean#refresh()
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ManagementService.class };
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        CassandraService cassandraService = new CassandraServiceImpl(this);
-        registerService(CassandraService.class, cassandraService);
-        trackService(CassandraService.class);
-        openTrackers();
-
-        ObjectName objectName = new ObjectName(CassandraClusterMBean.DOMAIN, "name", CassandraClusterMBean.NAME);
-        CassandraClusterMBean mbean = new CassandraClusterMBeanImpl(this);
-        ManagementService managementService = getService(ManagementService.class);
-        managementService.registerMBean(objectName, mbean);
-
-        final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
-        logger.info("Cassandra service was successfully registered");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        // Unregister cluster mbean
-        ManagementService managementService = getService(ManagementService.class);
-        ObjectName objectName = new ObjectName(CassandraClusterMBean.DOMAIN, "name", CassandraClusterMBean.NAME);
-        managementService.unregisterMBean(objectName);
-
-        // Unregister cassandra service
-        CassandraService cassandraService = getService(CassandraService.class);
-        if (cassandraService == null) {
-            return;
+    void refresh() {
+        try {
+            CassandraService cassandraService = services.getService(CassandraService.class);
+            Cluster cluster = cassandraService.getCluster();
+            metrics = cluster.getMetrics();
+            clusterName = cluster.getClusterName();
+        } catch (OXException e) {
+            LOGGER.error("Could not refresh the statistics for the Cassandra cluster .", e);
         }
-        ((CassandraServiceImpl) cassandraService).shutdown();
+    }
 
-        final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
-        logger.info("Cassandra service was successfully shutdown and unregistered");
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getClusterName()
+     */
+    @Override
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getOpenConnections()
+     */
+    @Override
+    public int getOpenConnections() {
+        return metrics.getOpenConnections().getValue();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getTrashedConnections()
+     */
+    @Override
+    public int getTrashedConnections() {
+        return metrics.getTrashedConnections().getValue();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getQueuedTasks()
+     */
+    @Override
+    public int getQueuedTasks() {
+        return metrics.getExecutorQueueDepth().getValue();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getBlockingExecutorQueueTasks()
+     */
+    @Override
+    public int getBlockingExecutorQueueTasks() {
+        return metrics.getBlockingExecutorQueueDepth().getValue();
     }
 }
