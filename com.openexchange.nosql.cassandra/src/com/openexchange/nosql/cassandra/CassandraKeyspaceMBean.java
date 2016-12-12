@@ -49,6 +49,8 @@
 
 package com.openexchange.nosql.cassandra;
 
+import java.util.Set;
+
 /**
  * {@link CassandraKeyspaceMBean}
  *
@@ -58,5 +60,5 @@ public interface CassandraKeyspaceMBean extends CassandraMBean {
 
     static final String NAME = "Cassandra Keyspace Monitoring Tool";
 
-    String[] getTables();
+    Set<String> getTables();
 }

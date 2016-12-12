@@ -50,6 +50,8 @@
 package com.openexchange.nosql.cassandra.beans;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import javax.management.NotCompliantMBeanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,12 +110,11 @@ public class CassandraKeyspaceMBeanImpl extends AbstractCassandraMBean implement
      * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getTables()
      */
     @Override
-    public String[] getTables() {
+    public Set<String> getTables() {
         Collection<TableMetadata> tables = keyspaceMetadata.getTables();
-        String[] tableNames = new String[tables.size()];
-        int index = 0;
+        Set<String> tableNames = new HashSet<>();
         for (TableMetadata table : tables) {
-            tableNames[index++] = table.getName();
+            tableNames.add(table.getName());
         }
         return tableNames;
     }
