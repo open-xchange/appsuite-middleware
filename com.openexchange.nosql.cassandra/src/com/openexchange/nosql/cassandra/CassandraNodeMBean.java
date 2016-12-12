@@ -56,9 +56,8 @@ import com.openexchange.management.MBeanMethodAnnotation;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface CassandraNodeMBean {
+public interface CassandraNodeMBean extends CassandraMBean {
 
-    static final String DOMAIN = "com.openxchange.nosql.cassandra";
     static final String NAME = "Cassandra Node Monitoring Bean";
 
     /**

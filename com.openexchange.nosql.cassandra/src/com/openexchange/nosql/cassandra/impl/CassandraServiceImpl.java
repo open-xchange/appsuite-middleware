@@ -120,6 +120,8 @@ public class CassandraServiceImpl implements CassandraService {
                 QueryLogger queryLogger = QueryLogger.builder().withConstantThreshold(slowQueryLatencyThresholdMillis).build();
                 cluster.register(queryLogger);
             }
+            // Register the MBean schema change listener
+            cluster.register(new MBeanSchemaChangeListener(services));
             //Initialise the global session
             globalSession = cluster.connect();
         } catch (NoHostAvailableException e) {

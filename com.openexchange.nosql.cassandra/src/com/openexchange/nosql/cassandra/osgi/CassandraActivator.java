@@ -49,14 +49,18 @@
 
 package com.openexchange.nosql.cassandra.osgi;
 
+import java.util.List;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.datastax.driver.core.KeyspaceMetadata;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.nosql.cassandra.CassandraClusterMBean;
+import com.openexchange.nosql.cassandra.CassandraKeyspaceMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.beans.CassandraClusterMBeanImpl;
+import com.openexchange.nosql.cassandra.beans.CassandraKeyspaceMBeanImpl;
 import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -96,6 +100,7 @@ public class CassandraActivator extends HousekeepingActivator {
         trackService(CassandraService.class);
         openTrackers();
 
+        // Register the cluster mbean
         ObjectName objectName = new ObjectName(CassandraClusterMBean.DOMAIN, "name", CassandraClusterMBean.NAME);
         CassandraClusterMBean mbean = new CassandraClusterMBeanImpl(this);
         ManagementService managementService = getService(ManagementService.class);

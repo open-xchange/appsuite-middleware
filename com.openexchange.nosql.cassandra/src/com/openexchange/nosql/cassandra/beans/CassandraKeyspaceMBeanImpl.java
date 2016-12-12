@@ -47,54 +47,74 @@
  *
  */
 
-package com.openexchange.nosql.cassandra;
+package com.openexchange.nosql.cassandra.beans;
 
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.Collection;
+import javax.management.NotCompliantMBeanException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.KeyspaceMetadata;
+import com.datastax.driver.core.TableMetadata;
+import com.openexchange.exception.OXException;
+import com.openexchange.nosql.cassandra.CassandraKeyspaceMBean;
+import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CassandraClusterMBean}
+ * {@link CassandraKeyspaceMBeanImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface CassandraClusterMBean extends CassandraMBean {
+public class CassandraKeyspaceMBeanImpl extends AbstractCassandraMBean implements CassandraKeyspaceMBean {
 
-    static final String NAME = "Cassandra Cluster Monitoring Bean";
+    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraKeyspaceMBeanImpl.class);
 
-    /**
-     * Returns the name of the cluster
-     * 
-     * @return the name of the cluster
-     */
-    String getClusterName();
+    private KeyspaceMetadata keyspaceMetadata;
+    private final String keyspaceName;
 
     /**
-     * Returns the total amount of connections that this OX node has to the Cassandra cluster
+     * Initialises a new {@link CassandraKeyspaceMBeanImpl}.
      * 
-     * @return the total amount of connections that this OX node has to the Cassandra cluster
+     * @param services
+     * @param description
+     * @param mbeanInterface
+     * @throws NotCompliantMBeanException
      */
-    int getOpenConnections();
+    public CassandraKeyspaceMBeanImpl(ServiceLookup services, String keyspaceName) throws NotCompliantMBeanException {
+        super(services, CassandraKeyspaceMBean.NAME, CassandraKeyspaceMBean.class);
+        this.keyspaceName = keyspaceName;
+    }
 
-    /**
-     * Returns the total amount of trashed connections
+    /*
+     * (non-Javadoc)
      * 
-     * @return the total amount of trashed connections
+     * @see com.openexchange.nosql.cassandra.beans.AbstractCassandraMBean#refresh()
      */
-    int getTrashedConnections();
+    @Override
+    void refresh() {
+        try {
+            CassandraService cassandraService = services.getService(CassandraService.class);
+            Cluster cluster = cassandraService.getCluster();
+            keyspaceMetadata = cluster.getMetadata().getKeyspace(keyspaceName);
+        } catch (OXException e) {
+            LOGGER.error("Could not refresh the metadata for the keyspace '{}'.", keyspaceName, e);
+        }
+    }
 
-    /**
-     * Returns the number of queued up tasks in the internal {@link CassandraService} executor
+    /*
+     * (non-Javadoc)
      * 
-     * @return the number of queued up tasks in the internal CassandraService executor, or <code>-1</code>
-     *         if the internal executor is not accessible or not an instance of {@link ThreadPoolExecutor}
+     * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getTables()
      */
-    int getQueuedTasks();
-
-    /**
-     * Returns the number of queued up tasks in the internal blocking executor of the {@link CassandraService}
-     * 
-     * @return the number of queued up tasks in the internal blocking executor of the {@link CassandraService},
-     *         or <code>-1</code> if the internal executor is not accessible or not an instance of
-     *         {@link ThreadPoolExecutor}
-     */
-    int getBlockingExecutorQueueTasks();
+    @Override
+    public String[] getTables() {
+        Collection<TableMetadata> tables = keyspaceMetadata.getTables();
+        String[] tableNames = new String[tables.size()];
+        int index = 0;
+        for (TableMetadata table : tables) {
+            tableNames[index++] = table.getName();
+        }
+        return tableNames;
+    }
 }

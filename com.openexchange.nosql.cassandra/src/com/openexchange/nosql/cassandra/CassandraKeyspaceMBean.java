@@ -49,52 +49,14 @@
 
 package com.openexchange.nosql.cassandra;
 
-import java.util.concurrent.ThreadPoolExecutor;
-
 /**
- * {@link CassandraClusterMBean}
+ * {@link CassandraKeyspaceMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface CassandraClusterMBean extends CassandraMBean {
+public interface CassandraKeyspaceMBean extends CassandraMBean {
 
-    static final String NAME = "Cassandra Cluster Monitoring Bean";
+    static final String NAME = "Cassandra Keyspace Monitoring Tool";
 
-    /**
-     * Returns the name of the cluster
-     * 
-     * @return the name of the cluster
-     */
-    String getClusterName();
-
-    /**
-     * Returns the total amount of connections that this OX node has to the Cassandra cluster
-     * 
-     * @return the total amount of connections that this OX node has to the Cassandra cluster
-     */
-    int getOpenConnections();
-
-    /**
-     * Returns the total amount of trashed connections
-     * 
-     * @return the total amount of trashed connections
-     */
-    int getTrashedConnections();
-
-    /**
-     * Returns the number of queued up tasks in the internal {@link CassandraService} executor
-     * 
-     * @return the number of queued up tasks in the internal CassandraService executor, or <code>-1</code>
-     *         if the internal executor is not accessible or not an instance of {@link ThreadPoolExecutor}
-     */
-    int getQueuedTasks();
-
-    /**
-     * Returns the number of queued up tasks in the internal blocking executor of the {@link CassandraService}
-     * 
-     * @return the number of queued up tasks in the internal blocking executor of the {@link CassandraService},
-     *         or <code>-1</code> if the internal executor is not accessible or not an instance of
-     *         {@link ThreadPoolExecutor}
-     */
-    int getBlockingExecutorQueueTasks();
+    String[] getTables();
 }
