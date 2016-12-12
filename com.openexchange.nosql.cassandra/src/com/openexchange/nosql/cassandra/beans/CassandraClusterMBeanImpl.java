@@ -49,10 +49,13 @@
 
 package com.openexchange.nosql.cassandra.beans;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.management.NotCompliantMBeanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Metrics;
 import com.datastax.driver.core.Metrics.Errors;
 import com.openexchange.exception.OXException;
@@ -72,6 +75,7 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
     private Metrics metrics;
     private Errors errors;
     private String clusterName;
+    private Cluster cluster;
 
     /**
      * Initialises a new {@link CassandraClusterMBeanImpl}.
@@ -94,13 +98,27 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
     void refresh() {
         try {
             CassandraService cassandraService = services.getService(CassandraService.class);
-            Cluster cluster = cassandraService.getCluster();
+            cluster = cassandraService.getCluster();
             metrics = cluster.getMetrics();
             errors = metrics.getErrorMetrics();
             clusterName = cluster.getClusterName();
         } catch (OXException e) {
             LOGGER.error("Could not refresh the statistics for the Cassandra cluster .", e);
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getHosts()
+     */
+    @Override
+    public Set<String> getHosts() {
+        Set<String> hosts = new HashSet<>();
+        for (Host host : cluster.getMetadata().getAllHosts()) {
+            hosts.add(host.getAddress().getHostAddress());
+        }
+        return hosts;
     }
 
     /*
@@ -162,8 +180,10 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
     public int getSchedulerQueueSize() {
         return metrics.getTaskSchedulerQueueSize().getValue();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getReconnectionSchedulerQueueSize()
      */
     @Override

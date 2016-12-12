@@ -49,6 +49,7 @@
 
 package com.openexchange.nosql.cassandra;
 
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
@@ -61,6 +62,8 @@ import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
 public interface CassandraClusterMBean extends CassandraMBean {
 
     static final String NAME = "Cassandra Cluster Monitoring Bean";
+
+    Set<String> getHosts();
 
     /**
      * Returns the name of the cluster
