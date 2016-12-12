@@ -162,6 +162,14 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
     public int getSchedulerQueueSize() {
         return metrics.getTaskSchedulerQueueSize().getValue();
     }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getReconnectionSchedulerQueueSize()
+     */
+    @Override
+    public int getReconnectionSchedulerQueueSize() {
+        return metrics.getReconnectionSchedulerQueueSize().getValue();
+    }
 
     /*
      * (non-Javadoc)

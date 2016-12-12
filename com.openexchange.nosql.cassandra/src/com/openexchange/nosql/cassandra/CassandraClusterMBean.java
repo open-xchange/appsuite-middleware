@@ -117,6 +117,15 @@ public interface CassandraClusterMBean extends CassandraMBean {
     int getSchedulerQueueSize();
 
     /**
+     * Returns the number of queued up tasks in the {@link CassandraService} reconnection executor.
+     * 
+     * @return the number of queued up tasks in the {@link CassandraService} reconnection executor,
+     *         or <code>-1</code> if the internal executor is not accessible or not an instance of
+     *         {@link ThreadPoolExecutor}.
+     */
+    int getReconnectionSchedulerQueueSize();
+
+    /**
      * Returns the number of authentication errors while connecting to Cassandra nodes.
      * 
      * @return the number of authentication errors while connecting to Cassandra nodes.
