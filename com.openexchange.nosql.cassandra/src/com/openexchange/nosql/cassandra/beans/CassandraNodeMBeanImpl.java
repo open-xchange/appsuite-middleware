@@ -47,11 +47,8 @@
  *
  */
 
-package com.openexchange.nosql.cassandra.impl;
+package com.openexchange.nosql.cassandra.beans;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +60,6 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Session.State;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.nosql.cassandra.CassandraNodeMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.server.ServiceLookup;
@@ -73,11 +69,9 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CassandraNodeMBeanImpl extends AnnotatedStandardMBean implements CassandraNodeMBean, DynamicMBean {
+public class CassandraNodeMBeanImpl extends AbstractCassandraMBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraNodeMBeanImpl.class);
-
-    private ServiceLookup services;
 
     private Host host;
     private int connections;
@@ -93,55 +87,36 @@ public class CassandraNodeMBeanImpl extends AnnotatedStandardMBean implements Ca
      * @throws NotCompliantMBeanException
      */
     public CassandraNodeMBeanImpl(ServiceLookup services, Host host) throws NotCompliantMBeanException {
-        super(CassandraNodeMBean.NAME, CassandraNodeMBean.class);
-        this.services = services;
+        super(services, CassandraNodeMBean.NAME, CassandraNodeMBean.class);
         this.host = host;
-    }
-
-    /**
-     * Refresh node statistics
-     * 
-     * @throws OXException If an error is occurred
-     */
-    private void refresh() throws OXException {
-        CassandraService cassandraService = services.getService(CassandraService.class);
-        Cluster cluster = cassandraService.getCluster();
-        LoadBalancingPolicy loadBalancingPolicy = cluster.getConfiguration().getPolicies().getLoadBalancingPolicy();
-        PoolingOptions poolingOptions = cluster.getConfiguration().getPoolingOptions();
-
-        Session session = cassandraService.getSession();
-        State state = session.getState();
-        HostDistance distance = loadBalancingPolicy.distance(host);
-
-        connections = state.getOpenConnections(host);
-        trashedConnections = state.getTrashedConnections(host);
-        inFlightQueries = state.getInFlightQueries(host);
-        maxLoad = connections * poolingOptions.getMaxRequestsPerConnection(distance);
-        hostState = host.getState();
-        cassandraVersion = host.getCassandraVersion().toString();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see javax.management.StandardMBean#getAttributes(java.lang.String[])
+     * @see com.openexchange.nosql.cassandra.impl.AbstractCassandraMBean#refresh()
      */
     @Override
-    public AttributeList getAttributes(String[] attributes) {
+    void refresh() {
         try {
-            refresh();
+            CassandraService cassandraService = services.getService(CassandraService.class);
+            Cluster cluster = cassandraService.getCluster();
+            LoadBalancingPolicy loadBalancingPolicy = cluster.getConfiguration().getPolicies().getLoadBalancingPolicy();
+            PoolingOptions poolingOptions = cluster.getConfiguration().getPoolingOptions();
+
+            Session session = cassandraService.getSession();
+            State state = session.getState();
+            HostDistance distance = loadBalancingPolicy.distance(host);
+
+            connections = state.getOpenConnections(host);
+            trashedConnections = state.getTrashedConnections(host);
+            inFlightQueries = state.getInFlightQueries(host);
+            maxLoad = connections * poolingOptions.getMaxRequestsPerConnection(distance);
+            hostState = host.getState();
+            cassandraVersion = host.getCassandraVersion().toString();
         } catch (OXException e) {
             LOGGER.error("Could not refresh the statistics for the Cassandra node '{}' in datacenter '{}' in rack '{}'.", host.getAddress().getHostName(), host.getDatacenter(), host.getRack(), e);
         }
-        AttributeList list = new AttributeList(attributes.length);
-        try {
-            for (String attribute : attributes) {
-                list.add(new Attribute(attribute, getAttribute(attribute)));
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-        return list;
     }
 
     /*
