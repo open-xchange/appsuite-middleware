@@ -63,7 +63,12 @@ public interface CassandraClusterMBean extends CassandraMBean {
 
     static final String NAME = "Cassandra Cluster Monitoring Bean";
 
-    Set<String> getHosts();
+    /**
+     * Returns the known nodes of this cluster.
+     * 
+     * @return the known nodes of this cluster.
+     */
+    Set<String> getNodes();
 
     /**
      * Returns the name of the cluster

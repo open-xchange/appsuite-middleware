@@ -113,7 +113,7 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getHosts()
      */
     @Override
-    public Set<String> getHosts() {
+    public Set<String> getNodes() {
         Set<String> hosts = new HashSet<>();
         for (Host host : cluster.getMetadata().getAllHosts()) {
             hosts.add(host.getAddress().getHostAddress());
