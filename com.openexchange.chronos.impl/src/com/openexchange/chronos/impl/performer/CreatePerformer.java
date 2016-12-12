@@ -139,7 +139,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
     }
 
     private List<Attendee> prepareAttendees(List<Attendee> attendeeData) throws OXException {
-        return new AttendeeHelper(session, folder, null, attendeeData).getAttendeesToInsert();
+        return AttendeeHelper.onNewEvent(session, folder, attendeeData).getAttendeesToInsert();
     }
 
     private Event prepareEvent(Event eventData) throws OXException {

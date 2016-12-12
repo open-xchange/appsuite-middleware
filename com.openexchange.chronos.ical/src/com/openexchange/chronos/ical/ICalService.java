@@ -76,4 +76,6 @@ public interface ICalService {
 
     CalendarExport exportICal(ICalParameters parameters) throws OXException;
 
+    ICalParameters initParameters();
+
 }

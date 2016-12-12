@@ -81,7 +81,6 @@ import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
-import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -118,7 +117,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             connection = dbProvider.getReadConnection(context);
             return selectEvents(connection, false, context.getContextId(), searchTerm, sortOptions, fields);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -132,7 +131,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 connection = dbProvider.getReadConnection(context);
                 return selectOverlappingEvents(connection, context.getContextId(), from, until, attendee.getEntity(), includeTransparent, includeDeclined, sortOptions, fields);
             } catch (SQLException e) {
-                throw EventExceptionCode.MYSQL.create(e);
+                throw asOXException(e);
             } finally {
                 dbProvider.releaseReadConnection(context, connection);
             }
@@ -156,7 +155,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             connection = dbProvider.getReadConnection(context);
             return selectOverlappingEvents(connection, context.getContextId(), from, until, I2i(userIDs), I2i(resourceIDs), includeTransparent, sortOptions, fields);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -169,7 +168,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             connection = dbProvider.getReadConnection(context);
             return selectEvents(connection, true, context.getContextId(), searchTerm, sortOptions, fields);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -182,7 +181,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             connection = dbProvider.getReadConnection(context);
             return selectEvent(connection, context.getContextId(), objectID, fields);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -196,7 +195,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             connection = dbProvider.getReadConnection(context);
             return selectException(connection, context.getContextId(), seriesID, recurrenceDatePosition, fields);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -212,7 +211,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             return IDGenerator.getId(context, Types.APPOINTMENT, connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, 1);
         }
@@ -228,7 +227,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = insertEvent(connection, context.getContextId(), event);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e, EventMapper.getInstance(), event, connection, "prg_dates");
         } finally {
             release(connection, updated);
         }
@@ -244,7 +243,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = updateEvent(connection, context.getContextId(), event.getId(), event);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e, EventMapper.getInstance(), event, connection, "prg_dates");
         } finally {
             release(connection, updated);
         }
@@ -260,7 +259,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = insertTombstoneEvent(connection, context.getContextId(), event);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e, EventMapper.getInstance(), event, connection, "del_dates");
         } finally {
             release(connection, updated);
         }
@@ -276,21 +275,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = deleteEvent(connection, context.getContextId(), objectID);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e, EventMapper.getInstance(), null, connection, "prg_dates");
         } finally {
             release(connection, updated);
-        }
-    }
-
-    public RecurrenceData loadRecurrenceData(int contextID, int seriesID) throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            return selectRecurrenceData(connection, contextID, seriesID, false);
-        } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
-        } finally {
-            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
@@ -627,6 +614,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                     event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, event.getChangeExceptionDates()));
                 }
             }
+        }
+        /*
+         * take over timezone
+         */
+        if (event.containsStartTimeZone()) {
+            event.setEndTimeZone(event.getStartTimeZone());
         }
 
         return event;

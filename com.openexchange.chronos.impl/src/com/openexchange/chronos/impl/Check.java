@@ -153,15 +153,8 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND_IN_FOLDER}
      */
     public static void eventIsInFolder(Event event, UserizedFolder folder) throws OXException {
-        if (PublicType.getInstance().equals(folder.getType())) {
-            if (event.getPublicFolderId() != i(folder)) {
-                throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(I(i(folder)), I(event.getId()));
-            }
-        } else {
-            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            if (null == userAttendee || userAttendee.getFolderID() != i(folder)) {
-                throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(I(i(folder)), I(event.getId()));
-            }
+        if (false == Utils.isInFolder(event, folder)) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(I(i(folder)), I(event.getId()));
         }
     }
 

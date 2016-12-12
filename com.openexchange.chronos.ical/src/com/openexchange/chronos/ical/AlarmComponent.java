@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.ical;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.java.Streams;
@@ -62,6 +64,7 @@ import com.openexchange.java.Streams;
 public class AlarmComponent extends Alarm implements ComponentData {
 
     private IFileHolder iCalHolder;
+    private Map<String, Object> parameters;
 
     /**
      * Initializes a new {@link AlarmComponent}.
@@ -97,6 +100,30 @@ public class AlarmComponent extends Alarm implements ComponentData {
     @Override
     public void close() {
         Streams.close(iCalHolder);
+    }
+
+    @Override
+    public <T> T getParameter(String name, Class<T> clazz) {
+        if (null == name || null == parameters) {
+            return null;
+        }
+        try {
+            return clazz.cast(parameters.get(name));
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public <T> void setParameter(String name, T value) {
+        if (null != name) {
+            if (null == parameters) {
+                parameters = new HashMap<String, Object>();
+            }
+            parameters.put(name, value);
+        } else if (null != parameters) {
+            parameters.remove(name);
+        }
     }
 
 }

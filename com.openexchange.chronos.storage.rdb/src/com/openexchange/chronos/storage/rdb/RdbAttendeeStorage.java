@@ -62,11 +62,11 @@ import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -102,7 +102,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), objectID, attendees);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
@@ -123,7 +123,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             updated += updateAttendees(connection, context.getContextId(), objectID, attendees);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
@@ -139,7 +139,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             updated += insertTombstoneAttendees(connection, context.getContextId(), objectID, attendees);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
@@ -182,7 +182,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             updated = deleteAttendees(connection, context.getContextId(), objectID, attendees);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
@@ -198,7 +198,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             updated = deleteAttendees(connection, context.getContextId(), objectID);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
@@ -254,7 +254,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     private static int updateAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
         int updated = 0;
         for (Attendee attendee : attendees) {
-            if (0 >= attendee.getEntity()) {
+            if (false == CalendarUtils.isInternal(attendee)) {
                 /*
                  * update records in dateExternal for external users
                  */
@@ -271,6 +271,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     stmt.setInt(parameterIndex++, objectID);
                     stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
                     updated += logExecuteUpdate(stmt);
+                } catch (SQLException e) {
+                    throw asOXException(e, ExternalAttendeeMapper.getInstance(), attendee, connection, "dateExternal");
                 }
             } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
                 /*
@@ -289,6 +291,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     stmt.setInt(parameterIndex++, objectID);
                     stmt.setInt(parameterIndex++, attendee.getEntity());
                     updated += logExecuteUpdate(stmt);
+                } catch (SQLException e) {
+                    throw asOXException(e, InternalAttendeeMapper.getInstance(), attendee, connection, "prg_dates_members");
                 }
             }
         }
@@ -315,7 +319,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private static int insertOrReplaceDateExternal(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException {
+    private static int insertOrReplaceDateExternal(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException, OXException {
         String sql = new StringBuilder()
             .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
             .append(" (cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?);")
@@ -329,10 +333,12 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
             stmt.setString(parameterIndex++, attendee.getComment());
             return logExecuteUpdate(stmt);
+        } catch (SQLException e) {
+            throw asOXException(e, ExternalAttendeeMapper.getInstance(), attendee, connection, tableName);
         }
     }
 
-    private static int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException {
+    private static int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException, OXException {
         String sql = new StringBuilder()
             .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
             .append(" (object_id,member_uid,confirm,reason,pfid,reminder,cid) VALUES (?,?,?,?,?,?,?);")
@@ -347,10 +353,12 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
             stmt.setInt(parameterIndex++, contextID);
             return logExecuteUpdate(stmt);
+        } catch (SQLException e) {
+            throw asOXException(e, InternalAttendeeMapper.getInstance(), attendee, connection, tableName);
         }
     }
 
-    private static int insertOrReplaceDateRights(Connection connection, String tableName, boolean replace, int contextID, int objectID, int entity, Attendee attendee) throws SQLException {
+    private static int insertOrReplaceDateRights(Connection connection, String tableName, boolean replace, int contextID, int objectID, int entity, Attendee attendee) throws SQLException, OXException {
         String sql = new StringBuilder()
             .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
             .append(" (object_id,cid,id,type,ma,dn) VALUES (?,?,?,?,?,?);")
@@ -371,6 +379,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 stmt.setString(parameterIndex++, attendee.getCn());
             }
             return logExecuteUpdate(stmt);
+        } catch (SQLException e) {
+            throw asOXException(e, InternalAttendeeMapper.getInstance(), attendee, connection, tableName);
         }
     }
 

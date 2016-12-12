@@ -78,6 +78,8 @@ public class ICalParametersImpl implements ICalParameters {
         set(DEFAULT_TIMEZONE, TimeZone.getTimeZone("EST"));
         //        set(DEFAULT_TIMEZONE, TimeZone.getDefault());
         set(KEEP_COMPONENTS, Boolean.TRUE);
+
+        set(ATTENDEE_COMMENTS, Boolean.TRUE);
     }
 
     @Override

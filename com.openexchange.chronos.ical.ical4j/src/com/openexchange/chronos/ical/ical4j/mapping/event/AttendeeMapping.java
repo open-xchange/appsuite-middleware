@@ -54,29 +54,36 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import javax.mail.internet.AddressException;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.ical.ComponentData;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerAttendeeRef;
 import net.fortuna.ical4j.extensions.caldav.property.CalendarServerAttendeeComment;
+import net.fortuna.ical4j.extensions.caldav.property.CalendarServerPrivateComment;
 import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.parameter.CuType;
+import net.fortuna.ical4j.model.parameter.Member;
 import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.parameter.SentBy;
+import net.fortuna.ical4j.util.Uris;
 
 /**
  * {@link AttendeeMapping}
@@ -123,6 +130,11 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
                     }
                 }
             }
+            String attendeeComment = parameters.get(ICalParameters.PRIVATE_ATTENDEE_COMMENT, String.class);
+            removeProperties(component, CalendarServerPrivateComment.PROPERTY_NAME);
+            if (null != attendeeComment) {
+                component.getProperties().add(new CalendarServerPrivateComment(new ParameterList(), attendeeComment));
+            }
         }
     }
 
@@ -135,9 +147,13 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
             List<Attendee> attendees = new ArrayList<Attendee>(properties.size());
             for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
                 net.fortuna.ical4j.model.property.Attendee property = (net.fortuna.ical4j.model.property.Attendee) iterator.next();
-                attendees.add(importAttendee(property));
+                attendees.add(importAttendee(sanitize(property)));
             }
             object.setAttendees(attendees);
+            Property attendeeCommentProperty = component.getProperty(CalendarServerPrivateComment.PROPERTY_NAME);
+            if (null != attendeeCommentProperty && ComponentData.class.isInstance(object)) {
+                ((ComponentData) object).setParameter(ICalParameters.PRIVATE_ATTENDEE_COMMENT, attendeeCommentProperty.getValue());
+            }
         }
     }
 
@@ -173,6 +189,11 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
         } else {
             property.getParameters().removeAll(Parameter.RSVP);
         }
+        if (null != attendee.getMember()) {
+            property.getParameters().replace(new Member(attendee.getMember()));
+        } else {
+            property.getParameters().removeAll(Parameter.MEMBER);
+        }
         return property;
     }
 
@@ -202,8 +223,9 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
         attendee.setCn(optParameterValue(property, Parameter.CN));
         attendee.setPartStat(Enums.parse(ParticipationStatus.class, optParameterValue(property, Parameter.PARTSTAT), ParticipationStatus.NEEDS_ACTION));
         attendee.setRole(Enums.parse(ParticipantRole.class, optParameterValue(property, Parameter.ROLE), null));
-        attendee.setCuType(Enums.parse(CalendarUserType.class, optParameterValue(property, Parameter.CUTYPE), null));
+        attendee.setCuType(Enums.parse(CalendarUserType.class, optParameterValue(property, Parameter.CUTYPE), CalendarUserType.INDIVIDUAL));
         attendee.setRsvp(Boolean.valueOf(optParameterValue(property, Parameter.RSVP)));
+        attendee.setMember(optParameterValue(property, Parameter.MEMBER));
         return attendee;
     }
 
@@ -261,6 +283,29 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
             default:
                 return null;
         }
+    }
+
+    private static net.fortuna.ical4j.model.property.Attendee sanitize(net.fortuna.ical4j.model.property.Attendee property) {
+        URI uri = property.getCalAddress();
+        if (null != uri) {
+            if (Uris.INVALID_SCHEME.equals(uri.getScheme()) && Strings.isNotEmpty(uri.getSchemeSpecificPart())) {
+                /*
+                 * try and parse value as quoted internet address
+                 */
+                try {
+                    QuotedInternetAddress address = new QuotedInternetAddress(uri.getSchemeSpecificPart());
+                    if (Strings.isNotEmpty(address.getAddress())) {
+                        property.setCalAddress(new URI("mailto", address.getAddress(), null));
+                        if (Strings.isNotEmpty(address.getPersonal()) && Strings.isEmpty(optParameterValue(property, Parameter.CN))) {
+                            property.getParameters().replace(new Cn(address.getPersonal()));
+                        }
+                    }
+                } catch (AddressException | URISyntaxException e) {
+                    // best effort
+                }
+            }
+        }
+        return property;
     }
 
 }

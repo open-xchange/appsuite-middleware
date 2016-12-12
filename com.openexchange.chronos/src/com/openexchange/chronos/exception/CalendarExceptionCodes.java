@@ -51,8 +51,10 @@ package com.openexchange.chronos.exception;
 
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTENDEE_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.CONCURRENT_MODIFICATION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.DATA_TRUNCATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
@@ -66,6 +68,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link CalendarExceptionCodes}
@@ -170,6 +173,21 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Unsupported occurrence move [id %1$d, folder %2$d, target folder %3$d]</li>
      */
     MOVE_OCCURRENCE_NOT_SUPPORTED("Unsupported occurrence move [id %1$d, folder %2$d, target folder %3$d]", MOVE_OCCURRENCE_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4225),
+    /**
+     * <li>Error while reading/writing data from/to the database.</li>
+     * <li>Unexpected database error [%1$s]</li>
+     */
+    DB_ERROR("Unexpected database error [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5000),
+    /**
+     * <li>Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.</li>
+     * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>
+     */
+    DATA_TRUNCATION("Data truncation [field %1$s, limit %2$d, current %3$d]", DATA_TRUNCATION_MSG, Category.CATEGORY_CAPACITY, 5070),
+    /**
+     * <li>The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.</li>
+     * <li>Incorrect string [string %1$s, field %2$s, column %3$s]</li>
+     */
+    INCORRECT_STRING("Incorrect string [string %1$s, field %2$s, column %3$s]", INCORRECT_STRING_MSG, Category.CATEGORY_USER_INPUT, 4227),
 
     ;
 

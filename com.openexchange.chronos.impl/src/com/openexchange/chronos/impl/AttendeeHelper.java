@@ -93,26 +93,57 @@ public class AttendeeHelper {
     private final List<Attendee> attendeesToUpdate;
 
     /**
+     * Initializes a new {@link AttendeeHelper} for a new event.
+     *
+     * @param session The calendar session
+     * @param folder The parent folder of the event being processed
+     * @param requestedAttendees The list of attendees, as supplied by the client
+     */
+    public static AttendeeHelper onNewEvent(CalendarSession session, UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder);
+        attendeeHelper.processNewEvent(emptyForNull(requestedAttendees));
+        return attendeeHelper;
+    }
+
+    /**
+     * Initializes a new {@link AttendeeHelper} for an updated event.
+     *
+     * @param session The calendar session
+     * @param folder The parent folder of the event being processed
+     * @param originalAttendees The original list of attendees
+     * @param updatedAttendees The new/updated list of attendees, as supplied by the client
+     */
+    public static AttendeeHelper onUpdatedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder);
+        attendeeHelper.processUpdatedEvent(emptyForNull(originalAttendees), emptyForNull(updatedAttendees));
+        return attendeeHelper;
+    }
+
+    /**
+     * Initializes a new {@link AttendeeHelper} for a deleted event.
+     *
+     * @param session The calendar session
+     * @param folder The parent folder of the event being processed
+     * @param originalAttendees The original list of attendees
+     */
+    public static AttendeeHelper onDeletedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees) throws OXException {
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder);
+        attendeeHelper.processDeletedEvent(emptyForNull(originalAttendees));
+        return attendeeHelper;
+    }
+
+    /**
      * Initializes a new {@link AttendeeHelper}.
      *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
-     * @param originalAttendees The original list of attendees, or <code>null</code> for newly created events
-     * @param updatedAttendees The new/updated list of attendees, or <code>null</code> for events being deleted
      */
-    public AttendeeHelper(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+    private AttendeeHelper(CalendarSession session, UserizedFolder folder) throws OXException {
         this.session = session;
         this.folder = folder;
         this.attendeesToInsert = new ArrayList<Attendee>();
         this.attendeesToDelete = new ArrayList<Attendee>();
         this.attendeesToUpdate = new ArrayList<Attendee>();
-        if (null == originalAttendees || 0 == originalAttendees.size()) {
-            processNewEvent(null == updatedAttendees ? Collections.<Attendee> emptyList() : updatedAttendees);
-        } else if (null == updatedAttendees || 0 == updatedAttendees.size()) {
-            processDeletedEvent(originalAttendees);
-        } else {
-            processUpdatedEvent(originalAttendees, updatedAttendees);
-        }
     }
 
     /**
@@ -163,7 +194,7 @@ public class AttendeeHelper {
         /*
          * always add attendee for default calendar user in folder
          */
-        Attendee defaultAttendee = getDefaultAttendee(folder, requestedAttendees);
+        Attendee defaultAttendee = getDefaultAttendee(session, folder, requestedAttendees);
         attendeesToInsert.add(defaultAttendee);
         if (null == requestedAttendees || 0 == requestedAttendees.size()) {
             return;// no further attendees
@@ -225,7 +256,9 @@ public class AttendeeHelper {
             userAttendee = session.getEntityResolver().applyEntityData(userAttendee, AttendeeField.ROLE, AttendeeField.RSVP);
             userAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
                 ATTENDEE_PUBLIC_FOLDER_ID : session.getEntityResolver().getDefaultCalendarID(userAttendee.getEntity()));
-            userAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), userAttendee.getEntity(), folder.getType()));
+            if (false == userAttendee.containsPartStat() || null == userAttendee.getPartStat()) {
+                userAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), userAttendee.getEntity(), folder.getType()));
+            }
             attendees.add(userAttendee);
         }
         /*
@@ -280,11 +313,12 @@ public class AttendeeHelper {
      * For <i>public</i> folders, this is an attendee for the current session's user, otherwise (<i>private</i> or <i>shared</i>, an
      * attendee for the folder owner (i.e. the calendar user) is prepared.
      *
+     * @param session The calendar session
      * @param folder The folder to get the default attendee for
      * @param requestedAttendees The attendees as supplied by the client, or <code>null</code> if not available
      * @return The default attendee
      */
-    public Attendee getDefaultAttendee(UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
+    public static Attendee getDefaultAttendee(CalendarSession session, UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
         /*
          * prepare attendee for default calendar user in folder
          */
@@ -322,6 +356,10 @@ public class AttendeeHelper {
             defaultStatus = ServerUserSetting.getInstance().getDefaultStatusPrivate(contextID, userID);
         }
         return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
+    }
+
+    private static List<Attendee> emptyForNull(List<Attendee> attendees) {
+        return null == attendees ? Collections.<Attendee> emptyList() : attendees;
     }
 
 }

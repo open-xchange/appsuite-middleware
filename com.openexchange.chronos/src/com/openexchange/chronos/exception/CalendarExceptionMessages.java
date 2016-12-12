@@ -85,6 +85,10 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_CALENDAR_USER_MSG = "The calendar user \"%1$s\" is invalid.";
 
+    public static final String INCORRECT_STRING_MSG = "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.";
+
+    public static final String DATA_TRUNCATION_MSG = "Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.";
+
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

@@ -69,7 +69,13 @@ public interface ICalParameters {
      * {@link Boolean} value to indicate whether attendee comments meant for the organizer (<code>X-CALENDARSERVER-ATTENDEE-COMMENT</code>)
      * should be exported or not.
      */
-    String ATTENDEE_COMMENTS = "";
+    String ATTENDEE_COMMENTS = "ATTENDEE_COMMENTS";
+
+    /**
+     * {@link String} value holding the attendee comment to export into or import from the <code>X-CALENDARSERVER-PRIVATE-COMMENT</code>
+     * property.
+     */
+    String PRIVATE_ATTENDEE_COMMENT = "PRIVATE_ATTENDEE_COMMENT";
 
     /**
      * Gets the value of an arbitrary extended parameter.

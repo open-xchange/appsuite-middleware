@@ -64,6 +64,7 @@ import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -75,6 +76,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
@@ -123,20 +125,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * load original event data
          */
         Event originalEvent = loadEventData(objectID);
-        /*
-         * check current session user's permissions
-         */
-        if (hasExternalOrganizer(originalEvent) && originalEvent.getUid().equals(updatedEvent.getUid()) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer())) {
-            // don't check that the event already exists in the target folder to support later addition of internal users to externally
-            // organized events; see https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12 for details
-        } else {
-            Check.eventIsInFolder(originalEvent, folder);
-        }
-        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
-        }
         requireUpToDateTimestamp(originalEvent, clientTimestamp);
         /*
          * update event or event occurrence
@@ -179,10 +167,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 }
                 /*
                  * reload the newly created exception as 'original' & perform the update
-                 * recurrence rule is forcibly ignored during update to satisfy UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
+                 * - recurrence rule is forcibly ignored during update to satisfy UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
+                 * - sequence number is also ignored (since possibly incremented implicitly before)
                  */
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
-                updateEvent(newExceptionEvent, updatedEvent, EventField.RECURRENCE_RULE);
+                updateEvent(newExceptionEvent, updatedEvent, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
                 addChangeExceptionDate(originalEvent, recurrenceID);
                 result.addCreation(new CreateResultImpl(loadEventData(newExceptionEvent.getId())));
             }
@@ -201,6 +190,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     private void updateEvent(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
         /*
+         * check current session user's permissions
+         */
+        if (needsExistenceCheckInTargetFolder(originalEvent, updatedEvent)) {
+            Check.eventIsInFolder(originalEvent, folder);
+        }
+        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
+            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
+        }
+        /*
          * update event data
          */
         boolean wasUpdated = false;
@@ -214,7 +214,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 EventMapper.getInstance().copy(eventUpdate.getUpdate(), newEvent, EventField.values());
                 List<Attendee> newAttendees;
                 if (updatedEvent.containsAttendees()) {
-                    newAttendees = new AttendeeHelper(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).apply(originalEvent.getAttendees());
+                    newAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).apply(originalEvent.getAttendees());
                 } else {
                     newAttendees = originalEvent.getAttendees();
                 }
@@ -259,6 +259,31 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (wasUpdated) {
             result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), loadEventData(originalEvent.getId())));
         }
+    }
+
+
+    /**
+     * Determines if it's allowed to skip the check if the updated event already exists in the targeted folder or not.
+     * <p/>
+     * The skip may be checked under certain circumstances, particularly:
+     * <ul>
+     * <li>the event has an <i>external</i> organizer</li>
+     * <li>the organizer matches in the original and in the updated event</li>
+     * <li>the unique identifier matches in the original and in the updated event</li>
+     * <li>the updated event's sequence number is not smaller than the sequence number of the original event</li>
+     * </ul>
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @return <code>true</code> if the check should be performed, <code>false</code>, otherwise
+     * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>, <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
+     */
+    public boolean needsExistenceCheckInTargetFolder(Event originalEvent, Event updatedEvent) {
+        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) &&
+            originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -306,7 +331,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (eventUpdate.getUpdatedFields().contains(EventField.TRANSP) && Transp.TRANSPARENT.equals(eventUpdate.getOriginal().getTransp().getValue())) {
             return true;
         }
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
+        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
         if (0 < attendeeHelper.getAttendeesToInsert().size()) {
             return true;
         }
@@ -325,7 +350,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         })) {
             return true;
         }
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
+        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
         if (0 < attendeeHelper.getAttendeesToDelete().size() || 0 < attendeeHelper.getAttendeesToInsert().size() || 0 < attendeeHelper.getAttendeesToUpdate().size()) {
             //TODO: more distinct evaluation of attendee updates
             return true;
@@ -334,9 +359,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     private void updateAttendees(Event originalEvent, Event updatedEvent) throws OXException {
-        List<Attendee> originalAttendees = originalEvent.getAttendees();
-        List<Attendee> updatedAttendees = updatedEvent.getAttendees();
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees, updatedAttendees);
+        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees());
         /*
          * perform attendee deletions
          */
@@ -418,12 +441,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * determine & check modified fields
          */
-        Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, updatedEvent);
-        if (null != ignoredFields && 0 < ignoredFields.length) {
-            for (EventField ignoredField : ignoredFields) {
-                EventMapper.getInstance().get(ignoredField).remove(eventUpdate);
-            }
-        }
+        Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, updatedEvent, true, ignoredFields);
         EventField[] updatedFields = EventMapper.getInstance().getAssignedFields(eventUpdate);
         if (0 == updatedFields.length) {
             // TODO or throw?
@@ -491,14 +509,52 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         break;
                     }
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
-                case UID:
+                case DELETE_EXCEPTION_DATES:
+                    if (isNullOrEmpty(eventUpdate.getDeleteExceptionDates()) && isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {
+                        // ignore neutral value
+                        break;
+                    }
+                    if (false == isSeriesMaster(originalEvent)) {
+                        throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                    }
+                    if (null != eventUpdate.getDeleteExceptionDates()) {
+                        Check.recurrenceIdsExist(originalEvent, eventUpdate.getDeleteExceptionDates());
+                    }
+                    break;
+                case CHANGE_EXCEPTION_DATES:
+                    if (isNullOrEmpty(eventUpdate.getDeleteExceptionDates()) && isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {
+                        // ignore neutral value
+                        break;
+                    }
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                case ORGANIZER:
+                    Organizer organizer = eventUpdate.getOrganizer();
+                    if (null == organizer) {
+                        // ignore implicitly
+                        eventUpdate.removeOrganizer();
+                    } else {
+                        organizer = session.getEntityResolver().prepare(organizer, CalendarUserType.INDIVIDUAL);
+                        if (false == CalendarUtils.matches(originalEvent.getOrganizer(), organizer)) {
+                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                        }
+                        eventUpdate.removeOrganizer();
+                    }
+                    break;
                 case CREATED:
+                    // ignore implicitly
+                    eventUpdate.removeCreated();
+                    break;
                 case CREATED_BY:
+                    // ignore implicitly
+                    eventUpdate.removeCreatedBy();
+                    break;
                 case SEQUENCE:
+                    // ignore implicitly
+                    eventUpdate.removeSequence();
+                    break;
+                case UID:
                 case SERIES_ID:
                 case PUBLIC_FOLDER_ID:
-                case CHANGE_EXCEPTION_DATES:
-                case DELETE_EXCEPTION_DATES:
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
                 default:
                     break;

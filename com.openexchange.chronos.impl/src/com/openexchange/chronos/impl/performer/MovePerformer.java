@@ -193,7 +193,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
          * ensure to add default calendar user if not already present
          */
         if (false == contains(originalEvent.getAttendees(), targetCalendarUser.getId())) {
-            Attendee defaultAttendee = new AttendeeHelper(session, targetFolder, null, null).getDefaultAttendee(targetFolder, null);
+            Attendee defaultAttendee = AttendeeHelper.getDefaultAttendee(session, targetFolder, null);
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
         }
         /*
@@ -230,7 +230,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
              */
             Attendee defaultAttendee = find(originalEvent.getAttendees(), targetCalendarUser.getId());
             if (null == defaultAttendee) {
-                defaultAttendee = new AttendeeHelper(session, targetFolder, null, null).getDefaultAttendee(targetFolder, null);
+                defaultAttendee = AttendeeHelper.getDefaultAttendee(session, targetFolder, null);
                 storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
             }
             for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
@@ -255,7 +255,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
              * ensure to add default calendar user of target folder if not already present
              */
             if (false == contains(originalEvent.getAttendees(), targetCalendarUser.getId())) {
-                Attendee defaultAttendee = new AttendeeHelper(session, targetFolder, null, null).getDefaultAttendee(targetFolder, null);
+                Attendee defaultAttendee = AttendeeHelper.getDefaultAttendee(session, targetFolder, null);
                 storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
             }
         }

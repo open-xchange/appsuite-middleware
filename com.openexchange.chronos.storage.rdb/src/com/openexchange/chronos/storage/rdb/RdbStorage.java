@@ -49,17 +49,30 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
+import com.openexchange.groupware.tools.mappings.MappedTruncation;
+import com.openexchange.groupware.tools.mappings.database.DbMapper;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.java.Charsets;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CalendarStorage}
@@ -129,7 +142,7 @@ public abstract class RdbStorage {
         } else {
             long start = System.currentTimeMillis();
             ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt, L(System.currentTimeMillis() - start));
             return resultSet;
         }
     }
@@ -146,8 +159,124 @@ public abstract class RdbStorage {
         } else {
             long start = System.currentTimeMillis();
             int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt, I(rowCount), L(System.currentTimeMillis() - start));
             return rowCount;
+        }
+    }
+
+    /**
+     * Gets an {@link OXException} appropriate for the supplied {@link SQLException}.
+     * <p/>
+     * For <i>write</i>-operations, {@link RdbStorage#asOXException(SQLException, DbMapper, E, String)} should be called to include more data.
+     *
+     * @param e The SQL exception to get the OX exception for
+     * @return The OX exception
+     */
+    protected OXException asOXException(SQLException e) {
+        return CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+    }
+
+    /**
+     * Gets an {@link OXException} appropriate for the supplied {@link SQLException} that occurred during a write-operation.
+     *
+     * @param e The SQL exception to get the OX exception for
+     * @param mapper The corresponding db mapper, or <code>null</code> if not available
+     * @param object The corresponding object being written, or <code>null</code> if not available
+     * @param connection The current database connection, or <code>null</code> if not available
+     * @param table The name of the targeted database table, or <code>null</code> if not available
+     * @return The OX exception
+     */
+    protected static <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, O object, Connection connection, String table) {
+        if (IncorrectStringSQLException.class.isInstance(e)) {
+            IncorrectStringSQLException incorrectStringException = (IncorrectStringSQLException) e;
+            /*
+             * derive mapped field & decorate with corresponding "problematic" if available
+             */
+            MappedIncorrectString<O> mappedIncorrectString = getMappedIncorrectString(incorrectStringException, mapper);
+            if (null != mappedIncorrectString) {
+                OXException oxException = CalendarExceptionCodes.INCORRECT_STRING.create(e, incorrectStringException.getIncorrectString(), mappedIncorrectString.getReadableName(), incorrectStringException.getColumn());
+                oxException.addProblematic(mappedIncorrectString);
+                return oxException;
+            }
+            /*
+             * wrap in default incorrect string exception, otherwise
+             */
+            return CalendarExceptionCodes.INCORRECT_STRING.create(e, incorrectStringException.getIncorrectString(), incorrectStringException.getColumn(), incorrectStringException.getColumn());
+        }
+        if (DataTruncation.class.isInstance(e)) {
+            /*
+             * extract additional information if possible & decorate with corresponding "problematic" if available
+             */
+            List<MappedTruncation<O>> mappedTruncations = getMappedTruncations((DataTruncation) e, mapper, object, connection, table);
+            if (null != mappedTruncations && 0 < mappedTruncations.size()) {
+                MappedTruncation<O> firstTruncation = mappedTruncations.get(0);
+                OXException oxException = CalendarExceptionCodes.DATA_TRUNCATION.create(firstTruncation.getReadableName(), I(firstTruncation.getMaxSize()), I(firstTruncation.getLength()));
+                for (MappedTruncation<O> mappedTruncation : mappedTruncations) {
+                    oxException.addProblematic(mappedTruncation);
+                }
+                return oxException;
+            }
+        }
+        return CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+    }
+
+    private static <O, E extends Enum<E>> MappedIncorrectString<O> getMappedIncorrectString(IncorrectStringSQLException e, DbMapper<O, E> mapper) {
+        if (null != mapper && null != e) {
+            E field = mapper.getMappedField(e.getColumn());
+            if (null != field) {
+                try {
+                    DbMapping<? extends Object, O> mapping = mapper.get(field);
+                    String readableName = mapping.getReadableName(mapper.newInstance());
+                    return new MappedIncorrectString<O>(mapping, e.getIncorrectString(), readableName);
+                } catch (OXException x) {
+                    LOG.warn("Error deriving mapping for incorrect string", x);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static <O, E extends Enum<E>> List<MappedTruncation<O>> getMappedTruncations(DataTruncation e, DbMapper<O, E> mapper, O object, Connection connection, String table) {
+        if (null != mapper && null != object && null != table && null != e) {
+            String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
+            if (null == truncatedColumns || 0 == truncatedColumns.length) {
+                return null;
+            }
+            List<MappedTruncation<O>> mappedTruncations = new ArrayList<MappedTruncation<O>>(truncatedColumns.length);
+            for (String column : truncatedColumns) {
+                MappedTruncation<O> mappedTruncation = getMappedTruncation(mapper, object, connection, table, column);
+                if (null != mappedTruncation) {
+                    mappedTruncations.add(mappedTruncation);
+                }
+            }
+            return 0 < mappedTruncations.size() ? mappedTruncations : null;
+        }
+        return null;
+    }
+
+    private static <O, E extends Enum<E>> MappedTruncation<O> getMappedTruncation(DbMapper<O, E> mapper, O object, Connection connection, String table, String column) {
+        E field = mapper.getMappedField(column);
+        if (null != field) {
+            try {
+                DbMapping<? extends Object, O> mapping = mapper.get(field);
+                Object value = mapping.get(object);
+                int maximumSize = getMaximumSize(connection, table, column);
+                int actualSize = null != value && String.class.isInstance(value) ? Charsets.getBytes((String) value, Charsets.UTF_8).length : 0;
+                String readableName = mapping.getReadableName(object);
+                return new MappedTruncation<O>(mapping, maximumSize, actualSize, readableName);
+            } catch (OXException x) {
+                LOG.warn("Error deriving mapping for truncated attribute", x);
+            }
+        }
+        return null;
+    }
+
+    private static int getMaximumSize(Connection connection, String table, String columnLabel) {
+        try {
+            return DBUtils.getColumnSize(connection, table, columnLabel);
+        } catch (SQLException e) {
+            LOG.warn("Error determining maximum size of column {} in table {}", columnLabel, table, e);
+            return -1;
         }
     }
 

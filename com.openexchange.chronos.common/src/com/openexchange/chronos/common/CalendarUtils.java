@@ -122,7 +122,7 @@ public class CalendarUtils {
             if (0 < user1.getEntity() && user1.getEntity() == user2.getEntity()) {
                 return true;
             }
-            if (null != user1.getUri() && user1.getUri().equals(user2.getUri())) {
+            if (null != user1.getUri() && user1.getUri().equalsIgnoreCase(user2.getUri())) {
                 return true;
             }
         }

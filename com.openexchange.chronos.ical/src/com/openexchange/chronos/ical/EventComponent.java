@@ -50,7 +50,9 @@
 package com.openexchange.chronos.ical;
 
 import java.io.Closeable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
@@ -66,6 +68,7 @@ import com.openexchange.java.Streams;
 public class EventComponent extends Event implements ComponentData {
 
     private IFileHolder iCalHolder;
+    private Map<String, Object> parameters;
 
     /**
      * Initializes a new {@link EventComponent}.
@@ -108,6 +111,29 @@ public class EventComponent extends Event implements ComponentData {
                     Streams.close((Closeable) alarm);
                 }
             }
+        }
+    }
+
+    @Override
+    public <T> T getParameter(String name, Class<T> clazz) {
+        if (null == name || null == parameters) {
+            return null;
+        }
+        try {
+            return clazz.cast(parameters.get(name));
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+    @Override
+    public <T> void setParameter(String name, T value) {
+        if (null != name) {
+            if (null == parameters) {
+                parameters = new HashMap<String, Object>();
+            }
+            parameters.put(name, value);
+        } else if (null != parameters) {
+            parameters.remove(name);
         }
     }
 

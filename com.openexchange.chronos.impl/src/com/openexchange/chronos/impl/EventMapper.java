@@ -56,6 +56,7 @@ import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -70,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link EventMapper}
@@ -104,6 +106,36 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
      */
     private EventMapper() {
         super();
+    }
+
+    /**
+     * Creates a new object and sets all those properties that are <i>set</i> and different in the supplied object to the values from the
+     * second one, thus, generating some kind of a 'delta' object.
+     *
+     * @param original The original object
+     * @param update The updated object
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences
+     * @return An object containing the properties that are different
+     */
+    public Event getDifferences(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
+        if (null == original) {
+            throw new IllegalArgumentException("original");
+        }
+        if (null == update) {
+            throw new IllegalArgumentException("update");
+        }
+        Event delta = newInstance();
+        for (Entry<EventField, ? extends Mapping<? extends Object, Event>> entry : getMappings().entrySet()) {
+            if (Arrays.contains(ignoredFields, entry.getKey())) {
+                continue;
+            }
+            Mapping<? extends Object, Event> mapping = entry.getValue();
+            if (mapping.isSet(update) && ((considerUnset || mapping.isSet(original)) && false == mapping.equals(original, update))) {
+                mapping.copy(update, delta);
+            }
+        }
+        return delta;
     }
 
     /**
@@ -628,6 +660,15 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         });
         mappings.put(EventField.TRANSP, new DefaultMapping<Transp, Event>() {
+
+            @Override
+            public boolean equals(Event object1, Event object2) {
+                Transp transp1 = get(object1);
+                Transp transp2 = get(object2);
+                String value1 = null != transp1 ? transp1.getValue() : null;
+                String value2 = null != transp2 ? transp2.getValue() : null;
+                return null == value1 ? null == value2 : value1.equals(value2);
+            }
 
             @Override
             public boolean isSet(Event object) {

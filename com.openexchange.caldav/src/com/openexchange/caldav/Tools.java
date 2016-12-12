@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -73,6 +74,17 @@ public class Tools {
 
     public static final String OAUTH_SCOPE = "caldav";
 
+    /**
+     * Gets a value indicating whether the supplied event represents a <i>phantom master</i>, i.e. a recurring event master the
+     * user has no access for that serves as container for detached occurrences.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is a phantom master, <code>false</code>, otherwise
+     */
+    public static boolean isPhantomMaster(Event event) {
+        return PhantomMaster.class.isInstance(event);
+    }
+
     public static Date getLatestModified(Date lastModified1, Date lastModified2) {
         return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;
     }
@@ -83,6 +95,10 @@ public class Tools {
 
     public static Date getLatestModified(Date lastModified, UserizedFolder folder) {
         return getLatestModified(lastModified, folder.getLastModifiedUTC());
+    }
+
+    public static Date getLatestModified(Date lastModified, Event event) {
+        return getLatestModified(lastModified, event.getLastModified());
     }
 
     /**

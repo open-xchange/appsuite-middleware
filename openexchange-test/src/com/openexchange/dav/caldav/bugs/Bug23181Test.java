@@ -236,7 +236,12 @@ public class Bug23181Test extends CalDAVTest {
         appointment.setIgnoreConflicts(true);
         appointment.setParentFolderID(manager2.getClient().getValues().getPrivateAppointmentFolder());
         appointment.setSequence(0);
-        manager2.insert(appointment);
+        appointment = manager2.insert(appointment);
+        /*
+         * update the appointment once to increase the sequence number
+         */
+        appointment.setLocation("new location");
+        manager2.update(appointment);
         /*
          * try to confirm updated appointment as user A in client
          */

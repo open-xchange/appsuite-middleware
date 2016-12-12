@@ -58,7 +58,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
-import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
@@ -95,14 +94,14 @@ public class Appointment2Event {
      * @param confirm The legacy "shown as" constant
      * @return The event status, defaulting to {@value EventStatus#CONFIRMED} if not mappable
      */
-    public static EventStatus getEventStatus(int shownAs) {
-        switch (shownAs) {
-            case 3: // com.openexchange.groupware.container.Appointment.TEMPORARY
-                return EventStatus.TENTATIVE;
-            default:
-                return EventStatus.CONFIRMED;
-        }
-    }
+    //    public static EventStatus getEventStatus(int shownAs) {
+    //        switch (shownAs) {
+    //            case 3: // com.openexchange.groupware.container.Appointment.TEMPORARY
+    //                return EventStatus.TENTATIVE;
+    //            default:
+    //                return EventStatus.CONFIRMED;
+    //        }
+    //    }
 
     /**
      * Gets the time transparency appropriate for the supplied "shown as" value.

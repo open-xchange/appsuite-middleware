@@ -55,12 +55,17 @@ import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -95,9 +100,20 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
      * @return The change exceptions
      */
     public List<Event> perform(UserizedFolder folder, int seriesID) throws OXException {
-        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
-         * construct search term
+         * load series master first
+         */
+        Event event = storage.getEventStorage().loadEvent(seriesID, getFields(session));
+        if (null == event) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(I(seriesID));
+        }
+        if (session.getUser().getId() != event.getCreatedBy()) {
+            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        }
+        /*
+         * construct search term to lookup all change exceptions
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getFolderIdTerm(folder))
@@ -105,11 +121,19 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
         ;
         /*
-         * perform search & userize the results
+         * perform search & filter the results based on user's access permissions
          */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
-        readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
-        return postProcess(events, folder, true);
+        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
+        if (null == changeExceptions || 0 == changeExceptions.size()) {
+            return Collections.emptyList();
+        }
+        readAdditionalEventData(changeExceptions, getCalendarUser(folder).getId(), getFields(session));
+        for (Iterator<Event> iterator = changeExceptions.iterator(); iterator.hasNext();) {
+            if (false == Utils.isInFolder(iterator.next(), folder)) {
+                iterator.remove();
+            }
+        }
+        return postProcess(changeExceptions, folder, true);
     }
 
 }

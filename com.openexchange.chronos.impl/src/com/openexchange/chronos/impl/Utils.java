@@ -77,6 +77,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -563,6 +564,23 @@ public class Utils {
      */
     public static boolean isInPast(Event event, TimeZone timeZone) throws OXException {
         return isInPast(event, new Date(), timeZone);
+    }
+
+    /**
+     * Gets a value indicating whether a specific event is actually present in the supplied folder. Based on the folder type, the
+     * event's public folder identifier or the attendee's personal calendar folder is checked.
+     *
+     * @param event The event to check
+     * @param folder The folder where the event should appear in
+     * @return <code>true</code> if the event <i>is</i> in the folder, <code>false</code>, otherwise
+     */
+    public static boolean isInFolder(Event event, UserizedFolder folder) throws OXException {
+        if (PublicType.getInstance().equals(folder.getType())) {
+            return event.getPublicFolderId() == i(folder);
+        } else {
+            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
+            return null != userAttendee && userAttendee.getFolderID() == i(folder);
+        }
     }
 
     /**
