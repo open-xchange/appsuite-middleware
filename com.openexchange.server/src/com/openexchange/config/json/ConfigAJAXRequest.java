@@ -109,7 +109,7 @@ public final class ConfigAJAXRequest {
         if (null == storageService) {
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
-        return storageService.getQuotaFileStorage(userId, contextId, Info.drive(userId));
+        return storageService.getQuotaFileStorage(userId, contextId, Info.drive());
     }
 
     /**

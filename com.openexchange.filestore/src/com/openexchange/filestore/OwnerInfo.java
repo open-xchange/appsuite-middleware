@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,83 +49,107 @@
 
 package com.openexchange.filestore;
 
-
 /**
- * {@link StorageInfo} - Information for a file storage.
+ * {@link OwnerInfo} - Carries the owner information for an initialized file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public class StorageInfo {
+public class OwnerInfo {
 
-    private final int id;
-    private final long quota;
-    private final String name;
-    private final OwnerInfo ownerInfo;
+    /** The owner information signaling no dedicated file storage is used */
+    public static final OwnerInfo NO_OWNER = new OwnerInfo(0, false);
 
     /**
-     * Initializes a new {@link StorageInfo}.
+     * Creates a new builder instance.
      *
-     * @param id The file storage identifier
-     * @param ownerInfo The owner information for the file storage
-     * @param name The entity-specific location inside the file storage
-     * @param quota The file storage quota
+     * @return The new builder instance
      */
-    public StorageInfo(int id, OwnerInfo ownerInfo, String name, long quota) {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * The builder for an {@code OwnerInfo} instance.
+     */
+    public static class Builder {
+
+        private int ownerId;
+        private boolean master;
+
+        Builder() {
+            super();
+        }
+
+        /**
+         * Sets the owner identifier
+         *
+         * @param ownerId The owner identifier to set
+         * @return This instance
+         */
+        public Builder setOwnerId(int ownerId) {
+            this.ownerId = ownerId;
+            return this;
+        }
+
+        /**
+         * Sets the master flag (if owner is equal to master)
+         *
+         * @param master <code>true</code> if owner is master; otherwise <code>false</code>
+         * @return This instance
+         */
+        public Builder setMaster(boolean master) {
+            this.master = master;
+            return this;
+        }
+
+        /**
+         * Builds the {@code OwnerInfo} instance from this builder's attributes.
+         *
+         * @return The {@code OwnerInfo} instance
+         */
+        public OwnerInfo build() {
+            return new OwnerInfo(ownerId, master);
+        }
+    }
+
+    // ----------------------------------------------------------------------------
+
+    private final int ownerId;
+    private final boolean master;
+
+    /**
+     * Initializes a new {@link OwnerInfo}.
+     */
+    OwnerInfo(int ownerId, boolean master) {
         super();
-        this.id = id;
-        this.ownerInfo = ownerInfo;
-        this.name = name;
-        this.quota = quota;
+        this.ownerId = ownerId;
+        this.master = master;
     }
 
     /**
-     * Gets the file storage quota
-     *
-     * @return The quota for the file storage or <code>0</code> if there is no quota.
-     */
-    public long getQuota() {
-        return quota;
-    }
-
-    /**
-     * Gets the file storage identifier
-     *
-     * @return The file storage identifier
-     */
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * Gets the entity-specific location inside the file storage.
-     *
-     * @return The entity-specific location inside the file storage.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Gets the owner information for the file storage.
+     * Gets the owner identifier
      * <p>
-     * The owner determines to what 'filestore_usage' entry the quota gets accounted.
+     * The file storage owner or <code>0</code> (zero); the owner determines to what 'filestore_usage' entry the quota gets accounted
      *
-     * @return The owner information
+     * @return The owner identifier
      */
-    public OwnerInfo getOwnerInfo() {
-        return ownerInfo;
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    /**
+     * Gets the master flag (if owner is equal to master)
+     *
+     * @return <code>true</code> if owner is master; otherwise <code>false</code>
+     */
+    public boolean isMaster() {
+        return master;
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("StorageInfo [id=").append(id).append(", quota=").append(quota).append(", ");
-        if (name != null) {
-            builder.append("name=").append(name).append(", ");
-        }
-        builder.append("ownerInfo=").append(ownerInfo).append("]");
-        return builder.toString();
+        return new StringBuilder(32).append("[ownerId=").append(ownerId).append(", master=").append(master).append("]").toString();
     }
 
 }

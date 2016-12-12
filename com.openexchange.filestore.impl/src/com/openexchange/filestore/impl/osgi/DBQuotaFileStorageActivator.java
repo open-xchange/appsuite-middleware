@@ -56,6 +56,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.DatabaseAccessService;
@@ -117,11 +118,12 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
             trackService(ContextService.class);
             trackService(UserService.class);
+            trackService(ConfigViewFactory.class);
 
             {
                 ServiceTrackerCustomizer<CacheService, CacheService> customizer = new ServiceTrackerCustomizer<CacheService, CacheService>() {
 
-                    private final String[] regionNames = { "QuotaFileStorages", "SingleUserContext" };
+                    private final String[] regionNames = { "QuotaFileStorages" };
 
                     @Override
                     public CacheService addingService(ServiceReference<CacheService> reference) {

@@ -81,6 +81,7 @@ import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.WebDAVRequestContext;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -181,6 +182,7 @@ public class ContactResource extends CommonResource<Contact> {
         String vCardID = null;
         String previousVCardID = null;
         boolean saved = false;
+        Session session = factory.getSession();
         try {
             if (false == exists()) {
                 throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
@@ -193,7 +195,7 @@ public class ContactResource extends CommonResource<Contact> {
             previousVCardID = object.getVCardId();
             Contact contact = vCardImport.getContact();
             vCardFileHolder = vCardImport.getVCard();
-            vCardID = storeVCard(factory.getSession().getContextId(), vCardFileHolder);
+            vCardID = storeVCard(session.getContextId(), vCardFileHolder);
             contact.setVCardId(vCardID);
             /*
              * update contact, trying again in case of recoverable errors
@@ -201,7 +203,7 @@ public class ContactResource extends CommonResource<Contact> {
             ContactService contactService = factory.requireService(ContactService.class);
             for (int i = 0; i < MAX_RETRIES && false == saved; i++) {
                 try {
-                    contactService.updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
+                    contactService.updateContact(session, Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
                     LOG.debug("{}: saved.", getUrl());
                     saved = true;
                 } catch (OXException e) {
@@ -220,9 +222,9 @@ public class ContactResource extends CommonResource<Contact> {
             Streams.close(vCardFileHolder);
             closeVCardImport();
             if (saved) {
-                deleteVCard(factory.getSession().getContextId(), previousVCardID);
+                deleteVCard(session.getContextId(), previousVCardID);
             } else if (null != vCardID) {
-                deleteVCard(factory.getSession().getContextId(), vCardID);
+                deleteVCard(session.getContextId(), vCardID);
             }
         }
     }
@@ -231,6 +233,7 @@ public class ContactResource extends CommonResource<Contact> {
     public void delete() throws WebdavProtocolException {
         boolean deleted = false;
         String vCardID = null != object ? object.getVCardId() : null;
+        Session session = factory.getSession();
         try {
             if (false == exists()) {
                 throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
@@ -240,7 +243,7 @@ public class ContactResource extends CommonResource<Contact> {
              */
             for (int i = 0; i < MAX_RETRIES && false == deleted; i++) {
                 try {
-                    factory.requireService(ContactService.class).deleteContact(factory.getSession(),
+                    factory.requireService(ContactService.class).deleteContact(session,
                         Integer.toString(object.getParentFolderID()), Integer.toString(object.getObjectID()), object.getLastModified());
                     LOG.debug("{}: deleted.", getUrl());
                     deleted = true;
@@ -253,7 +256,7 @@ public class ContactResource extends CommonResource<Contact> {
             }
         } finally {
             if (null != vCardID && deleted) {
-                deleteVCard(factory.getSession().getContextId(), vCardID);
+                deleteVCard(session.getContextId(), vCardID);
             }
         }
     }
@@ -263,6 +266,7 @@ public class ContactResource extends CommonResource<Contact> {
         String vCardID = null;
         IFileHolder vCardFileHolder = null;
         boolean created = false;
+        Session session = factory.getSession();
         try {
             if (exists()) {
                 throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
@@ -289,7 +293,7 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * set initial parent folder to the default contacts folder in case of an iOS client
              */
-            contact.setContextId(factory.getSession().getContextId());
+            contact.setContextId(session.getContextId());
             String parentFolderID = DAVUserAgent.IOS.equals(getUserAgent()) ? factory.getState().getDefaultFolder().getID() : String.valueOf(this.parentFolderID);
             if (contact.getMarkAsDistribtuionlist()) {
                 /*
@@ -299,8 +303,8 @@ public class ContactResource extends CommonResource<Contact> {
                     LOG.warn("{}: contact groups not supported, performing immediate deletion of this resource.", this.getUrl());
                     contact.removeDistributionLists();
                     contact.removeNumberOfDistributionLists();
-                    contactService.createContact(factory.getSession(), parentFolderID, contact);
-                    contactService.deleteContact(factory.getSession(), parentFolderID, Integer.toString(contact.getObjectID()), contact.getLastModified());
+                    contactService.createContact(session, parentFolderID, contact);
+                    contactService.deleteContact(session, parentFolderID, Integer.toString(contact.getObjectID()), contact.getLastModified());
                 } catch (OXException e) {
                     throw protocolException(getUrl(), e);
                 }
@@ -310,7 +314,7 @@ public class ContactResource extends CommonResource<Contact> {
              * store original vCard if possible
              */
             vCardFileHolder = vCardImport.getVCard();
-            vCardID = storeVCard(factory.getSession().getContextId(), vCardFileHolder);
+            vCardID = storeVCard(session.getContextId(), vCardFileHolder);
             contact.setVCardId(vCardID);
             /*
              * save contact, trying again in case of recoverable errors
@@ -318,7 +322,7 @@ public class ContactResource extends CommonResource<Contact> {
             object = contact;
             for (int i = 0; i <= MAX_RETRIES && false == created; i++) {
                 try {
-                    contactService.createContact(factory.getSession(), parentFolderID, object);
+                    contactService.createContact(session, parentFolderID, object);
                     LOG.debug("{}: created.", getUrl());
                     created = true;
                 } catch (OXException e) {
@@ -337,7 +341,7 @@ public class ContactResource extends CommonResource<Contact> {
             Streams.close(vCardFileHolder);
             closeVCardImport();
             if (null != vCardID && false == created) {
-                deleteVCard(factory.getSession().getContextId(), vCardID);
+                deleteVCard(session.getContextId(), vCardID);
             }
         }
     }
@@ -525,7 +529,8 @@ public class ContactResource extends CommonResource<Contact> {
          */
         InputStream originalVCard = null;
         try {
-            originalVCard = optVCard(factory.getSession().getContextId(), object.getVCardId());
+            Session session = factory.getSession();
+            originalVCard = optVCard(session.getContextId(), object.getVCardId());
             return vCardService.exportContact(contact, originalVCard, parameters);
         } finally {
             Streams.close(originalVCard);

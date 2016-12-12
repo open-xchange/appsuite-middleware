@@ -76,6 +76,13 @@ public class DefaultVCardStorageService implements VCardStorageService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultVCardStorageService.class);
 
     /**
+     * Initializes a new {@link DefaultVCardStorageService}.
+     */
+    public DefaultVCardStorageService() {
+        super();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -88,7 +95,7 @@ public class DefaultVCardStorageService implements VCardStorageService {
         return fileStorageID;
     }
 
-    protected SaveFileAction createFileAction(InputStream file, int contextId) throws OXException {
+    protected SaveFileAction createFileAction(InputStream file,int contextId) throws OXException {
         return new SaveFileAction(getFileStorage(contextId), file, -1, false);
     }
 
