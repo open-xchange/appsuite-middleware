@@ -54,6 +54,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -90,6 +91,7 @@ public abstract class AbstractAJAXSession {
 
     @Before
     public void setUp() throws Exception {
+        AJAXConfig.init();
         ProvisioningSetup.init();
 
         String clientId = getClientId();
