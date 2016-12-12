@@ -1,3 +1,9 @@
+open-xchange-munin-scripts (7.8.2-18) stable; urgency=medium
+
+  * Build for patch 2016-12-19 (3813)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 12 Dec 2016 10:39:25 +0100
+
 open-xchange-munin-scripts (7.8.2-17) stable; urgency=medium
 
   * Build for patch 2016-12-05 (3763)
