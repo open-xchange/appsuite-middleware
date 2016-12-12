@@ -49,6 +49,7 @@
 
 package com.openexchange.nosql.cassandra;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -60,5 +61,30 @@ public interface CassandraKeyspaceMBean extends CassandraMBean {
 
     static final String NAME = "Cassandra Keyspace Monitoring Tool";
 
+    /**
+     * Returns the tables defined in this keyspace.
+     * 
+     * @return the tables defined in this keyspace.
+     */
     Set<String> getTables();
+
+    /**
+     * Returns the replication options for this keyspace.
+     * 
+     * @return the replication options for this keyspace.
+     */
+    Map<String, String> getReplicationOptions();
+
+    /**
+     * Returns the user types defined in this keyspace.
+     * 
+     * @return the user types defined in this keyspace.
+     */
+    Set<String> getUserTypes();
+    
+    /**
+     * Returns 
+     * @return
+     */
+    Set<String> getFunctions();
 }

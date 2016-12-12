@@ -51,13 +51,16 @@ package com.openexchange.nosql.cassandra.beans;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.management.NotCompliantMBeanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.FunctionMetadata;
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.TableMetadata;
+import com.datastax.driver.core.UserType;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraKeyspaceMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
@@ -117,5 +120,48 @@ public class CassandraKeyspaceMBeanImpl extends AbstractCassandraMBean implement
             tableNames.add(table.getName());
         }
         return tableNames;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getReplicationOptions()
+     */
+    @Override
+    public Map<String, String> getReplicationOptions() {
+        return keyspaceMetadata.getReplication();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getUserTypes()
+     */
+    @Override
+    public Set<String> getUserTypes() {
+        Set<String> userTypes = new HashSet<>();
+        for (UserType userType : keyspaceMetadata.getUserTypes()) {
+            userTypes.add(userType.getTypeName());
+        }
+        return userTypes;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getFunctions()
+     */
+    @Override
+    public Set<String> getFunctions() {
+        Set<String> functions = new HashSet<>();
+        StringBuilder sb = new StringBuilder();
+        for (FunctionMetadata function : keyspaceMetadata.getFunctions()) {
+            sb.append(function.getReturnType().getName());
+            sb.append(" ");
+            sb.append(function.getSignature());
+            functions.add(sb.toString());
+            sb.setLength(0);
+        }
+        return functions;
     }
 }
