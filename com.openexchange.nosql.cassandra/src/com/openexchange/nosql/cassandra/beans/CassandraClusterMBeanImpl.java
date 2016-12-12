@@ -156,6 +156,16 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getSchedulerQueueSize()
+     */
+    @Override
+    public int getSchedulerQueueSize() {
+        return metrics.getTaskSchedulerQueueSize().getValue();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getConnectedNodes()
      */
     @Override
@@ -382,4 +392,5 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
     public long getWriteTimeouts() {
         return errors.getWriteTimeouts().getCount();
     }
+
 }
