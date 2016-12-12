@@ -116,7 +116,7 @@ public class CreateInfoitemSolver implements ProblemSolver {
                         LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", identifier, context.getContextId());
                     }
 
-                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive(fsOwner));
+                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive());
                     try {
                         document.setFileSize(storage.getFileSize(identifier));
                         document.setFileMIMEType(storage.getMimeType(identifier));

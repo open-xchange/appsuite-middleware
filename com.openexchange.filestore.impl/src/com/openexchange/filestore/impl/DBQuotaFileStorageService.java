@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
+import com.openexchange.filestore.OwnerInfo;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageListener;
@@ -135,7 +136,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
             return null;
         }
 
-        CacheKey cacheKey = optService.newCacheKey(userId, Integer.toString(info.getUserId()), info.getPurpose().getIdentifier());
+        CacheKey cacheKey = optService.newCacheKey(userId, info.getPurpose().getIdentifier());
         Object object = cache.getFromGroup(cacheKey, Integer.toString(contextId));
         return object instanceof DBQuotaFileStorage ? (DBQuotaFileStorage) object : null;
     }
@@ -145,7 +146,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         Cache cache = optCache(optService);
         if (null != cache) {
             try {
-                CacheKey cacheKey = optService.newCacheKey(userId, Integer.toString(info.getUserId()), info.getPurpose().getIdentifier());
+                CacheKey cacheKey = optService.newCacheKey(userId, info.getPurpose().getIdentifier());
                 cache.putInGroup(cacheKey, Integer.toString(contextId), fileStorage, false);
             } catch (Exception e) {
                 Logger logger = org.slf4j.LoggerFactory.getLogger(DBQuotaFileStorageService.class);
@@ -181,7 +182,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         }
 
         // Return appropriate unlimited quota file storage
-        return new DBQuotaFileStorage(contextId, Info.administrative(), optOwner > 0 ? optOwner : 0, Long.MAX_VALUE, fileStorageService.getFileStorage(uri), uri, listeners, usageServices, limitServices);
+        return new DBQuotaFileStorage(contextId, Info.administrative(), OwnerInfo.builder().setOwnerId(optOwner).build(), Long.MAX_VALUE, fileStorageService.getFileStorage(uri), uri, listeners, usageServices, limitServices);
     }
 
     @Override
@@ -258,7 +259,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
                 URI uri = new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + storageInfo.getName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
-                storage = new DBQuotaFileStorage(contextId, info, storageInfo.getOwner(), storageInfo.getQuota(), fileStorageService.getFileStorage(uri), uri, listeners, usageServices, limitServices);
+                storage = new DBQuotaFileStorage(contextId, info, storageInfo.getOwnerInfo(), storageInfo.getQuota(), fileStorageService.getFileStorage(uri), uri, listeners, usageServices, limitServices);
 
                 // Put it into cache
                 putCachedFileStorage(userId, contextId, info, storage);
@@ -282,7 +283,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
     public StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
         ContextService contextService = Services.requireService(ContextService.class);
         if (userId <= 0) {
-            return newStorageInfoFor(0, contextService.getContext(contextId));
+            return newStorageInfoFor(OwnerInfo.NO_OWNER, contextService.getContext(contextId));
         }
 
         UserService userService = Services.requireService(UserService.class);
@@ -290,14 +291,14 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         User user = userService.getUser(userId, context);
         if (user.getFilestoreId() <= 0) {
             // No user-specific file storage
-            return newStorageInfoFor(0, context);
+            return newStorageInfoFor(OwnerInfo.NO_OWNER, context);
         }
 
         // A user-specific file storage; determine its owner
         int nextOwnerId = user.getFileStorageOwner();
         if (nextOwnerId <= 0) {
             // User is the owner
-            return newStorageInfoFor(userId, user);
+            return newStorageInfoFor(OwnerInfo.builder().setOwnerId(userId).setMaster(true).build(), user);
         }
 
         // Separate owner (chain)
@@ -312,11 +313,15 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
 
-        return newStorageInfoFor(owner.getId(), owner);
+        if (owner.getId() == userId) {
+            return newStorageInfoFor(OwnerInfo.builder().setOwnerId(userId).setMaster(true).build(), user);
+        }
+
+        return newStorageInfoFor(OwnerInfo.builder().setOwnerId(owner.getId()).setMaster(false).build(), owner);
     }
 
-    private StorageInfo newStorageInfoFor(int owner, FileStorageInfo fileStorageInfo) {
-        return new StorageInfo(fileStorageInfo.getFilestoreId(), owner, fileStorageInfo.getFilestoreName(), fileStorageInfo.getFileStorageQuota());
+    private StorageInfo newStorageInfoFor(OwnerInfo ownerInfo, FileStorageInfo fileStorageInfo) {
+        return new StorageInfo(fileStorageInfo.getFilestoreId(), ownerInfo, fileStorageInfo.getFilestoreName(), fileStorageInfo.getFileStorageQuota());
     }
 
 }
