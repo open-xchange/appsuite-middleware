@@ -85,20 +85,16 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     protected int folderId;
 
-    protected String sessionId;
-
     protected List<String> clean = new ArrayList<String>();
 
     protected String hostName = null;
 
-    public InfostoreAJAXTest() {
-        super();
-    }
+    protected String sessionId;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        this.sessionId = getSessionId();
+        this.sessionId = getClient().getSession().getId();
         final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), sessionId);
         this.folderId = createFolderForTest(userId);
 
@@ -128,7 +124,6 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
             } catch (Exception x) {
                 // Ignore: We don't want exceptions thrown in tearDown to override test failures.
             }
-            this.logout();
         } finally {
             super.tearDown();
         }
@@ -138,11 +133,11 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     protected void removeDocumentsAndFolders() throws JSONException, IOException, SAXException {
         removeAll();
-        FolderTest.deleteFolders(getWebConversation(), getHostName(), sessionId, new int[] { folderId }, Long.MAX_VALUE, false);
+        FolderTest.deleteFolders(getWebConversation(), getHostName(), getClient().getSession().getId(), new int[] { folderId }, Long.MAX_VALUE, false);
     }
 
     protected void removeDocumentsInFolder(final int folderId) throws JSONException, IOException, SAXException {
-        FolderTest.clearFolder(getWebConversation(), getHostName(), sessionId, new int[] { folderId }, Long.MAX_VALUE);
+        FolderTest.clearFolder(getWebConversation(), getHostName(), getClient().getSession().getId(), new int[] { folderId }, Long.MAX_VALUE);
     }
 
     public void removeAll() throws JSONException, IOException, SAXException {

@@ -50,7 +50,6 @@
 package com.openexchange.ajax;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -76,6 +75,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.AjaxInit;
@@ -111,16 +111,6 @@ public abstract class AbstractAJAXTest {
 
     private WebConversation webConversation2 = null;
 
-    private String sessionId = null;
-
-    private String sessionId2 = null;
-
-    private String login = null;
-
-    private String seconduser = null;
-
-    private String password = null;
-
     private Properties ajaxProps = null;
 
     protected static final int APPEND_MODIFIED = 1000000;
@@ -129,16 +119,23 @@ public abstract class AbstractAJAXTest {
 
     private AJAXClient client;
 
+    private AJAXClient client2;
+
     protected TestUser testUser;
+
+    protected TestUser testUser2;
 
     @Before
     public void setUp() throws Exception {
         try {
             AJAXConfig.init();
+            ProvisioningSetup.init();
 
             testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
             testUser = testContext.acquireUser();
+            testUser2 = testContext.acquireUser();
             client = new AJAXClient(testUser);
+            client2 = new AJAXClient(testUser2);
         } catch (final OXException ex) {
             ex.printStackTrace();
         }
@@ -149,11 +146,7 @@ public abstract class AbstractAJAXTest {
      */
     @After
     public void tearDown() throws Exception {
-        try {
-            logout();
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
+        TestContextPool.backContext(testContext);
     }
 
     protected String getAJAXProperty(final String key) {
@@ -212,73 +205,24 @@ public abstract class AbstractAJAXTest {
         return conv;
     }
 
-    /**
-     * @return Returns the sessionId.
-     * @throws JSONException if parsing of serialized json fails.
-     * @throws SAXException if a SAX error occurs.
-     * @throws IOException if the communication with the server fails.
-     * @throws OXException
-     */
-    protected String getSessionId() throws IOException, JSONException, OXException {
-        if (null == sessionId) {
-            sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(), getLogin(), getPassword());
-            assertNotNull("Can't get session id.", sessionId);
-        }
-        return sessionId;
+    protected String getSessionId() {
+        return getClient().getSession().getId();
     }
 
-    protected String getSecondSessionId() throws IOException, JSONException, OXException {
-        if (null == sessionId2) {
-            sessionId2 = LoginTest.getSessionId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
-            assertNotNull("Can't get session id for second user.", sessionId2);
-        }
-        return sessionId2;
-    }
-
-    /**
-     * Terminates the session on the server.
-     * 
-     * @throws Exception if an error occurs.
-     */
-    protected void logout() throws Exception {
-        if (null != sessionId) {
-            LoginTest.logout(getWebConversation(), getHostName(), getSessionId());
-            sessionId = null;
-            webConversation = null;
-        }
-        webConversation = null;
-        if (null != sessionId2) {
-            LoginTest.logout(getSecondWebConversation(), getHostName(), getSecondSessionId());
-            sessionId2 = null;
-        }
-        webConversation2 = null;
+    protected String getSecondSessionId() {
+        return client2.getSession().getId();
     }
 
     public String getLogin() {
-        if (null == login) {
-            login = getAJAXProperty("login");
-        }
-        if (!login.contains("@")) {
-            login += "@" + getAJAXProperty("contextName");
-        }
-        return login;
+        return testUser.getLogin();
     }
 
     public String getPassword() {
-        if (null == password) {
-            password = getAJAXProperty("password");
-        }
-        return password;
+        return testUser.getPassword();
     }
 
     public String getSeconduser() {
-        if (null == seconduser) {
-            seconduser = getAJAXProperty("seconduser");
-        }
-        if (!seconduser.contains("@")) {
-            seconduser += "@" + getAJAXProperty("contextName");
-        }
-        return seconduser;
+        return testUser2.getLogin();
     }
 
     // Query methods

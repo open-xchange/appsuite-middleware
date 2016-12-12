@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -38,10 +37,6 @@ import com.openexchange.tools.URLParameter;
 public class MailTest extends AbstractAJAXTest {
 
     private String sessionId = null;
-
-    public MailTest() {
-        super();
-    }
 
     private static final String MAIL_URL = "/ajax/mail";
 
@@ -66,12 +61,7 @@ public class MailTest extends AbstractAJAXTest {
 
     @Before
     public void setUp() throws Exception {
-        sessionId = getSessionId();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        logout();
+        sessionId = getClient().getSession().getId();
     }
 
     public static File createTempFile() {

@@ -69,8 +69,6 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -101,8 +99,6 @@ import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 public class FolderTest extends AbstractAJAXTest {
-
-    private String sessionId;
 
     public static final String FOLDER_URL = "/ajax/folders";
 
@@ -578,22 +574,6 @@ public class FolderTest extends AbstractAJAXTest {
             }
         }
         throw new TestException("Private infostore folder not found!");
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        sessionId = getSessionId();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            logout();
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

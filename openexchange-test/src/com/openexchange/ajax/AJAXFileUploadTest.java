@@ -62,8 +62,6 @@ import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -87,21 +85,6 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
     private final static String FILE_CONTENT = "A hash table supporting full concurrency of retrievals and adjustable expected concurrency for updates.\n" + "This class obeys the same functional specification as Hashtable, and includes versions of methods corresponding to each method of Hashtable.\n" + "However, even though all operations are thread-safe, retrieval operations do not entail locking, and there is not any support for locking the entire table in a way that prevents all access.\n" + "This class is fully interoperable with Hashtable in programs that rely on its thread safety but not on its synchronization details.\n\n" + "Retrieval operations (including get) generally do not block, so may overlap with update operations (including put and remove).\n" + "Retrievals reflect the results of the most recently completed update operations holding upon their onset.\n" + "For aggregate operations such as putAll and clear, concurrent retrievals may reflect insertion or removal of only some entries.\n" + "Similarly, Iterators and Enumerations return elements reflecting the state of the hash table at some point at or since the creation of the iterator/enumeration.\n" + "They do not throw ConcurrentModificationException. However, iterators are designed to be used by only one thread at a time.";
 
     private String sessionId;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        sessionId = getSessionId();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            logout();
-        } finally {
-            super.tearDown();
-        }
-    }
 
     private static final String getUploadedFile(final WebConversation conversation, final String hostname, final String sessionId, final String id) throws IOException, SAXException {
 
