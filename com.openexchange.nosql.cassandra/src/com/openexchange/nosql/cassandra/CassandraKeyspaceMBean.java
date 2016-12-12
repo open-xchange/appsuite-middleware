@@ -81,10 +81,11 @@ public interface CassandraKeyspaceMBean extends CassandraMBean {
      * @return the user types defined in this keyspace.
      */
     Set<String> getUserTypes();
-    
+
     /**
-     * Returns 
-     * @return
+     * Returns the functions defined in this keyspace.
+     * 
+     * @return the functions defined in this keyspace.
      */
     Set<String> getFunctions();
 }
