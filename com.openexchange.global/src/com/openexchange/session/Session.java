@@ -205,6 +205,13 @@ public interface Session {
     public static final String PARAM_COOKIE_REFRESH_TIMESTAMP = "__session.cookierefresh".intern();
 
     /**
+     * The parameter for optional OAuth identifier associated with a session intended for mail access & transport.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_XOAUTH2_TOKEN = "__session.xoauth2".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();
