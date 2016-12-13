@@ -64,7 +64,7 @@ public interface QuotaFileStorageService {
     /**
      * Gets a usage-accounting, but unlimited {@link QuotaFileStorage} instance rather for administrative purposes using specified arguments.
      * <p>
-     * This methods is intended to be used by provisioning-related operations that do not honor possible quote-exceeding file operations.
+     * This methods is intended to be used by provisioning-related operations that do not honor possible quota-exceeding file operations.
      *
      * @param baseUri The base URI for the file storage
      * @param optOwner The optional user identifier
