@@ -56,6 +56,6 @@ package com.openexchange.nosql.cassandra;
  */
 public interface CassandraMBean {
 
-    static final String DOMAIN = "com.openxchange.nosql.cassandra";
+    static final String DOMAIN = "com.openexchange.nosql.cassandra";
 
 }

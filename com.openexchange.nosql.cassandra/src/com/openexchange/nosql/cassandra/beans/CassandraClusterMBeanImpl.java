@@ -107,7 +107,7 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
             LOGGER.error("Could not refresh the statistics for the Cassandra cluster .", e);
         }
     }
-
+    
     /*
      * (non-Javadoc)
      * 

@@ -49,10 +49,15 @@
 
 package com.openexchange.nosql.cassandra.beans;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.management.Attribute;
 import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
 import javax.management.DynamicMBean;
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
+import javax.management.ReflectionException;
 import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.server.ServiceLookup;
 
@@ -65,6 +70,9 @@ abstract class AbstractCassandraMBean extends AnnotatedStandardMBean implements 
 
     protected final ServiceLookup services;
 
+    private final AtomicLong refreshTime;
+    private static final long REFRESH_INTERVAL = TimeUnit.MINUTES.toMillis(5);
+
     /**
      * Initialises a new {@link AbstractCassandraMBean}.
      * 
@@ -76,6 +84,7 @@ abstract class AbstractCassandraMBean extends AnnotatedStandardMBean implements 
     public AbstractCassandraMBean(ServiceLookup services, String description, Class<?> mbeanInterface) throws NotCompliantMBeanException {
         super(description, mbeanInterface);
         this.services = services;
+        refreshTime = new AtomicLong(0);
     }
 
     /**
@@ -104,5 +113,20 @@ abstract class AbstractCassandraMBean extends AnnotatedStandardMBean implements 
             throw new IllegalArgumentException(e);
         }
         return list;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.management.StandardMBean#getAttribute(java.lang.String)
+     */
+    @Override
+    public Object getAttribute(String attribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
+        long now = System.currentTimeMillis();
+        if (now - refreshTime.get() >= REFRESH_INTERVAL) {
+            refreshTime.set(now);
+            refresh();
+        }
+        return super.getAttribute(attribute);
     }
 }
