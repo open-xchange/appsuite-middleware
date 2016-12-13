@@ -333,6 +333,16 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexhange.mail.authType</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the authentication type which should be used. Known values: 'login' and 'OAuth'<br> |
+| __Default__ | login  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | mail.properties  |
+
+---
 
 
 ## OAuth 
