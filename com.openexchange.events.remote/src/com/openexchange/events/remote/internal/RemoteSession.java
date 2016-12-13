@@ -100,9 +100,13 @@ public class RemoteSession implements PutIfAbsent {
         session.userLogin = (String) map.get("__userLogin");
         Boolean booleanObject = (Boolean) map.get("__tranzient");
         session.tranzient = null != booleanObject ? booleanObject.booleanValue() : false;
-        Serializable alternativeId = map.get("__paramAlternativeId");
-        if (null != alternativeId) {
-            session.setParameter(PARAM_ALTERNATIVE_ID, alternativeId);
+        Serializable serializable = map.get("__paramAlternativeId");
+        if (null != serializable) {
+            session.setParameter(PARAM_ALTERNATIVE_ID, serializable);
+        }
+        serializable = map.get("__paramXoauth2Token");
+        if (null != serializable) {
+            session.setParameter(PARAM_XOAUTH2_TOKEN, serializable);
         }
         return session;
     }
@@ -129,9 +133,13 @@ public class RemoteSession implements PutIfAbsent {
         map.put("__client", session.getClient());
         map.put("__userLogin", session.getUserlogin());
         map.put("__tranzient", Boolean.valueOf(session.isTransient()));
-        Object alternativeId = session.getParameter(PARAM_ALTERNATIVE_ID);
-        if (null != alternativeId && Serializable.class.isInstance(alternativeId)) {
-            map.put("__paramAlternativeId", (Serializable) alternativeId);
+        Object obj = session.getParameter(PARAM_ALTERNATIVE_ID);
+        if (null != obj && Serializable.class.isInstance(obj)) {
+            map.put("__paramAlternativeId", (Serializable) obj);
+        }
+        obj = session.getParameter(PARAM_XOAUTH2_TOKEN);
+        if (null != obj && Serializable.class.isInstance(obj)) {
+            map.put("__paramXoauth2Token", (Serializable) obj);
         }
         return map;
     }

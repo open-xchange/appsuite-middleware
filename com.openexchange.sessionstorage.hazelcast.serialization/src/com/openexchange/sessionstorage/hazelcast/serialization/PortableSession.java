@@ -53,7 +53,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import com.hazelcast.nio.serialization.PortableReader;
@@ -116,6 +118,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_ALT_ID = "altId";
     public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
+    public static final String PARAMETER_NAME_XOAUTH2_TOKEN = "xoauth2";
 
     /**
      * Initializes a new {@link PortableSession}.
@@ -169,12 +172,13 @@ public class PortableSession extends StoredSession implements CustomPortable {
             writer.writeUTF(PARAMETER_ALT_ID, null == altId ? null : altId.toString());
         }
         {
-            List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
-            int size = remoteParameterNames.size();
-            if (size <= 0) {
-                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
-                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
-            } else {
+            List<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
+            Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
+            // Add static remote parameters
+            remoteParameterNames.add(PARAM_XOAUTH2_TOKEN);
+            // Add configured remote parameters
+            remoteParameterNames.addAll(configuredRemoteParameterNames);
+            {
                 StringAppender names = null;
                 StringAppender values = null;
                 for (String parameterName : remoteParameterNames) {
@@ -183,7 +187,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
                         if (isSerializablePojo(value)) {
                             String sValue = value.toString();
                             if (null == names) {
-                                int capacity = size << 4;
+                                int capacity = remoteParameterNames.size() << 4;
                                 names = new StringAppender(':', capacity);
                                 values = new StringAppender(':', capacity);
                             }
