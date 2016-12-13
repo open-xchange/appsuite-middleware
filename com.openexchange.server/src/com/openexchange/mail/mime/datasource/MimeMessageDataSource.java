@@ -55,10 +55,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -73,6 +76,7 @@ import org.apache.james.mime4j.dom.Header;
 import org.apache.james.mime4j.dom.Message;
 import org.apache.james.mime4j.dom.MessageWriter;
 import org.apache.james.mime4j.dom.TextBody;
+import org.apache.james.mime4j.dom.address.Address;
 import org.apache.james.mime4j.dom.address.AddressList;
 import org.apache.james.mime4j.dom.address.Mailbox;
 import org.apache.james.mime4j.dom.address.MailboxList;
@@ -347,12 +351,12 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
                     mime4jOf(bodyPart, mime4jBodyPart, bodyFactory, mailConfig, session);
                     mime4jMultipart.addBodyPart(mime4jBodyPart);
                 }
-                entity.setBody(mime4jMultipart);
+                entity.setMultipart(mime4jMultipart);
             } else if (contentType.startsWith("message/rfc822") || (name != null && name.endsWith(".eml"))) {
                 final MimeMessage m = (MimeMessage) mimePart.getContent();
                 final MessageImpl mime4jMessage = new MessageImpl();
                 mime4jOf(m, mime4jMessage, bodyFactory, mailConfig, session);
-                entity.setBody(mime4jMessage);
+                entity.setMessage(mime4jMessage);
             } else if (contentType.startsWith("text/")) {
                 // A text part
                 String text = tryGetStringContent(mimePart);
@@ -360,11 +364,11 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
                     text = MessageUtility.readMimePart(mimePart, contentType);
                 }
                 final TextBody textBody = bodyFactory.textBody(text, contentType.getCharsetParameter());
-                entity.setBody(textBody);
+                entity.setBody(textBody, contentType.getBaseType());
             } else {
                 // Binary
                 final BinaryBody binaryBody = bodyFactory.binaryBody(mimePart.getInputStream());
-                entity.setBody(binaryBody);
+                entity.setBody(binaryBody, contentType.getBaseType());
             }
             // Headers
             {
@@ -489,6 +493,11 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
+        public void createMessageId(final String hostname) {
+            message.createMessageId(hostname);
+        }
+
+        @Override
         public Header getHeader() {
             return message.getHeader();
         }
@@ -514,6 +523,11 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
+        public void setSubject(final String subject) {
+            message.setSubject(subject);
+        }
+
+        @Override
         public boolean equals(final Object obj) {
             return message.equals(obj);
         }
@@ -524,8 +538,33 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
+        public void setMessage(final Message message) {
+            ((AbstractEntity) message).setMessage(message);
+        }
+
+        @Override
         public Date getDate() {
             return message.getDate();
+        }
+
+        @Override
+        public void setMultipart(final org.apache.james.mime4j.dom.Multipart multipart) {
+            message.setMultipart(multipart);
+        }
+
+        @Override
+        public void setDate(final Date date) {
+            message.setDate(date);
+        }
+
+        @Override
+        public void setDate(final Date date, final TimeZone zone) {
+            message.setDate(date, zone);
+        }
+
+        @Override
+        public void setMultipart(final org.apache.james.mime4j.dom.Multipart multipart, final Map<String, String> parameters) {
+            message.setMultipart(multipart, parameters);
         }
 
         @Override
@@ -534,8 +573,43 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
+        public void setText(final TextBody textBody) {
+            message.setText(textBody);
+        }
+
+        @Override
+        public void setSender(final Mailbox sender) {
+            message.setSender(sender);
+        }
+
+        @Override
         public MailboxList getFrom() {
             return message.getFrom();
+        }
+
+        @Override
+        public void setText(final TextBody textBody, final String subtype) {
+            message.setText(textBody, subtype);
+        }
+
+        @Override
+        public void setFrom(final Mailbox from) {
+            message.setFrom(from);
+        }
+
+        @Override
+        public void setFrom(final Mailbox... from) {
+            message.setFrom(from);
+        }
+
+        @Override
+        public void setBody(final Body body, final String mimeType) {
+            message.setBody(body, mimeType);
+        }
+
+        @Override
+        public void setFrom(final Collection<Mailbox> from) {
+            message.setFrom(from);
         }
 
         @Override
@@ -544,8 +618,28 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
+        public void setBody(final Body body, final String mimeType, final Map<String, String> parameters) {
+            message.setBody(body, mimeType, parameters);
+        }
+
+        @Override
+        public void setTo(final Address to) {
+            message.setTo(to);
+        }
+
+        @Override
+        public void setTo(final Address... to) {
+            message.setTo(to);
+        }
+
+        @Override
         public String getMimeType() {
             return message.getMimeType();
+        }
+
+        @Override
+        public void setTo(final Collection<? extends Address> to) {
+            message.setTo(to);
         }
 
         @Override
@@ -564,8 +658,28 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
+        public void setCc(final Address cc) {
+            message.setCc(cc);
+        }
+
+        @Override
         public String getContentTransferEncoding() {
             return message.getContentTransferEncoding();
+        }
+
+        @Override
+        public void setCc(final Address... cc) {
+            message.setCc(cc);
+        }
+
+        @Override
+        public void setContentTransferEncoding(final String contentTransferEncoding) {
+            message.setContentTransferEncoding(contentTransferEncoding);
+        }
+
+        @Override
+        public void setCc(final Collection<? extends Address> cc) {
+            message.setCc(cc);
         }
 
         @Override
@@ -579,13 +693,73 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
+        public void setBcc(final Address bcc) {
+            message.setBcc(bcc);
+        }
+
+        @Override
+        public void setContentDisposition(final String dispositionType) {
+            message.setContentDisposition(dispositionType);
+        }
+
+        @Override
+        public void setBcc(final Address... bcc) {
+            message.setBcc(bcc);
+        }
+
+        @Override
+        public void setContentDisposition(final String dispositionType, final String filename) {
+            message.setContentDisposition(dispositionType, filename);
+        }
+
+        @Override
+        public void setBcc(final Collection<? extends Address> bcc) {
+            message.setBcc(bcc);
+        }
+
+        @Override
         public AddressList getReplyTo() {
             return message.getReplyTo();
         }
 
         @Override
+        public void setContentDisposition(final String dispositionType, final String filename, final long size) {
+            message.setContentDisposition(dispositionType, filename, size);
+        }
+
+        @Override
+        public void setReplyTo(final Address replyTo) {
+            message.setReplyTo(replyTo);
+        }
+
+        @Override
+        public void setReplyTo(final Address... replyTo) {
+            message.setReplyTo(replyTo);
+        }
+
+        @Override
+        public void setReplyTo(final Collection<? extends Address> replyTo) {
+            message.setReplyTo(replyTo);
+        }
+
+        @Override
+        public void setContentDisposition(final String dispositionType, final String filename, final long size, final Date creationDate, final Date modificationDate, final Date readDate) {
+            message.setContentDisposition(dispositionType, filename, size, creationDate, modificationDate, readDate);
+        }
+
+        @Override
         public String getFilename() {
             return message.getFilename();
+        }
+
+        @Override
+        public void setFilename(final String filename) {
+            message.setFilename(filename);
+        }
+
+        @Override
+        public boolean isMimeType(final String type) {
+            return message.isMimeType(type);
         }
 
         @Override

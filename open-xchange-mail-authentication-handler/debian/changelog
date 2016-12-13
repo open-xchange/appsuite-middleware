@@ -1,0 +1,5 @@
+open-xchange-mail-authentication-handler (7.8.4-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 13 Dec 2016 15:18:00 +0200
