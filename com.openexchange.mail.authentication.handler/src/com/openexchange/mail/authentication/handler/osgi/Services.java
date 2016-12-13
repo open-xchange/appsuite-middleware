@@ -47,55 +47,73 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.mail.authentication.handler.osgi;
+
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link AuthType} - The authentication type.
+ * {@link Services}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public enum AuthType {
+public class Services {
 
     /**
-     * The login authentication type.
+     * Initializes a new {@link Services}.
      */
-    LOGIN("login"),
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<Activator> REF = new AtomicReference<>();
+
     /**
-     * The OAuth authentication type.
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    OAUTH("OAuth"),
-    ;
-
-    private final String name;
-
-    private AuthType(String name) {
-        this.name = name;
+    public static void setServiceLookup(final Activator serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Parses specified string into an AuthType.
+     * Gets the service lookup.
      *
-     * @param authTypeStr The string to parse to an AuthType
-     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
+     * @return The service lookup or <code>null</code>
      */
-    public static final AuthType parse(final String authTypeStr) {
-        final AuthType[] values = AuthType.values();
-        for (final AuthType authType : values) {
-            if (authType.name.equalsIgnoreCase(authTypeStr)) {
-                return authType;
-            }
+    public static HousekeepingActivator getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.advertisement\" not started?");
         }
-        return null;
+        return serviceLookup.getService(clazz);
     }
 
     /**
-     * Gets the name
+     * (Optionally) Gets the service of specified type
      *
-     * @return The name
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
      */
-    public String getName() {
-        return name;
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

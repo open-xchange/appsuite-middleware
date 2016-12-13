@@ -49,53 +49,24 @@
 
 package com.openexchange.mail.api;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 /**
- * {@link AuthType} - The authentication type.
+ * The {@link AuthenticationFailedHandler} handles failed authentications to a mail server
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public enum AuthType {
+public interface AuthenticationFailedHandler {
+
 
     /**
-     * The login authentication type.
-     */
-    LOGIN("login"),
-    /**
-     * The OAuth authentication type.
-     */
-    OAUTH("OAuth"),
-    ;
-
-    private final String name;
-
-    private AuthType(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Parses specified string into an AuthType.
+     * This method is called in case the authentication has failed.
      *
-     * @param authTypeStr The string to parse to an AuthType
-     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
+     * @param session The user which couln't be authenticated.
+     * @throws OXException
      */
-    public static final AuthType parse(final String authTypeStr) {
-        final AuthType[] values = AuthType.values();
-        for (final AuthType authType : values) {
-            if (authType.name.equalsIgnoreCase(authTypeStr)) {
-                return authType;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets the name
-     *
-     * @return The name
-     */
-    public String getName() {
-        return name;
-    }
+    public void handleAuthenticationFailed(Session session) throws OXException;
 
 }

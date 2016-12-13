@@ -105,6 +105,7 @@ import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.AuthType;
+import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -694,6 +695,14 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         } catch (javax.mail.AuthenticationFailedException e) {
             if (null == smtpConfig || null == session) {
                 throw e;
+            }
+
+            if(smtpConfig.getAccountId()==MailAccount.DEFAULT_ID){
+                AuthenticationFailedHandler handler = Services.getService(AuthenticationFailedHandler.class);
+                if(handler!=null){
+                    handler.handleAuthenticationFailed(session);
+                    throw e;
+                }
             }
 
             if (AuthType.OAUTH.equals(smtpConfig.getAuthType())) {

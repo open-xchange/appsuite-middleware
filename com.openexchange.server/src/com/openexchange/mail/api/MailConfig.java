@@ -66,6 +66,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -275,6 +277,8 @@ public abstract class MailConfig {
     protected static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
 
     protected static final Object[] INIT_ARGS = new Object[0];
+
+    private static final String AUTH_TYPE_PROPERTY="com.openexhange.mail.authType";
 
     /**
      * Gets the user-specific mail configuration.
@@ -714,19 +718,36 @@ public abstract class MailConfig {
 
         // Assign password
         if (account.isDefaultAccount()) {
-            PasswordSource cur = MailProperties.getInstance().getPasswordSource();
-            if (PasswordSource.GLOBAL.equals(cur)) {
-                final String masterPw = MailProperties.getInstance().getMasterPassword();
-                if (masterPw == null) {
-                    throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
-                }
-                mailConfig.password = masterPw;
+
+            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+            String authTypeStr = view.opt(AUTH_TYPE_PROPERTY, String.class, AuthType.LOGIN.getName());
+            AuthType authType = AuthType.parse(authTypeStr);
+
+            if (authType != null && authType.equals(AuthType.OAUTH)) {
+
+               Object obj = session.getParameter(Session.PARAM_XOAUTH2_TOKEN);
+               if(obj==null){
+                   throw MailExceptionCode.UNEXPECTED_ERROR.create("The session contains no xoauth2 token.");
+               }
+               mailConfig.password = obj.toString();
+               mailConfig.authType = AuthType.OAUTH;
             } else {
-                String sessionPassword = session.getPassword();
-                if (null == sessionPassword) {
-                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+
+                PasswordSource cur = MailProperties.getInstance().getPasswordSource();
+                if (PasswordSource.GLOBAL.equals(cur)) {
+                    final String masterPw = MailProperties.getInstance().getMasterPassword();
+                    if (masterPw == null) {
+                        throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
+                    }
+                    mailConfig.password = masterPw;
+                } else {
+                    String sessionPassword = session.getPassword();
+                    if (null == sessionPassword) {
+                        throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                    }
+                    mailConfig.password = sessionPassword;
                 }
-                mailConfig.password = sessionPassword;
             }
         } else {
             CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(account.isMailAccount(), account.getId(), session);

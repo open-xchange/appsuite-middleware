@@ -47,55 +47,30 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.mail.authentication.handler.osgi;
+
+import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.mail.authentication.handler.DefaultAuthenticationFailedHandler;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link AuthType} - The authentication type.
+ * {@link Activator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public enum AuthType {
+public class Activator extends HousekeepingActivator {
 
-    /**
-     * The login authentication type.
-     */
-    LOGIN("login"),
-    /**
-     * The OAuth authentication type.
-     */
-    OAUTH("OAuth"),
-    ;
-
-    private final String name;
-
-    private AuthType(String name) {
-        this.name = name;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{SessiondService.class};
     }
 
-    /**
-     * Parses specified string into an AuthType.
-     *
-     * @param authTypeStr The string to parse to an AuthType
-     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
-     */
-    public static final AuthType parse(final String authTypeStr) {
-        final AuthType[] values = AuthType.values();
-        for (final AuthType authType : values) {
-            if (authType.name.equalsIgnoreCase(authTypeStr)) {
-                return authType;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets the name
-     *
-     * @return The name
-     */
-    public String getName() {
-        return name;
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        registerService(AuthenticationFailedHandler.class, new DefaultAuthenticationFailedHandler());
     }
 
 }
