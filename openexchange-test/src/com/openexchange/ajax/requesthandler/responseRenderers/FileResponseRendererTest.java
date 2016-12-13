@@ -137,7 +137,7 @@ public class FileResponseRendererTest extends TestCase {
             resp.setOutputStream(servletOutputStream);
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
 
-            final int contentLength = resp.getContentLength();
+            final long contentLength = resp.getContentLength();
             assertTrue("Unexpected Content-Length: " + contentLength, contentLength > 0);
             assertTrue("Unexpected Content-Length: " + contentLength + ", but should be less than " + length, length > contentLength);
             final int size = servletOutputStream.size();
@@ -643,7 +643,7 @@ public class FileResponseRendererTest extends TestCase {
             requestData.setHttpServletRequest(req);
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
-            final int contentLength = resp.getContentLength();
+            final long contentLength = resp.getContentLength();
             assertTrue("Content-Length should be -1", contentLength == -1);
         } catch (final Exception e) {
             e.printStackTrace();

@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 /**
  * {@link ByteArrayServletOutputStream} - A {@code ServletOutputStream} backed by a {@code ByteArrayOutputStream}.
@@ -131,6 +132,16 @@ public class ByteArrayServletOutputStream extends ServletOutputStream {
     @Override
     public void close() throws IOException {
         out.close();
+    }
+
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
+    @Override
+    public void setWriteListener(WriteListener writeListener) {
+        // Nope
     }
 
 }

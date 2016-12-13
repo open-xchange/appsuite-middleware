@@ -440,8 +440,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
      * @param parameters The request parameters
      * @return The validated session
      */
-    protected Session checkSession(String sessionId, HttpRequestPacket requestPacket, Parameters parameters) {
-        return getAuthenticator().checkSession(sessionId, requestPacket, parameters);
+    protected Session checkSession(String sessionId, S sessionBoundSocket) {
+        return getAuthenticator().checkSession(sessionId, sessionBoundSocket.getHttpRequest());
     }
 
     /**
@@ -502,8 +502,11 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
                 connectionId = ConnectionId.newInstance(sConId);
             }
 
+            // Create the socket instance
+            S sessionBoundSocket = doCreateSocket(connectionId, parameters, handler, requestPacket, listeners);
+
             // Get and verify session
-            Session session = checkSession(sessionId, requestPacket, parameters);
+            Session session = checkSession(sessionId, sessionBoundSocket);
 
             // Check if enabled for given session
             if (false == isEnabledFor(session)) {
@@ -515,8 +518,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
                 throw new HandshakeException("Such a Web Socket connection already exists: " + connectionId);
             }
 
-            // Create the socket instance with session association
-            S sessionBoundSocket = doCreateSocket(session, connectionId, parameters, handler, requestPacket, listeners);
+            // Associate socket with resolved session
+            sessionBoundSocket.setSessionInfo(session);
 
             /*-
              * Add to socket collection
@@ -570,7 +573,6 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
     /**
      * Creates the session-bound socket using given arguments.
      *
-     * @param session The associated session
      * @param connectionId The socket's connection identifier
      * @param parameters The parsed request parameters
      * @param handler The protocol handler
@@ -578,7 +580,7 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
      * @param listeners The initial listeners to apply
      * @throws HandshakeException If Web Socket hand-shake is supposed to fail
      */
-    protected abstract S doCreateSocket(Session session, ConnectionId connectionId, Parameters parameters, ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener[] listeners) throws HandshakeException;
+    protected abstract S doCreateSocket(ConnectionId connectionId, Parameters parameters, ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener[] listeners) throws HandshakeException;
 
     @Override
     public void onConnect(WebSocket socket) {

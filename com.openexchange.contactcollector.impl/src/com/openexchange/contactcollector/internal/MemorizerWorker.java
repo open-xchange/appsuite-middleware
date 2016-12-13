@@ -72,16 +72,21 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.BatchIncrementArguments;
+import com.openexchange.objectusecount.BatchIncrementArguments.ObjectAndFolder;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.preferences.ServerUserSetting;
@@ -102,6 +107,9 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import gnu.trove.iterator.TObjectIntIterator;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * {@link MemorizerWorker}
@@ -366,7 +374,6 @@ public final class MemorizerWorker {
 
         UserConfiguration userConfig;
         ContactService contactService;
-        ObjectUseCountService useCountService = null;
         try {
             UserConfigurationService userConfigurationService = services.getOptionalService(UserConfigurationService.class);
             if (null == userConfigurationService) {
@@ -380,20 +387,24 @@ public final class MemorizerWorker {
                 return;
             }
 
-            useCountService = memorizerTask.isIncrementUseCount() ? services.getOptionalService(ObjectUseCountService.class) : null;
             userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
         } catch (final Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         }
 
-        // Iterate addresses...
+        // Iterate addresses and collect use-counts
+        TObjectIntMap<BatchIncrementArguments.ObjectAndFolder> useCounts = memorizerTask.isIncrementUseCount() ? new TObjectIntHashMap<BatchIncrementArguments.ObjectAndFolder>(6, 0.9F, 0) : null;
         for (InternetAddress address : addresses) {
             try {
-                memorizeContact(address, folderId, session, ctx, userConfig, contactService, useCountService);
+                memorizeContact(address, folderId, session, ctx, userConfig, contactService, useCounts, services);
             } catch (Exception e) {
                 LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
             }
+        }
+        if (null != useCounts && !useCounts.isEmpty()) {
+            ObjectUseCountService useCountService = services.getOptionalService(ObjectUseCountService.class);
+            batchIncrementUseCount(useCounts, session, useCountService);
         }
     }
 
@@ -403,7 +414,7 @@ public final class MemorizerWorker {
 
 	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
 
-    static void memorizeContact(InternetAddress address, int folderId, Session session, Context ctx, UserConfiguration userConfig, ContactService contactService, ObjectUseCountService useCountService) throws OXException {
+    static void memorizeContact(InternetAddress address, int folderId, Session session, Context ctx, UserConfiguration userConfig, ContactService contactService, TObjectIntMap<BatchIncrementArguments.ObjectAndFolder> useCounts, ServiceLookup services) throws OXException {
         // Convert email address to a contact
         Contact contact = transformInternetAddress(address, session);
         if (null == contact) {
@@ -421,11 +432,14 @@ public final class MemorizerWorker {
         		orTerm.addSearchTerm(term);
         	}
 
-        	SearchIterator<Contact> iterator = contactService.searchContacts(session, orTerm, FIELDS);
+        	SortOptions sortOptions = new SortOptions(ContactField.USE_COUNT, Order.DESCENDING);
+        	sortOptions.setLimit(getSearchLimit(services));
+
+        	SearchIterator<Contact> iterator = contactService.searchContacts(session, orTerm, FIELDS, sortOptions);
             try {
                 if (iterator.hasNext()) {
                     // At least one such contact found: If no use-count service was passed, then there is nothing to do.
-                    if (null == useCountService) {
+                    if (null == useCounts) {
                         return;
                     }
 
@@ -455,19 +469,23 @@ public final class MemorizerWorker {
 
             contactService.createContact(session, Integer.toString(contact.getParentFolderID()), contact);
             int objectId = contact.getObjectID();
-            incrementUseCount(objectId, folderId, session, useCountService);
+            BatchIncrementArguments.ObjectAndFolder key = new BatchIncrementArguments.ObjectAndFolder(objectId, folderId);
+            int count = useCounts.get(key);
+            useCounts.put(key, count + 1);
             return;
         }
 
         // Such contacts already exists. Increment their use count
-        if (null != useCountService) {
+        if (null != useCounts) {
             int numOfFoundContacts = foundContacts.size();
             if (numOfFoundContacts > 0) {
                 if (1 == numOfFoundContacts) {
                     Contact foundContact = foundContacts.get(0);
                     OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
                     if (perm.canWriteAllObjects()) {
-                        incrementUseCount(foundContact.getObjectID(), foundContact.getParentFolderID(), session, useCountService);
+                        BatchIncrementArguments.ObjectAndFolder key = new BatchIncrementArguments.ObjectAndFolder(foundContact.getObjectID(), foundContact.getParentFolderID());
+                        int count = useCounts.get(key);
+                        useCounts.put(key, count + 1);
                     }
                 } else {
                     Set<IntPair> alreadyProcessed = new HashSet<IntPair>(foundContacts.size(), 0.9F);
@@ -477,7 +495,9 @@ public final class MemorizerWorker {
                         if (alreadyProcessed.add(new IntPair(objectID, parentFolderID))) {
                             OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(parentFolderID, session.getUserId(), userConfig);
                             if (perm.canWriteAllObjects()) {
-                                incrementUseCount(objectID, parentFolderID, session, useCountService);
+                                BatchIncrementArguments.ObjectAndFolder key = new BatchIncrementArguments.ObjectAndFolder(objectID, parentFolderID);
+                                int count = useCounts.get(key);
+                                useCounts.put(key, count + 1);
                             }
                         }
                     }
@@ -486,12 +506,54 @@ public final class MemorizerWorker {
         }
     }
 
+    private static volatile Integer searchLimit;
+    static int getSearchLimit(ServiceLookup services) {
+        Integer tmp = searchLimit;
+        if (null == tmp) {
+            synchronized (MemorizerWorker.class) {
+                tmp = searchLimit;
+                if (null == tmp) {
+                    int defaultLimit = 5;
+                    ConfigurationService configurationService = services.getOptionalService(ConfigurationService.class);
+                    if (null == configurationService) {
+                        return defaultLimit;
+                    }
+                    tmp = Integer.valueOf(configurationService.getIntProperty("com.openexchange.contactcollector.searchLimit", defaultLimit));
+                    searchLimit = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
     static void incrementUseCount(int objectId, int folderId, Session session, ObjectUseCountService useCountService) {
         if (null != useCountService) {
             try {
                 useCountService.incrementObjectUseCount(session, new IncrementArguments.Builder(objectId, folderId).build());
             } catch (Exception e) {
                 LOG.warn("Failed to increment use count for contact {} inside folder {} for user {} in context {}", objectId, folderId, session.getUserId(), session.getContextId(), e);
+            }
+        }
+    }
+
+    static void batchIncrementUseCount(TObjectIntMap<BatchIncrementArguments.ObjectAndFolder> useCounts, Session session, ObjectUseCountService useCountService) {
+        if (null != useCounts && null != useCountService) {
+            try {
+                BatchIncrementArguments.Builder builder = new BatchIncrementArguments.Builder();
+
+                TObjectIntIterator<ObjectAndFolder> iterator = useCounts.iterator();
+                for (int i = useCounts.size(); i-- > 0;) {
+                    iterator.advance();
+                    ObjectAndFolder key = iterator.key();
+                    int count = iterator.value();
+                    for (int k = count; k-- > 0;) {
+                        builder.add(key.getObjectId(), key.getFolderId());
+                    }
+                }
+
+                useCountService.incrementObjectUseCount(session, builder.build());
+            } catch (Exception e) {
+                LOG.warn("Failed to batch increment use count for user {} in context {}", session.getUserId(), session.getContextId(), e);
             }
         }
     }

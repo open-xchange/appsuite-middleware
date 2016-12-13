@@ -55,6 +55,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -64,24 +66,31 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
+import javax.servlet.ReadListener;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
+import javax.servlet.http.Part;
 import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.util.Globals;
 import org.glassfish.grizzly.http.server.util.SimpleDateFormats;
 import org.glassfish.grizzly.http.server.util.StringParser;
 import org.glassfish.grizzly.http.util.FastHttpDateFormat;
-import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.servlet.CookieWrapper;
 import org.slf4j.Logger;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
-import com.openexchange.tools.servlet.DelegateServletInputStream;
 
 
 /**
@@ -93,6 +102,29 @@ import com.openexchange.tools.servlet.DelegateServletInputStream;
 public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketHttpServletRequest.class);
+
+    private static final ServletInputStream EMPTY_STREAM = new ServletInputStream() {
+
+        @Override
+        public int read() throws IOException {
+            return -1;
+        }
+
+        @Override
+        public void setReadListener(ReadListener readListener) {
+            // Nope
+        }
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public boolean isFinished() {
+            return true;
+        }
+    };
 
     private final HttpRequestPacket requestPacket;
     private final Cookies cookies;
@@ -156,7 +188,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        return new DelegateServletInputStream(Streams.EMPTY_INPUT_STREAM);
+        return EMPTY_STREAM;
     }
 
     @Override
@@ -244,7 +276,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
 
     @Override
     public Locale getLocale() {
-        Iterable<String> values = requestPacket.getHeaders().values(Header.AcceptLanguage);
+        Iterable<String> values = requestPacket.getHeaders().values("Accept-Language");
 
         List<Locale> locales = new LinkedList<>();
         for (String value : values) {
@@ -255,7 +287,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
 
     @Override
     public Enumeration<Locale> getLocales() {
-        Iterable<String> values = requestPacket.getHeaders().values(Header.AcceptLanguage);
+        Iterable<String> values = requestPacket.getHeaders().values("Accept-Language");
 
         List<Locale> locales = new LinkedList<>();
         for (String value : values) {
@@ -675,6 +707,81 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
         }
 
         return true;
+    }
+
+    @Override
+    public long getContentLengthLong() {
+        return requestPacket.getContentLength();
+    }
+
+    @Override
+    public ServletContext getServletContext() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public AsyncContext startAsync() throws IllegalStateException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isAsyncStarted() {
+        return false;
+    }
+
+    @Override
+    public boolean isAsyncSupported() {
+        return false;
+    }
+
+    @Override
+    public AsyncContext getAsyncContext() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public DispatcherType getDispatcherType() {
+        return DispatcherType.REQUEST;
+    }
+
+    @Override
+    public String changeSessionId() {
+        return null;
+    }
+
+    @Override
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        return false;
+    }
+
+    @Override
+    public void login(String username, String password) throws ServletException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void logout() throws ServletException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<Part> getParts() throws IOException, ServletException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Part getPart(String name) throws IOException, ServletException {
+        return null;
+    }
+
+    @Override
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+        throw new UnsupportedOperationException();
     }
 
 }

@@ -49,38 +49,38 @@
 
 package com.openexchange.http.grizzly.osgi;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
-import org.glassfish.grizzly.http.server.OXServerConfiguration;
-import org.glassfish.grizzly.http.server.OXTCPNIOTransportFilter;
+import org.glassfish.grizzly.http.server.OXSessionManager;
+import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
+import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.service.comet.CometContextService;
 import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
-import com.openexchange.http.grizzly.service.http.FilterProxy;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
-import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
+import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
+import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
-import com.openexchange.java.Reflections;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
 import com.openexchange.startup.ThreadControlService;
@@ -91,12 +91,27 @@ import com.openexchange.timer.TimerService;
  * {@link GrizzlyActivator}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GrizzlyActivator extends HousekeepingActivator {
+
+    private OXSessionManager sessionManager;
+
+    /**
+     * Initializes a new {@link GrizzlyActivator}.
+     */
+    public GrizzlyActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { ConfigurationService.class, RequestWatcherService.class, ThreadPoolService.class, TimerService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     /**
@@ -122,31 +137,33 @@ public class GrizzlyActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws OXException {
+    protected synchronized void startBundle() throws OXException {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
         try {
             Services.setServiceLookup(this);
+            ConfigurationService configurationService = getService(ConfigurationService.class);
             trackService(DispatcherPrefixService.class);
 
             log.info("Starting Grizzly server.");
-            ServletFilterRegistration.initInstance();
+
+            // Initialize Grizzly configuration
+            GrizzlyConfig grizzlyConfig;
             {
-                ServiceTracker<Filter, FilterProxy> tracker = new ServiceTracker<Filter, FilterProxy>(context, Filter.class, new ServletFilterTracker(context));
-                rememberTracker(tracker);
+                GrizzlyConfig.Builder builder = GrizzlyConfig.builder();
+                builder.initializeFrom(configurationService);
+                grizzlyConfig = builder.build();
             }
 
-            final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
-            grizzlyConfig.start();
+            // Initialize HTTP session manager
+            OXSessionManager sessionManager = new OXSessionManager(grizzlyConfig, getService(TimerService.class));
+            this.sessionManager = sessionManager;
 
-            /*
-             * create, configure and start server
-             */
-            final OXHttpServer grizzly = new OXHttpServer();
+            // Create, configure and start server
+            OXHttpServer grizzly = new OXHttpServer(grizzlyConfig);
 
-            OXServerConfiguration serverConfiguration = (OXServerConfiguration) grizzly.getServerConfiguration();
+            ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
             serverConfiguration.setAllowPayloadForUndefinedHttpMethods(true);
-            serverConfiguration.setWsTimeoutMillis(grizzlyConfig.getWsTimeoutMillis());
 
             final NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
 
@@ -157,10 +174,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
             networkListener.setMaxFormPostSize(maxBodySize);
             networkListener.setMaxBufferedPostSize(maxBodySize);
             networkListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
+            networkListener.setSessionManager(sessionManager);
 
             // Set the transport
             {
-                TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(getService(ConfigurationService.class));
+                TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(configurationService);
                 networkListener.setTransport(configuredTcpNioTransport);
             }
 
@@ -194,14 +212,18 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 log.info("Enabled Comet for Grizzly server.");
             }
 
+            grizzly.addListener(networkListener);
+            log.info("Prepared Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
+
             if (grizzlyConfig.isSslEnabled()) {
                 NetworkListener networkSslListener = new NetworkListener("https-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpsPort());
                 networkSslListener.setMaxFormPostSize(maxBodySize);
                 networkSslListener.setMaxBufferedPostSize(maxBodySize);
                 networkSslListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
+                networkSslListener.setSessionManager(sessionManager);
                 networkSslListener.setSSLEngineConfig(createSslConfiguration(grizzlyConfig));
                 networkSslListener.setSecure(true);
-                TCPNIOTransport configuredTcpNioTransportSsl = buildTcpNioTransport(getService(ConfigurationService.class));
+                TCPNIOTransport configuredTcpNioTransportSsl = buildTcpNioTransport(configurationService);
                 networkSslListener.setTransport(configuredTcpNioTransportSsl);
                 if (grizzlyConfig.isWebsocketsEnabled()) {
                     networkSslListener.registerAddOn(new WebSocketAddOn());
@@ -214,26 +236,40 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 log.info("Prepared secure Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpsPort()));
             }
 
-            grizzly.addListener(networkListener);
-            log.info("Prepared Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
+            // Start Grizzly server
             grizzly.start();
 
-            if (grizzlyConfig.isShutdownFast()) {
-                /*-
-                 * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
-                 * getService() will get its own instance of HttpServiceImpl
-                 */
-                registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
-                log.info("Registered OSGi HttpService for Grizzly server.");
+            // The HttpService factory
+            HttpServiceFactory httpServiceFactory;
+            {
+                // Build default list of filters
+                ImmutableList.Builder<Filter> builder = ImmutableList.builder();
+                builder.add(new WrappingFilter(grizzlyConfig));
+                boolean isFilterEnabled = configurationService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
+                if (isFilterEnabled) {
+                    builder.add(new RequestReportingFilter(getService(RequestWatcherService.class), configurationService));
+                }
+
+                // Create the HttpService factory. Each distinct bundle will get its own instance of HttpServiceImpl.
+                httpServiceFactory = new HttpServiceFactory(grizzly, builder.build(), context.getBundle());
             }
 
-            registerService(Reloadable.class, grizzlyConfig);
+            // Initialize the filter tracker
+            {
+                ServiceTracker<Filter, Filter> tracker = new ServiceTracker<Filter, Filter>(context, Filter.class, new ServletFilterTracker(httpServiceFactory.getMainHttpHandler(), context));
+                rememberTracker(tracker);
+            }
+
+            if (grizzlyConfig.isShutdownFast()) {
+                registerService(HttpService.class.getName(), httpServiceFactory);
+                log.info("Registered OSGi HttpService for Grizzly server.");
+            }
 
             // Track the thread control
             track(ThreadControlService.class, new ThreadControlTracker(context));
 
             // Finally start listeners if server start-up is completed
-            track(SignalStartedService.class, new StartUpTracker(grizzly, grizzlyConfig, context));
+            track(SignalStartedService.class, new StartUpTracker(httpServiceFactory, grizzly, grizzlyConfig, context));
             openTrackers();
         } catch (Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
@@ -241,12 +277,17 @@ public class GrizzlyActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class).info("Unregistering services.");
         super.stopBundle();
 
+        OXSessionManager sessionManager = this.sessionManager;
+        if (null != sessionManager) {
+            this.sessionManager = null;
+            sessionManager.destroy();
+        }
+
         Services.setServiceLookup(null);
-        ServletFilterRegistration.dropInstance();
     }
 
     /**
@@ -264,34 +305,28 @@ public class GrizzlyActivator extends HousekeepingActivator {
         // Determine settings for TCP NIO connections
         boolean keepAlive = configurationService.getBoolProperty("com.openexchange.http.grizzly.keepAlive", true);
         boolean tcpNoDelay = configurationService.getBoolProperty("com.openexchange.http.grizzly.tcpNoDelay", true);
-        int readTimeoutMillis = configurationService.getIntProperty("com.openexchange.http.grizzly.readTimeoutMillis", OXTCPNIOTransportFilter.DEFAULT_READ_TIMEOUT_MILLIS);
-        int writeTimeoutMillis = configurationService.getIntProperty("com.openexchange.http.grizzly.writeTimeoutMillis", OXTCPNIOTransportFilter.DEFAULT_WRITE_TIMEOUT_MILLIS);
+        int readTimeoutMillis = configurationService.getIntProperty("com.openexchange.http.grizzly.readTimeoutMillis", org.glassfish.grizzly.Transport.DEFAULT_READ_TIMEOUT * 1000);
+        int writeTimeoutMillis = configurationService.getIntProperty("com.openexchange.http.grizzly.writeTimeoutMillis", org.glassfish.grizzly.Transport.DEFAULT_WRITE_TIMEOUT * 1000);
 
         // Build up the TCPNIOTransport to use
-        TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance().setKeepAlive(keepAlive).setTcpNoDelay(tcpNoDelay).setClientSocketSoTimeout(readTimeoutMillis);
-        TCPNIOTransport transport = builder.build();
-        setTransportFilterUsingTimeouts(transport, readTimeoutMillis, writeTimeoutMillis);
+        TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
+        TCPNIOTransport transport = builder
+                                    .setIOStrategy(SameThreadIOStrategy.getInstance())
+                                    .setMemoryManager(builder.getMemoryManager())
+
+                                    .setKeepAlive(keepAlive)
+                                    .setTcpNoDelay(tcpNoDelay)
+                                    .setClientSocketSoTimeout(readTimeoutMillis)
+
+                                    .setReadTimeout(readTimeoutMillis, TimeUnit.MILLISECONDS)
+                                    .setWriteTimeout(writeTimeoutMillis, TimeUnit.MILLISECONDS)
+
+                                    .build();
 
         // Apply ExecutorService backed by {c.o}.threadpool
         ExecutorService executor = GrizzlOXExecutorService.createInstance();
         transport.setWorkerThreadPool(executor);
         return transport;
-    }
-
-    private void setTransportFilterUsingTimeouts(TCPNIOTransport transport, long readTimeoutMillis, long writeTimeoutMillis) throws OXException {
-        try {
-            Field defaultTransportFilterField = TCPNIOTransport.class.getDeclaredField("defaultTransportFilter");
-            Reflections.makeModifiable(defaultTransportFilterField);
-            defaultTransportFilterField.set(transport, new OXTCPNIOTransportFilter(transport, readTimeoutMillis, writeTimeoutMillis));
-        } catch (NoSuchFieldException e) {
-            throw new OXException(e);
-        } catch (SecurityException e) {
-            throw new OXException(e);
-        } catch (IllegalArgumentException e) {
-            throw new OXException(e);
-        } catch (IllegalAccessException e) {
-            throw new OXException(e);
-        }
     }
 
 }

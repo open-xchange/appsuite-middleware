@@ -3034,8 +3034,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
                             cache = cacheService.getCache("QuotaFileStorages");
                             cache.invalidateGroup(Integer.toString(contextId));
-                            cache = cacheService.getCache("SingleUserContext");
-                            cache.remove(Integer.valueOf(contextId));
                         } catch (final OXException e) {
                             log.error("", e);
                         }

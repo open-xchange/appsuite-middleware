@@ -50,7 +50,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -86,12 +86,14 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
 
-import org.glassfish.grizzly.http.server.OXHttpServer;
+import java.util.List;
+import javax.servlet.Filter;
+import org.glassfish.grizzly.http.server.HttpServer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -110,17 +112,29 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceFactory.class);
 
     private final OSGiMainHandler mainHttpHandler;
+    private final List<Filter> initialFilters;
 
-    public HttpServiceFactory(final OXHttpServer httpServer, final Bundle bundle) {
-        mainHttpHandler = new OSGiMainHandler(bundle);
+    public HttpServiceFactory(HttpServer httpServer, List<Filter> initialFilters, Bundle bundle) {
+        super();
+        this.initialFilters = initialFilters;
+        mainHttpHandler = new OSGiMainHandler(initialFilters, bundle);
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
+    }
+
+    /**
+     * Gets the main HTTP handler
+     *
+     * @return The main HTTP handler
+     */
+    public OSGiMainHandler getMainHttpHandler() {
+        return mainHttpHandler;
     }
 
     @Override
     public HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
         LOG.debug("Bundle: {}, is getting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
 
-        return new HttpServiceImpl(bundle);
+        return new HttpServiceImpl(initialFilters, bundle);
     }
 
     @Override

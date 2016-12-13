@@ -50,7 +50,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -86,26 +86,25 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
-import javax.servlet.Servlet;
-import org.glassfish.grizzly.http.server.HttpHandler;
+
 import org.osgi.service.http.HttpContext;
+
+import javax.servlet.Servlet;
+import java.util.concurrent.locks.ReentrantLock;
+import org.glassfish.grizzly.http.server.HttpHandler;
 
 /**
  * Context mapper.
@@ -123,8 +122,23 @@ public class OSGiCleanMapper {
     private static final Set<Servlet> registeredServlets = new HashSet<Servlet>(16);
 
     private final Set<String> localAliases = new HashSet<String>(4);
-    private final HashMap<HttpContext, ArrayList<OSGiServletHandler>> contextServletHandlerMap =
-            new HashMap<HttpContext, ArrayList<OSGiServletHandler>>(3);
+    private final HashMap<HttpContext, List<OSGiServletHandler>> contextServletHandlerMap =
+            new HashMap<HttpContext, List<OSGiServletHandler>>(3);
+
+    protected final Map<HttpContext, OSGiServletContext> httpContextToServletContextMap =
+                new HashMap<HttpContext, OSGiServletContext>();
+
+
+    // ------------------------------------------------------------ Constructors
+
+
+    protected OSGiCleanMapper() {
+        super();
+    }
+
+
+    // ---------------------------------------------------------- Public Methods
+
 
     /**
      * Performs mapping of requested URI to registered alias if any.
@@ -224,7 +238,7 @@ public class OSGiCleanMapper {
      *
      * @return The unmodifiable {@link HttpHandler}s.
      */
-    Set<Entry<String, HttpHandler>> getHttpHandlers() {
+    Set<Map.Entry<String, HttpHandler>> getHttpHandlers() {
         return Collections.unmodifiableSet(registrations.entrySet());
     }
 
@@ -242,8 +256,6 @@ public class OSGiCleanMapper {
 
             // local cleanup
             localAliases.remove(alias);
-        } else {
-            // already gone
         }
     }
 
@@ -287,8 +299,7 @@ public class OSGiCleanMapper {
             HttpHandler httpHandler = getHttpHandler(alias);
             if (httpHandler instanceof OSGiServletHandler) {
                 OSGiServletHandler servletHandler = (OSGiServletHandler) httpHandler;
-
-                WriteLock removalLock = servletHandler.getRemovalLock();
+                java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock removalLock = servletHandler.getRemovalLock();
                 removalLock.lock();
                 try {
                     Servlet servlet = servletHandler.getServletInstance();
@@ -335,10 +346,24 @@ public class OSGiCleanMapper {
         return contextServletHandlerMap.get(httpContext);
     }
 
-    public void addContext(HttpContext httpContext, ArrayList<OSGiServletHandler> servletHandlers) {
+    public void addContext(final HttpContext httpContext,
+            final List<OSGiServletHandler> servletHandlers) {
+        addContext(httpContext, null, servletHandlers);
+    }
+
+    public void addContext(final HttpContext httpContext,
+            OSGiServletContext servletCtx,
+            final List<OSGiServletHandler> servletHandlers) {
+        if (servletCtx == null) {
+            servletCtx = new OSGiServletContext(httpContext);
+        }
+
         contextServletHandlerMap.put(httpContext, servletHandlers);
-        LOG.debug("Adding another ServletHandler to the map. Now using {} handlers", contextServletHandlerMap.size());
-        LOG.debug("{}", new Object() { @Override public String toString() { return prettyPrintServletHandlerMap();}});
+        httpContextToServletContextMap.put(httpContext, servletCtx);
+    }
+
+    public OSGiServletContext getServletContext(final HttpContext httpContext) {
+        return httpContextToServletContextMap.get(httpContext);
     }
 
     private static boolean registerAliasHandler(String alias, HttpHandler httpHandler) {
@@ -348,25 +373,7 @@ public class OSGiCleanMapper {
         boolean wasNew = aliasTree.add(alias);
         if (wasNew) {
             registrations.put(alias, httpHandler);
-        } else {
-            // TODO already registered, wtf
         }
         return wasNew;
     }
-
-    /**
-     * Prettyprint the currently used ServletHandlerMap
-     * @return the formatted ServletHandlerMap
-     */
-    private String prettyPrintServletHandlerMap() {
-        StringBuilder sb = new StringBuilder();
-        for (Entry<HttpContext, ArrayList<OSGiServletHandler>> entry : contextServletHandlerMap.entrySet()) {
-            sb.append("HttpContext: ").append(entry.getKey().toString()).append('\n');
-            for (OSGiServletHandler handler : entry.getValue()) {
-                sb.append('\t').append(handler.toString()).append("\t servletPath: ").append(handler.getServletPath()) .append('\n');
-            }
-        }
-        return sb.toString();
-    }
-
 }

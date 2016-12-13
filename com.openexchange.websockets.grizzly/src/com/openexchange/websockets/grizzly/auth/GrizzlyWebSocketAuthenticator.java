@@ -49,8 +49,7 @@
 
 package com.openexchange.websockets.grizzly.auth;
 
-import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.http.util.Parameters;
+import javax.servlet.http.HttpServletRequest;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import com.openexchange.session.Session;
 
@@ -66,11 +65,10 @@ public interface GrizzlyWebSocketAuthenticator {
      * Checks specified session against associated websocket-creating request information.
      *
      * @param sessionId The identifier of the session to check
-     * @param requestPacket The request packet
-     * @param parameters The parameters
+     * @param request The request
      * @return The verified session
      * @throws HandshakeException If session validation fails
      */
-    Session checkSession(String sessionId, HttpRequestPacket requestPacket, Parameters parameters) throws HandshakeException;
+    Session checkSession(String sessionId, HttpServletRequest request) throws HandshakeException;
 
 }

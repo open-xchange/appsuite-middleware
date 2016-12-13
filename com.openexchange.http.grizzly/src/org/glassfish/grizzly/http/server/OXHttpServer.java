@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,50 +47,9 @@
  *
  */
 
-/*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
- * Copyright (c) 2008-2012 Oracle and/or its affiliates. All rights reserved.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common Development
- * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License.  You can
- * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
- * language governing permissions and limitations under the License.
- *
- * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
- *
- * GPL Classpath Exception:
- * Oracle designates this particular file as subject to the "Classpath"
- * exception as provided by Oracle in the GPL Version 2 section of the License
- * file that accompanied this code.
- *
- * Modifications:
- * If applicable, add the following below the License Header, with the fields
- * enclosed by brackets [] replaced by your own identifying information:
- * "Portions Copyright [year] [name of copyright owner]"
- *
- * Contributor(s):
- * If you wish your version of this file to be governed by only the CDDL or
- * only the GPL Version 2, indicate your decision by adding "[Contributor]
- * elects to include this software in this distribution under the [CDDL or GPL
- * Version 2] license."  If you don't indicate a single choice of license, a
- * recipient has the option to distribute your version of this file under
- * either the CDDL, the GPL Version 2 or to extend the choice of license to
- * its licensees as provided above.  However, if you add GPL Version 2 code
- * and therefore, elected the GPL Version 2 license, then the option applies
- * only if the new code is made subject to such option by the copyright
- * holder.
- */
-
 package org.glassfish.grizzly.http.server;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
@@ -106,58 +65,60 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.glassfish.grizzly.CompletionHandler;
 import org.glassfish.grizzly.ConnectionProbe;
+import org.glassfish.grizzly.EmptyCompletionHandler;
 import org.glassfish.grizzly.Grizzly;
+import org.glassfish.grizzly.GrizzlyFuture;
 import org.glassfish.grizzly.PortRange;
 import org.glassfish.grizzly.Processor;
+import org.glassfish.grizzly.Transport;
 import org.glassfish.grizzly.TransportProbe;
 import org.glassfish.grizzly.attributes.AttributeBuilder;
-import org.glassfish.grizzly.filterchain.DefaultFilterChain;
 import org.glassfish.grizzly.filterchain.FilterChain;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.TransportFilter;
+import org.glassfish.grizzly.http.CompressionConfig;
 import org.glassfish.grizzly.http.ContentEncoding;
 import org.glassfish.grizzly.http.GZipContentEncoding;
 import org.glassfish.grizzly.http.LZMAContentEncoding;
+import org.glassfish.grizzly.http.CompressionConfig.CompressionMode;
 import org.glassfish.grizzly.http.server.filecache.FileCache;
-import org.glassfish.grizzly.http.server.jmx.JmxEventListener;
+import org.glassfish.grizzly.http.server.jmxbase.JmxEventListener;
+import org.glassfish.grizzly.impl.FutureImpl;
 import org.glassfish.grizzly.memory.MemoryProbe;
 import org.glassfish.grizzly.monitoring.MonitoringConfig;
-import org.glassfish.grizzly.monitoring.jmx.GrizzlyJmxManager;
-import org.glassfish.grizzly.monitoring.jmx.JmxObject;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
-import org.glassfish.grizzly.rcm.ResourceAllocationFilter;
+import org.glassfish.grizzly.ssl.SSLBaseFilter;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
-import org.glassfish.grizzly.ssl.SSLFilter;
 import org.glassfish.grizzly.threadpool.DefaultWorkerThread;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.grizzly.threadpool.ThreadPoolProbe;
-import org.glassfish.grizzly.utils.Charsets;
 import org.glassfish.grizzly.utils.DelayedExecutor;
+import org.glassfish.grizzly.utils.Futures;
 import org.glassfish.grizzly.utils.IdleTimeoutFilter;
-import org.glassfish.grizzly.websockets.WebSocketAddOn;
-import org.glassfish.grizzly.websockets.WebSocketFilter;
 import com.openexchange.http.grizzly.GrizzlyConfig;
-import com.openexchange.java.Reflections;
-
 
 /**
+ * {@link OXHttpServer}
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
 public class OXHttpServer extends HttpServer {
 
-    private static final Logger LOGGER = Grizzly.logger(OXHttpServer.class);
-
-    /**
-     * Configuration details for this server instance.
-     */
-    private final OXServerConfiguration serverConfig = new OXServerConfiguration(this);
-
+    private static final Logger LOGGER = Grizzly.logger(HttpServer.class);
 
     /**
      * Flag indicating whether or not this server instance has been started.
      */
-    private boolean started;
+    private State state = State.STOPPED;
+
+    /**
+     * Future to control graceful shutdown status
+     */
+    private FutureImpl<HttpServer> shutdownFuture;
 
     /**
      * HttpHandler, which processes HTTP requests
@@ -173,27 +134,21 @@ public class OXHttpServer extends HttpServer {
 
     private volatile ExecutorService auxExecutorService;
 
-    private volatile DelayedExecutor delayedExecutor;
+    volatile DelayedExecutor delayedExecutor;
 
-    protected volatile GrizzlyJmxManager jmxManager;
-
-    protected volatile JmxObject managementObject;
-
-//    private volatile JmxObject serviceManagementObject;
-
+    private final GrizzlyConfig grizzlyConfig;
 
     // ---------------------------------------------------------- Public Methods
 
-
     /**
-     * @return the {@link ServerConfiguration} used to configure this
-     *  {@link HttpServer} instance
+     * Initializes a new {@link OXHttpServer}.
+     *
+     * @param grizzlyConfig The Grizzly configuration
      */
-    @Override
-    public final ServerConfiguration getServerConfiguration() {
-        return serverConfig;
+    public OXHttpServer(GrizzlyConfig grizzlyConfig) {
+        super();
+        this.grizzlyConfig = grizzlyConfig;
     }
-
 
     /**
      * <p>
@@ -211,9 +166,7 @@ public class OXHttpServer extends HttpServer {
     @Override
     public synchronized void addListener(final NetworkListener listener) {
 
-        if (!started) {
-            listeners.put(listener.getName(), listener);
-        } else {
+        if (state == State.RUNNING) {
             configureListener(listener);
             if (!listener.isStarted()) {
                 try {
@@ -229,6 +182,7 @@ public class OXHttpServer extends HttpServer {
             }
         }
 
+        listeners.put(listener.getName(), listener);
     }
 
 
@@ -238,7 +192,7 @@ public class OXHttpServer extends HttpServer {
      *  specified <code>name</code>.
      */
     @Override
-    public NetworkListener getListener(final String name) {
+    public synchronized NetworkListener getListener(final String name) {
 
         return listeners.get(name);
 
@@ -250,8 +204,8 @@ public class OXHttpServer extends HttpServer {
      *  associated with this <code>HttpServer</code> instance.
      */
     @Override
-    public Collection<NetworkListener> getListeners() {
-        return Collections.unmodifiableMap(listeners).values();
+    public synchronized Collection<NetworkListener> getListeners() {
+        return Collections.unmodifiableCollection(listeners.values());
     }
 
 
@@ -267,19 +221,21 @@ public class OXHttpServer extends HttpServer {
      * </p>
      *
      * @param name the name of the {@link NetworkListener} to remove.
+     * @return {@link NetworkListener}, that has been removed, or <tt>null</tt>
+     *      if the listener with the given name doesn't exist
      */
     @Override
-    public NetworkListener removeListener(final String name) {
+    public synchronized NetworkListener removeListener(final String name) {
 
         final NetworkListener listener = listeners.remove(name);
         if (listener != null) {
             if (listener.isStarted()) {
                 try {
-                    listener.stop();
+                    listener.shutdownNow();
                 } catch (IOException ioe) {
                     if (LOGGER.isLoggable(Level.SEVERE)) {
                         LOGGER.log(Level.SEVERE,
-                                   "Failed to stop listener [{0}] : {1}",
+                                   "Failed to shutdown listener [{0}] : {1}",
                                     new Object[] { listener.toString(), ioe.toString() });
                         LOGGER.log(Level.SEVERE, ioe.toString(), ioe);
                     }
@@ -288,11 +244,6 @@ public class OXHttpServer extends HttpServer {
         }
         return listener;
 
-    }
-
-    @Override
-    DelayedExecutor getDelayedExecutor() {
-        return delayedExecutor;
     }
 
     /**
@@ -306,7 +257,7 @@ public class OXHttpServer extends HttpServer {
      */
     public synchronized void startListeners() throws IOException {
 
-        if (!started) {
+        if (state != State.RUNNING) {
             throw new IllegalStateException("Http server not started, yet.");
         }
 
@@ -335,10 +286,15 @@ public class OXHttpServer extends HttpServer {
     @Override
     public synchronized void start() throws IOException{
 
-        if (started) {
+        if (state == State.RUNNING) {
             return;
+        } else if (state == State.STOPPING) {
+            throw new IllegalStateException("The server is currently in pending"
+                    + " shutdown state. You have to either wait for shutdown to"
+                    + " complete or force it by calling shutdownNow()");
         }
-        started = true;
+        state = State.RUNNING;
+        shutdownFuture = null;
 
         configureAuxThreadPool();
 
@@ -349,6 +305,7 @@ public class OXHttpServer extends HttpServer {
             configureListener(listener);
         }
 
+        ServerConfiguration serverConfig = getServerConfiguration();
         if (serverConfig.isJmxEnabled()) {
             enableJMX();
         }
@@ -386,13 +343,13 @@ public class OXHttpServer extends HttpServer {
     }
 
     private void setupHttpHandler() {
-
+        ServerConfiguration serverConfig = getServerConfiguration();
         serverConfig.addJmxEventListener(httpHandlerChain);
 
         synchronized (serverConfig.handlersSync) {
             for (final HttpHandler httpHandler : serverConfig.orderedHandlers) {
-                final String[] mappings = serverConfig.handlers.get(httpHandler);
-                httpHandlerChain.addHandler(httpHandler, mappings);
+                httpHandlerChain.addHandler(httpHandler,
+                        serverConfig.handlers.get(httpHandler));
             }
         }
         httpHandlerChain.start();
@@ -422,47 +379,81 @@ public class OXHttpServer extends HttpServer {
      *  been started.
      */
     @Override
-    public synchronized boolean isStarted() {
-        return started;
+    public boolean isStarted() {
+        return state != State.STOPPED;
     }
-
 
     @Override
-    public JmxObject getManagementObject(boolean clear) {
-        if (!clear && managementObject == null) {
-            synchronized (serverConfig) {
-                if (managementObject == null) {
-                    managementObject = new org.glassfish.grizzly.http.server.jmx.HttpServer(this);
-                }
-            }
+    public synchronized GrizzlyFuture<HttpServer> shutdown(final long gracePeriod,
+                                                           final TimeUnit timeUnit) {
+        if (state != State.RUNNING) {
+            return shutdownFuture != null ? shutdownFuture :
+                    Futures.<HttpServer> createReadyFuture(this);
         }
-        try {
-            return managementObject;
-        } finally {
-            if (clear) {
-                managementObject = null;
-            }
-        }
-    }
 
+        shutdownFuture = Futures.createSafeFuture();
+        state = State.STOPPING;
+
+        final int listenersCount = listeners.size();
+        final FutureImpl<HttpServer> shutdownFutureLocal = shutdownFuture;
+
+        final CompletionHandler<NetworkListener> shutdownCompletionHandler =
+                new EmptyCompletionHandler<NetworkListener>() {
+                    final AtomicInteger counter =
+                            new AtomicInteger(listenersCount);
+
+                    @Override
+                    public void completed(final NetworkListener networkListener) {
+                        if (counter.decrementAndGet() == 0) {
+                            try {
+                                shutdownNow();
+                                shutdownFutureLocal.result(OXHttpServer.this);
+                            } catch (Throwable e) {
+                                shutdownFutureLocal.failure(e);
+                            }
+                        }
+                    }
+                };
+
+        if (listenersCount > 0) {
+            for (NetworkListener listener : listeners.values()) {
+                listener.shutdown(gracePeriod, timeUnit).addCompletionHandler(shutdownCompletionHandler);
+            }
+        } else {
+            // No listeners (edge-case), so call shutdown now to ensure the server is properly torn down.
+            shutdownNow();
+            shutdownFutureLocal.result(OXHttpServer.this);
+        }
+
+
+        return shutdownFuture;
+    }
 
     /**
      * <p>
-     * Stops the <code>HttpServer</code> instance.
+     * Gracefully shuts down the <code>HttpServer</code> instance.
      * </p>
      */
     @Override
-    public synchronized void stop() {
+    public synchronized GrizzlyFuture<HttpServer> shutdown() {
+        return shutdown(-1, TimeUnit.MILLISECONDS);
+    }
 
-        if (!started) {
+    /**
+     * <p>
+     * Immediately shuts down the <code>HttpServer</code> instance.
+     * </p>
+     */
+    @Override
+    public synchronized void shutdownNow() {
+
+        if (state == State.STOPPED) {
             return;
         }
-        started = false;
-
-
+        state = State.STOPPED;
 
         try {
-
+            ServerConfiguration serverConfig = getServerConfiguration();
             if (serverConfig.isJmxEnabled()) {
                 for (final JmxEventListener l : serverConfig.getJmxEventListeners()) {
                     l.jmxDisabled();
@@ -477,6 +468,7 @@ public class OXHttpServer extends HttpServer {
             }
 
             delayedExecutor.stop();
+            delayedExecutor.destroy();
             delayedExecutor = null;
 
             stopAuxThreadPool();
@@ -494,15 +486,31 @@ public class OXHttpServer extends HttpServer {
                     ((FilterChain) p).clear();
                 }
             }
+
+            if (shutdownFuture != null) {
+                shutdownFuture.result(this);
+            }
         }
 
     }
 
+    /**
+     * <p>
+     * Immediately shuts down the <code>HttpServer</code> instance.
+     * </p>
+     *
+     * @deprecated use {@link #shutdownNow()}
+     */
+    @Deprecated
+    @Override
+    public void stop() {
+        shutdownNow();
+    }
 
     /**
      * @return a <code>HttpServer</code> configured to listen to requests
      * on {@link NetworkListener#DEFAULT_NETWORK_HOST}:{@link NetworkListener#DEFAULT_NETWORK_PORT},
-     * using the directory in which the server was launched the server's document root.
+     * using the directory in which the server was launched the server's document root
      */
     public static HttpServer createSimpleServer() {
 
@@ -512,101 +520,107 @@ public class OXHttpServer extends HttpServer {
 
 
     /**
-     * @param path the document root.
+     * @param docRoot the document root,
+     *   can be <code>null</code> when no static pages are needed
      *
      * @return a <code>HttpServer</code> configured to listen to requests
      * on {@link NetworkListener#DEFAULT_NETWORK_HOST}:{@link NetworkListener#DEFAULT_NETWORK_PORT},
-     * using the specified <code>path</code> as the server's document root.
+     * using the specified <code>docRoot</code> as the server's document root
      */
-    public static HttpServer createSimpleServer(final String path) {
+    public static HttpServer createSimpleServer(final String docRoot) {
 
-        return createSimpleServer(path, NetworkListener.DEFAULT_NETWORK_PORT);
+        return createSimpleServer(docRoot, NetworkListener.DEFAULT_NETWORK_PORT);
 
     }
 
 
     /**
-     * @param path the document root.
-     * @param port the network port to which this listener will bind.
+     * @param docRoot the document root,
+     *   can be <code>null</code> when no static pages are needed
+     * @param port the network port to which this listener will bind
      *
      * @return a <code>HttpServer</code> configured to listen to requests
      * on {@link NetworkListener#DEFAULT_NETWORK_HOST}:<code>port</code>,
-     * using the specified <code>path</code> as the server's document root.
+     * using the specified <code>docRoot</code> as the server's document root
      */
-    public static HttpServer createSimpleServer(final String path,
+    public static HttpServer createSimpleServer(final String docRoot,
                                                 final int port) {
 
-        return createSimpleServer(path, NetworkListener.DEFAULT_NETWORK_HOST, port);
+        return createSimpleServer(docRoot, NetworkListener.DEFAULT_NETWORK_HOST, port);
 
     }
 
 
     /**
-     * @param path the document root.
-     * @param range port range to attempt to bind to.
+     * @param docRoot the document root,
+     *   can be <code>null</code> when no static pages are needed
+     * @param range port range to attempt to bind to
      *
      * @return a <code>HttpServer</code> configured to listen to requests
      * on {@link NetworkListener#DEFAULT_NETWORK_HOST}:<code>[port-range]</code>,
-     * using the specified <code>path</code> as the server's document root.
+     * using the specified <code>docRoot</code> as the server's document root
      */
-    public static HttpServer createSimpleServer(final String path,
+    public static HttpServer createSimpleServer(final String docRoot,
                                                 final PortRange range) {
 
-        return createSimpleServer(path,
+        return createSimpleServer(docRoot,
                 NetworkListener.DEFAULT_NETWORK_HOST,
                 range);
 
     }
 
     /**
-     * @param path the document root.
-     * @param socketAddress the endpoint address to which this listener will bind.
+     * @param docRoot the document root,
+     *   can be <code>null</code> when no static pages are needed
+     * @param socketAddress the endpoint address to which this listener will bind
      *
      * @return a <code>HttpServer</code> configured to listen to requests
      * on <code>socketAddress</code>,
-     * using the specified <code>path</code> as the server's document root.
+     * using the specified <code>docRoot</code> as the server's document root
      */
-    public static HttpServer createSimpleServer(final String path,
+    public static HttpServer createSimpleServer(final String docRoot,
                                                 final SocketAddress socketAddress) {
 
         final InetSocketAddress inetAddr = (InetSocketAddress) socketAddress;
-        return createSimpleServer(path, inetAddr.getHostName(), inetAddr.getPort());
+        return createSimpleServer(docRoot, inetAddr.getHostName(), inetAddr.getPort());
     }
 
     /**
-     * @param path the document root.
-     * @param host the network port to which this listener will bind.
-     * @param port the network port to which this listener will bind.
+     * @param docRoot the document root,
+     *   can be <code>null</code> when no static pages are needed
+     * @param host the network port to which this listener will bind
+     * @param port the network port to which this listener will bind
      *
      * @return a <code>HttpServer</code> configured to listen to requests
      * on <code>host</code>:<code>port</code>,
-     * using the specified <code>path</code> as the server's document root.
+     * using the specified <code>docRoot</code> as the server's document root
      */
-    public static HttpServer createSimpleServer(final String path,
+    public static HttpServer createSimpleServer(final String docRoot,
                                                 final String host,
                                                 final int port) {
 
-        return createSimpleServer(path, host, new PortRange(port));
+        return createSimpleServer(docRoot, host, new PortRange(port));
 
     }
 
     /**
-     * @param path the document root.
-     * @param host the network port to which this listener will bind.
-     * @param range port range to attempt to bind to.
+     * @param docRoot the document root,
+     *   can be <code>null</code> when no static pages are needed
+     * @param host the network port to which this listener will bind
+     * @param range port range to attempt to bind to
      *
      * @return a <code>HttpServer</code> configured to listen to requests
      * on <code>host</code>:<code>[port-range]</code>,
-     * using the specified <code>path</code> as the server's document root.
+     * using the specified <code>docRoot</code> as the server's document root
      */
-    public static HttpServer createSimpleServer(final String path,
+    public static HttpServer createSimpleServer(final String docRoot,
                                                 final String host,
                                                 final PortRange range) {
 
         final HttpServer server = new HttpServer();
         final ServerConfiguration config = server.getServerConfiguration();
-        if (path != null) {
-            config.addHttpHandler(new StaticHttpHandler(path), "/");
+        if (docRoot != null) {
+            config.addHttpHandler(new StaticHttpHandler(docRoot), "/");
         }
         final NetworkListener listener =
                 new NetworkListener("grizzly",
@@ -614,34 +628,6 @@ public class OXHttpServer extends HttpServer {
                                     range);
         server.addListener(listener);
         return server;
-
-    }
-
-    // ------------------------------------------------------- Protected Methods
-
-
-    @Override
-    protected void enableJMX() {
-
-        if (jmxManager == null) {
-            synchronized (serverConfig) {
-                if (jmxManager == null) {
-                    jmxManager= GrizzlyJmxManager.instance();
-                }
-            }
-        }
-        jmxManager.registerAtRoot(getManagementObject(false),
-                                  serverConfig.getName());
-
-    }
-
-
-    @Override
-    protected void disableJMX() {
-
-        if (jmxManager != null) {
-            jmxManager.deregister(getManagementObject(true));
-        }
 
     }
 
@@ -654,9 +640,6 @@ public class OXHttpServer extends HttpServer {
         if (chain == null) {
             final FilterChainBuilder builder = FilterChainBuilder.stateless();
             builder.add(new TransportFilter());
-            builder.add(new IdleTimeoutFilter(delayedExecutor,
-                    listener.getKeepAlive().getIdleTimeoutInSeconds(),
-                    TimeUnit.SECONDS));
             if (listener.isSecure()) {
                 SSLEngineConfigurator sslConfig = listener.getSslEngineConfig();
                 if (sslConfig == null) {
@@ -667,7 +650,7 @@ public class OXHttpServer extends HttpServer {
                             false);
                     listener.setSSLEngineConfig(sslConfig);
                 }
-                final SSLFilter filter = new SSLFilter(sslConfig, null);
+                final SSLBaseFilter filter = new SSLBaseFilter(sslConfig);
                 builder.add(filter);
 
             }
@@ -677,7 +660,7 @@ public class OXHttpServer extends HttpServer {
 
             // Passing null value for the delayed executor, because IdleTimeoutFilter should
             // handle idle connections for us
-            final org.glassfish.grizzly.http.HttpServerFilter httpServerFilter =
+            final org.glassfish.grizzly.http.HttpServerFilter httpServerCodecFilter =
                     new org.glassfish.grizzly.http.HttpServerFilter(listener.isChunkingEnabled(),
                                          maxHeaderSize,
                                          null,
@@ -688,21 +671,25 @@ public class OXHttpServer extends HttpServer {
             final Set<ContentEncoding> contentEncodings =
                     configureCompressionEncodings(listener);
             for (ContentEncoding contentEncoding : contentEncodings) {
-                httpServerFilter.addContentEncoding(contentEncoding);
+                httpServerCodecFilter.addContentEncoding(contentEncoding);
             }
-            if (listener.isRcmSupportEnabled()) {
-                builder.add(new ResourceAllocationFilter());
-            }
+            ServerConfiguration serverConfig = getServerConfiguration();
+            httpServerCodecFilter.setAllowPayloadForUndefinedHttpMethods(
+                    serverConfig.isAllowPayloadForUndefinedHttpMethods());
+            httpServerCodecFilter.setMaxPayloadRemainderToSkip(
+                    serverConfig.getMaxPayloadRemainderToSkip());
 
-            httpServerFilter.setAllowPayloadForUndefinedHttpMethods(
-                serverConfig.isAllowPayloadForUndefinedHttpMethods());
-
-            httpServerFilter.getMonitoringConfig().addProbes(
+            httpServerCodecFilter.getMonitoringConfig().addProbes(
                     serverConfig.getMonitoringConfig().getHttpConfig().getProbes());
-            builder.add(httpServerFilter);
+            builder.add(httpServerCodecFilter);
 
+            builder.add(new IdleTimeoutFilter(delayedExecutor,
+                    listener.getKeepAlive().getIdleTimeoutInSeconds(),
+                    TimeUnit.SECONDS));
+
+            final Transport transport = listener.getTransport();
             final FileCache fileCache = listener.getFileCache();
-            fileCache.initialize(listener.getTransport().getMemoryManager(), delayedExecutor);
+            fileCache.initialize(delayedExecutor);
             final FileCacheFilter fileCacheFilter = new FileCacheFilter(fileCache);
             fileCache.getMonitoringConfig().addProbes(
                     serverConfig.getMonitoringConfig().getFileCacheConfig().getProbes());
@@ -710,102 +697,88 @@ public class OXHttpServer extends HttpServer {
 
             final ServerFilterConfiguration config = new ServerFilterConfiguration(serverConfig);
 
-            final HttpServerFilter webServerFilter = new OXHttpServerFilter(
-                    config,
-                    delayedExecutor);
-
             if (listener.isSendFileExplicitlyConfigured()) {
                 config.setSendFileEnabled(listener.isSendFileEnabled());
+                fileCache.setFileSendEnabled(listener.isSendFileEnabled());
             }
 
-            if (listener.getScheme() != null) {
-                config.setScheme(listener.getScheme());
+            if (listener.getBackendConfiguration() != null) {
+                config.setBackendConfiguration(listener.getBackendConfiguration());
+            }
+
+            if (listener.getDefaultErrorPageGenerator() != null) {
+                config.setDefaultErrorPageGenerator(listener.getDefaultErrorPageGenerator());
+            }
+
+            if (listener.getSessionManager() != null) {
+                config.setSessionManager(listener.getSessionManager());
             }
 
             config.setTraceEnabled(config.isTraceEnabled() || listener.isTraceEnabled());
+
             config.setMaxFormPostSize(listener.getMaxFormPostSize());
             config.setMaxBufferedPostSize(listener.getMaxBufferedPostSize());
-            config.setDefaultQueryEncoding(Charsets.lookupCharset(GrizzlyConfig.getInstance().getDefaultEncoding()));
 
+            config.setSessionTimeoutSeconds(grizzlyConfig.getCookieMaxInactivityInterval());
 
-            webServerFilter.setHttpHandler(httpHandlerChain);
+            final HttpServerFilter httpServerFilter = new OXHttpServerFilter(grizzlyConfig, config, delayedExecutor);
+            httpServerFilter.setHttpHandler(httpHandlerChain);
 
-            webServerFilter.getMonitoringConfig().addProbes(
+            httpServerFilter.getMonitoringConfig().addProbes(
                     serverConfig.getMonitoringConfig().getWebServerConfig().getProbes());
 
-            builder.add(webServerFilter);
+            builder.add(httpServerFilter);
 
             final AddOn[] addons = listener.getAddOnSet().getArray();
             if (addons != null) {
                 for (AddOn addon : addons) {
                     addon.setup(listener, builder);
-                    if (addon instanceof WebSocketAddOn) {
-                        try {
-                            int index = builder.indexOfType(org.glassfish.grizzly.websockets.WebSocketFilter.class);
-                            Field field = org.glassfish.grizzly.filterchain.FilterChainBuilder.class.getDeclaredField("patternFilterChain");
-                            field.setAccessible(true);
-                            org.glassfish.grizzly.filterchain.DefaultFilterChain filterChain = (DefaultFilterChain) field.get(builder);
-
-                            org.glassfish.grizzly.websockets.WebSocketFilter filter = (WebSocketFilter) filterChain.get(index);
-                            Field wsTimeoutMSField = org.glassfish.grizzly.websockets.WebSocketFilter.class.getDeclaredField("wsTimeoutMS");
-                            Reflections.makeModifiable(wsTimeoutMSField);
-                            wsTimeoutMSField.set(filter, Long.valueOf(serverConfig.getWsTimeoutMillis()));
-                        } catch (Exception e) {
-                            LOGGER.log(Level.WARNING, "Failed to apply Web Socket timeout milliseconds of " + serverConfig.getWsTimeoutMillis(), e);
-                        }
-                    }
                 }
             }
 
             chain = builder.build();
             listener.setFilterChain(chain);
+
+            final int transactionTimeout = listener.getTransactionTimeout();
+            if (transactionTimeout >= 0) {
+                ThreadPoolConfig threadPoolConfig = transport.getWorkerThreadPoolConfig();
+
+                if (threadPoolConfig != null) {
+                    threadPoolConfig.setTransactionTimeout(
+                            delayedExecutor,
+                            transactionTimeout,
+                            TimeUnit.SECONDS);
+                }
+
+            }
+
         }
         configureMonitoring(listener);
     }
 
     @Override
-    protected Set<ContentEncoding> configureCompressionEncodings(final NetworkListener listener) {
-            final String mode = listener.getCompression();
-            int compressionMinSize = listener.getCompressionMinSize();
-            CompressionLevel compressionLevel;
-            try {
-                compressionLevel = CompressionLevel.getCompressionLevel(mode);
-            } catch (IllegalArgumentException e) {
-                try {
-                    // Try to parse compression as an int, which would give the
-                    // minimum compression size
-                    compressionLevel = CompressionLevel.ON;
-                    compressionMinSize = Integer.parseInt(mode);
-                } catch (Exception ignore) {
-                    compressionLevel = CompressionLevel.OFF;
-                }
-            }
-            final String compressableMimeTypesString = listener.getCompressableMimeTypes();
-            final String noCompressionUserAgentsString = listener.getNoCompressionUserAgents();
-            final String[] compressableMimeTypes =
-                    ((compressableMimeTypesString != null)
-                            ? compressableMimeTypesString.split(",")
-                            : new String[0]);
-            final String[] noCompressionUserAgents =
-                    ((noCompressionUserAgentsString != null)
-                            ? noCompressionUserAgentsString.split(",")
-                            : new String[0]);
+    protected Set<ContentEncoding> configureCompressionEncodings(
+            final NetworkListener listener) {
+
+        final CompressionConfig compressionConfig = listener.getCompressionConfig();
+
+        if (compressionConfig.getCompressionMode() != CompressionMode.OFF) {
             final ContentEncoding gzipContentEncoding = new GZipContentEncoding(
                 GZipContentEncoding.DEFAULT_IN_BUFFER_SIZE,
                 GZipContentEncoding.DEFAULT_OUT_BUFFER_SIZE,
-                new CompressionEncodingFilter(compressionLevel, compressionMinSize,
-                    compressableMimeTypes,
-                    noCompressionUserAgents,
+                new CompressionEncodingFilter(compressionConfig,
                     GZipContentEncoding.getGzipAliases()));
-            final ContentEncoding lzmaEncoding = new LZMAContentEncoding(new CompressionEncodingFilter(compressionLevel, compressionMinSize,
-                    compressableMimeTypes,
-                    noCompressionUserAgents,
+            final ContentEncoding lzmaEncoding = new LZMAContentEncoding(
+                    new CompressionEncodingFilter(compressionConfig,
                     LZMAContentEncoding.getLzmaAliases()));
             final Set<ContentEncoding> set = new HashSet<ContentEncoding>(2);
             set.add(gzipContentEncoding);
             set.add(lzmaEncoding);
             return set;
+        } else {
+            return Collections.emptySet();
         }
+    }
 
     @SuppressWarnings("unchecked")
     private void configureMonitoring(final NetworkListener listener) {
@@ -820,11 +793,7 @@ public class OXHttpServer extends HttpServer {
         final MonitoringConfig<ThreadPoolProbe> threadPoolMonitoringCfg =
                 transport.getThreadPoolMonitoringConfig();
 
-        transportMonitoringCfg.clearProbes();
-        connectionMonitoringCfg.clearProbes();
-        memoryMonitoringCfg.clearProbes();
-        threadPoolMonitoringCfg.clearProbes();
-
+        ServerConfiguration serverConfig = getServerConfiguration();
         transportMonitoringCfg.addProbes(serverConfig.getMonitoringConfig()
                 .getTransportConfig().getProbes());
         connectionMonitoringCfg.addProbes(serverConfig.getMonitoringConfig()
@@ -846,7 +815,7 @@ public class OXHttpServer extends HttpServer {
             public Thread newThread(Runnable r) {
                 final Thread newThread = new DefaultWorkerThread(
                         AttributeBuilder.DEFAULT_ATTRIBUTE_BUILDER,
-                        serverConfig.getName() + "-" + threadCounter.getAndIncrement(),
+                        getServerConfiguration().getName() + "-" + threadCounter.getAndIncrement(),
                         null,
                         r);
                 newThread.setDaemon(true);
@@ -871,9 +840,10 @@ public class OXHttpServer extends HttpServer {
      * Modifies handlers mapping during runtime.
      */
     @Override
-    synchronized void onAddHttpHandler(HttpHandler httpHandler, String[] mapping) {
+    synchronized void onAddHttpHandler(HttpHandler httpHandler,
+            final HttpHandlerRegistration[] registrations) {
         if (isStarted()) {
-            httpHandlerChain.addHandler(httpHandler, mapping);
+            httpHandlerChain.addHandler(httpHandler, registrations);
         }
     }
 
@@ -886,4 +856,5 @@ public class OXHttpServer extends HttpServer {
             httpHandlerChain.removeHttpHandler(httpHandler);
         }
     }
+
 }

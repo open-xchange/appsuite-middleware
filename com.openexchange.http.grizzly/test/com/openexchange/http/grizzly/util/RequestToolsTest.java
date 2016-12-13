@@ -59,7 +59,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import com.openexchange.http.grizzly.eas.EASCommandCodes.EASCommands;
+import com.openexchange.http.grizzly.eas.EASCommandCodes;
 
 /**
  * {@link RequestToolsTest}
@@ -69,13 +69,13 @@ import com.openexchange.http.grizzly.eas.EASCommandCodes.EASCommands;
  */
 public class RequestToolsTest {
 
-    private static String SYNC = EASCommands.SYNC.getCommandName();
+    private static String SYNC = EASCommandCodes.SYNC.getCommandName().toLowerCase();
 
-    private static String PING = EASCommands.PING.getCommandName();
+    private static String PING = EASCommandCodes.PING.getCommandName().toLowerCase();
 
-    private static String SYNC_UPDATE_PATH = "/syncUpdate";
+    private static String SYNC_UPDATE_PATH = "/syncUpdate".toLowerCase();
 
-    private static String PING_PATH = "/Ping";
+    private static String PING_PATH = "/Ping".toLowerCase();
 
     @Mock
     private HttpServletRequest servletRequest;

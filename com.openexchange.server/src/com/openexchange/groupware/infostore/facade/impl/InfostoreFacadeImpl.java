@@ -811,7 +811,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
 
-        return storageService.getQuotaFileStorage(folderOwner, contextId, Info.drive(folderOwner));
+        return storageService.getQuotaFileStorage(folderOwner, contextId, Info.drive());
     }
 
     private Metadata[] nonNull(final DocumentMetadata document) {

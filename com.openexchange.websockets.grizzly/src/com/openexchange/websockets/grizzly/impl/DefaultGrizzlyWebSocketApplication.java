@@ -294,7 +294,7 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
     // ------------------------------------------------------ Methods from WebSocketApplication ------------------------------------------------------
 
     @Override
-    protected DefaultSessionBoundWebSocket doCreateSocket(Session session, ConnectionId connectionId, Parameters parameters, ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener[] listeners) {
+    protected DefaultSessionBoundWebSocket doCreateSocket(ConnectionId connectionId, Parameters parameters, ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener[] listeners) {
         // Apply initial listeners
         WebSocketListener[] effectiveListeners;
         {
@@ -319,7 +319,7 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
 
         // Create & return new session-bound Web Socket
         String path = requestPacket.getRequestURI();
-        return new DefaultSessionBoundWebSocket(SessionInfo.newInstance(session), connectionId, path, parameters, handler, requestPacket, effectiveListeners);
+        return new DefaultSessionBoundWebSocket(connectionId, path, parameters, handler, requestPacket, effectiveListeners);
     }
 
     private static final int MAX_SIZE = 8;

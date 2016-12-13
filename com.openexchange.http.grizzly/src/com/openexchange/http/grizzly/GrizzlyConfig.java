@@ -49,237 +49,505 @@
 
 package com.openexchange.http.grizzly;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
-import com.openexchange.server.Initialization;
 
 /**
  * {@link GrizzlyConfig} Collects and exposes configuration parameters needed by GrizzlOX
  *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlyConfig implements Initialization, Reloadable {
+public class GrizzlyConfig {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyConfig.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyConfig.class);
 
-    private static final GrizzlyConfig instance = new GrizzlyConfig();
-
-    private final PropertyChangeSupport changes = new PropertyChangeSupport(this);
-
-    public static GrizzlyConfig getInstance() {
-        return instance;
+    /**
+     * Creates a new builder instance.
+     *
+     * @return The builder
+     */
+    public static Builder builder() {
+        return new Builder();
     }
 
-    private final AtomicBoolean started = new AtomicBoolean();
+    /** Create an appropriate instance of <code>GrizzlyConfig</code> */
+    public static final class Builder {
 
-    // grizzly properties
+        private String httpHost = "0.0.0.0";
+        private int httpPort = 8009;
+        private int httpsPort = 8010;
+        private boolean isJMXEnabled = false;
+        private boolean isWebsocketsEnabled = false;
+        private boolean isCometEnabled = false;
+        private int maxRequestParameters = 1000;
+        private String backendRoute = "OX0";
+        private boolean isAbsoluteRedirect = false;
+        private boolean shutdownFast = false;
+        private int awaitShutDownSeconds = 90;
+        private int maxHttpHeaderSize = 8192;
+        private boolean isSslEnabled = false;
+        private String keystorePath = "";
+        private String keystorePassword = "";
+        private int cookieMaxAge = 604800;
+        private int cookieMaxInactivityInterval = 1800;
+        private boolean isForceHttps = false;
+        private boolean isCookieHttpOnly = true;
+        private String contentSecurityPolicy = null;
+        private String defaultEncoding = "UTF-8";
+        private boolean isConsiderXForwards = false;
+        private List<String> knownProxies = Collections.emptyList();
+        private String forHeader = "X-Forwarded-For";
+        private String protocolHeader = "X-Forwarded-Proto";
+        private String httpsProtoValue = "https";
+        private int httpProtoPort = 80;
+        private int httpsProtoPort = 443;
+        private String echoHeader = "X-Echo-Header";
+        private int maxBodySize = 104857600;
+        private int maxNumberOfHttpSessions = 250000;
+        private boolean isSessionAutologin = false;
+        private List<String> enabledCiphers = null;
+        private long wsTimeoutMillis;
+        private int sessionExpiryCheckInterval = 60;
+        private boolean checkTrackingIdInRequestParameters = false;
+
+        /**
+         * Initializes a new {@link GrizzlyConfig.Builder}.
+         */
+        Builder() {
+            super();
+        }
+
+        /**
+         * (Re-)Initializes this builder using specified service.
+         *
+         * @param configService The service
+         */
+        public Builder initializeFrom(ConfigurationService configService) {
+            // Grizzly properties
+            this.isJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
+            this.isWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
+            this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
+            this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
+            this.maxHttpHeaderSize = configService.getIntProperty("com.openexchange.http.grizzly.maxHttpHeaderSize", 8192);
+            this.wsTimeoutMillis = configService.getIntProperty("com.openexchange.http.grizzly.wsTimeoutMillis", 900000);
+            this.isSslEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasSSLEnabled", false);
+            this.keystorePath = configService.getProperty("com.openexchange.http.grizzly.keystorePath", "");
+            this.keystorePassword = configService.getProperty("com.openexchange.http.grizzly.keystorePassword", "");
+            this.sessionExpiryCheckInterval = configService.getIntProperty("com.openexchange.http.grizzly.sessionExpiryCheckInterval", 60);
+
+            // server properties
+            this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
+            this.cookieMaxInactivityInterval = configService.getIntProperty("com.openexchange.servlet.maxInactiveInterval", 1800);
+            this.isForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
+            this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
+            {
+                String csp = configService.getProperty("com.openexchange.servlet.contentSecurityPolicy", "").trim();
+                csp = Strings.unquote(csp);
+                this.contentSecurityPolicy = csp.trim();
+            }
+            this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
+            this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
+            String proxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
+            setKnownProxies(proxyCandidates);
+            this.forHeader = configService.getProperty("com.openexchange.server.forHeader", "X-Forwarded-For");
+            this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
+            this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
+            this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
+            this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
+            this.checkTrackingIdInRequestParameters = configService.getBoolProperty("com.openexchange.server.checkTrackingIdInRequestParameters", false);
+            final int configuredMaxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
+            this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
+            final int configuredMaxNumberOfHttpSessions = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
+            this.maxNumberOfHttpSessions = configuredMaxNumberOfHttpSessions <= 0 ? 0 : configuredMaxNumberOfHttpSessions;
+            this.shutdownFast = configService.getBoolProperty("com.openexchange.connector.shutdownFast", false);
+            this.awaitShutDownSeconds = configService.getIntProperty("com.openexchange.connector.awaitShutDownSeconds", 90);
+
+            this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
+            // keep backwards compatibility with AJP configuration
+            if(httpHost.equals("*")) {
+                this.httpHost="0.0.0.0";
+            }
+            this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
+            this.httpsPort = configService.getIntProperty("com.openexchange.connector.networkSslListenerPort", 8010);
+            this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 1000);
+            this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
+            this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
+
+            // sessiond properties
+            this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
+
+            this.enabledCiphers = configService.getProperty("com.openexchange.http.grizzly.enabledCipherSuites", "", ",");
+
+            return this;
+        }
+
+        private void setKnownProxies(String ipList) {
+            if(ipList.isEmpty()) {
+                this.knownProxies = Collections.emptyList();
+            } else {
+                List<String> proxyCandidates = IPTools.splitAndTrim(ipList, IPTools.COMMA_SEPARATOR);
+                List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
+                if(!erroneousIPs.isEmpty()) {
+                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
+                } else {
+                    this.knownProxies = proxyCandidates;
+                }
+            }
+        }
+
+        public Builder setHttpHost(String httpHost) {
+            this.httpHost = httpHost;
+            return this;
+        }
+
+        public Builder setHttpPort(int httpPort) {
+            this.httpPort = httpPort;
+            return this;
+        }
+
+        public Builder setHttpsPort(int httpsPort) {
+            this.httpsPort = httpsPort;
+            return this;
+        }
+
+        public Builder setJMXEnabled(boolean isJMXEnabled) {
+            this.isJMXEnabled = isJMXEnabled;
+            return this;
+        }
+
+        public Builder setWebsocketsEnabled(boolean isWebsocketsEnabled) {
+            this.isWebsocketsEnabled = isWebsocketsEnabled;
+            return this;
+        }
+
+        public Builder setCometEnabled(boolean isCometEnabled) {
+            this.isCometEnabled = isCometEnabled;
+            return this;
+        }
+
+        public Builder setMaxRequestParameters(int maxRequestParameters) {
+            this.maxRequestParameters = maxRequestParameters;
+            return this;
+        }
+
+        public Builder setBackendRoute(String backendRoute) {
+            this.backendRoute = backendRoute;
+            return this;
+        }
+
+        public Builder setAbsoluteRedirect(boolean isAbsoluteRedirect) {
+            this.isAbsoluteRedirect = isAbsoluteRedirect;
+            return this;
+        }
+
+        public Builder setShutdownFast(boolean shutdownFast) {
+            this.shutdownFast = shutdownFast;
+            return this;
+        }
+
+        public Builder setAwaitShutDownSeconds(int awaitShutDownSeconds) {
+            this.awaitShutDownSeconds = awaitShutDownSeconds;
+            return this;
+        }
+
+        public Builder setMaxHttpHeaderSize(int maxHttpHeaderSize) {
+            this.maxHttpHeaderSize = maxHttpHeaderSize;
+            return this;
+        }
+
+        public Builder setSslEnabled(boolean isSslEnabled) {
+            this.isSslEnabled = isSslEnabled;
+            return this;
+        }
+
+        public Builder setKeystorePath(String keystorePath) {
+            this.keystorePath = keystorePath;
+            return this;
+        }
+
+        public Builder setKeystorePassword(String keystorePassword) {
+            this.keystorePassword = keystorePassword;
+            return this;
+        }
+
+        public Builder setCookieMaxAge(int cookieMaxAge) {
+            this.cookieMaxAge = cookieMaxAge;
+            return this;
+        }
+
+        public Builder setCookieMaxInactivityInterval(int cookieMaxInactivityInterval) {
+            this.cookieMaxInactivityInterval = cookieMaxInactivityInterval;
+            return this;
+        }
+
+        public Builder setForceHttps(boolean isForceHttps) {
+            this.isForceHttps = isForceHttps;
+            return this;
+        }
+
+        public Builder setCookieHttpOnly(boolean isCookieHttpOnly) {
+            this.isCookieHttpOnly = isCookieHttpOnly;
+            return this;
+        }
+
+        public Builder setContentSecurityPolicy(String contentSecurityPolicy) {
+            this.contentSecurityPolicy = contentSecurityPolicy;
+            return this;
+        }
+
+        public Builder setDefaultEncoding(String defaultEncoding) {
+            this.defaultEncoding = defaultEncoding;
+            return this;
+        }
+
+        public Builder checkTrackingIdInRequestParameters(boolean checkTrackingIdInRequestParameters) {
+            this.checkTrackingIdInRequestParameters = checkTrackingIdInRequestParameters;
+            return this;
+        }
+
+        public Builder setConsiderXForwards(boolean isConsiderXForwards) {
+            this.isConsiderXForwards = isConsiderXForwards;
+            return this;
+        }
+
+        public Builder setKnownProxies(List<String> knownProxies) {
+            this.knownProxies = knownProxies;
+            return this;
+        }
+
+        public Builder setForHeader(String forHeader) {
+            this.forHeader = forHeader;
+            return this;
+        }
+
+        public Builder setProtocolHeader(String protocolHeader) {
+            this.protocolHeader = protocolHeader;
+            return this;
+        }
+
+        public Builder setHttpsProtoValue(String httpsProtoValue) {
+            this.httpsProtoValue = httpsProtoValue;
+            return this;
+        }
+
+        public Builder setHttpProtoPort(int httpProtoPort) {
+            this.httpProtoPort = httpProtoPort;
+            return this;
+        }
+
+        public Builder setHttpsProtoPort(int httpsProtoPort) {
+            this.httpsProtoPort = httpsProtoPort;
+            return this;
+        }
+
+        public Builder setEchoHeader(String echoHeader) {
+            this.echoHeader = echoHeader;
+            return this;
+        }
+
+        public Builder setMaxBodySize(int maxBodySize) {
+            this.maxBodySize = maxBodySize;
+            return this;
+        }
+
+        public Builder setMaxNumberOfHttpSessions(int maxNumberOfHttpSessions) {
+            this.maxNumberOfHttpSessions = maxNumberOfHttpSessions;
+            return this;
+        }
+
+        public Builder setSessionAutologin(boolean isSessionAutologin) {
+            this.isSessionAutologin = isSessionAutologin;
+            return this;
+        }
+
+        public Builder setEnabledCiphers(List<String> enabledCiphers) {
+            this.enabledCiphers = enabledCiphers;
+            return this;
+        }
+
+        public Builder setWsTimeoutMillis(long wsTimeoutMillis) {
+            this.wsTimeoutMillis = wsTimeoutMillis;
+            return this;
+        }
+
+        public Builder setSessionExpiryCheckInterval(int sessionExpiryCheckInterval) {
+            this.sessionExpiryCheckInterval = sessionExpiryCheckInterval;
+            return this;
+        }
+
+        public GrizzlyConfig build() {
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+
+    // Grizzly properties
 
     /** The host for the http network listener. Default value: 0.0.0.0, bind to every nic of your host. */
-    private String httpHost = "0.0.0.0";
+    private final String httpHost;
 
     /** The default port for the http network listener. */
-    private int httpPort = 8009;
+    private final int httpPort;
 
     /** The default port for the https network listener. */
-    private int httpsPort = 8010;
+    private final int httpsPort;
 
     /** Enable grizzly monitoring via JMX? */
-    private boolean isJMXEnabled = false;
+    private final boolean isJMXEnabled;
 
     /** Enable Bi-directional, full-duplex communications channels over a single TCP connection. */
-    private boolean isWebsocketsEnabled = false;
+    private final boolean isWebsocketsEnabled;
 
     /** Enable Technologies for pseudo realtime communication with the server */
-    private boolean isCometEnabled = false;
+    private final boolean isCometEnabled;
 
     /** The max. number of allowed request parameters */
-    private int maxRequestParameters = 1000;
+    private final int maxRequestParameters;
 
     /** Unique backend route for every single backend behind the load balancer */
-    private String backendRoute = "OX0";
+    private final String backendRoute;
 
     /** Do we want to send absolute or relative redirects */
-    private boolean isAbsoluteRedirect = false;
+    private final boolean isAbsoluteRedirect;
 
     /** Do we want a fast or a clean shut-down */
-    private boolean shutdownFast = false;
+    private final boolean shutdownFast;
 
     /** The number of seconds to await the shut-down */
-    private int awaitShutDownSeconds = 90;
+    private final int awaitShutDownSeconds;
 
     /** The maximum header size for an HTTP request in bytes. */
-    private int maxHttpHeaderSize = 8192;
+    private final int maxHttpHeaderSize;
 
     /** Enable SSL */
-    private boolean isSslEnabled = false;
+    private final boolean isSslEnabled;
 
     /** Path to keystore with X.509 certificates */
-    private String keystorePath = "";
+    private final String keystorePath;
 
     /** Keystore password */
-    private String keystorePassword = "";
+    private final String keystorePassword;
 
     // server properties
 
     /** Maximal age of a cookie in seconds. A negative value destroys the cookie when the browser exits. A value of 0 deletes the cookie. */
-    private int cookieMaxAge = 604800;
+    private final int cookieMaxAge;
 
     /** Interval between two client requests in seconds until the JSession is declared invalid */
-    private int cookieMaxInactivityInterval = 1800;
+    private final int cookieMaxInactivityInterval;
 
     /** Marks cookies as secure although the request is insecure e.g. when the backend is behind a ssl terminating proxy */
-    private boolean isForceHttps = false;
+    private final boolean isForceHttps;
 
     /** Make the cookie accessible only via http methods. This prevents Javascript access to the cookie / cross site scripting */
-    private boolean isCookieHttpOnly = true;
+    private final boolean isCookieHttpOnly;
 
     /** The the value for the <code>Content-Security-Policy</code> header<br>Please refer to <a href="http://www.html5rocks.com/en/tutorials/security/content-security-policy/">An Introduction to Content Security Policy</a>*/
-    private String contentSecurityPolicy = null;
+    private final String contentSecurityPolicy;
 
     /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
-    private String defaultEncoding = "UTF-8";
+    private final String defaultEncoding;
 
     /** Do we want to consider X-Forward-* Headers */
-    private boolean isConsiderXForwards = false;
+    private final boolean isConsiderXForwards;
 
     /** A comma separated list of known proxies */
-    private List<String> knownProxies = Collections.emptyList();
+    private final List<String> knownProxies;
     /**
      * The name of the protocolHeader used to identify the originating IP address of a client connecting to a web server through an HTTP
      * proxy or load balancer
      */
-    private String forHeader = "X-Forwarded-For";
+    private final String forHeader;
 
     /** The name of the protocolHeader used to decide if we are dealing with a in-/secure Request */
-    private String protocolHeader = "X-Forwarded-Proto";
+    private final String protocolHeader;
 
     /** The value indicating secure http communication */
-    private String httpsProtoValue = "https";
+    private final String httpsProtoValue;
 
     /** The port used for http communication */
-    private int httpProtoPort = 80;
+    private final int httpProtoPort;
 
     /** The port used for https communication */
-    private int httpsProtoPort = 443;
+    private final int httpsProtoPort;
 
     /** The name of the echo header whose value is echoed for each request providing that header, see mod_id for apache */
-    private String echoHeader = "X-Echo-Header";
+    private final String echoHeader;
 
     /** The maximum allowed size for PUT and POST bodies */
-    private int maxBodySize = 104857600;
+    private final int maxBodySize;
 
     /** The max. number of HTTP sessions */
-    private int maxNumberOfHttpSessions = 250000;
+    private final int maxNumberOfHttpSessions;
 
     // sessiond properties
 
     /** Is autologin enabled in the session.d properties? */
-    private boolean isSessionAutologin = false;
+    private final boolean isSessionAutologin;
 
-    private List<String> enabledCiphers = null;
+    private final List<String> enabledCiphers;
 
     /** The Web Socket timeout in milliseconds */
-    private long wsTimeoutMillis;
+    private final long wsTimeoutMillis;
 
+    /** The interval in seconds when to check for expired/invalid HTTP sessions */
+    private final int sessionExpiryCheckInterval;
 
-    @Override
-    public void start() throws OXException {
-        if (!started.compareAndSet(false, true)) {
-            LOG.error("{} already started", this.getClass().getName());
-            return;
-        }
-        init();
-    }
+    /** Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created */
+    private final boolean checkTrackingIdInRequestParameters;
 
-    @Override
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.error("{} cannot be stopped since it has no been started before", this.getClass().getName());
-            return;
-        }
-    }
-
-    private void init() throws OXException {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
-        if (configService == null) {
-            throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
-        }
-
-        // grizzly properties
-        this.isJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
-        this.isWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
-        this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-        this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
-        this.maxHttpHeaderSize = configService.getIntProperty("com.openexchange.http.grizzly.maxHttpHeaderSize", 8192);
-        this.wsTimeoutMillis = configService.getIntProperty("com.openexchange.http.grizzly.wsTimeoutMillis", 900000);
-        this.isSslEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasSSLEnabled", false);
-        this.keystorePath = configService.getProperty("com.openexchange.http.grizzly.keystorePath", "");
-        this.keystorePassword = configService.getProperty("com.openexchange.http.grizzly.keystorePassword", "");
-
-
-        // server properties
-        this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
-        this.cookieMaxInactivityInterval = configService.getIntProperty("com.openexchange.servlet.maxInactiveInterval", 1800);
-        this.isForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
-        this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
-        {
-            String csp = configService.getProperty("com.openexchange.servlet.contentSecurityPolicy", "").trim();
-            csp = Strings.unquote(csp);
-            this.contentSecurityPolicy = csp.trim();
-        }
-        this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
-        this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
-        String proxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
-        setKnownProxies(proxyCandidates);
-        this.forHeader = configService.getProperty("com.openexchange.server.forHeader", "X-Forwarded-For");
-        this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
-        this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
-        this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
-        this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
-        final int configuredMaxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
-        this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
-        final int configuredMaxNumberOfHttpSessions = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
-        this.maxNumberOfHttpSessions = configuredMaxNumberOfHttpSessions <= 0 ? 0 : configuredMaxNumberOfHttpSessions;
-        this.shutdownFast = configService.getBoolProperty("com.openexchange.connector.shutdownFast", false);
-        this.awaitShutDownSeconds = configService.getIntProperty("com.openexchange.connector.awaitShutDownSeconds", 90);
-
-        this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
-        // keep backwards compatibility with ajp config
-        if(httpHost.equals("*")) {
-            this.httpHost="0.0.0.0";
-        }
-        this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
-        this.httpsPort = configService.getIntProperty("com.openexchange.connector.networkSslListenerPort", 8010);
-        this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 1000);
-        this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
-        this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
-
-        // sessiond properties
-        this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
-
-        this.enabledCiphers = configService.getProperty("com.openexchange.http.grizzly.enabledCipherSuites", "", ",");
-
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
+        super();
+        this.httpHost = httpHost;
+        this.httpPort = httpPort;
+        this.httpsPort = httpsPort;
+        this.isJMXEnabled = isJMXEnabled;
+        this.isWebsocketsEnabled = isWebsocketsEnabled;
+        this.isCometEnabled = isCometEnabled;
+        this.maxRequestParameters = maxRequestParameters;
+        this.backendRoute = backendRoute;
+        this.isAbsoluteRedirect = isAbsoluteRedirect;
+        this.shutdownFast = shutdownFast;
+        this.awaitShutDownSeconds = awaitShutDownSeconds;
+        this.maxHttpHeaderSize = maxHttpHeaderSize;
+        this.isSslEnabled = isSslEnabled;
+        this.keystorePath = keystorePath;
+        this.keystorePassword = keystorePassword;
+        this.sessionExpiryCheckInterval = sessionExpiryCheckInterval;
+        this.checkTrackingIdInRequestParameters = checkTrackingIdInRequestParameters;
+        this.cookieMaxAge = cookieMaxAge;
+        this.cookieMaxInactivityInterval = cookieMaxInactivityInterval;
+        this.isForceHttps = isForceHttps;
+        this.isCookieHttpOnly = isCookieHttpOnly;
+        this.contentSecurityPolicy = contentSecurityPolicy;
+        this.defaultEncoding = defaultEncoding;
+        this.isConsiderXForwards = isConsiderXForwards;
+        this.knownProxies = knownProxies;
+        this.forHeader = forHeader;
+        this.protocolHeader = protocolHeader;
+        this.httpsProtoValue = httpsProtoValue;
+        this.httpProtoPort = httpProtoPort;
+        this.httpsProtoPort = httpsProtoPort;
+        this.echoHeader = echoHeader;
+        this.maxBodySize = maxBodySize;
+        this.maxNumberOfHttpSessions = maxNumberOfHttpSessions;
+        this.isSessionAutologin = isSessionAutologin;
+        this.enabledCiphers = enabledCiphers;
+        this.wsTimeoutMillis = wsTimeoutMillis;
     }
 
     /**
-     * Gets the started
+     * Gets the interval in seconds when to check for expired/invalid HTTP sessions
      *
-     * @return The started
+     * @return The interval in seconds when to check for expired/invalid HTTP sessions
      */
-    public AtomicBoolean getStarted() {
-        return started;
+    public int getSessionExpiryCheckInterval() {
+        return sessionExpiryCheckInterval;
     }
 
     /**
@@ -297,7 +565,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The httpHost
      */
     public String getHttpHost() {
-        return instance.httpHost;
+        return httpHost;
     }
 
     /**
@@ -306,7 +574,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The httpPort
      */
     public int getHttpPort() {
-        return instance.httpPort;
+        return httpPort;
     }
 
     /**
@@ -315,7 +583,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The httpsPort
      */
     public int getHttpsPort() {
-        return instance.httpsPort;
+        return httpsPort;
     }
 
     /**
@@ -324,7 +592,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The hasJMXEnabled
      */
     public boolean isJMXEnabled() {
-        return instance.isJMXEnabled;
+        return isJMXEnabled;
     }
 
     /**
@@ -333,7 +601,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The hasWebsocketsEnabled
      */
     public boolean isWebsocketsEnabled() {
-        return instance.isWebsocketsEnabled;
+        return isWebsocketsEnabled;
     }
 
     /**
@@ -342,7 +610,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The hasCometEnabled
      */
     public boolean isCometEnabled() {
-        return instance.isCometEnabled;
+        return isCometEnabled;
     }
 
     /**
@@ -351,7 +619,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The maxRequestParameters
      */
     public int getMaxRequestParameters() {
-        return instance.maxRequestParameters;
+        return maxRequestParameters;
     }
 
     /**
@@ -360,7 +628,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The backendRoute
      */
     public String getBackendRoute() {
-        return instance.backendRoute;
+        return backendRoute;
     }
 
     /**
@@ -369,16 +637,16 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The cookieMaxAge
      */
     public int getCookieMaxAge() {
-        return instance.cookieMaxAge;
+        return cookieMaxAge;
     }
 
     /**
-     * Gets the cookieMaxInactivityInterval
+     * Gets the cookieMaxInactivityInterval in seconds
      *
-     * @return The cookieMaxInactivityInterval
+     * @return The cookieMaxInactivityInterval in seconds
      */
     public int getCookieMaxInactivityInterval() {
-        return instance.cookieMaxInactivityInterval;
+        return cookieMaxInactivityInterval;
     }
 
     /**
@@ -387,7 +655,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The isForceHttps
      */
     public boolean isForceHttps() {
-        return instance.isForceHttps;
+        return isForceHttps;
     }
 
     /**
@@ -396,7 +664,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The isCookieHttpOnly
      */
     public boolean isCookieHttpOnly() {
-        return instance.isCookieHttpOnly;
+        return isCookieHttpOnly;
     }
 
     /**
@@ -407,7 +675,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The <code>Content-Security-Policy</code> header; default value is <code>null</code>/empty string.
      */
     public String getContentSecurityPolicy() {
-        return instance.contentSecurityPolicy;
+        return contentSecurityPolicy;
     }
 
     /**
@@ -416,23 +684,9 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      * @return The isSessionAutologin
      */
     public boolean isSessionAutologin() {
-        return instance.isSessionAutologin;
+        return isSessionAutologin;
     }
 
-
-    private void setKnownProxies(String ipList) {
-        if(ipList.isEmpty()) {
-            this.knownProxies = Collections.emptyList();
-        } else {
-            List<String> proxyCandidates = IPTools.splitAndTrim(ipList, IPTools.COMMA_SEPARATOR);
-            List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
-            if(!erroneousIPs.isEmpty()) {
-                LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
-            } else {
-                this.knownProxies = proxyCandidates;
-            }
-        }
-    }
     /**
      * Returns the known proxies as comma separated list of IPs
      * @return the known proxies as comma separated list of IPs or an empty String
@@ -458,7 +712,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         return protocolHeader;
     }
 
-
     /**
      * Gets the httpsProtoValue
      *
@@ -467,7 +720,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     public String getHttpsProtoValue() {
         return httpsProtoValue;
     }
-
 
     /**
      * Gets the httpProtoPort
@@ -478,7 +730,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         return httpProtoPort;
     }
 
-
     /**
      * Gets the httpsProtoPort
      *
@@ -487,7 +738,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     public int getHttpsProtoPort() {
         return httpsProtoPort;
     }
-
 
     /**
      * Gets the isAbsoluteRedirect
@@ -583,25 +833,13 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         return enabledCiphers;
     }
 
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        String proxies = configService.getProperty("com.openexchange.server.knownProxies");
-        List<String> oldProxies = knownProxies;
-        setKnownProxies(proxies);
-        changes.firePropertyChange("knownProxies", oldProxies, proxies);
-    }
-
-    @Override
-    public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest("com.openexchange.server.knownProxies").build();
-    }
-
-    public void addPropertyListener(PropertyChangeListener listener) {
-        changes.addPropertyChangeListener(listener);
-    }
-
-    public void removePropertyListener(PropertyChangeListener listener) {
-        changes.removePropertyChangeListener(listener);
+    /**
+     * Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created
+     *
+     * @return <code>true</code> to look-up; otherwise <code>false</code> to always create a new one
+     */
+    public boolean isCheckTrackingIdInRequestParameters() {
+        return checkTrackingIdInRequestParameters;
     }
 
 }

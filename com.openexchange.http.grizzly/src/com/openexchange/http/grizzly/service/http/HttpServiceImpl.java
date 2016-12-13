@@ -50,7 +50,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -86,12 +86,14 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
 
 import java.util.Dictionary;
+import java.util.List;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.osgi.framework.Bundle;
@@ -107,23 +109,34 @@ import org.slf4j.Logger;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since Jan 20, 2009
  */
-public class HttpServiceImpl implements HttpService {
+public class HttpServiceImpl implements HttpServiceExtension {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceImpl.class);
 
     private final Bundle bundle;
-    final OSGiMainHandler mainHttpHandler;
+    private final OSGiMainHandler mainHttpHandler;
+    private final List<Filter> initialFilters;
+
+
+    // ------------------------------------------------------------ Constructors
+
 
     /**
      * {@link HttpService} constructor.
      *
+     * @param initialFilters The initial Servlet filters to apply
      * @param bundle {@link org.osgi.framework.Bundle} that got this instance of {@link org.osgi.service.http.HttpService}.
-     * @param logger {@link services.http.Logger} utility to be used here.
      */
-    public HttpServiceImpl(Bundle bundle) {
+    public HttpServiceImpl(List<Filter> initialFilters, Bundle bundle) {
+        super();
+        this.initialFilters = initialFilters;
         this.bundle = bundle;
-        mainHttpHandler = new OSGiMainHandler(bundle);
+        mainHttpHandler = new OSGiMainHandler(initialFilters, bundle);
     }
+
+
+    // ------------------------------------------------ Methods from HttpService
+
 
     /**
      * {@inheritDoc}
@@ -137,10 +150,12 @@ public class HttpServiceImpl implements HttpService {
      * {@inheritDoc}
      */
     @Override
-    public void registerServlet(final String alias, final Servlet servlet, final Dictionary initparams, HttpContext httpContext) throws ServletException, NamespaceException {
+    public void registerServlet(
+            final String alias, final Servlet servlet, final Dictionary initparams, HttpContext httpContext)
+            throws ServletException, NamespaceException {
 
-        LOG.info("Registering servlet: {}, under: {} with context: {}", servlet.getClass().getName(), alias, httpContext);
-        // .append(", with: ").append(initparams)
+        // LOG.info("Registering servlet: {}, under: {}, with: {} and context: {}", servlet, alias, initparams, httpContext);
+        LOG.info("Registering servlet: {}, under: {} and context: {}", servlet, alias, httpContext);
 
         mainHttpHandler.registerServletHandler(alias, servlet, initparams, httpContext, this);
     }
@@ -149,7 +164,8 @@ public class HttpServiceImpl implements HttpService {
      * {@inheritDoc}
      */
     @Override
-    public void registerResources(final String alias, String prefix, HttpContext httpContext) throws NamespaceException {
+    public void registerResources(final String alias, String prefix, HttpContext httpContext)
+            throws NamespaceException {
 
         LOG.info("Registering resource: alias: {}, prefix: {} and context: {}", alias, prefix, httpContext);
 
@@ -163,6 +179,29 @@ public class HttpServiceImpl implements HttpService {
     public void unregister(final String alias) {
         LOG.info("Unregistering alias: {}", alias);
         mainHttpHandler.unregisterAlias(alias);
+    }
+
+
+    // --------------------------------------- Methods from HttpServiceExtension
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void registerFilter(Filter filter, String urlPattern, Dictionary initParams, HttpContext context)
+    throws ServletException {
+        LOG.info("Registering servlet: {}, under url-pattern: {}, with: {} and context: {}", filter, urlPattern, initParams, context);
+        mainHttpHandler.registerFilter(filter, urlPattern, initParams, context, this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unregisterFilter(Filter filter) {
+        LOG.info("Unregister filter: {}", filter);
+        mainHttpHandler.unregisterFilter(filter);
     }
 
 }

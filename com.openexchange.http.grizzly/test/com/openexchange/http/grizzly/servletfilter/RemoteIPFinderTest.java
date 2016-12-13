@@ -50,6 +50,7 @@
 package com.openexchange.http.grizzly.servletfilter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static com.openexchange.http.grizzly.util.IPTools.COMMA_SEPARATOR;
 import static com.openexchange.http.grizzly.util.IPTools.splitAndTrim;
 import java.util.Collections;
@@ -59,7 +60,7 @@ import com.openexchange.http.grizzly.util.IPTools;
 
 /**
  * {@link RemoteIPFinderTest}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RemoteIPFinderTest {
@@ -98,13 +99,13 @@ public class RemoteIPFinderTest {
     @Test
     public void testEmptyRemoteIPv4() {
         String remoteIP = IPTools.getRemoteIP(emptyRemote, knownIPv4);
-        assertEquals("", remoteIP);
+        assertNull(remoteIP);
     }
 
     @Test
     public void testInvalidRemoteIPv4() {
         String remoteIP = IPTools.getRemoteIP(invalidIPv4Remotes, knownIPv4);
-        assertEquals("", remoteIP);
+        assertNull(remoteIP);
     }
 
     @Test
@@ -122,13 +123,13 @@ public class RemoteIPFinderTest {
     @Test
     public void testEmptyRemoteIPv6() {
         String remoteIP = IPTools.getRemoteIP(emptyRemote, knownIPv6);
-        assertEquals("", remoteIP);
+        assertNull(remoteIP);
     }
 
     @Test
     public void testInvalidRemoteIPv6() {
         String remoteIP = IPTools.getRemoteIP(invalidIPv6Remotes, knownIPv6);
-        assertEquals("", remoteIP);
+        assertNull(remoteIP);
     }
 
 }

@@ -53,19 +53,17 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.collections.CollectionUtils;
 import org.glassfish.grizzly.http.server.Request;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.http.grizzly.eas.EASCommandCodes.EASCommands;
+import com.openexchange.http.grizzly.eas.EASCommandCodes;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -176,12 +174,8 @@ public final class RequestTools {
      */
     public static boolean isIgnoredEasRequest(HttpServletRequest request, Set<String> ignoredEasCommands) {
         if (isEasRequest(request)) {
-            Set<String> lIgnoredEasCommands = new HashSet<String>(ignoredEasCommands);
-            CollectionUtils.transform(lIgnoredEasCommands, new StringToLowerCaseTransformer());
-
             String cmd = request.getParameter(EAS_CMD);
-
-            if ((cmd != null) && (lIgnoredEasCommands.contains(cmd.toLowerCase()))) {
+            if ((cmd != null) && (ignoredEasCommands.contains(cmd.toLowerCase()))) {
                 return true;
             }
 
@@ -193,11 +187,9 @@ public final class RequestTools {
              */
             byte[] bytes = getBase64Bytes(request.getQueryString());
             if (null != bytes && bytes.length > 2) {
-                Set<EASCommands> set = EASCommands.get(lIgnoredEasCommands);
-
+                Set<EASCommandCodes> set = EASCommandCodes.get(ignoredEasCommands);
                 byte code = bytes[1];
-
-                for (EASCommands command : set) {
+                for (EASCommandCodes command : set) {
                     if (command.getByte() == code) {
                         return true;
                     }
@@ -264,8 +256,7 @@ public final class RequestTools {
      */
     public static boolean isIgnoredUsmRequest(HttpServletRequest request, Set<String> ignoredUsmCommands) {
         String pathInfo = request.getPathInfo();
-
-        if (isUsmRequest(request) && (pathInfo != null)) {
+        if ((pathInfo != null) && isUsmRequest(request)) {
             pathInfo = pathInfo.toLowerCase();
 
             Boolean result = USM_PATH_CACHE.getIfPresent(pathInfo);
@@ -273,14 +264,11 @@ public final class RequestTools {
                 return result.booleanValue();
             }
 
-            Set<String> lIgnoredUsmCommands = new HashSet<String>(ignoredUsmCommands);
-            CollectionUtils.transform(lIgnoredUsmCommands, new StringToLowerCaseTransformer());
-
             boolean isIgnored = false;
-            if (lIgnoredUsmCommands.contains(pathInfo)) {
+            if (ignoredUsmCommands.contains(pathInfo)) {
                 isIgnored = true;
             }
-            USM_PATH_CACHE.put(pathInfo, isIgnored);
+            USM_PATH_CACHE.put(pathInfo, Boolean.valueOf(isIgnored));
             return isIgnored;
 
         }

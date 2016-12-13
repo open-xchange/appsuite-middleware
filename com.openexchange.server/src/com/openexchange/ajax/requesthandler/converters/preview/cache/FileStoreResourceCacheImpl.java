@@ -287,7 +287,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     }
 
                     // Storing the resource exceeded the quota. We schedule an alignment task if this wasn't already done.
-                    if (triggerAlignment && alignmentRequests.putIfAbsent(contextId, SCHEDULED) == null && scheduleAlignmentTask(globalQuota, contextId)) {
+                    if (triggerAlignment && alignmentRequests.putIfAbsent(contextId, SCHEDULED) == null && scheduleAlignmentTask(globalQuota, userId, contextId)) {
                         LOG.debug("Scheduling alignment task for context {}.", contextId);
                     } else {
                         LOG.debug("Skipping scheduling of alignment task for context {}.", contextId);
@@ -317,14 +317,14 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return false;
     }
 
-    protected boolean scheduleAlignmentTask(final long globalQuota, final int contextId) {
+    protected boolean scheduleAlignmentTask(final long globalQuota, final int userId, final int contextId) {
         try {
             TimerService timerService = optTimerService();
             if (timerService != null) {
                 timerService.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        alignToQuota(globalQuota, contextId);
+                        alignToQuota(globalQuota, userId, contextId);
                     }
                 }, ALIGNMENT_DELAY);
 
@@ -339,7 +339,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return false;
     }
 
-    protected void alignToQuota(long globalQuota, int contextId) {
+    protected void alignToQuota(long globalQuota, int userId, int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
         if (!alignmentRequests.replace(iContextId, SCHEDULED, RUNNING)) {
             return;

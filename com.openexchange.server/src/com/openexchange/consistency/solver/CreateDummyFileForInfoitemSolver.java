@@ -104,7 +104,7 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
                         fsOwner = admin.getId();
                     }
 
-                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive(fsOwner));
+                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive());
                     String identifier = createDummyFile(storage);
                     database.startTransaction();
                     int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", context);

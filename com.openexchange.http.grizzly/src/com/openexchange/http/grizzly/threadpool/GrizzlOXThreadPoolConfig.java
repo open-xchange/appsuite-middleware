@@ -49,66 +49,22 @@
 
 package com.openexchange.http.grizzly.threadpool;
 
-import java.util.Queue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import org.glassfish.grizzly.memory.MemoryManager;
-import org.glassfish.grizzly.threadpool.AbstractThreadPool;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
-import org.glassfish.grizzly.utils.DelayedExecutor;
 
 /**
  * {@link GrizzlOXThreadPoolConfig} Configuration for the GrizzlOXThreadPool.
  *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlOXThreadPoolConfig extends ThreadPoolConfig {
+public class GrizzlOXThreadPoolConfig {
 
-    private static final ThreadPoolConfig DEFAULT = new GrizzlOXThreadPoolConfig(
-        "GrizzlOX",
-        AbstractThreadPool.DEFAULT_MIN_THREAD_COUNT,
-        AbstractThreadPool.DEFAULT_MAX_THREAD_COUNT,
-        null,
-        AbstractThreadPool.DEFAULT_MAX_TASKS_QUEUED,
-        AbstractThreadPool.DEFAULT_IDLE_THREAD_KEEPALIVE_TIMEOUT,
-        TimeUnit.MILLISECONDS,
-        null,
-        Thread.NORM_PRIORITY,
-        null,
-        null,
-        -1);
-
-    /**
-     * Initializes a new {@link GrizzlOXThreadPoolConfig}.
-     *
-     * @param poolName The name of pool configured via this ThreadPoolConfing
-     * @param corePoolSize The minimum pool size
-     * @param maxPoolSize The maximum pool size
-     * @param queue The queue to use for the Runnables, may be null
-     * @param queueLimit How many Runnables are allowed to be queued, -1 for unlimmited
-     * @param keepAliveTime KeepAlive timeout for idle threads
-     * @param timeUnit Unit for the keepAliveTime paramter
-     * @param threadFactory Which ThreadFactory to use for the Creation of WorkerThreads, may be null
-     * @param priority Priority
-     * @param mm mm, may be null
-     * @param transactionMonitor tm, may be null
-     * @param transactionTimeoutMillis transaction timout ms, -1 to
-     */
-    public GrizzlOXThreadPoolConfig(String poolName, int corePoolSize, int maxPoolSize, Queue<Runnable> queue, int queueLimit, long keepAliveTime, TimeUnit timeUnit, ThreadFactory threadFactory, int priority, MemoryManager mm, DelayedExecutor transactionMonitor, long transactionTimeoutMillis) {
-        super(
-            poolName,
-            corePoolSize,
-            maxPoolSize,
-            queue,
-            queueLimit,
-            keepAliveTime,
-            timeUnit,
-            threadFactory,
-            priority,
-            mm,
-            transactionMonitor,
-            transactionTimeoutMillis);
+    private static ThreadPoolConfig createDefault() {
+        ThreadPoolConfig threadPoolConfig = ThreadPoolConfig.defaultConfig();
+        threadPoolConfig.setPoolName("GrizzlOX");
+        return threadPoolConfig;
     }
+
+    private static final ThreadPoolConfig DEFAULT = createDefault();
 
     /**
      * Gets the default

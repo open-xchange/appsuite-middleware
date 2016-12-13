@@ -49,11 +49,14 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.http.HttpServletRequest;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.websockets.DefaultWebSocket;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import com.openexchange.session.Session;
 import com.openexchange.websockets.ConnectionId;
 
 /**
@@ -64,16 +67,16 @@ import com.openexchange.websockets.ConnectionId;
  */
 public class SessionBoundWebSocket extends DefaultWebSocket {
 
-    private final SessionInfo sessionInfo;
+    private final AtomicReference<SessionInfo> sessionInfoReference;
     private final ConnectionId connectionId;
     private final String path;
 
     /**
      * Initializes a new {@link SessionBoundWebSocket}.
      */
-    public SessionBoundWebSocket(SessionInfo sessionInfo, ConnectionId connectionId, String path, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
+    public SessionBoundWebSocket(ConnectionId connectionId, String path, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
         super(protocolHandler, request, listeners);
-        this.sessionInfo = sessionInfo;
+        this.sessionInfoReference = new AtomicReference<SessionInfo>(null);
         this.connectionId = connectionId;
         this.path = path;
     }
@@ -94,8 +97,8 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
      *
      * @return The HTTP request
      */
-    public HttpRequestPacket getRequest() {
-        return request;
+    public HttpServletRequest getHttpRequest() {
+        return servletRequest;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -110,12 +113,30 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
     }
 
     /**
+     * Sets the basic information extracted from given session.
+     *
+     * @param session The session to extract from
+     */
+    public void setSessionInfo(Session session) {
+        this.sessionInfoReference.set(SessionInfo.newInstance(session));
+    }
+
+    /**
+     * Sets the basic information for the session currently associated with this Web Socket.
+     *
+     * @param sessionInfo The session information to set
+     */
+    public void setSessionInfo(SessionInfo sessionInfo) {
+        this.sessionInfoReference.set(sessionInfo);
+    }
+
+    /**
      * Gets the basic information for the session currently associated with this Web Socket.
      *
      * @return The session information
      */
     public SessionInfo getSessionInfo() {
-        return sessionInfo;
+        return sessionInfoReference.get();
     }
 
     /**
@@ -124,6 +145,7 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
      * @return The session identifier
      */
     public String getSessionId() {
+        SessionInfo sessionInfo = sessionInfoReference.get();
         return sessionInfo.getSessionId();
     }
 
@@ -133,6 +155,7 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
      * @return The user identifier
      */
     public int getUserId() {
+        SessionInfo sessionInfo = sessionInfoReference.get();
         return sessionInfo.getUserId();
     }
 
@@ -142,6 +165,7 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
      * @return The context identifier
      */
     public int getContextId() {
+        SessionInfo sessionInfo = sessionInfoReference.get();
         return sessionInfo.getContextId();
     }
 
@@ -171,9 +195,10 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
     public String toString() {
         StringBuilder builder = new StringBuilder(128);
         builder.append("{");
-        builder.append("userId=").append(getUserId());
-        builder.append(", contextId=").append(getContextId());
-        String sessionId = getSessionId();
+        SessionInfo sessionInfo = sessionInfoReference.get();
+        builder.append("userId=").append(sessionInfo.getUserId());
+        builder.append(", contextId=").append(sessionInfo.getContextId());
+        String sessionId = sessionInfo.getSessionId();
         if (sessionId != null) {
             builder.append(", sessionId=").append(sessionId);
         }

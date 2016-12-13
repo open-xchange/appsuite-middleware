@@ -53,64 +53,82 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
+import javax.servlet.http.Part;
 import org.glassfish.grizzly.http.server.OXRequest;
-import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.servlet.ServletUtils;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.dispatcher.Parameterizable;
 
 public class HttpServletRequestWrapper implements HttpServletRequest, Parameterizable {
 
+    private static final String ABSENT = new String(new char[] {'_','_','a', 'b', 's', 'e', 'n', 't'});
+
+    /** The protocol scheme for HTTP */
     public final static String HTTP_SCHEME = "http";
 
+    /** The protocol scheme for HTTPS */
     public final static String HTTPS_SCHEME = "https";
 
     private final HttpServletRequest delegate;
-
     private final String requestScheme;
-
     private final int serverPort;
-
     private final boolean isSecure;
-
     private final String remoteAddress;
+    private final ConcurrentMap<String, String> additionalParams;
 
-        /**
-         * Initializes a new {@link HttpServletRequestWrapper}.
-         *
-         * @param requestScheme The scheme of the incoming request: http or https
-         * @param remoteAddress
-         * @param serverPort The serverPort of the incoming request
-         * @param httpServletRequest The incoming request
-         * @throws IllegalArgumentException If the port is smaller than 1
-         */
-        public HttpServletRequestWrapper(String requestScheme, String remoteAddress, int serverPort, HttpServletRequest httpServletRequest) {
-            if (serverPort < 1) {
-                throw new IllegalArgumentException("Port is out of valid range: " + serverPort);
-            }
-            if (requestScheme.equalsIgnoreCase(HTTPS_SCHEME)) {
-                this.requestScheme = HTTPS_SCHEME;
-                this.isSecure = true;
-            } else {
-                this.requestScheme = HTTP_SCHEME;
-                this.isSecure = false;
-            }
-            this.remoteAddress = remoteAddress;
-            this.serverPort = serverPort;
-            this.delegate = httpServletRequest;
-
-            OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(delegate);
-            internalRequest.setXForwardPort(serverPort);
-            internalRequest.setxForwardProto(requestScheme);
-            internalRequest.setAttribute("com.openexchange.http.isForcedSecurity", true);
+    /**
+     * Initializes a new {@link HttpServletRequestWrapper}.
+     *
+     * @param requestScheme The scheme of the request: http or https
+     * @param remoteAddress The remote IP address of the request
+     * @param serverPort The server port of the request
+     * @param httpServletRequest The request (to delegate to)
+     * @throws IllegalArgumentException If the port is smaller than 1
+     */
+    public HttpServletRequestWrapper(String requestScheme, String remoteAddress, int serverPort, HttpServletRequest httpServletRequest) {
+        if (serverPort < 1) {
+            throw new IllegalArgumentException("Port is out of valid range: " + serverPort);
         }
+        if (requestScheme.equalsIgnoreCase(HTTPS_SCHEME)) {
+            this.requestScheme = HTTPS_SCHEME;
+            this.isSecure = true;
+        } else {
+            this.requestScheme = HTTP_SCHEME;
+            this.isSecure = false;
+        }
+        this.remoteAddress = remoteAddress;
+        this.serverPort = serverPort;
+        this.delegate = httpServletRequest;
+        this.additionalParams = new ConcurrentHashMap<>(6, 0.9F, 1);
+
+        OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(httpServletRequest);
+        internalRequest.setXForwardPort(serverPort);
+        internalRequest.setXForwardProto(requestScheme);
+        internalRequest.setAttribute("com.openexchange.http.isForcedSecurity", true);
+    }
 
     /**
      * Initializes a new {@link HttpServletRequestWrapper}.
@@ -128,15 +146,16 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
         }
         this.serverPort = httpServletRequest.getServerPort();
         this.remoteAddress = httpServletRequest.getRemoteAddr();
+        this.additionalParams = new ConcurrentHashMap<>(6, 0.9F, 1);
     }
 
     @Override
-    public Object getAttribute(String arg0) {
-        return delegate.getAttribute(arg0);
+    public Object getAttribute(String name) {
+        return delegate.getAttribute(name);
     }
 
     @Override
-    public Enumeration getAttributeNames() {
+    public Enumeration<String> getAttributeNames() {
         return delegate.getAttributeNames();
     }
 
@@ -171,23 +190,23 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     }
 
     @Override
-    public long getDateHeader(String arg0) {
-        return delegate.getDateHeader(arg0);
+    public long getDateHeader(String name) {
+        return null == name || 0 == name.length() ? -1L : delegate.getDateHeader(name);
     }
 
     @Override
-    public String getHeader(String arg0) {
-        return delegate.getHeader(arg0);
+    public String getHeader(String name) {
+        return null == name || 0 == name.length() ? null : delegate.getHeader(name);
     }
 
     @Override
-    public Enumeration getHeaderNames() {
+    public Enumeration<String> getHeaderNames() {
         return delegate.getHeaderNames();
     }
 
     @Override
-    public Enumeration getHeaders(String arg0) {
-        return delegate.getHeaders(arg0);
+    public Enumeration<String> getHeaders(String name) {
+        return delegate.getHeaders(name);
     }
 
     @Override
@@ -196,8 +215,8 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     }
 
     @Override
-    public int getIntHeader(String arg0) {
-        return delegate.getIntHeader(arg0);
+    public int getIntHeader(String name) {
+        return null == name || 0 == name.length() ? -1 : delegate.getIntHeader(name);
     }
 
     @Override
@@ -221,7 +240,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     }
 
     @Override
-    public Enumeration getLocales() {
+    public Enumeration<Locale> getLocales() {
         return delegate.getLocales();
     }
 
@@ -231,23 +250,75 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     }
 
     @Override
-    public String getParameter(String arg0) {
-        return delegate.getParameter(arg0);
+    public String getParameter(String name) {
+        String value = additionalParams.get(name);
+        if (null != value) {
+            return ABSENT == value ? null /*Explicitly removed*/ : value;
+        }
+
+        return delegate.getParameter(name);
     }
 
     @Override
-    public Map getParameterMap() {
-        return delegate.getParameterMap();
+    public Map<String, String[]> getParameterMap() {
+        if (additionalParams.isEmpty()) {
+            return delegate.getParameterMap();
+        }
+
+        // Create copy from request's parameters
+        Map<String, String[]> parameters = delegate.getParameterMap();
+        if (null != parameters && !parameters.isEmpty()) {
+            parameters = new LinkedHashMap<>(parameters);
+        } else {
+            parameters = new LinkedHashMap<>(4, 0.9F);
+        }
+
+        // Overwrite/clean by the ones from additional parameters
+        for (Map.Entry<String,String> entry : additionalParams.entrySet()) {
+            String value = entry.getValue();
+            if (ABSENT == value) {
+                parameters.remove(entry.getKey());
+            } else {
+                parameters.put(entry.getKey(), new String[] { value });
+            }
+        }
+
+        return ImmutableMap.copyOf(parameters);
     }
 
     @Override
-    public Enumeration getParameterNames() {
-        return delegate.getParameterNames();
+    public Enumeration<String> getParameterNames() {
+        if (additionalParams.isEmpty()) {
+            return delegate.getParameterNames();
+        }
+
+        // Create copy from request's parameters
+        Set<String> names = new LinkedHashSet<>(6);
+        for (Enumeration<String> e = delegate.getParameterNames(); e.hasMoreElements();) {
+            names.add(e.nextElement());
+        }
+
+        // Enhance/clean by the ones from additional parameters
+        for (Map.Entry<String,String> entry : additionalParams.entrySet()) {
+            String value = entry.getValue();
+            if (ABSENT == value) {
+                names.remove(entry.getKey());
+            } else {
+                names.add(entry.getKey());
+            }
+        }
+
+        return new IteratorEnumeration<String>(names.iterator());
     }
 
     @Override
-    public String[] getParameterValues(String arg0) {
-        return delegate.getParameterValues(arg0);
+    public String[] getParameterValues(String name) {
+        String value = additionalParams.get(name);
+        if (null != value) {
+            return ABSENT == value ? null /*Explicitly removed*/ : new String[] { value };
+        }
+
+        return delegate.getParameterValues(name);
     }
 
     @Override
@@ -388,28 +459,161 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     }
 
     /**
-     * com.openexchange.ajax.Multiple accesses reequest objects concurrently
+     * com.openexchange.ajax.Multiple accesses request objects concurrently
      * so we have to prevent concurrent modifications
      */
     @Override
-    public synchronized void removeAttribute(String arg0) {
-        delegate.removeAttribute(arg0);
+    public synchronized void removeAttribute(String name) {
+        delegate.removeAttribute(name);
     }
 
     @Override
-    public synchronized void setAttribute(String arg0, Object arg1) {
-        delegate.setAttribute(arg0, arg1);
+    public synchronized void setAttribute(String name, Object o) {
+        delegate.setAttribute(name, o);
     }
 
     @Override
-    public synchronized void setCharacterEncoding(String arg0) throws UnsupportedEncodingException {
-        delegate.setCharacterEncoding(arg0);
+    public synchronized void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+        delegate.setCharacterEncoding(env);
     }
 
     @Override
-    public synchronized void putParameter(String name, String value) {
-        Request internalRequest = ServletUtils.getInternalRequest(delegate);
-        internalRequest.putParameter(name, value);
+    public void putParameter(String name, String value) {
+        if (null == name) {
+           throw new NullPointerException("name is null");
+        }
+
+        additionalParams.put(name, null == value ? ABSENT : value);
+    }
+
+    @Override
+    public long getContentLengthLong() {
+        return delegate.getContentLengthLong();
+    }
+
+    @Override
+    public ServletContext getServletContext() {
+        return delegate.getServletContext();
+    }
+
+    @Override
+    public AsyncContext startAsync() throws IllegalStateException {
+        return delegate.startAsync();
+    }
+
+    @Override
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        return delegate.startAsync(servletRequest, servletResponse);
+    }
+
+    @Override
+    public boolean isAsyncStarted() {
+        return delegate.isAsyncStarted();
+    }
+
+    @Override
+    public boolean isAsyncSupported() {
+        return delegate.isAsyncSupported();
+    }
+
+    @Override
+    public AsyncContext getAsyncContext() {
+        return delegate.getAsyncContext();
+    }
+
+    @Override
+    public DispatcherType getDispatcherType() {
+        return delegate.getDispatcherType();
+    }
+
+    @Override
+    public String changeSessionId() {
+        return delegate.changeSessionId();
+    }
+
+    @Override
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        return delegate.authenticate(response);
+    }
+
+    @Override
+    public void login(String username, String password) throws ServletException {
+        delegate.login(username, password);
+    }
+
+    @Override
+    public void logout() throws ServletException {
+        delegate.logout();
+    }
+
+    @Override
+    public Collection<Part> getParts() throws IOException, ServletException {
+        return delegate.getParts();
+    }
+
+    @Override
+    public Part getPart(String name) throws IOException, ServletException {
+        return delegate.getPart(name);
+    }
+
+    @Override
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+        return delegate.upgrade(handlerClass);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------
+
+    private static class IteratorEnumeration<E> implements Enumeration<E> {
+
+        /** The iterator being decorated. */
+        private final Iterator<E> iterator;
+
+        /**
+         * Constructs a new <code>IteratorEnumeration</code> that will use the given iterator.
+         *
+         * @param iterator  the iterator to use
+         */
+        public IteratorEnumeration(Iterator<E> iterator ) {
+            super();
+            this.iterator = iterator;
+        }
+
+        // Iterator interface
+        //-------------------------------------------------------------------------
+
+        /**
+         *  Returns true if the underlying iterator has more elements.
+         *
+         *  @return true if the underlying iterator has more elements
+         */
+        @Override
+        public boolean hasMoreElements() {
+            return iterator.hasNext();
+        }
+
+        /**
+         *  Returns the next element from the underlying iterator.
+         *
+         *  @return the next element from the underlying iterator.
+         *  @throws java.util.NoSuchElementException  if the underlying iterator has no
+         *    more elements
+         */
+        @Override
+        public E nextElement() {
+            return iterator.next();
+        }
+
+        // Properties
+        //-------------------------------------------------------------------------
+
+        /**
+         *  Returns the underlying iterator.
+         *
+         *  @return the underlying iterator
+         */
+        public Iterator<E> getIterator() {
+            return iterator;
+        }
     }
 
 }
