@@ -49,72 +49,47 @@
 
 package com.openexchange.chronos.ical;
 
-import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.DelegatingAlarm;
-import com.openexchange.java.Streams;
+import java.util.Map;
 
 /**
- * {@link AlarmComponent}
+ * {@link DefaultICalProperty}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AlarmComponent extends DelegatingAlarm implements ComponentData {
+public class DefaultICalProperty implements ICalProperty {
 
-    private IFileHolder iCalHolder;
-    private List<ICalProperty> properties;
-
-    /**
-     * Initializes a new {@link AlarmComponent}.
-     */
-    public AlarmComponent() {
-        this(new Alarm(), null);
-    }
+    private final String name;
+    private final String value;
+    private final Map<String, String> parameters;
 
     /**
-     * Initializes a new {@link AlarmComponent}.
+     * Initializes a new {@link DefaultICalProperty}.
      *
-     * @param delegate The underlying alarm delegate
-     * @param iCalHolder A file holder storing the original iCal component, or <code>null</code> if not available
+     * @param name The property name
+     * @param value The value
+     * @param parameters The parameters, or <code>null</code> if there are none
      */
-    public AlarmComponent(Alarm delegate, IFileHolder iCalHolder) {
-        super(delegate);
-        this.iCalHolder = iCalHolder;
-    }
-
-    /**
-     * Sets the file holder storing the original iCal component.
-     *
-     * @param iCalHolder A file holder storing the original iCal component
-     */
-    public void setComponent(IFileHolder iCalHolder) {
-        this.iCalHolder = iCalHolder;
+    public DefaultICalProperty(String name, String value, Map<String, String> parameters) {
+        super();
+        this.name = name;
+        this.value = value;
+        this.parameters = parameters;
     }
 
     @Override
-    public IFileHolder getComponent() {
-        return iCalHolder;
+    public String getName() {
+        return name;
     }
 
     @Override
-    public void close() {
-        Streams.close(iCalHolder);
+    public String getValue() {
+        return value;
     }
 
     @Override
-    public List<ICalProperty> getProperties() {
-        return properties;
-    }
-
-    /**
-     * Sets the list of further arbitrary iCalendar properties associated with the component.
-     *
-     * @param properties The extra properties to set
-     */
-    public void setProperties(List<ICalProperty> properties) {
-        this.properties = properties;
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 
 }

@@ -231,13 +231,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (needsSequenceNumberIncrement(eventUpdate)) {
                 eventUpdate.getUpdate().setSequence(originalEvent.getSequence() + 1);
             }
-            storage.getEventStorage().updateEvent(eventUpdate.getUpdate());
             if (isSeriesMaster(originalEvent) && needsChangeExceptionsReset(eventUpdate)) {
                 /*
-                 * ensure to also delete any change exceptions if required
+                 * reset change & delete exceptions
                  */
+                eventUpdate.getUpdate().setDeleteExceptionDates(null);
+                eventUpdate.getUpdate().setChangeExceptionDates(null);
                 deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
             }
+            storage.getEventStorage().updateEvent(eventUpdate.getUpdate());
             wasUpdated = true;
         }
         /*

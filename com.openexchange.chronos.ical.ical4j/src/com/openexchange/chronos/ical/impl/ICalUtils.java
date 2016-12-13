@@ -53,11 +53,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.SequenceInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.chronos.ical.DefaultICalProperty;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalProperty;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.CalendarParser;
@@ -68,7 +79,9 @@ import net.fortuna.ical4j.extensions.caldav.property.Acknowledged;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterFactoryRegistry;
+import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactoryImpl;
 import net.fortuna.ical4j.model.PropertyFactoryRegistry;
@@ -79,12 +92,8 @@ import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
+import net.fortuna.ical4j.model.parameter.XParameter;
+import net.fortuna.ical4j.model.property.XProperty;
 
 /**
  * {@link ICalUtils}
@@ -154,6 +163,66 @@ public class ICalUtils {
             Streams.close(writer);
         }
         return fileHolder;
+    }
+
+    static List<Property> exportProperties(List<ICalProperty> iCalProperties) {
+        if (null == iCalProperties || 0 == iCalProperties.size()) {
+            return Collections.emptyList();
+        }
+        List<Property> properties = new ArrayList<Property>(iCalProperties.size());
+        for (ICalProperty iCalProperty : iCalProperties) {
+            properties.add(exportProperty(iCalProperty));
+        }
+        return properties;
+    }
+
+    private static Property exportProperty(ICalProperty iCalProperty) {
+        return new XProperty(iCalProperty.getName(), exportParameters(iCalProperty.getParameters()), iCalProperty.getValue());
+    }
+
+    private static ParameterList exportParameters(Map<String, String> iCalParameters) {
+        ParameterList parameterList = new ParameterList();
+        if (null != iCalParameters && 0 < iCalParameters.size()) {
+            for (Map.Entry<String, String> entry : iCalParameters.entrySet()) {
+                parameterList.add(new XParameter(entry.getKey(), entry.getValue()));
+            }
+        }
+        return parameterList;
+    }
+
+    static List<ICalProperty> importProperties(Component component, String[] propertyNames) {
+        if (null == propertyNames || 0 == propertyNames.length) {
+            return Collections.emptyList();
+        }
+        List<ICalProperty> iCalProperties = new ArrayList<ICalProperty>(propertyNames.length);
+        for (String propertyName : propertyNames) {
+            iCalProperties.addAll(importProperties(component.getProperties(propertyName)));
+        }
+        return iCalProperties;
+    }
+
+    static List<ICalProperty> importProperties(PropertyList propertyList) {
+        if (null == propertyList || 0 == propertyList.size()) {
+            return Collections.emptyList();
+        }
+        List<ICalProperty> iCalProperties = new ArrayList<ICalProperty>(propertyList.size());
+        for (Iterator<?> iterator = propertyList.iterator(); iterator.hasNext();) {
+            Property property = (Property) iterator.next();
+            iCalProperties.add(new DefaultICalProperty(property.getName(), property.getValue(), importParameters(property.getParameters())));
+        }
+        return iCalProperties;
+    }
+
+    static Map<String, String> importParameters(ParameterList parameterList) {
+        if (null == parameterList || 0 == parameterList.size()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> iCalParameters = new HashMap<String, String>(parameterList.size());
+        for (Iterator<?> iterator = parameterList.iterator(); iterator.hasNext();) {
+            Parameter parameter = (Parameter) iterator.next();
+            iCalParameters.put(parameter.getName(), parameter.getValue());
+        }
+        return iCalParameters;
     }
 
     static CalendarBuilder getCalendarBuilder(ICalParameters parameters) {

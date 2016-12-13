@@ -69,6 +69,7 @@ import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.DeleteResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -226,6 +227,8 @@ public abstract class AbstractUpdatePerformer {
 
     /**
      * Loads all data for a specific event, including attendees, attachments and alarms.
+     * <p/>
+     * The parent folder identifier is set based on {@link AbstractUpdatePerformer#folder}
      *
      * @param id The identifier of the event to load
      * @return The event data
@@ -236,9 +239,8 @@ public abstract class AbstractUpdatePerformer {
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(I(id));
         }
-        event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
-        event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
-        event.setAlarms(storage.getAlarmStorage().loadAlarms(event.getId(), calendarUser.getId()));
+        event = Utils.loadAdditionalEventData(storage, calendarUser.getId(), event, EventField.values());
+        event.setFolderId(i(folder));
         return event;
     }
 
@@ -253,14 +255,13 @@ public abstract class AbstractUpdatePerformer {
     }
 
     protected Event loadExceptionData(int seriesID, RecurrenceId recurrenceID) throws OXException {
-        Event excpetion = storage.getEventStorage().loadException(seriesID, recurrenceID, null);
-        if (null == excpetion) {
+        Event exception = storage.getEventStorage().loadException(seriesID, recurrenceID, null);
+        if (null == exception) {
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(seriesID), String.valueOf(recurrenceID));
         }
-        excpetion.setAttendees(storage.getAttendeeStorage().loadAttendees(excpetion.getId()));
-        excpetion.setAttachments(storage.getAttachmentStorage().loadAttachments(excpetion.getId()));
-        excpetion.setAlarms(storage.getAlarmStorage().loadAlarms(excpetion.getId(), calendarUser.getId()));
-        return excpetion;
+        exception = Utils.loadAdditionalEventData(storage, calendarUser.getId(), exception, EventField.values());
+        exception.setFolderId(i(folder));
+        return exception;
     }
 
     protected UserizedFolder getFolder(int folderID) throws OXException {

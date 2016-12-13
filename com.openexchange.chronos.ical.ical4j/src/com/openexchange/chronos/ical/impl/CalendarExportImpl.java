@@ -165,6 +165,42 @@ public class CalendarExportImpl implements CalendarExport {
         }
     }
 
+    private VEvent exportEvent(Event event) throws OXException {
+        /*
+         * initialize original vEvent component if available
+         */
+        VEvent originalVEvent = null;
+        if (ComponentData.class.isInstance(event)) {
+            IFileHolder originalComponent = ((ComponentData) event).getComponent();
+            if (null != originalComponent) {
+                originalVEvent = ICalUtils.parseVEventComponent(originalComponent, parameters, warnings);
+            }
+        }
+        /*
+         * export event data & track timezones
+         */
+        VEvent vEvent = mapper.exportEvent(event, originalVEvent, parameters, warnings);
+        trackTimezones(event);
+        /*
+         * export any arbitrary properties
+         */
+        if (ComponentData.class.isInstance(event)) {
+            for (Property property : ICalUtils.exportProperties(((ComponentData) event).getProperties())) {
+                vEvent.getProperties().add(property);
+            }
+        }
+        /*
+         * export sub-components
+         */
+        List<Alarm> alarms = event.getAlarms();
+        if (null != alarms && 0 < alarms.size()) {
+            for (Alarm alarm : alarms) {
+                vEvent.getAlarms().add(exportAlarm(alarm));
+            }
+        }
+        return vEvent;
+    }
+
     private VAlarm exportAlarm(Alarm alarm) throws OXException {
         VAlarm originalVAlarm = null;
         if (ComponentData.class.isInstance(alarm)) {
@@ -174,25 +210,6 @@ public class CalendarExportImpl implements CalendarExport {
             }
         }
         return mapper.exportAlarm(alarm, originalVAlarm, parameters, warnings);
-    }
-
-    private VEvent exportEvent(Event event) throws OXException {
-        VEvent originalVEvent = null;
-        if (ComponentData.class.isInstance(event)) {
-            IFileHolder originalComponent = ((ComponentData) event).getComponent();
-            if (null != originalComponent) {
-                originalVEvent = ICalUtils.parseVEventComponent(originalComponent, parameters, warnings);
-            }
-        }
-        VEvent vEvent = mapper.exportEvent(event, originalVEvent, parameters, warnings);
-        List<Alarm> alarms = event.getAlarms();
-        if (null != alarms && 0 < alarms.size()) {
-            for (Alarm alarm : alarms) {
-                vEvent.getAlarms().add(exportAlarm(alarm));
-            }
-        }
-        trackTimezones(event);
-        return vEvent;
     }
 
     private void trackTimezones(Event event) {

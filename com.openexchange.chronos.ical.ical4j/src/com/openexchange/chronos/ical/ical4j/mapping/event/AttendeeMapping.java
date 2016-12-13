@@ -61,7 +61,6 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.ical.ComponentData;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
@@ -70,9 +69,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerAttendeeRef;
 import net.fortuna.ical4j.extensions.caldav.property.CalendarServerAttendeeComment;
-import net.fortuna.ical4j.extensions.caldav.property.CalendarServerPrivateComment;
 import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -113,28 +110,28 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
                     addConversionWarning(warnings, e, Property.ATTENDEE, e.getMessage());
                 }
             }
-            if (Boolean.TRUE.equals(parameters.get(ICalParameters.ATTENDEE_COMMENTS, Boolean.class))) {
-                properties = component.getProperties(CalendarServerAttendeeComment.PROPERTY_NAME);
-                removeProperties(component, CalendarServerAttendeeComment.PROPERTY_NAME);
-                for (Attendee attendee : attendees) {
-                    if (Strings.isNotEmpty(attendee.getComment())) {
-                        CalendarServerAttendeeComment property = getMatchingAttendeeComment(properties, attendee.getUri());
-                        if (null == property) {
-                            property = new CalendarServerAttendeeComment(CalendarServerAttendeeComment.FACTORY);
-                        }
-                        try {
-                            component.getProperties().add(exportAttendeeComment(attendee, property));
-                        } catch (URISyntaxException e) {
-                            addConversionWarning(warnings, e, CalendarServerAttendeeComment.PROPERTY_NAME, e.getMessage());
-                        }
-                    }
-                }
-            }
-            String attendeeComment = parameters.get(ICalParameters.PRIVATE_ATTENDEE_COMMENT, String.class);
-            removeProperties(component, CalendarServerPrivateComment.PROPERTY_NAME);
-            if (null != attendeeComment) {
-                component.getProperties().add(new CalendarServerPrivateComment(new ParameterList(), attendeeComment));
-            }
+            //            if (Boolean.TRUE.equals(parameters.get(ICalParameters.ATTENDEE_COMMENTS, Boolean.class))) {
+            //                properties = component.getProperties(CalendarServerAttendeeComment.PROPERTY_NAME);
+            //                removeProperties(component, CalendarServerAttendeeComment.PROPERTY_NAME);
+            //                for (Attendee attendee : attendees) {
+            //                    if (Strings.isNotEmpty(attendee.getComment())) {
+            //                        CalendarServerAttendeeComment property = getMatchingAttendeeComment(properties, attendee.getUri());
+            //                        if (null == property) {
+            //                            property = new CalendarServerAttendeeComment(CalendarServerAttendeeComment.FACTORY);
+            //                        }
+            //                        try {
+            //                            component.getProperties().add(exportAttendeeComment(attendee, property));
+            //                        } catch (URISyntaxException e) {
+            //                            addConversionWarning(warnings, e, CalendarServerAttendeeComment.PROPERTY_NAME, e.getMessage());
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //            String attendeeComment = parameters.get(ICalParameters.PRIVATE_ATTENDEE_COMMENT, String.class);
+            //            removeProperties(component, CalendarServerPrivateComment.PROPERTY_NAME);
+            //            if (null != attendeeComment) {
+            //                component.getProperties().add(new CalendarServerPrivateComment(new ParameterList(), attendeeComment));
+            //            }
         }
     }
 
@@ -150,10 +147,10 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
                 attendees.add(importAttendee(sanitize(property)));
             }
             object.setAttendees(attendees);
-            Property attendeeCommentProperty = component.getProperty(CalendarServerPrivateComment.PROPERTY_NAME);
-            if (null != attendeeCommentProperty && ComponentData.class.isInstance(object)) {
-                ((ComponentData) object).setParameter(ICalParameters.PRIVATE_ATTENDEE_COMMENT, attendeeCommentProperty.getValue());
-            }
+            //            Property attendeeCommentProperty = component.getProperty(CalendarServerPrivateComment.PROPERTY_NAME);
+            //            if (null != attendeeCommentProperty && ComponentData.class.isInstance(object)) {
+            //                ((ComponentData) object).setParameter(ICalParameters.PRIVATE_ATTENDEE_COMMENT, attendeeCommentProperty.getValue());
+            //            }
         }
     }
 

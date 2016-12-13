@@ -51,15 +51,17 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.fortuna.ical4j.model.component.VAlarm;
-import net.fortuna.ical4j.model.component.VEvent;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.AlarmComponent;
+import com.openexchange.chronos.ical.EventComponent;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.alarm.AlarmMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.event.EventMappings;
 import com.openexchange.chronos.ical.impl.ICalUtils;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VEvent;
 
 /**
  * {@link ICalMapper}
@@ -122,9 +124,9 @@ public class ICalMapper {
      * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      * @return The imported vEvent as contact
      */
-    public Event importVEvent(VEvent vEvent, Event event, ICalParameters parameters, List<OXException> warnings) {
+    public EventComponent importVEvent(VEvent vEvent, EventComponent event, ICalParameters parameters, List<OXException> warnings) {
         if (null == event) {
-            event = new Event();
+            event = new EventComponent();
         }
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         if (null == warnings) {
@@ -136,9 +138,9 @@ public class ICalMapper {
         return event;
     }
 
-    public Alarm importVAlarm(VAlarm vAlarm, Alarm alarm, ICalParameters parameters, List<OXException> warnings) {
+    public Alarm importVAlarm(VAlarm vAlarm, AlarmComponent alarm, ICalParameters parameters, List<OXException> warnings) {
         if (null == alarm) {
-            alarm = new Alarm();
+            alarm = new AlarmComponent();
         }
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         if (null == warnings) {

@@ -49,72 +49,20 @@
 
 package com.openexchange.chronos.ical;
 
-import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.DelegatingAlarm;
-import com.openexchange.java.Streams;
+import java.util.Map;
 
 /**
- * {@link AlarmComponent}
+ * {@link ICalProperty}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AlarmComponent extends DelegatingAlarm implements ComponentData {
+public interface ICalProperty {
 
-    private IFileHolder iCalHolder;
-    private List<ICalProperty> properties;
+    String getName();
 
-    /**
-     * Initializes a new {@link AlarmComponent}.
-     */
-    public AlarmComponent() {
-        this(new Alarm(), null);
-    }
+    String getValue();
 
-    /**
-     * Initializes a new {@link AlarmComponent}.
-     *
-     * @param delegate The underlying alarm delegate
-     * @param iCalHolder A file holder storing the original iCal component, or <code>null</code> if not available
-     */
-    public AlarmComponent(Alarm delegate, IFileHolder iCalHolder) {
-        super(delegate);
-        this.iCalHolder = iCalHolder;
-    }
-
-    /**
-     * Sets the file holder storing the original iCal component.
-     *
-     * @param iCalHolder A file holder storing the original iCal component
-     */
-    public void setComponent(IFileHolder iCalHolder) {
-        this.iCalHolder = iCalHolder;
-    }
-
-    @Override
-    public IFileHolder getComponent() {
-        return iCalHolder;
-    }
-
-    @Override
-    public void close() {
-        Streams.close(iCalHolder);
-    }
-
-    @Override
-    public List<ICalProperty> getProperties() {
-        return properties;
-    }
-
-    /**
-     * Sets the list of further arbitrary iCalendar properties associated with the component.
-     *
-     * @param properties The extra properties to set
-     */
-    public void setProperties(List<ICalProperty> properties) {
-        this.properties = properties;
-    }
+    Map<String, String> getParameters();
 
 }

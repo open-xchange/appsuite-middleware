@@ -135,8 +135,9 @@ public class CalendarImportImpl implements CalendarImport {
         for (Iterator<?> iterator = eventComponents.iterator(); iterator.hasNext();) {
             VEvent vEvent = (VEvent) iterator.next();
             EventComponent event = new EventComponent();
-            event.setAlarms(importAlarms(vEvent.getAlarms()));
             mapper.importVEvent(vEvent, event, parameters, warnings);
+            event.setProperties(ICalUtils.importProperties(vEvent, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
+            event.setAlarms(importAlarms(vEvent.getAlarms()));
             if (Boolean.TRUE.equals(parameters.get(ICalParameters.KEEP_COMPONENTS, Boolean.class))) {
                 event.setComponent(ICalUtils.exportComponent(vEvent, parameters));
             }
@@ -154,6 +155,7 @@ public class CalendarImportImpl implements CalendarImport {
             VAlarm vAlarm = (VAlarm) iterator.next();
             AlarmComponent alarm = new AlarmComponent();
             mapper.importVAlarm(vAlarm, alarm, parameters, warnings);
+            alarm.setProperties(ICalUtils.importProperties(vAlarm, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
             if (Boolean.TRUE.equals(parameters.get(ICalParameters.KEEP_COMPONENTS, Boolean.class))) {
                 alarm.setComponent(ICalUtils.exportComponent(vAlarm, parameters));
             }

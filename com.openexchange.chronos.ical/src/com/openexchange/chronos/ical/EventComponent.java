@@ -50,12 +50,11 @@
 package com.openexchange.chronos.ical;
 
 import java.io.Closeable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.java.Streams;
 
@@ -65,25 +64,26 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventComponent extends Event implements ComponentData {
+public class EventComponent extends DelegatingEvent implements ComponentData {
 
     private IFileHolder iCalHolder;
-    private Map<String, Object> parameters;
+    private List<ICalProperty> properties;
 
     /**
      * Initializes a new {@link EventComponent}.
      */
     public EventComponent() {
-        this(null);
+        this(new Event(), null);
     }
 
     /**
      * Initializes a new {@link EventComponent}.
      *
+     * @param delegate The underlying event delegate
      * @param iCalHolder A file holder storing the original iCal component, or <code>null</code> if not available
      */
-    public EventComponent(ThresholdFileHolder iCalHolder) {
-        super();
+    public EventComponent(Event delegate, ThresholdFileHolder iCalHolder) {
+        super(delegate);
         this.iCalHolder = iCalHolder;
     }
 
@@ -115,26 +115,17 @@ public class EventComponent extends Event implements ComponentData {
     }
 
     @Override
-    public <T> T getParameter(String name, Class<T> clazz) {
-        if (null == name || null == parameters) {
-            return null;
-        }
-        try {
-            return clazz.cast(parameters.get(name));
-        } catch (ClassCastException e) {
-            return null;
-        }
+    public List<ICalProperty> getProperties() {
+        return properties;
     }
-    @Override
-    public <T> void setParameter(String name, T value) {
-        if (null != name) {
-            if (null == parameters) {
-                parameters = new HashMap<String, Object>();
-            }
-            parameters.put(name, value);
-        } else if (null != parameters) {
-            parameters.remove(name);
-        }
+
+    /**
+     * Sets the list of further arbitrary iCalendar properties associated with the component.
+     *
+     * @param properties The extra properties to set
+     */
+    public void setProperties(List<ICalProperty> properties) {
+        this.properties = properties;
     }
 
 }

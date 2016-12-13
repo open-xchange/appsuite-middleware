@@ -50,7 +50,7 @@
 package com.openexchange.chronos.ical;
 
 import java.io.Closeable;
-
+import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
 
 /**
@@ -69,20 +69,10 @@ public interface ComponentData extends Closeable {
     IFileHolder getComponent();
 
     /**
-     * Gets the value of an arbitrary extended parameter.
+     * Gets a list of further arbitrary iCalendar properties associated with the component.
      *
-     * @param name The parameter name
-     * @param clazz The parameter value's class
-     * @return The parameter's value, or <code>null</code> if not set
+     * @return The extra properties, or <code>null</code> if not set
      */
-    <T> T getParameter(String name, Class<T> clazz);
-
-    /**
-     * Sets the value for an arbitrary extended parameter.
-     *
-     * @param name The parameter name
-     * @param value The parameter value, or <code>null</code> to remove the parameter
-     */
-    <T> void setParameter(String name, T value);
+    List<ICalProperty> getProperties();
 
 }
