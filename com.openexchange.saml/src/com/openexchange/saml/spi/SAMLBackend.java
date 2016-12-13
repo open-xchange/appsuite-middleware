@@ -158,6 +158,15 @@ public interface SAMLBackend {
     AuthenticationInfo resolveAuthnResponse(Response response, Assertion bearerAssertion, AuthnRequestInfo requestInfo) throws OXException;
 
     /**
+     * Gets the possible available access token from given assertion.
+     *
+     * @param assertion The assertion to get the access token from
+     * @return The access token or <code>null</code>
+     * @throws OXException If determining the OAuth access token fails
+     */
+    String getAccessToken(Assertion assertion) throws OXException;
+
+    /**
      * Resolves a logout request and determines which sessions are to be terminated. This method is only
      * called if single logout is activated. Otherwise you can simply return <code>null</code>.
      *

@@ -255,6 +255,11 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
                         if (samlCookieValue != null) {
                             session.setParameter(SAMLSessionParameters.SESSION_COOKIE, samlCookieValue);
                         }
+
+                        String accessToken = reservationState.get(SAMLSessionParameters.ACCESS_TOKEN);
+                        if (accessToken != null) {
+                            session.setParameter(Session.PARAM_XOAUTH2_TOKEN, accessToken);
+                        }
                     }
                 };
 

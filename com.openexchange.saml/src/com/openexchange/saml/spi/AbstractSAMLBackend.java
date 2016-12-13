@@ -100,6 +100,17 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     protected abstract AuthenticationInfo doResolveAuthnResponse(Response response, Assertion assertion) throws OXException;
 
     /**
+     * Gets the possible available access token from given assertion.
+     *
+     * @param assertion The assertion to get the access token from
+     * @return The access token or <code>null</code>
+     * @throws OXException If determining the OAuth access token fails
+     */
+    protected String doGetAccessToken(Assertion assertion) throws OXException {
+        return null;
+    }
+
+    /**
      * @see SAMLBackend#resolveLogoutRequest(LogoutRequest)
      */
     protected abstract LogoutInfo doResolveLogoutRequest(LogoutRequest request) throws OXException;
@@ -178,6 +189,11 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     public AuthenticationInfo resolveAuthnResponse(Response response, Assertion assertion, AuthnRequestInfo requestInfo) throws OXException {
         // if there is a need to use the AuthnRequestInfo, just override this method
         return doResolveAuthnResponse(response, assertion);
+    }
+
+    @Override
+    public String getAccessToken(Assertion assertion) throws OXException {
+        return doGetAccessToken(assertion);
     }
 
     @Override
