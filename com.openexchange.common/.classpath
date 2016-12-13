@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core-0.8.0.jar" sourcepath="lib/source/apache-mime4j-core-0.8.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom-0.8.0.jar" sourcepath="lib/source/apache-mime4j-dom-0.8.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-examples-0.8.0.jar" sourcepath="lib/source/apache-mime4j-examples-0.8.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-storage-0.8.0.jar" sourcepath="lib/source/apache-mime4j-storage-0.8.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jericho-html-3.4.jar" sourcepath="lib/jericho-html-3.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/boilerpipe-1.2.0.jar" sourcepath="lib/source/boilerpipe-sources-1.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.2.jar" sourcepath="lib/source/commons-collections-3.2.2-sources.jar"/>
@@ -10,7 +14,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/brownies-collections-0.9.6.jar" sourcepath="lib/source/brownies-collections-0.9.6-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/scribe-java-1.3.7.jar" sourcepath="lib/scribe-java-1.3.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.3.1.jar" sourcepath="lib/source/commons-fileupload-1.3.1-src.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-examples-0.7.2.jar" sourcepath="lib/source/apache-mime4j-examples-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrentlinkedhashmap-lru-1.3.2.jar" sourcepath="lib/concurrentlinkedhashmap-lru-1.3.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-compress-1.3.jar" sourcepath="lib/source/commons-compress-1.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/high-scale-lib-1.1.4.jar" sourcepath="lib/source/high-scale-lib-1.1.4-sources.jar"/>
@@ -18,9 +21,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.7.jar" sourcepath="lib/source/cssparser-0.9.7-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/backport-util-concurrent-3.1.jar" sourcepath="lib/backport-util-concurrent-3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-jms-api.jar" sourcepath="lib/source/jboss-jms-api-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core-0.7.2.jar" sourcepath="lib/source/apache-mime4j-core-0.7.2-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom-0.7.2.jar" sourcepath="lib/source/apache-mime4j-dom-0.7.2-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-storage-0.7.2.jar" sourcepath="lib/source/apache-mime4j-storage-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/automaton-1.11-8.jar" sourcepath="lib/source/automaton-1.11-8-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/gnu-rex.jar" sourcepath="lib/gnu-rex.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/rabin-hash-function-2.0.jar" sourcepath="lib/source/rabin-hash-function-2.0-src.jar"/>

@@ -315,11 +315,12 @@ public final class ImportAction extends AbstractMailAction {
     }
 
     private void validateRfc822Message(File rfc822File) throws IOException, OXException {
-        MimeConfig config = new MimeConfig();
-        config.setMaxLineLen(-1);
-        config.setMaxHeaderLen(-1);
-        config.setMaxHeaderCount(250);
-        config.setStrictParsing(true);
+        MimeConfig config = new MimeConfig.Builder()
+                                .setMaxLineLen(-1)
+                                .setMaxHeaderLen(-1)
+                                .setMaxHeaderCount(250)
+                                .setStrictParsing(true)
+                                .build();
 
         MimeStreamParser parser = new MimeStreamParser(config);
         parser.setContentHandler(DO_NOTHING_HANDLER);

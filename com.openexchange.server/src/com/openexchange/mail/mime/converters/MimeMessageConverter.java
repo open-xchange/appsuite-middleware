@@ -2423,10 +2423,11 @@ public final class MimeMessageConverter {
             headers = new HeaderCollection(128);
             if (useMime4j() && (part instanceof IMAPMessage)) {
                 final ContentHandler handler = new HeaderContentHandler(headers);
-                final MimeConfig config = new MimeConfig();
-                config.setMaxLineLen(-1);
-                config.setMaxHeaderLen(-1);
-                config.setMaxHeaderCount(-1);
+                final MimeConfig config = new MimeConfig.Builder()
+                                                .setMaxLineLen(-1)
+                                                .setMaxHeaderLen(-1)
+                                                .setMaxHeaderCount(-1)
+                                                .build();
                 final MimeStreamParser parser = new MimeStreamParser(config);
                 parser.setContentHandler(handler);
                 try {
