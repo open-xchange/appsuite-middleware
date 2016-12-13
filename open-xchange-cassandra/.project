@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>open-xchange-cassandra</name>
+	<comment></comment>
+	<projects>
+		<project>com.openexchange.nosql.cassandra</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.csc.dip.projectset.ProjectSetBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.csc.dip.projectset.ProjectSetNature</nature>
+	</natures>
+</projectDescription>
