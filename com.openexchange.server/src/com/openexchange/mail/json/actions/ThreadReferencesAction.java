@@ -172,9 +172,6 @@ public class ThreadReferencesAction extends AbstractMailAction {
         mailInterface.openFor(folderId);
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
         {
-            mailAccess = MailAccess.getInstance(session, fullnameArgument.getAccountId());
-            mailAccess.connect();
-
             MailConfig mailConfig = mailAccess.getMailConfig();
             MailCapabilities capabilities = mailConfig.getCapabilities();
 
