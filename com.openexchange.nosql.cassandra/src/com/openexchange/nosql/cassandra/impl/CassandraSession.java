@@ -47,63 +47,45 @@
  *
  */
 
-package com.openexchange.nosql.cassandra;
+package com.openexchange.nosql.cassandra.impl;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.MappingManager;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link CassandraService}
+ * {@link CassandraSession}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface CassandraService {
+public class CassandraSession {
+
+    private final Session session;
+    private final MappingManager mappingManager;
 
     /**
-     * Returns the Cassandra {@link Cluster} instance with the specified name
-     * 
-     * @return The Cassandra {@link Cluster} instance
-     * @throws OXException if there is no such Cassandra {@link Cluster} or any other error is occurred
+     * Initialises a new {@link CassandraSession}.
      */
-    Cluster getCluster() throws OXException;
+    public CassandraSession(Session session, MappingManager mappingManager) {
+        super();
+        this.session = session;
+        this.mappingManager = mappingManager;
+    }
 
     /**
-     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}. Note that the returned
-     * {@link Session} is not bound to any keyspace, meaning that all tables in the CQL queries
-     * performed with that {@link Session} will have to be prefixed with the keyspace
-     * 
-     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster}
-     * @throws OXException if the Cassandra {@link Session} cannot be returned
+     * Gets the session
+     *
+     * @return The session
      */
-    Session getSession() throws OXException;
+    public Session getSession() {
+        return session;
+    }
 
     /**
-     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}
-     * 
-     * @param keyspace The keyspace name
-     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified keyspace
-     * @throws OXException if there is no such Cassandra keyspace or if the Cassandra {@link Session} cannot be returned
+     * Gets the mappingManager
+     *
+     * @return The mappingManager
      */
-    Session getSession(String keyspace) throws OXException;
-
-    /**
-     * Returns a Cassandra {@link Session} for an asynchronous query
-     * 
-     * @param keyspace The keyspace name
-     * @return The Cassandra {@link Session} encapsulated in a {@link ListenableFuture} object
-     * @throws OXException If the Cassandra {@link Session} cannot be returned
-     */
-    ListenableFuture<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException;
-
-    /**
-     * Returns a {@link MappingManager} for the specified keyspace.
-     * 
-     * @param keyspace The keyspace for which to get the {@link MappingManager}
-     * @return The {@link MappingManager} bound to the specified keyspace
-     * @throws OXException if the {@link MappingManager} cannot be returned
-     */
-    MappingManager getMappingManager(String keyspace) throws OXException;
+    public MappingManager getMappingManager() {
+        return mappingManager;
+    }
 }
