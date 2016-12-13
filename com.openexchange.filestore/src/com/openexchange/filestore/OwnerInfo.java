@@ -51,17 +51,20 @@ package com.openexchange.filestore;
 
 /**
  * {@link OwnerInfo} - Carries the owner information for an initialized file storage.
+ * <p>
+ * The file storage owner determines to what <code>'filestore_usage'</code> entry the quota gets accounted.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
+ * @see #NO_OWNER
  */
 public class OwnerInfo {
 
-    /** The owner information signaling no dedicated file storage is used */
+    /** The owner information signaling no dedicated file storage is used, but the context-associated one. */
     public static final OwnerInfo NO_OWNER = new OwnerInfo(0, false);
 
     /**
-     * Creates a new builder instance.
+     * Creates a new builder instance with owner set to <code>0</code> (zero) and master flag set to <code>true</code>.
      *
      * @return The new builder instance
      */
@@ -79,6 +82,8 @@ public class OwnerInfo {
 
         Builder() {
             super();
+            ownerId = 0;
+            master = true;
         }
 
         /**
@@ -121,7 +126,7 @@ public class OwnerInfo {
     /**
      * Initializes a new {@link OwnerInfo}.
      */
-    OwnerInfo(int ownerId, boolean master) {
+    protected OwnerInfo(int ownerId, boolean master) {
         super();
         this.ownerId = ownerId;
         this.master = master;
