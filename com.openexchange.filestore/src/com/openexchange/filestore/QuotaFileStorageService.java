@@ -62,7 +62,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface QuotaFileStorageService {
 
     /**
-     * Gets a usage-accounting, but unlimited {@link QuotaFileStorage} instance for specified arguments.
+     * Gets a usage-accounting, but unlimited {@link QuotaFileStorage} instance rather for administrative purposes using specified arguments.
      * <p>
      * This methods is intended to be used by provisioning-related operations that do not honor possible quote-exceeding file operations.
      *
