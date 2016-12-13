@@ -51,7 +51,8 @@ package com.openexchange.filestore;
 
 
 /**
- * {@link Info} - The info passed along with obtaining a certain file storage.
+ * {@link Info} - The info passed along with obtaining a certain file storage;<br>
+ * e.g. revealing the intended purpose for the requested file storage representation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
