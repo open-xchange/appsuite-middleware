@@ -59,6 +59,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.log.audit.AuditLogService;
+import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mail.transport.listener.MailTransportListener;
@@ -111,6 +112,7 @@ public final class SMTPActivator extends HousekeepingActivator {
             trackService(NoReplyConfigFactory.class);
             trackService(AuditLogService.class);
             trackService(OAuthService.class);
+            trackService(AuthenticationFailedHandler.class);
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             openTrackers();
 

@@ -84,6 +84,7 @@ import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
@@ -786,6 +787,18 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private OXException handleConnectFailure(OXException e, MailConfig mailConfig) {
         if (!MimeMailExceptionCode.LOGIN_FAILED.equals(e) && !MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
             return e;
+        }
+
+        if(MimeMailExceptionCode.LOGIN_FAILED.equals(e) && mailConfig.getAccountId()==MailAccount.DEFAULT_ID){
+            AuthenticationFailedHandler handler = MailJSONActivator.SERVICES.get().getOptionalService(AuthenticationFailedHandler.class);
+            if(handler!=null){
+                try {
+                    handler.handleAuthenticationFailed(mailConfig.getSession());
+                    return e;
+                } catch (OXException e1) {
+                    return e1;
+                }
+            }
         }
 
         // Authentication failed... Check for OAuth-based authentication

@@ -54,6 +54,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
@@ -103,6 +104,8 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     private final String identifier;
     private final Set<Device> supportedDevices;
     private final Set<OnboardingType> supportedTypes;
+
+    private static final Logger LOG = Logger.getLogger(MailOnboardingProvider.class.getName());
 
     /**
      * Initializes a new {@link MailOnboardingProvider}.
@@ -216,7 +219,13 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             String imapLogin;
 
             if (customSource) {
-                imapLogin = services.getService(CustomLoginSource.class).getImapLogin(session);
+                CustomLoginSource customLoginSource = services.getService(CustomLoginSource.class);
+                if(customLoginSource==null){
+                    LOG.warning("Unable to find any CustomLoginSource services! Falling back to imap config.");
+                    imapLogin = imapConfig.getLogin();
+                } else {
+                    imapLogin = customLoginSource.getImapLogin(session);
+                }
             } else {
                 imapLogin = imapConfig.getLogin();
             }
@@ -247,7 +256,13 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             String smtpLogin;
 
             if (customSource) {
-                smtpLogin = services.getService(CustomLoginSource.class).getSmtpLogin(session);
+                CustomLoginSource customLoginSource = services.getService(CustomLoginSource.class);
+                if(customLoginSource==null){
+                    LOG.warning("Unable to find any CustomLoginSource services! Falling back to smtp config.");
+                    smtpLogin = smtpConfig.getLogin();
+                }else {
+                    smtpLogin = customLoginSource.getSmtpLogin(session);
+                }
             } else {
                 smtpLogin = smtpConfig.getLogin();
             }

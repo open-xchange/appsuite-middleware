@@ -704,7 +704,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         return secure ? "https" : "http";
     }
 
-    private void enhanceAuthInfo(AuthenticationInfo authInfo, Assertion bearerAssertion) {
+    private void enhanceAuthInfo(AuthenticationInfo authInfo, Assertion bearerAssertion) throws OXException {
         Map<String, String> properties = authInfo.getProperties();
         String sessionIndex = extractSessionIndex(bearerAssertion);
         if (sessionIndex != null) {
@@ -743,6 +743,15 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         String subjectID = extractSubjectID(bearerAssertion);
         if (subjectID != null) {
             properties.put(SAMLSessionParameters.SUBJECT_ID, subjectID);
+        }
+
+        /*
+         * The bearer assertion might include an Attribute statement, with an attribute conforming to the xXMLml format of the
+         * OAuth 2 specification.
+         */
+        String accessToken = extractAccessToken(bearerAssertion);
+        if (accessToken != null) {
+            properties.put(SAMLSessionParameters.ACCESS_TOKEN, accessToken);
         }
 
         /*
@@ -1075,6 +1084,10 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         }
 
         return null;
+    }
+
+    private String extractAccessToken(Assertion assertion) throws OXException {
+        return backend.getAccessToken(assertion);
     }
 
     private static String generateID() {

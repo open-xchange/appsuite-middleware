@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.api;
 
-
 /**
  * {@link AuthType} - The authentication type.
  *
@@ -72,6 +71,22 @@ public enum AuthType {
 
     private AuthType(String name) {
         this.name = name;
+    }
+
+    /**
+     * Parses specified string into an AuthType.
+     *
+     * @param authTypeStr The string to parse to an AuthType
+     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
+     */
+    public static final AuthType parse(final String authTypeStr) {
+        final AuthType[] values = AuthType.values();
+        for (final AuthType authType : values) {
+            if (authType.name.equalsIgnoreCase(authTypeStr)) {
+                return authType;
+            }
+        }
+        return null;
     }
 
     /**

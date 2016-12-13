@@ -154,21 +154,27 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
      * @return A valid user identifier in case usage/limit service should be called; otherwise <code>0</code> (zero)
      */
     private int considerService() {
-        if (purpose == Purpose.ADMINISTRATIVE) {
-            // Do not invoke services for administrative purpose(s)
-            return 0;
-        }
+        /*-
+         * Expression reflects:
+         *
+         *  if (purpose == Purpose.ADMINISTRATIVE) {
+         *    // Do not invoke services for administrative purpose(s)
+         *    return 0;
+         *  }
+         *
+         *  // Check for a dedicated storage
+         *  int ownerId = ownerInfo.getOwnerId();
+         *  boolean dedicatedStorage = ownerId > 0;
+         *  if (dedicatedStorage && ownerInfo.isMaster()) {
+         *    // User-associated storage is valid
+         *    return ownerId;
+         *  }
+         *
+         *  // Do not invoke services as this storage is not adequate for call-backs to those services
+         *  return 0;
+         */
 
-        // Check for a dedicated storage
-        int ownerId = ownerInfo.getOwnerId();
-        boolean dedicatedStorage = ownerId > 0;
-        if (dedicatedStorage && ownerInfo.isMaster()) {
-            // User-associated storage is valid
-            return ownerId;
-        }
-
-        // Do not invoke services as this storage is not adequate for call-backs to those services
-        return 0;
+        return (purpose != Purpose.ADMINISTRATIVE) && ownerInfo.isMaster() && (ownerInfo.getOwnerId() > 0) ? ownerInfo.getOwnerId() : 0;
     }
 
     private DatabaseService getDatabaseService() throws OXException {
