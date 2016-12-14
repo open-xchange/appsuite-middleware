@@ -59,6 +59,7 @@ import com.openexchange.socketio.server.SocketIOManager;
 import com.openexchange.socketio.websocket.WsSocketIOServlet;
 import com.openexchange.socketio.websocket.WsTransport;
 import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocketListener;
 
@@ -88,7 +89,7 @@ public class SocketIoActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, TimerService.class };
+        return new Class<?>[] { HttpService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override
