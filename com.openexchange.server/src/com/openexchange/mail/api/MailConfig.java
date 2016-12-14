@@ -768,7 +768,7 @@ public abstract class MailConfig {
         // Assign password
         if (account.isDefaultAccount()) {
             AuthType authType = getConfiguredAuthType(session);
-            if (authType != null && authType.equals(AuthType.OAUTH)) {
+            if (AuthType.OAUTH == authType) {
                 Object obj = session.getParameter(Session.PARAM_XOAUTH2_TOKEN);
                 if (obj == null) {
                     throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
