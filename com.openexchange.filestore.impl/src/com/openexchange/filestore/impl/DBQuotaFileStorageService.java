@@ -296,7 +296,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
         // A user-specific file storage; determine its owner
         int nextOwnerId = user.getFileStorageOwner();
-        if (nextOwnerId <= 0) {
+        if (nextOwnerId <= 0 || nextOwnerId == userId) {
             // User is the owner
             return newStorageInfoFor(OwnerInfo.builder().setOwnerId(userId).setMaster(true).build(), user);
         }
@@ -304,17 +304,13 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         // Separate owner (chain)
         User owner;
         do {
-            owner = nextOwnerId == userId ? user : userService.getUser(nextOwnerId, context);
+            owner = userService.getUser(nextOwnerId, context);
             nextOwnerId = owner.getFileStorageOwner();
         } while (nextOwnerId > 0);
 
         if (owner.getFilestoreId() <= 0) {
             // Huh... Owner has no file storage set
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
-        }
-
-        if (owner.getId() == userId) {
-            return newStorageInfoFor(OwnerInfo.builder().setOwnerId(userId).setMaster(true).build(), user);
         }
 
         return newStorageInfoFor(OwnerInfo.builder().setOwnerId(owner.getId()).setMaster(false).build(), owner);
