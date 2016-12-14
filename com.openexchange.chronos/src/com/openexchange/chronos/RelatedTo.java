@@ -47,59 +47,48 @@
  *
  */
 
-package com.openexchange.chronos.ical;
-
-import java.util.Map;
+package com.openexchange.chronos;
 
 /**
- * {@link DefaultICalProperty}
+ * {@link RelatedTo}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
+ * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.5">RFC 5545, section 3.8.4.5</a>
  */
-public class DefaultICalProperty implements ICalProperty {
+public class RelatedTo {
 
-    private final String name;
+    private final String relType;
     private final String value;
-    private final Map<String, String> parameters;
 
     /**
-     * Initializes a new {@link DefaultICalProperty}.
+     * Initializes a new {@link RelatedTo}.
      *
-     * @param name The property name
-     * @param value The value
-     * @param parameters The parameters, or <code>null</code> if there are none
+     * @param relType The relationship type, or <code>null</code> for the default <code>PARENT</code> relationship
+     * @param value The value, i.e. the unique identifier of the referenced component
      */
-    public DefaultICalProperty(String name, String value, Map<String, String> parameters) {
+    public RelatedTo(String relType, String value) {
         super();
-        this.name = name;
+        this.relType = relType;
         this.value = value;
-        this.parameters = parameters;
     }
 
     /**
-     * Initializes a new {@link DefaultICalProperty}, without further parameters.
+     * Gets the relType
      *
-     * @param name The property name
-     * @param value The value
+     * @return The relType
      */
-    public DefaultICalProperty(String name, String value) {
-        this(name, value, null);
+    public String getRelType() {
+        return relType;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
+    /**
+     * Gets the value
+     *
+     * @return The value
+     */
     public String getValue() {
         return value;
-    }
-
-    @Override
-    public Map<String, String> getParameters() {
-        return parameters;
     }
 
 }

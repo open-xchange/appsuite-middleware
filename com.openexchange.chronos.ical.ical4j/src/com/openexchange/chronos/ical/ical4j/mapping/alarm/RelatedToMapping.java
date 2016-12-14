@@ -47,59 +47,55 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 
-import java.util.Map;
+import java.util.List;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.RelatedTo;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.parameter.RelType;
 
 /**
- * {@link DefaultICalProperty}
+ * {@link RelatedToMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultICalProperty implements ICalProperty {
-
-    private final String name;
-    private final String value;
-    private final Map<String, String> parameters;
+public class RelatedToMapping extends AbstractICalMapping<VAlarm, Alarm> {
 
     /**
-     * Initializes a new {@link DefaultICalProperty}.
-     *
-     * @param name The property name
-     * @param value The value
-     * @param parameters The parameters, or <code>null</code> if there are none
+     * Initializes a new {@link RelatedToMapping}.
      */
-    public DefaultICalProperty(String name, String value, Map<String, String> parameters) {
-        super();
-        this.name = name;
-        this.value = value;
-        this.parameters = parameters;
-    }
+	public RelatedToMapping() {
+		super();
+	}
 
-    /**
-     * Initializes a new {@link DefaultICalProperty}, without further parameters.
-     *
-     * @param name The property name
-     * @param value The value
-     */
-    public DefaultICalProperty(String name, String value) {
-        this(name, value, null);
-    }
+	@Override
+	public void export(Alarm object, VAlarm component, ICalParameters parameters, List<OXException> warnings) {
+        RelatedTo value = object.getRelatedTo();
+        removeProperties(component, Property.RELATED_TO);
+        if (null != value) {
+            net.fortuna.ical4j.model.property.RelatedTo property = new net.fortuna.ical4j.model.property.RelatedTo(value.getValue());
+            if (null != value.getRelType()) {
+                property.getParameters().add(new RelType(value.getRelType()));
+            }
+            component.getProperties().add(property);
+        }
+	}
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public Map<String, String> getParameters() {
-        return parameters;
-    }
+	@Override
+	public void importICal(VAlarm component, Alarm object, ICalParameters parameters, List<OXException> warnings) {
+        Property property = component.getProperty(Property.RELATED_TO);
+        if (null == property) {
+            object.setRelatedTo(null);
+        } else {
+            object.setRelatedTo(new RelatedTo(optParameterValue(property, Parameter.RELTYPE), property.getValue()));
+		}
+	}
 
 }

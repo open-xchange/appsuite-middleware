@@ -117,12 +117,12 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public String getRelatedTo() {
+    public RelatedTo getRelatedTo() {
         return delegate.getRelatedTo();
     }
 
     @Override
-    public void setRelatedTo(String relatedTo) {
+    public void setRelatedTo(RelatedTo relatedTo) {
         delegate.setRelatedTo(relatedTo);
     }
 

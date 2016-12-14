@@ -64,7 +64,7 @@ public class Alarm {
     String uid;
     int eventId;
     String iCalId;
-    String relatedTo;
+    RelatedTo relatedTo;
 
     Trigger trigger;
     Date acknowledged;
@@ -150,7 +150,7 @@ public class Alarm {
      *
      * @return The relatedTo
      */
-    public String getRelatedTo() {
+    public RelatedTo getRelatedTo() {
         return relatedTo;
     }
 
@@ -159,7 +159,7 @@ public class Alarm {
      *
      * @param relatedTo The relatedTo to set
      */
-    public void setRelatedTo(String relatedTo) {
+    public void setRelatedTo(RelatedTo relatedTo) {
         this.relatedTo = relatedTo;
     }
 

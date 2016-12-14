@@ -52,11 +52,9 @@ package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import net.fortuna.ical4j.model.component.VAlarm;
-
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import net.fortuna.ical4j.model.component.VAlarm;
 
 /**
  * {@link AlarmMappings}
@@ -74,7 +72,8 @@ public class AlarmMappings {
 		new UidMapping(),
 		new DescriptionMapping(),
 		new ActionMapping(),
-		new AcknowledgedMapping()
+		new AcknowledgedMapping(),
+		new RelatedToMapping()
 	));
 
     /**

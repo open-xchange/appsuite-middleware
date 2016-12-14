@@ -69,9 +69,14 @@ public enum AlarmAction {
     DISPLAY,
 
     /**
-     *
-     */
+    *
+    */
     EMAIL,
+
+    /**
+    *
+    */
+    NONE,
 
     ;
 }
