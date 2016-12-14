@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.Map;
 import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
+import com.openexchange.pns.Interest;
 import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 import com.openexchange.websockets.WebSocket;
@@ -96,7 +97,7 @@ public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResol
 
     @Override
     public Map<String, WebSocketClient> getSupportedClients() {
-        return Collections.singletonMap(Client.APPSUITE_UI.getClientId(), new WebSocketClient(Client.APPSUITE_UI.getClientId(), PATH_FILTER_APPSUITE_UI, true));
+        return Collections.singletonMap(Client.APPSUITE_UI.getClientId(), new WebSocketClient(Client.APPSUITE_UI.getClientId(), PATH_FILTER_APPSUITE_UI, Interest.interestsFor("ox:mail:*", "ox:calendar:*")));
     }
 
 }
