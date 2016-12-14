@@ -205,7 +205,7 @@ public interface Session {
     public static final String PARAM_COOKIE_REFRESH_TIMESTAMP = "__session.cookierefresh".intern();
 
     /**
-     * The parameter for optional OAuth identifier associated with a session intended for mail access & transport.
+     * The parameter for optional OAuth token associated with a session intended for mail access & transport.
      *
      * @type <code>java.lang.String</code>
      */
