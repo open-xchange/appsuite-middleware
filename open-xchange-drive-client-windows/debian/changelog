@@ -1,3 +1,9 @@
+open-xchange-drive-client-windows (7.8.1-28) stable; urgency=medium
+
+  * Build for patch 2016-12-16 (3824)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 13 Dec 2016 12:18:22 +0100
+
 open-xchange-drive-client-windows (7.8.1-27) stable; urgency=medium
 
   * Build for patch 2016-11-28 (3758)
