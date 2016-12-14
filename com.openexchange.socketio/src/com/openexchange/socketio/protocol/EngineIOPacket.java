@@ -24,13 +24,15 @@
 package com.openexchange.socketio.protocol;
 
 import java.io.InputStream;
+import com.openexchange.java.Streams;
 
 /**
  * @author Alexander Sova (bird@codeminders.com)
  */
 public class EngineIOPacket {
 
-    public enum Type {
+    /** The enumeration of known Engine.IO types */
+    public static enum Type {
         OPEN(0),
         CLOSE(1),
         PING(2),
@@ -40,12 +42,17 @@ public class EngineIOPacket {
         NOOP(6),
         UNKNOWN(-1);
 
-        private int value;
+        private final int value;
 
-        Type(int value) {
+        private Type(int value) {
             this.value = value;
         }
 
+        /**
+         * Gets the numeric value associated with this Engine.IO type
+         *
+         * @return The numeric value
+         */
         public int value() {
             return value;
         }
@@ -72,10 +79,18 @@ public class EngineIOPacket {
         }
     }
 
+    // ------------------------------------------------------------------------
+
     private final Type type;
     private final String textData;
     private final InputStream binaryData;
 
+    /**
+     * Initializes a new {@link EngineIOPacket} with text data.
+     *
+     * @param type The type
+     * @param data The text
+     */
     public EngineIOPacket(Type type, String data) {
         super();
         this.type = type;
@@ -83,11 +98,29 @@ public class EngineIOPacket {
         binaryData = null;
     }
 
-    //TODO: support byte[] in addtion to InputStream
+    /**
+     * Initializes a new {@link EngineIOPacket} with binary data.
+     *
+     * @param type The type
+     * @param binaryData The binary data
+     */
     public EngineIOPacket(Type type, InputStream binaryData) {
         super();
         this.type = type;
         this.binaryData = binaryData;
+        textData = null;
+    }
+
+    /**
+     * Initializes a new {@link EngineIOPacket} with binary data.
+     *
+     * @param type The type
+     * @param binaryData The binary data
+     */
+    public EngineIOPacket(Type type, byte[] binaryData) {
+        super();
+        this.type = type;
+        this.binaryData = Streams.newByteArrayInputStream(binaryData);
         textData = null;
     }
 
@@ -105,6 +138,21 @@ public class EngineIOPacket {
 
     public InputStream getBinaryData() {
         return binaryData;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        if (type != null) {
+            builder.append(type.name());
+        }
+        if (textData != null && textData.length() > 0) {
+            builder.append(" with text: \"").append(textData).append('"');
+        }
+        if (binaryData != null) {
+            builder.append(" with binary data");
+        }
+        return builder.toString();
     }
 
 }

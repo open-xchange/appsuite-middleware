@@ -49,7 +49,7 @@ import com.openexchange.socketio.protocol.SocketIOProtocol;
 import com.openexchange.timer.ScheduledTimerTask;
 
 /**
- * A SocketIO session.
+ * A Socket.IO session.
  * <ul>
  * <li>Provides access to the active connection</li>
  * <li>Holds open sockets (using the active connection) per different namespace</li>
@@ -498,7 +498,7 @@ public class Session implements DisconnectListener {
         }
     }
 
-    private synchronized void upgradeConnection(TransportConnection connection) {
+    private void upgradeConnection(TransportConnection connection) {
         LOGGER.debug("Upgrading from {} to {}", activeConnection.getTransport(), connection.getTransport());
         activeConnection = connection;
     }
