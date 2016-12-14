@@ -27,6 +27,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-authorization-standard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-blackwhitelist"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-calendar-printing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-cassandra"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-configjump-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-contact-storage-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-datamining"/>
