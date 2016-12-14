@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 17
+%define        ox_release 18
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -83,6 +83,11 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     # SoftwareChange_Request-3414
     sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
 
+    # SoftwareChange_Request-3823
+    pfile=/opt/open-xchange/etc/client-onboarding-mail.properties
+    ox_add_property com.openexchange.client.onboarding.mail.imap.login.customsource false ${pfile}
+    ox_add_property com.openexchange.client.onboarding.mail.smtp.login.customsource false ${pfile}
+
 fi
 
 %clean
@@ -104,6 +109,8 @@ fi
 /opt/open-xchange/sbin/*
 
 %changelog
+* Tue Dec 13 2016 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2016-12-12 (3817)
 * Mon Dec 05 2016 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2016-12-05 (3763)
 * Sat Nov 12 2016 Thorben Betten <thorben.betten@open-xchange.com>
