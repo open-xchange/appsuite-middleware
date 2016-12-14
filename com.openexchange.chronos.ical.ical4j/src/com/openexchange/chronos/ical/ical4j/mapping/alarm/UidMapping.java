@@ -49,12 +49,11 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.property.Uid;
-
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 
 /**
  * {@link UidMapping}
@@ -73,7 +72,7 @@ public class UidMapping extends ICalTextMapping<VAlarm, Alarm> {
 
 	@Override
 	protected String getValue(Alarm object) {
-		return object.getDescription();
+        return object.getUid();
 	}
 
 	@Override

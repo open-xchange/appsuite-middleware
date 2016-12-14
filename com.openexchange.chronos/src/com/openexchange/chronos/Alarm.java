@@ -74,6 +74,25 @@ public class Alarm {
     int repeat;
 
     /**
+     * Initializes a new {@link Alarm}.
+     */
+    public Alarm() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link Alarm}.
+     *
+     * @param trigger The trigger to apply
+     * @param action The action to apply
+     */
+    public Alarm(Trigger trigger, AlarmAction action) {
+        this();
+        this.trigger = trigger;
+        this.action = action;
+    }
+
+    /**
      * Gets the id
      *
      * @return The id

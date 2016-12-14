@@ -69,6 +69,33 @@ public class Trigger {
 	private Related related;
 	private Date dateTime;
 
+    /**
+     * Initializes a new {@link Trigger}.
+     */
+    public Trigger() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link Trigger}.
+     *
+     * @param duration The duration to apply
+     */
+    public Trigger(String duration) {
+        this();
+        this.duration = duration;
+    }
+
+    /**
+     * Initializes a new {@link Trigger}.
+     *
+     * @param dateTime The dateTime to apply
+     */
+    public Trigger(Date dateTime) {
+        this();
+        this.dateTime = dateTime;
+    }
+
 	public String getDuration() {
 		return duration;
 	}
