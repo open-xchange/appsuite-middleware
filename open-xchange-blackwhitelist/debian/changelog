@@ -1,3 +1,9 @@
+open-xchange-blackwhitelist (7.8.2-19) stable; urgency=medium
+
+  * Build for patch 2016-12-19 (3813)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 14 Dec 2016 10:02:30 +0100
+
 open-xchange-blackwhitelist (7.8.2-18) stable; urgency=medium
 
   * Build for patch 2016-12-12 (3817)
