@@ -30,7 +30,8 @@ import com.openexchange.socketio.server.SocketIOProtocolException;
  */
 public abstract class SocketIOPacket {
 
-    public enum Type {
+    /** The enumeration of known Socket.IO types */
+    public static enum Type {
         CONNECT(0),
         DISCONNECT(1),
         EVENT(2),
@@ -39,12 +40,17 @@ public abstract class SocketIOPacket {
         BINARY_EVENT(5),
         BINARY_ACK(6);
 
-        private int value;
+        private final int value;
 
-        Type(int value) {
+        private Type(int value) {
             this.value = value;
         }
 
+        /**
+         * Gets the numeric value associated with this Socket.IO type
+         *
+         * @return The numeric value
+         */
         public int value() {
             return value;
         }
