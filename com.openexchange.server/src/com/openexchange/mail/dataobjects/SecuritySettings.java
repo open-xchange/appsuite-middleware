@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.dataobjects;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * {@link SecuritySettings} - (Immutable) Security settings for mail transport.
  *
@@ -201,6 +204,14 @@ public class SecuritySettings {
      */
     public String getAuthentication() {
         return authentication;
+    }
+
+    public String getJsonString() throws JSONException {
+        JSONObject settings = new JSONObject();
+        settings.append("encrypt", this.isEncrypt());
+        settings.append("sign", this.isSign());
+        settings.append("inline", this.isPgpInline());
+        return (settings.toString());
     }
 
 }
