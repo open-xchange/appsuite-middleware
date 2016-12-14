@@ -379,5 +379,13 @@ public abstract class OXUserStorageInterface {
      */
     public abstract void deleteAllRecoveryData (final Context ctx, final Connection con ) throws StorageException;
 
+    /**
+     * Delete default folder flags from media folders
+     * @param ctx
+     * @param userId
+     * @throws StorageException
+     */
+    public abstract void deleteDefaultFolderFlags(Context ctx, User user) throws StorageException;
+
 
 }
