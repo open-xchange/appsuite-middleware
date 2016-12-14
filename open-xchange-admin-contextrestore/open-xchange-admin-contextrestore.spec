@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -71,6 +71,8 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
+* Wed Dec 14 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2016-12-19 (3814)
 * Tue Dec 13 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2016-12-14 (3806)
 * Tue Dec 06 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
