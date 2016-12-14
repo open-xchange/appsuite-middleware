@@ -68,6 +68,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
@@ -78,6 +79,8 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.api.MailConfig.PasswordSource;
+import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -382,12 +385,17 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         try {
             // Create a mail access instance
             int accountId = accountDescription.getId();
+            boolean isDefault = accountId==MailAccount.DEFAULT_ID;
             MailAccess<?, ?> mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
             mailConfig = mailAccess.getMailConfig();
             // Set auth-type, login and password
             mailConfig.setAuthType(accountDescription.getAuthType());
-            mailConfig.setLogin(accountDescription.getLogin());
-            mailConfig.setPassword(accountDescription.getPassword());
+            if ( !Strings.isEmpty(accountDescription.getLogin())) {
+                mailConfig.setLogin(accountDescription.getLogin());
+            }
+            if ( !isDefault || !PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource())) {
+                mailConfig.setPassword(accountDescription.getPassword());
+            }
             // Set server and port
             final URI uri;
             try {
@@ -395,9 +403,11 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             } catch (final URISyntaxException e) {
                 throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
             }
-            if (null != uri) {
-                mailConfig.setServer(uri.getHost());
-                mailConfig.setPort(uri.getPort());
+            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
+                if (null != uri) {
+                    mailConfig.setServer(uri.getHost());
+                    mailConfig.setPort(uri.getPort());
+                }
             }
             mailConfig.setSecure(accountDescription.isMailSecure());
             mailAccess.setCacheable(false);
