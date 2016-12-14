@@ -209,7 +209,16 @@ public class CalendarExportImpl implements CalendarExport {
                 originalVAlarm = ICalUtils.parseVAlarmComponent(originalComponent, parameters, warnings);
             }
         }
-        return mapper.exportAlarm(alarm, originalVAlarm, parameters, warnings);
+        VAlarm vAlarm = mapper.exportAlarm(alarm, originalVAlarm, parameters, warnings);
+        /*
+         * export any arbitrary properties
+         */
+        if (ComponentData.class.isInstance(alarm)) {
+            for (Property property : ICalUtils.exportProperties(((ComponentData) alarm).getProperties())) {
+                vAlarm.getProperties().add(property);
+            }
+        }
+        return vAlarm;
     }
 
     private void trackTimezones(Event event) {
