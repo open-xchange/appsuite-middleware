@@ -2898,4 +2898,30 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     public void delete(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         delete(ctx, user, null, auth);
     }
+
+    @Override
+    public void deleteDefaultFolderFlags(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        if (null == ctx) {
+            throw new InvalidDataException("Invalid context id.");
+        }
+        if (null == user) {
+            throw new InvalidCredentialsException("Invalid user id.");
+        }
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            contextcheck(ctx);
+            user = getData(ctx, user, auth);
+            oxu.deleteDefaultFolderFlags(ctx, user);
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+        
+    }
 }

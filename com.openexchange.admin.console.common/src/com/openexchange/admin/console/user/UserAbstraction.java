@@ -676,6 +676,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_CONFIG_LONG = "config";
     protected static final String OPT_REMOVE_CONFIG_LONG = "remove-config";
     protected static final String OPT_PRIMARY_ACCOUNT_NAME = "primary-account-name";
+    
+    protected CLIOption removeDefaultFolderFlagsOption = null;
+    protected static final String OPT_REMOVE_DEFAULT_FOLDER_FLAGS = "remove-default-folder-flags";
 
     // For right error output
     protected String username = null;
@@ -1872,6 +1875,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         // Their values are set through AdminParser's dynamic options!
         this.removeConfigOption_NO_READ = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter'", false, false);
     }
+    
+    protected final void setRemoveDefaultFolderFlagsOption(final AdminParser adminParser) {
+        this.removeDefaultFolderFlagsOption = setLongOpt(adminParser, OPT_REMOVE_DEFAULT_FOLDER_FLAGS, "Remove the default folder flags for media folders", false, false);
+    }
 
     /**
      * @param theMethods
@@ -2393,6 +2400,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         setConfigOption(parser);
         setRemoveConfigOption(parser);
+        setRemoveDefaultFolderFlagsOption(parser);
 
         this.email1Option = setLongOpt(parser, OPT_EMAIL1_LONG, "stringvalue", "Email1", true, false, true);
         this.mailenabledOption = setSettableBooleanLongOpt(parser, OPT_MAILENABLED_LONG, "true / false", "Mailenabled", true, false, true);

@@ -135,7 +135,9 @@ import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -3624,6 +3626,94 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
+        }
+    }
+
+    @Override
+    public void deleteDefaultFolderFlags(Context ctx, User user) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            List<Pair<Integer, String>> folderIds = prepareFolders(contextId, user, con);
+            StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
+            stmt = con.prepareStatement(sb.toString());
+            for (Pair<Integer, String> pair : folderIds) {
+                stmt.setString(1, pair.getSecond());
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, pair.getFirst());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e.toString());
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException exp) {
+                    log.error("Pool Error pushing ox connection to pool!", exp);
+                }
+            }
+        }
+    }
+    
+    private List<Pair<Integer, String>> prepareFolders(int contextId, User user, Connection con) throws StorageException, SQLException {
+        List<Pair<Integer, String>> result = new ArrayList<>(6);
+        Locale locale = new Locale(user.getLanguage());
+        StringHelper translator = StringHelper.valueOf(locale);
+        boolean needTranslation = true;
+        if (Locale.ENGLISH.equals(locale) || Locale.US.equals(locale)) {
+            needTranslation = false;
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT fuid, fname, parent FROM oxfolder_tree WHERE cid = ? AND created_from = ? AND module = 8 AND default_flag = 1 AND type IN (20, 21, 22, 23, 24) FOR UPDATE");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, user.getId());
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                int folderId = rs.getInt(1);
+                String name = rs.getString(2);
+                if (needTranslation) {
+                    int parent = rs.getInt(3);
+                    String translatedName = translator.getString(name);
+                    int i = 1;
+                    while (existsFolder(contextId, user, parent, translatedName, con)) {
+                        StringBuilder sb = new StringBuilder(translatedName).append(" (").append(i++).append(")");
+                        translatedName = sb.toString();
+                    }
+                }
+                result.add(new Pair<Integer, String>(folderId, name));
+            }
+            return result;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private boolean existsFolder(int contextId, User user, int parent, String name, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ? AND fname = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, parent);
+            stmt.setString(3, name);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 }

@@ -937,4 +937,9 @@ public interface OXUserInterface extends Remote {
      */
     public User[] listByAliasDomain(Context context, String aliasDomain, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException;
 
+    /**
+     * TODO
+     */
+    public void deleteDefaultFolderFlags(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
 }
