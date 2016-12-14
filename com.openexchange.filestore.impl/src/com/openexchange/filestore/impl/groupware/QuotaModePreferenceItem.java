@@ -47,33 +47,69 @@
  *
  */
 
-package com.openexchange.unified.quota.osgi;
+package com.openexchange.filestore.impl.groupware;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.filestore.unified.quota.UnifiedQuotaPreferenceItem;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
+ * {@link QuotaModePreferenceItem}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class Activator extends HousekeepingActivator{
+public class QuotaModePreferenceItem implements PreferencesItemService, ConfigTreeEquivalent{
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigViewFactory.class};
+    final QuotaFileStorageService storageService;
+
+    /**
+     * Initializes a new {@link QuotaModePreferenceItem}.
+     */
+    public QuotaModePreferenceItem(QuotaFileStorageService storageService) {
+        super();
+        this.storageService = storageService;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        UnifiedQuotaPreferenceItem item = new UnifiedQuotaPreferenceItem(this);
-        registerService(PreferencesItemService.class, item);
-        registerService(ConfigTreeEquivalent.class, item);
+    public String[] getPath() {
+        return new String[] { "filestoreMode" };
+    }
 
+    @Override
+    public IValueHandler getSharedValue() {
+       return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                String mode = storageService.getQuotaFileStorage(user.getId(), ctx.getContextId(), Info.drive()).getMode();
+                setting.setSingleValue(mode);
+            }
+        };
+    }
+
+    @Override
+    public String getConfigTreePath() {
+       return "filestoreMode";
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/core//filestoreMode";
     }
 
 }

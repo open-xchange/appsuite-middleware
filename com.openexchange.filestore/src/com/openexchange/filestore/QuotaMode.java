@@ -52,31 +52,22 @@ package com.openexchange.filestore;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link QuotaLimitService} - Provides methods to query the file storage limit.
+ * {@link QuotaMode} - Advertises the mode in which this quota-aware file storage is running.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public interface QuotaLimitService {
+public interface QuotaMode {
+
+    /** Signals that a file storage is running in default mode */
+    public static final String DEFAULT_MODE = "default";
 
     /**
-     * Gets the current limit for specified user.
+     * Advertises the mode in which this quota-aware file storage is running
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The current limit for specified user
-     * @throws OXException If current limit cannot be returned
+     * @return The mode
+     * @throws OXException If mode cannot be returned
      */
-    long getLimit(int userId, int contextId) throws OXException;
-
-    /**
-     * Checks if this limit service is applicable for given user
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
-     * @throws OXException If applicability cannot be checked
-     */
-    boolean isApplicableFor(int userId, int contextId) throws OXException;
+    String getMode() throws OXException;
 
 }
