@@ -178,7 +178,7 @@ public class Interest {
      * @return <code>true</code> if interested; otherwise <code>false</code>
      */
     public boolean isInterestedIn(String topic) {
-        return checker.isInterestedIn(topic);
+        return null != topic && checker.isInterestedIn(topic);
     }
 
     @Override
