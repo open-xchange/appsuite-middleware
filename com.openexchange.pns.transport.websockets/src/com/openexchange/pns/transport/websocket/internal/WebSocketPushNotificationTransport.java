@@ -210,7 +210,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 if (null == exists) {
                     String pathFilter = client.getPathFilter();
                     try {
-                        exists = Boolean.valueOf(webSocketService.exists(pathFilter, userId, contextId));
+                        exists = Boolean.valueOf(client.isInterestedIn(topic) && webSocketService.exists(pathFilter, userId, contextId));
                     } catch (OXException e) {
                         LOG.error("Failed to check for any open filter-satisfying Web Socket using filter \"{}\" for user {} in context {}. Assuming there is any...", null == pathFilter ? "<none>" : pathFilter, I(userId), I(contextId), e);
                         exists = Boolean.TRUE;

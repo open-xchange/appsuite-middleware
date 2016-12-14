@@ -59,6 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -82,6 +83,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
+import com.openexchange.mail.utils.ImmutableReference;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.StorageUtility;
@@ -95,6 +97,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Password;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -271,8 +274,6 @@ public abstract class MailConfig {
             return str;
         }
     }
-
-    private static volatile Boolean usePartModifier;
 
     protected static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
 
@@ -625,6 +626,8 @@ public abstract class MailConfig {
         return null;
     }
 
+    static volatile Boolean usePartModifier;
+
     /**
      * Checks if a part modifier shall be used, that is {@link PartModifier#getInstance()} is not <code>null</code> and not
      * assignment-compatible to {@link DummyPartModifier} (which does nothing at all).
@@ -651,11 +654,12 @@ public abstract class MailConfig {
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 usePartModifier = null;
+                doSaneLogin = null;
             }
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.partModifierImpl");
+                return Reloadables.interestsForProperties("com.openexchange.mail.partModifierImpl", "com.openexchange.mail.saneLogin");
             }
         });
     }
@@ -678,6 +682,26 @@ public abstract class MailConfig {
         return true;
     }
 
+    static volatile Boolean doSaneLogin;
+    private static boolean doSaneLogin() {
+        Boolean tmp = doSaneLogin;
+        if (null == tmp) {
+            synchronized (MailConfig.class) {
+                tmp = doSaneLogin;
+                if (null == tmp) {
+                    boolean defaultValue = true;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.saneLogin", defaultValue));
+                    doSaneLogin = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     /**
      * Gets the sane (puny-code) representation of passed login in case it appears to be an Internet address.
      *
@@ -685,8 +709,7 @@ public abstract class MailConfig {
      * @return The sane login
      */
     public static final String saneLogin(final String login) {
-        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (!(null == service ? true : service.getBoolProperty("com.openexchange.mail.saneLogin", true))) {
+        if (false == doSaneLogin()) {
             return login;
         }
         try {
@@ -694,6 +717,32 @@ public abstract class MailConfig {
         } catch (final Exception e) {
             return login;
         }
+    }
+
+    private static final Cache<UserAndContext, ImmutableReference<AuthType>> CACHE_AUTH_TYPE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>auth type cache</i>.
+     */
+    public static void invalidateAuthTypeCache() {
+        CACHE_AUTH_TYPE.invalidateAll();
+    }
+
+    private static AuthType getConfiguredAuthType(Session session) throws OXException {
+        UserAndContext key = UserAndContext.newInstance(session);
+        ImmutableReference<AuthType> authType = CACHE_AUTH_TYPE.getIfPresent(key);
+        if (null == authType) {
+            authType = doGetConfiguredAuthType(session);
+            CACHE_AUTH_TYPE.put(key, authType);
+        }
+        return authType.getValue();
+    }
+
+    private static ImmutableReference<AuthType> doGetConfiguredAuthType(Session session) throws OXException {
+        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+        String authTypeStr = view.opt(AUTH_TYPE_PROPERTY, String.class, AuthType.LOGIN.getName());
+        return new ImmutableReference<AuthType>(AuthType.parse(authTypeStr));
     }
 
     /**
@@ -718,20 +767,14 @@ public abstract class MailConfig {
 
         // Assign password
         if (account.isDefaultAccount()) {
-
-            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-            String authTypeStr = view.opt(AUTH_TYPE_PROPERTY, String.class, AuthType.LOGIN.getName());
-            AuthType authType = AuthType.parse(authTypeStr);
-
-            if (authType != null && authType.equals(AuthType.OAUTH)) {
-
-               Object obj = session.getParameter(Session.PARAM_XOAUTH2_TOKEN);
-               if(obj==null){
-                   throw MailExceptionCode.UNEXPECTED_ERROR.create("The session contains no xoauth2 token.");
-               }
-               mailConfig.password = obj.toString();
-               mailConfig.authType = AuthType.OAUTH;
+            AuthType authType = getConfiguredAuthType(session);
+            if (AuthType.OAUTH == authType) {
+                Object obj = session.getParameter(Session.PARAM_XOAUTH2_TOKEN);
+                if (obj == null) {
+                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
+                }
+                mailConfig.password = obj.toString();
+                mailConfig.authType = AuthType.OAUTH;
             } else {
 
                 PasswordSource cur = MailProperties.getInstance().getPasswordSource();

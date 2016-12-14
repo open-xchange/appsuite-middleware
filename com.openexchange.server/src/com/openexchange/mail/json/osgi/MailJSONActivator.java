@@ -75,6 +75,8 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -91,6 +93,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
@@ -273,6 +276,18 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         registerService(Reloadable.class, MailReloadable.getInstance());
         registerService(Reloadable.class, TransportReloadable.getInstance());
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                MailConfig.invalidateAuthTypeCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
 
         registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(this));
 
