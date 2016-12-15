@@ -553,7 +553,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     if (null == configuredPermissions) {
                         permissions = new ArrayList<OCLPermission>((isSystem ? 1 : parentPermissions.size()) + 1);
                     } else {
-                        permissions = new ArrayList<OCLPermission>(configuredPermissions.length);
+                        permissions = new ArrayList<OCLPermission>(configuredPermissions.length + 2);
                         for (Permission permission : configuredPermissions) {
                             permissions.add(newOCLPermissionFor(permission));
                         }
