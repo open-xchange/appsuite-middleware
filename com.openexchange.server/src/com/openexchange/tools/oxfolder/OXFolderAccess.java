@@ -517,40 +517,6 @@ public class OXFolderAccess {
             if (user.isGuest()) {
                 throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module), Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
-            /*
-             * (Re-)Create default infostore folder on demand
-             */
-            Connection wc = DBPool.pickupWriteable(ctx);
-            boolean rollback = false;
-            boolean created = false;
-            try {
-                wc.setAutoCommit(false);
-                rollback = true;
-                /*
-                 * Check existence again within this transaction to avoid race conditions
-                 */
-                folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) : OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
-                if (-1 == folderId) {
-                    /*
-                     * Not found, create default folder
-                     */
-                    int folderType = -1 == type ? FolderObject.PUBLIC : type;
-                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, ctx.getContextId(), userId, folderType, user.getLocale());
-                    created = true;
-                }
-                wc.commit();
-                rollback = false;
-            } finally {
-                if (rollback) {
-                    DBUtils.rollback(wc);
-                }
-                DBUtils.autocommit(wc);
-                if (created) {
-                    DBPool.closeWriterSilent(ctx, wc);
-                } else {
-                    DBPool.closeWriterAfterReading(ctx, wc);
-                }
-            }
             return folderId;
         } catch (OXException e) {
             throw e;

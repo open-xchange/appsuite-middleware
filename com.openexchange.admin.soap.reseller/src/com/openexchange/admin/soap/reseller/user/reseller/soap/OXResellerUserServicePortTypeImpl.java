@@ -1490,7 +1490,12 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         if (tmp != null) {
             user.setDefaultSenderAddress(tmp);
         }
-
+        
+        tmp = soapUser.getDefaultFolderMode();
+        if (tmp != null) {
+            user.setDefaultFolderMode(tmp);
+        }
+        
         tmp = soapUser.getDepartment();
         if (tmp != null) {
             user.setDepartment(tmp);
@@ -2129,6 +2134,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setCountryHome(user.getCountry_home());
         soapUser.setCountryOther(user.getCountry_other());
         soapUser.setDefaultSenderAddress(user.getDefaultSenderAddress());
+        soapUser.setDefaultFolderMode(user.getDefaultFolderMode());
         soapUser.setDefaultGroup(group2Soap(user.getDefault_group()));
         soapUser.setDepartment(user.getDepartment());
         soapUser.setDisplayName(user.getDisplay_name());
