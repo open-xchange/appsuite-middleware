@@ -118,6 +118,7 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
+import com.openexchange.folderstorage.internal.ConfiguredDefaultPermissions;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.folderstorage.outlook.sql.Delete;
@@ -456,6 +457,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
+    /**
+     * Gets the optionally configured default permissions for a new folder that is supposed to be created below specified parent.
+     *
+     * @param parentId The identifier of the parent folder
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The configured default permissions or <code>null</code>
+     * @throws OXException If look-up for configured default permissions fails
+     */
+    private Permission[] getConfiguredDefaultPermissionsFor(String parentId, int userId, int contextId) throws OXException {
+        return ConfiguredDefaultPermissions.getInstance().getConfiguredDefaultPermissionsFor(parentId, userId, contextId);
+    }
+
     // private static final TIntSet SPECIALS = new TIntHashSet(new int[] { FolderObject.SYSTEM_PRIVATE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID });
 
     @Override
@@ -517,14 +531,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             if (null != perms) {
                 final OCLPermission[] oclPermissions = new OCLPermission[perms.length];
                 for (int i = 0; i < perms.length; i++) {
-                    final Permission p = perms[i];
-                    final OCLPermission oclPerm = new OCLPermission();
-                    oclPerm.setEntity(p.getEntity());
-                    oclPerm.setGroupPermission(p.isGroup());
-                    oclPerm.setFolderAdmin(p.isAdmin());
-                    oclPerm.setAllPermission(p.getFolderPermission(), p.getReadPermission(), p.getWritePermission(), p.getDeletePermission());
-                    oclPerm.setSystem(p.getSystem());
-                    oclPermissions[i] = oclPerm;
+                    oclPermissions[i] = newOCLPermissionFor(perms[i]);
                 }
                 createMe.setPermissionsAsArray(oclPermissions);
             } else {
@@ -540,11 +547,25 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 /*
                  * Create permission list
                  */
-                final List<OCLPermission> permissions = new ArrayList<OCLPermission>((isSystem ? 1 : parentPermissions.size()) + 1);
+                final List<OCLPermission> permissions;
+                {
+                    Permission[] configuredPermissions = getConfiguredDefaultPermissionsFor(Integer.toString(parentFolderID), session.getUserId(), session.getContextId());
+                    if (null == configuredPermissions) {
+                        permissions = new ArrayList<OCLPermission>((isSystem ? 1 : parentPermissions.size()) + 1);
+                    } else {
+                        permissions = new ArrayList<OCLPermission>(configuredPermissions.length);
+                        for (Permission permission : configuredPermissions) {
+                            permissions.add(newOCLPermissionFor(permission));
+                        }
+                    }
+                }
                 if (isShared) {
                     permissions.add(newMaxPermissionFor(parent.getCreatedBy()));
                     permissions.add(newStandardPermissionFor(userId));
                 } else {
+                    /*
+                     * client did not pass permissions, check whether to apply default ones
+                     */
                     permissions.add(newMaxPermissionFor(userId));
                 }
                 if (!isSystem) {
@@ -586,6 +607,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         } finally {
             provider.close();
         }
+    }
+
+    private static OCLPermission newOCLPermissionFor(Permission p) {
+        if (null == p) {
+            return null;
+        }
+        OCLPermission oclPerm = new OCLPermission();
+        oclPerm.setEntity(p.getEntity());
+        oclPerm.setGroupPermission(p.isGroup());
+        oclPerm.setFolderAdmin(p.isAdmin());
+        oclPerm.setAllPermission(p.getFolderPermission(), p.getReadPermission(), p.getWritePermission(), p.getDeletePermission());
+        oclPerm.setSystem(p.getSystem());
+        return oclPerm;
     }
 
     private static OCLPermission newMaxPermissionFor(final int entity) {
@@ -1721,12 +1755,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 final OCLPermission[] oclPermissions = new OCLPermission[perms.length];
                 for (int i = 0; i < perms.length; i++) {
                     final Permission p = perms[i];
-                    final OCLPermission oclPerm = new OCLPermission();
-                    oclPerm.setEntity(p.getEntity());
-                    oclPerm.setGroupPermission(p.isGroup());
-                    oclPerm.setFolderAdmin(p.isAdmin());
-                    oclPerm.setAllPermission(p.getFolderPermission(), p.getReadPermission(), p.getWritePermission(), p.getDeletePermission());
-                    oclPerm.setSystem(p.getSystem());
+                    final OCLPermission oclPerm = newOCLPermissionFor(p);
                     oclPermissions[i] = oclPerm;
                 }
                 updateMe.setPermissionsAsArray(oclPermissions);

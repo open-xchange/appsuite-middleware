@@ -177,7 +177,7 @@ public class ConfiguredDefaultPermissions {
     }
 
     private Map<String, List<Permission>> parseExpressionsLine(String expressionsLine) throws OXException {
-        // E.g. 2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8
+        // E.g. 2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@author
         List<String> expressions = Strings.splitAndTrim(expressionsLine, Pattern.quote("|"));
         ImmutableMap.Builder<String, List<Permission>> mapBuilder = ImmutableMap.builder();
         ImmutablePermission.Builder permissionBuilder = ImmutablePermission.builder();
