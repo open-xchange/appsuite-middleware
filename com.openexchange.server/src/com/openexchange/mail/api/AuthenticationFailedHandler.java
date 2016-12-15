@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link AuthenticationFailedHandler} - Handles failed authentications to a mail or transport server.
+ * {@link AuthenticationFailedHandler} - Handles failed authentications that occurred while attempting to connect/log-in to a certain service.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
