@@ -834,6 +834,9 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                         .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
                         .sign(jSecuritySettings.optBoolean("sign", false))
                         .authentication(jSecuritySettings.optString("authentication", null))
+                        .guestLanguage(jSecuritySettings.optString("guest_language", null))
+                        .guestMessage(jSecuritySettings.optString("guest_message", null))
+                        .pin(jSecuritySettings.optString("pin", null))
                         .build();
                     if (settings.anythingSet()) {
                         composedMail.setSecuritySettings(settings);
