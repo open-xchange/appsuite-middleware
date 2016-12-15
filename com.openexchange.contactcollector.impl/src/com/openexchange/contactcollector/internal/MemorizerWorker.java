@@ -468,8 +468,8 @@ public final class MemorizerWorker {
             }
 
             contactService.createContact(session, Integer.toString(contact.getParentFolderID()), contact);
-            int objectId = contact.getObjectID();
             if (null != useCounts) {
+                int objectId = contact.getObjectID();
                 BatchIncrementArguments.ObjectAndFolder key = new BatchIncrementArguments.ObjectAndFolder(objectId, folderId);
                 int count = useCounts.get(key);
                 useCounts.put(key, count + 1);
