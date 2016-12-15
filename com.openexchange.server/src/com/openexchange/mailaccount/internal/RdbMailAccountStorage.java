@@ -102,7 +102,9 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.IMailAccessCache;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.ProviderUtility;
@@ -1220,7 +1222,58 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount(id);
         fillMailAccount(retval, id, userId, contextId, false, con);
         fillTransportAccount(retval, id, userId, contextId, con);
+        if(MailAccount.DEFAULT_ID==id){
+            checkDefaultAccountConfiguration(retval, userId, contextId);
+        }
         return retval;
+    }
+
+    /**
+     * Checks if some special configuration is active for the primary mail account and updates the mail account fields if necessary
+     *
+     * @param retval The primary mail account
+     * @param userId The user id
+     * @param contextId The context id
+     * @throws OXException
+     */
+    private void checkDefaultAccountConfiguration(AbstractMailAccount retval, int userId, int contextId) throws OXException {
+
+        if (PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource())) {
+            retval.setPassword(null);
+        }
+
+        switch(MailProperties.getInstance().getLoginSource()){
+            case PRIMARY_EMAIL:
+                retval.setLogin(UserStorage.getInstance().getUser(userId, contextId).getMail());
+                break;
+            case USER_IMAPLOGIN:
+            default:
+                //nothing to do
+                break;
+            case USER_NAME:
+                retval.setLogin(UserStorage.getInstance().getUser(userId, contextId).getLoginInfo());
+                break;
+        }
+
+        switch(MailProperties.getInstance().getMailServerSource()){
+            case GLOBAL:
+                retval.setMailServer(MailProperties.getInstance().getMailServer());
+                break;
+            case USER:
+            default:
+                break;
+
+        }
+
+        switch(MailProperties.getInstance().getTransportServerSource()){
+            case GLOBAL:
+                retval.setTransportServer(MailProperties.getInstance().getTransportServer());
+                break;
+            case USER:
+            default:
+                break;
+
+        }
     }
 
     @Override
