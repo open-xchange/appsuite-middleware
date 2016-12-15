@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -170,8 +171,19 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        final long fileSize = fileStorage.getFileSize(identifier);
-        final boolean deleted = fileStorage.deleteFile(identifier);
+        long fileSize;
+        try {
+            fileSize = fileStorage.getFileSize(identifier);
+        } catch (OXException e) {
+            if (false == FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+
+            // Obviously the file has been deleted before
+            return true;
+        }
+
+        boolean deleted = fileStorage.deleteFile(identifier);
         if (!deleted) {
             return false;
         }
@@ -384,9 +396,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
+        if (null == identifiers || identifiers.length == 0) {
+            return Collections.emptySet();
+        }
+
         Map<String, Long> fileSizes = new HashMap<String, Long>();
         SortedSet<String> set = new TreeSet<String>();
-        for (String identifier : identifiers) {
+        for (String identifier : newLinkedHashSetFor(identifiers)) {
             boolean deleted;
             try {
                 // Get size before attempting delete. File is not found afterwards
@@ -409,6 +425,16 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             sum += fileSize.longValue();
         }
         decUsage(Arrays.asList(identifiers), sum);
+        return set;
+    }
+
+    private static LinkedHashSet<String> newLinkedHashSetFor(String[] identifiers) {
+        LinkedHashSet<String> set = new LinkedHashSet<>();
+        for (String identifier : identifiers) {
+            if (null != identifier) {
+                set.add(identifier);
+            }
+        }
         return set;
     }
 
