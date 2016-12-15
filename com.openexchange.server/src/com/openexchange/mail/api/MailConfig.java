@@ -97,7 +97,6 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Password;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.session.UserAndContext;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -109,6 +108,57 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailConfig {
+
+    private static final class AuthTypeKey {
+
+        final boolean forMailAccess;
+        final int userId;
+        final int contextId;
+        private final int hash;
+
+        AuthTypeKey(boolean forMailAccess, int userId, int contextId) {
+            super();
+            this.forMailAccess = forMailAccess;
+            this.userId = userId;
+            this.contextId = contextId;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + (forMailAccess ? 1231 : 1237);
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            AuthTypeKey other = (AuthTypeKey) obj;
+            if (forMailAccess != other.forMailAccess) {
+                return false;
+            }
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
+    }
 
     public static enum BoolCapVal {
 
@@ -279,7 +329,8 @@ public abstract class MailConfig {
 
     protected static final Object[] INIT_ARGS = new Object[0];
 
-    private static final String AUTH_TYPE_PROPERTY="com.openexhange.mail.authType";
+    private static final String PROPERTY_AUTH_TYPE_MAIL = "com.openexhange.mail.authType";
+    private static final String PROPERTY_AUTH_TYPE_TRANSPORT = "com.openexhange.mail.transport.authType";
 
     /**
      * Gets the user-specific mail configuration.
@@ -719,7 +770,7 @@ public abstract class MailConfig {
         }
     }
 
-    private static final Cache<UserAndContext, ImmutableReference<AuthType>> CACHE_AUTH_TYPE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+    private static final Cache<AuthTypeKey, ImmutableReference<AuthType>> CACHE_AUTH_TYPE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
 
     /**
      * Invalidates the <i>auth type cache</i>.
@@ -728,21 +779,30 @@ public abstract class MailConfig {
         CACHE_AUTH_TYPE.invalidateAll();
     }
 
-    private static AuthType getConfiguredAuthType(Session session) throws OXException {
-        UserAndContext key = UserAndContext.newInstance(session);
+    private static AuthType getConfiguredAuthType(boolean forMailAccess, Session session) throws OXException {
+        AuthTypeKey key = new AuthTypeKey(forMailAccess, session.getUserId(), session.getContextId());
         ImmutableReference<AuthType> authType = CACHE_AUTH_TYPE.getIfPresent(key);
         if (null == authType) {
-            authType = doGetConfiguredAuthType(session);
+            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            if (null == factory) {
+                return AuthType.LOGIN;
+            }
+
+            authType = doGetConfiguredAuthType(forMailAccess, session, factory);
             CACHE_AUTH_TYPE.put(key, authType);
         }
         return authType.getValue();
     }
 
-    private static ImmutableReference<AuthType> doGetConfiguredAuthType(Session session) throws OXException {
-        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+    private static ImmutableReference<AuthType> doGetConfiguredAuthType(boolean forMailAccess, Session session, ConfigViewFactory factory) throws OXException {
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-        String authTypeStr = view.opt(AUTH_TYPE_PROPERTY, String.class, AuthType.LOGIN.getName());
-        return new ImmutableReference<AuthType>(AuthType.parse(authTypeStr));
+        String property = forMailAccess ? PROPERTY_AUTH_TYPE_MAIL : PROPERTY_AUTH_TYPE_TRANSPORT;
+        String authTypeStr = view.opt(property, String.class, AuthType.LOGIN.getName());
+        AuthType authType = AuthType.parse(authTypeStr);
+        if (null == authType) {
+            throw MailConfigException.create("Invalid or unsupported value configured for property \"" + property + "\": " + authTypeStr);
+        }
+        return new ImmutableReference<AuthType>(authType);
     }
 
     /**
@@ -767,7 +827,7 @@ public abstract class MailConfig {
 
         // Assign password
         if (account.isDefaultAccount()) {
-            AuthType authType = getConfiguredAuthType(session);
+            AuthType authType = getConfiguredAuthType(account.isMailAccount(), session);
             if (AuthType.OAUTH == authType) {
                 Object obj = session.getParameter(Session.PARAM_XOAUTH2_TOKEN);
                 if (obj == null) {
