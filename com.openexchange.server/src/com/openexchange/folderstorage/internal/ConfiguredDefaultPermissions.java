@@ -61,7 +61,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.ImmutablePermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.utils.ImmutableReference;
@@ -75,13 +75,15 @@ import com.openexchange.session.UserAndContext;
  *
  *    expression := folder "=" permission ("," permission)*
  *
- *    permission := ("admin_")? ("group_" | "user_") entity "@" rights
+ *    permission := ("admin_")? ("group_" | "user_") entity(int) "@" rights
  *
- *        rights := folder-permission "." read-permission "." write-permission "." delete-permission
+ *        rights := (folder-permission(int) "." read-permission(int) "." write-permission(int) "." delete-permission(int)) | ("viewer" | "writer" | "author")
  * </pre>
- * Example:
+ * Examples:
  * <pre>
  *   2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8
+ *
+ *   2=group_2@viewer,admin_user_5@author|15=admin_group_2@writer
  * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -90,6 +92,13 @@ import com.openexchange.session.UserAndContext;
 public class ConfiguredDefaultPermissions {
 
     private static final String PROP_DEFAULT_PERMISSIONS = "com.openexchange.folderstorage.defaultPermissions";
+
+//    public static void main(String[] args) throws Exception {
+//        Map<String, List<Permission>> map = new ConfiguredDefaultPermissions().parseExpressionsLine("2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8|3=user_6@viewer,group_7@author");
+//        for (Map.Entry<String,List<Permission>> entry : map.entrySet()) {
+//            System.out.println("Folder=" + entry.getKey() + " Permissions=" + entry.getValue());
+//        }
+//    }
 
     private static final ConfiguredDefaultPermissions INSTANCE = new ConfiguredDefaultPermissions();
 
@@ -171,6 +180,7 @@ public class ConfiguredDefaultPermissions {
         // E.g. 2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8
         List<String> expressions = Strings.splitAndTrim(expressionsLine, Pattern.quote("|"));
         ImmutableMap.Builder<String, List<Permission>> mapBuilder = ImmutableMap.builder();
+        ImmutablePermission.Builder permissionBuilder = ImmutablePermission.builder();
         for (String expression : expressions) {
             // E.g. 2=group_2@2.4.0.0,admin_user_5@8.4.4.4
             int pos = expression.indexOf('=');
@@ -208,36 +218,53 @@ public class ConfiguredDefaultPermissions {
                 int entityId = Integer.parseInt(permExpression.substring(off, pos));
                 off = pos + 1;
 
-                pos = permExpression.indexOf('.', off);
-                if (pos < 0) {
-                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                permissionBuilder.reset();
+                permissionBuilder.setAdmin(admin).setGroup(group).setEntity(entityId);
+
+                int fp, rp, wp, dp;
+                if (permExpression.startsWith("viewer", off)) {
+                    fp = Permission.READ_FOLDER;
+                    rp = Permission.READ_ALL_OBJECTS;
+                    wp = Permission.NO_PERMISSIONS;
+                    dp = Permission.NO_PERMISSIONS;
+                } else if (permExpression.startsWith("writer", off)) {
+                    fp = Permission.READ_FOLDER;
+                    rp = Permission.READ_ALL_OBJECTS;
+                    wp = Permission.WRITE_ALL_OBJECTS;
+                    dp = Permission.NO_PERMISSIONS;
+                } else if (permExpression.startsWith("author", off)) {
+                    fp = Permission.CREATE_SUB_FOLDERS;
+                    rp = Permission.READ_ALL_OBJECTS;
+                    wp = Permission.WRITE_ALL_OBJECTS;
+                    dp = Permission.DELETE_ALL_OBJECTS;
+                } else {
+                    pos = permExpression.indexOf('.', off);
+                    if (pos < 0) {
+                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                    }
+                    fp = Integer.parseInt(permExpression.substring(off, pos));
+                    off = pos + 1;
+
+                    pos = permExpression.indexOf('.', off);
+                    if (pos < 0) {
+                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                    }
+                    rp = Integer.parseInt(permExpression.substring(off, pos));
+                    off = pos + 1;
+
+                    pos = permExpression.indexOf('.', off);
+                    if (pos < 0) {
+                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                    }
+                    wp = Integer.parseInt(permExpression.substring(off, pos));
+                    off = pos + 1;
+
+                    dp = Integer.parseInt(permExpression.substring(off));
+                    off = pos + 1;
                 }
-                int fp = Integer.parseInt(permExpression.substring(off, pos));
-                off = pos + 1;
 
-                pos = permExpression.indexOf('.', off);
-                if (pos < 0) {
-                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
-                }
-                int orp = Integer.parseInt(permExpression.substring(off, pos));
-                off = pos + 1;
-
-                pos = permExpression.indexOf('.', off);
-                if (pos < 0) {
-                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
-                }
-                int owp = Integer.parseInt(permExpression.substring(off, pos));
-                off = pos + 1;
-
-                int odp = Integer.parseInt(permExpression.substring(off));
-                off = pos + 1;
-
-                DefaultPermission permission = new DefaultPermission();
-                permission.setEntity(entityId);
-                permission.setAdmin(admin);
-                permission.setGroup(group);
-                permission.setAllPermissions(fp, orp, owp, odp);
-                listBuilder.add(permission);
+                permissionBuilder.setFolderPermission(fp).setReadPermission(rp).setWritePermission(wp).setDeletePermission(dp).setSystem(0);
+                listBuilder.add(permissionBuilder.build());
             }
             mapBuilder.put(folderId, listBuilder.build());
         }
