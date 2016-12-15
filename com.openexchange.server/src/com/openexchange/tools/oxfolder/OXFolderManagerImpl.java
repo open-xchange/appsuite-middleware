@@ -1960,7 +1960,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                             new EventClient(session).delete(fo);
                         }
                     } catch (final OXException e) {
-                        LOG.warn("Delete event could not be enqueued", e);
+                        if (OXFolderExceptionCode.NOT_EXISTS.getNumber() == e.getCode() && OXFolderExceptionCode.NOT_EXISTS.getPrefix().equals(e.getPrefix())) {
+                            // Ignore non-existent folder
+                        } else {
+                            LOG.warn("Delete event could not be enqueued", e);
+                        }
                     }
                 }
             }
