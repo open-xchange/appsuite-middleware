@@ -185,7 +185,7 @@ public class ConfiguredDefaultPermissions {
             // E.g. 2=group_2@2.4.0.0,admin_user_5@8.4.4.4
             int pos = expression.indexOf('=');
             if (pos < 1) {
-                throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Missing '=' character in expression: " + expression);
             }
 
             String folderId = expression.substring(0, pos).trim();
@@ -208,12 +208,12 @@ public class ConfiguredDefaultPermissions {
                 } else if (permExpression.startsWith("user_", off)) {
                     off += 5;
                 } else {
-                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Permission expression is required to start with either \"admin_user_\", \"user_\", \"admin_group_\" or \"group_\" prefix: " + expression);
                 }
 
                 pos = permExpression.indexOf('@', off);
                 if (pos < 0) {
-                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Missing '@' character in expression: " + expression);
                 }
                 int entityId = Integer.parseInt(permExpression.substring(off, pos));
                 off = pos + 1;
@@ -240,21 +240,21 @@ public class ConfiguredDefaultPermissions {
                 } else {
                     pos = permExpression.indexOf('.', off);
                     if (pos < 0) {
-                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
                     }
                     fp = Integer.parseInt(permExpression.substring(off, pos));
                     off = pos + 1;
 
                     pos = permExpression.indexOf('.', off);
                     if (pos < 0) {
-                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
                     }
                     rp = Integer.parseInt(permExpression.substring(off, pos));
                     off = pos + 1;
 
                     pos = permExpression.indexOf('.', off);
                     if (pos < 0) {
-                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\"");
+                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
                     }
                     wp = Integer.parseInt(permExpression.substring(off, pos));
                     off = pos + 1;
