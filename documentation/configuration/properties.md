@@ -349,7 +349,17 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexhange.mail.authType</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the authentication type which should be used. Known values: 'login' and 'OAuth'<br> |
+| __Description__ | Specifies the authentication type which should be used for mail access. Known values: 'login' and 'oauth'<br> |
+| __Default__ | login  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexhange.mail.transport.authType</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the authentication type which should be used for mail transport. Known values: 'login' and 'oauth'<br> |
 | __Default__ | login  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
