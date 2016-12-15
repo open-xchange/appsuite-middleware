@@ -116,6 +116,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -3689,9 +3690,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     int parent = rs.getInt(3);
                     String translatedName = translator.getString(name);
                     int i = 1;
-                    while (existsFolder(contextId, user, parent, translatedName, con)) {
-                        StringBuilder sb = new StringBuilder(translatedName).append(" (").append(i++).append(")");
-                        translatedName = sb.toString();
+                    while (existsFolder(contextId, parent, translatedName, con)) {
+                        translatedName = FileStorageUtility.enhance(translatedName, i++);
                     }
                 }
                 result.add(new Pair<Integer, String>(folderId, name));
@@ -3702,7 +3702,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private boolean existsFolder(int contextId, User user, int parent, String name, Connection con) throws SQLException {
+    private boolean existsFolder(int contextId, int parent, String name, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
