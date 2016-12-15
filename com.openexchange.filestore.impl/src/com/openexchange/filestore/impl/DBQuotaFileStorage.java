@@ -204,11 +204,6 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public long getQuota() throws OXException {
-        if (quota < 0) {
-            // Marked as unlimited
-            return Long.MAX_VALUE;
-        }
-
         QuotaBackendService backendService = getHighestRankedBackendService(effectiveUserId, contextId);
         return null == backendService ? quota : backendService.getLimit(effectiveUserId, contextId);
     }
