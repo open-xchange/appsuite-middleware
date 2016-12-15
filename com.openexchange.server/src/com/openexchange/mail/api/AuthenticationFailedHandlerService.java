@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,31 @@
  *
  */
 
-package com.openexchange.mail.authentication.handler.osgi;
+package com.openexchange.mail.api;
 
-import com.openexchange.mail.api.AuthenticationFailedHandler;
-import com.openexchange.mail.authentication.handler.DefaultAuthenticationFailedHandler;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator} - The bundle activator for <code>"com.openexchange.mail.authentication.handler"</code> bundle.
+ * {@link AuthenticationFailedHandlerService} - The service collecting registered instances of {@link AuthenticationFailedHandler} for chained handling of possible failed authentication errors.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class Activator extends HousekeepingActivator {
+@SingletonService
+public interface AuthenticationFailedHandlerService {
 
     /**
-     * Initializes a new {@link Activator}.
+     * Calls the currently available chain of {@link AuthenticationFailedHandler handlers}.
+     *
+     * @param failedAuthentication The optional {@code OXException} instance that reflects the failed authentication
+     * @param service The type of service that yielded the failed authentication
+     * @param mailConfig The effective mail configuration for affected user
+     * @param session The user which couln't be authenticated.
+     * @throws OXException If handling the failed authentication is supported being aborted with an error
      */
-    public Activator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{SessiondService.class};
-    }
-
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(AuthenticationFailedHandler.class, new DefaultAuthenticationFailedHandler(getService(SessiondService.class)));
-    }
+    void handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException;
 
 }

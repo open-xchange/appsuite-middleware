@@ -46,11 +46,21 @@ Specifies the max. number of Drive documents that are allowed to be sent via E-M
   - data:
       Key: com.openexhange.mail.authType
       Description: >
-Specifies the authentication type which should be used. Known values: 'login' and 'OAuth'
+Specifies the authentication type which should be used for mail access. Known values: 'login' and 'oauth'
       Default: login
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true
       Related: 
       File: mail.properties
-      
+  - data:
+      Key: com.openexhange.mail.transport.authType
+      Description: >
+Specifies the authentication type which should be used for mail transport. Known values: 'login' and 'oauth'
+      Default: login
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: 
+      File: mail.properties
+ 

@@ -77,6 +77,7 @@ import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.mail.api.permittance.Permittance;
 import com.openexchange.mail.api.permittance.Permitter;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
@@ -84,7 +85,6 @@ import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
@@ -789,14 +789,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             return e;
         }
 
-        if(MimeMailExceptionCode.LOGIN_FAILED.equals(e) && mailConfig.getAccountId()==MailAccount.DEFAULT_ID){
-            AuthenticationFailedHandler handler = MailJSONActivator.SERVICES.get().getOptionalService(AuthenticationFailedHandler.class);
-            if(handler!=null){
+        if (mailConfig.getAccountId() == MailAccount.DEFAULT_ID) {
+            AuthenticationFailedHandlerService handlerService = ServerServiceRegistry.getInstance().getService(AuthenticationFailedHandlerService.class);
+            if (null != handlerService) {
                 try {
-                    handler.handleAuthenticationFailed(mailConfig.getSession());
+                    handlerService.handleAuthenticationFailed(e, Service.MAIL, mailConfig, session);
                     return e;
-                } catch (OXException e1) {
-                    return e1;
+                } catch (OXException x) {
+                    return x;
                 }
             }
         }

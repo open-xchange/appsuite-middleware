@@ -61,6 +61,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -203,19 +204,25 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public long getQuota() throws OXException {
-        if (quota < 0) {
-            // Marked as unlimited
-            return Long.MAX_VALUE;
-        }
-
         QuotaBackendService backendService = getHighestRankedBackendService(effectiveUserId, contextId);
         return null == backendService ? quota : backendService.getLimit(effectiveUserId, contextId);
     }
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        final long fileSize = fileStorage.getFileSize(identifier);
-        final boolean deleted = fileStorage.deleteFile(identifier);
+        long fileSize;
+        try {
+            fileSize = fileStorage.getFileSize(identifier);
+        } catch (OXException e) {
+            if (false == FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+
+            // Obviously the file has been deleted before
+            return true;
+        }
+
+        boolean deleted = fileStorage.deleteFile(identifier);
         if (!deleted) {
             return false;
         }
@@ -499,7 +506,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
         Map<String, Long> fileSizes = new HashMap<String, Long>();
         SortedSet<String> set = new TreeSet<String>();
-        for (String identifier : identifiers) {
+        for (String identifier : new LinkedHashSet<>(Arrays.asList(identifiers))) {
             boolean deleted;
             try {
                 // Get size before attempting delete. File is not found afterwards

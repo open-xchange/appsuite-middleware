@@ -74,28 +74,31 @@ public enum AuthType {
     }
 
     /**
-     * Parses specified string into an AuthType.
-     *
-     * @param authTypeStr The string to parse to an AuthType
-     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
-     */
-    public static final AuthType parse(final String authTypeStr) {
-        final AuthType[] values = AuthType.values();
-        for (final AuthType authType : values) {
-            if (authType.name.equalsIgnoreCase(authTypeStr)) {
-                return authType;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Gets the name
      *
      * @return The name
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Parses specified string into an AuthType.
+     *
+     * @param authTypeStr The string to parse to an AuthType
+     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
+     */
+    public static final AuthType parse(final String authTypeStr) {
+        if (null == authTypeStr) {
+            return null;
+        }
+
+        for (AuthType authType : AuthType.values()) {
+            if (authType.name.equalsIgnoreCase(authTypeStr)) {
+                return authType;
+            }
+        }
+        return null;
     }
 
 }

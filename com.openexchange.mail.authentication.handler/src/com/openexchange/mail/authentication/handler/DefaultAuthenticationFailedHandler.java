@@ -50,27 +50,42 @@
 package com.openexchange.mail.authentication.handler;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
-import com.openexchange.mail.authentication.handler.osgi.Services;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link DefaultAuthenticationFailedHandler} is the default implementation of the {@link AuthenticationFailedHandler} interface.
- *
- * It handles the failed authentication by terminating the current session.
+ * {@link DefaultAuthenticationFailedHandler} is the default implementation for the {@link AuthenticationFailedHandler} interface.
+ * <p>
+ * It handles the failed authentication by terminating the current session and throwing an <code>SES-0206</code> (<i>"Your session was invalidated. Please try again."</i>) error.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class DefaultAuthenticationFailedHandler implements AuthenticationFailedHandler{
+public class DefaultAuthenticationFailedHandler implements AuthenticationFailedHandler {
+
+    private final SessiondService sessiondService;
+
+    /**
+     * Initializes a new {@link DefaultAuthenticationFailedHandler}.
+     */
+    public DefaultAuthenticationFailedHandler(SessiondService sessiondService) {
+        super();
+        this.sessiondService = sessiondService;
+    }
 
     @Override
-    public void handleAuthenticationFailed(Session session) throws OXException {
-       SessiondService sessionService = Services.getService(SessiondService.class);
-       sessionService.removeSession(session.getSessionID());
-       throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+    public Result handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) throws OXException {
+        if (AuthType.OAUTH.equals(mailConfig.getAuthType())) {
+            sessiondService.removeSession(session.getSessionID());
+            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(failedAuth, new Object[0]);
+        }
+
+        // Don't care...
+        return Result.NEUTRAL;
     }
 
 }

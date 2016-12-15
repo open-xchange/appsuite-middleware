@@ -47,73 +47,42 @@
  *
  */
 
-package com.openexchange.mail.authentication.handler.osgi;
-
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.tools.oxfolder;
 
 /**
- * {@link Services}
+ * {@link OXFolderDefaultMode}
+ * Describes all possible default folder modes on user creation.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.8.4
  */
-public class Services {
+public enum OXFolderDefaultMode {
+    DEFAULT("default"),
+    DEFAULT_DELETABLE("default-deletable"),
+    NONE("no-default-folders");
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
+    private String text;
+
+    private OXFolderDefaultMode(String text) {
+        this.text = text;
     }
 
-    private static final AtomicReference<Activator> REF = new AtomicReference<>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final Activator serviceLookup) {
-        REF.set(serviceLookup);
+    public String getText() {
+        return text;
     }
 
     /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
+     * Translates the given text to a corresponding {@link OXFolderDefaultMode}
+     * 
+     * @param text, the text to handle
+     * @return the {@link OXFolderDefaultMode} enumeration value
      */
-    public static HousekeepingActivator getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.advertisement\" not started?");
+    public static OXFolderDefaultMode fromString(String text) {
+        for (OXFolderDefaultMode mode : OXFolderDefaultMode.values()) {
+            if (text.equalsIgnoreCase(mode.getText())) {
+                return mode;
+            }
         }
-        return serviceLookup.getService(clazz);
+        return null;
     }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
-    }
-
 }

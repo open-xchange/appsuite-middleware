@@ -41,6 +41,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="country_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="country_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="defaultSenderAddress" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="defaultFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="default_group" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Group" minOccurs="0"/>
  *         &lt;element name="department" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="display_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
@@ -180,6 +181,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "countryBusiness",
     "countryHome",
     "countryOther",
+    "defaultFolderMode",
     "defaultSenderAddress",
     "defaultGroup",
     "department",
@@ -333,6 +335,8 @@ public class User {
     protected String countryHome;
     @XmlElement(name = "country_other", nillable = true)
     protected String countryOther;
+    @XmlElement(name = "default_folder_mode", nillable = true)
+    protected String defaultFolderMode;
     @XmlElement(nillable = true)
     protected String defaultSenderAddress;
     @XmlElement(name = "default_group", nillable = true)
@@ -1014,6 +1018,30 @@ public class User {
      */
     public void setDefaultSenderAddress(final String value) {
         this.defaultSenderAddress = value;
+    }
+    
+
+    /**
+     * Ruft den Wert der defaultFolderMode-Eigenschaft ab.
+     * 
+     * @return
+     *      possible object is
+     *     {@link String }
+     */
+    public String getDefaultFolderMode() {
+        return defaultFolderMode;
+    }
+
+    /**
+     * Legt den Wert der defaultFolderMode-Eigenschaft fest.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setDefaultFolderMode(String value) {
+        this.defaultFolderMode = value;
     }
 
     /**

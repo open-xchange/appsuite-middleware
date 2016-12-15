@@ -63,6 +63,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +155,11 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.share.ShareService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.file.AppendFileAction;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.Customizer;
@@ -167,8 +172,14 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link InfostoreFacadeImpl}
@@ -177,7 +188,7 @@ import gnu.trove.list.linked.TIntLinkedList;
  */
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, InfostoreSearchEngine {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
     private static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
     private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<QuotaFileStorageService>();
 
@@ -214,7 +225,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     private final EntityLockManager lockManager = new EntityLockManagerImpl("infostore_lock");
 
     private final ThreadLocal<List<FileRemoveInfo>> fileIdRemoveList = new ThreadLocal<List<FileRemoveInfo>>();
-    private final ThreadLocal<Map<Integer, Set<Integer>>> guestCleanupList = new ThreadLocal<Map<Integer, Set<Integer>>>();
+    private final ThreadLocal<TIntObjectMap<TIntSet>> guestCleanupList = new ThreadLocal<TIntObjectMap<TIntSet>>();
 
     private final TouchInfoitemsWithExpiredLocksListener expiredLocksListener;
 
@@ -1117,7 +1128,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         Context context = session.getContext();
         String whereClause = "infostore.folder_id = " + folderId;
         List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
-        if (0 < allDocuments.size()) {
+        if (!allDocuments.isEmpty()) {
             List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
             objectPermissionLoader.add(allDocuments, context, objectPermissionLoader.load(folderId, context));
             removeDocuments(allDocuments, allVersions, date, session, null);
@@ -1127,7 +1138,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     protected void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession session, final List<DocumentMetadata> rejected) throws OXException {
         final List<DocumentMetadata> delDocs = new ArrayList<DocumentMetadata>();
         final List<DocumentMetadata> delVers = new ArrayList<DocumentMetadata>();
-        final Set<Integer> rejectedIds = new HashSet<Integer>();
+        final TIntSet rejectedIds = new TIntHashSet(allDocuments.size());
 
         final Date now = new Date(); // FIXME: Recovery will change lastModified;
 
@@ -1137,7 +1148,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     throw InfostoreExceptionCodes.NOT_ALL_DELETED.create();
                 }
                 rejected.add(m);
-                rejectedIds.add(Integer.valueOf(m.getId()));
+                rejectedIds.add(m.getId());
             } else {
                 checkWriteLock(m, session);
                 m.setLastModified(now);
@@ -1157,7 +1168,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         List<String> filestoreLocations = new ArrayList<String>(allVersions.size());
         TIntList folderAdmins = new TIntLinkedList();
         for (final DocumentMetadata m : allVersions) {
-            if (!rejectedIds.contains(Integer.valueOf(m.getId()))) {
+            if (!rejectedIds.contains(m.getId())) {
                 delVers.add(m);
                 m.setLastModified(now);
                 if (null != m.getFilestoreLocation()) {
@@ -1209,8 +1220,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         removeList.add(new FileRemoveInfo(filestoreLocations.get(i), folderAdmins[i], contextId));
                     }
                 } else {
+                    Map<UserAndContext, List<String>> map = new LinkedHashMap<>(size);
                     for (int i = 0; i < size; i++) {
-                        getFileStorage(folderAdmins[i], contextId).deleteFile(filestoreLocations.get(i));
+                        UserAndContext key = UserAndContext.newInstance(folderAdmins[i], contextId);
+                        List<String> list = map.get(key);
+                        if (null == list) {
+                            list = new LinkedList<>();
+                            map.put(key, list);
+                        }
+                        list.add(filestoreLocations.get(i));
+                    }
+                    for (Map.Entry<UserAndContext, List<String>> entry : map.entrySet()) {
+                        List<String> locations = entry.getValue();
+                        getFileStorage(entry.getKey().getUserId(), contextId).deleteFiles(locations.toArray(new String[locations.size()]));
                     }
                 }
             }
@@ -1224,19 +1246,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param removedDocuments The documents being removed
      */
     private void rememberForGuestCleanup(int contextID, List<DocumentMetadata> removedDocuments) {
-        if (null != removedDocuments && 0 < removedDocuments.size()) {
+        if (null != removedDocuments && !removedDocuments.isEmpty()) {
             for (DocumentMetadata document : removedDocuments) {
                 List<ObjectPermission> objectPermissions = document.getObjectPermissions();
                 if (null != objectPermissions && 0 < objectPermissions.size()) {
-                    Map<Integer, Set<Integer>> cleanupList = guestCleanupList.get();
-                    Set<Integer> entities = cleanupList.get(I(contextID));
+                    TIntObjectMap<TIntSet> cleanupList = guestCleanupList.get();
+                    TIntSet entities = cleanupList.get(contextID);
                     if (null == entities) {
-                        entities = new HashSet<Integer>(objectPermissions.size());
-                        cleanupList.put(I(contextID), entities);
+                        entities = new TIntHashSet(objectPermissions.size());
+                        cleanupList.put(contextID, entities);
                     }
                     for (ObjectPermission permission : objectPermissions) {
                         if (false == permission.isGroup()) {
-                            entities.add(I(permission.getEntity()));
+                            entities.add(permission.getEntity());
                         }
                     }
                 }
@@ -2363,39 +2385,85 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         db.commit();
         ServiceMethod.COMMIT.callUnsafe(security);
         lockManager.commit();
-        List<FileRemoveInfo> filesToRemove = fileIdRemoveList.get();
-        if (null != filesToRemove && !filesToRemove.isEmpty()) {
-            if (1 == filesToRemove.size()) {
-                FileRemoveInfo removeInfo = filesToRemove.get(0);
-                getFileStorage(removeInfo.folderAdmin, removeInfo.contextId).deleteFile(removeInfo.fileId);
-            } else {
-                Map<QuotaFileStorage, List<String>> removalsPerStorage = new HashMap<QuotaFileStorage, List<String>>();
-                for (FileRemoveInfo removeInfo : filesToRemove) {
-                    QuotaFileStorage fileStorage = getFileStorage(removeInfo.folderAdmin, removeInfo.contextId);
-                    List<String> removals = removalsPerStorage.get(fileStorage);
-                    if (null == removals) {
-                        removals = new ArrayList<String>();
-                        removalsPerStorage.put(fileStorage, removals);
+        final List<FileRemoveInfo> filesToRemove = fileIdRemoveList.get();
+        if (null != filesToRemove) {
+            int size = filesToRemove.size();
+            if (size > 0) {
+                if (1 == size) {
+                    final FileRemoveInfo removeInfo = filesToRemove.get(0);
+                    final QuotaFileStorage fileStorage = getFileStorage(removeInfo.folderAdmin, removeInfo.contextId);
+                    Task<Void> task = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call()  {
+                            try {
+                                fileStorage.deleteFile(removeInfo.fileId);
+                            } catch (Exception e) {
+                                LOG.error("Failed to delete file {} from storage of owner {} in context {}", removeInfo.fileId, removeInfo.folderAdmin, removeInfo.contextId, e);
+                            }
+                            return null;
+                        }
+                    };
+                    ThreadPools.submitElseExecute(task);
+                } else {
+                    // Group by owner/context pair
+                    Map<UserAndContext, List<String>> removalsPerStorage = new LinkedHashMap<UserAndContext, List<String>>();
+                    for (FileRemoveInfo removeInfo : filesToRemove) {
+                        UserAndContext key = UserAndContext.newInstance(removeInfo.folderAdmin, removeInfo.contextId);
+                        List<String> removals = removalsPerStorage.get(key);
+                        if (null == removals) {
+                            removals = new ArrayList<String>();
+                            removalsPerStorage.put(key, removals);
+                        }
+                        removals.add(removeInfo.fileId);
                     }
-                    removals.add(removeInfo.fileId);
-                }
-                for (Map.Entry<QuotaFileStorage, List<String>> entry : removalsPerStorage.entrySet()) {
-                    entry.getKey().deleteFiles(entry.getValue().toArray(new String[entry.getValue().size()]));
+                    for (Map.Entry<UserAndContext, List<String>> entry : removalsPerStorage.entrySet()) {
+                        final UserAndContext key = entry.getKey();
+                        final List<String> locations = entry.getValue();
+                        final QuotaFileStorage fileStorage = getFileStorage(key.getUserId(), key.getContextId());
+                        Task<Void> task = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() {
+                                try {
+                                    fileStorage.deleteFiles(locations.toArray(new String[locations.size()]));
+                                } catch (Exception e) {
+                                    LOG.error("Failed to delete files {} from storage of owner {} in context {}", locations, key.getUserId(), key.getContextId(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        ThreadPools.submitElseExecute(task);
+                    }
                 }
             }
         }
         /*
          * schedule guest cleanup tasks as needed
          */
-        Map<Integer, Set<Integer>> guestsToCleanup = guestCleanupList.get();
-        if (null != guestsToCleanup && 0 < guestsToCleanup.size()) {
-            for (Entry<Integer, Set<Integer>> entry : guestsToCleanup.entrySet()) {
-                int contextID = i(entry.getKey());
-                Set<Integer> guestIDs = filterGuests(contextID, entry.getValue());
-                if (null != guestIDs && 0 < guestIDs.size()) {
-                    ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+        TIntObjectMap<TIntSet> guestsToCleanup = guestCleanupList.get();
+        if (null != guestsToCleanup && !guestsToCleanup.isEmpty()) {
+            TIntObjectIterator<TIntSet> iter = guestsToCleanup.iterator();
+            for (int i = guestsToCleanup.size(); i-- > 0;) {
+                iter.advance();
+                final int contextID = iter.key();
+                final int[] guestIDs = filterGuests(contextID, iter.value());
+                if (null != guestIDs) {
+                    final ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
                     if (null != shareService) {
-                        shareService.scheduleGuestCleanup(contextID, I2i(guestIDs));
+                        Task<Void> task = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    shareService.scheduleGuestCleanup(contextID, guestIDs);
+                                } catch (Exception e) {
+                                    LOG.error("Failed to clean-up guests {} in context {}", Arrays.toString(guestIDs), contextID, e);
+                                }
+                                return null;
+                            }
+                        };
+                        ThreadPools.submitElseExecute(task);
                     }
                 }
             }
@@ -2403,15 +2471,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         super.commit();
     }
 
-    private Set<Integer> filterGuests(int contextID, Set<Integer> entityIDs) throws OXException {
-        if (null == entityIDs || 0 == entityIDs.size()) {
-            return Collections.emptySet();
+    private int[] filterGuests(int contextID, TIntSet entityIDs) throws OXException {
+        if (null == entityIDs) {
+            return null;
         }
         UserService userService = ServerServiceRegistry.getServize(UserService.class);
-        Set<Integer> guestIDs = new HashSet<Integer>(entityIDs.size());
-        for (Integer id : entityIDs) {
+        TIntSet guestIDs = new TIntHashSet(entityIDs.size());
+        TIntIterator iter = entityIDs.iterator();
+        for (int k = entityIDs.size(); k-- > 0;) {
+            int id = iter.next();
             try {
-                if (userService.isGuest(id.intValue(), contextID)) {
+                if (userService.isGuest(id, contextID)) {
                     guestIDs.add(id);
                 }
             } catch (OXException e) {
@@ -2421,7 +2491,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 throw e;
             }
         }
-        return guestIDs;
+        return guestIDs.toArray();
     }
 
     @Override
@@ -2458,7 +2528,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     @Override
     public void startTransaction() throws OXException {
         fileIdRemoveList.set(new LinkedList<InfostoreFacadeImpl.FileRemoveInfo>());
-        guestCleanupList.set(new HashMap<Integer, Set<Integer>>());
+        guestCleanupList.set(new TIntObjectHashMap<TIntSet>());
         db.startTransaction();
         ServiceMethod.START_TRANSACTION.callUnsafe(security);
         lockManager.startTransaction();

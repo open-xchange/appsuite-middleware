@@ -84,7 +84,7 @@ If you would like to add a reference to another property use the following appro
 
 ## Advertisement 
 
-| Key | <span style="font-weight:normal">com.openexchange.advertisement.<reseller>.packageScheme</span> |
+| Key | <span style="font-weight:normal">com.openexchange.advertisement.[reseller].packageScheme</span> |
 |:----------------|:--------|
 | __Description__ |         Defines which package scheme is used for the reseller. <reseller> can be replaced with either the reseller name or the reseller id.<br>        Use 'OX_ALL' for the default reseller. Available package schemes are:<br>        Global - always uses the default reseller and default package.<br>        AccessCombinations - Using access combination names to retrive the package.<br>        TaxonomyTypes - Using taxonomy types to retrieve the package.<br> |
 | __Default__ | Global  |
@@ -94,7 +94,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | advertisement.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexchange.advertisement.<reseller>.taxonomy.types</span> |
+| Key | <span style="font-weight:normal">com.openexchange.advertisement.[reseller].taxonomy.types</span> |
 |:----------------|:--------|
 | __Description__ |         Defines a comma separated list of taxonomy types which are used as package identifiers. <br>        This list is used by the 'TaxonomyTypes' package scheme to identify the package.<br> |
 | __Default__ |  |
@@ -274,6 +274,20 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
+## Folder 
+
+| Key | <span style="font-weight:normal">com.openexchange.folderstorage.defaultPermissions</span> |
+|:----------------|:--------|
+| __Description__ | Specifies default permission to use in case folder is supposed to be created below a certain parent folder.<br>The value is a pipe ('|') separated listing of expressions; each expression defines the default permissions<br>for a denoted parent folder. Currently the reserved folder identifiers "2" and "15" are considered as "2"<br>denoted the public PIM folder whereas "15" denotes the public Drive folder.<br><br>An expression starts with the parent folder identifier followed by '=' character; e.g. "2=".<br>Then there is a comma-separated list of permissions to assume per entity (user or group).<br><br>Each permission either starts with "user_", "admin_user_", "group_" or "admin_group_" (the prefix "admin_" controls<br>whether the entity is supposed to be set as folder administrator) followed by the numeric entity identifier.<br><br>Then an '@' character is supposed to occur and finally followed by rights expression. The rights may be dot-separated<br>listing (<folder-permission> + "." + <read-permission> + "." + <write-permission> + "." + <delete-permission>) or one<br>of the tokens  "viewer", "writer" or "author".<br><br>More formally<br>expressions = expression ("|" expression)*<br>expression = folder "=" permission ("," permission)*<br>permission = ("admin_")? ("group_" | "user_") entity(int) "@" rights<br>rights = (folder-permission(int) "." read-permission(int) "." write-permission(int) "." delete-permission(int)) | ("viewer" | "writer" | "author")<br><br>Example<br>2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8<br>2=group_2@viewer,admin_user_5@author|15=admin_group_2@writer<br> |
+| __Default__ | No defaut value  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | foldercache.properties  |
+
+---
+
+
 ## Grizzly 
 
 | Key | <span style="font-weight:normal">com.openexchange.http.grizzly.wsTimeoutMillis</span> |
@@ -335,7 +349,17 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexhange.mail.authType</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the authentication type which should be used. Known values: 'login' and 'OAuth'<br> |
+| __Description__ | Specifies the authentication type which should be used for mail access. Known values: 'login' and 'oauth'<br> |
+| __Default__ | login  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexhange.mail.transport.authType</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the authentication type which should be used for mail transport. Known values: 'login' and 'oauth'<br> |
 | __Default__ | login  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |

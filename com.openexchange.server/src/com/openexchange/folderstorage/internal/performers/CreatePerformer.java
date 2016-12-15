@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.internal.ConfiguredDefaultPermissions;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
@@ -128,19 +127,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
      */
     public CreatePerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
-    }
-
-    /**
-     * Gets the configured default permissions for a new folder that is supposed to be created below specified parent.
-     *
-     * @param parentId The identifier of the parent folder
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The configured default permissions or <code>null</code>
-     * @throws OXException If look-up for configured default permissions fails
-     */
-    private Permission[] getConfiguredDefaultPermissionsFor(String parentId, int userId, int contextId) throws OXException {
-        return ConfiguredDefaultPermissions.getInstance().getConfiguredDefaultPermissionsFor(parentId, userId, contextId);
     }
 
     /**
@@ -231,12 +217,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              * check for any present guest permissions
              */
             Permission[] permissions = toCreate.getPermissions();
-            if (null == permissions) {
-                /*
-                 * client did not pass permissions, check whether to apply default ones
-                 */
-                permissions = getConfiguredDefaultPermissionsFor(parentId, storageParameters.getUserId(), storageParameters.getContextId());
-            }
             ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, permissions, new Permission[0]);
             final String newId;
             try {
