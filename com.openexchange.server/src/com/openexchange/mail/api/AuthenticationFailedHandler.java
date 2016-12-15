@@ -53,20 +53,52 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * The {@link AuthenticationFailedHandler} handles failed authentications to a mail server
+ * {@link AuthenticationFailedHandler} - Handles failed authentications to a mail or transport server.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
 public interface AuthenticationFailedHandler {
 
+    /** The result for a handled authentication error */
+    public static enum Result {
+        /**
+         * Possible further handlers are supposed to be invoked.
+         */
+        NEUTRAL,
+        /**
+         * Possible further handlers are <b>not</b> supposed to be invoked.
+         */
+        ABORT;
+    }
+
+    /** The type of service that yielded the failed authentication */
+    public static enum Service {
+        /**
+         * The mail access service; e.g. IMAP
+         */
+        MAIL,
+        /**
+         * The mail transport service; e.g. SMTP
+         */
+        TRANSPORT,
+        /**
+         * The mail filter service; e.g. SIEVE
+         */
+        MAIL_FILTER;
+    }
 
     /**
      * This method is called in case the authentication has failed.
      *
+     * @param failedAuthentication The optional {@code OXException} instance that reflects the failed authentication
+     * @param service The type of service that yielded the failed authentication
+     * @param mailConfig The effective mail configuration for affected user
      * @param session The user which couln't be authenticated.
-     * @throws OXException
+     * @return The result that controls whether to proceed in invocation chain
+     * @throws OXException If handling the failed authentication is supported being aborted with an error
      */
-    public void handleAuthenticationFailed(Session session) throws OXException;
+    Result handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException;
 
 }
