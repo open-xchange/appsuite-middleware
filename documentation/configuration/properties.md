@@ -84,7 +84,7 @@ If you would like to add a reference to another property use the following appro
 
 ## Advertisement 
 
-| Key | <span style="font-weight:normal">com.openexchange.advertisement.<reseller>.packageScheme</span> |
+| Key | <span style="font-weight:normal">com.openexchange.advertisement.[reseller].packageScheme</span> |
 |:----------------|:--------|
 | __Description__ |         Defines which package scheme is used for the reseller. <reseller> can be replaced with either the reseller name or the reseller id.<br>        Use 'OX_ALL' for the default reseller. Available package schemes are:<br>        Global - always uses the default reseller and default package.<br>        AccessCombinations - Using access combination names to retrive the package.<br>        TaxonomyTypes - Using taxonomy types to retrieve the package.<br> |
 | __Default__ | Global  |
@@ -94,7 +94,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | advertisement.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexchange.advertisement.<reseller>.taxonomy.types</span> |
+| Key | <span style="font-weight:normal">com.openexchange.advertisement.[reseller].taxonomy.types</span> |
 |:----------------|:--------|
 | __Description__ |         Defines a comma separated list of taxonomy types which are used as package identifiers. <br>        This list is used by the 'TaxonomyTypes' package scheme to identify the package.<br> |
 | __Default__ |  |
