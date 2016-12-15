@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,69 @@
  *
  */
 
-package com.openexchange.filestore;
+package com.openexchange.filestore.impl.groupware;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.session.Session;
 
 /**
- * {@link QuotaLimitService} - Provides methods to query the file storage limit.
+ * {@link QuotaModePreferenceItem}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public interface QuotaLimitService {
+public class QuotaModePreferenceItem implements PreferencesItemService, ConfigTreeEquivalent{
+
+    final QuotaFileStorageService storageService;
 
     /**
-     * Gets the current limit for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The current limit for specified user
-     * @throws OXException If current limit cannot be returned
+     * Initializes a new {@link QuotaModePreferenceItem}.
      */
-    long getLimit(int userId, int contextId) throws OXException;
+    public QuotaModePreferenceItem(QuotaFileStorageService storageService) {
+        super();
+        this.storageService = storageService;
+    }
 
-    /**
-     * Checks if this limit service is applicable for given user
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
-     * @throws OXException If applicability cannot be checked
-     */
-    boolean isApplicableFor(int userId, int contextId) throws OXException;
+    @Override
+    public String[] getPath() {
+        return new String[] { "filestoreMode" };
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+       return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                String mode = storageService.getQuotaFileStorage(user.getId(), ctx.getContextId(), Info.drive()).getMode();
+                setting.setSingleValue(mode);
+            }
+        };
+    }
+
+    @Override
+    public String getConfigTreePath() {
+       return "filestoreMode";
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/core//filestoreMode";
+    }
 
 }

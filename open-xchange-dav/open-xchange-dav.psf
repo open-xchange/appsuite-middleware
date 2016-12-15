@@ -4,6 +4,5 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.caldav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.carddav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.dav"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.dav.push"/>
 </provider>
 </psf>

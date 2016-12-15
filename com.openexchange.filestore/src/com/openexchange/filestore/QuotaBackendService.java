@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,74 +47,66 @@
  *
  */
 
-package com.openexchange.filestore.unified.quota;
+package com.openexchange.filestore;
 
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
- * {@link UnifiedQuotaPreferenceItem}
+ * {@link QuotaBackendService} - Provides methods to query and increment/decrement the file storage usage as well as to query the file storage limit.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class UnifiedQuotaPreferenceItem implements PreferencesItemService, ConfigTreeEquivalent{
-
-    private static final String CONFIG = "com.openexchange.unified.quota.enabled";
-    final ServiceLookup services;
+public interface QuotaBackendService extends QuotaMode {
 
     /**
-     * Initializes a new {@link UnifiedQuotaPreferenceItem}.
+     * Gets the current limit for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The current limit for specified user
+     * @throws OXException If current limit cannot be returned
      */
-    public UnifiedQuotaPreferenceItem(ServiceLookup services) {
-        super();
-        this.services=services;
-    }
+    long getLimit(int userId, int contextId) throws OXException;
 
-    @Override
-    public String[] getPath() {
-        return new String[] { "unifiedquota" };
-    }
+    /**
+     * Gets the current usage for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The current usage for specified user
+     * @throws OXException If current usage cannot be returned
+     */
+    long getUsage(int userId, int contextId) throws OXException;
 
-    @Override
-    public IValueHandler getSharedValue() {
-       return new ReadOnlyValue() {
+    /**
+     * Increments the usage by the given value for specified user
+     *
+     * @param required The required bytes to increment by
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If usage cannot be updated
+     */
+    void incrementUsage(long required, int userId, int contextId) throws OXException;
 
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
-            }
+    /**
+     * Decrements the usage by the given value for specified user
+     *
+     * @param released The released bytes to decrement by
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If usage cannot be updated
+     */
+    void decrementUsage(long released, int userId, int contextId) throws OXException;
 
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-
-                ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
-                ConfigView view = factory.getView(user.getId(), ctx.getContextId());
-                boolean enabled = view.opt(CONFIG, boolean.class, false);
-                setting.setSingleValue(enabled);
-            }
-        };
-    }
-
-    @Override
-    public String getConfigTreePath() {
-       return "unifiedquota";
-    }
-
-    @Override
-    public String getJslobPath() {
-        return "io.ox/core//unifiedquota";
-    }
+    /**
+     * Checks if this usage service is applicable for given user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If applicability cannot be checked
+     */
+    boolean isApplicableFor(int userId, int contextId) throws OXException;
 
 }

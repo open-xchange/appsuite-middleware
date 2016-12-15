@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,33 +47,45 @@
  *
  */
 
-package com.openexchange.unified.quota.osgi;
+package com.openexchange.socketio.websocket;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.filestore.unified.quota.UnifiedQuotaPreferenceItem;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.slf4j.Logger;
+import com.openexchange.socketio.protocol.EngineIOPacket;
+import com.openexchange.socketio.server.Session;
+import com.openexchange.threadpool.AbstractTask;
 
 /**
- * {@link Activator}
+ * {@link PacketHandlerTask} - Invokes handling of received Socket.IO packets.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class Activator extends HousekeepingActivator{
+public class PacketHandlerTask extends AbstractTask<Void> {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigViewFactory.class};
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PacketHandlerTask.class);
+
+    private final EngineIOPacket packet;
+    private final WsTransportConnection transportConnection;
+    private final Session session;
+
+    /**
+     * Initializes a new {@link PacketHandlerTask}.
+     */
+    public PacketHandlerTask(EngineIOPacket packet, WsTransportConnection transportConnection, Session session) {
+        super();
+        this.packet = packet;
+        this.transportConnection = transportConnection;
+        this.session = session;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        UnifiedQuotaPreferenceItem item = new UnifiedQuotaPreferenceItem(this);
-        registerService(PreferencesItemService.class, item);
-        registerService(ConfigTreeEquivalent.class, item);
-
+    public Void call() {
+        try {
+            session.onPacket(packet, transportConnection);
+        } catch (Exception e) {
+            LOGGER.error("Failed to handle incoming packet {} for Socket.IO session {}", packet, session.getSessionId(), e);
+        }
+        return null;
     }
 
 }
