@@ -790,7 +790,7 @@ public final class OXFolderAdminHelper {
                 cid,
                 writeCon);
         }
-        addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon);
+        addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon, OXFolderDefaultMode.DEFAULT);
         LOG.info("Folder rights for mail admin successfully added for context {}", cid);
     }
 
@@ -1445,7 +1445,7 @@ public final class OXFolderAdminHelper {
      * @param writeCon A writable connection to (master) database
      * @throws OXException If user's default folders could not be created successfully
      */
-    public void addUserToOXFolders(final int userId, final String displayName, final String language, final int cid, final Connection writeCon) throws OXException {
+    public void addUserToOXFolders(final int userId, final String displayName, final String language, final int cid, final Connection writeCon, OXFolderDefaultMode folderDefaultMode) throws OXException {
         try {
             final Context ctx = new ContextImpl(cid);
             final StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
@@ -1494,6 +1494,7 @@ public final class OXFolderAdminHelper {
             if (defaultInfostoreTrashName == null || defaultInfostoreTrashName.length() == 0) {
                 defaultInfostoreTrashName = DEFAULT_INFOSTORE_TRASH_NAME;
             }
+            
             LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}\tInfostore Trash={}",
                 defaultCalName, defaultConName, defaultTaskName, defaultInfostoreTrashName);
             /*
@@ -1513,7 +1514,7 @@ public final class OXFolderAdminHelper {
             fo.setFolderName(defaultCalName);
             fo.setModule(FolderObject.CALENDAR);
             int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, true, ctx, writeCon);
             LOG.info("User's default CALENDAR folder successfully created");
             /*
              * Insert default contact folder
@@ -1521,7 +1522,7 @@ public final class OXFolderAdminHelper {
             fo.setFolderName(defaultConName);
             fo.setModule(FolderObject.CONTACT);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, true, ctx, writeCon);
             LOG.info("User's default CONTACT folder successfully created");
             /*
              * Insert default contact folder
@@ -1529,12 +1530,21 @@ public final class OXFolderAdminHelper {
             fo.setFolderName(defaultTaskName);
             fo.setModule(FolderObject.TASK);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, true, ctx, writeCon);
             LOG.info("User's default TASK folder successfully created");
             /*
              * Insert default infostore folders
              */
-            InfoStoreFolderAdminHelper.addDefaultFolders(writeCon, cid, userId);
+            switch (folderDefaultMode) {
+                case DEFAULT_DELETABLE:
+                    InfoStoreFolderAdminHelper.addDefaultFoldersDeletable(writeCon, cid, userId, LocaleTools.getLocale(language));
+                    break;
+                case NONE:
+                    InfoStoreFolderAdminHelper.addDefaultFoldersNone(writeCon, cid, userId);
+                    break;
+                default:
+                    InfoStoreFolderAdminHelper.addDefaultFolders(writeCon, cid, userId);
+            }
 
             LOG.info("All user default folders were successfully created");
             /*

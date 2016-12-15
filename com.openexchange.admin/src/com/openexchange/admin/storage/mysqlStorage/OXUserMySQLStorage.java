@@ -153,6 +153,7 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
+import com.openexchange.tools.oxfolder.OXFolderDefaultMode;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
@@ -2052,7 +2053,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // by the ox api
                 if (userId != admin_id) {
                     final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
-                    oxa.addUserToOXFolders(userId, usrdata.getDisplay_name(), lang, contextId, con);
+                    OXFolderDefaultMode folderCreationMode = getFolderCreationMode(usrdata);
+                    oxa.addUserToOXFolders(userId, usrdata.getDisplay_name(), lang, contextId, con, folderCreationMode);
                 }
             } finally {
                 Databases.closeSQLStuff(stmt);
@@ -2108,6 +2110,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             Databases.closeSQLStuff(ps);
         }
+    }
+
+    private OXFolderDefaultMode getFolderCreationMode(final User usrdata) {
+        OXFolderDefaultMode folderCreationMode = OXFolderDefaultMode.DEFAULT;
+        if (usrdata.isDefaultFolderModeSet()) {
+            folderCreationMode = OXFolderDefaultMode.fromString(usrdata.getDefaultFolderMode());
+        }
+        return folderCreationMode;
     }
 
     private void insertDynamicAttributes(final Connection write_ox_con, final int cid, final int userId, final Map<String, Map<String, String>> dynamicValues) throws SQLException {

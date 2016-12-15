@@ -1665,36 +1665,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         usr.setId(Integer.valueOf(retval));
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
-        // homedirectory
-        /*-
-         *
-        final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
-        if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId().intValue())) {
-            if (!new File(homedir).mkdir()) {
-                log.error("unable to create directory: {}", homedir);
-            }
-            final String CHOWN = "/bin/chown";
-            final Process p;
-            try {
-                p = Runtime.getRuntime().exec(new String[] { CHOWN, usr.getName() + ":", homedir });
-                p.waitFor();
-                if (p.exitValue() != 0) {
-                    log.error("{} exited abnormally", CHOWN);
-                    final BufferedReader prerr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-                    String line = null;
-                    while ((line = prerr.readLine()) != null) {
-                        log.error(line);
-                    }
-                    log.error("Unable to chown homedirectory: {}", homedir);
-                }
-            } catch (final IOException e) {
-                log.error("Unable to chown homedirectory: {}", homedir, e);
-            } catch (final InterruptedException e) {
-                log.error("Unable to chown homedirectory: {}", homedir, e);
-            }
-        }
-        */
-
         // Trigger plugin extensions
         {
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();

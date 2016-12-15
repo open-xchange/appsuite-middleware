@@ -114,6 +114,7 @@ import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INVERT;
 import com.openexchange.sql.grammar.Table;
 import com.openexchange.sql.grammar.UPDATE;
+import com.openexchange.tools.oxfolder.OXFolderDefaultMode;
 
 /**
  * @author d7
@@ -2709,6 +2710,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (primaryEmail != null && email1 == null) {
                 throw new InvalidDataException("email1 not set but required!");
             }
+        }
+        
+        if (usr.isDefaultFolderModeSet() && OXFolderDefaultMode.fromString(usr.getDefaultFolderMode()) == null) {
+            String modes = "";
+            for (OXFolderDefaultMode mode : OXFolderDefaultMode.values()) {
+                modes = modes.concat("\n ").concat(mode.getText());
+            }
+            throw new InvalidDataException("An invalid folder mode was selected. Only the following modes are allowed: " + modes);
         }
     }
 

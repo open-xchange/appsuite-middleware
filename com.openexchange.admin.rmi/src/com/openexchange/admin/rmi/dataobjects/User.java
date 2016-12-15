@@ -572,6 +572,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private Integer folderTree;
 
     private boolean folderTreeSet = false;
+    
+    private String defaultFolderMode;
+    
+    private boolean defaultFolderModeSet = false;
 
     private Map<String, String> guiPreferences;
 
@@ -4424,6 +4428,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.userfield20 = null;
         this.defaultSenderAddress = null;
         folderTree = null;
+        defaultFolderMode = null;
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
         this.primaryAccountName = null;
@@ -4705,7 +4710,21 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public boolean isFolderTreeSet() {
         return folderTreeSet;
     }
-
+    
+    
+    public String getDefaultFolderMode() {
+        return defaultFolderMode;
+    }
+    
+    public void setDefaultFolderMode(String defaultFolderMode) {
+        this.defaultFolderModeSet = true;
+        this.defaultFolderMode = defaultFolderMode;
+    }
+    
+    public boolean isDefaultFolderModeSet() {
+        return defaultFolderModeSet;
+    }
+    
     /**
      * Sets a generic user attribute
      */
@@ -4881,6 +4900,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (defaultSenderAddressset ? 1231 : 1237);
         result = prime * result + ((folderTree == null) ? 0 : folderTree.hashCode());
         result = prime * result + (folderTreeSet ? 1231 : 1237);
+        result = prime * result + ((defaultFolderMode == null) ? 0 : defaultFolderMode.hashCode());
+        result = prime * result + (defaultFolderModeSet ? 1231 :1237);
         result = prime * result + ((default_group == null) ? 0 : default_group.hashCode());
         result = prime * result + (default_groupset ? 1231 : 1237);
         result = prime * result + ((department == null) ? 0 : department.hashCode());
@@ -5285,6 +5306,16 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         }
         if (folderTreeSet != other.folderTreeSet) {
+            return false;
+        }
+        if (defaultFolderMode == null) {
+            if (other.defaultFolderMode != null) {
+                return false;
+            }
+        } else if (!defaultFolderMode.equals(other.defaultFolderMode)) {
+            return false;
+        }
+        if (defaultFolderModeSet != other.defaultFolderModeSet) {
             return false;
         }
         if (default_group == null) {
