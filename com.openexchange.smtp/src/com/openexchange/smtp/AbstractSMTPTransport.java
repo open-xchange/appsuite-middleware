@@ -466,7 +466,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     /*
                      * Enable XOAUTH2/OAUTHBEARER (if appropriate)
                      */
-                    if (AuthType.XOAUTH2 == smtpConfig.getAuthType()) {
+                    if (AuthType.OAUTH == smtpConfig.getAuthType()) {
                         smtpProps.put("mail.smtp.auth.mechanisms", "XOAUTH2");
                     } else if (AuthType.OAUTHBEARER == smtpConfig.getAuthType()) {
                         smtpProps.put("mail.smtp.auth.mechanisms", "OAUTHBEARER");
@@ -955,7 +955,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         switch (authType) {
             case LOGIN:
                 return true;
-            case XOAUTH2:
+            case OAUTH:
                 // Don't know better here; see AbstractSMTPTransport.doConnectTransport()
                 return true;
             case OAUTHBEARER:

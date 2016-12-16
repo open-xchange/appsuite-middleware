@@ -293,6 +293,8 @@ public final class LoginPerformer {
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             retval.setSession(session);
 
+            session.setParameter(Session.PARAM_OAUTH_TOKEN, "123456");
+
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
 

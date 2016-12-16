@@ -69,7 +69,7 @@ public enum AuthType {
     /**
      * The XOAUTH2 authentication type; see <a href="https://developers.google.com/gmail/xoauth2_protocol">https://developers.google.com/gmail/xoauth2_protocol</a>
      */
-    XOAUTH2("XOAUTH2"),
+    OAUTH("XOAUTH2"),
     /**
      * The OAUTHBEARER authentication type; see <a href="https://tools.ietf.org/html/rfc7628">https://tools.ietf.org/html/rfc7628</a>.
      */
@@ -98,7 +98,7 @@ public enum AuthType {
             builder.put(Strings.asciiLowerCase(authType.name), authType);
         }
         // Legacy behavior
-        builder.put("oauth", AuthType.XOAUTH2);
+        builder.put("oauth", AuthType.OAUTH);
         MAP = builder.build();
     }
 
@@ -112,7 +112,7 @@ public enum AuthType {
         return null == authTypeStr ? null : MAP.get(Strings.asciiLowerCase(authTypeStr));
     }
 
-    private static final EnumSet<AuthType> OAUTH_TYPES = EnumSet.of(AuthType.XOAUTH2, AuthType.OAUTHBEARER);
+    private static final EnumSet<AuthType> OAUTH_TYPES = EnumSet.of(AuthType.OAUTH, AuthType.OAUTHBEARER);
 
     /**
      * Checks if given auth type is one of known OAuth-based types; either XOAUTH2 or OAUTHBEARER.

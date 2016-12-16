@@ -258,7 +258,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                         if (null != contextId) {
                             Integer userId = (Integer) lastSessionEvent.getProperty(SessiondEventConstants.PROP_USER_ID);
                             if (null != userId) {
-                                ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false);
+                                ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false, false);
                                 IMAPStoreCache.getInstance().dropFor(userId.intValue(), contextId.intValue());
 
                                 IMAPNotifierRegistry.getInstance().handleRemovedSession(userId.intValue(), contextId.intValue());

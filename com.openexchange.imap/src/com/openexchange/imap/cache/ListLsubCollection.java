@@ -68,7 +68,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
@@ -110,11 +110,15 @@ final class ListLsubCollection implements Serializable {
 
     private static final String INBOX = "INBOX";
 
+    private static enum State {
+        DEPRECATED, DEPRECATED_FORCE_NEW, INITIALIZED;
+    }
+
     // -----------------------------------------------------------------------------------------------------------
 
     private final ConcurrentMap<String, ListLsubEntryImpl> listMap;
     private final ConcurrentMap<String, ListLsubEntryImpl> lsubMap;
-    private final AtomicBoolean deprecated;
+    private final AtomicReference<State> deprecated;
     private final String[] shared;
     private final String[] user;
     private Boolean mbox;
@@ -145,7 +149,7 @@ final class ListLsubCollection implements Serializable {
         sentEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         trashEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         archiveEntries = new ConcurrentHashMap<String, ListLsubEntry>();
-        deprecated = new AtomicBoolean();
+        deprecated = new AtomicReference<State>();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
         init(false, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
@@ -171,7 +175,7 @@ final class ListLsubCollection implements Serializable {
         sentEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         trashEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         archiveEntries = new ConcurrentHashMap<String, ListLsubEntry>();
-        deprecated = new AtomicBoolean();
+        deprecated = new AtomicReference<State>();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
         init(false, imapStore, doStatus, doGetAcl, ignoreSubscriptions);
@@ -232,7 +236,7 @@ final class ListLsubCollection implements Serializable {
     }
 
     private void checkDeprecated() {
-        if (deprecated.get()) {
+        if (State.INITIALIZED != deprecated.get()) {
             throw new ListLsubRuntimeException("LIST/LSUB cache is deprecated.");
         }
     }
@@ -286,14 +290,16 @@ final class ListLsubCollection implements Serializable {
      * @return <code>true</code> if deprecated; otherwise <code>false</code>
      */
     public boolean isDeprecated() {
-        return deprecated.get();
+        return State.INITIALIZED != deprecated.get();
     }
 
     /**
      * Clears this collection and resets its time stamp to force re-initialization.
+     *
+     * @param forceNewConnection <code>true</code> to enforce a new connection; otherwise <code>false</code>
      */
-    public void clear() {
-        deprecated.set(true);
+    public void clear(boolean forceNewConnection) {
+        deprecated.set(forceNewConnection ? State.DEPRECATED_FORCE_NEW : State.DEPRECATED);
         stamp = 0;
         LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
     }
@@ -409,7 +415,7 @@ final class ListLsubCollection implements Serializable {
      * @throws OXException If re-initialization fails
      */
     public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
-        clear();
+        clear(false);
         init(true, imapStore, doStatus, doGetAcl, ignoreSubscriptions);
     }
 
@@ -422,7 +428,7 @@ final class ListLsubCollection implements Serializable {
      * @throws MessagingException If a messaging error occurs
      */
     public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws MessagingException {
-        clear();
+        clear(false);
         init(true, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
     }
 
@@ -495,133 +501,149 @@ final class ListLsubCollection implements Serializable {
         final boolean debug = LOG.isDebugEnabled();
         final long st = debug ? System.currentTimeMillis() : 0L;
         /*
-         * Perform LIST "" ""
+         * Check for if a new connection is supposed to be used
          */
-        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                doRootListCommand(protocol);
-                return null;
-            }
-
-        });
-        if (!ignoreSubscriptions) {
+        IMAPFolder imapFolderToUse = imapFolder;
+        boolean forceNewConnection = (State.DEPRECATED_FORCE_NEW == deprecated.get());
+        if (forceNewConnection) {
+            imapFolderToUse = (IMAPFolder) imapFolderToUse.getStore().getFolder(imapFolderToUse.getFullName());
+            imapFolderToUse.open(IMAPFolder.READ_ONLY);
+        }
+        try {
             /*
-             * Perform LSUB "" "*"
+             * Perform LIST "" ""
              */
-            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+            imapFolderToUse.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    doListLsubCommand(protocol, true);
+                    doRootListCommand(protocol);
                     return null;
                 }
 
             });
-        }
-        /*
-         * Perform LIST "" "*"
-         */
-        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                doListLsubCommand(protocol, false);
-                return null;
-            }
-
-        });
-        if (ignoreSubscriptions) {
-            lsubMap.putAll(listMap);
-        }
-        if (imapStore.getCapabilities().containsKey("SPECIAL-USE")) {
-            /*
-             * Perform LIST (SPECIAL-USE) "" "*"
-             */
-            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-                @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    doListSpecialUse(protocol, true);
-                    return null;
-                }
-
-            });
-        }
-        /*
-         * Debug logs
-         */
-        if (debug) {
-            final StringBuilder sb = new StringBuilder(1024);
-            {
-                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
-                sb.append("LIST cache contains after (re-)initialization:\n");
-                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
-                }
-                LOG.debug(sb.toString());
-            }
-            {
-                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
-                sb.setLength(0);
-                sb.append("LSUB cache contains after (re-)initialization:\n");
-                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
-                }
-                LOG.debug(sb.toString());
-            }
-        }
-        if (!ignoreSubscriptions) {
-            /*
-             * Consistency check
-             */
-            checkConsistency(imapStore);
-        }
-        /*
-         * Status if enabled
-         */
-        if (doStatus) {
-            final ConcurrentMap<String, ListLsubEntryImpl> primary;
-            final ConcurrentMap<String, ListLsubEntryImpl> lookup;
-            if (listMap.size() > lsubMap.size()) {
-                primary = lsubMap;
-                lookup = listMap;
-            } else {
-                primary = listMap;
-                lookup = lsubMap;
-            }
-            if (primary.size() <= initStatusThreshold()) {
+            if (!ignoreSubscriptions) {
                 /*
-                 * Gather STATUS for each entry
+                 * Perform LSUB "" "*"
                  */
-                for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
-                    final ListLsubEntryImpl listEntry = iter.next();
-                    if (listEntry.canOpen()) {
-                        try {
-                            final String fullName = listEntry.getFullName();
-                            final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
-                            if (null != status) {
-                                listEntry.setStatus(status);
-                                final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
-                                if (null != lsubEntry) {
-                                    lsubEntry.setStatus(status);
+                imapFolderToUse.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                    @Override
+                    public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                        doListLsubCommand(protocol, true);
+                        return null;
+                    }
+
+                });
+            }
+            /*
+             * Perform LIST "" "*"
+             */
+            imapFolderToUse.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                @Override
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    doListLsubCommand(protocol, false);
+                    return null;
+                }
+
+            });
+            if (ignoreSubscriptions) {
+                lsubMap.putAll(listMap);
+            }
+            if (imapStore.getCapabilities().containsKey("SPECIAL-USE")) {
+                /*
+                 * Perform LIST (SPECIAL-USE) "" "*"
+                 */
+                imapFolderToUse.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                    @Override
+                    public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                        doListSpecialUse(protocol, true);
+                        return null;
+                    }
+
+                });
+            }
+            /*
+             * Debug logs
+             */
+            if (debug) {
+                final StringBuilder sb = new StringBuilder(1024);
+                {
+                    final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
+                    sb.append("LIST cache contains after (re-)initialization:\n");
+                    for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                        sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                    }
+                    LOG.debug(sb.toString());
+                }
+                {
+                    final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
+                    sb.setLength(0);
+                    sb.append("LSUB cache contains after (re-)initialization:\n");
+                    for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                        sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                    }
+                    LOG.debug(sb.toString());
+                }
+            }
+            if (!ignoreSubscriptions) {
+                /*
+                 * Consistency check
+                 */
+                checkConsistency(imapStore);
+            }
+            /*
+             * Status if enabled
+             */
+            if (doStatus) {
+                final ConcurrentMap<String, ListLsubEntryImpl> primary;
+                final ConcurrentMap<String, ListLsubEntryImpl> lookup;
+                if (listMap.size() > lsubMap.size()) {
+                    primary = lsubMap;
+                    lookup = listMap;
+                } else {
+                    primary = listMap;
+                    lookup = lsubMap;
+                }
+                if (primary.size() <= initStatusThreshold()) {
+                    /*
+                     * Gather STATUS for each entry
+                     */
+                    for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
+                        final ListLsubEntryImpl listEntry = iter.next();
+                        if (listEntry.canOpen()) {
+                            try {
+                                final String fullName = listEntry.getFullName();
+                                final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolderToUse);
+                                if (null != status) {
+                                    listEntry.setStatus(status);
+                                    final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
+                                    if (null != lsubEntry) {
+                                        lsubEntry.setStatus(status);
+                                    }
                                 }
+                            } catch (final Exception e) {
+                                // Swallow failed STATUS command
+                                org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug("STATUS command failed for {}", imapFolderToUse.getStore().toString(), e);
                             }
-                        } catch (final Exception e) {
-                            // Swallow failed STATUS command
-                            org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug("STATUS command failed for {}", imapFolder.getStore().toString(), e);
                         }
                     }
                 }
             }
+            /*
+             * ACLs if enabled
+             */
+            if (doGetAcl) {
+                initACLs(imapFolderToUse);
+            }
+        } finally {
+            if (forceNewConnection) {
+                imapFolderToUse.close(false);
+            }
         }
-        /*
-         * ACLs if enabled
-         */
-        if (doGetAcl) {
-            initACLs(imapFolder);
-        }
+
         if (debug) {
             final long dur = System.currentTimeMillis() - st;
             final StringBuilder sb = new StringBuilder(128);
@@ -643,7 +665,7 @@ final class ListLsubCollection implements Serializable {
          * Set time stamp
          */
         stamp = System.currentTimeMillis();
-        deprecated.set(false);
+        deprecated.set(State.INITIALIZED);
     }
 
     /**
@@ -848,7 +870,7 @@ final class ListLsubCollection implements Serializable {
      * @throws MessagingException If a messaging error occurs
      */
     public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws MessagingException {
-        if (deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
+        if (State.INITIALIZED != deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
             init(true, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
             return;
         }
@@ -2278,7 +2300,7 @@ final class ListLsubCollection implements Serializable {
         private Rights myRights;
 
         private Boolean subscribed;
-        
+
         private boolean dummy;
 
         protected ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
@@ -2338,7 +2360,7 @@ final class ListLsubCollection implements Serializable {
                 children.clear();
             }
         }
-        
+
         /**
          * Sets the dummy flag
          *
@@ -2349,7 +2371,7 @@ final class ListLsubCollection implements Serializable {
             this.dummy = dummy;
             return this;
         }
-        
+
         /**
          * Gets the dummy flag
          *

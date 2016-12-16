@@ -527,7 +527,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         switch (authType) {
             case LOGIN:
                 return true;
-            case XOAUTH2:
+            case OAUTH:
                 try {
                     IMAPConfig imapConfig = getIMAPConfig();
                     final String serverUrl = new StringBuilder().append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
@@ -1409,7 +1409,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Enable XOAUTH2/OAUTHBEARER (if appropriate)
          */
-        if (AuthType.XOAUTH2 == config.getAuthType()) {
+        if (AuthType.OAUTH == config.getAuthType()) {
             imapProps.put("mail.imap.auth.mechanisms", "XOAUTH2");
         } else if (AuthType.OAUTHBEARER == config.getAuthType()) {
             imapProps.put("mail.imap.auth.mechanisms", "OAUTHBEARER");

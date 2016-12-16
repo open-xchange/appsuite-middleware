@@ -220,7 +220,7 @@ public final class ListLsubCache {
      * @param contextId The context identifier
      */
     public static void dropFor(int userId, int contextId) {
-        dropFor(userId, contextId, true);
+        dropFor(userId, contextId, true, false);
     }
 
     /**
@@ -229,12 +229,33 @@ public final class ListLsubCache {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param notify Whether to notify
+     * @param enforceNewConnection Whether a new connection is supposed to be used for cache initialization on subsequent calls
      */
-    public static void dropFor(int userId, int contextId, boolean notify) {
-        getCache(userId, contextId).remove();
+    public static void dropFor(int userId, int contextId, boolean notify, boolean enforceNewConnection) {
+        if (enforceNewConnection) {
+            // Get the associated map
+            ConcurrentMap<Integer, Future<ListLsubCollection>> map = getCache(userId, contextId).get();
+            if (null != map) {
+                for (Future<ListLsubCollection> f : map.values()) {
+                    try {
+                        ListLsubCollection collection = getFrom(f);
+                        synchronized (collection) {
+                            collection.clear(enforceNewConnection);
+                        }
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+
+            }
+        } else {
+            getCache(userId, contextId).remove();
+        }
+
         if (notify) {
             fireInvalidateCacheEvent(userId, contextId);
         }
+
         LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
     }
 
@@ -304,7 +325,7 @@ public final class ListLsubCache {
         ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
         if (null != collection) {
             synchronized (collection) {
-                collection.clear();
+                collection.clear(false);
             }
 
             fireInvalidateCacheEvent(userId, contextId);

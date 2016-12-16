@@ -1739,6 +1739,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         try {
+            Folder folder = imapFolder.getStore().getFolder(imapFolder.getFullName());
+            folder.open(READ_ONLY);
+            folder.close(false);
+
+
             int messageCount = imapFolder.getMessageCount();
             if (messageCount <= 0) {
                 return EMPTY_RETVAL;
