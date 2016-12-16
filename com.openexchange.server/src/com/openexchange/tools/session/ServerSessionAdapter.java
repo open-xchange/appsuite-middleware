@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.session;
 
-import static com.openexchange.osgi.util.ServiceCallWrapper.doServiceCall;
 import java.util.Set;
 import org.apache.commons.lang.Validate;
 import com.openexchange.annotation.NonNull;
@@ -62,8 +61,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -494,47 +493,39 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     }
 
     private static Context loadContext(final int contextId) throws OXException {
-        try {
-            return doServiceCall(ServerSessionAdapter.class, ContextService.class,
-                new ServiceUser<ContextService, Context>() {
-                    @Override
-                    public Context call(ContextService service) throws OXException {
-                        return service.getContext(contextId);
-                    }
-                });
-        } catch (ServiceException e) {
-            throw e.toOXException();
+        ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
         }
+
+        return service.getContext(contextId);
     }
 
     private User loadUser() throws Exception {
-        return doServiceCall(getClass(), UserService.class,
-            new ServiceUser<UserService, User>() {
-                @Override
-                public User call(UserService service) throws OXException {
-                    return service.getUser(getUserId(), getContextId());
-                }
-            });
+        UserService service = ServerServiceRegistry.getInstance().getService(UserService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(UserService.class);
+        }
+
+        return service.getUser(getUserId(), getContextId());
     }
 
     private UserPermissionBits loadUserPermissionBits() throws Exception {
-        return doServiceCall(getClass(), UserPermissionService.class,
-            new ServiceUser<UserPermissionService, UserPermissionBits>() {
-                @Override
-                public UserPermissionBits call(UserPermissionService service) throws OXException {
-                    return service.getUserPermissionBits(getUserId(), getContext());
-                }
-            });
+        UserPermissionService service = ServerServiceRegistry.getInstance().getService(UserPermissionService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(UserPermissionService.class);
+        }
+
+        return service.getUserPermissionBits(getUserId(), getContext());
     }
 
     private UserConfiguration loadUserConfiguration() throws Exception {
-        return doServiceCall(getClass(), UserConfigurationService.class,
-            new ServiceUser<UserConfigurationService, UserConfiguration>() {
-                @Override
-                public UserConfiguration call(UserConfigurationService service) throws OXException {
-                    return service.getUserConfiguration(getUserId(), getContext());
-                }
-            });
+        UserConfigurationService service = ServerServiceRegistry.getInstance().getService(UserConfigurationService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(UserConfigurationService.class);
+        }
+
+        return service.getUserConfiguration(getUserId(), getContext());
     }
 
 }
