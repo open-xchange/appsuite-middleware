@@ -937,7 +937,10 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             case LOGIN:
                 return true;
             case OAUTH:
-                // Don't know better here
+                // Don't know better here; see AbstractSMTPTransport.doConnectTransport()
+                return true;
+            case OAUTHBEARER:
+                // Don't know better here; see AbstractSMTPTransport.doConnectTransport()
                 return true;
             default:
                 return false;
