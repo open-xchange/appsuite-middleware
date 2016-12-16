@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.internal;
 
-import static com.openexchange.osgi.util.ServiceCallWrapper.doServiceCall;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -68,10 +67,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -282,46 +280,13 @@ public final class CalculatePermission {
             allowedContentTypes);
     }
 
-    private static User[] getUsers(final int[] userIds, final Context context) throws OXException {
-        try {
-            return doServiceCall(CalculatePermission.class, UserService.class,
-                new ServiceUser<UserService, User[]>() {
-                    @Override
-                    public User[] call(UserService service) throws Exception {
-                        return service.getUser(context, userIds);
-                    }
-                });
-        } catch (ServiceException e) {
-            throw e.toOXException();
+    private static UserPermissionBits getUserPermissionBits(int userId, Context context) throws OXException {
+        UserPermissionService service = ServerServiceRegistry.getInstance().getService(UserPermissionService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(UserPermissionService.class);
         }
-    }
 
-    private static UserPermissionBits getUserPermissionBits(final int userId, final Context context) throws OXException {
-        try {
-            return doServiceCall(CalculatePermission.class, UserPermissionService.class,
-                new ServiceUser<UserPermissionService, UserPermissionBits>() {
-                    @Override
-                    public UserPermissionBits call(UserPermissionService service) throws Exception {
-                        return service.getUserPermissionBits(userId, context);
-                    }
-                });
-        } catch (ServiceException e) {
-            throw e.toOXException();
-        }
-    }
-
-    private static UserPermissionBits[] getUserPermissionBits(final Context context, final User[] users) throws OXException {
-        try {
-            return doServiceCall(CalculatePermission.class, UserPermissionService.class,
-                new ServiceUser<UserPermissionService, UserPermissionBits[]>() {
-                    @Override
-                    public UserPermissionBits[] call(UserPermissionService service) throws Exception {
-                        return service.getUserPermissionBits(context, users);
-                    }
-                });
-        } catch (ServiceException e) {
-            throw e.toOXException();
-        }
+        return service.getUserPermissionBits(userId, context);
     }
 
     private static Permission getMaxPermission(final Permission[] permissions, final UserPermissionBits userPermissionBits) {

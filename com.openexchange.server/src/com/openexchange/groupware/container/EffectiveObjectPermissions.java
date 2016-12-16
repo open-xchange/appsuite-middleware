@@ -71,8 +71,8 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
-import com.openexchange.osgi.util.ServiceCallWrapper;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -200,23 +200,19 @@ public class EffectiveObjectPermissions {
      * @throws OXException
      */
     public static EffectiveObjectPermission load(final Context ctx, final User user, final UserPermissionBits permissionBits, final int module, final int folderId, final int id) throws OXException {
+        DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        Connection con = null;
         try {
-            return ServiceCallWrapper.doServiceCall(EffectiveObjectPermissions.class, DatabaseService.class, new ServiceCallWrapper.ServiceUser<DatabaseService, EffectiveObjectPermission>() {
-                @Override
-                public EffectiveObjectPermission call(DatabaseService service) throws Exception {
-                    Connection con = null;
-                    try {
-                        con = service.getReadOnly(ctx);
-                        return load(ctx, user, permissionBits, module, folderId, id, con);
-                    } finally {
-                        if (con != null) {
-                            service.backReadOnly(ctx, con);
-                        }
-                    }
-                }
-            });
-        } catch (ServiceException e) {
-            throw e.toOXException();
+            con = service.getReadOnly(ctx);
+            return load(ctx, user, permissionBits, module, folderId, id, con);
+        } finally {
+            if (con != null) {
+                service.backReadOnly(ctx, con);
+            }
         }
     }
 
