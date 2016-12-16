@@ -802,7 +802,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         }
 
         // Authentication failed... Check for OAuth-based authentication
-        if (AuthType.OAUTH.equals(mailConfig.getAuthType())) {
+        if (AuthType.isOAuthType(mailConfig.getAuthType())) {
             // Determine identifier of the associated OAuth account
             int oauthAccountId = mailConfig.getOAuthAccountId();
             if (oauthAccountId >= 0) {

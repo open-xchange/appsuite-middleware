@@ -464,10 +464,12 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         smtpProps.put("mail.smtp.sendpartial", "true");
                     }
                     /*
-                     * Enable XOAUTH2 (if appropriate)
+                     * Enable XOAUTH2/OAUTHBEARER (if appropriate)
                      */
-                    if (AuthType.OAUTH == smtpConfig.getAuthType()) {
+                    if (AuthType.XOAUTH2 == smtpConfig.getAuthType()) {
                         smtpProps.put("mail.smtp.auth.mechanisms", "XOAUTH2");
+                    } else if (AuthType.OAUTHBEARER == smtpConfig.getAuthType()) {
+                        smtpProps.put("mail.smtp.auth.mechanisms", "OAUTHBEARER");
                     }
                     /*
                      * Check if a secure SMTP connection should be established
@@ -698,6 +700,10 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 throw e;
             }
 
+            if ("No authentication mechanisms supported by both server and client".equals(e.getMessage())) {
+                throw MailExceptionCode.AUTH_TYPE_NOT_SUPPORTED.create(smtpConfig.getAuthType().getName(), smtpConfig.getServer());
+            }
+
             if (smtpConfig.getAccountId() == MailAccount.DEFAULT_ID) {
                 AuthenticationFailedHandlerService handlerService = Services.getService(AuthenticationFailedHandlerService.class);
                 if (handlerService != null) {
@@ -707,7 +713,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
 
-            if (AuthType.OAUTH.equals(smtpConfig.getAuthType())) {
+            if (AuthType.isOAuthType(smtpConfig.getAuthType())) {
                 // Determine identifier of the associated OAuth account
                 int oauthAccountId = smtpConfig.getOAuthAccountId();
                 if (oauthAccountId >= 0) {
@@ -949,8 +955,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         switch (authType) {
             case LOGIN:
                 return true;
-            case OAUTH:
-                // Don't know better here
+            case XOAUTH2:
+                // Don't know better here; see AbstractSMTPTransport.doConnectTransport()
+                return true;
+            case OAUTHBEARER:
+                // Don't know better here; see AbstractSMTPTransport.doConnectTransport()
                 return true;
             default:
                 return false;

@@ -81,6 +81,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.mail.oauth.TokenInfo;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.ImmutableReference;
@@ -827,16 +828,18 @@ public abstract class MailConfig {
 
         // Assign password
         if (account.isDefaultAccount()) {
-            AuthType authType = getConfiguredAuthType(account.isMailAccount(), session);
-            if (AuthType.OAUTH == authType) {
-                Object obj = session.getParameter(Session.PARAM_XOAUTH2_TOKEN);
+            // First, check the configured authentication type for current user
+            AuthType configuredAuthType = getConfiguredAuthType(account.isMailAccount(), session);
+            if (AuthType.isOAuthType(configuredAuthType)) {
+                // Apparently, OAuth is supposed to be used
+                Object obj = session.getParameter(Session.PARAM_OAUTH_TOKEN);
                 if (obj == null) {
                     throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
                 }
                 mailConfig.password = obj.toString();
-                mailConfig.authType = AuthType.OAUTH;
+                mailConfig.authType = configuredAuthType;
             } else {
-
+                // Common handling based on configuration
                 PasswordSource cur = MailProperties.getInstance().getPasswordSource();
                 if (PasswordSource.GLOBAL.equals(cur)) {
                     final String masterPw = MailProperties.getInstance().getMasterPassword();
@@ -917,12 +920,13 @@ public abstract class MailConfig {
      * @throws OXException If authentication information cannot be resolved
      */
     public static AuthInfo determinePasswordAndAuthType(String login, Session session, Account account, boolean forMailAccess) throws OXException {
-        int oAuthAccontId = assumeXOauth2For(account, forMailAccess);
+        // This method is only called for external accounts
+        int oAuthAccontId = assumeOauthFor(account, forMailAccess);
         if (oAuthAccontId >= 0) {
-            // Do the XOAUTH2 dance...
+            // Do the OAuth dance...
             MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
-            String token = mailOAuthService.getTokenFor(oAuthAccontId, session);
-            return new AuthInfo(login, token, AuthType.OAUTH, oAuthAccontId);
+            TokenInfo tokenInfo = mailOAuthService.getTokenFor(oAuthAccontId, session);
+            return new AuthInfo(login, tokenInfo.getToken(), AuthType.parse(tokenInfo.getAuthMechanism()), oAuthAccontId);
         }
 
         String mailAccountPassword = account.getPassword();
@@ -944,7 +948,7 @@ public abstract class MailConfig {
      * @param forMailAccess <code>true</code> to resolve for mail access; otherwise <code>false</code> for mail transport
      * @return The verified identifier of the associated OAuth account or <code>-1</code>
      */
-    protected static int assumeXOauth2For(Account account, boolean forMailAccess) {
+    protected static int assumeOauthFor(Account account, boolean forMailAccess) {
         if (forMailAccess) {
             MailAccount mailAccount = (MailAccount) account;
             if (false == mailAccount.isMailOAuthAble()) {

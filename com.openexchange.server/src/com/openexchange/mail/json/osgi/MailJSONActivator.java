@@ -92,7 +92,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
@@ -162,7 +161,6 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         SERVICES.set(serviceLookup);
 
         trackService(Dispatcher.class);
-        trackService(AuthenticationFailedHandler.class);
 
         final BundleContext context = this.context;
 

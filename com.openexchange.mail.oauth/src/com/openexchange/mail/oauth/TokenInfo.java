@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,28 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.mail.oauth;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link AuthenticationFailedHandler} - Handles failed authentications that occurred while attempting to connect/log-in to a certain service.
+ * {@link TokenInfo} - The token information.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public interface AuthenticationFailedHandler {
-
-    /** The result for a handled authentication error */
-    public static enum Result {
-        /**
-         * Possible further handlers are supposed to be invoked.
-         */
-        NEUTRAL,
-        /**
-         * Possible further handlers are <b>not</b> supposed to be invoked.
-         */
-        ABORT;
-    }
-
-    /** The type of service that yielded the failed authentication */
-    public static enum Service {
-        /**
-         * The mail access service; e.g. IMAP
-         */
-        MAIL,
-        /**
-         * The mail transport service; e.g. SMTP
-         */
-        TRANSPORT,
-        /**
-         * The mail filter service; e.g. SIEVE
-         */
-        MAIL_FILTER;
-    }
+public interface TokenInfo {
 
     /**
-     * This method is called in case the authentication has failed.
+     * Gets the token string.
      *
-     * @param failedAuthentication The optional {@code OXException} instance that reflects the failed authentication
-     * @param service The type of service that yielded the failed authentication
-     * @param mailConfig The effective mail configuration for affected user
-     * @param session The user which couln't be authenticated.
-     * @return The result that controls whether to proceed in invocation chain
-     * @throws OXException If handling the failed authentication is supposed being aborted with an error
+     * @return The token string
      */
-    Result handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException;
+    String getToken();
 
+    /**
+     * Gets the authentication mechanism that is supposed being performed for the token.
+     *
+     * @return The authentication mechanism; e.g. <code>"XOAUTH2"</code> or <code>"OAUTHBEARER"</code>
+     */
+    String getAuthMechanism();
 }

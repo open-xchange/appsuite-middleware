@@ -527,11 +527,19 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         switch (authType) {
             case LOGIN:
                 return true;
-            case OAUTH:
+            case XOAUTH2:
                 try {
                     IMAPConfig imapConfig = getIMAPConfig();
                     final String serverUrl = new StringBuilder().append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
                     return IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=XOAUTH2");
+                } catch (IOException e) {
+                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                }
+            case OAUTHBEARER:
+                try {
+                    IMAPConfig imapConfig = getIMAPConfig();
+                    final String serverUrl = new StringBuilder().append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
+                    return IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=OAUTHBEARER");
                 } catch (IOException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
@@ -1399,10 +1407,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapProps.put("mail.imap.auditLog.enabled", "true");
         }
         /*
-         * Enable XOAUTH2 (if appropriate)
+         * Enable XOAUTH2/OAUTHBEARER (if appropriate)
          */
-        if (AuthType.OAUTH == config.getAuthType()) {
+        if (AuthType.XOAUTH2 == config.getAuthType()) {
             imapProps.put("mail.imap.auth.mechanisms", "XOAUTH2");
+        } else if (AuthType.OAUTHBEARER == config.getAuthType()) {
+            imapProps.put("mail.imap.auth.mechanisms", "OAUTHBEARER");
         }
         /*
          * Check if a secure IMAP connection should be established
