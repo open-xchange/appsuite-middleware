@@ -72,11 +72,13 @@ import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -152,6 +154,7 @@ public class SieveHandler {
     private final boolean onlyWelcome;
     protected final String sieve_host;
     protected final int sieve_host_port;
+    private final String oauthToken;
     private Capabilities capa = null;
     private boolean punycode = false;
     private Socket s_sieve = null;
@@ -173,7 +176,7 @@ public class SieveHandler {
      * @param host
      * @param port
      */
-    public SieveHandler(final String userName, final String passwd, final String host, final int port, final String authEnc) {
+    public SieveHandler(String userName, String passwd, String host, int port, String authEnc, String oauthToken) {
         sieve_user = userName;
         sieve_auth = userName;
         sieve_auth_enc = authEnc;
@@ -181,9 +184,10 @@ public class SieveHandler {
         sieve_host = host; // "127.0.0.1"
         sieve_host_port = port; // 2000
         onlyWelcome = false;
+        this.oauthToken = oauthToken;
     }
 
-    public SieveHandler(final String userName, final String authUserName, final String authUserPasswd, final String host, final int port, final String authEnc) {
+    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken) {
         sieve_user = userName;
         sieve_auth = authUserName;
         sieve_auth_enc = authEnc;
@@ -191,6 +195,7 @@ public class SieveHandler {
         sieve_host = host; // "127.0.0.1"
         sieve_host_port = port; // 2000
         onlyWelcome = false;
+        this.oauthToken = oauthToken;
     }
 
     public SieveHandler(String host, int port) {
@@ -201,6 +206,7 @@ public class SieveHandler {
         sieve_host = host; // "127.0.0.1"
         sieve_host_port = port; // 2000
         onlyWelcome = true;
+        this.oauthToken = null;
     }
 
     public String getSieveHost() {
@@ -229,9 +235,11 @@ public class SieveHandler {
      * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">Note: Timeout is required to be set prior to {@link #initializeConnection()} is invoked to become effective</div>
      *
      * @param connectTimeout The connect timeout to set
+     * @return This SIEVE handler with new behavior applied
      */
-    public void setConnectTimeout(long connectTimeout) {
+    public SieveHandler setConnectTimeout(long connectTimeout) {
         this.connectTimeout = connectTimeout < 0 ? null : Long.valueOf(connectTimeout);
+        return this;
     }
 
     /**
@@ -243,9 +251,11 @@ public class SieveHandler {
      * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">Note: Timeout is required to be set prior to {@link #initializeConnection()} is invoked to become effective</div>
      *
      * @param readTimeout The read timeout to set
+     * @return This SIEVE handler with new behavior applied
      */
-    public void setReadTimeout(long readTimeout) {
+    public SieveHandler setReadTimeout(long readTimeout) {
         this.readTimeout = readTimeout < 0 ? null : Long.valueOf(readTimeout);
+        return this;
     }
 
     /**
@@ -393,23 +403,40 @@ public class SieveHandler {
             /*
              * Check for supported authentication support
              */
-            if (null == sasl || (!sasl.contains("PLAIN") && !sasl.contains("GSSAPI")) ) {
-                throw new OXSieveHandlerException(
-                    new StringBuilder(64).append("The server doesn't support PLAIN, nor GSSAPI authentication over a ").append(
-                        issueTLS ? "TLS" : "plain-text").append(" connection.").toString(),
-                    sieve_host,
-                    sieve_host_port,
-                    null);
+            if (null == sasl) {
+                String message = new StringBuilder(64).append("The server doesn't support any SASL authentication mechanism over a ").append(issueTLS ? "TLS" : "plain-text").append(" connection.").toString();
+                throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null);
             }
             measureStart();
             String useAuth = "PLAIN";
-            final boolean preferGSSAPI;
             {
-                final ConfigurationService service = Services.getService(ConfigurationService.class);
-                preferGSSAPI = null != service && service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
+                String preferredSaslMech = null;
+                {
+                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null != service) {
+                        preferredSaslMech = service.getProperty("com.openexchange.mail.filter.preferredSaslMech");
+                        if (null == preferredSaslMech) {
+                            // Check old property to keep compatibility
+                            boolean preferGSSAPI = service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
+                            if (preferGSSAPI) {
+                                useAuth = "GSSAPI";
+                            }
+                        }
+                    }
+                }
+                if ("GSSAPI".equals(preferredSaslMech) && sasl.contains("GSSAPI")) {
+                    useAuth = "GSSAPI";
+                }
+                if ("XOAUTH2".equals(preferredSaslMech) && sasl.contains("XOAUTH2")) {
+                    useAuth = "XOAUTH2";
+                }
+                if ("OAUTHBEARER".equals(preferredSaslMech) && sasl.contains("OAUTHBEARER")) {
+                    useAuth = "OAUTHBEARER";
+                }
             }
-            if (preferGSSAPI && sasl.contains("GSSAPI")) {
-                useAuth = "GSSAPI";
+            if (!sasl.contains(useAuth)) {
+                String message = new StringBuilder(64).append("The server doesn't support ").append(useAuth).append(" authentication over a ").append(issueTLS ? "TLS" : "plain-text").append(" connection.").toString();
+                throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null);
             }
             if (!selectAuth(useAuth, commandBuilder)) {
                 throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
@@ -438,8 +465,7 @@ public class SieveHandler {
             throw new OXSieveHandlerException("Script upload not possible. No Script", sieve_host, sieve_host_port, null);
         }
 
-        final String put =
-            commandBuilder.append(SIEVE_PUT).append('\"').append(script_name).append("\" {").append(script.length).append("+}").append(CRLF).toString();
+        String put = commandBuilder.append(SIEVE_PUT).append('\"').append(script_name).append("\" {").append(script.length).append("+}").append(CRLF).toString();
         commandBuilder.setLength(0);
 
         bos_sieve.write(put.getBytes(com.openexchange.java.Charsets.UTF_8));
@@ -448,14 +474,14 @@ public class SieveHandler {
         bos_sieve.write(CRLF.getBytes(com.openexchange.java.Charsets.UTF_8));
         bos_sieve.flush();
 
-        String actualline = bis_sieve.readLine();
-        if (null != actualline && actualline.startsWith(SIEVE_OK)) {
+        String currentLine = bis_sieve.readLine();
+        if (null != currentLine && currentLine.startsWith(SIEVE_OK)) {
             return;
-        } else if (null != actualline && actualline.startsWith("NO ")) {
-            final String errorMessage = parseError(actualline).replaceAll(CRLF, "\n");
-            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage)).setParseError(true);
+        } else if (null != currentLine && currentLine.startsWith("NO ")) {
+            final String errorMessage = parseError(currentLine).replaceAll(CRLF, "\n");
+            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(currentLine, errorMessage)).setParseError(true);
         } else {
-            throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(actualline, null));
+            throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(currentLine, null));
         }
     }
 
@@ -843,6 +869,75 @@ public class SieveHandler {
         }
     }
 
+    private boolean authXOAUTH2(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+        if (Strings.isEmpty(oauthToken)) {
+            return false;
+        }
+
+        String resp = "user=" + sieve_user + "\001auth=Bearer " + oauthToken + "\001\001";
+        String irs = Base64.encode(Charsets.toAsciiBytes(resp));
+
+        {
+            String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"XOAUTH2\" {").append(irs.length()).append("+}").append(CRLF).toString();
+            commandBuilder.setLength(0);
+            bos_sieve.write(auth_mech_string.getBytes());
+        }
+
+        bos_sieve.write(irs.getBytes());
+        bos_sieve.write(CRLF.getBytes());
+        bos_sieve.flush();
+
+        while (true) {
+            final String temp = bis_sieve.readLine();
+            if (null != temp) {
+                if (temp.startsWith(SIEVE_OK)) {
+                    AUTH = true;
+                    return true;
+                } else if (temp.startsWith(SIEVE_NO)) {
+                    AUTH = false;
+                    return false;
+                }
+            } else {
+                AUTH = false;
+                return false;
+            }
+        }
+    }
+
+    private boolean authOAUTHBEARER(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+        if (Strings.isEmpty(oauthToken)) {
+            return false;
+        }
+
+        String resp = "n,a=" + sieve_user + ",\001host=" + sieve_host + "\001port=" + sieve_host_port + "\001auth=Bearer " + oauthToken + "\001\001";
+        String irs = Base64.encode(Charsets.toAsciiBytes(resp));
+
+        {
+            String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"OAUTHBEARER\" {").append(irs.length()).append("+}").append(CRLF).toString();
+            commandBuilder.setLength(0);
+            bos_sieve.write(auth_mech_string.getBytes());
+        }
+
+        bos_sieve.write(irs.getBytes());
+        bos_sieve.write(CRLF.getBytes());
+        bos_sieve.flush();
+
+        while (true) {
+            final String temp = bis_sieve.readLine();
+            if (null != temp) {
+                if (temp.startsWith(SIEVE_OK)) {
+                    AUTH = true;
+                    return true;
+                } else if (temp.startsWith(SIEVE_NO)) {
+                    AUTH = false;
+                    return false;
+                }
+            } else {
+                AUTH = false;
+                return false;
+            }
+        }
+    }
 
     private boolean authGSSAPI(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String user = getRightEncodedString(sieve_user, "username");
@@ -1168,6 +1263,10 @@ public class SieveHandler {
             return authLOGIN(commandBuilder);
         } else if (auth_mech.equals("GSSAPI")) {
             return authGSSAPI(commandBuilder);
+        } else if (auth_mech.equals("XOAUTH2")) {
+            return authXOAUTH2(commandBuilder);
+        } else if (auth_mech.equals("OAUTHBEARER")) {
+            return authOAUTHBEARER(commandBuilder);
         }
         return false;
     }

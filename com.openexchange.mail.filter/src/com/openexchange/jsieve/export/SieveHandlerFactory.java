@@ -144,9 +144,9 @@ public final class SieveHandlerFactory {
             String authname = creds.getAuthname();
             String password = getRightPassword(config, creds);
             if (null != username) {
-                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
+                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
             }
-            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
+            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
         }
 
         if (MailFilterProperties.CredSrc.IMAP_LOGIN.name.equals(credsrc)) {
@@ -164,9 +164,9 @@ public final class SieveHandlerFactory {
             String username = creds.getUsername();
             String password = getRightPassword(config, creds);
             if (null != username) {
-                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
+                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
             }
-            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
+            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
         }
 
         if (MailFilterProperties.CredSrc.MAIL.name.equals(credsrc)) {
@@ -184,9 +184,9 @@ public final class SieveHandlerFactory {
             String username = creds.getUsername();
             String password = getRightPassword(config, creds);
             if (null != username) {
-                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
+                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
             }
-            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
+            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
         }
 
         // Unknown credsrc
