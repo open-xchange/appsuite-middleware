@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.oauth.MailOAuthProvider;
 import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.mail.oauth.TokenInfo;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
@@ -132,7 +133,7 @@ public class MailOAuthServiceImpl implements MailOAuthService {
     }
 
     @Override
-    public String getTokenFor(int oauthAccountId, Session session) throws OXException {
+    public TokenInfo getTokenFor(int oauthAccountId, Session session) throws OXException {
         OAuthService oAuthService = services.getOptionalService(OAuthService.class);
         if (null == oAuthService) {
             throw ServiceExceptionCode.absentService(OAuthService.class);

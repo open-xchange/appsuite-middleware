@@ -57,14 +57,14 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.UrlInfo;
+import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.mail.oauth.TokenInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportAuthSupportAware;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPExceptionCode;
@@ -194,17 +194,18 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
             }
             switch (transportAuth) {
             case CUSTOM:
-                int oAuthAccontId = assumeXOauth2For(account, false);
+                int oAuthAccontId = assumeOauthFor(account, false);
                 if (oAuthAccontId >= 0) {
-                    OAuthService oauthService = Services.optService(OAuthService.class);
-                    if (null == oauthService) {
-                        throw ServiceExceptionCode.absentService(OAuthService.class);
+                    // Do the OAuth dance...
+                    MailOAuthService mailOAuthService = Services.optService(MailOAuthService.class);
+                    if (null == mailOAuthService) {
+                        throw ServiceExceptionCode.absentService(MailOAuthService.class);
                     }
 
-                    OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
-                    login = oAuthAccount.getToken();
-                    password = oAuthAccount.getSecret();
-                    authType = AuthType.OAUTH;
+                    TokenInfo tokenInfo = mailOAuthService.getTokenFor(oAuthAccontId, session);
+                    login = saneLogin(account.getTransportLogin());
+                    password = tokenInfo.getToken();
+                    authType = AuthType.parse(tokenInfo.getAuthMechanism());
                 } else {
                     login = saneLogin(account.getTransportLogin());
                     password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());

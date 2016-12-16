@@ -49,6 +49,11 @@
 
 package com.openexchange.mail.api;
 
+import java.util.EnumSet;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.java.Strings;
+
 /**
  * {@link AuthType} - The authentication type.
  *
@@ -62,9 +67,13 @@ public enum AuthType {
      */
     LOGIN("login"),
     /**
-     * The OAuth authentication type.
+     * The XOAUTH2 authentication type; see <a href="https://developers.google.com/gmail/xoauth2_protocol">https://developers.google.com/gmail/xoauth2_protocol</a>
      */
-    OAUTH("OAuth"),
+    XOAUTH2("XOAUTH2"),
+    /**
+     * The OAUTHBEARER authentication type; see <a href="https://tools.ietf.org/html/rfc7628">https://tools.ietf.org/html/rfc7628</a>.
+     */
+    OAUTHBEARER("OAUTHBEARER"),
     ;
 
     private final String name;
@@ -82,6 +91,17 @@ public enum AuthType {
         return name;
     }
 
+    private static final Map<String, AuthType> MAP;
+    static {
+        ImmutableMap.Builder<String, AuthType> builder = ImmutableMap.builder();
+        for (AuthType authType : AuthType.values()) {
+            builder.put(Strings.asciiLowerCase(authType.name), authType);
+        }
+        // Legacy behavior
+        builder.put("oauth", AuthType.XOAUTH2);
+        MAP = builder.build();
+    }
+
     /**
      * Parses specified string into an AuthType.
      *
@@ -89,16 +109,19 @@ public enum AuthType {
      * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
      */
     public static final AuthType parse(final String authTypeStr) {
-        if (null == authTypeStr) {
-            return null;
-        }
+        return null == authTypeStr ? null : MAP.get(Strings.asciiLowerCase(authTypeStr));
+    }
 
-        for (AuthType authType : AuthType.values()) {
-            if (authType.name.equalsIgnoreCase(authTypeStr)) {
-                return authType;
-            }
-        }
-        return null;
+    private static final EnumSet<AuthType> OAUTH_TYPES = EnumSet.of(AuthType.XOAUTH2, AuthType.OAUTHBEARER);
+
+    /**
+     * Checks if given auth type is one of known OAuth-based types; either XOAUTH2 or OAUTHBEARER.
+     *
+     * @param authType The auth type to check
+     * @return <code>true</code> auth type is one of known OAuth-based types; otherwise <code>false</code>
+     */
+    public static boolean isOAuthType(AuthType authType) {
+        return null != authType && OAUTH_TYPES.contains(authType);
     }
 
 }

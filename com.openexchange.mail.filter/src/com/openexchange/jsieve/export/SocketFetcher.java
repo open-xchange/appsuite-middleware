@@ -74,7 +74,7 @@ public final class SocketFetcher {
 
         private final org.slf4j.Logger logger;
 
-        public PrivilegedActionImpl(final org.slf4j.Logger logger) {
+        PrivilegedActionImpl(final org.slf4j.Logger logger) {
             super();
             this.logger = logger;
         }
@@ -109,9 +109,10 @@ public final class SocketFetcher {
             if (null == factoryProvider) {
                 throw new IllegalStateException("No " + SSLSocketFactoryProvider.class.getSimpleName() + " available. Bundle \"com.openexchange.net.ssl\" seems not to be started.");
             }
-            final SSLSocketFactory ssf =  factoryProvider.getDefault();
+
             // Create new socket layered over an existing socket connected to the named host, at the given port.
-            final Socket newSocket = ssf.createSocket(socket, host, port, true);
+            SSLSocketFactory ssf =  factoryProvider.getDefault();
+            Socket newSocket = ssf.createSocket(socket, host, port, true);
             configureSSLSocket(newSocket);
             return newSocket;
         } catch (Exception ex) {
@@ -125,16 +126,10 @@ public final class SocketFetcher {
                 throw (IOException) ex;
             }
             final StringBuilder err = new StringBuilder(256);
-            err.append("Exception in startTLS using ").append("unknown socket factory").append(": host, port: ");
-            err.append(host);
-            err.append(", ");
-            err.append(port);
-            err.append("; Exception: ");
-            err.append(ex);
+            err.append("Exception in startTLS using unknown socket factory: host, port: ");
+            err.append(host).append(", ").append(port).append("; Exception: ").append(ex);
             // wrap anything else before sending it on
-            final IOException ioex = new IOException(err.toString());
-            ioex.initCause(ex);
-            throw ioex;
+            throw new IOException(err.toString(), ex);
         }
     }
 
@@ -146,7 +141,7 @@ public final class SocketFetcher {
      * @throws ClassNotFoundException If class cannot be found
      * @throws NoSuchMethodException If "getDefault()" does not exist in socket factory
      * @throws IllegalAccessException If "getDefault()" is not accessible
-     * @throws InvocationTargetException If an error occurs on "getDefault()" invokation
+     * @throws InvocationTargetException If an error occurs on "getDefault()" invocation
      */
     public static SocketFactory getSocketFactory(final String sfClass) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (sfClass == null || sfClass.length() == 0) {

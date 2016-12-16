@@ -68,9 +68,9 @@ public interface AuthenticationFailedHandlerService {
      *
      * @param failedAuthentication The optional {@code OXException} instance that reflects the failed authentication
      * @param service The type of service that yielded the failed authentication
-     * @param mailConfig The effective mail configuration for affected user
+     * @param mailConfig The effective mail configuration for affected user (providing host, port, credentials, auth type, etc.)
      * @param session The user which couln't be authenticated.
-     * @throws OXException If handling the failed authentication is supported being aborted with an error
+     * @throws OXException If handling the failed authentication is supposed being aborted with an error
      */
     void handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException;
 

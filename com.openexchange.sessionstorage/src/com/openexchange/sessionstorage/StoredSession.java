@@ -129,9 +129,9 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
-            parameter = parameters.get(PARAM_XOAUTH2_TOKEN);
+            parameter = parameters.get(PARAM_OAUTH_TOKEN);
             if (null != parameter) {
-                this.parameters.put(PARAM_XOAUTH2_TOKEN, parameter);
+                this.parameters.put(PARAM_OAUTH_TOKEN, parameter);
             }
             this.parameters.putAll(parameters);
             List<String> remoteParameterNames = new ArrayList<String>();
@@ -164,9 +164,9 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
-            parameter = session.getParameter(PARAM_XOAUTH2_TOKEN);
+            parameter = session.getParameter(PARAM_OAUTH_TOKEN);
             if (null != parameter) {
-                this.parameters.put(PARAM_XOAUTH2_TOKEN, parameter);
+                this.parameters.put(PARAM_OAUTH_TOKEN, parameter);
             }
             this.parameters.putAll(parameters);
             List<String> remoteParameterNames = new ArrayList<String>();
