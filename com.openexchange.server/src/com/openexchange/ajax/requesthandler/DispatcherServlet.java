@@ -381,7 +381,17 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
-    private static final Set<OXExceptionCode> IGNOREES = ImmutableSet.<OXExceptionCode> of(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND, SessionExceptionCodes.SESSION_EXPIRED, UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED, UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED);
+    private static final Set<OXExceptionCode> IGNOREES = ImmutableSet.<OXExceptionCode> of(
+            OXFolderExceptionCode.NOT_EXISTS,
+            MailExceptionCode.MAIL_NOT_FOUND,
+            MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND,
+            MailExceptionCode.ATTACHMENT_NOT_FOUND,
+            MailExceptionCode.REFERENCED_MAIL_NOT_FOUND,
+            MailExceptionCode.FOLDER_NOT_FOUND,
+            SessionExceptionCodes.SESSION_EXPIRED,
+            UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
+            UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED
+        );
 
     /**
      * A set of those {@link Category categories} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
