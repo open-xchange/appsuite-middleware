@@ -138,12 +138,13 @@ public abstract class AbstractRequest {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
         final Subject subject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
+        final String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_TOKEN);
 
         try {
             final String username = getUsername();
-            return new Credentials(loginName, password, userId, contextId, username, subject);
+            return new Credentials(loginName, password, userId, contextId, username, subject, oauthToken);
         } catch (final OXException e) {
-            return new Credentials(loginName, password, userId, contextId, null, subject);
+            return new Credentials(loginName, password, userId, contextId, null, subject, oauthToken);
         }
     }
 

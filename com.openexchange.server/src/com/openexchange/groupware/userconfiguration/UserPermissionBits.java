@@ -51,7 +51,6 @@ package com.openexchange.groupware.userconfiguration;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import static com.openexchange.osgi.util.ServiceCallWrapper.doServiceCall;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
@@ -60,11 +59,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -1020,20 +1018,19 @@ public class UserPermissionBits implements Serializable, Cloneable {
     }
 
     /**
-     * @deprecated remove when deprected constructors are removed
+     * @deprecated remove when deprecated constructors are removed
      */
     @Deprecated
     private static Context loadContext(final int contextId) {
         try {
-            return doServiceCall(ServerSessionAdapter.class, ContextService.class,
-                new ServiceUser<ContextService, Context>() {
-                    @Override
-                    public Context call(ContextService service) throws OXException {
-                        return service.getContext(contextId);
-                    }
-                });
-        } catch (ServiceException e) {
-            throw e.toRuntimeException();
+            ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class);
+            if (null == service) {
+                throw ServiceExceptionCode.absentService(ContextService.class);
+            }
+
+            return service.getContext(contextId);
+        } catch (OXException e) {
+            throw new RuntimeException(e);
         }
     }
 

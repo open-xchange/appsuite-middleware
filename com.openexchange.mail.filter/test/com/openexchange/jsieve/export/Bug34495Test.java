@@ -79,7 +79,7 @@ public class Bug34495Test extends SieveHandler {
     private static final String DELIMS = "\"\\\r\n ";
 
     public Bug34495Test() {
-        super(null, null, null, 0, null);
+        super(null, null, null, 0, null, null);
     }
 
 

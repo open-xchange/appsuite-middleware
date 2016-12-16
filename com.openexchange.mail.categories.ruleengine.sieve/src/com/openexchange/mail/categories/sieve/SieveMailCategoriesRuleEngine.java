@@ -184,7 +184,8 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             loginName = MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc) ? session.getLogin() : session.getLoginName();
         }
         Subject subject = (Subject) session.getParameter("kerberosSubject");
-        return new Credentials(loginName, session.getPassword(), session.getUserId(), session.getContextId(), null, subject);
+        String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_TOKEN);
+        return new Credentials(loginName, session.getPassword(), session.getUserId(), session.getContextId(), null, subject, oauthToken);
     }
 
     private Rule mailCategoryRule2SieveRule(MailCategoryRule rule, RuleType type) throws SieveException {
