@@ -12,8 +12,6 @@ public class DeleteTest extends ContactTest {
     @Test
     public void testDelete() throws Exception {
         final Contact contactObj = createContactObject("testDelete");
-        final int id = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-
-        deleteContact(getWebConversation(), id, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+        final int id = cotm.newAction(contactObj).getObjectID();
     }
 }

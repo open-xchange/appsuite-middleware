@@ -114,27 +114,26 @@ public class Bug7276Test extends AbstractTaskTest {
      */
     @Test
     public void testBug() throws Throwable {
-        final AJAXClient client1 = getClient();
         final int folder2 = client2.getValues().getPrivateTaskFolder();
         // User 1 inserts task.
         Task task = Create.createWithDefaults();
         task.setTitle("Test bug #7276");
-        task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
-        task.setParticipants(ParticipantTools.createParticipants(client1.getValues().getUserId(), client2.getValues().getUserId()));
+        task.setParentFolderID(getClient().getValues().getPrivateTaskFolder());
+        task.setParticipants(ParticipantTools.createParticipants(getClient().getValues().getUserId(), client2.getValues().getUserId()));
         {
-            final InsertResponse response = client1.execute(new InsertRequest(task, client1.getValues().getTimeZone()));
+            final InsertResponse response = getClient().execute(new InsertRequest(task, getClient().getValues().getTimeZone()));
             response.fillTask(task);
         }
         // User 2 checks if he can see it.
         TaskTools.get(client2, new GetRequest(folder2, task.getObjectID()));
         // User 1 modifies the task and removes participant User 2
         {
-            final GetResponse response = TaskTools.get(client1, new GetRequest(task.getParentFolderID(), task.getObjectID()));
-            task = response.getTask(client1.getValues().getTimeZone());
+            final GetResponse response = TaskTools.get(getClient(), new GetRequest(task.getParentFolderID(), task.getObjectID()));
+            task = response.getTask(getClient().getValues().getTimeZone());
         }
-        task.setParticipants(ParticipantTools.createParticipants(client1.getValues().getUserId()));
+        task.setParticipants(ParticipantTools.createParticipants(getClient().getValues().getUserId()));
         {
-            final UpdateResponse response = TaskTools.update(client1, new UpdateRequest(task, client1.getValues().getTimeZone()));
+            final UpdateResponse response = TaskTools.update(getClient(), new UpdateRequest(task, getClient().getValues().getTimeZone()));
             task.setLastModified(response.getTimestamp());
         }
         // Now User 2 tries to load the task again.
@@ -146,6 +145,6 @@ public class Bug7276Test extends AbstractTaskTest {
             assertTrue("Wrong exception", actual.similarTo(expectedErr));
         }
         // Clean up
-        client1.execute(new DeleteRequest(task));
+        getClient().execute(new DeleteRequest(task));
     }
 }

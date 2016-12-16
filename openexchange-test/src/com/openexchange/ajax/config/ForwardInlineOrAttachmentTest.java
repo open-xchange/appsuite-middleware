@@ -49,11 +49,17 @@
 
 package com.openexchange.ajax.config;
 
-import static com.openexchange.ajax.config.ConfigTools.readSetting;
-import static com.openexchange.ajax.config.ConfigTools.storeSetting;
 import static org.junit.Assert.assertEquals;
+import java.io.IOException;
+import org.json.JSONException;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.SetRequest;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.exception.OXException;
 
 /**
  * Tests if forwarding configuration parameter correctly stores the values
@@ -79,23 +85,19 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
     private static final String ATTACHMENT = "Attachment";
 
     /**
-     * Default constructor.
-     * 
-     * @param name Name of the test.
-     */
-    public ForwardInlineOrAttachmentTest() {
-        super();
-    }
-
-    /**
      * Tests if the forward configuration parameter is stored correctly.
+     * @throws JSONException 
+     * @throws SAXException 
+     * @throws IOException 
+     * @throws OXException 
      */
     @Test
-    public void testForwardParameter() throws Throwable {
-        final String forward = readSetting(getWebConversation(), getHostName(), getSessionId(), PATH);
-        for (final String testString : new String[] { INLINE, ATTACHMENT, forward }) {
-            storeSetting(getWebConversation(), getHostName(), getSessionId(), PATH, testString);
-            assertEquals("Written setting isn't returned from server.", testString, readSetting(getWebConversation(), getHostName(), getSessionId(), PATH));
+    public void testForwardParameter() throws OXException, IOException, SAXException, JSONException {
+        GetRequest getRequest = new GetRequest(PATH);
+        GetResponse repsonse = getClient().execute(getRequest);
+        for (final String testString : new String[] { INLINE, ATTACHMENT, repsonse.getData().toString() }) {
+            getClient().execute(new SetRequest(Tree.ForwardMessage, testString));
+            assertEquals("Written setting isn't returned from server.", testString, getClient().execute(getRequest));
         }
     }
 }

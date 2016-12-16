@@ -21,7 +21,6 @@ import com.openexchange.ajax.infostore.test.ZipDocumentsTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     AllTest.class,
-    DeleteTest.class,
     GetTest.class,
     ListTest.class,
     NewTest.class,

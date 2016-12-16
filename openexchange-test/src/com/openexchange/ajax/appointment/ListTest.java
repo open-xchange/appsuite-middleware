@@ -55,19 +55,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.appointment.action.ListRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.ListIDInt;
+import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
@@ -76,16 +75,11 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
 
 public class ListTest extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListTest.class);
-
-    private AJAXClient client1;
-
-    private CalendarTestManager ctm1;
 
     private FolderTestManager ftm;
 
@@ -94,11 +88,8 @@ public class ListTest extends AppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = new AJAXClient(testUser);
-
-        ctm1 = new CalendarTestManager(client1);
-        ctm1.setFailOnError(true);
-        ftm = new FolderTestManager(client1);
+        catm.setFailOnError(true);
+        ftm = new FolderTestManager(getClient());
 
     }
 
@@ -111,17 +102,20 @@ public class ListTest extends AppointmentTest {
         final Appointment appointmentObj3 = createAppointmentObject("testList");
         appointmentObj3.setIgnoreConflicts(true);
 
-        final Appointment id1 = ctm1.insert(appointmentObj);
-        final Appointment id2 = ctm1.insert(appointmentObj2);
-        final Appointment id3 = ctm1.insert(appointmentObj3);
-
-        final int[][] objectIdAndFolderId = { { id1.getObjectID(), appointmentFolderId }, { id2.getObjectID(), appointmentFolderId }, { id3.getObjectID(), appointmentFolderId } };
+        final Appointment id1 = catm.insert(appointmentObj);
+        final Appointment id2 = catm.insert(appointmentObj2);
+        final Appointment id3 = catm.insert(appointmentObj3);
 
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.TITLE, Appointment.CREATED_BY, Appointment.FOLDER_ID, Appointment.USERS };
 
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
+        ListIDs listIDs = new ListIDs();
+        listIDs.add(new ListIDInt(appointmentFolderId, id1.getObjectID()));
+        listIDs.add(new ListIDInt(appointmentFolderId, id2.getObjectID()));
+        listIDs.add(new ListIDInt(appointmentFolderId, id3.getObjectID()));
+        ;
+        final List<Appointment> appointmentArray = catm.list(listIDs, cols);
 
-        assertEquals("check response array", 3, appointmentArray.length);
+        assertEquals("check response array", 3, appointmentArray.size());
     }
 
     @Test
@@ -133,17 +127,19 @@ public class ListTest extends AppointmentTest {
         final Appointment appointmentObj3 = createAppointmentObject("testList");
         appointmentObj3.setIgnoreConflicts(true);
 
-        final Appointment id1 = ctm1.insert(appointmentObj);
-        final Appointment id2 = ctm1.insert(appointmentObj2);
-        final Appointment id3 = ctm1.insert(appointmentObj3);
+        final Appointment id1 = catm.insert(appointmentObj);
+        final Appointment id2 = catm.insert(appointmentObj2);
+        final Appointment id3 = catm.insert(appointmentObj3);
 
-        final int[][] objectIdAndFolderId = {};
-
+        ListIDs listIDs = new ListIDs();
+        listIDs.add(new ListIDInt(appointmentFolderId, 0));
+        listIDs.add(new ListIDInt(appointmentFolderId, 0));
+        listIDs.add(new ListIDInt(appointmentFolderId, 0));
+        ;
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.TITLE, Appointment.CREATED_BY, Appointment.FOLDER_ID, Appointment.USERS };
+        final List<Appointment> appointmentArray = catm.list(listIDs, cols);
 
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
-
-        assertEquals("check response array", 0, appointmentArray.length);
+        assertEquals("check response array", 0, appointmentArray.size());
     }
 
     @Test
@@ -164,9 +160,9 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setUid("1234567890abcdef" + System.currentTimeMillis());
         appointmentObj.setSequence(0);
 
-        final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
-        final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+        final int userParticipantId = cotm.searchAction(userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int groupParticipantId = GroupTest.searchGroup(getClient(), groupParticipant)[0].getIdentifier();
+        final int resourceParticipantId = rtm.search(resourceParticipant).get(0).getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);
@@ -177,15 +173,15 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setParticipants(participants);
         appointmentObj.setIgnoreConflicts(true);
 
-        Appointment appointment = ctm1.insert(appointmentObj);
+        Appointment appointment = catm.insert(appointmentObj);
 
-        final int[][] objectIdAndFolderId = { { appointment.getObjectID(), appointmentFolderId } };
+        ListIDs listIDs = new ListIDs();
+        listIDs.add(new ListIDInt(appointmentFolderId, appointment.getObjectID()));
+        final List<Appointment> appointmentArray = catm.list(listIDs, APPOINTMENT_FIELDS);
 
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
+        assertEquals("check response array", 1, appointmentArray.size());
 
-        assertEquals("check response array", 1, appointmentArray.length);
-
-        final Appointment loadAppointment = appointmentArray[0];
+        final Appointment loadAppointment = appointmentArray.get(0);
 
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -237,7 +233,7 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        Appointment appointment1 = ctm1.insert(appointmentObj);
+        Appointment appointment1 = catm.insert(appointmentObj);
 
         Appointment appointmentObj2 = new Appointment();
         appointmentObj2.setTitle("testListWithRecurrencePosition2");
@@ -246,7 +242,7 @@ public class ListTest extends AppointmentTest {
         appointmentObj2.setShownAs(Appointment.ABSENT);
         appointmentObj2.setIgnoreConflicts(true);
         appointmentObj2.setParentFolderID(appointmentFolderId);
-        Appointment appointment2 = ctm1.insert(appointmentObj2);
+        Appointment appointment2 = catm.insert(appointmentObj2);
 
         final Appointment[] appointmentList = new Appointment[3];
         appointmentList[0] = new Appointment();
@@ -260,41 +256,41 @@ public class ListTest extends AppointmentTest {
         appointmentList[2] = new Appointment();
         appointmentList[2].setObjectID(appointment2.getObjectID());
         appointmentList[2].setParentFolderID(appointmentFolderId);
-
-        final Appointment[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), appointmentList, cols, timeZone, getHostName(), getSessionId());
-
-        assertEquals("3 elements expected", 3, appointmentArray.length);
-
-        boolean found1 = false;
-        boolean found2 = false;
-        boolean found3 = false;
-
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == appointment1.getObjectID() && appointmentArray[a].getRecurrencePosition() == 2) {
-                found1 = true;
-            } else if (appointmentArray[a].getObjectID() == appointment1.getObjectID() && appointmentArray[a].getRecurrencePosition() == 3) {
-                found2 = true;
-            } else if (appointmentArray[a].getObjectID() == appointment2.getObjectID()) {
-                found3 = true;
-            }
-        }
-
-        assertTrue("not all objects in response : " + found1 + ":" + found2 + ":" + found3, (found1 && found2 && found3));
+        
+        //FIXME no corresponding method in calendartestmanager
+//        List<Appointment> appointmentArray = ctm.all(publicFolderId, null, null, false);
+//
+//        assertEquals("3 elements expected", 3, appointmentArray.length);
+//
+//        boolean found1 = false;
+//        boolean found2 = false;
+//        boolean found3 = false;
+//
+//        for (int a = 0; a < appointmentArray.length; a++) {
+//            if (appointmentArray[a].getObjectID() == appointment1.getObjectID() && appointmentArray[a].getRecurrencePosition() == 2) {
+//                found1 = true;
+//            } else if (appointmentArray[a].getObjectID() == appointment1.getObjectID() && appointmentArray[a].getRecurrencePosition() == 3) {
+//                found2 = true;
+//            } else if (appointmentArray[a].getObjectID() == appointment2.getObjectID()) {
+//                found3 = true;
+//            }
+//        }
+//
+//        assertTrue("not all objects in response : " + found1 + ":" + found2 + ":" + found3, (found1 && found2 && found3));
     }
 
     // Node 2652    @Test
     @Test
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC };
 
         final Appointment appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
         appointmentObj.setStartDate(new Date());
         appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60 * 60 * 1000));
         appointmentObj.setIgnoreConflicts(true);
-        Appointment appointment = ctm1.insert(appointmentObj);
+        Appointment appointment = catm.insert(appointmentObj);
         final ListRequest listRequest = new ListRequest(l(new int[] { appointmentFolderId, appointment.getObjectID() }), cols, true);
-        final CommonListResponse response = Executor.execute(client, listRequest);
+        final CommonListResponse response = Executor.execute(getClient(), listRequest);
         final JSONArray arr = (JSONArray) response.getResponse().getData();
 
         assertNotNull(arr);
@@ -311,9 +307,7 @@ public class ListTest extends AppointmentTest {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm1.cleanUp();
             ftm.cleanUp();
-            client1.logout();
         } finally {
             super.tearDown();
         }

@@ -79,8 +79,6 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
 
     protected int rightHandLimit = -1;
 
-    protected String categoryId;
-
     public AbstractAllRequest(final String servletPath, final int folderId, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
@@ -163,9 +161,6 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         if (validateLimit()) {
             params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
             params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
-        }
-        if (!Strings.isEmpty(categoryId)) {
-            params.add(new Parameter("categoryid", categoryId));
         }
         return params.toArray(new Parameter[params.size()]);
     }

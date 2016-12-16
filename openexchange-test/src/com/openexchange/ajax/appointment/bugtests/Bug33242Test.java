@@ -113,7 +113,7 @@ public class Bug33242Test extends AbstractAJAXSession {
         ctm = new CalendarTestManager(client1);
         ctm2 = new CalendarTestManager(client2);
 
-        groupParticipant = testContext.acquireGroupParticipant();
+        groupParticipant = testContext.getGroupParticipants().get(0);
 
         prepareSeries();
         prepareSingle();

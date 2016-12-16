@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
@@ -330,6 +331,13 @@ public class MailTestManager {
      */
     public MailMessage[] listMails(String folderPath, int[] columns, int sort, Order order, boolean failOnError, String categoryId) throws Exception {
         AllRequest request = new AllRequest(folderPath, columns, sort, order, failOnError, categoryId);
+        AllResponse response = client.execute(request);
+        lastResponse = response;
+        return response.getMailMessages(columns);
+    }
+
+    public MailMessage[] listMails(String folderPath, int[] columns, int sort, Order order, boolean failOnError, List<Parameter> additionalParams) throws Exception {
+        AllRequest request = new AllRequest(folderPath, columns, sort, order, failOnError, additionalParams);
         AllResponse response = client.execute(request);
         lastResponse = response;
         return response.getMailMessages(columns);

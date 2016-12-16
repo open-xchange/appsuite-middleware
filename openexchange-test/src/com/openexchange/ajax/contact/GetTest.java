@@ -56,10 +56,9 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.GetRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.user.UserTools;
 import com.openexchange.groupware.container.Contact;
 
 public class GetTest extends ContactTest {
@@ -67,18 +66,18 @@ public class GetTest extends ContactTest {
     @Test
     public void testGet() throws Exception {
         final Contact contactObj = createContactObject("testGet");
-        final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = cotm.newAction(contactObj).getObjectID();
 
-        loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL, getHostName(), getSessionId());
+        loadContact(getClient(), objectId, contactFolderId);
     }
 
     @Test
     public void testGetWithAllFields() throws Exception {
         final Contact contactObject = createCompleteContactObject();
 
-        final int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = cotm.newAction(contactObject).getObjectID();
 
-        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL, getHostName(), getSessionId());
+        final Contact loadContact = loadContact(getClient(), objectId, contactFolderId);
 
         contactObject.setObjectID(objectId);
         compareObject(contactObject, loadContact);
@@ -90,13 +89,11 @@ public class GetTest extends ContactTest {
         contactObject.setSurName("testGetWithAllFieldsOnUpdate");
         contactObject.setParentFolderID(contactFolderId);
 
-        final int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = cotm.newAction(contactObject).getObjectID();
 
         contactObject = createCompleteContactObject();
 
-        updateContact(getWebConversation(), contactObject, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-
-        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL, getHostName(), getSessionId());
+        final Contact loadContact = cotm.updateAction(contactFolderId, contactObject);
 
         contactObject.setObjectID(objectId);
         compareObject(contactObject, loadContact);
@@ -104,12 +101,11 @@ public class GetTest extends ContactTest {
 
     @Test
     public void testGetUser() throws Exception {
-        Contact loadContact = loadUser(getWebConversation(), userId, getHostName(), getSessionId());
+        Contact loadContact = UserTools.getUserContact(getClient(), userId);
         assertNotNull("contact object is null", loadContact);
         assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
         assertTrue("object id not set", loadContact.getObjectID() > 0);
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
-        com.openexchange.ajax.user.actions.GetResponse response = client.execute(new com.openexchange.ajax.user.actions.GetRequest(userId, client.getValues().getTimeZone()));
+        com.openexchange.ajax.user.actions.GetResponse response = getClient().execute(new com.openexchange.ajax.user.actions.GetRequest(userId, getClient().getValues().getTimeZone()));
         loadContact = response.getContact();
         assertNotNull("contact object is null", loadContact);
         assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
@@ -119,19 +115,12 @@ public class GetTest extends ContactTest {
     // Node 2652    @Test
     @Test
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
-
         final Contact contactObj = createContactObject("testNew");
-        final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-        try {
-            final GetRequest req = new GetRequest(contactFolderId, objectId, client.getValues().getTimeZone());
+        final int objectId = cotm.newAction(contactObj).getObjectID();
+        final GetRequest req = new GetRequest(contactFolderId, objectId, getClient().getValues().getTimeZone());
 
-            final AbstractAJAXResponse response = Executor.execute(client, req);
-            final JSONObject contact = (JSONObject) response.getResponse().getData();
-            assertTrue(contact.has("last_modified_utc"));
-
-        } finally {
-            deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
-        }
+        final AbstractAJAXResponse response = Executor.execute(getClient(), req);
+        final JSONObject contact = (JSONObject) response.getResponse().getData();
+        assertTrue(contact.has("last_modified_utc"));
     }
 }

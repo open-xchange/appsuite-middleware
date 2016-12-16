@@ -47,59 +47,17 @@
  *
  */
 
-package com.openexchange.test.osgi;
+package com.openexchange.ajax.appointment.action;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import org.json.JSONObject;
-import org.junit.Test;
-import com.openexchange.ajax.LoginTest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonSearchResponse;
 
 /**
- * {@link BundleTestConfiguration} - Test absence of configuration bundle
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class BundleTestConfiguration extends AbstractBundleTest {
+public class FreeBusyResponse extends CommonSearchResponse {
 
-    private static final String BUNDLE_ID = "com.openexchange.configread";
-
-    @Test
-    public void testConfigurationAbsence() {
-        try {
-            final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
-
-            /*
-             * Everything should work although configuration is missing
-             */
-            assertTrue("Error contained in returned JSON object", !jsonObject.has("error") || jsonObject.isNull("error"));
-
-            /*
-             * Check for session ID
-             */
-            assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
-            final String sessionId = jsonObject.getString("session");
-
-            /*
-             * Perform a normal request
-             */
-            final JSONObject folderObject = getRootFolders(getWebConversation(), loginTest.getHostName(), sessionId);
-
-            /*
-             * Everything should work although configuration is missing
-             */
-            assertTrue("Error contained in returned JSON object", !folderObject.has("error") || folderObject.isNull("error"));
-
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+    public FreeBusyResponse(final Response response) {
+        super(response);
     }
-
-    @Override
-    protected String getBundleName() {
-        return BUNDLE_ID;
-    }
-
 }

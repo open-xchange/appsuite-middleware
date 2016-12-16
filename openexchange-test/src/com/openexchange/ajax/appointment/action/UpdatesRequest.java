@@ -142,7 +142,9 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
     public Parameter[] getParameters() {
         final List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES));
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
+        if (folderId != 0) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, folderId));
+        }
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, timestamp));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, ignore.getValue()));

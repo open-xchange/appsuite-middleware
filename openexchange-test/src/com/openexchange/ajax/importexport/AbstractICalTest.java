@@ -69,9 +69,6 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
@@ -132,19 +129,17 @@ public class AbstractICalTest extends AbstractAJAXTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        final FolderObject appointmentFolderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-        appointmentFolderId = appointmentFolderObj.getObjectID();
+        appointmentFolderId = getClient().getValues().getPrivateAppointmentFolder();
 
-        final FolderObject taskFolderObj = FolderTest.getStandardTaskFolder(getWebConversation(), getHostName(), getSessionId());
-        taskFolderId = taskFolderObj.getObjectID();
+        taskFolderId = getClient().getValues().getPrivateTaskFolder();
 
-        userId = appointmentFolderObj.getCreatedBy();
+        userId = getClient().getValues().getUserId();
 
-        timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
+        timeZone = getClient().getValues().getTimeZone();
 
         LOG.debug(new StringBuilder().append("use timezone: ").append(timeZone).toString());
 
-        final Contact contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
+        final Contact contactObj = cotm.getAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId);
         emailaddress = contactObj.getEmail1();
 
         final Calendar c = Calendar.getInstance();

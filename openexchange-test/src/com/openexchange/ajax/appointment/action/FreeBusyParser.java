@@ -49,31 +49,24 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CTMUtils;
+import com.openexchange.ajax.framework.AbstractSearchParser;
 
 /**
- * {@link GetChangeExceptionsResponse}
  * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * {@link FreeBusyParser}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public class GetChangeExceptionsResponse extends AbstractColumnsResponse {
+public class FreeBusyParser extends AbstractSearchParser<FreeBusyResponse> {
 
-    protected GetChangeExceptionsResponse(Response response) {
-        super(response);
+    protected FreeBusyParser(final boolean failOnError, final int[] columns) {
+        super(failOnError, columns);
     }
 
-    public List<Appointment> getAppointments(final TimeZone timeZone) throws OXException, JSONException {
-        Appointment[] objects = CTMUtils.jsonArray2AppointmentArray((JSONArray) getData(), getColumns(), timeZone);
-        return Arrays.asList(objects);
+    @Override
+    protected FreeBusyResponse instanciateResponse(final Response response) {
+        return new FreeBusyResponse(response);
     }
-
 }

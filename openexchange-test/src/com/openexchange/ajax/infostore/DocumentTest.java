@@ -26,8 +26,9 @@ public class DocumentTest extends InfostoreAJAXTest {
     public void setUp() throws Exception {
         super.setUp();
         upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        id = createNew(getWebConversation(), getHostName(), sessionId, m("folder_id", ((Integer) folderId).toString(), "title", "test upload", "description", "test upload description"), upload, "text/plain");
-        clean.add(id);
+        com.openexchange.file.storage.File data = createFile(folderId, "test upload");
+        itm.newAction(data, upload);
+        clean.add(data.getId());
     }
 
     @Test

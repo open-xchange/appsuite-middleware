@@ -8,7 +8,6 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -30,7 +29,7 @@ public class MultipleTest extends ContactTest {
         final InsertRequest insertRequest3 = new InsertRequest(contactObj, true);
 
         final MultipleRequest<InsertResponse> multipleInsertRequest = MultipleRequest.create(new InsertRequest[] { insertRequest1, insertRequest2, insertRequest3 });
-        final MultipleResponse multipleInsertResponse = Executor.execute(new AJAXClient(ajaxSession, false), multipleInsertRequest);
+        final MultipleResponse multipleInsertResponse = Executor.execute(getClient(), multipleInsertRequest);
 
         assertFalse("first insert request has errors: ", multipleInsertResponse.getResponse(0).hasError());
         assertFalse("second insert request has errors: ", multipleInsertResponse.getResponse(1).hasError());

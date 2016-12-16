@@ -20,8 +20,6 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.exception.OXException;
@@ -172,7 +170,7 @@ public class AllTest extends AppointmentTest {
 
         final int cols[] = new int[] { Appointment.OBJECT_ID };
 
-        listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
+        catm.all(appointmentFolderId, start, end, cols);
     }
 
     @Test
@@ -182,7 +180,7 @@ public class AllTest extends AppointmentTest {
 
         final int cols[] = new int[] { Appointment.OBJECT_ID };
 
-        listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
+        catm.all(appointmentFolderId, start, end, cols);
     }
 
     @Test
@@ -207,7 +205,7 @@ public class AllTest extends AppointmentTest {
         appointmentObj.setEndDate(endDate);
         appointmentObj.setFullTime(true);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
         calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(startTime);
@@ -219,7 +217,7 @@ public class AllTest extends AppointmentTest {
         Date start = calendar.getTime();
         Date end = new Date(start.getTime() + dayInMillis);
 
-        Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
+        Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, cols);
         boolean found = false;
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
@@ -231,7 +229,7 @@ public class AllTest extends AppointmentTest {
         // one day less
         start = new Date(calendar.getTimeInMillis() - dayInMillis);
         end = new Date(start.getTime() + dayInMillis);
-        appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
+        appointmentArray = catm.all(appointmentFolderId, start, end, cols);
         found = false;
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
@@ -243,7 +241,7 @@ public class AllTest extends AppointmentTest {
         // one day more
         start = new Date(calendar.getTimeInMillis() + dayInMillis);
         end = new Date(start.getTime() + dayInMillis);
-        appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
+        appointmentArray = catm.all(appointmentFolderId, start, end, cols);
         found = false;
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
@@ -251,8 +249,6 @@ public class AllTest extends AppointmentTest {
             }
         }
         assertFalse("appointment found one day after start date in day view", found);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
     // Bug 12171
@@ -267,20 +263,12 @@ public class AllTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setOccurrence(3);
         appointmentObj.setIgnoreConflicts(true);
-        int objectId = -1;
-        try {
-            objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        int objectId = catm.insert(appointmentObj).getObjectID();
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, new Date(0), new Date(Long.MAX_VALUE), cols);
 
-            final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), timeZone, false, getHostName(), getSessionId());
-
-            for (final Appointment loaded : appointmentArray) {
-                if (loaded.getObjectID() == objectId) {
-                    assertEquals(appointmentObj.getOccurrence(), loaded.getOccurrence());
-                }
-            }
-        } finally {
-            if (objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
+        for (final Appointment loaded : appointmentArray) {
+            if (loaded.getObjectID() == objectId) {
+                assertEquals(appointmentObj.getOccurrence(), loaded.getOccurrence());
             }
         }
     }
@@ -288,30 +276,25 @@ public class AllTest extends AppointmentTest {
     // Node 2652
     @Test
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC };
 
         final Appointment appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
         appointmentObj.setStartDate(new Date());
         appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60 * 60 * 1000));
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-        try {
-            final AllRequest req = new AllRequest(appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), TimeZone.getTimeZone("UTC"));
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        final AllRequest req = new AllRequest(appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), TimeZone.getTimeZone("UTC"));
 
-            final CommonAllResponse response = Executor.execute(client, req);
-            final JSONArray arr = (JSONArray) response.getResponse().getData();
+        final CommonAllResponse response = Executor.execute(getClient(), req);
+        final JSONArray arr = (JSONArray) response.getResponse().getData();
 
-            assertNotNull(arr);
-            final int size = arr.length();
-            assertTrue(size > 0);
-            for (int i = 0; i < size; i++) {
-                final JSONArray objectData = arr.optJSONArray(i);
-                assertNotNull(objectData);
-                assertNotNull(objectData.opt(2));
-            }
-        } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
+        assertNotNull(arr);
+        final int size = arr.length();
+        assertTrue(size > 0);
+        for (int i = 0; i < size; i++) {
+            final JSONArray objectData = arr.optJSONArray(i);
+            assertNotNull(objectData);
+            assertNotNull(objectData.opt(2));
         }
     }
 }

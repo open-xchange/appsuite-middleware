@@ -56,7 +56,6 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -76,9 +75,17 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.test.AttachmentTestManager;
+import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.ContactTestManager;
+import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.ResourceTestManager;
+import com.openexchange.test.TaskTestManager;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -125,6 +132,22 @@ public abstract class AbstractAJAXTest {
 
     protected TestUser testUser2;
 
+    protected FolderTestManager ftm;
+
+    protected CalendarTestManager catm;
+
+    protected ContactTestManager cotm;
+    
+    protected TaskTestManager ttm;
+
+    protected InfostoreTestManager itm;
+
+    protected ResourceTestManager rtm;
+
+    protected MailTestManager mtm;
+
+    protected AttachmentTestManager atm;
+
     @Before
     public void setUp() throws Exception {
         try {
@@ -136,6 +159,15 @@ public abstract class AbstractAJAXTest {
             testUser2 = testContext.acquireUser();
             client = new AJAXClient(testUser);
             client2 = new AJAXClient(testUser2);
+            
+            ftm = new FolderTestManager(client);
+            catm = new CalendarTestManager(client);
+            cotm = new ContactTestManager(client);
+            ttm = new TaskTestManager(client);
+            itm = new InfostoreTestManager(client);
+            rtm = new ResourceTestManager(client);
+            mtm = new MailTestManager(client);
+            atm = new AttachmentTestManager(client);
         } catch (final OXException ex) {
             ex.printStackTrace();
         }
@@ -146,7 +178,18 @@ public abstract class AbstractAJAXTest {
      */
     @After
     public void tearDown() throws Exception {
-        TestContextPool.backContext(testContext);
+        try {
+            ftm.cleanUp();
+            catm.cleanUp();
+            cotm.cleanUp();
+            ttm.cleanUp();
+            itm.cleanUp();
+            rtm.cleanUp();
+            mtm.cleanUp();
+            atm.cleanUp();
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     protected String getAJAXProperty(final String key) {
@@ -239,29 +282,10 @@ public abstract class AbstractAJAXTest {
         return o;
     }
 
-    protected void putN(final WebConversation webConv, final String url, final String body) throws MalformedURLException, IOException, SAXException {
-        putS(webConv, url, body);
-    }
-
-    protected JSONArray putA(final WebConversation webConv, final String url, final String body) throws MalformedURLException, JSONException, IOException, SAXException {
-        final JSONArray a = new JSONArray(putS(webConv, url, body));
-        return a;
-    }
-
     protected String gS(final WebConversation webConv, final String url) throws MalformedURLException, IOException, SAXException {
         final GetMethodWebRequest m = new GetMethodWebRequest(url);
         final WebResponse resp = webConv.getResponse(m);
         return resp.getText();
-    }
-
-    protected JSONObject g(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
-        final JSONObject o = new JSONObject(gS(webConv, url));
-        return o;
-    }
-
-    protected JSONArray gA(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
-        final JSONArray a = new JSONArray(gS(webConv, url));
-        return a;
     }
 
     protected String pS(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, IOException, SAXException {
@@ -274,31 +298,12 @@ public abstract class AbstractAJAXTest {
         return resp.getText();
     }
 
-    protected JSONObject p(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-        final JSONObject o = new JSONObject(pS(webConv, url, data));
-        return o;
-    }
-
-    protected JSONArray pA(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-        return new JSONArray(pS(webConv, url, data));
-    }
-
     protected Response gT(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
         final String res = gS(webConv, url);
         if ("".equals(res.trim())) {
             return null;
         }
         return Response.parse(res);
-
-    }
-
-    protected Response pT(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-        final String res = pS(webConv, url, data);
-        if ("".equals(res.trim())) {
-            return null;
-        }
-        return Response.parse(res);
-
     }
 
     protected Response putT(final WebConversation webConv, final String url, final String data) throws MalformedURLException, JSONException, IOException, SAXException {
@@ -354,5 +359,9 @@ public abstract class AbstractAJAXTest {
 
     public AJAXClient getClient() {
         return client;
+    }
+
+    public AJAXClient getClient2() {
+        return client2;
     }
 }

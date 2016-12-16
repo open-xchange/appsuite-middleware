@@ -1,11 +1,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import static org.junit.Assert.assertTrue;
-import java.util.Date;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.framework.ListIDInt;
+import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -27,22 +26,15 @@ public class Bug8724Test extends AppointmentTest {
     public void testBug8724_I() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testBug8724_I");
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
         final Appointment appointmentListObject = new Appointment();
         appointmentListObject.setObjectID(objectId + 1000);
         appointmentListObject.setParentFolderID(appointmentFolderId);
 
-        try {
-            listAppointment(getWebConversation(), new Appointment[] { appointmentListObject }, _appointmentFields, timeZone, getHostName(), getSessionId());
-        } catch (final OXException exc) {
-            assertTrue(true);
-        }
+        catm.list(new ListIDs(appointmentFolderId, objectId + 1000), _appointmentFields);
 
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
-        final Date modified = loadAppointment.getLastModified();
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId(), false);
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
     }
 
     /**
@@ -53,7 +45,7 @@ public class Bug8724Test extends AppointmentTest {
     public void testBug8724_II() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testBug8724_II");
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
         final Appointment appointmentListObject1 = new Appointment();
         appointmentListObject1.setObjectID(objectId + 1000);
@@ -63,17 +55,10 @@ public class Bug8724Test extends AppointmentTest {
         appointmentListObject2.setObjectID(objectId + 1001);
         appointmentListObject2.setParentFolderID(appointmentFolderId);
 
-        final Appointment[] appointmentArray = { appointmentListObject1, appointmentListObject2 };
+        ListIDs foldersAndIds = new ListIDs(appointmentFolderId, objectId + 1000);
+        foldersAndIds.add(new ListIDInt(appointmentFolderId, objectId + 1001));
+        catm.list(foldersAndIds, _appointmentFields);
 
-        try {
-            listAppointment(getWebConversation(), appointmentArray, _appointmentFields, timeZone, getHostName(), getSessionId());
-        } catch (final OXException exc) {
-            assertTrue(true);
-        }
-
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
-        final Date modified = loadAppointment.getLastModified();
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getSessionId(), false);
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
     }
 }

@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,7 +63,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -265,7 +263,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         }
     }
 
-    private File newDocument(int folderId, List<FileStorageObjectPermission> objectPermissions) throws OXException, IOException, JSONException {
+    private File newDocument(int folderId, List<FileStorageObjectPermission> objectPermissions) {
         File doc = new DefaultFile();
         doc.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
         doc.setDescription("Infostore Item Description");

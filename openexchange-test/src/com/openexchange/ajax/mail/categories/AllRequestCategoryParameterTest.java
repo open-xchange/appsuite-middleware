@@ -68,8 +68,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class AllRequestCategoryParameterTest extends AbstractMailCategoriesTest {
 
-    private static final int[] COLUMNS = new int[] { 102, 600, 601, 602, 603, 604, 605, 606, 607, 608, 610, 611, 614, 652 };
-
     /**
      * Initializes a new {@link AllRequestCategoryParameterTest}.
      * 

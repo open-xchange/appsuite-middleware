@@ -56,7 +56,6 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -140,7 +139,7 @@ public class ClearTest extends AbstractAJAXSession {
                 appointmentObj.setParentFolderID(Integer.parseInt(newId));
                 appointmentObj.setIgnoreConflicts(true);
 
-                AppointmentTest.insertAppointment(session.getConversation(), appointmentObj, values.getTimeZone(), protocol + hostname, session.getId());
+                catm.insert(appointmentObj).getObjectID();
             }
             {
                 final Appointment appointmentObj = new Appointment();
@@ -151,7 +150,7 @@ public class ClearTest extends AbstractAJAXSession {
                 appointmentObj.setParentFolderID(Integer.parseInt(newId));
                 appointmentObj.setIgnoreConflicts(true);
 
-                AppointmentTest.insertAppointment(session.getConversation(), appointmentObj, values.getTimeZone(), protocol + hostname, session.getId());
+                catm.insert(appointmentObj).getObjectID();
             }
 
             final CalendarTestManager calendarTestManager = new CalendarTestManager(client);

@@ -65,7 +65,7 @@ public class CopyTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.FREE);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId1 = catm.insert(appointmentObj).getObjectID();
 
         final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
         targetFolderId = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
@@ -100,11 +100,6 @@ public class CopyTest extends AppointmentTest {
 
         if (data.has("conflicts")) {
             fail("conflicts found!");
-        }
-
-        deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-        if (objectId2 > 0) {
-            deleteAppointment(getWebConversation(), objectId2, targetFolderId, PROTOCOL + getHostName(), getSessionId(), false);
         }
     }
 }

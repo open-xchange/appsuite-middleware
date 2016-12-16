@@ -1,12 +1,9 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.util.Date;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -39,23 +36,17 @@ public class Bug9089Test extends AppointmentTest {
         appointmentObj.setParentFolderID(newFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        Appointment loadAppointment = catm.get(newFolderId, objectId);
         Date modified = loadAppointment.getLastModified();
 
         appointmentObj.setPrivateFlag(true);
 
-        try {
-            updateAppointment(getWebConversation(), appointmentObj, objectId, newFolderId, modified, timeZone, getHostName(), getSessionId());
-            fail("exception expected");
-        } catch (final OXException exc) {
-            assertTrue(true);
-        }
+        catm.update(newFolderId, appointmentObj);
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
+        loadAppointment = catm.get(newFolderId, objectId);
         modified = loadAppointment.getLastModified();
 
-        deleteAppointment(getWebConversation(), objectId, newFolderId, modified, getHostName(), getSessionId(), false);
         FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, modified, getHostName(), getLogin(), getPassword(), "");
     }
 }

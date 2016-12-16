@@ -5,17 +5,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 
 public class ConfirmTest extends AppointmentTest {
 
     @Test
     public void testConfirm() throws Exception {
-        final FolderObject sharedFolderObject = FolderTest.getStandardCalendarFolder(getSecondWebConversation(), getHostName(), getSecondSessionId());
-        final int secondUserId = sharedFolderObject.getCreatedBy();
+        final int secondUserId = getClient2().getValues().getUserId();
 
         final Appointment appointmentObj = createAppointmentObject("testConfirm");
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
@@ -28,11 +25,11 @@ public class ConfirmTest extends AppointmentTest {
 
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        
+        catm.confirm(appointmentObj, Appointment.ACCEPT, "Yap.");
 
-        confirmAppointment(getSecondWebConversation(), objectId, sharedFolderObject.getObjectID(), Appointment.ACCEPT, "Yap.", PROTOCOL + getHostName(), getSecondSessionId());
-
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
 
         boolean found = false;
 
@@ -45,7 +42,5 @@ public class ConfirmTest extends AppointmentTest {
         }
 
         assertTrue("user participant with id " + secondUserId + " not found", found);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 }

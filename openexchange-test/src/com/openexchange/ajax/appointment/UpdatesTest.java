@@ -5,8 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -22,12 +24,12 @@ public class UpdatesTest extends AppointmentTest {
 
     @Test
     public void testModified() throws Exception {
-        AppointmentTest.listModifiedAppointment(getWebConversation(), appointmentFolderId, new Date(), new Date(), new Date(System.currentTimeMillis() - (dayInMillis * 7)), _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
+        catm.updates(appointmentFolderId, _appointmentFields, new Date(System.currentTimeMillis() - (dayInMillis * 7)), false);
     }
 
     @Test
     public void testDeleted() throws Exception {
-        AppointmentTest.listDeleteAppointment(getWebConversation(), appointmentFolderId, new Date(), new Date(), new Date(System.currentTimeMillis() - (dayInMillis * 7)), timeZone, PROTOCOL + getHostName(), getSessionId());
+        catm.updates(appointmentFolderId, _appointmentFields, new Date(System.currentTimeMillis() - (dayInMillis * 7)), false, false, Ignore.CHANGED);
     }
 
     @Test
@@ -37,25 +39,23 @@ public class UpdatesTest extends AppointmentTest {
 
         final Appointment appointmentObj = createAppointmentObject("testModifiedWithoutFolderId");
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         final Date modified = loadAppointment.getLastModified();
 
-        final Appointment[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, decrementDate(modified), _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final List<Appointment> appointmentArray = catm.updates(0, _appointmentFields, decrementDate(modified), false);
 
-        assertTrue("no appointment object in response", appointmentArray.length > 0);
+        assertTrue("no appointment object in response", appointmentArray.size() > 0);
         boolean found = false;
 
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == objectId) {
+        for (int a = 0; a < appointmentArray.size(); a++) {
+            if (appointmentArray.get(a).getObjectID() == objectId) {
                 found = true;
             }
         }
 
         assertTrue("created object not found in response", found);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
     @Test
@@ -65,48 +65,45 @@ public class UpdatesTest extends AppointmentTest {
 
         final Appointment appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdExtended");
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId1 = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId1 = catm.insert(appointmentObj).getObjectID();
 
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId1, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(appointmentFolderId, objectId1);
         Date modified = loadAppointment.getLastModified();
 
-        Appointment[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, decrementDate(modified), _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
+        List<Appointment> appointmentArray = catm.updates(0, _appointmentFields, decrementDate(modified), false);
 
-        assertTrue("no appointment object in response", appointmentArray.length > 0);
+        assertTrue("no appointment object in response", appointmentArray.size() > 0);
         boolean found1 = false;
 
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == objectId1) {
+        for (int a = 0; a < appointmentArray.size(); a++) {
+            if (appointmentArray.get(a).getObjectID() == objectId1) {
                 found1 = true;
             }
         }
 
         assertTrue("created object not found in response", found1);
 
-        final int objectId2 = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId2 = catm.insert(appointmentObj).getObjectID();
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId2, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        loadAppointment = catm.get(appointmentFolderId, objectId2);
         modified = loadAppointment.getLastModified();
 
-        appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, decrementDate(modified), _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
+        appointmentArray = catm.updates(0, _appointmentFields, decrementDate(modified), false);
 
-        assertTrue("no appointment object in response", appointmentArray.length > 0);
+        assertTrue("no appointment object in response", appointmentArray.size() > 0);
         found1 = false;
         boolean found2 = false;
 
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == objectId1) {
+        for (int a = 0; a < appointmentArray.size(); a++) {
+            if (appointmentArray.get(a).getObjectID() == objectId1) {
                 found1 = true;
-            } else if (appointmentArray[a].getObjectID() == objectId2) {
+            } else if (appointmentArray.get(a).getObjectID() == objectId2) {
                 found2 = true;
             }
         }
 
         assertFalse("invalid object id in reponse", found1);
         assertTrue("created object not found in response", found2);
-
-        deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, getHostName(), getSessionId(), false);
-        deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
     @Test
@@ -116,16 +113,14 @@ public class UpdatesTest extends AppointmentTest {
 
         final Appointment appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdWithFutureTimestamp");
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         final Date modified = new Date(loadAppointment.getLastModified().getTime() + (7 * dayInMillis));
 
-        final Appointment[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, modified, _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final List<Appointment> appointmentArray = catm.updates(0, _appointmentFields, modified, false);
 
-        assertEquals("unexpected data in response", 0, appointmentArray.length);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
+        assertEquals("unexpected data in response", 0, appointmentArray.size());
     }
 
     @Test
@@ -138,25 +133,23 @@ public class UpdatesTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setOccurrence(5);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
         appointmentObj.setObjectID(objectId);
 
-        final Appointment[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, new Date(0), _appointmentFields, timeZone, getHostName(), getSessionId());
+        final List<Appointment> appointmentArray = catm.updates(0, _appointmentFields, new Date(0), false);
 
         boolean found = false;
 
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (objectId == appointmentArray[a].getObjectID()) {
-                compareObject(appointmentObj, appointmentArray[a]);
+        for (int a = 0; a < appointmentArray.size(); a++) {
+            if (objectId == appointmentArray.get(a).getObjectID()) {
+                compareObject(appointmentObj, appointmentArray.get(a));
                 found = true;
                 break;
             }
         }
 
         assertTrue("object with object_id: " + objectId + " not found in response", found);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
     private static Date decrementDate(final Date date) {

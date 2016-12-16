@@ -72,9 +72,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AttachmentTest;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -111,8 +109,8 @@ public class Bug16249Test extends AttachmentTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        folderId = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId()).getObjectID();
-        timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
+        timeZone = getClient().getValues().getTimeZone();
     }
 
     @Test

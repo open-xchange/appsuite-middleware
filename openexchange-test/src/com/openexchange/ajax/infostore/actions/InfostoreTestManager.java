@@ -57,13 +57,17 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -183,11 +187,11 @@ public class InfostoreTestManager {
         lastResponse = updateResponse;
     }
 
-    public void deleteAction(List<String> ids, List<String> folders, Date timestamp) throws OXException, IOException, SAXException, JSONException {
+    public void deleteAction(List<String> ids, List<String> folders, Date timestamp) throws OXException, IOException, JSONException {
         deleteAction(ids, folders, timestamp, null);
     }
 
-    public void deleteAction(List<String> ids, List<String> folders, Date timestamp, Boolean hardDelete) throws OXException, IOException, SAXException, JSONException {
+    public void deleteAction(List<String> ids, List<String> folders, Date timestamp, Boolean hardDelete) throws OXException, IOException, JSONException {
         DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(ids, folders, timestamp);
         deleteRequest.setHardDelete(hardDelete);
         deleteRequest.setFailOnError(getFailOnError());
@@ -204,11 +208,28 @@ public class InfostoreTestManager {
         deleteAction(data.getId(), data.getFolderId(), data.getLastModified());
     }
 
-    public File getAction(String id) throws OXException, JSONException, OXException, IOException, SAXException {
+    public File getAction(String id) throws OXException, JSONException, IOException {
         GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
         getRequest.setFailOnError(getFailOnError());
         GetInfostoreResponse getResponse = getClient().execute(getRequest);
         lastResponse = getResponse;
         return getResponse.getDocumentMetadata();
+    }
+
+    public File newDocument(int folderId) {
+        return this.newDocument(folderId, null);
+    }
+
+    public File newDocument(int folderId, List<FileStorageObjectPermission> objectPermissions) {
+        File doc = new DefaultFile();
+        doc.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
+        doc.setDescription("Infostore Item Description");
+        doc.setFileMIMEType("image/png");
+        doc.setFolderId(String.valueOf(folderId));
+        if (objectPermissions != null) {
+            doc.setObjectPermissions(objectPermissions);
+        }
+        doc.setFileName("contact_image.png");
+        return doc;
     }
 }

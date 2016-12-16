@@ -38,16 +38,16 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
 
         boolean found = false;
 
         final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));
@@ -71,8 +71,6 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
         final Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 32);
         assertOccurrence(32, simpleDateFormat.parse("2007-04-01 08:00:00"), simpleDateFormat.parse("2007-04-01 10:00:00"), occurrence, timeZone);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     @Test
@@ -97,16 +95,16 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
 
         boolean found = false;
 
         final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));
@@ -130,8 +128,6 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
         final Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 32);
         assertOccurrence(32, simpleDateFormatUTC.parse("2007-04-01 00:00:00"), simpleDateFormatUTC.parse("2007-04-02 00:00:00"), occurrence, timeZone);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     @Test
@@ -155,16 +151,16 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
 
         boolean found = false;
 
         final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));
@@ -188,8 +184,6 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
         final Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 32);
         assertOccurrence(32, simpleDateFormat.parse("2007-11-01 08:00:00"), simpleDateFormat.parse("2007-11-01 10:00:00"), occurrence);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     @Test
@@ -214,16 +208,16 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setUntil(until);
         appointmentObj.setFullTime(true);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
 
         boolean found = false;
 
         final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, _fields, start, end, timeZone, true, getHostName(), getSessionId());
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));
@@ -247,7 +241,5 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
         final Occurrence occurrence = getOccurrenceByPosition(occurrenceArray, 32);
         assertOccurrence(32, simpleDateFormatUTC.parse("2007-11-01 00:00:00"), simpleDateFormatUTC.parse("2007-11-02 00:00:00"), occurrence);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 }

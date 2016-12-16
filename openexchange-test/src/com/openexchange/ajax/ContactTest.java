@@ -50,55 +50,25 @@
 package com.openexchange.ajax;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.xml.sax.SAXException;
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.PutMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ContactFields;
-import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.user.UserTools;
-import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.contact.Data;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.test.OXTestToolkit;
-import com.openexchange.test.TestException;
-import com.openexchange.tools.URLParameter;
 
 public class ContactTest extends AbstractAJAXTest {
 
@@ -119,9 +89,8 @@ public class ContactTest extends AbstractAJAXTest {
     public void setUp() throws Exception {
         super.setUp();
         
-        final FolderObject folderObj = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId());
-        contactFolderId = folderObj.getObjectID();
-        userId = folderObj.getCreatedBy();
+        contactFolderId = getClient().getValues().getPrivateContactFolder();
+        userId = getClient().getValues().getUserId();
 
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -145,7 +114,7 @@ public class ContactTest extends AbstractAJAXTest {
         entry[2].setEntryID(contactEntry.getObjectID());
 
         contactObj.setDistributionList(entry);
-        return insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        return cotm.newAction(contactObj).getObjectID();
     }
 
     protected void compareObject(final Contact contactObj1, final Contact contactObj2) throws Exception {
@@ -368,8 +337,7 @@ public class ContactTest extends AbstractAJAXTest {
         contactObj.setParentFolderID(contactFolderId);
 
         final Contact link1 = createContactObject("link1");
-        final int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
-        link1.setObjectID(linkId1);
+        cotm.newAction(link1);
 
         final DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
         entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
@@ -381,441 +349,11 @@ public class ContactTest extends AbstractAJAXTest {
         return contactObj;
     }
 
-    public static int insertContact(final WebConversation webCon, final Contact contactObj, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        int objectId = 0;
-
-        final StringWriter stringWriter = new StringWriter();
-        final JSONObject jsonObj = new JSONObject();
-        final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
-        contactWriter.writeContact(contactObj, jsonObj, null);
-
-        stringWriter.write(jsonObj.toString());
-        stringWriter.flush();
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-
-        WebRequest req = null;
-        WebResponse resp = null;
-
-        JSONObject jResponse = null;
-
-        if (contactObj.containsImage1()) {
-            final PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), true);
-
-            postReq.setParameter("json", stringWriter.toString());
-
-            final File f = File.createTempFile("open-xchange_image", ".jpg");
-            final FileOutputStream fos = new FileOutputStream(f);
-            fos.write(contactObj.getImage1());
-            fos.flush();
-            fos.close();
-
-            postReq.selectFile("file", f, Data.CONTENT_TYPE);
-
-            req = postReq;
-            resp = webCon.getResource(req);
-            f.delete();
-            jResponse = extractFromCallback(resp.getText());
-        } else {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-
-            req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-            resp = webCon.getResponse(req);
-
-            jResponse = new JSONObject(resp.getText());
-        }
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = Response.parse(jResponse.toString());
-
-        if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
-        }
-
-        final JSONObject data = (JSONObject) response.getData();
-        if (data.has(DataFields.ID)) {
-            objectId = data.getInt(DataFields.ID);
-        }
-
-        return objectId;
-    }
-
-    public static void updateContact(final WebConversation webCon, final Contact contactObj, final int objectId, final int inFolder, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        final StringWriter stringWriter = new StringWriter();
-        final JSONObject jsonObj = new JSONObject();
-        final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
-        contactWriter.writeContact(contactObj, jsonObj, null);
-
-        stringWriter.write(jsonObj.toString());
-        stringWriter.flush();
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
-        parameter.setParameter(DataFields.ID, Integer.toString(objectId));
-        parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(inFolder));
-        parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date(System.currentTimeMillis() + 1000000));
-
-        WebRequest req = null;
-        WebResponse resp = null;
-
-        JSONObject jResponse = null;
-
-        if (contactObj.containsImage1()) {
-            final PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), true);
-            postReq.setParameter("json", stringWriter.toString());
-
-            final File f = File.createTempFile("open-xchange_image", ".jpg");
-            final FileOutputStream fos = new FileOutputStream(f);
-            fos.write(contactObj.getImage1());
-            fos.flush();
-            fos.close();
-
-            postReq.selectFile("file", f, Data.CONTENT_TYPE);
-
-            req = postReq;
-            resp = webCon.getResource(req);
-            f.delete();
-            jResponse = extractFromCallback(resp.getText());
-        } else {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-
-            req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-            resp = webCon.getResponse(req);
-
-            jResponse = new JSONObject(resp.getText());
-        }
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = Response.parse(jResponse.toString());
-
-        if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
-        }
-    }
-
-    public static void deleteContact(final WebConversation webCon, final int id, final int inFolder, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
-        parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date(System.currentTimeMillis() + 1000000));
-
-        final JSONObject jsonObj = new JSONObject();
-        jsonObj.put(DataFields.ID, id);
-        jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-
-        final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
-        final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = Response.parse(resp.getText());
-
-        if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
-        }
-    }
-
-    public static Contact[] listContact(final WebConversation webCon, final int inFolder, final int[] cols, final String host, final String session) throws Exception {
-        return listContact(webCon, inFolder, cols, -1, -1, host, session);
-    }
-
-    public static Contact[] listContact(final WebConversation webCon, final int inFolder, final int[] cols, final int leftHandLimit, final int rightHandLimit, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
-        parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
-
-        if (leftHandLimit > -1) {
-            parameter.setParameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit);
-        }
-
-        if (rightHandLimit > -1) {
-            parameter.setParameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit);
-        }
-
-        final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = Response.parse(resp.getText());
-
-        if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
-        }
-
-        assertNotNull("timestamp", response.getTimestamp());
-
-        assertEquals(200, resp.getResponseCode());
-
-        return jsonArray2ContactArray((JSONArray) response.getData(), cols);
-    }
-
-    public static Contact[] searchContact(final WebConversation webCon, final String searchpattern, final int inFolder, final int[] cols, final String host, final String session) throws OXException, Exception {
-        return searchContact(webCon, searchpattern, inFolder, cols, false, host, session);
-    }
-
-    public static Contact[] searchContact(final WebConversation webCon, final String searchpattern, final int inFolder, final int[] cols, final boolean startletter, String host, final String session) throws OXException, Exception {
-        host = appendPrefix(host);
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
-
-        final JSONObject jsonObj = new JSONObject();
-        jsonObj.put("pattern", searchpattern);
-        jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-        jsonObj.put("startletter", startletter);
-
-        final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = Response.parse(resp.getText());
-
-        if (response.hasError()) {
-            throw new TestException(response.getErrorMessage());
-        }
-
-        assertEquals(200, resp.getResponseCode());
-
-        return jsonArray2ContactArray((JSONArray) response.getData(), cols);
-    }
-
-    public static Contact[] searchContactAdvanced(final WebConversation webCon, final ContactSearchObject cso, final int folder, final int[] cols, final String host, final String session) throws OXException, Exception {
-        return searchContactAdvanced(webCon, cso, folder, 0, cols, host, session);
-    }
-
-    public static Contact[] searchContactAdvanced(final WebConversation webCon, final ContactSearchObject cso, final int folder, final int orderBy, final int[] cols, String host, final String session) throws OXException, Exception {
-        host = appendPrefix(host);
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
-
-        if (orderBy != 0) {
-            parameter.setParameter(AJAXServlet.PARAMETER_SORT, orderBy);
-            parameter.setParameter(AJAXServlet.PARAMETER_ORDER, "ASC");
-        }
-
-        final JSONObject jsonObj = new JSONObject();
-        // jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, folder);
-        jsonObj.put(ContactFields.LAST_NAME, cso.getSurname());
-        jsonObj.put(ContactFields.FIRST_NAME, cso.getGivenName());
-        jsonObj.put(ContactFields.DISPLAY_NAME, cso.getDisplayName());
-        jsonObj.put(ContactFields.EMAIL1, cso.getEmail1());
-        jsonObj.put(ContactFields.EMAIL2, cso.getEmail2());
-        jsonObj.put(ContactFields.EMAIL3, cso.getEmail3());
-
-        if (cso.isEmailAutoComplete()) {
-            jsonObj.put("emailAutoComplete", "true");
-            // parameter.setParameter("emailAutoComplete","true");
-        }
-
-        final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = Response.parse(resp.getText());
-
-        if (response.hasError()) {
-            throw new TestException(response.getErrorMessage());
-        }
-
-        assertNotNull("timestamp", response.getTimestamp());
-
-        assertEquals(200, resp.getResponseCode());
-
-        return jsonArray2ContactArray((JSONArray) response.getData(), cols);
-    }
-
-    public static Contact[] listContact(final WebConversation webCon, final int[][] objectIdAndFolderId, final int[] cols, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
-
-        final JSONArray jsonArray = new JSONArray();
-
-        for (int a = 0; a < objectIdAndFolderId.length; a++) {
-            final int i[] = objectIdAndFolderId[a];
-            final JSONObject jsonObj = new JSONObject();
-            jsonObj.put(DataFields.ID, i[0]);
-            jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, i[1]);
-            jsonArray.put(jsonObj);
-        }
-
-        final ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-        final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-        final WebResponse resp = webCon.getResponse(req);
-        final Response response = Response.parse(resp.getText());
-
-        if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
-        }
-
-        assertNotNull("timestamp", response.getTimestamp());
-
-        assertEquals(200, resp.getResponseCode());
-
-        return jsonArray2ContactArray((JSONArray) response.getData(), cols);
-    }
-
-    public static Contact loadUser(final WebConversation webCon, final int userId, final String host, final String session) throws OXException, IOException, SAXException, JSONException {
-        return UserTools.getUserContact(webCon, host, session, userId);
-    }
-
-    public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, final String protocol, final String host, final String session) throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session), false);
-        if (protocol.endsWith("://")) {
-            client.setProtocol(protocol.substring(0, protocol.length() - 3));
-        } else {
-            client.setProtocol(protocol);
-        }
-        client.setHostname(host);
+    public static Contact loadContact(AJAXClient client, final int objectId, final int inFolder) throws Exception {
         final TimeZone timeZone = client.getValues().getTimeZone();
         final GetRequest request = new GetRequest(inFolder, objectId, timeZone);
         final GetResponse response = client.execute(request);
         return response.getContact();
-    }
-
-    public static Contact loadUser(final WebConversation webCon, final int userId, final int inFolder, final String host, final String session) throws Exception {
-        final int[] cols = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.INTERNAL_USERID };
-
-        final Contact[] contactArray = listContact(webCon, inFolder, cols, host, session);
-
-        for (int a = 0; a < contactArray.length; a++) {
-            if (contactArray[a].getInternalUserId() == userId) {
-                return contactArray[a];
-            }
-        }
-
-        return null;
-    }
-
-    public static byte[] loadImage(final WebConversation webCon, final int objectId, final int inFolder, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_IMAGE);
-        parameter.setParameter(DataFields.ID, objectId);
-        parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-
-        final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
-        final InputStream is = resp.getInputStream();
-        assertNotNull("response InputStream is null", is);
-
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final byte[] b = new byte[1024];
-        int i = 0;
-        while ((i = is.read(b)) != -1) {
-            baos.write(b, 0, i);
-        }
-
-        return baos.toByteArray();
-    }
-
-    public static Contact[] listModifiedAppointment(final WebConversation webCon, final int inFolder, final Date modified, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        final int[] cols = new int[] { Appointment.OBJECT_ID };
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
-        parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-        parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
-        parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
-
-        final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = Response.parse(resp.getText());
-
-        if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
-        }
-
-        assertNotNull("timestamp", response.getTimestamp());
-
-        assertEquals(200, resp.getResponseCode());
-
-        return jsonArray2ContactArray((JSONArray) response.getData(), cols);
-    }
-
-    public static Contact[] listDeleteAppointment(final WebConversation webCon, final int inFolder, final Date modified, String host, final String session) throws Exception {
-        host = appendPrefix(host);
-
-        final int[] cols = new int[] { Appointment.OBJECT_ID };
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
-        parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-        parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "updated");
-        parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
-
-        final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = Response.parse(resp.getText());
-
-        if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
-        }
-
-        assertNotNull("timestamp", response.getTimestamp());
-
-        assertEquals(200, resp.getResponseCode());
-
-        return jsonArray2ContactArray((JSONArray) response.getData(), cols);
-    }
-
-    private static Contact[] jsonArray2AppointmentArray(final JSONArray jsonArray) throws Exception {
-        final Contact[] contactArray = new Contact[jsonArray.length()];
-
-        final ContactParser contactParser = new ContactParser();
-
-        for (int a = 0; a < contactArray.length; a++) {
-            contactArray[a] = new Contact();
-            final JSONObject jObj = jsonArray.getJSONObject(a);
-
-            contactParser.parse(contactArray[a], jObj);
-        }
-
-        return contactArray;
     }
 
     protected static Contact[] jsonArray2ContactArray(final JSONArray jsonArray, final int[] cols) throws Exception {

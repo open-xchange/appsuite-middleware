@@ -3,7 +3,6 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
@@ -45,18 +44,8 @@ public class Bug9497Test extends AbstractRecurrenceTest {
         appointmentObj.setDayInMonth(28);
         appointmentObj.setMonth(Calendar.DECEMBER);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        loadAppointment(getWebConversation(), objectId, 39, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        catm.get(appointmentFolderId, objectId, 39);
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

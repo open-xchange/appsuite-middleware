@@ -47,42 +47,67 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.ajax.appointment.action;
 
-import java.io.FileInputStream;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.importexport.actions.VCardImportRequest;
-import com.openexchange.ajax.session.LoginTools;
-import com.openexchange.ajax.session.actions.LoginRequest;
-import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.configuration.AJAXConfig;
+import java.util.Date;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link Importer}
  * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link FreeBusyRequest}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public class Importer {
+public class FreeBusyRequest extends AbstractAppointmentRequest<FreeBusyResponse> {
 
-    public Importer() {
+    private final JSONObject body = new JSONObject();
+
+    private final FreeBusyParser freeBusyParser;
+
+    private int userId;
+
+    private int type;
+
+    private Date start;
+
+    private Date end;
+
+    public FreeBusyRequest(int userId, int type, final Date start, final Date end) {
         super();
+        this.userId = userId;
+        this.type = type;
+        this.start = start;
+        this.end = end;
+        freeBusyParser = new FreeBusyParser(false, Appointment.ALL_COLUMNS);
+        
     }
 
-    public static void main(String[] args) throws Throwable {
-        AJAXConfig.init();
-        for (int i = 8999; i >= 1; i--) {
-            if (i == 1043 || i == 7551 || i == 1051 || i == 1059 || i == 1713) {
-                continue;
-            }
-            // System.out.println(i);
-            AJAXSession session = new AJAXSession();
-            AJAXClient client = new AJAXClient(session, false); // normally true, but there is an explicit call at the end of the method
-            LoginResponse loginResponse = client.execute(new LoginRequest("oxuser" + i + "@performance", "secret", LoginTools.generateAuthId(), AJAXClient.class.getName(), "6.20.0"));
-            session.setId(loginResponse.getSessionId());
-            int folderId = client.getValues().getPrivateContactFolder();
-            client.execute(new VCardImportRequest(folderId, new FileInputStream(args[0])));
-            client.logout();
-        }
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        return new Parameter[] { 
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_FREEBUSY),
+            new URLParameter(AJAXServlet.PARAMETER_ID, userId),
+            new URLParameter(AJAXServlet.PARAMETER_TYPE, type),
+            new URLParameter(AJAXServlet.PARAMETER_START, start.toString()),
+            new URLParameter(AJAXServlet.PARAMETER_END, end.toString()),
+        };
+    }
+
+    @Override
+    public FreeBusyParser getParser() {
+        return freeBusyParser;
+    }
+
+    @Override
+    public Object getBody() {
+        return body;
     }
 }

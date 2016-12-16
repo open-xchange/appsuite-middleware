@@ -6,13 +6,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import org.junit.Test;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.URLParameter;
 
 public class Bug11250Test extends AppointmentTest {
 
@@ -44,7 +42,7 @@ public class Bug11250Test extends AppointmentTest {
         appointmentObj.setStartDate(startDate);
         appointmentObj.setEndDate(endDate);
 
-        final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId1 = catm.insert(appointmentObj).getObjectID();
 
         startDate = simpleDateFormat.parse(year + "-06-03 10:00:00");
         endDate = simpleDateFormat.parse(year + "-06-03 11:00:00");
@@ -53,7 +51,7 @@ public class Bug11250Test extends AppointmentTest {
         appointmentObj.setStartDate(startDate);
         appointmentObj.setEndDate(endDate);
 
-        final int objectId3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId3 = catm.insert(appointmentObj).getObjectID();
 
         appointmentObj = createAppointmentObject("testBug11250_2");
         appointmentObj.setIgnoreConflicts(true);
@@ -69,18 +67,9 @@ public class Bug11250Test extends AppointmentTest {
         appointmentObj.setInterval(2);
         appointmentObj.setRecurrenceCount(2);
 
-        final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId2 = catm.insert(appointmentObj).getObjectID();
 
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
-        parameter.setParameter(AJAXServlet.PARAMETER_START, start);
-        parameter.setParameter(AJAXServlet.PARAMETER_END, end);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(_appointmentFields));
-        parameter.setParameter(AJAXServlet.PARAMETER_SORT, CalendarObject.START_DATE);
-        parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, targetFolder);
-
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), _appointmentFields, parameter, timeZone, getHostName(), getSessionId());
+        final Appointment[] appointmentArray = catm.all(targetFolder, start, end, _appointmentFields);
         assertEquals("appointment array size not equals", 4, appointmentArray.length);
 
         assertEquals("appointment id at position 1 not equals", objectId1, appointmentArray[0].getObjectID());

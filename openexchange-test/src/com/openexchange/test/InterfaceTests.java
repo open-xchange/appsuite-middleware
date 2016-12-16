@@ -74,7 +74,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     com.openexchange.SmokeTestSuite.class,
     com.openexchange.ajax.FolderTest.class,
-    com.openexchange.ajax.MultipleTest.class,
     com.openexchange.ajax.UserTest.class,
     com.openexchange.ajax.mailaccount.MailAccountSuite.class,
     com.openexchange.ajax.appointment.AppointmentAJAXSuite.class,

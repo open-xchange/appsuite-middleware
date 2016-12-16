@@ -52,7 +52,6 @@ package com.openexchange.ajax.importexport;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.junit.Before;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.exception.OXException;
@@ -157,12 +155,6 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         //  sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
     }
 
-    protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, OXException {
-        final FolderObject folderObj = com.openexchange.ajax.FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-
-        return folderObj.getCreatedBy();
-    }
-
     public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, OXException {
         final StringBuilder bob = new StringBuilder("http://");
         bob.append(getHostName());
@@ -200,7 +192,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         folderObj.setModule(folderObjectModuleID);
         folderObj.setType(FolderObject.PRIVATE);
 
-        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(getUserId_FIXME(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(getClient().getValues().getPrivateAppointmentFolder(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
         };
 
         folderObj.setPermissionsAsArray(permission);

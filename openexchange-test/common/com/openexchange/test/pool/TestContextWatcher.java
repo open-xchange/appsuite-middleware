@@ -99,6 +99,9 @@ public class TestContextWatcher implements Runnable {
     }
 
     public void contextSuccessfullyReturned(TestContext context) {
+        if (context == null) {
+            return;
+        }
         contextsInUse.remove(context);
     }
 

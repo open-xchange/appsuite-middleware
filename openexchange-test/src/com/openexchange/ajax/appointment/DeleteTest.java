@@ -19,12 +19,11 @@ public class DeleteTest extends AppointmentTest {
     public void testDelete() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testDelete");
         appointmentObj.setIgnoreConflicts(true);
-        insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        final int id = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-
-        deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
+        final int id = catm.insert(appointmentObj).getObjectID();
+        appointmentObj.setObjectID(id);
+        catm.delete(appointmentObj, false, false);
         try {
-            deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+            catm.delete(appointmentObj, true, true);
             fail("OXObjectNotFoundException expected!");
         } catch (final Exception ex) {
             assertTrue(true);
@@ -55,9 +54,9 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
 
         appointmentObj = new Appointment();
@@ -71,23 +70,21 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        appointmentObj.setObjectID(newObjectId);
+        catm.update(appointmentFolderId, appointmentObj);
+        int newObjectId = appointmentObj.getObjectID();
 
         assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
 
-        loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        loadAppointment = catm.get(appointmentFolderId, newObjectId);
 
         // Loaded exception MUST NOT contain any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        loadAppointment = catm.get(appointmentFolderId, newObjectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
     }
 
-    // Bug #12173    @Test
+    // Bug #12173 
     @Test
     public void testDeleteRecurrenceWithDate() throws Exception {
         final Calendar c = Calendar.getInstance();
@@ -113,18 +110,9 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, exceptionDate, new Date(Long.MAX_VALUE), PROTOCOL + getHostName(), getSessionId(), true);
-
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        // May not fail
-
-        // Delete all
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
-
     }
 }

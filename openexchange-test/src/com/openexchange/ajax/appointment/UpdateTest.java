@@ -56,11 +56,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -82,7 +81,7 @@ public class UpdateTest extends AppointmentTest {
     public void testSimple() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testSimple");
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
         appointmentObj.setShownAs(Appointment.RESERVED);
         appointmentObj.setFullTime(true);
@@ -90,24 +89,23 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         appointmentObj.removeParentFolderID();
 
-        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        catm.update(appointmentFolderId, appointmentObj);
     }
 
     @Test
     public void testUpdateAppointmentWithParticipant() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
         appointmentObj.setShownAs(Appointment.RESERVED);
         appointmentObj.setFullTime(true);
         appointmentObj.setLocation(null);
         appointmentObj.setObjectID(objectId);
 
-        final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
-        final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+        final int userParticipantId = cotm.searchAction(userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int groupParticipantId = GroupTest.searchGroup(getClient(), groupParticipant)[0].getIdentifier();
+        final int resourceParticipantId = rtm.search(resourceParticipant).get(0).getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);
@@ -119,8 +117,7 @@ public class UpdateTest extends AppointmentTest {
 
         appointmentObj.removeParentFolderID();
 
-        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        catm.update(appointmentFolderId, appointmentObj);
     }
 
     @Test
@@ -147,9 +144,9 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
 
         final long newStartTime = startTime + 60 * 60 * 1000;
@@ -165,16 +162,16 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setOrganizer(testUser.getUser());
 
-        final int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        catm.update(appointmentFolderId, appointmentObj);
+        Appointment newApp = catm.get(appointmentObj);
+        final int newObjectId = newApp.getObjectID();
         assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
         appointmentObj.setObjectID(newObjectId);
 
-        loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        loadAppointment = catm.get(appointmentFolderId, objectId);
 
         // Loaded change exception MUST NOT contain any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     // Node 356
@@ -188,7 +185,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setOccurrence(5);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
         appointmentObj.setObjectID(objectId);
 
@@ -217,31 +214,29 @@ public class UpdateTest extends AppointmentTest {
 
         appointmentObj.setRecurringStart(recurrenceStart.getTimeInMillis());
 
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         final Date modified = loadAppointment.getLastModified();
 
-        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, modified, timeZone, getHostName(), getSessionId());
+        catm.update(appointmentFolderId, appointmentObj);
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        loadAppointment = catm.get(appointmentFolderId, objectId);
 
         loadAppointment.removeUntil();   // TODO add expected until
         compareObject(appointmentObj, loadAppointment);
 
-        final Appointment[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, new Date(0), _appointmentFields, timeZone, getHostName(), getSessionId());
+        final List<Appointment> appointmentArray = catm.updates(0, _appointmentFields, new Date(0), false);
 
         boolean found = false;
 
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (objectId == appointmentArray[a].getObjectID()) {
-                compareObject(appointmentObj, appointmentArray[a]);
+        for (int a = 0; a < appointmentArray.size(); a++) {
+            if (objectId == appointmentArray.get(a).getObjectID()) {
+                compareObject(appointmentObj, appointmentArray.get(a));
                 found = true;
                 break;
             }
         }
 
         assertTrue("object with object_id: " + objectId + " not found in response", found);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
     // Bug 12700    FIXME    @Test
@@ -254,7 +249,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setEndDate(D("04/01/2008 14:00"));
 
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, utc, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
 
         final Appointment update = new Appointment();
@@ -262,12 +257,13 @@ public class UpdateTest extends AppointmentTest {
         update.setParentFolderID(appointmentFolderId);
         update.setFullTime(true);
 
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, utc, getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         final Date modified = new Date(Long.MAX_VALUE);
+        loadAppointment.setLastModified(modified);
 
-        updateAppointment(getWebConversation(), update, objectId, appointmentFolderId, modified, utc, getHostName(), getSessionId());
+        catm.update(appointmentFolderId, appointmentObj);
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, utc, getHostName(), getSessionId());
+        loadAppointment = catm.get(appointmentFolderId, objectId);
 
         final Calendar check = new GregorianCalendar();
         check.setTimeZone(utc);

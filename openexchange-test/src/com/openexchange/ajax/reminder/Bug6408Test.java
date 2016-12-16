@@ -6,11 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 public class Bug6408Test extends ReminderTest {
@@ -21,8 +17,7 @@ public class Bug6408Test extends ReminderTest {
 
     @Test
     public void testBug6408() throws Exception {
-        ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
-        final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
+        final TimeZone timeZone = getClient().getValues().getTimeZone();
 
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(timeZone);
@@ -36,8 +31,7 @@ public class Bug6408Test extends ReminderTest {
         final long startTime = c.getTimeInMillis();
         final long endTime = startTime + 3600000;
 
-        final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-        final int folderId = folderObj.getObjectID();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
 
         final int alarmMinutes = 60;
 
@@ -50,7 +44,7 @@ public class Bug6408Test extends ReminderTest {
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int targetId = catm.insert(appointmentObj).getObjectID();
 
         final ReminderObject reminderObj = new ReminderObject();
         reminderObj.setTargetId(targetId);
@@ -77,7 +71,7 @@ public class Bug6408Test extends ReminderTest {
 
         reminderObj.setDate(new Date(startTime - alarmInMillies));
 
-        AppointmentTest.updateAppointment(getWebConversation(), appointmentObj, targetId, folderId, timeZone, getHostName(), getSessionId());
+        catm.update(folderId, appointmentObj);
 
         reminderArray = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
 
@@ -96,6 +90,5 @@ public class Bug6408Test extends ReminderTest {
         assertTrue("no reminder find for target id " + targetId + " in response", found);
 
         deleteReminder(getWebConversation(), reminderArray[pos].getObjectId(), getHostName(), getSessionId());
-        AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId(), false);
     }
 }

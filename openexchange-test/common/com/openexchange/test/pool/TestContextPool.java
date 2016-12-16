@@ -86,7 +86,7 @@ public class TestContextPool {
                 TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
                 context.setAcquiredBy(acquiredBy);
                 contextWatcher.get().contextInUse(context);
-//                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());
+                //                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());
                 return context;
             } catch (InterruptedException e) {
                 // should not happen
@@ -97,10 +97,17 @@ public class TestContextPool {
     }
 
     public static void backContext(TestContext context) {
+        if (context == null) {
+            return;
+        }
+        contextWatcher.get().contextSuccessfullyReturned(context);
+        if (contexts.contains(context)) {
+            LOG.info("Context {} formerly acquired by class {} has already been returned.", context.getName(), context.getAcquiredBy());
+            return;
+        }
         try {
             context.reset();
             contexts.put(context);
-            contextWatcher.get().contextSuccessfullyReturned(context);
         } catch (InterruptedException e) {
             // should not happen
             LOG.error("", e);

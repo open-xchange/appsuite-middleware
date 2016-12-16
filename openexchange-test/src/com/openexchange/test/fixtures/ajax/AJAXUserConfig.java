@@ -3,8 +3,6 @@ package com.openexchange.test.fixtures.ajax;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -23,14 +21,9 @@ public class AJAXUserConfig implements TestUserConfig {
     @Override
     public Object get(Tree tree) {
         try {
-            return ConfigTools.get(client, new GetRequest(tree)).getData();
-        } catch (OXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+            return client.execute(new GetRequest(tree)).getData();
+        } catch (OXException | IOException | JSONException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return null;
@@ -59,14 +52,8 @@ public class AJAXUserConfig implements TestUserConfig {
     @Override
     public void set(Tree tree, Object value) {
         try {
-            ConfigTools.set(client, new SetRequest(tree, value));
-        } catch (OXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+            client.execute(new SetRequest(tree, value));
+        } catch (OXException | IOException | JSONException e) {
             e.printStackTrace();
         }
     }

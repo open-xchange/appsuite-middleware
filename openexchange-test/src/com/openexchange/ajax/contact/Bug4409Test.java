@@ -1,7 +1,7 @@
 
 package com.openexchange.ajax.contact;
 
-import org.junit.After;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.Contact;
@@ -25,20 +25,8 @@ public class Bug4409Test extends ContactTest {
         contactObj.setSurName("testBug4409");
         contactObj.setParentFolderID(contactFolderId);
 
-        objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
-
-        loadImage(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
+        objectId = cotm.newAction(contactObj).getObjectID();
+        Contact reloaded = cotm.getAction(contactObj);
+        assertNotNull(reloaded.getImage1());
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (objectId != -1) {
-                deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

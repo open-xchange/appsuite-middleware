@@ -94,7 +94,7 @@ public class Bug41794Test extends AbstractAJAXSession {
         super.setUp();
         client2 = new AJAXClient(testContext.acquireUser());
         client3 = new AJAXClient(testContext.acquireUser());
-        groupParticipant = testContext.acquireGroupParticipant();
+        groupParticipant = testContext.getGroupParticipants().get(0);
         ctm1 = new CalendarTestManager(getClient());
         ctm2 = new CalendarTestManager(client2);
         ctm3 = new CalendarTestManager(client3);

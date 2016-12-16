@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import org.json.JSONException;
 import org.junit.After;
@@ -110,24 +109,6 @@ public class MaxMailSizeTest extends AbstractMailTest {
         mail.setContentType(MailContentType.PLAIN.toString());
         mail.setBody("Test Mail");
         mail.sanitize();
-
-        class FooInputStream extends InputStream {
-
-            private final long size;
-
-            private long read = 0L;
-
-            public FooInputStream(long size) {
-                super();
-                this.size = size;
-            }
-
-            @Override
-            public int read() throws IOException {
-                return read++ < size ? 'a' : -1;
-            }
-
-        }
 
         TestMail inSentBox = manager.send(mail, new FooInputStream(3500000L)); // Results in approx. 4800000 Byte Mail Size
         assertFalse("Sending resulted in error.", manager.getLastResponse().hasError());

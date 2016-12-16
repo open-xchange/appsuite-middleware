@@ -61,7 +61,6 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
@@ -91,7 +90,7 @@ public class Bug7380Test extends AbstractTaskTest {
         task.setTitle("Test bug #7380");
         task.setParentFolderID(getPrivateFolder());
         final AJAXSession session = getSession();
-        final List<Participant> participants = ParticipantTools.getParticipants(session.getConversation(), AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME), session.getId(), 1, true, client.getValues().getUserId());
+        final List<Participant> participants = ParticipantTools.getParticipants(getClient(), 1, true, client.getValues().getUserId());
         task.setParticipants(participants);
         final InsertResponse iResponse = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
         task.setObjectID(iResponse.getId());

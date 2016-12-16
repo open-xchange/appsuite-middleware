@@ -41,7 +41,7 @@ public class PortalSearchTest extends AppointmentTest {
         final Appointment appointmentObj = createAppointmentObject("testNewAppointmentsSearch");
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
 
         final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
@@ -63,7 +63,5 @@ public class PortalSearchTest extends AppointmentTest {
         }
 
         assertTrue("object with id " + objectId + " not found in response", found);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 }

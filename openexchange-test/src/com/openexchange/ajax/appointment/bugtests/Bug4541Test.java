@@ -38,22 +38,21 @@ public class Bug4541Test extends AppointmentTest {
 
         appointmentObj.setParticipants(participants);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
 
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(newFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
         appointmentObj.setTitle("testBug4541 - update");
         appointmentObj.removeParentFolderID();
 
-        updateAppointment(getWebConversation(), appointmentObj, objectId, newFolderId, timeZone, getHostName(), getSessionId());
+        catm.update(newFolderId, appointmentObj);
         appointmentObj.setParentFolderID(newFolderId);
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
+        loadAppointment = catm.get(newFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getSessionId(), false);
         FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword(), "");
     }
 }

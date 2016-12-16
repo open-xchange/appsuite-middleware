@@ -7,7 +7,6 @@ import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -17,8 +16,6 @@ import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.container.Appointment;
 
 public class MultipleTest extends AppointmentTest {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleTest.class);
 
     @Test
     public void testMultipleInsert() throws Exception {
@@ -41,7 +38,7 @@ public class MultipleTest extends AppointmentTest {
         final int objectId2 = ((CommonInsertResponse) multipleInsertResponse.getResponse(1)).getId();
         final int objectId3 = ((CommonInsertResponse) multipleInsertResponse.getResponse(2)).getId();
 
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId3, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId3);
         final Date modified = loadAppointment.getLastModified();
 
         final DeleteRequest deleteRequest1 = new DeleteRequest(objectId1, appointmentFolderId, modified);
@@ -54,19 +51,5 @@ public class MultipleTest extends AppointmentTest {
         assertFalse("first delete request has errors: ", multipleDeleteResponse.getResponse(0).hasError());
         assertFalse("second delete request has errors: ", multipleDeleteResponse.getResponse(1).hasError());
         assertFalse("third delete request has errors: ", multipleDeleteResponse.getResponse(2).hasError());
-    }
-
-    /**
-     * Inserts a lot of appointments with 1 multiple request.
-     */
-    public void _testTonnenInsert() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
-        final InsertRequest[] inserts = new InsertRequest[1000];
-        for (int i = 0; i < inserts.length; i++) {
-            final Appointment appointmentObj = createAppointmentObject("testMultipleInsert");
-            appointmentObj.setIgnoreConflicts(true);
-            inserts[i] = new InsertRequest(appointmentObj, client.getValues().getTimeZone(), true);
-        }
-        Executor.execute(client, MultipleRequest.create(inserts));
     }
 }

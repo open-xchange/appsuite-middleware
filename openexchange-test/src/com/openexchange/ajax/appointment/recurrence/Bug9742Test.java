@@ -6,8 +6,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import com.meterware.httpunit.WebConversation;
-import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -15,7 +13,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -84,13 +81,10 @@ public class Bug9742Test extends AbstractAJAXSession {
         final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);
         final int objectId = insertResponse.getId();
 
-        final String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        final WebConversation webCon = ajaxSession.getConversation();
-
-        final Appointment loadAppointment = AppointmentTest.loadAppointment(webCon, objectId, appointmentFolderId, timeZone, hostname, ajaxSession.getId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         final Date modified = loadAppointment.getLastModified();
 
-        final Appointment[] appointmentArray = AppointmentTest.listAppointment(webCon, appointmentFolderId, APPOINTMENT_FIELDS, start, end, timeZone, false, hostname, ajaxSession.getId());
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, APPOINTMENT_FIELDS);
 
         int appointmentCounter = 0;
         for (int a = 0; a < appointmentArray.length; a++) {

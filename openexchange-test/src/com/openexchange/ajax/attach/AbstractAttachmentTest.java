@@ -62,7 +62,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,12 +74,13 @@ import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AttachmentTest;
-import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
+import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.test.OXTestToolkit;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
@@ -91,6 +91,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
     protected int moduleId = -1;
 
     protected String sessionId;
+    private Response res;
 
     @Before
     public void setUp() throws Exception {
@@ -127,16 +128,16 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         final int id = clean.get(0).getId();
         removeAttachments();
 
-        final Response res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, id);
-        assertTrue(res.hasError());
+        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, id);
+        assertTrue(atm.getLastResponse().hasError());
     }
 
     protected void doUpdates() throws Exception {
         upload();
         Thread.sleep(2000); // Hang around a bit
-        Response res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, clean.get(0).getId());
-        assertNoError(res);
-        final long timestamp = res.getTimestamp().getTime();
+        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, clean.get(0).getId());
+        assertFalse(atm.getLastResponse().hasError());
+        final long timestamp = atm.getLastResponse().getTimestamp().getTime();
         upload();
         upload();
         upload();
@@ -257,51 +258,35 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
     protected void doGet() throws Exception {
         upload();
-        final Response res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, clean.get(0).getId());
-        assertNoError(res);
+        
+        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, clean.get(0).getId());
+        assertFalse(atm.getLastResponse().hasError());
 
-        final JSONObject data = (JSONObject) res.getData();
-
-        assertEquals(folderId, data.getInt("folder"));
-        assertEquals(attachedId, data.getInt("attached"));
-        assertEquals(moduleId, data.getInt("module"));
-        assertEquals(testFile.getName(), data.getString("filename"));
-        assertEquals("text/plain", data.getString("file_mimetype"));
-        assertEquals(testFile.length(), data.getLong("file_size"));
-        assertEquals(clean.get(0).getId(), data.getInt("id"));
+        assertEquals(folderId, get.getFolderId());
+        assertEquals(attachedId, get.getAttachedId());
+        assertEquals(moduleId, get.getModuleId());
+        assertEquals(testFile.getName(), get.getFilename());
+        assertEquals("text/plain", get.getFileMIMEType());
+        assertEquals(testFile.length(), get.getFilesize());
+        assertEquals(clean.get(0).getId(), get.getId());
     }
 
     protected void doMultiple() throws Exception {
-        final AttachmentMetadata attachment = new AttachmentImpl();
-        final AttachmentMetadata attachment2 = new AttachmentImpl();
+        TestTask attachment = new TestTask();
+        int id = atm.attach(attachment, testFile.getName(), new FileInputStream(testFile), null);
+        AbstractAJAXResponse resp = atm.getLastResponse();
+        assertFalse(resp.hasError());
 
-        attachment.setFolderId(folderId);
-        attachment.setAttachedId(attachedId);
-        attachment.setModuleId(moduleId);
-
-        attachment2.setFolderId(folderId);
-        attachment2.setAttachedId(attachedId);
-        attachment2.setModuleId(moduleId);
-
-        final Response res = attach(getWebConversation(), sessionId, folderId, attachedId, moduleId, Arrays.asList(testFile, testFile2));
-        assertNoError(res);
-
-        attachment.setId(((JSONArray) res.getData()).getInt(0));
-        attachment2.setId(((JSONArray) res.getData()).getInt(1));
-        clean.add(attachment);
-        clean.add(attachment2);
-
-        assertFilename(clean.get(0), testFile.getName());
-        assertFilename(clean.get(1), testFile2.getName());
+        AttachmentMetadata reloaded = atm.get(folderId, attachedId, AttachmentTools.determineModule(attachment), id);
+        assertEquals(reloaded.getFilename(), testFile.getName());
     }
 
-    protected final void assertFilename(final AttachmentMetadata att, final String filename) throws MalformedURLException, JSONException, IOException, SAXException {
-        final Response res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, att.getId());
-        assertNoError(res);
+    protected final void assertFilename(final AttachmentMetadata att, final String filename) throws MalformedURLException, JSONException, IOException, OXException {
+        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, att.getId());
+        assertFalse(atm.getLastResponse().hasError());
+        assertNotNull(get);
 
-        final JSONObject data = (JSONObject) res.getData();
-
-        assertEquals(filename, data.getString("filename"));
+        assertEquals(filename, get.getFilename());
     }
 
     protected void doDocument() throws Exception {
@@ -362,10 +347,6 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
     }
 
-    public void refreshSessionId() throws IOException, JSONException, OXException {
-        sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(), getLogin(), getPassword());
-    }
-
     protected void doQuota() throws Exception {
         Response res = quota(getWebConversation(), sessionId);
         assertNoError(res);
@@ -379,13 +360,13 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         quota = (JSONObject) res.getData();
         final int useAfter = quota.getInt("use");
 
-        res = get(getWebConversation(), sessionId, clean.get(0).getFolderId(), clean.get(0).getAttachedId(), clean.get(0).getAttachedId(), clean.get(0).getId());
-        assertNoError(res);
+        AttachmentMetadata get = atm.get(clean.get(0).getFolderId(), clean.get(0).getAttachedId(), clean.get(0).getAttachedId(), clean.get(0).getId());
+        assertFalse(atm.getLastResponse().hasError());
 
         assertEquals(useAfter - use, ((JSONObject) res.getData()).get("file_size"));
     }
 
-    protected void doDatasource() throws MalformedURLException, JSONException, IOException, SAXException {
+    protected void doDatasource() throws MalformedURLException, JSONException, IOException, SAXException, OXException {
         // Action attach in a regular PUT may contain a datasource field
         // Note that POST must always contain a file upload field and may never contain a datasource field. Maybe, anyway. Whatever.
 
@@ -414,9 +395,8 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setId(data.intValue());
         clean.add(attachment);
 
-        res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, clean.get(0).getId());
-
-        assertFalse(res.hasError()); // Good enough
+        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, clean.get(0).getId());
+        assertFalse(atm.getLastResponse().hasError()); // Good enough
     }
 
     public void upload() throws Exception {

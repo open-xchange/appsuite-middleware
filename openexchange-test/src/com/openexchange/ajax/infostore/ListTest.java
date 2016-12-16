@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.test.TestInit;
 
@@ -111,13 +112,10 @@ public class ListTest extends InfostoreAJAXTest {
     }
 
     // Find a non-existing ID
-    public String getFantasyID() throws JSONException, IOException, SAXException {
+    public String getFantasyID() throws JSONException, IOException, OXException {
         String id = "20000";
-        Response res = this.get(getWebConversation(), getHostName(), sessionId, id);
-        while (!(res.getErrorMessage().contains("IFO-0300") || res.getErrorMessage().contains("IFO-0438"))) {
-            id += 10000;
-            res = this.get(getWebConversation(), getHostName(), sessionId, id);
-        }
+        com.openexchange.file.storage.File file = itm.getAction(id);
+        assertTrue(itm.getLastResponse().hasError());
         return id;
     }
 

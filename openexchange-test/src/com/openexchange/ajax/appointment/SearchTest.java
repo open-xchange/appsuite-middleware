@@ -57,8 +57,6 @@ import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Appointment;
 
@@ -76,41 +74,34 @@ public class SearchTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-
-        final Appointment[] appointmentArray = searchAppointment(getWebConversation(), "testSimpleSearch" + date, appointmentFolderId, new Date(), new Date(), APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        
+        final Appointment[] appointmentArray = catm.searchAppointment("testSimpleSearch" + date, appointmentFolderId, new Date(), new Date(), APPOINTMENT_FIELDS);
         assertTrue("appointment array size is 0", appointmentArray.length > 0);
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     // Node 2652    @Test
     @Test
     public void testLastModifiedUTC() throws Exception {
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED_UTC };
 
         final Appointment appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
         appointmentObj.setStartDate(new Date());
         appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60 * 60 * 1000));
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-        try {
-            final SearchRequest searchRequest = new SearchRequest("testShowLastModifiedUTC", appointmentFolderId, cols, true);
-            final SearchResponse response = Executor.execute(client, searchRequest);
-            final JSONArray arr = (JSONArray) response.getResponse().getData();
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        final SearchRequest searchRequest = new SearchRequest("testShowLastModifiedUTC", appointmentFolderId, cols, true);
+        final SearchResponse response = Executor.execute(getClient(), searchRequest);
+        final JSONArray arr = (JSONArray) response.getResponse().getData();
 
-            assertNotNull(arr);
-            final int size = arr.length();
-            assertTrue(size > 0);
+        assertNotNull(arr);
+        final int size = arr.length();
+        assertTrue(size > 0);
 
-            for (int i = 0; i < size; i++) {
-                final JSONArray objectData = arr.optJSONArray(i);
-                assertNotNull(objectData);
-                assertNotNull(objectData.opt(2));
-            }
-        } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
+        for (int i = 0; i < size; i++) {
+            final JSONArray objectData = arr.optJSONArray(i);
+            assertNotNull(objectData);
+            assertNotNull(objectData.opt(2));
         }
     }
 }

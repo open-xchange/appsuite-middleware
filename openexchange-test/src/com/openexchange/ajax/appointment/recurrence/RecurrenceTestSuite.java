@@ -55,7 +55,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     DailyRecurrenceTest.class,
-    WeeklyRecurrenceTest.class,
     ConfirmationsSeriesTest.class,
 
     Bug9497Test.class,

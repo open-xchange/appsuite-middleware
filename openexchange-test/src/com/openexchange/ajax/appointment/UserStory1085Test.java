@@ -151,8 +151,8 @@ public class UserStory1085Test extends AppointmentTest {
 
     @Test
     public void testUserStory1085() throws Exception {
-        final Appointment[] appointmentsB = getFreeBusy(getWebConversation(), userIdB, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
-        final Appointment[] appointmentsC = getFreeBusy(getWebConversation(), userIdC, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
+        final Appointment[] appointmentsB = catm.freeBusy(userIdB, Participant.USER, start, end);
+        final Appointment[] appointmentsC = catm.freeBusy(userIdC, Participant.USER, start, end);
 
         boolean foundShare = false;
         boolean foundPrivate = false;

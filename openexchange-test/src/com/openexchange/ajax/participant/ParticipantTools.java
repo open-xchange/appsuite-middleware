@@ -57,14 +57,10 @@ import java.util.List;
 import java.util.Random;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.meterware.httpunit.WebConversation;
-import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -77,23 +73,11 @@ import com.openexchange.groupware.search.ContactSearchObject;
  */
 public final class ParticipantTools {
 
-    private static final int[] COLUMNS = new int[] { Contact.INTERNAL_USERID };
-
     /**
      * Prevent instantiation
      */
     private ParticipantTools() {
         super();
-    }
-
-    public static List<Participant> getParticipants(final WebConversation conversation, final String hostName, final String sessionId) throws Exception {
-        final Contact[] userContacts = ContactTest.searchContact(conversation, "*", FolderObject.SYSTEM_LDAP_FOLDER_ID, COLUMNS, AbstractAJAXTest.PROTOCOL + hostName, sessionId);
-        final List<Participant> participants = new ArrayList<Participant>();
-        for (final Contact userContact : userContacts) {
-            final UserParticipant user = new UserParticipant(userContact.getInternalUserId());
-            participants.add(user);
-        }
-        return participants;
     }
 
     public static List<Participant> getParticipants(final AJAXClient client) throws OXException, IOException, SAXException, JSONException {
@@ -117,8 +101,8 @@ public final class ParticipantTools {
         return participants;
     }
 
-    public static List<Participant> getParticipants(final WebConversation conversation, final String hostName, final String sessionId, final int count, final boolean noCreator, final int creatorId) throws Exception {
-        List<Participant> participants = getParticipants(conversation, hostName, sessionId);
+    public static List<Participant> getParticipants(AJAXClient client, final int count, final boolean noCreator, final int creatorId) throws Exception {
+        List<Participant> participants = getParticipants(client);
         if (noCreator) {
             removeParticipant(participants, creatorId);
         }

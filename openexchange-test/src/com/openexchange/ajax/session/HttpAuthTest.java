@@ -59,7 +59,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
@@ -95,18 +94,17 @@ public class HttpAuthTest extends AbstractAJAXSession {
     @Test
     public void testRedirect() throws Throwable {
         final AJAXSession session = new AJAXSession();
-        final AJAXClient myClient = new AJAXClient(session, false);
         try {
             session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
             // Create session.
-            HttpAuthResponse response = myClient.execute(new HttpAuthRequest(testUser.getLogin(), testUser.getPassword()));
+            HttpAuthResponse response = getClient().execute(new HttpAuthRequest(testUser.getLogin(), testUser.getPassword()));
             String location = response.getLocation();
             assertNotNull("Location is missing in response.", location);
             int sessionStart = location.indexOf("session=");
             String sessionId = location.substring(sessionStart + 8, location.indexOf('&', sessionStart + 8));
             session.setId(sessionId);
         } finally {
-            myClient.logout();
+            getClient().logout();
         }
     }
 }

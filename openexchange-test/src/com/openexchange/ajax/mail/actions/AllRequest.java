@@ -55,6 +55,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.framework.AbstractAllRequest;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 
 /**
@@ -65,7 +66,11 @@ import com.openexchange.mail.json.actions.AbstractMailAction;
  */
 public class AllRequest extends AbstractAllRequest<AllResponse> {
 
+    private String categoryId;
+
     private boolean threadSort;
+
+    private List<com.openexchange.ajax.framework.AJAXRequest.Parameter> additionalParams;
 
     /**
      * Default constructor.
@@ -88,6 +93,11 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
      */
     public AllRequest(final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
+    }
+
+    public AllRequest(final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError, List<Parameter> additionalParams) {
+        super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
+        this.additionalParams = additionalParams;
     }
 
     public AllRequest(final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError, String categoryId) {
@@ -118,6 +128,12 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         if (validateLimit()) {
             params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
             params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
+        }
+        if (!Strings.isEmpty(categoryId)) {
+            params.add(new Parameter("categoryid", categoryId));
+        }
+        for (Parameter additional : additionalParams) {
+            params.add(additional);
         }
         return params.toArray(new Parameter[params.size()]);
     }

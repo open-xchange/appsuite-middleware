@@ -70,6 +70,8 @@ import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.FreeBusyRequest;
+import com.openexchange.ajax.appointment.action.FreeBusyResponse;
 import com.openexchange.ajax.appointment.action.GetChangeExceptionsRequest;
 import com.openexchange.ajax.appointment.action.GetChangeExceptionsResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -80,6 +82,8 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.NewAppointmentSearchRequest;
 import com.openexchange.ajax.appointment.action.NewAppointmentSearchResponse;
+import com.openexchange.ajax.appointment.action.SearchRequest;
+import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
@@ -88,6 +92,7 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -343,6 +348,18 @@ public class CalendarTestManager implements TestManager {
 
     public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
         UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster);
+        AppointmentUpdatesResponse resp = execute(req);
+        extractInfo(resp);
+        try {
+            return resp.getAppointments(timezone);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, boolean showPrivates, Ignore ignore) {
+        UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster, showPrivates, ignore);
         AppointmentUpdatesResponse resp = execute(req);
         extractInfo(resp);
         try {
@@ -679,4 +696,18 @@ public class CalendarTestManager implements TestManager {
         }
     }
 
+    public Appointment[] searchAppointment(String pattern, int folderId, Date start, Date end, int[] cols) throws OXException, IOException, JSONException {
+        SearchRequest searchRequest = new SearchRequest(pattern, folderId, start, end, cols, -1, null, false, failOnError);
+        SearchResponse response = client.execute(searchRequest);
+        final JSONArray arr = (JSONArray) response.getResponse().getData();
+        return CTMUtils.jsonArray2AppointmentArray(arr, cols, client.getValues().getTimeZone());
+    }
+
+    public Appointment[] freeBusy(int userId, int type, Date start, Date end) throws Exception {
+        FreeBusyRequest freeBusyRequest = new FreeBusyRequest(userId, type, start, end);
+        FreeBusyResponse response = client.execute(freeBusyRequest);
+
+        final JSONArray arr = (JSONArray) response.getResponse().getData();
+        return CTMUtils.jsonArray2AppointmentArray(arr, client.getValues().getTimeZone());
+    }
 }

@@ -47,64 +47,31 @@
  *
  */
 
-package com.openexchange.test.osgi;
+package com.openexchange.ajax.mail;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Test;
-import com.openexchange.ajax.LoginTest;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * {@link BundleTestAuthentication} - Test absence of authentication bundle
+ * {@link FooInputStream}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public final class BundleTestAuthentication extends AbstractBundleTest {
+public class FooInputStream extends InputStream {
 
-    private static final String BUNDLE_ID = "com.openexchange.authentication.database";
+    private final long size;
 
-    /**
-     * Initializes a new {@link BundleTestAuthentication}
-     */
-    public BundleTestAuthentication(final String name) {
+    private long read = 0L;
+
+    public FooInputStream(long size) {
         super();
-    }
-
-    @Test
-    public void testAuthenticationAbsence() {
-        try {
-            final LoginTest loginTest = new LoginTest();
-            final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(), loginTest.getPassword());
-
-            /*
-             * Check for error
-             */
-            assertTrue("No error contained in returned JSON object", jsonObject.has("error") && !jsonObject.isNull("error"));
-
-            /*
-             * Check for code "SRV-0001": Missing service
-             */
-            assertTrue("Missing error code", jsonObject.has("code") && !jsonObject.isNull("code"));
-            assertTrue("Unexpected error code: " + jsonObject.getString("code"), "SRV-0001".equals(jsonObject.get("code")));
-
-            /*
-             * Check for proper error parameters
-             */
-            assertTrue("Missing error parameters", jsonObject.has("error_params") && !jsonObject.isNull("error_params"));
-            final JSONArray jArray = jsonObject.getJSONArray("error_params");
-            assertTrue("Unexpected error parameters: " + jArray, jArray.length() == 1 && "com.openexchange.authentication.AuthenticationService".equals(jArray.getString(0)));
-
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+        this.size = size;
     }
 
     @Override
-    protected String getBundleName() {
-        return BUNDLE_ID;
+    public int read() throws IOException {
+        return read++ < size ? 'a' : -1;
     }
 
 }

@@ -134,6 +134,7 @@ public abstract class AbstractUpdatesRequest<T extends AbstractColumnsResponse> 
 
     public enum Ignore {
         DELETED("deleted"),
+        CHANGED("changed"),
         NONE("none");
 
         private final String value;

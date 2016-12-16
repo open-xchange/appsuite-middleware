@@ -7,10 +7,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import org.junit.Before;
 import org.junit.Test;
-import com.meterware.httpunit.WebConversation;
-import com.openexchange.webdav.xml.GroupUserTest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
-public class RegisterTest {
+public class RegisterTest extends AbstractAJAXSession {
 
     public static final int MAGIC = 1337;
 
@@ -35,14 +34,13 @@ public class RegisterTest {
     protected static final String localAddress = "localhost";
 
     protected static final int localPort = 33890;
-    
+
     @Before
     public void setUp() throws Exception {
-        final WebConversation webConversation = new WebConversation();
-
+        super.setUp();
         this.datagramSocket = new DatagramSocket(localPort, InetAddress.getByName(localAddress));
-        this.userId = GroupUserTest.getUserId(webConversation, "localhost", "offspring", "netline", "defaultcontext");;
-        this.contextId = GroupUserTest.getContextId(webConversation, "localhost", "offspring", "netline", "defaultcontext");;
+        this.userId = this.getClient().getValues().getUserId();
+        this.contextId = this.getClient().getValues().getContextId();
     }
 
     @Test

@@ -95,10 +95,6 @@ public class DuplicateAuthIdTest {
         session1.setId(response.getSessionId());
 
         client2 = new AJAXClient(testUser2);
-
-        session2 = new AJAXSession();
-        session2.getConversation().putCookie("JSESSIONID", session1.getConversation().getCookieValue("JSESSIONID"));
-        client2 = new AJAXClient(session2, false); // explicit logout in test method
     }
 
     @After

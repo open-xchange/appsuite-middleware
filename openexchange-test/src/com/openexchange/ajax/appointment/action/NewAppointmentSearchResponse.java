@@ -51,10 +51,10 @@ package com.openexchange.ajax.appointment.action;
 
 import java.util.TimeZone;
 import org.json.JSONArray;
-import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CTMUtils;
 
 /**
  *
@@ -79,6 +79,6 @@ public class NewAppointmentSearchResponse extends AbstractAJAXResponse {
 
     public Appointment[] getAppointments() throws Exception {
         final JSONArray jsonArray = (JSONArray) getResponse().getData();
-        return AppointmentTest.jsonArray2AppointmentArray(jsonArray, columns, timeZone);
+        return CTMUtils.jsonArray2AppointmentArray(jsonArray, columns, timeZone);
     }
 }

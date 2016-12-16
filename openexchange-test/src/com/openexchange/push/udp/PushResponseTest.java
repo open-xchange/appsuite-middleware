@@ -8,17 +8,10 @@ import java.net.InetAddress;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
-import com.meterware.httpunit.WebConversation;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.webdav.xml.AppointmentTest;
-import com.openexchange.webdav.xml.FolderTest;
-import com.openexchange.webdav.xml.GroupUserTest;
 
-public class PushResponseTest {
-
-    private static String host = "localhost";
-
-    private static int port = 44335;
+public class PushResponseTest extends AbstractAJAXSession {
 
     private DatagramSocket datagramSocket = null;
 
@@ -32,24 +25,19 @@ public class PushResponseTest {
 
     @Before
     public void setUp() throws Exception {
-        final WebConversation webConversation = new WebConversation();
-        final int contextId = GroupUserTest.getContextId(webConversation, "localhost", "offspring", "netline", "defaultcontext");
-
-        final int appointmentFolderId = FolderTest.getAppointmentDefaultFolder(webConversation, "localhost", "offspring", "netline", "defaultcontext").getObjectID();
-
+        super.setUp();
         this.datagramSocket = new DatagramSocket(localPort, InetAddress.getByName(localAddress));
+        this.folderId = this.getClient().getValues().getPrivateAppointmentFolder();
+        this.contextId = this.getClient().getValues().getUserId();
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("pushTestSuite");
         appointmentObj.setStartDate(new Date());
         appointmentObj.setEndDate(new Date());
-        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setParentFolderID(this.folderId);
         appointmentObj.setShownAs(Appointment.ABSENT);
 
-        AppointmentTest.insertAppointment(webConversation, appointmentObj, "localhost", "offspring", "netline", "defaultcontext");
-
-        this.folderId = appointmentFolderId;
-        this.contextId = contextId;
+        catm.insert(appointmentObj);
     }
 
     @Test

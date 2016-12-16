@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.Create;
@@ -24,8 +23,6 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.AbstractMailTest;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -109,7 +106,7 @@ public class MailTest extends AbstractMailTest {
 
     private void checkContacts(final int folderId) throws Exception {
         final int[] cols = new int[] { Contact.OBJECT_ID, Contact.EMAIL1 };
-        final Contact[] contacts = ContactTest.listContact(getClient().getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), getClient().getSession().getId());
+        final Contact[] contacts = cotm.searchAction("*", folderId);
         assertEquals("Number of collected Contacts not correct.", 1, contacts.length);
         assertEquals("Email does not match.", getSendAddress(), contacts[0].getEmail1());
     }

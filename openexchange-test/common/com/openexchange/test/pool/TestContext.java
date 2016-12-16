@@ -50,11 +50,13 @@
 package com.openexchange.test.pool;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.ConcurrentHashSet;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link TestContext}
@@ -73,7 +75,7 @@ public class TestContext implements Serializable {
 
     private final String name;
 
-    private final int id;
+    private final Integer id;
 
     private String acquiredBy;
 
@@ -83,7 +85,9 @@ public class TestContext implements Serializable {
 
     private volatile ConcurrentHashSet<String> acquiredGroupParticipants = new ConcurrentHashSet<String>(); //required for reset
 
-    private volatile BlockingQueue<String> groupParticipants = new LinkedBlockingQueue<>();
+    private volatile List<String> groupParticipants = new ArrayList<String>();
+    private volatile List<String> userParticipants = new ArrayList<String>();
+    private volatile List<String> resourceParticipants = new ArrayList<String>();
 
     // the admin is not handled to be acquired only by one party
     private AtomicReference<TestUser> contextAdmin = new AtomicReference<>();
@@ -99,30 +103,6 @@ public class TestContext implements Serializable {
 
     public TestUser getAdmin() {
         return contextAdmin.get();
-    }
-
-    public void addGroupParticipant(String groupParticipant) {
-        groupParticipants.add(groupParticipant);
-    }
-
-    public String acquireGroupParticipant() {
-        try {
-            String participant = groupParticipants.poll(10L, TimeUnit.SECONDS);
-            acquiredGroupParticipants.add(participant);
-            return participant;
-        } catch (InterruptedException e) {
-            LOG.error("", e);
-        }
-        return null;
-    }
-
-    public void backGroupParticipant(String groupParticipant) {
-        try {
-            groupParticipants.remove(groupParticipant);
-            groupParticipants.put(groupParticipant);
-        } catch (InterruptedException e) {
-            LOG.error("", e);
-        }
     }
 
     public void addUser(TestUser user) {
@@ -154,7 +134,7 @@ public class TestContext implements Serializable {
      */
     protected void reset() {
         setAcquiredBy(null);
-        
+
         if (!acquiredUsers.isEmpty()) {
             users.addAll(acquiredUsers);
             acquiredUsers.clear();
@@ -180,4 +160,75 @@ public class TestContext implements Serializable {
     public void setAcquiredBy(String acquiredBy) {
         this.acquiredBy = acquiredBy;
     }
+
+    public List<String> getUserParticipants() {
+        return userParticipants;
+    }
+
+    public void addUserParticipants(String... userParticipants) {
+        this.userParticipants.addAll(Arrays.asList(userParticipants));
+    }
+
+    public List<String> getResourceParticipants() {
+        return resourceParticipants;
+    }
+
+    public void addResourceParticipants(String... resourceParticipants) {
+        this.resourceParticipants.addAll(Arrays.asList(resourceParticipants));
+    }
+
+    public void addGroupParticipant(String... groupParticipants) {
+        this.groupParticipants.addAll(Arrays.asList(groupParticipants));
+    }
+
+    public List<String> getGroupParticipants() {
+        return this.groupParticipants;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((acquiredBy == null) ? 0 : acquiredBy.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TestContext other = (TestContext) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equalsIgnoreCase(other.name)) {
+            return false;
+        }
+        if (acquiredBy == null) {
+            if (other.acquiredBy != null) {
+                return false;
+            }
+        } else if (!acquiredBy.equals(other.acquiredBy)) {
+            return false;
+        }
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        return true;
+    }
+
 }

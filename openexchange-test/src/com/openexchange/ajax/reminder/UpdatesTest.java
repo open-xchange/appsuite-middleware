@@ -56,29 +56,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
-import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 public class UpdatesTest extends ReminderTest {
 
-    public UpdatesTest() {
-        super();
-    }
-
     @Test
     public void testRange() throws Exception {
-        final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
-        final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
+        final int userId = getClient().getValues().getUserId();
+        final TimeZone timeZone = getClient().getValues().getTimeZone();
 
         Calendar c = TimeTools.createCalendar(timeZone);
         c.add(Calendar.HOUR_OF_DAY, 2);
@@ -86,8 +76,7 @@ public class UpdatesTest extends ReminderTest {
         final long startTime = c.getTimeInMillis();
         final long endTime = startTime + 3600000;
 
-        final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-        final int folderId = folderObj.getObjectID();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testRange");
@@ -98,7 +87,7 @@ public class UpdatesTest extends ReminderTest {
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int targetId = catm.insert(appointmentObj).getObjectID();
         final ReminderObject[] reminderObj = listUpdates(getWebConversation(), new Date(System.currentTimeMillis() - 5000), getHostName(), getSessionId(), timeZone);
 
         int pos = -1;
@@ -119,8 +108,7 @@ public class UpdatesTest extends ReminderTest {
         final long expectedAlarm = startTime - (45 * 60 * 1000);
         assertEquals("alarm is not equals", new Date(expectedAlarm), reminderObj[pos].getDate());
 
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
-        final GetResponse aGetR = client.execute(new GetRequest(folderId, targetId));
-        client.execute(new DeleteRequest(targetId, folderId, aGetR.getTimestamp()));
+        final GetResponse aGetR = getClient().execute(new GetRequest(folderId, targetId));
+        getClient().execute(new DeleteRequest(targetId, folderId, aGetR.getTimestamp()));
     }
 }

@@ -5,20 +5,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;
 
@@ -36,21 +33,20 @@ public class UpdateTest extends InfostoreAJAXTest {
 
     @Test
     public void testBasic() throws Exception {
-        Response res = this.update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("title", "test knowledge updated", "color_label", "1"));
-        assertNoError(res);
-        assertNotNull(res.getTimestamp());
+        final String id = clean.get(0);
+        com.openexchange.file.storage.File file = itm.getAction(id);
+        file.setTitle("test knowledge updated");
+        file.setColorLabel(1);
+        UpdateInfostoreResponse result = update(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE, com.openexchange.file.storage.File.Field.COLOR_LABEL }, Long.MAX_VALUE);
+        assertFalse(result.hasError());
+        assertNotNull(itm.getLastResponse().getTimestamp());
 
-        res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
+        com.openexchange.file.storage.File object = itm.getAction(clean.get(0));
 
-        final JSONObject object = (JSONObject) res.getData();
-
-        assertEquals("test knowledge updated", object.getString("title"));
-        assertEquals("test knowledge description", object.getString("description"));
-        assertEquals(1, object.getInt("color_label"));
-
-        assertEquals(0, object.getInt("version"));
-        assertNotNull(res.getTimestamp());
+        assertEquals("test knowledge updated", object.getTitle());
+        assertEquals("test knowledge description", object.getDescription());
+        assertEquals(1, object.getColorLabel());
+        assertEquals(0, object.getVersion());
 
     }
 
@@ -65,23 +61,23 @@ public class UpdateTest extends InfostoreAJAXTest {
     }
 
     private void descriptionRoundtrip(final String desc) throws Exception {
-        Response res = this.update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("description", desc));
-        assertNoError(res);
-        res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
+        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
+        file.setDescription(desc);
+        UpdateInfostoreResponse result = update(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.DESCRIPTION }, Long.MAX_VALUE);
+        assertFalse(result.hasError());
+        assertNotNull(itm.getLastResponse().getTimestamp());
 
-        res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
-        final JSONObject object = (JSONObject) res.getData();
-        assertEquals(desc, object.getString("description"));
+        com.openexchange.file.storage.File obj = itm.getAction(clean.get(0));
+        assertEquals(desc, obj.getDescription());
     }
 
     @Test
     public void testConflict() throws Exception {
-        final Response res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        final Response res2 = this.update(getWebConversation(), getHostName(), sessionId, clean.get(0), res.getTimestamp().getTime() - 2000, m("title", "test knowledge updated"));
-        assertNotNull(res2.getErrorMessage());
-        assertFalse("".equals(res2.getErrorMessage()));
+        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
+        file.setTitle("test knowledge updated");
+        UpdateInfostoreResponse result = update(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, file.getLastModified().getTime() - 2000);
+        assertTrue(result.hasConflicts());
+        assertTrue(result.hasError());
 
     }
 
@@ -94,13 +90,11 @@ public class UpdateTest extends InfostoreAJAXTest {
         Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");
         assertNoError(res);
 
-        res = get(getWebConversation(), getHostName(), sessionId, id);
-        final JSONObject obj = (JSONObject) res.getData();
+        com.openexchange.file.storage.File obj = itm.getAction(id);
 
-        assertEquals(1, obj.getInt("version"));
-
-        assertEquals("text/plain", obj.getString("file_mimetype"));
-        assertEquals(upload.getName(), obj.getString("filename"));
+        assertEquals(1, obj.getVersion());
+        assertEquals("text/plain", obj.getFileMIMEType());
+        assertEquals(upload.getName(), obj.getFileName());
 
         InputStream is = null;
         InputStream is2 = null;
@@ -119,7 +113,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     }
 
     @Test
-    public void testUploadEmptyFile() throws IOException, JSONException, SAXException {
+    public void testUploadEmptyFile() throws IOException, JSONException, SAXException, OXException {
         final File emptyFile = File.createTempFile("infostore-new-test", ".txt");
 
         final String id = clean.get(0);
@@ -127,14 +121,10 @@ public class UpdateTest extends InfostoreAJAXTest {
         Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), emptyFile, "text/plain");
         assertNoError(res);
 
-        res = get(getWebConversation(), getHostName(), sessionId, id);
-        final JSONObject obj = (JSONObject) res.getData();
-
-        assertEquals(1, obj.getInt("version"));
-
-        assertEquals("text/plain", obj.getString("file_mimetype"));
-        assertEquals(1, obj.getInt("version"));
-        assertEquals(emptyFile.getName(), obj.getString("filename"));
+        com.openexchange.file.storage.File obj = itm.getAction(id);
+        assertEquals(1, obj.getVersion());
+        assertEquals("text/plain", obj.getFileMIMEType());
+        assertEquals(emptyFile.getName(), obj.getFileMD5Sum());
         assertTrue(emptyFile.delete());
     }
 
@@ -148,16 +138,13 @@ public class UpdateTest extends InfostoreAJAXTest {
         Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");
         assertNoError(res);
 
-        final String id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title", "otherFile", "description", "other_desc", "folder_id", ((Integer) folderId).toString()));
-
+        final String id2 = createFileOnServer(folderId, "otherFile", "text/javascript").getId();
         clean.add(id2);
 
         res = update(getWebConversation(), getHostName(), sessionId, id2, Long.MAX_VALUE, m(), upload, "text/plain");
 
-        res = get(getWebConversation(), getHostName(), sessionId, id2);
-
-        JSONObject obj = (JSONObject) res.getData();
-        assertFalse(upload.getName().equals(obj.get("filename")));
+        com.openexchange.file.storage.File obj = itm.getAction(clean.get(0));
+        assertFalse(upload.getName().equals(obj.getFileName()));
     }
 
     //Bug 4120
@@ -173,93 +160,72 @@ public class UpdateTest extends InfostoreAJAXTest {
         res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");
         assertNoError(res);
 
-        final String id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title", "otherFile", "description", "other_desc", "filename", "theFile.txt", "folder_id", ((Integer) folderId).toString()), upload, "text/plain");
+        com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
+        data.setFileMIMEType("text/plain");
+        data.setDescription("other_desc");
+        data.setFileName("theFile.txt");
+        itm.newAction(data, upload);
 
-        clean.add(id2);
+        clean.add(data.getId());
 
-        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m("title", "otherTitle", "version", "1"));
-        assertFalse(res.hasError());
+        com.openexchange.file.storage.File file = itm.getAction(id);
+        file.setTitle("otherTitle");
+        file.setVersion("1");
+        UpdateInfostoreResponse result = update(file, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.VERSION, com.openexchange.file.storage.File.Field.TITLE}, Long.MAX_VALUE);
+        assertFalse(result.hasConflicts());
 
-        res = get(getWebConversation(), getHostName(), sessionId, id);
+        com.openexchange.file.storage.File reloaded = itm.getAction(id);
 
-        JSONObject infoitem = (JSONObject) res.getData();
-        assertEquals("theFile (1).txt", infoitem.get("filename"));
+        assertEquals("theFile (1).txt", reloaded.getFileName());
     }
 
-    public void notestLargeFileUpload() throws Exception {
-        final File largeFile = File.createTempFile("test", "bin");
-        largeFile.deleteOnExit();
-
-        BufferedOutputStream out = null;
-        try {
-            out = new BufferedOutputStream(new FileOutputStream(largeFile), 1000000);
-            for (int i = 0; i < SIZE; i++) {
-                out.write(megabyte);
-                out.flush();
-            }
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
-
-        try {
-            final String id = createNew(getWebConversation(), getHostName(), sessionId, m("folder_id", ((Integer) folderId).toString(), "title", "test large upload", "description", "test large upload description"), largeFile, "text/plain");
-            clean.add(id);
-            fail("Uploaded Large File and got no error");
-        } catch (final Exception x) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
-    public void testSwitchVersion() throws Exception {
-        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-
-        final String id = clean.get(0);
-
-        Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain"); // V1
-        assertNoError(res);
-
-        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");// V2
-        assertNoError(res);
-
-        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");// V3
-        assertNoError(res);
-
-        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m("version", "2"));
-        assertNoError(res);
-
-        res = get(getWebConversation(), getHostName(), sessionId, id);
-        final JSONObject obj = (JSONObject) res.getData();
-        assertEquals("Version does not match.", "2", obj.get("version"));
-
-        res = versions(getWebConversation(), getHostName(), sessionId, id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION });
-        assertNoError(res);
-
-        VersionsTest.assureVersions(new Integer[] { 1, 2, 3 }, res, 2);
-    }
+    // FIXME MS re-add
+    //    @Test
+    //    public void testSwitchVersion() throws Exception {
+    //        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+    //
+    //        final String id = clean.get(0);
+    //
+    //        Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain"); // V1
+    //        assertNoError(res);
+    //
+    //        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");// V2
+    //        assertNoError(res);
+    //
+    //        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");// V3
+    //        assertNoError(res);
+    //
+    //        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m("version", "2"));
+    //        assertNoError(res);
+    //
+    //        com.openexchange.file.storage.File obj = itm.getAction(id);
+    //        assertEquals("Version does not match.", "2", obj.getVersion());
+    //
+    //        res = versions(getWebConversation(), getHostName(), sessionId, id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION });
+    //        assertNoError(res);
+    //
+    //        VersionsTest.assureVersions(new Integer[] { 1, 2, 3 }, res, 2);
+    //    }
 
     @Test
     public void testUpdateCurrentVersionByDefault() throws Exception {
-        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-
         final String id = clean.get(0);
 
-        Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain"); // V1
-        assertNoError(res);
+        com.openexchange.file.storage.File file = itm.getAction(id);
+        UpdateInfostoreResponse result = update(file, new com.openexchange.file.storage.File.Field[] {}, Long.MAX_VALUE);
+        assertFalse(result.hasConflicts());
+        assertFalse(result.hasError());
 
-        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");// V2
-        assertNoError(res);
+        result = update(file, new com.openexchange.file.storage.File.Field[] {}, Long.MAX_VALUE);
+        assertFalse(result.hasConflicts());
+        assertFalse(result.hasError());
 
-        res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m("description", "New Description"));
-        assertNoError(res);
+        file.setDescription("New Description");
+        result = update(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.DESCRIPTION }, Long.MAX_VALUE);
 
-        res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNoError(res);
+        com.openexchange.file.storage.File obj = itm.getAction(id);
 
-        final JSONObject document = (JSONObject) res.getData();
-        assertEquals("New Description", document.get("description"));
+        assertEquals("New Description", obj.getDescription());
     }
 
     // Bug 3928
@@ -272,17 +238,13 @@ public class UpdateTest extends InfostoreAJAXTest {
         Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m("version_comment", "Version Comment"), upload, "text/plain"); // V1
         assertNoError(res);
 
-        res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNoError(res);
-
-        final JSONObject document = (JSONObject) res.getData();
-        assertEquals("Version Comment", document.get("version_comment"));
+        com.openexchange.file.storage.File obj = itm.getAction(id);
+        assertEquals("Version Comment", obj.getVersionComment());
     }
 
     //Bug 4269
     @Test
     public void testVirtualFolder() throws Exception {
-
         for (int folderId : virtualFolders) {
             virtualFolderTest(folderId);
         }
@@ -290,9 +252,11 @@ public class UpdateTest extends InfostoreAJAXTest {
 
     // Bug 4269
     public void virtualFolderTest(int folderId) throws Exception {
-        final Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("folder_id", "" + folderId));
-        assertTrue(res.hasError());
-        assertTrue(res.getErrorMessage(), res.getErrorMessage().contains("IFO-1700"));
+        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
+        file.setFolderId(String.valueOf(folderId));
+        UpdateInfostoreResponse result = update(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.FOLDER_ID }, Long.MAX_VALUE);
+        assertTrue(result.hasError());
+        assertTrue(result.getErrorMessage(), result.getErrorMessage().contains("IFO-1700"));
     }
 
 }

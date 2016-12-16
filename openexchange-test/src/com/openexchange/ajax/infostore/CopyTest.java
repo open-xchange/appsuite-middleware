@@ -50,7 +50,6 @@
 package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.File;
@@ -58,13 +57,11 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.realtime.json.fields.ResourceIDField;
 import com.openexchange.test.OXTestToolkit;
@@ -83,48 +80,40 @@ public class CopyTest extends InfostoreAJAXTest {
         final String id = copy(getWebConversation(), getHostName(), sessionId, clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m());
         clean.add(id);
 
-        Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
+        com.openexchange.file.storage.File orig = itm.getAction(clean.get(0));
+        com.openexchange.file.storage.File copy = itm.getAction(id);
 
-        final JSONObject orig = (JSONObject) res.getData();
-
-        res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNoError(res);
-
-        final JSONObject copy = (JSONObject) res.getData();
-
-        assertEquals(orig.length(), copy.length());
-
-        for (final Iterator keys = orig.keys(); keys.hasNext();) {
-            final String key = keys.next().toString();
+        assertEquals(orig.getFileName(), copy.getFileName());
+        Map<String, Object> meta = orig.getMeta();
+        for (Map.Entry<String, Object> entry : meta.entrySet()) {
+            String key = entry.getKey();
             if (!skipKeys.contains(key)) {
-                assertEquals(key + " seems to have a wrong value", orig.get(key).toString(), copy.get(key).toString());
+                assertEquals(key + " seems to have a wrong value", orig.getMeta().get(key).toString(), copy.getMeta().get(key).toString());
             }
         }
-
-        assertNotNull(res.getTimestamp());
     }
 
     @Test
     public void testCopyFile() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final String id = createNew(getWebConversation(), getHostName(), sessionId, m("folder_id", ((Integer) folderId).toString(), "title", "test upload", "description", "test upload description"), upload, "text/plain");
+
+        com.openexchange.file.storage.File data = createFile(folderId, "test upload");
+        data.setFileMIMEType("text/plain");
+        itm.newAction(data, upload);
+
+        String id = data.getId();
         clean.add(id);
         //FIXME Bug 4120
         final String copyId = copy(getWebConversation(), getHostName(), sessionId, id, String.valueOf(folderId), Long.MAX_VALUE, m("filename", "other.properties"));
         clean.add(copyId);
 
-        Response res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNoError(res);
-        final JSONObject orig = (JSONObject) res.getData();
+        com.openexchange.file.storage.File file = itm.getAction(id);
 
-        res = get(getWebConversation(), getHostName(), sessionId, copyId);
-        assertNoError(res);
-        final JSONObject copy = (JSONObject) res.getData();
+        com.openexchange.file.storage.File copy = itm.getAction(copyId);
 
-        assertEquals("other.properties", copy.get("filename"));
-        assertEquals(orig.get("file_size"), copy.get("file_size"));
-        assertEquals(orig.get("file_mimetype"), copy.get("file_mimetype"));
+        assertEquals("other.properties", copy.getFileName());
+        assertEquals(data.getFileSize(), copy.getFileSize());
+        assertEquals(data.getFileMIMEType(), copy.getFileMIMEType());
 
         InputStream is = null;
         InputStream is2 = null;
@@ -148,24 +137,16 @@ public class CopyTest extends InfostoreAJAXTest {
         final String id = copy(getWebConversation(), getHostName(), sessionId, clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m("title", "copy"));
         clean.add(id);
 
-        Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
+        com.openexchange.file.storage.File orig = itm.getAction(clean.get(0));
+        com.openexchange.file.storage.File copy = itm.getAction(id);
 
-        final JSONObject orig = (JSONObject) res.getData();
-
-        res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNoError(res);
-
-        final JSONObject copy = (JSONObject) res.getData();
-
-        assertEquals(orig.length(), copy.length());
-
-        for (final Iterator keys = orig.keys(); keys.hasNext();) {
-            final String key = keys.next().toString();
+        Map<String, Object> meta = orig.getMeta();
+        for (Map.Entry<String, Object> entry : meta.entrySet()) {
+            String key = entry.getKey();
             if (!skipKeys.contains(key) && !key.equals("title")) {
-                assertEquals(key + " seems to have a wrong value", orig.get(key).toString(), copy.get(key).toString());
+                assertEquals(key + " seems to have a wrong value", orig.getMeta().get(key).toString(), copy.getMeta().get(key).toString());
             } else if (key.equals("title")) {
-                assertEquals("copy", copy.get(key));
+                assertEquals("copy", copy.getMeta().get(key));
             }
         }
     }
@@ -176,13 +157,10 @@ public class CopyTest extends InfostoreAJAXTest {
         final String id = copy(getWebConversation(), getHostName(), sessionId, clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m("title", "copy"), upload, "text/plain");
         clean.add(id);
 
-        final Response res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNoError(res);
+        com.openexchange.file.storage.File copy = itm.getAction(id);
 
-        final JSONObject copy = (JSONObject) res.getData();
-
-        assertEquals(upload.getName(), copy.get("filename"));
-        assertEquals("text/plain", copy.get("file_mimetype"));
+        assertEquals(upload.getName(), copy.getFileName());
+        assertEquals("text/plain", copy.getFileMIMEType());
     }
 
     //Bug 4269

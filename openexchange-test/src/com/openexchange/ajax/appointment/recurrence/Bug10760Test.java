@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
@@ -21,10 +20,6 @@ import com.openexchange.groupware.container.Appointment;
 public class Bug10760Test extends AbstractRecurrenceTest {
 
     private int objectId;
-
-    public Bug10760Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -44,11 +39,11 @@ public class Bug10760Test extends AbstractRecurrenceTest {
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
 
         appointmentObj.setRecurrencePosition(2);
-        final int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        catm.update(appointmentFolderId, appointmentObj);
         final List<Integer> tmp = new ArrayList<Integer>();
         for (int i = 0; i < APPOINTMENT_FIELDS.length; i++) {
             tmp.add(Integer.valueOf(APPOINTMENT_FIELDS[i]));
@@ -63,24 +58,13 @@ public class Bug10760Test extends AbstractRecurrenceTest {
         for (int i = 0; i < fields.length; i++) {
             fields[i] = tmp.get(i).intValue();
         }
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, fields, new Date(), new Date(), timeZone, false, getHostName(), getSessionId());
+        
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, new Date(), new Date());
         for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == newObjectId) {
+            if (appointmentArray[a].getObjectID() == objectId) {
                 assertEquals("recurrence id is not equals expected", objectId, appointmentArray[a].getRecurrenceID());
                 assertEquals("recurrence pos is not equals expected", 2, appointmentArray[a].getRecurrencePosition());
             }
-        }
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-            }
-        } finally {
-            super.tearDown();
         }
     }
 

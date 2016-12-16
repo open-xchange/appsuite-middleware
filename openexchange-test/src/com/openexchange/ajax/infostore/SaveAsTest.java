@@ -2,20 +2,17 @@
 package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.attach.SimpleAttachmentTest;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.test.OXTestToolkit;
 
@@ -34,16 +31,14 @@ public class SaveAsTest extends InfostoreAJAXTest {
 
         clean.add(id);
 
-        final Response res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNotNull(res.getTimestamp());
-        final JSONObject obj = (JSONObject) res.getData();
+        com.openexchange.file.storage.File obj = itm.getAction(id);
 
         final File upload = attachmentTest.getTestFile();
 
-        assertEquals("My Attachment", obj.getString("title"));
-        assertEquals("An attachment cum InfoItem", obj.getString("description"));
-        assertEquals(1, obj.getInt("version"));
-        assertEquals(upload.getName(), obj.getString("filename"));
+        assertEquals("My Attachment", obj.getTitle());
+        assertEquals("An attachment cum InfoItem", obj.getDescription());
+        assertEquals(1, obj.getVersion());
+        assertEquals(upload.getName(), obj.getFileName());
 
         InputStream is = null;
         InputStream is2 = null;

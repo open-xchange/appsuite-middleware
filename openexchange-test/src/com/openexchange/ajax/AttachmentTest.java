@@ -258,13 +258,6 @@ public class AttachmentTest extends AbstractAJAXTest {
         return putT(webConv, url.toString(), data.toString());
     }
 
-    public Response get(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id) throws MalformedURLException, JSONException, IOException, SAXException {
-        final StringBuffer url = getUrl(sessionId, "get");
-        addCommon(url, folderId, attachedId, moduleId);
-        url.append("&id=" + id);
-        return gT(webConv, url.toString());
-    }
-
     public InputStream document(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id) throws IOException {
         return document(webConv, sessionId, folderId, attachedId, moduleId, id, null);
     }
