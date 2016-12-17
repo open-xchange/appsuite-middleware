@@ -507,6 +507,8 @@ final class ListLsubCollection implements Serializable {
         IMAPFolder imapFolderToUse = imapFolder;
         boolean forceNewConnection = (State.DEPRECATED_FORCE_NEW == deprecated.get());
         if (forceNewConnection && imapFolderToUse.checkOpen()) {
+            // If an IMAPFolder is open it uses its own IMAPProtocol instance
+            // A new IMAPFolder falls-back to the connection of the underlying IMAPStore, which is stateless
             imapFolderToUse = (IMAPFolder) imapFolderToUse.getStore().getFolder(imapFolderToUse.getFullName());
         }
         try {
