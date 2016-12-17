@@ -299,9 +299,10 @@ final class ListLsubCollection implements Serializable {
      * @param forceNewConnection <code>true</code> to enforce a new connection; otherwise <code>false</code>
      */
     public void clear(boolean forceNewConnection) {
-        deprecated.set(forceNewConnection ? State.DEPRECATED_FORCE_NEW : State.DEPRECATED);
-        stamp = 0;
-        LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
+        if (deprecated.compareAndSet(State.INITIALIZED, forceNewConnection ? State.DEPRECATED_FORCE_NEW : State.DEPRECATED)) {
+            stamp = 0;
+            LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
+        }
     }
 
     /**

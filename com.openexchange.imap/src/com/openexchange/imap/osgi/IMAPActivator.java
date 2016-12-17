@@ -75,6 +75,7 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
+import com.openexchange.imap.osgi.console.ClearListLsubCommandProvider;
 import com.openexchange.imap.osgi.console.ListLsubCommandProvider;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
@@ -169,6 +170,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Command provider
              */
             registerService(CommandProvider.class, new ListLsubCommandProvider());
+            registerService(CommandProvider.class, new ClearListLsubCommandProvider());
             registerService(MailAccountDeleteListener.class, listLsubInvalidator);
             /*
              * Initialize cache regions
