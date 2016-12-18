@@ -538,6 +538,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = replacePercentTags(html);
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
+            html = dropWeirdXmlNamespaceDeclarations(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
             html = dropExtraChar(html);
@@ -1753,15 +1754,40 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlContent;
     }
 
-    private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);
-    private static final Pattern PATTERN_CC2 = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_XML_NS_DECLARATION = Pattern.compile("<\\?xml:namespace[^>]*>", Pattern.CASE_INSENSITIVE);
+
+    private static String dropWeirdXmlNamespaceDeclarations(String htmlContent) {
+        // <?xml:namespace prefix = "o" ns =  "urn:schemas-microsoft-com:office:office" />
+        if (null == htmlContent) {
+            return htmlContent;
+        }
+
+        if (htmlContent.indexOf("<?xml:") < 0 && htmlContent.indexOf("<?XML:") < 0) {
+            return htmlContent;
+        }
+
+        Matcher m = PATTERN_XML_NS_DECLARATION.matcher(htmlContent);
+        if (false == m.find()) {
+            return htmlContent;
+        }
+
+        StringBuffer sb = new StringBuffer(htmlContent.length());
+        do {
+            m.appendReplacement(sb, "");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static final Pattern PATTERN_CC =  Pattern.compile("(<!(?:--)?\\[if)([^\\]>]+\\]?(?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_CC2 = Pattern.compile("(<!(?:--)?\\[if)([^\\]>]+\\]?(?:--!?)?>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
 
     private static final String CC_START_IF = "<!-- [if";
 
     private static final String CC_END_IF = " -->";
 
     private static final String CC_ENDIF = "<!-- <![endif] -->";
-    
+
     private static final String CC_UNCOMMENTED_ENDIF = "<![endif] -->";
 
     /**
@@ -1799,7 +1825,7 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             return htmlContent;
         }
-        
+
         int lastMatch = 0;
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
         do {
