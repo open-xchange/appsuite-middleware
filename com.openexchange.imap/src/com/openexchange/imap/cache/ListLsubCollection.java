@@ -981,16 +981,14 @@ final class ListLsubCollection implements Serializable {
     }
 
     private List<ListLsubEntryImpl> sortedListResponses(final Response[] r, final String command, final boolean lsub) {
-        final List<ListLsubEntryImpl> list = new ArrayList<ListLsubEntryImpl>(r.length);
-        for (int i = 0, len = r.length - 1; i < len; i++) {
-            if (!(r[i] instanceof IMAPResponse)) {
-                continue;
-            }
-            final IMAPResponse ir = (IMAPResponse) r[i];
-            if (ir.keyEquals(command)) {
-                final ListLsubEntryImpl entryImpl = parseListResponse(ir, lsub ? null : lsubMap);
-                list.add(entryImpl);
-                r[i] = null;
+        List<ListLsubEntryImpl> list = new ArrayList<ListLsubEntryImpl>(r.length);
+        for (int i = 0, len = r.length - 1; len-- > 0; i++) {
+            if (r[i] instanceof IMAPResponse) {
+                IMAPResponse ir = (IMAPResponse) r[i];
+                if (ir.keyEquals(command)) {
+                    list.add(parseListResponse(ir, lsub ? null : lsubMap));
+                    r[i] = null;
+                }
             }
         }
         Collections.sort(list);
