@@ -74,11 +74,11 @@ import com.openexchange.server.ServiceLookup;
 class CassandraServiceInitializer implements Initializer {
 
     private final ConfigurationService configurationService;
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link CassandraServiceInitializer}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public CassandraServiceInitializer(ServiceLookup services) {
@@ -89,7 +89,7 @@ class CassandraServiceInitializer implements Initializer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.datastax.driver.core.Cluster.Initializer#getClusterName()
      */
     @Override
@@ -99,7 +99,7 @@ class CassandraServiceInitializer implements Initializer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.datastax.driver.core.Cluster.Initializer#getContactPoints()
      */
     @Override
@@ -117,7 +117,7 @@ class CassandraServiceInitializer implements Initializer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.datastax.driver.core.Cluster.Initializer#getConfiguration()
      */
     @Override
@@ -155,7 +155,7 @@ class CassandraServiceInitializer implements Initializer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.datastax.driver.core.Cluster.Initializer#getInitialListeners()
      */
     @Override
