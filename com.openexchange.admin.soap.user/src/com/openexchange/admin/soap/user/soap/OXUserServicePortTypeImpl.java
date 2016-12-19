@@ -1513,7 +1513,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setDefaultSenderAddress(tmp);
         }
         
-        tmp = soapUser.getDriveUserFolderMode();
+        tmp = soapUser.getDriveFolderMode();
         if (tmp != null) {
             user.setDriveFolderMode(tmp);
         }
@@ -2101,6 +2101,12 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setUserfield20(tmp);
         }
 
+        
+        Boolean bool_tmp = soapUser.isRemoveDriveFolderFlags();
+        if (bool_tmp != null) {
+            user.setRemoveDriveFolderFlags(bool_tmp);
+        }
+
         SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
         if (null != userAttributes) {
             user.setUserAttributes(soap2MapMap(userAttributes));
@@ -2156,7 +2162,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setCountryHome(user.getCountry_home());
         soapUser.setCountryOther(user.getCountry_other());
         soapUser.setDefaultSenderAddress(user.getDefaultSenderAddress());
-        soapUser.setDriveUserFolderMode(user.getDriveFolderMode());
+        soapUser.setDriveFolderMode(user.getDriveFolderMode());
         soapUser.setDefaultGroup(group2Soap(user.getDefault_group()));
         soapUser.setDepartment(user.getDepartment());
         soapUser.setDisplayName(user.getDisplay_name());
@@ -2270,6 +2276,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setUserfield18(user.getUserfield18());
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
+        soapUser.setRemoveDriveFolderFlags(user.isRemoveDriveFolderFlags());
         return soapUser;
     }
 

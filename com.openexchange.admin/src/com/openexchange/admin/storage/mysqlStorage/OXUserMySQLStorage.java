@@ -1031,6 +1031,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
                 }
             }
+            
+            if (usrdata.isRemoveDriveFolderFlags()) {
+                removeDriveFolderFlags(ctx, usrdata, con);
+            }
 
             // update the user mail settings
             final String send_addr = usrdata.getDefaultSenderAddress(); // see
@@ -3641,13 +3645,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    @Override
-    public void deleteDefaultFolderFlags(Context ctx, User user) throws StorageException {
+    private void removeDriveFolderFlags(Context ctx, User user, Connection con) throws StorageException {
         int contextId = ctx.getId().intValue();
-        Connection con = null;
         PreparedStatement stmt = null;
         try {
-            con = cache.getConnectionForContext(contextId);
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, user, con);
             StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
@@ -3658,9 +3659,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e.toString());
         } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
@@ -3669,19 +3667,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw e;
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (con != null) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (PoolException exp) {
-                    log.error("Pool Error pushing ox connection to pool!", exp);
-                }
-            }
+//            if (con != null) {
+//                try {
+//                    cache.pushConnectionForContext(contextId, con);
+//                } catch (PoolException exp) {
+//                    log.error("Pool Error pushing ox connection to pool!", exp);
+//                }
+//            }
         }
     }
     
     private List<Pair<Integer, String>> prepareFolders(int contextId, User user, Connection con) throws StorageException, SQLException {
         List<Pair<Integer, String>> result = new ArrayList<>(6);
-        Locale locale = new Locale(user.getLanguage());
+        Locale locale = getLocale(contextId, user.getId(), con);
         StringHelper translator = StringHelper.valueOf(locale);
         boolean needTranslation = true;
         if (Locale.ENGLISH.equals(locale) || Locale.US.equals(locale)) {
@@ -3723,6 +3721,27 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt.setString(3, name);
             rs = stmt.executeQuery();
             return rs.next();
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+    
+    private Locale getLocale(int contextId, int userId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT preferredLanguage FROM user WHERE cid = ? AND id = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            String locale;
+            if (rs.next()) {
+                locale = rs.getString(1);
+                if (Strings.isNotEmpty(locale)) {
+                    return new Locale(locale);
+                } 
+            }
+            return Locale.getDefault();
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }

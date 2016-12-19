@@ -146,6 +146,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="userfield18" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield19" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+<<<<<<< HEAD
+=======
+ *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="remove_drive_folder_flags" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+>>>>>>> 2b50186a082... MW-488: Added SOAP & refactoring
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -286,7 +291,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield17",
     "userfield18",
     "userfield19",
-    "userfield20"
+    "userfield20",
+    "primaryAccountName",
+    "removeDriveFolderFlags"
 })
 public class User {
 
@@ -551,6 +558,10 @@ public class User {
     protected String userfield19;
     @XmlElement(nillable = true)
     protected String userfield20;
+    @XmlElement(nillable = true)
+    private String primaryAccountName;
+    @XmlElement(name = "remove_drive_folder_flags", nillable = true)
+    protected Boolean removeDriveFolderFlags;
 
     /**
      * Gets the value of the aliases property.
@@ -3705,6 +3716,32 @@ public class User {
      */
     public void setUserfield20(String value) {
         this.userfield20 = value;
+    }
+
+    /**
+     * Gets the primaryAccountName
+     *
+     * @return The primaryAccountName
+     */
+    public String getPrimaryAccountName() {
+        return primaryAccountName;
+    }
+
+    /**
+     * Sets the primaryAccountName
+     *
+     * @param primaryAccountName The primaryAccountName to set
+     */
+    public void setPrimaryAccountName(String primaryAccountName) {
+        this.primaryAccountName = primaryAccountName;
+    }
+    
+    public boolean isRemoveDriveFolderFlags() {
+        return removeDriveFolderFlags;
+    }
+    
+    public void setRemoveDriveFolderFlags(Boolean removeDriveFolderFlags) {
+        this.removeDriveFolderFlags = removeDriveFolderFlags;
     }
 
 }

@@ -106,10 +106,6 @@ public class Change extends ChangeCore {
         if (null != personal) {
             oxusr.changeMailAddressPersonal(ctx, usr, "NULL".equals(personal) ? null : personal, auth);
         }
-        
-        if (parser.hasOption(removeDefaultFolderFlagsOption)) {
-            oxusr.deleteDefaultFolderFlags(ctx, usr, auth);
-        }
 
     }
 
@@ -121,7 +117,7 @@ public class Change extends ChangeCore {
         setCapsToDrop(parser);
         setPersonal(parser);
         setUserQuotaOption(parser, false);
-        setRemoveDefaultFolderFlagsOption(parser);
+        setRemoveDriveFolderFlagsOption(parser);
     }
 
 }
