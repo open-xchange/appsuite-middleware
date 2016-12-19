@@ -50,19 +50,16 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mailfilter.properties
-
     ox_update_permissions "/opt/open-xchange/etc/mailfilter.properties" root:open-xchange 640
 
-    # SoftwareChange_Request-1140
-    pfile=/opt/open-xchange/etc/mailfilter.properties
-    if ! ox_exists_property com.openexchange.mail.filter.preferGSSAPI $pfile; then
-        ox_set_property com.openexchange.mail.filter.preferGSSAPI false $pfile
-    fi
+    PFILE=/opt/open-xchange/etc/mailfilter.properties
 
     # SoftwareChange_Request-1954
-    VALUE=$(ox_read_property com.openexchange.mail.filter.useUTF7FolderEncoding /opt/open-xchange/etc/mailfilter.properties)
-    ox_set_property com.openexchange.mail.filter.useUTF7FolderEncoding "$VALUE" /opt/open-xchange/etc/mailfilter.properties
+    VALUE=$(ox_read_property com.openexchange.mail.filter.useUTF7FolderEncoding $PFILE)
+    ox_set_property com.openexchange.mail.filter.useUTF7FolderEncoding "$VALUE" $PFILE
+
+    # SoftwareChange_Request-3843
+    ox_remove_property com.openexchange.mail.filter.preferGSSAPI $PFILE
 fi
 
 %clean
