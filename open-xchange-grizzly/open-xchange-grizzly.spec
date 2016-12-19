@@ -71,6 +71,11 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property com.openexchange.http.grizzly.enabledCipherSuites '' $PFILE
     ox_add_property com.openexchange.http.grizzly.keystorePath '' $PFILE
     ox_add_property com.openexchange.http.grizzly.keystorePassword '' $PFILE
+
+    # SoftwareChange_Request-3827
+    ox_remove_property com.openexchange.http.grizzly.ping $PFILE
+    ox_remove_property com.openexchange.http.grizzly.pingDelay $PFILE
+    ox_remove_property com.openexchange.http.grizzly.maxPingCount $PFILE
 fi
 
 %clean
