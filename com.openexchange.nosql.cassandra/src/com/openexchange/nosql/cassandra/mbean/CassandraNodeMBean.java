@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.nosql.cassandra;
+package com.openexchange.nosql.cassandra.mbean;
 
 import com.openexchange.management.MBeanMethodAnnotation;
 
@@ -82,7 +82,6 @@ public interface CassandraNodeMBean extends CassandraMBean {
      * @return the amount of trashed connections for the node
      */
     @MBeanMethodAnnotation(description = "Returns the amount of trashed connections for the node", parameters = {}, parameterDescriptions = {})
-
     int getTrashedConnections();
 
     /**

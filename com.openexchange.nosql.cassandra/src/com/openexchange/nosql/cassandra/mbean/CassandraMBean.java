@@ -47,45 +47,14 @@
  *
  */
 
-package com.openexchange.nosql.cassandra;
-
-import java.util.Map;
-import java.util.Set;
+package com.openexchange.nosql.cassandra.mbean;
 
 /**
- * {@link CassandraKeyspaceMBean}
+ * {@link CassandraMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface CassandraKeyspaceMBean extends CassandraMBean {
+interface CassandraMBean {
 
-    static final String NAME = "Cassandra Keyspace Monitoring Tool";
-
-    /**
-     * Returns the tables defined in this keyspace.
-     * 
-     * @return the tables defined in this keyspace.
-     */
-    Set<String> getTables();
-
-    /**
-     * Returns the replication options for this keyspace.
-     * 
-     * @return the replication options for this keyspace.
-     */
-    Map<String, String> getReplicationOptions();
-
-    /**
-     * Returns the user types defined in this keyspace.
-     * 
-     * @return the user types defined in this keyspace.
-     */
-    Set<String> getUserTypes();
-
-    /**
-     * Returns the functions defined in this keyspace.
-     * 
-     * @return the functions defined in this keyspace.
-     */
-    Set<String> getFunctions();
+    static final String DOMAIN = "com.openexchange.nosql.cassandra";
 }

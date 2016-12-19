@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.nosql.cassandra.beans;
+package com.openexchange.nosql.cassandra.mbean.impl;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -81,7 +81,7 @@ abstract class AbstractCassandraMBean extends AnnotatedStandardMBean implements 
      * @param mbeanInterface The Class
      * @throws NotCompliantMBeanException
      */
-    public AbstractCassandraMBean(ServiceLookup services, String description, Class<?> mbeanInterface) throws NotCompliantMBeanException {
+    AbstractCassandraMBean(ServiceLookup services, String description, Class<?> mbeanInterface) throws NotCompliantMBeanException {
         super(description, mbeanInterface);
         this.services = services;
         refreshTime = new AtomicLong(0);

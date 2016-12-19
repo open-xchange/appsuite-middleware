@@ -47,13 +47,14 @@
  *
  */
 
-package com.openexchange.nosql.cassandra;
+package com.openexchange.nosql.cassandra.mbean;
 
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
+import com.openexchange.nosql.cassandra.CassandraService;
 
 /**
  * {@link CassandraClusterMBean}

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.nosql.cassandra.beans;
+package com.openexchange.nosql.cassandra.mbean.impl;
 
 import javax.management.NotCompliantMBeanException;
 import org.slf4j.Logger;
@@ -60,8 +60,8 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Session.State;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.nosql.cassandra.CassandraNodeMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.nosql.cassandra.mbean.CassandraNodeMBean;
 import com.openexchange.server.ServiceLookup;
 
 /**

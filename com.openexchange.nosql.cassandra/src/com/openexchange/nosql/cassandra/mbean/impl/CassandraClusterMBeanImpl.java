@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.nosql.cassandra.beans;
+package com.openexchange.nosql.cassandra.mbean.impl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -60,8 +60,8 @@ import com.datastax.driver.core.Metrics;
 import com.datastax.driver.core.Metrics.Errors;
 import com.datastax.driver.core.TokenRange;
 import com.openexchange.exception.OXException;
-import com.openexchange.nosql.cassandra.CassandraClusterMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.nosql.cassandra.mbean.CassandraClusterMBean;
 import com.openexchange.server.ServiceLookup;
 
 /**

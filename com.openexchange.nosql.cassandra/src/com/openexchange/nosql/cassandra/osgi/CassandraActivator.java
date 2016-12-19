@@ -54,10 +54,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
-import com.openexchange.nosql.cassandra.CassandraClusterMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
-import com.openexchange.nosql.cassandra.beans.CassandraClusterMBeanImpl;
 import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
+import com.openexchange.nosql.cassandra.mbean.CassandraClusterMBean;
+import com.openexchange.nosql.cassandra.mbean.impl.CassandraClusterMBeanImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**

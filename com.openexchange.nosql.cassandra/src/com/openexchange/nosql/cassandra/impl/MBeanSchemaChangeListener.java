@@ -61,9 +61,9 @@ import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.SchemaChangeListenerBase;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.nosql.cassandra.CassandraKeyspaceMBean;
-import com.openexchange.nosql.cassandra.CassandraNodeMBean;
-import com.openexchange.nosql.cassandra.beans.CassandraKeyspaceMBeanImpl;
+import com.openexchange.nosql.cassandra.mbean.CassandraKeyspaceMBean;
+import com.openexchange.nosql.cassandra.mbean.CassandraNodeMBean;
+import com.openexchange.nosql.cassandra.mbean.impl.CassandraKeyspaceMBeanImpl;
 import com.openexchange.server.ServiceLookup;
 
 /**

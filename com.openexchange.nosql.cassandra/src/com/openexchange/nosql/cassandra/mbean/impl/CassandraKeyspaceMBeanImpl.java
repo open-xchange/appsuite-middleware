@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.nosql.cassandra.beans;
+package com.openexchange.nosql.cassandra.mbean.impl;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -62,8 +62,8 @@ import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.TableMetadata;
 import com.datastax.driver.core.UserType;
 import com.openexchange.exception.OXException;
-import com.openexchange.nosql.cassandra.CassandraKeyspaceMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.nosql.cassandra.mbean.CassandraKeyspaceMBean;
 import com.openexchange.server.ServiceLookup;
 
 /**

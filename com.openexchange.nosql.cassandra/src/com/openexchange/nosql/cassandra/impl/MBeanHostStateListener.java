@@ -61,8 +61,8 @@ import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Host.StateListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.nosql.cassandra.CassandraNodeMBean;
-import com.openexchange.nosql.cassandra.beans.CassandraNodeMBeanImpl;
+import com.openexchange.nosql.cassandra.mbean.CassandraNodeMBean;
+import com.openexchange.nosql.cassandra.mbean.impl.CassandraNodeMBeanImpl;
 import com.openexchange.server.ServiceLookup;
 
 /**
