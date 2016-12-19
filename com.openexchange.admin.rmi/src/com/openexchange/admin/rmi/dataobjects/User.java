@@ -573,9 +573,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean folderTreeSet = false;
     
-    private String defaultFolderMode;
+    private String driveFolderMode;
     
-    private boolean defaultFolderModeSet = false;
+    private boolean driveFolderModeSet = false;
 
     private Map<String, String> guiPreferences;
 
@@ -4428,7 +4428,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.userfield20 = null;
         this.defaultSenderAddress = null;
         folderTree = null;
-        defaultFolderMode = null;
+        this.driveFolderMode = null;
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
         this.primaryAccountName = null;
@@ -4712,17 +4712,17 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
     
     
-    public String getDefaultFolderMode() {
-        return defaultFolderMode;
+    public String getDriveFolderMode() {
+        return driveFolderMode;
     }
     
-    public void setDefaultFolderMode(String defaultFolderMode) {
-        this.defaultFolderModeSet = true;
-        this.defaultFolderMode = defaultFolderMode;
+    public void setDriveFolderMode(String driveFolderMode) {
+        this.driveFolderModeSet = true;
+        this.driveFolderMode = driveFolderMode;
     }
     
-    public boolean isDefaultFolderModeSet() {
-        return defaultFolderModeSet;
+    public boolean isDriveFolderModeSet() {
+        return driveFolderModeSet;
     }
     
     /**
@@ -4900,8 +4900,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (defaultSenderAddressset ? 1231 : 1237);
         result = prime * result + ((folderTree == null) ? 0 : folderTree.hashCode());
         result = prime * result + (folderTreeSet ? 1231 : 1237);
-        result = prime * result + ((defaultFolderMode == null) ? 0 : defaultFolderMode.hashCode());
-        result = prime * result + (defaultFolderModeSet ? 1231 :1237);
+        result = prime * result + ((driveFolderMode == null) ? 0 : driveFolderMode.hashCode());
+        result = prime * result + (driveFolderModeSet ? 1231 :1237);
         result = prime * result + ((default_group == null) ? 0 : default_group.hashCode());
         result = prime * result + (default_groupset ? 1231 : 1237);
         result = prime * result + ((department == null) ? 0 : department.hashCode());
@@ -5308,14 +5308,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (folderTreeSet != other.folderTreeSet) {
             return false;
         }
-        if (defaultFolderMode == null) {
-            if (other.defaultFolderMode != null) {
+        if (driveFolderMode == null) {
+            if (other.driveFolderMode != null) {
                 return false;
             }
-        } else if (!defaultFolderMode.equals(other.defaultFolderMode)) {
+        } else if (!driveFolderMode.equals(other.driveFolderMode)) {
             return false;
         }
-        if (defaultFolderModeSet != other.defaultFolderModeSet) {
+        if (driveFolderModeSet != other.driveFolderModeSet) {
             return false;
         }
         if (default_group == null) {
