@@ -123,6 +123,8 @@ public class CassandraActivator extends HousekeepingActivator {
         if (cassandraService == null) {
             return;
         }
+        unregisterService(CassandraService.class);
+        // Shutdown the service
         ((CassandraServiceImpl) cassandraService).shutdown();
 
         final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);

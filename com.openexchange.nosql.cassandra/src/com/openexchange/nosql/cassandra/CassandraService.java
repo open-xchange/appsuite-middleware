@@ -49,10 +49,10 @@
 
 package com.openexchange.nosql.cassandra;
 
+import java.util.concurrent.Future;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.MappingManager;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,16 +71,6 @@ public interface CassandraService {
     Cluster getCluster() throws OXException;
 
     /**
-     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}. Note that the returned
-     * {@link Session} is not bound to any keyspace, meaning that all tables in the CQL queries
-     * performed with that {@link Session} will have to be prefixed with the keyspace name.
-     * 
-     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster}
-     * @throws OXException if the Cassandra {@link Session} cannot be returned
-     */
-    Session getSession() throws OXException;
-
-    /**
      * Returns a Cassandra {@link Session} for the specified keyspace
      * 
      * @param keyspace The keyspace name
@@ -93,10 +83,10 @@ public interface CassandraService {
      * Returns a Cassandra {@link Session} for an asynchronous query for the specified keyspace
      * 
      * @param keyspace The keyspace name
-     * @return The Cassandra {@link Session} encapsulated in a {@link ListenableFuture} object
+     * @return The Cassandra {@link Session} encapsulated in a {@link Future} object
      * @throws OXException If the Cassandra {@link Session} cannot be returned
      */
-    ListenableFuture<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException;
+    Future<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException;
 
     /**
      * Returns a {@link MappingManager} for the specified keyspace.

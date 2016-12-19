@@ -49,10 +49,13 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.Cluster;
@@ -61,7 +64,6 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AuthenticationException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.mapping.MappingManager;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraService;
@@ -85,12 +87,12 @@ public class CassandraServiceImpl implements CassandraService {
     /**
      * Local Cassandra {@link Session}s cache; one per keyspace
      */
-    private final ConcurrentMap<String, CassandraSession> synchronousSessions;
+    private final Map<String, CassandraSession> synchronousSessions;
 
     /**
      * Local Cassandra asynchronous {@link Session}s cache; one per keyspace
      */
-    private final ConcurrentMap<String, ListenableFuture<Session>> asynchronousSessions;
+    private final ConcurrentMap<String, Future<Session>> asynchronousSessions;
     /**
      * A multi-purpose global keyspace-less Cassandra {@link Session}. Used for
      * retrieving statistics for the {@link Cluster}
@@ -130,7 +132,7 @@ public class CassandraServiceImpl implements CassandraService {
             throw CassandraServiceExceptionCodes.AUTHENTICATION_ERROR.create(e, initializer.getContactPoints());
         }
         // Initialise the sessions cache
-        synchronousSessions = new ConcurrentHashMap<>();
+        synchronousSessions = new HashMap<>();
         asynchronousSessions = new ConcurrentHashMap<>();
     }
 
@@ -142,16 +144,6 @@ public class CassandraServiceImpl implements CassandraService {
     @Override
     public Cluster getCluster() throws OXException {
         return cluster;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getSession()
-     */
-    @Override
-    public Session getSession() throws OXException {
-        return globalSession;
     }
 
     /*
@@ -170,33 +162,25 @@ public class CassandraServiceImpl implements CassandraService {
      * @see com.openexchange.nosql.cassandra.CassandraService#getSessionForAsynchronousExecution(java.lang.String)
      */
     @Override
-    public ListenableFuture<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException {
+    public Future<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException {
         // Fetch a connection from cache
-        ListenableFuture<Session> session = asynchronousSessions.get(keyspace);
+        Future<Session> session = asynchronousSessions.get(keyspace);
         if (session != null) {
             return session;
         }
 
-        // If none exists, connect
-        ListenableFuture<Session> newSession = cluster.connectAsync(keyspace);
-        // Cache the new session
-        session = asynchronousSessions.putIfAbsent(keyspace, newSession);
-        if (session != null) {
-            // A session was already initialised by another thread, thus we close the new session
-            try {
-                newSession.get().close();
-            } catch (InterruptedException e) {
-                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (ExecutionException e) {
-                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (CancellationException e) {
-                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        synchronized (this) {
+            session = asynchronousSessions.get(keyspace);
+            if (session != null) {
+                return session;
             }
-        } else {
-            session = newSession;
-        }
 
-        return session;
+            // If none exists, connect
+            Future<Session> newSession = cluster.connectAsync(keyspace);
+            // Cache the new session
+            asynchronousSessions.put(keyspace, newSession);
+            return newSession;
+        }
     }
 
     /*
@@ -209,12 +193,26 @@ public class CassandraServiceImpl implements CassandraService {
         return getCassandraSession(keyspace).getMappingManager();
     }
 
+    //////////////////////////////////// HELPERS //////////////////////////////////////////////////
+
+    /**
+     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}. Note that the returned
+     * {@link Session} is not bound to any keyspace, meaning that all tables in the CQL queries
+     * performed with that {@link Session} will have to be prefixed with the keyspace name.
+     * 
+     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster}
+     * @throws OXException if the Cassandra {@link Session} cannot be returned
+     */
+    public Session getSession() throws OXException {
+        return globalSession;
+    }
+
     /**
      * Shutdown the service
      */
     public void shutdown() {
         LOGGER.info("Cassandra Service is shutting down");
-        if (cluster == null || cluster.isClosed()) {
+        if (cluster.isClosed()) {
             return;
         }
 
@@ -227,7 +225,7 @@ public class CassandraServiceImpl implements CassandraService {
 
         // Close asynchronous sessions
         LOGGER.info("Closing asynchronous session");
-        for (ListenableFuture<Session> session : asynchronousSessions.values()) {
+        for (Future<Session> session : asynchronousSessions.values()) {
             Session futureSession = null;
             try {
                 boolean canceled = session.cancel(false);
@@ -272,18 +270,19 @@ public class CassandraServiceImpl implements CassandraService {
             return session;
         }
 
-        // If none exists, connect
-        Session newSession = cluster.connect(keyspace);
-        MappingManager mappingManager = new MappingManager(newSession);
-        CassandraSession newCassandraSession = new CassandraSession(newSession, mappingManager);
-        // Cache the new session
-        session = synchronousSessions.putIfAbsent(keyspace, newCassandraSession);
-        if (session != null) {
-            // A session was already initialised by another thread, thus we close the new session
-            newSession.close();
-        } else {
-            session = newCassandraSession;
+        synchronized (this) {
+            session = synchronousSessions.get(keyspace);
+            if (session != null) {
+                return session;
+            }
+
+            // If none exists, connect
+            Session newSession = cluster.connect(keyspace);
+            MappingManager mappingManager = new MappingManager(newSession);
+            CassandraSession newCassandraSession = new CassandraSession(newSession, mappingManager);
+            // Cache the new session
+            synchronousSessions.put(keyspace, newCassandraSession);
+            return newCassandraSession;
         }
-        return session;
     }
 }

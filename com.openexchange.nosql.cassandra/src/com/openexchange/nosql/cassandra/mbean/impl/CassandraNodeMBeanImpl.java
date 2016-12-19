@@ -61,6 +61,7 @@ import com.datastax.driver.core.Session.State;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
 import com.openexchange.nosql.cassandra.mbean.CassandraNodeMBean;
 import com.openexchange.server.ServiceLookup;
 
@@ -104,7 +105,7 @@ public class CassandraNodeMBeanImpl extends AbstractCassandraMBean implements Ca
             LoadBalancingPolicy loadBalancingPolicy = cluster.getConfiguration().getPolicies().getLoadBalancingPolicy();
             PoolingOptions poolingOptions = cluster.getConfiguration().getPoolingOptions();
 
-            Session session = cassandraService.getSession();
+            Session session = ((CassandraServiceImpl) cassandraService).getSession();
             State state = session.getState();
             HostDistance distance = loadBalancingPolicy.distance(host);
 
