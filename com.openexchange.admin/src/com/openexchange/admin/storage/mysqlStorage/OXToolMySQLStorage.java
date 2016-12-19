@@ -2712,7 +2712,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
         
-        if (usr.isDefaultFolderModeSet() && OXFolderDefaultMode.fromString(usr.getDefaultFolderMode()) == null) {
+        if (usr.isDriveFolderModeSet() && OXFolderDefaultMode.fromString(usr.getDriveFolderMode()) == null) {
             String modes = "";
             for (OXFolderDefaultMode mode : OXFolderDefaultMode.values()) {
                 modes = modes.concat("\n ").concat(mode.getText());

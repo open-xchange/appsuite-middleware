@@ -265,14 +265,14 @@ public class UserTest extends AbstractTest {
     }
     
     @Test
-    public void testCreateUserWithWrongDefaultFoldersMode() throws Exception {
+    public void testCreateUserWithWrongDriveFoldersMode() throws Exception {
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
         
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
         final User user = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
-        user.setDefaultFolderMode("wrong");
+        user.setDriveFolderMode("wrong");
         User createdUser = null;
         try {
             createdUser = oxu.create(ctx, user, access, cred);

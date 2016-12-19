@@ -38,7 +38,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="country_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="country_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="country_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="defaultFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="driveFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="defaultSenderAddress" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="default_group" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Group" minOccurs="0"/>
  *         &lt;element name="department" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
@@ -174,7 +174,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "countryBusiness",
     "countryHome",
     "countryOther",
-    "defaultFolderMode",
+    "driveFolderMode",
     "defaultSenderAddress",
     "defaultGroup",
     "department",
@@ -327,8 +327,8 @@ public class User {
     protected String countryHome;
     @XmlElement(name = "country_other", nillable = true)
     protected String countryOther;
-    @XmlElement(name = "default_folder_mode", nillable = true)
-    protected String defaultFolderMode;
+    @XmlElement(name = "drive_folder_mode", nillable = true)
+    protected String driveFolderMode;
     @XmlElement(nillable = true)
     protected String defaultSenderAddress;
     @XmlElement(name = "default_group", nillable = true)
@@ -1020,26 +1020,26 @@ public class User {
     }
     
     /**
-     * Get defaultFolderMode value.
+     * Get driveFolderMode value.
      * 
      * @return
      *      possible object is
      *     {@link String }
      */
-    public String getDefaultFolderMode() {
-        return defaultFolderMode;
+    public String getDriveFolderMode() {
+        return driveFolderMode;
     }
 
     /**
-     * Set defaultFolderMode value..
+     * Set driveFolderMode value..
      *
      * @param value
      *     allowed object is
      *     {@link String }
      *
      */
-    public void setDefaultFolderMode(String value) {
-        this.defaultFolderMode = value;
+    public void setDriveFolderMode(String value) {
+        this.driveFolderMode = value;
     }
 
     /**

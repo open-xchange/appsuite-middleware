@@ -2114,8 +2114,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private OXFolderDefaultMode getFolderCreationMode(final User usrdata) {
         OXFolderDefaultMode folderCreationMode = OXFolderDefaultMode.DEFAULT;
-        if (usrdata.isDefaultFolderModeSet()) {
-            folderCreationMode = OXFolderDefaultMode.fromString(usrdata.getDefaultFolderMode());
+        if (usrdata.isDriveFolderModeSet()) {
+            folderCreationMode = OXFolderDefaultMode.fromString(usrdata.getDriveFolderMode());
         }
         return folderCreationMode;
     }
