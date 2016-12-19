@@ -52,16 +52,21 @@ package com.openexchange.saml.impl;
 import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import static com.openexchange.tools.servlet.http.Tools.filter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -85,6 +90,8 @@ import com.openexchange.session.Session;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -98,6 +105,8 @@ import com.openexchange.user.UserService;
  * @since v7.6.1
  */
 public class SAMLLoginRequestHandler implements LoginRequestHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SAMLLoginRequestHandler.class);
 
     private final SAMLConfig config;
 
@@ -156,6 +165,24 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         if (!user.isMailEnabled()) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
+        }
+
+        {
+            // try autologin (this is needed for the unsolicited response)
+            String autologinRedirect = tryAutoLogin(req, resp, reservation);
+            if (null != autologinRedirect) {
+                resp.sendRedirect(autologinRedirect);
+                return;
+            }
+        }
+
+        {
+            // try autologin with SessionIndex
+            String sessionIndexAutologinRedirect = trySessionIndexAutoLogin(req, resp, reservation);
+            if (null != sessionIndexAutologinRedirect) {
+                resp.sendRedirect(sessionIndexAutologinRedirect);
+                return;
+            }
         }
 
         // If SAML autologin is enabled we need to set another cookie
@@ -303,4 +330,106 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
     }
 
+    private String tryAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation) throws OXException {
+        Cookie samlCookie = null;
+        if (config.isAutoLoginEnabled()) {
+            LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
+            String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
+            Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
+            samlCookie = cookies.get(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash);
+            if (samlCookie != null) {
+                SessiondService sessiondService = services.getService(SessiondService.class);
+                Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + SAMLSessionParameters.SESSION_COOKIE + "=" + samlCookie.getValue() + ")"));
+                if (sessions.size() > 0) {
+                    Session session = sessiondService.getSession(sessions.iterator().next());
+                    if (session == null) {
+                        LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
+                    } else {
+                        try {
+                            LOG.debug("Found session '{}' for SAML auto-login cookie '{}' with value '{}'", session.getSessionID(), samlCookie.getName(), samlCookie.getValue());
+                            SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
+                            // compare against authInfo
+                            if (session.getContextId() == reservation.getContextId() && session.getUserId() == reservation.getUserId()) {
+                                String uiWebPath = httpRequest.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
+                                if (Strings.isEmpty(uiWebPath)) {
+                                    uiWebPath = loginConfiguration.getUiWebPath();
+                                }
+                                return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
+                            } else {
+                                LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
+                            }
+                        } catch (OXException e) {
+                            LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
+                        }
+                    }
+                } else {
+                    LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
+                }
+            }
+        }
+
+        if (samlCookie != null) {
+            // cookie exists but no according session was found => remove it
+            Cookie toRemove = (Cookie) samlCookie.clone();
+            toRemove.setMaxAge(0);
+            httpResponse.addCookie(toRemove);
+        }
+
+        return null;
+    }
+
+    private String trySessionIndexAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation) throws OXException {
+        if (config.isSessionIndexAutoLoginEnabled()) {
+            SessiondService sessiondService = services.getService(SessiondService.class);
+
+            Map<String, String> state = reservation.getState();
+            String sessionIndex;
+            if (null == state) {
+                LOG.debug("Reservation does not have any state");
+                return null;
+            } else {
+                sessionIndex = state.get(SAMLSessionParameters.SESSION_INDEX);
+            }
+            if (null == sessionIndex) {
+                LOG.debug("Reservation state does not include a SessionIndex");
+                return null;
+            }
+
+            Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + SAMLSessionParameters.SESSION_INDEX + "=" + sessionIndex + ")"));
+            if (null == sessions || sessions.size() <= 0) {
+                LOG.debug("Found no session for SAML SessionIndex '{}'", sessionIndex);
+                return null;
+            }
+            LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
+            String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
+            // iterate over sessions
+
+            for (String sessionString : sessions) {
+                Session session = sessiondService.getSession(sessionString);
+                if (session == null) {
+                    LOG.debug("No session found with session identifier '{}'", sessionString);
+                    continue;
+                }
+                try {
+                    LOG.debug("Found session '{}' for SAML SessionIndex '{}'", session.getSessionID(), sessionIndex);
+                    SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
+                    // compare against authInfo
+                    if (session.getContextId() == reservation.getContextId() && session.getUserId() == reservation.getUserId()) {
+                        String uiWebPath = httpRequest.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
+                        if (Strings.isEmpty(uiWebPath)) {
+                            uiWebPath = loginConfiguration.getUiWebPath();
+                        }
+                        LOG.debug("Session '{}' is the same for user '{}' in context '{}'",session.getSessionID(), session.getUserId(), session.getContextId());
+                        return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
+                    } else {
+                        LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
+                    }
+                } catch (OXException e) {
+                    LOG.debug("Ignoring SAML auto-login attempt for session '{}' due to failed IP or secret check", sessionString, e);
+                }
+            }
+
+        }
+        return null;
+    }
 }

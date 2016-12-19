@@ -122,4 +122,8 @@ public class TestConfig implements SAMLConfig {
         return true;
     }
 
+    @Override
+    public boolean isSessionIndexAutoLoginEnabled() {
+        return true;
+    }
 }

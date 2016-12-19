@@ -53,6 +53,7 @@ import static com.openexchange.saml.SAMLProperties.ACS_URL;
 import static com.openexchange.saml.SAMLProperties.ALLOW_UNSOLICITED_RESPONSES;
 import static com.openexchange.saml.SAMLProperties.ENABLE_AUTO_LOGIN;
 import static com.openexchange.saml.SAMLProperties.ENABLE_METADATA_SERVICE;
+import static com.openexchange.saml.SAMLProperties.ENABLE_SESSION_INDEX_AUTO_LOGIN;
 import static com.openexchange.saml.SAMLProperties.ENABLE_SINGLE_LOGOUT;
 import static com.openexchange.saml.SAMLProperties.ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_ENTITY_ID;
@@ -102,6 +103,8 @@ public class DefaultConfig implements SAMLConfig {
 
     private boolean allowUnsolicitedResponses;
 
+    private boolean sessionIndexAutoLoginEnabled;
+
     private DefaultConfig() {
         super();
     }
@@ -128,6 +131,7 @@ public class DefaultConfig implements SAMLConfig {
         config.setEnableMetadataService(configService.getBoolProperty(ENABLE_METADATA_SERVICE, false));
         config.setAutoLoginEnabled(configService.getBoolProperty(ENABLE_AUTO_LOGIN, false));
         config.setAllowUnsolicitedResponses(configService.getBoolProperty(ALLOW_UNSOLICITED_RESPONSES, true));
+        config.setSessionIndexAutoLoginEnabled(configService.getBoolProperty(ENABLE_SESSION_INDEX_AUTO_LOGIN, false));
         return config;
     }
 
@@ -259,6 +263,7 @@ public class DefaultConfig implements SAMLConfig {
         this.autoLoginEnabled = autoLoginEnabled;;
     }
 
+    @Override
     public boolean isAllowUnsolicitedResponses() {
         return allowUnsolicitedResponses;
     }
@@ -267,4 +272,12 @@ public class DefaultConfig implements SAMLConfig {
         this.allowUnsolicitedResponses = allowUnsolicitedResponses;
     }
 
+    @Override
+    public boolean isSessionIndexAutoLoginEnabled() {
+        return sessionIndexAutoLoginEnabled;
+    }
+
+    private void setSessionIndexAutoLoginEnabled(boolean sessionIndexAutoLoginEnabled) {
+        this.sessionIndexAutoLoginEnabled = sessionIndexAutoLoginEnabled;
+    }
 }

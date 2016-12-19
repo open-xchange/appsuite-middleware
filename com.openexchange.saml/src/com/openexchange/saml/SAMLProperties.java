@@ -128,5 +128,9 @@ public class SAMLProperties {
      */
     public static final String ALLOW_UNSOLICITED_RESPONSES = "com.openexchange.saml.allowUnsolicitedResponses";
 
+    /**
+     * Whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.
+     */
+    public static final String ENABLE_SESSION_INDEX_AUTO_LOGIN = "com.openexchange.saml.enableSessionIndexAutoLogin";
 
 }
