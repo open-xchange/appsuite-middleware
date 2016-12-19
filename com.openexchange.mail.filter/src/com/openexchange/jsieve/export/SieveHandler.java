@@ -161,34 +161,24 @@ public class SieveHandler {
     protected BufferedReader bis_sieve = null;
     protected BufferedOutputStream bos_sieve = null;
     private long mStart;
-    private long mEnd;
     private boolean useSIEVEResponseCodes = false;
     private Long connectTimeout = null;
     private Long readTimeout = null;
 
     /**
-     * SieveHandler use socket-connection to manage sieve-scripts.<br>
-     * <br>
-     * Important: Don't forget to close the SieveHandler!
+     * Initializes a new {@link SieveHandler}.
      *
-     * @param userName
-     * @param passwd
-     * @param host
-     * @param port
+     * @param userName The optional user name to use for <code>"PLAIN"</code> SASL authentication; if <code>null</code> <code>authUserName</code> is considered
+     * @param authUserName The login string to use for authentication
+     * @param authUserPasswd The secret string to use for authentication
+     * @param host The host name or IP address of the SIEVE end-point
+     * @param port The port of the SIEVE end-point
+     * @param authEnc The encoding to use when transferring credential bytes to SIEVE end-point
+     * @param oauthToken The optional OAuth token; relevant in case <code>"XOAUTH2"</code> or <code>"OAUTHBEARER"</code> SASL authentication is supposed to be performed
      */
-    public SieveHandler(String userName, String passwd, String host, int port, String authEnc, String oauthToken) {
-        sieve_user = userName;
-        sieve_auth = userName;
-        sieve_auth_enc = authEnc;
-        sieve_auth_passwd = passwd;
-        sieve_host = host; // "127.0.0.1"
-        sieve_host_port = port; // 2000
-        onlyWelcome = false;
-        this.oauthToken = oauthToken;
-    }
-
     public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken) {
-        sieve_user = userName;
+        super();
+        sieve_user = null == userName ? authUserName : userName;
         sieve_auth = authUserName;
         sieve_auth_enc = authEnc;
         sieve_auth_passwd = authUserPasswd;
@@ -198,7 +188,14 @@ public class SieveHandler {
         this.oauthToken = oauthToken;
     }
 
+    /**
+     * Initializes a new {@link SieveHandler} only suitable for retrieving the SIEVE end-point's welcome message.
+     *
+     * @param host The host name or IP address of the SIEVE end-point
+     * @param port The port of the SIEVE end-point
+     */
     public SieveHandler(String host, int port) {
+        super();
         sieve_user = null;
         sieve_auth = null;
         sieve_auth_enc = null;
@@ -209,21 +206,39 @@ public class SieveHandler {
         this.oauthToken = null;
     }
 
+    /**
+     * Gets the host name or IP address of the SIEVE end-point
+     *
+     * @return The host name or IP address of the SIEVE end-point
+     */
     public String getSieveHost() {
         return sieve_host;
     }
 
+    /**
+     * gets the port of the SIEVE end-point
+     *
+     * @return The port of the SIEVE end-point
+     */
     public int getSievePort() {
         return sieve_host_port;
     }
 
+    /**
+     * Sets the start time stamp, which is the current time in milliseconds at the time of invocation.
+     */
     private void measureStart() {
         this.mStart = System.currentTimeMillis();
     }
 
+    /**
+     * Sets the end time stamp, which is the current time in milliseconds at the time of invocation, and logs the duration since previously set start time stamp for given method.
+     *
+     * @param method The method to use when generating the <code>DEBUG</code> log message
+     */
     private void measureEnd(final String method) {
-        this.mEnd = System.currentTimeMillis();
-        log.debug("SieveHandler.{}() took {}ms to perform", method, (this.mEnd - this.mStart));
+        long end = System.currentTimeMillis();
+        log.debug("SieveHandler.{}() took {}ms to perform", method, (end - this.mStart));
     }
 
     /**

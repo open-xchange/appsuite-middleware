@@ -92,41 +92,42 @@ public final class SieveHandlerFactory {
     public static SieveHandler getSieveHandler(Credentials creds, boolean onlyWelcome) throws OXException {
         ConfigurationService config = Services.getService(ConfigurationService.class);
 
-        String logintype = config.getProperty(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property);
+        // Determine & parse host and port
         int sieve_port;
         String sieve_server;
-        User storageUser = null;
-        if (MailFilterProperties.LoginTypes.GLOBAL.name.equals(logintype)) {
-            sieve_server = config.getProperty(MailFilterProperties.Values.SIEVE_SERVER.property);
-            if (null == sieve_server) {
-                throw MailFilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperties.Values.SIEVE_SERVER.property);
-            }
-            try {
-                sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
-            } catch (final RuntimeException e) {
-                throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
-            }
-        } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
-            storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
-            if (null != storageUser) {
-                final String mailServerURL = storageUser.getImapServer();
-                final URI uri;
-                try {
-                    uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
-                } catch (final URISyntaxException e) {
-                    throw MailFilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
+        User user = null;
+        {
+            String logintype = config.getProperty(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property);
+            if (MailFilterProperties.LoginTypes.GLOBAL.name.equals(logintype)) {
+                sieve_server = config.getProperty(MailFilterProperties.Values.SIEVE_SERVER.property);
+                if (null == sieve_server) {
+                    throw MailFilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperties.Values.SIEVE_SERVER.property);
                 }
-                sieve_server = uri.getHost();
+                try {
+                    sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
+                } catch (final RuntimeException e) {
+                    throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
+                }
+            } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
+                user = getUser(creds, null);
+                {
+                    String mailServerURL = user.getImapServer();
+                    try {
+                        URI uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
+                        sieve_server = uri.getHost();
+                    } catch (final URISyntaxException e) {
+                        throw MailFilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
+                    }
+                }
+
                 try {
                     sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
                 } catch (final RuntimeException e) {
                     throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
                 }
             } else {
-                throw MailFilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+                throw MailFilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
             }
-        } else {
-            throw MailFilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
         }
 
         if (onlyWelcome) {
@@ -135,62 +136,54 @@ public final class SieveHandlerFactory {
         }
 
         // Get SIEVE_AUTH_ENC property
-        final String authEnc = config.getProperty(MailFilterProperties.Values.SIEVE_AUTH_ENC.property, MailFilterProperties.Values.SIEVE_AUTH_ENC.def);
+        String authEnc = config.getProperty(MailFilterProperties.Values.SIEVE_AUTH_ENC.property, MailFilterProperties.Values.SIEVE_AUTH_ENC.def);
 
-        // Establish SieveHandler
-        String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        if (MailFilterProperties.CredSrc.SESSION.name.equals(credsrc) || MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
-            String username = creds.getUsername();
-            String authname = creds.getAuthname();
-            String password = getRightPassword(config, creds);
-            if (null != username) {
-                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
-            }
-            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
-        }
-
-        if (MailFilterProperties.CredSrc.IMAP_LOGIN.name.equals(credsrc)) {
-            String authname;
-            if (null != storageUser) {
-                authname = storageUser.getImapLogin();
-            } else {
-                storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
-                if (null != storageUser) {
-                    authname = storageUser.getImapLogin();
-                } else {
-                    throw MailFilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+        // Determine & parse login and password dependent on configured credentials source
+        switch (getCredSrc(config)) {
+            case IMAP_LOGIN:
+                {
+                    String authname = getUser(creds, user).getImapLogin();
+                    return newSieveHandlerUsing(sieve_server, sieve_port, creds.getUsername(), authname, getRightPassword(config, creds), authEnc, creds.getOauthToken());
                 }
-            }
-            String username = creds.getUsername();
-            String password = getRightPassword(config, creds);
-            if (null != username) {
-                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
-            }
-            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
-        }
-
-        if (MailFilterProperties.CredSrc.MAIL.name.equals(credsrc)) {
-            String authname;
-            if (null != storageUser) {
-                authname = storageUser.getMail();
-            } else {
-                storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
-                if (null != storageUser) {
-                    authname = storageUser.getMail();
-                } else {
-                    throw MailFilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+            case MAIL:
+                {
+                    String authname = getUser(creds, user).getMail();
+                    return newSieveHandlerUsing(sieve_server, sieve_port, creds.getUsername(), authname, getRightPassword(config, creds), authEnc, creds.getOauthToken());
                 }
-            }
-            String username = creds.getUsername();
-            String password = getRightPassword(config, creds);
-            if (null != username) {
-                return new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
-            }
-            return new SieveHandler(authname, password, sieve_server, sieve_port, authEnc, creds.getOauthToken());
+            case SESSION:
+                // fall-through
+            case SESSION_FULL_LOGIN:
+                return newSieveHandlerUsing(sieve_server, sieve_port, creds.getUsername(), creds.getAuthname(), getRightPassword(config, creds), authEnc, creds.getOauthToken());
+            default:
+                throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
+
+        }
+    }
+
+    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken) {
+        return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken);
+    }
+
+    private static User getUser(Credentials creds, User user) throws OXException {
+        if (null != user) {
+            return user;
         }
 
-        // Unknown credsrc
-        throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
+        User storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
+        if (null == storageUser) {
+            throw MailFilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+        }
+        return storageUser;
+    }
+
+    private static MailFilterProperties.CredSrc getCredSrc(ConfigurationService config) throws OXException {
+        String sCredSrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        MailFilterProperties.CredSrc credSrc = MailFilterProperties.CredSrc.credSrcFor(sCredSrc);
+        if (null == credSrc) {
+            // Unknown credsrc
+            throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
+        }
+        return credSrc;
     }
 
     /**
@@ -202,17 +195,25 @@ public final class SieveHandlerFactory {
      * @throws OXException
      */
     public static String getRightPassword(final ConfigurationService config, final Credentials creds) throws OXException {
-        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
-        if (MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
-            return creds.getPassword();
-        } else if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
-            final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
-            if (null == masterpassword || masterpassword.length() == 0) {
-                throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
-            }
-            return masterpassword;
-        } else {
+        String sPasswordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
+        MailFilterProperties.PasswordSource passwordSource = MailFilterProperties.PasswordSource.passwordSourceFor(sPasswordsrc);
+        if (null == passwordSource) {
             throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
+
+        switch (passwordSource) {
+            case GLOBAL:
+                {
+                    String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
+                    if (null == masterpassword || masterpassword.length() == 0) {
+                        throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
+                    }
+                    return masterpassword;
+                }
+            case SESSION:
+                return creds.getPassword();
+            default:
+                throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
         }
     }
 }

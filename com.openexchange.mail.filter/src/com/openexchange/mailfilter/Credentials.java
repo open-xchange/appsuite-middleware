@@ -55,9 +55,11 @@ import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
 
 /**
- * This class holds the credentials to login into the imap server.
+ * This class holds the credentials to login into the SIEVE server.
  */
 public class Credentials {
+
+    private static final String SESSION_FULL_LOGIN = MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name;
 
     private String username;
     private String authname;
@@ -74,13 +76,10 @@ public class Credentials {
      * @param session ServerSession
      */
     public Credentials(Session session) {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
-            authname = session.getLogin();
-        } else {
-            authname = session.getLoginName();
-        }
+        super();
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        authname = SESSION_FULL_LOGIN.equals(credsrc) ? session.getLogin() : session.getLoginName();
         password = session.getPassword();
         userid = session.getUserId();
         contextid = session.getContextId();
@@ -195,10 +194,7 @@ public class Credentials {
      * @return The string value of context ID if a context ID is present; otherwise "unknown" is returned
      */
     public final String getContextString() {
-        if (!b_contextid) {
-            return "unknown";
-        }
-        return String.valueOf(contextid);
+        return b_contextid ? String.valueOf(contextid) : "unknown";
     }
 
     /**
