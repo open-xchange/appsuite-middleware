@@ -1541,6 +1541,11 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             user.setDefaultFolderMode(tmp);
         }
         
+        Boolean bool_tmp = soapUser.isRemoveDriveFolderFlags();
+        if (bool_tmp != null) {
+            user.setRemoveDriveFolderFlags(bool_tmp);
+        }
+        
         tmp = soapUser.getDepartment();
         if (tmp != null) {
             user.setDepartment(tmp);
@@ -2299,6 +2304,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
         soapUser.setPrimaryAccountName(user.getPrimaryAccountName());
+        soapUser.setRemoveDriveFolderFlags(user.isRemoveDriveFolderFlags());
         return soapUser;
     }
 
