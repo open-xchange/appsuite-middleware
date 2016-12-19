@@ -98,6 +98,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
 
     private static final String CAPABILITY_ZIPPABLE_FOLDER = Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name());
     private static final String CAPABILITY_FILE_VERSIONS = Strings.asciiLowerCase(FileStorageCapability.FILE_VERSIONS.name());
+    private static final String CAPABILITY_EXTENDED_METADATA = Strings.asciiLowerCase(FileStorageCapability.EXTENDED_METADATA.name());
 
     /**
      * <code>"9"</code>
@@ -290,6 +291,14 @@ public final class FileStorageFolderImpl extends AbstractFolder {
                 supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
             }
             supportedCapabilities.add(CAPABILITY_FILE_VERSIONS);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.EXTENDED_METADATA, folderAccess)) {
+            if (null == supportedCapabilities) {
+                supportedCapabilities = new LinkedHashSet<>(2);
+            } else {
+                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
+            }
+            supportedCapabilities.add(CAPABILITY_EXTENDED_METADATA);
         }
         this.supportedCapabilities = supportedCapabilities;
         lastModified = fsFolder.getLastModifiedDate();

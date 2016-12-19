@@ -260,8 +260,8 @@ public class ObjectPermissionValidator implements InfostoreValidator {
                 for (int userID : userIDs) {
                     try {
                         UserPermissionBits permissionBits = permissionBitsStorage.getUserPermissionBits(connection, userID, session.getContext());
-                        if (false == permissionBits.hasFullSharedFolderAccess() || false == permissionBits.hasInfostore()) {
-                            validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "User " + userID + " has no permission to see share items.");
+                        if (false == permissionBits.hasInfostore()) {
+                            validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "User " + userID + " has no permissons for module infostore.");
                             validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(userID)));
                             return false;
                         }
