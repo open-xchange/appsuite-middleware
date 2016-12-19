@@ -1,0 +1,12 @@
+array:
+  - data:
+      Key: com.openexchange.saml.enableSessionIndexAutoLogin
+      Description: >
+Specifies whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.
+      Default: false
+      Version: 7.8.4
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: 
+      File: saml.properties
+  		
