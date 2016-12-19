@@ -66,11 +66,13 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
+import com.openexchange.mailaccount.json.fields.GetSwitch;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.json.fields.TransportAccountGetSwitch;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -438,6 +440,30 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
         writeAttribute(attribute, account, jAccount, OBJECT_ATTR_PUTTER);
     }
 
+    /**
+     * Adds value from account description for specified attribute to given JSON array.
+     *
+     * @param attribute The attribute to add
+     * @param account The account description
+     * @param jAccount The JSON array
+     * @throws OXException If adding attribute fails
+     */
+    public static void writeAttributeToArray(Attribute attribute, MailAccountDescription account, JSONArray jAccount) throws OXException {
+        writeAttribute(attribute, account, jAccount, ARRAY_ATTR_PUTTER);
+    }
+
+    /**
+     * Adds value from account description for specified attribute to given JSON object.
+     *
+     * @param attribute The attribute to add
+     * @param account The account description
+     * @param jAccount The JSON object
+     * @throws OXException If adding attribute fails
+     */
+    public static void writeAttributeToObject(Attribute attribute, MailAccountDescription account, JSONObject jAccount) throws OXException {
+        writeAttribute(attribute, account, jAccount, OBJECT_ATTR_PUTTER);
+    }
+
     private static interface AttributePutter {
 
         void putAttribute(Attribute attribute, Object value, JSONValue jValue) throws JSONException;
@@ -460,6 +486,46 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
             jValue.toArray().put(null == value ? JSONObject.NULL : value);
         }
     };
+
+    private static void writeAttribute(Attribute attribute, MailAccountDescription account, JSONValue jValue, AttributePutter putter) throws OXException {
+        try {
+            boolean hideForDefault = hideDetailsForDefaultAccount() && MailAccount.DEFAULT_ID == account.getId();
+            if (hideForDefault) {
+                if (HIDDEN_FOR_DEFAULT.contains(attribute)) {
+                    putter.putAttribute(attribute, null, jValue);
+                    return;
+                }
+            }
+
+            GetSwitch getter = new GetSwitch(account);
+            if (Attribute.PASSWORD_LITERAL == attribute || Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
+                putter.putAttribute(attribute, null, jValue);
+            } else if (Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL == attribute || Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL == attribute) {
+                putter.putAttribute(attribute, Boolean.valueOf(String.valueOf(attribute.doSwitch(getter))), jValue);
+            } else if (Attribute.META == attribute) {
+                putter.putAttribute(attribute, null, jValue);
+            } else if (Attribute.PRIMARY_ADDRESS_LITERAL == attribute) {
+                Object value  = attribute.doSwitch(getter);
+                if (null == value) {
+                    putter.putAttribute(attribute, null, jValue);
+                } else {
+                    putter.putAttribute(attribute, addr2String(value.toString()), jValue);
+                }
+            } else if (FULL_NAMES.contains(attribute)) {
+                Object value = attribute.doSwitch(getter);
+                if (null == value) {
+                    putter.putAttribute(attribute, null, jValue);
+                } else {
+                    putter.putAttribute(attribute, prepareFullname(account.getId(), value.toString()), jValue);
+                }
+            } else {
+                Object value  = attribute.doSwitch(getter);
+                putter.putAttribute(attribute, value, jValue);
+            }
+        } catch (JSONException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
 
     private static void writeAttribute(Attribute attribute, TransportAccount account, JSONValue jValue, AttributePutter putter) throws OXException {
         try {

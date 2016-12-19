@@ -188,10 +188,6 @@ public final class ListLsubCache {
 
     private static final String INBOX = "INBOX";
 
-    private static final boolean DO_STATUS = false;
-
-    private static final boolean DO_GETACL = false;
-
     /** The cache */
     static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> CACHE = new NonBlockingHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
 
@@ -220,7 +216,7 @@ public final class ListLsubCache {
      * @param contextId The context identifier
      */
     public static void dropFor(int userId, int contextId) {
-        dropFor(userId, contextId, true);
+        dropFor(userId, contextId, true, false);
     }
 
     /**
@@ -229,12 +225,33 @@ public final class ListLsubCache {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param notify Whether to notify
+     * @param enforceNewConnection Whether a new connection is supposed to be used for cache initialization on subsequent calls
      */
-    public static void dropFor(int userId, int contextId, boolean notify) {
-        getCache(userId, contextId).remove();
+    public static void dropFor(int userId, int contextId, boolean notify, boolean enforceNewConnection) {
+        if (enforceNewConnection) {
+            // Get the associated map
+            ConcurrentMap<Integer, Future<ListLsubCollection>> map = getCache(userId, contextId).get();
+            if (null != map) {
+                for (Future<ListLsubCollection> f : map.values()) {
+                    try {
+                        ListLsubCollection collection = getFrom(f);
+                        synchronized (collection) {
+                            collection.clear(enforceNewConnection);
+                        }
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+
+            }
+        } else {
+            getCache(userId, contextId).remove();
+        }
+
         if (notify) {
             fireInvalidateCacheEvent(userId, contextId);
         }
+
         LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
     }
 
@@ -304,7 +321,7 @@ public final class ListLsubCache {
         ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
         if (null != collection) {
             synchronized (collection) {
-                collection.clear();
+                collection.clear(false);
             }
 
             fireInvalidateCacheEvent(userId, contextId);
@@ -328,7 +345,7 @@ public final class ListLsubCache {
             if (checkTimeStamp(imapFolder, collection, ignoreSubscriptions)) {
                 return;
             }
-            collection.addSingle(fullName, imapFolder, DO_STATUS, DO_GETACL);
+            collection.addSingle(fullName, imapFolder);
 
             fireInvalidateCacheEvent(session);
         }
@@ -352,7 +369,7 @@ public final class ListLsubCache {
             if (checkTimeStamp(imapFolder, collection, ignoreSubscriptions)) {
                 return;
             }
-            collection.addSingle(imapFolder, subscribed, DO_STATUS, DO_GETACL);
+            collection.addSingle(imapFolder, subscribed);
 
             fireInvalidateCacheEvent(session);
         }
@@ -452,7 +469,7 @@ public final class ListLsubCache {
             if (false == exists) {
                 return ListLsubCollection.emptyEntryFor(fullName);
             }
-            collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+            collection.update(fullName, imapFolder, ignoreSubscriptions);
             fireInvalidateCacheEvent(session);
             entry = collection.getLsub(fullName);
             return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
@@ -499,35 +516,10 @@ public final class ListLsubCache {
                 if (false == exists) {
                     return ListLsubCollection.emptyEntryFor(fullName);
                 }
-                collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+                collection.update(fullName, imapFolder, ignoreSubscriptions);
                 fireInvalidateCacheEvent(session);
                 entry = collection.getList(fullName);
                 return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
-            }
-        } catch (MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
-    }
-
-    /**
-     * Initializes ACL list
-     *
-     * @param accountId The account identifier
-     * @param imapStore The IMAP store
-     * @param session The session
-     * @param ignoreSubscriptions Whether to ignore subscriptions
-     * @throws OXException If initialization fails
-     */
-    public static void initACLs(int accountId, IMAPStore imapStore, Session session, boolean ignoreSubscriptions) throws OXException {
-        if (DO_GETACL) {
-            // Already perform during initialization
-            return;
-        }
-        try {
-            IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-            ListLsubCollection collection = getCollection(accountId, imapFolder, session, ignoreSubscriptions);
-            synchronized (collection) {
-                collection.initACLs(imapFolder);
             }
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -699,7 +691,7 @@ public final class ListLsubCache {
             if (false == exists) {
                 return ListLsubCollection.emptyEntryFor(fullName);
             }
-            collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+            collection.update(fullName, imapFolder, ignoreSubscriptions);
             fireInvalidateCacheEvent(session);
             entry = collection.getList(fullName);
             return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
@@ -736,11 +728,11 @@ public final class ListLsubCache {
          * Check collection's deprecation status and stamp
          */
         if (collection.isDeprecated()) {
-            collection.reinit(imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+            collection.reinit(imapFolder, ignoreSubscriptions);
             return true;
         }
         if ((System.currentTimeMillis() - collection.getStamp()) > getTimeout()) {
-            collection.reinit(imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+            collection.reinit(imapFolder, ignoreSubscriptions);
             return true;
         }
         return false;
@@ -793,7 +785,7 @@ public final class ListLsubCache {
             /*
              * Update & re-check
              */
-            collection.reinit(imapStore, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+            collection.reinit(imapStore, ignoreSubscriptions);
             fireInvalidateCacheEvent(session);
             if (null == optParentFullName) {
                 return subscribedOnly ? collection.getLsubs() : collection.getLists();
@@ -844,7 +836,7 @@ public final class ListLsubCache {
                 /*
                  * Update & re-check
                  */
-                collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+                collection.update(fullName, imapFolder, ignoreSubscriptions);
                 fireInvalidateCacheEvent(session);
                 listEntry = collection.getList(fullName);
             }
@@ -1035,7 +1027,7 @@ public final class ListLsubCache {
                     } catch (MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);
                     }
-                    return new ListLsubCollection(imapFolder, shared, user, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+                    return new ListLsubCollection(imapFolder, shared, user, ignoreSubscriptions);
                 }
             });
             f = map.putIfAbsent(Integer.valueOf(accountId), ft);

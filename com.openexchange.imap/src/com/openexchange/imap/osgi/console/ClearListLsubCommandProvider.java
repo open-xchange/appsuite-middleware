@@ -47,81 +47,38 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.imap.osgi.console;
 
-import java.util.EnumSet;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.java.Strings;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
+import com.openexchange.imap.cache.ListLsubCache;
 
 /**
- * {@link AuthType} - The authentication type.
+ * {@link ClearListLsubCommandProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
-public enum AuthType {
+public class ClearListLsubCommandProvider implements CommandProvider {
 
     /**
-     * The login authentication type.
+     * Initializes a new {@link ClearListLsubCommandProvider}.
      */
-    LOGIN("login"),
-    /**
-     * The XOAUTH2 authentication type; see <a href="https://developers.google.com/gmail/xoauth2_protocol">https://developers.google.com/gmail/xoauth2_protocol</a>
-     */
-    OAUTH("XOAUTH2"),
-    /**
-     * The OAUTHBEARER authentication type; see <a href="https://tools.ietf.org/html/rfc7628">https://tools.ietf.org/html/rfc7628</a>.
-     */
-    OAUTHBEARER("OAUTHBEARER"),
-    ;
-
-    private final String name;
-
-    private AuthType(String name) {
-        this.name = name;
+    public ClearListLsubCommandProvider() {
+        super();
     }
 
-    /**
-     * Gets the name
-     *
-     * @return The name
-     */
-    public String getName() {
-        return name;
+    @Override
+    public String getHelp() {
+        return "clearimaplistlsub <user-id> <context-id> - Clears the content of the IMAP LIST/LSUB cache for the primary account\n";
     }
 
-    private static final Map<String, AuthType> MAP;
-    static {
-        ImmutableMap.Builder<String, AuthType> builder = ImmutableMap.builder();
-        for (AuthType authType : AuthType.values()) {
-            builder.put(Strings.asciiLowerCase(authType.name), authType);
-        }
-        // Legacy behavior
-        builder.put("oauth", AuthType.OAUTH);
-        MAP = builder.build();
-    }
+    public void _clearimaplistlsub(final CommandInterpreter ci) {
+        String sUserId = ci.nextArgument();
+        String sContextId = ci.nextArgument();
 
-    /**
-     * Parses specified string into an AuthType.
-     *
-     * @param authTypeStr The string to parse to an AuthType
-     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
-     */
-    public static final AuthType parse(final String authTypeStr) {
-        return null == authTypeStr ? null : MAP.get(Strings.asciiLowerCase(authTypeStr));
-    }
-
-    private static final EnumSet<AuthType> OAUTH_TYPES = EnumSet.of(AuthType.OAUTH, AuthType.OAUTHBEARER);
-
-    /**
-     * Checks if given auth type is one of known OAuth-based types; either XOAUTH2 or OAUTHBEARER.
-     *
-     * @param authType The auth type to check
-     * @return <code>true</code> auth type is one of known OAuth-based types; otherwise <code>false</code>
-     */
-    public static boolean isOAuthType(AuthType authType) {
-        return null != authType && OAUTH_TYPES.contains(authType);
+        ListLsubCache.dropFor(Integer.parseInt(sUserId.trim()), Integer.parseInt(sContextId.trim()), false, true);
+        ci.println("Cleared LIST/LSUB cache for user " + sUserId + " in context " + sContextId);
     }
 
 }
