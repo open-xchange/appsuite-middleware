@@ -1,0 +1,15 @@
+Source: open-xchange-cassandra
+Section: web
+Priority: optional
+Maintainer: Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-cassandra
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Provides: open-xchange-cassandra
+Description: The Open-Xchange Cassandra Service
+ This package provides connectivity to a Cassandra cluster via a Cassandra Service
