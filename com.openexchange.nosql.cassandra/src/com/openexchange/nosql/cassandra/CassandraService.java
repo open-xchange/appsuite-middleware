@@ -63,17 +63,17 @@ import com.openexchange.exception.OXException;
 public interface CassandraService {
 
     /**
-     * Returns the Cassandra {@link Cluster} instance with the specified name
+     * Returns the Cassandra {@link Cluster} instance
      * 
      * @return The Cassandra {@link Cluster} instance
-     * @throws OXException if there is no such Cassandra {@link Cluster} or any other error is occurred
+     * @throws OXException if the Cassandra {@link Cluster} cannot be returned or any other error is occurred
      */
     Cluster getCluster() throws OXException;
 
     /**
      * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}. Note that the returned
      * {@link Session} is not bound to any keyspace, meaning that all tables in the CQL queries
-     * performed with that {@link Session} will have to be prefixed with the keyspace
+     * performed with that {@link Session} will have to be prefixed with the keyspace name.
      * 
      * @return a Cassandra {@link Session} for the Cassandra {@link Cluster}
      * @throws OXException if the Cassandra {@link Session} cannot be returned
@@ -81,7 +81,7 @@ public interface CassandraService {
     Session getSession() throws OXException;
 
     /**
-     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}
+     * Returns a Cassandra {@link Session} for the specified keyspace
      * 
      * @param keyspace The keyspace name
      * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified keyspace
@@ -90,7 +90,7 @@ public interface CassandraService {
     Session getSession(String keyspace) throws OXException;
 
     /**
-     * Returns a Cassandra {@link Session} for an asynchronous query
+     * Returns a Cassandra {@link Session} for an asynchronous query for the specified keyspace
      * 
      * @param keyspace The keyspace name
      * @return The Cassandra {@link Session} encapsulated in a {@link ListenableFuture} object
