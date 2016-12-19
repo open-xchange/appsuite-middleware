@@ -92,7 +92,7 @@ public class CassandraServiceImpl implements CassandraService {
      */
     private final ConcurrentMap<String, ListenableFuture<Session>> asynchronousSessions;
     /**
-     * A multipurpose global keyspace-less Cassandra {@link Session}. Used for
+     * A multi-purpose global keyspace-less Cassandra {@link Session}. Used for
      * retrieving statistics for the {@link Cluster}
      */
     private final Session globalSession;
@@ -213,17 +213,20 @@ public class CassandraServiceImpl implements CassandraService {
      * Shutdown the service
      */
     public void shutdown() {
+        LOGGER.info("Cassandra Service is shutting down");
         if (cluster == null || cluster.isClosed()) {
             return;
         }
 
         // Close synchronous session
+        LOGGER.info("Closing synchronous session");
         for (CassandraSession session : synchronousSessions.values()) {
             session.getSession().close();
         }
         synchronousSessions.clear();
 
         // Close asynchronous sessions
+        LOGGER.info("Closing asynchronous session");
         for (ListenableFuture<Session> session : asynchronousSessions.values()) {
             Session futureSession = null;
             try {
@@ -245,17 +248,19 @@ public class CassandraServiceImpl implements CassandraService {
         asynchronousSessions.clear();
 
         // Close the global session
+        LOGGER.info("Closing global session");
         if (globalSession != null && !globalSession.isClosed()) {
             globalSession.close();
         }
 
         // Close the cluster
+        LOGGER.info("Closing cluster connection");
         cluster.close();
     }
 
     /**
      * Helper method for retrieving a {@link CassandraSession} from the local cache. If no session exists
-     * one will be created and cached for future user.
+     * one will be created and cached for future use.
      * 
      * @param keyspace The keyspace
      * @return A {@link CassandraSession}
