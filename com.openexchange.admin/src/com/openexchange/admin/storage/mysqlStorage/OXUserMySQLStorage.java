@@ -135,6 +135,7 @@ import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
@@ -3673,8 +3674,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     
     private List<Pair<Integer, String>> prepareFolders(int contextId, int userId, Connection con) throws StorageException, SQLException {
         List<Pair<Integer, String>> result = new ArrayList<>(6);
-        Locale locale = getLocale(contextId, userId, con);
-        StringHelper translator = StringHelper.valueOf(locale);
+        String language = getLanguage(contextId, userId, con);
+        Locale locale = LocaleTools.getLocale(language);
+        StringHelper helper = StringHelper.valueOf(locale);
         boolean needTranslation = true;
         if (Locale.ENGLISH.equals(locale) || Locale.US.equals(locale)) {
             needTranslation = false;
@@ -3689,15 +3691,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             while (rs.next()) {
                 int folderId = rs.getInt(1);
                 String name = rs.getString(2);
+                String translatedName = name;
                 if (needTranslation) {
                     int parent = rs.getInt(3);
-                    String translatedName = translator.getString(name);
+                    translatedName = helper.getString(name);
                     int i = 1;
-                    while (existsFolder(contextId, parent, translatedName, con)) {
+                    while (existsFolder(contextId, parent, folderId, translatedName, con)) {
                         translatedName = FileStorageUtility.enhance(translatedName, i++);
                     }
                 }
-                result.add(new Pair<Integer, String>(folderId, name));
+                result.add(new Pair<Integer, String>(folderId, translatedName));
             }
             return result;
         } finally {
@@ -3705,14 +3708,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private boolean existsFolder(int contextId, int parent, String name, Connection con) throws SQLException {
+    private boolean existsFolder(int contextId, int parent, int folderId, String name, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ? AND fname = ?");
+            stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ? AND fuid <> ? AND fname = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, parent);
-            stmt.setString(3, name);
+            stmt.setInt(3, folderId);
+            stmt.setString(4, name);
             rs = stmt.executeQuery();
             return rs.next();
         } finally {
@@ -3720,7 +3724,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
     
-    private Locale getLocale(int contextId, int userId, Connection con) throws SQLException {
+    private String getLanguage(int contextId, int userId, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -3728,14 +3732,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            String locale;
+            String language;
             if (rs.next()) {
-                locale = rs.getString(1);
-                if (Strings.isNotEmpty(locale)) {
-                    return new Locale(locale);
+                language = rs.getString(1);
+                if (Strings.isNotEmpty(language)) {
+                    return language;
                 } 
             }
-            return Locale.getDefault();
+            return Locale.getDefault().getLanguage();
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
