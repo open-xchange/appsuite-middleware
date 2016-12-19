@@ -76,7 +76,7 @@ public class CassandraActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
@@ -86,7 +86,7 @@ public class CassandraActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.DeferredActivator#startBundle()
      */
     @Override
@@ -108,7 +108,7 @@ public class CassandraActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
      */
     @Override

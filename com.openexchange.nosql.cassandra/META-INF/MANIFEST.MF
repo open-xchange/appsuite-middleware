@@ -5,10 +5,10 @@ Bundle-SymbolicName: com.openexchange.nosql.cassandra
 Bundle-Version: 7.8.4
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: lib/cassandra-driver-core-3.1.2.jar,
+Bundle-ClassPath: .,
+ lib/cassandra-driver-core-3.1.2.jar,
  lib/cassandra-driver-extras-3.1.2.jar,
  lib/cassandra-driver-mapping-3.1.2.jar,
- .,
  lib/metrics-core-3.2.0.jar,
  lib/netty-all-4.0.37.Final.jar
 Import-Package: com.google.common.base,
@@ -28,3 +28,21 @@ Import-Package: com.google.common.base,
  org.slf4j,
  sun.misc
 Bundle-Activator: com.openexchange.nosql.cassandra.osgi.CassandraActivator
+Export-Package: com.datastax.driver.core,
+ com.datastax.driver.core.exceptions,
+ com.datastax.driver.core.policies,
+ com.datastax.driver.core.querybuilder,
+ com.datastax.driver.core.schemabuilder,
+ com.datastax.driver.core.utils,
+ com.datastax.driver.extras.codecs,
+ com.datastax.driver.extras.codecs.arrays,
+ com.datastax.driver.extras.codecs.date,
+ com.datastax.driver.extras.codecs.enums,
+ com.datastax.driver.extras.codecs.guava,
+ com.datastax.driver.extras.codecs.jdk8,
+ com.datastax.driver.extras.codecs.joda,
+ com.datastax.driver.extras.codecs.json,
+ com.datastax.driver.mapping,
+ com.datastax.driver.mapping.annotations,
+ com.openexchange.nosql.cassandra,
+ com.openexchange.nosql.cassandra.exceptions
