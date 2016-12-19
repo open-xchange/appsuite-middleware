@@ -557,7 +557,11 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexhange.mail.authType</span> |
 |:----------------|:--------|
+<<<<<<< HEAD
 | __Description__ | Specifies the authentication type which should be used for primary account's mail access. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
+=======
+| __Description__ | Specifies the authentication type which should be used for mail access. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
+>>>>>>> Automatically updated properties markdown
 | __Default__ | login  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
@@ -567,7 +571,11 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexhange.mail.transport.authType</span> |
 |:----------------|:--------|
+<<<<<<< HEAD
 | __Description__ | Specifies the authentication type which should be used for primary account's mail transport. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
+=======
+| __Description__ | Specifies the authentication type which should be used for mail transport. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
+>>>>>>> Automatically updated properties markdown
 | __Default__ | login  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
