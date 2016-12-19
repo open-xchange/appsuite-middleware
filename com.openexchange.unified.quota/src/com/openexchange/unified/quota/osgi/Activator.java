@@ -47,24 +47,33 @@
  *
  */
 
-package com.openexchange.startup.impl;
+package com.openexchange.unified.quota.osgi;
 
-import com.openexchange.startup.SignalStartedService;
-
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.filestore.unified.quota.UnifiedQuotaPreferenceItem;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link SignalStartedServiceImpl} - The singleton started service implementation.
+ * {@link Activator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public final class SignalStartedServiceImpl implements SignalStartedService {
+public class Activator extends HousekeepingActivator{
 
-    /**
-     * Initializes a new {@link SignalStartedServiceImpl}.
-     */
-    public SignalStartedServiceImpl() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{ConfigViewFactory.class};
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        UnifiedQuotaPreferenceItem item = new UnifiedQuotaPreferenceItem(this);
+        registerService(PreferencesItemService.class, item);
+        registerService(ConfigTreeEquivalent.class, item);
+
     }
 
 }

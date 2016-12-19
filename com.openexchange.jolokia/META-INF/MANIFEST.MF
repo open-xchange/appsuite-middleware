@@ -1,7 +1,7 @@
 Bundle-Activator: com.openexchange.jolokia.osgi.CustomJolokiaBundleActivator
 Bundle-ClassPath: .,
  lib/json-simple-1.1.jar,
- lib/jolokia-osgi-bundle-1.3.4.jar
+ lib/jolokia-osgi-1.3.5.jar
 Bundle-Description: Jolokia agent exposing JMX via HTTP/JSON
 Bundle-ManifestVersion: 2
 Bundle-Name: Jolokia Agent custom
@@ -13,11 +13,16 @@ Import-Package: com.openexchange.config,
  com.openexchange.i18n,
  com.openexchange.osgi,
  com.openexchange.server,
+ javax.crypto,
+ javax.crypto.spec,
  javax.management,
  javax.management.openmbean,
  javax.management.relation,
  javax.management.remote,
  javax.naming,
+ javax.security.auth,
+ javax.security.auth.callback,
+ javax.security.auth.login,
  javax.servlet,
  javax.servlet.http,
  javax.xml.datatype,
@@ -26,7 +31,9 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.apache.log4j,
  org.osgi.framework;version="[1.0.0,2.0.0)",
+ org.osgi.service.cm,
  org.osgi.service.http,
+ org.osgi.service.log;version="[1.0.0,2.0.0)",
  org.osgi.util.tracker;version="[1.0.0,2.0.0)",
  org.slf4j,
  org.w3c.dom,

@@ -9,7 +9,6 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-spamhandler-parallels
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-parallels (>=@OXVERSION@), open-xchange-spamhandler-spamassassin (>=@OXVERSION@)
-Conflicts: open-xchange-spamhandler-cloudmark, open-xchange-spamhandler-default, open-xchange-spamhandler-spamexperts
 Provides: open-xchange-spamhandler
 Description: Spam handler for Parallels extensions
  This package contains the spam handler implementation for Parallels extension. This spam handler extends the spam handler for SpamAssassin

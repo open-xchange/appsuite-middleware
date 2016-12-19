@@ -71,6 +71,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -91,6 +92,8 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.java.Streams;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.osgi.ServiceListings;
 
 /**
  * {@link FilestoreDataMover} - The base implementation to move files from one storage to another.
@@ -105,6 +108,17 @@ public abstract class FilestoreDataMover implements Callable<Void> {
 
     // ------------------------------------------------------------------------------------------------------------------
 
+    private static final AtomicReference<ServiceListing<FilestoreDataMoveListener>> LISTENERS_REF = new AtomicReference<ServiceListing<FilestoreDataMoveListener>>(null);
+
+    /**
+     * Applies given listener listing.
+     *
+     * @param listeners The listeners to apply
+     */
+    public static void setListeners(ServiceListing<FilestoreDataMoveListener> listeners) {
+        LISTENERS_REF.set(listeners);
+    }
+
     /**
      * Creates a new instance appropriate for moving the files for a single context.
      *
@@ -114,7 +128,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @return The new instance
      */
     public static FilestoreDataMover newContextMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx) {
-        return new ContextFilestoreDataMover(srcFilestore, dstFilestore, ctx);
+        return new ContextFilestoreDataMover(srcFilestore, dstFilestore, ctx, LISTENERS_REF.get());
     }
 
     /**
@@ -127,7 +141,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @return The new instance
      */
     public static FilestoreDataMover newUserMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
-        return new UserFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
+        return new UserFilestoreDataMover(srcFilestore, dstFilestore, user, ctx, LISTENERS_REF.get());
     }
 
     /**
@@ -143,7 +157,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @return The new instance
      */
     public static FilestoreDataMover newUser2MasterMover(Filestore srcFilestore, Filestore dstFilestore, User user, User masterUser, Context ctx) {
-        return new User2MasterUserFilestoreDataMover(srcFilestore, dstFilestore, user, masterUser, ctx);
+        return new User2MasterUserFilestoreDataMover(srcFilestore, dstFilestore, user, masterUser, ctx, LISTENERS_REF.get());
     }
 
     /**
@@ -160,7 +174,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @return The new instance
      */
     public static FilestoreDataMover newUserFromMasterMover(Filestore srcFilestore, Filestore dstFilestore, long maxQuota, User user, User masterUser, Context ctx) {
-        return new MasterUser2UserFilestoreDataMover(srcFilestore, dstFilestore, maxQuota, masterUser, user, ctx);
+        return new MasterUser2UserFilestoreDataMover(srcFilestore, dstFilestore, maxQuota, masterUser, user, ctx, LISTENERS_REF.get());
     }
 
     /**
@@ -176,7 +190,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @return The new instance
      */
     public static FilestoreDataMover newContext2UserMover(Filestore srcFilestore, Filestore dstFilestore, long maxQuota, User user, Context ctx) {
-        return new Context2UserFilestoreDataMover(srcFilestore, dstFilestore, maxQuota, user, ctx);
+        return new Context2UserFilestoreDataMover(srcFilestore, dstFilestore, maxQuota, user, ctx, LISTENERS_REF.get());
     }
 
     /**
@@ -191,7 +205,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @return The new instance
      */
     public static FilestoreDataMover newUser2ContextMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
-        return new User2ContextFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
+        return new User2ContextFilestoreDataMover(srcFilestore, dstFilestore, user, ctx, LISTENERS_REF.get());
     }
 
     // ------------------------------------------------------------------------------------------------------------------
@@ -208,15 +222,28 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     /** The queue holding post-process tasks */
     protected final Queue<PostProcessTask> postProcessTasks;
 
+    /** The tracked listeners */
+    private final ServiceListing<FilestoreDataMoveListener> listeners;
+
     /**
      * Initializes a new {@link FilestoreDataMover}.
      */
-    protected FilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx) {
+    protected FilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx, ServiceListing<FilestoreDataMoveListener> listeners) {
         super();
         this.srcFilestore = srcFilestore;
         this.dstFilestore = dstFilestore;
         this.ctx = ctx;
+        this.listeners = listeners;
         postProcessTasks = new ConcurrentLinkedQueue<PostProcessTask>();
+    }
+
+    /**
+     * Gets the currently available listeners
+     *
+     * @return The listeners to notify
+     */
+    protected ServiceListing<FilestoreDataMoveListener> getListeners() {
+        return null == listeners ? ServiceListings.<FilestoreDataMoveListener>emptyList() : listeners;
     }
 
     @Override

@@ -70,8 +70,9 @@ public interface QuotaFileStorage extends FileStorage {
      * Gets the total available quota
      *
      * @return The total quota, <code>0</code> (zero) if no quota at all (deny all), or less than <code>0</code> (zero) for unlimited/not set
+     * @throws OXException If quota limit cannot be returned
      */
-    long getQuota();
+    long getQuota() throws OXException;
 
     /**
      * Gets the currently used quota

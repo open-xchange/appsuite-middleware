@@ -77,23 +77,25 @@ public interface QuotaFileStorageService {
     /**
      * Gets a {@link QuotaFileStorage} instance for specified context.
      * <p>
-     * This the same as calling {@link #getQuotaFileStorage(int, int)} with the first parameter set to <code>-1</code>.
+     * This the same as calling {@link #getQuotaFileStorage(int, int, Info)} with the first parameter set to <code>-1</code>.
      *
      * @param contextId The context identifier
+     * @param info The information for what/whom the storage is supposed to be used
      * @return An appropriate {@code QuotaFileStorage} instance
      * @throws OXException If an appropriate {@code QuotaFileStorage} instance cannot be returned
      */
-    QuotaFileStorage getQuotaFileStorage(int contextId) throws OXException;
+    QuotaFileStorage getQuotaFileStorage(int contextId, Info info) throws OXException;
 
     /**
      * Gets a {@link QuotaFileStorage} instance for specified user (or context in case <tt>userId</tt> is <code>-1</code>).
      *
      * @param userId The user identifier; pass <code>-1</code> to access context-specific file storage
      * @param contextId The context identifier
+     * @param info The information for what/whom the storage is supposed to be used
      * @return An appropriate {@code QuotaFileStorage} instance
      * @throws OXException If an appropriate {@code QuotaFileStorage} instance cannot be returned
      */
-    QuotaFileStorage getQuotaFileStorage(int userId, int contextId) throws OXException;
+    QuotaFileStorage getQuotaFileStorage(int userId, int contextId, Info info) throws OXException;
 
     /**
      * Gets the appropriate URI pointing to proper file storage for specified user (or context in case <tt>userId</tt> is <code>-1</code>).

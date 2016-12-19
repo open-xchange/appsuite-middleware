@@ -56,6 +56,7 @@ import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -85,7 +86,7 @@ public class CreateInfoitemSolver implements ProblemSolver {
 
     private final DatabaseImpl database;
 
-    private FileStorage storage;
+    private final FileStorage storage;
 
     private final User admin;
 
@@ -115,7 +116,7 @@ public class CreateInfoitemSolver implements ProblemSolver {
                         LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", identifier, context.getContextId());
                     }
 
-                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId());
+                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive(fsOwner));
                     try {
                         document.setFileSize(storage.getFileSize(identifier));
                         document.setFileMIMEType(storage.getMimeType(identifier));

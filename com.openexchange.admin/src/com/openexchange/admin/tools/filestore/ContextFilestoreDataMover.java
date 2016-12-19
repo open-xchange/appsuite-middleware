@@ -69,6 +69,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.osgi.ServiceListing;
 
 /**
  * {@link ContextFilestoreDataMover} - The implementation to move files from one storage to another for a single context.
@@ -83,8 +84,8 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
     /**
      * Initializes a new {@link ContextFilestoreDataMover}.
      */
-    protected ContextFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx) {
-        super(srcFilestore, dstFilestore, ctx);
+    protected ContextFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx, ServiceListing<FilestoreDataMoveListener> listeners) {
+        super(srcFilestore, dstFilestore, ctx, listeners);
     }
 
     /**
@@ -109,11 +110,24 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
         // rsync can be used in case both file storages are disk-based storages
         boolean useRsync = "file".equalsIgnoreCase(srcBaseUri.getScheme()) && "file".equalsIgnoreCase(dstBaseUri.getScheme());
 
+        final URI srcFullUri;
+        final URI dstFullUri;
+
         Runnable finalTask = null;
         Reverter reverter = null;
         if (useRsync) {
             // Invoke rsync process
-            URI srcFullUri = getFullyQualifyingUriForContext(contextId, srcBaseUri);
+            srcFullUri = getFullyQualifyingUriForContext(contextId, srcBaseUri);
+            dstFullUri = getFullyQualifyingUriForContext(contextId, dstBaseUri);
+
+            try {
+                for (FilestoreDataMoveListener listener : getListeners()) {
+                    listener.onBeforeContextDataMove(contextId, srcFullUri, dstFullUri);
+                }
+            } catch (OXException e) {
+                throw new StorageException(e);
+            }
+
             File fsDirectory = new File(srcFullUri);
             if (fsDirectory.exists()) {
                 ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", fsDirectory.getAbsolutePath(), ensureEndingSlash(dstBaseUri.getPath()).toString() });
@@ -126,7 +140,6 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
 
                     @Override
                     public void revertCopy() throws StorageException {
-                        URI dstFullUri = getFullyQualifyingUriForContext(contextId, dstBaseUri);
                         File dfsDirectory = new File(dstFullUri);
                         try {
                             ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", dfsDirectory.getAbsolutePath(), ensureEndingSlash(srcBaseUri.getPath()).toString() });
@@ -142,10 +155,14 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
             }
         } else {
             // Not possible to use rsync; e.g. move from disk to S3
-            final URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, srcBaseUri));
-            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, dstBaseUri));
+            srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, srcBaseUri));
+            dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, dstBaseUri));
 
             try {
+                for (FilestoreDataMoveListener listener : getListeners()) {
+                    listener.onBeforeContextDataMove(contextId, srcFullUri, dstFullUri);
+                }
+
                 // Grab associated file storages
                 final FileStorage srcStorage = FileStorages.getFileStorageService().getFileStorage(srcFullUri);
                 FileStorage dstStorage = FileStorages.getFileStorageService().getFileStorage(dstFullUri);
@@ -232,6 +249,10 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(ctx);
             error = false;
+
+            for (FilestoreDataMoveListener listener : getListeners()) {
+                listener.onAfterContextDataMoved(contextId, srcFullUri, dstFullUri);
+            }
 
             try {
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);

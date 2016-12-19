@@ -54,6 +54,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Nov 25 2016 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.8.4 release
 * Thu Nov 24 2016 Carsten Hoeger <choeger@open-xchange.com>

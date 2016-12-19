@@ -2803,7 +2803,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT login, password FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT login, password, oauth FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, accountId);
             stmt.setLong(3, userId);
@@ -2817,6 +2817,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 final String password = result.getString(2);
                 if (!result.wasNull()) {
                     transportAccount.setTransportPassword(password);
+                }
+
+                final int oauthId = result.getInt(3);
+                if (result.wasNull()) {
+                    transportAccount.setTransportOAuthId(-1);
+                } else {
+                    transportAccount.setTransportOAuthId(oauthId < 0 ? -1 : oauthId);
                 }
             }
         } catch (final SQLException e) {

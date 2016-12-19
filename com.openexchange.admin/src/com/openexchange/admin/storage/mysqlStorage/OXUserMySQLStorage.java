@@ -117,6 +117,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -1289,14 +1290,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
                         cache.invalidateGroup(ctx.getId().toString());
                         cache = cacheService.getCache("QuotaFileStorages");
-                        cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                        if (null != quotaAffectedUserIDs) {
-                            List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
-                            for (Integer userID : quotaAffectedUserIDs) {
-                                keys.add(userID);
-                            }
-                            cache.removeFromGroup(keys, String.valueOf(ctx.getId()));
-                        }
+                        cache.invalidateGroup(Integer.toString(contextId));
                         if (displayNameUpdate) {
                             final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
                             if (fuid > 0) {
@@ -2925,7 +2919,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         if (owner <= 0 || owner == userId) {
                             // Delete file storage
                             QuotaFileStorageService qfsService = FileStorages.getQuotaFileStorageService();
-                            QuotaFileStorage quotaFileStorage = qfsService.getQuotaFileStorage(userId, contextId);
+                            QuotaFileStorage quotaFileStorage = qfsService.getQuotaFileStorage(userId, contextId, Info.administrative());
 
                             try {
                                 quotaFileStorage.remove();
@@ -3039,7 +3033,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
                             cache = cacheService.getCache("QuotaFileStorages");
-                            cache.removeFromGroup(user.getId(), ctx.getId().toString());
+                            cache.invalidateGroup(Integer.toString(contextId));
+                            cache = cacheService.getCache("SingleUserContext");
+                            cache.remove(Integer.valueOf(contextId));
                         } catch (final OXException e) {
                             log.error("", e);
                         }
@@ -3212,7 +3208,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
                             cache = cacheService.getCache("QuotaFileStorages");
-                            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
+                            cache.invalidateGroup(Integer.toString(contextId));
                         }
                     } catch (final OXException e) {
                         log.error("", e);

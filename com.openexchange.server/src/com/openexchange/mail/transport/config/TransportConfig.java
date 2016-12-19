@@ -50,7 +50,6 @@
 package com.openexchange.mail.transport.config;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.UrlInfo;
@@ -99,7 +98,7 @@ public abstract class TransportConfig extends MailConfig {
             transportAccount = storage.getTransportAccount(accountId, userId, contextId);
         }
         transportConfig.accountId = accountId;
-        fillLoginAndPassword(transportConfig, session, UserStorage.getInstance().getUser(userId, contextId).getLoginInfo(), transportAccount);
+        fillLoginAndPassword(transportConfig, session, getUser(session).getLoginInfo(), transportAccount);
         transportConfig.setStartTls(transportAccount.isTransportStartTls());
 
         UrlInfo urlInfo = TransportConfig.getTransportServerURL(transportAccount);

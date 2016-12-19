@@ -10,6 +10,5 @@ Package: open-xchange-spamhandler-default
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Conflicts: open-xchange-spamhandler-spamassassin
 Provides: open-xchange-spamhandler
 Description: The Open-Xchange Default Spam Handler

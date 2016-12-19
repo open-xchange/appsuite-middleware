@@ -2,14 +2,14 @@ Source: open-xchange-dav
 Section: web
 Priority: optional
 Maintainer: Steffen Templin <steffen.templin@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@), open-xchange-freebusy (>= @OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@), open-xchange-freebusy (>= @OXVERSION@), open-xchange-pns-impl (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-dav
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
-Depends: ${misc:Depends}, open-xchange-freebusy (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-freebusy (>= @OXVERSION@), open-xchange-pns-impl (>= @OXVERSION@)
 Description: The Open-Xchange CardDAV and CalDAV implementation
 Replaces: open-xchange-caldav (<< 6.21.0-0), open-xchange-carddav (<< 6.21.0-0), open-xchange-webdav-directory (<< 6.21.0-0), open-xchange-webdav-acl (<< 6.21.0-0)
 Conflicts: open-xchange-caldav (<< 6.21.0-0), open-xchange-carddav (<< 6.21.0-0), open-xchange-webdav-directory (<< 6.21.0-0), open-xchange-webdav-acl (<< 6.21.0-0)

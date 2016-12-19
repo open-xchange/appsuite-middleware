@@ -68,6 +68,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
@@ -188,8 +189,8 @@ public final class VersionControlUtil {
 
         int contextId = context.getContextId();
         QuotaFileStorageService qfs = FileStorages.getQuotaFileStorageService();
-        QuotaFileStorage prevFs = qfs.getQuotaFileStorage(previousOwner, contextId);
-        QuotaFileStorage newFs = qfs.getQuotaFileStorage(newOwner, contextId);
+        QuotaFileStorage prevFs = qfs.getQuotaFileStorage(previousOwner, contextId, Info.drive(previousOwner));
+        QuotaFileStorage newFs = qfs.getQuotaFileStorage(newOwner, contextId, Info.drive(newOwner));
         if (prevFs.getUri().equals(newFs.getUri())) {
             return Collections.emptyMap();
         }
@@ -264,7 +265,8 @@ public final class VersionControlUtil {
         OXFolderAccess folderAccess = new OXFolderAccess(con, context);
         int contextId = context.getContextId();
         QuotaFileStorageService qfs = FileStorages.getQuotaFileStorageService();
-        QuotaFileStorage destFs = qfs.getQuotaFileStorage(folderAccess.getFolderOwner((int) destinationFolder), contextId);
+        int folderOwner = folderAccess.getFolderOwner((int) destinationFolder);
+        QuotaFileStorage destFs = qfs.getQuotaFileStorage(folderOwner, contextId, Info.drive(folderOwner));
         Map<Integer, DocumentMetadata> oldDocs = asMap(oldDocuments);
 
         Map<Integer, List<VersionControlResult>> resultMap = new LinkedHashMap<Integer, List<VersionControlResult>>(documents.size());
@@ -273,7 +275,8 @@ public final class VersionControlUtil {
             Integer id = Integer.valueOf(document.getId());
             DocumentMetadata oldDoc = oldDocs.get(id);
             if (null != oldDoc) {
-                QuotaFileStorage srcFs = qfs.getQuotaFileStorage(folderAccess.getFolderOwner((int) oldDoc.getFolderId()), contextId);
+                folderOwner = folderAccess.getFolderOwner((int) oldDoc.getFolderId());
+                QuotaFileStorage srcFs = qfs.getQuotaFileStorage(folderOwner, contextId, Info.drive(folderOwner));
                 if (srcFs.getUri().equals(destFs.getUri())) {
                     // Same, so nothing to do
                 } else {

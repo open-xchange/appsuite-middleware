@@ -101,6 +101,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/linkedinsubscribe.properties
 
 %changelog
+* Fri Nov 25 2016 Marc Arens <marc.arens@open-xchange.com>
+Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Marc Arens <marc.arens@open-xchange.com>
 First release candidate for 7.8.3 release
 * Thu Nov 24 2016 Marc Arens <marc.arens@open-xchange.com>

@@ -53,7 +53,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.Tools;
 import com.openexchange.user.UserService;
@@ -67,15 +67,18 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        Filter filter = Tools.generateServiceFilter(context, ConfigurationService.class, ContextService.class, UserService.class);
+    public synchronized void start(BundleContext context) throws Exception {
+        Filter filter = Tools.generateServiceFilter(context, ConfigViewFactory.class, ContextService.class, UserService.class);
         tracker = new ServiceTracker<Object, Object>(context, filter, new SpamdServiceRegisterer(context));
         tracker.open();
     }
 
     @Override
-    public void stop(BundleContext context) {
-        tracker.close();
-        tracker = null;
+    public synchronized void stop(BundleContext context) {
+        ServiceTracker<Object,Object> tracker = this.tracker;
+        if (null != tracker) {
+            this.tracker = null;
+            tracker.close();
+        }
     }
 }

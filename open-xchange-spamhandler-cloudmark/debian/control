@@ -10,6 +10,5 @@ Package: open-xchange-spamhandler-cloudmark
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Conflicts: open-xchange-spamhandler-default
 Provides: open-xchange-spamhandler
 Description: The Open-Xchange Cloudmark Spamhandler can be used in a generic way since it can be configured to report Spam and/or Ham messages to any configured EMail address.

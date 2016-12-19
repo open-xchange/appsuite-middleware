@@ -77,6 +77,7 @@ public class DefaultPushNotification implements PushNotification {
         private int userId;
         private int contextId;
         private String topic;
+        private String sourceToken;
         private Map<String, Object> messageData;
 
         /**
@@ -119,6 +120,16 @@ public class DefaultPushNotification implements PushNotification {
         }
 
         /**
+         * Sets the source token
+         * @param sourceToken The source token
+         * @return This builder
+         */
+        public Builder sourceToken(String sourceToken) {
+            this.sourceToken = sourceToken;
+            return this;
+        }
+
+        /**
          * Sets the message data
          * @param messageData The message data
          * @return This builder
@@ -144,7 +155,7 @@ public class DefaultPushNotification implements PushNotification {
             if (Strings.isEmpty(topic)) {
                 throw new IllegalArgumentException("Topic not specified");
             }
-            return new DefaultPushNotification(userId, contextId, topic, messageData);
+            return new DefaultPushNotification(userId, contextId, topic, sourceToken, messageData);
         }
 
     }
@@ -154,16 +165,18 @@ public class DefaultPushNotification implements PushNotification {
     private final int userId;
     private final int contextId;
     private final String topic;
+    private final String sourceToken;
     private final Map<String, Object> messageData;
 
     /**
      * Initializes a new {@link DefaultPushNotification}.
      */
-    DefaultPushNotification(int userId, int contextId, String topic, Map<String, Object> messageData) {
+    DefaultPushNotification(int userId, int contextId, String topic, String sourceToken, Map<String, Object> messageData) {
         super();
         this.userId = userId;
         this.contextId = contextId;
         this.topic = topic;
+        this.sourceToken = sourceToken;
         this.messageData = null == messageData ? null : ImmutableMap.copyOf(messageData);
     }
 
@@ -175,6 +188,11 @@ public class DefaultPushNotification implements PushNotification {
     @Override
     public String getTopic() {
         return topic;
+    }
+
+    @Override
+    public String getSourceToken() {
+        return sourceToken;
     }
 
     @Override
@@ -193,6 +211,7 @@ public class DefaultPushNotification implements PushNotification {
         int result = prime * 1 + contextId;
         result = prime * result + userId;
         result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+        result = prime * result + ((sourceToken == null) ? 0 : sourceToken.hashCode());
         result = prime * result + ((messageData == null) ? 0 : messageData.hashCode());
         return result;
     }
@@ -219,6 +238,13 @@ public class DefaultPushNotification implements PushNotification {
         } else if (!topic.equals(other.getTopic())) {
             return false;
         }
+        if (sourceToken == null) {
+            if (other.getSourceToken() != null) {
+                return false;
+            }
+        } else if (!sourceToken.equals(other.getSourceToken())) {
+            return false;
+        }
         if (messageData == null) {
             if (other.getMessageData() != null) {
                 return false;
@@ -235,6 +261,9 @@ public class DefaultPushNotification implements PushNotification {
         sb.append("{userId=").append(userId).append(", contextId=").append(contextId).append(", ");
         if (topic != null) {
             sb.append("topic=").append(topic).append(", ");
+        }
+        if (sourceToken != null) {
+            sb.append("sourceToken=").append(sourceToken).append(", ");
         }
         if (messageData != null) {
             sb.append("messageData=").append(messageData);

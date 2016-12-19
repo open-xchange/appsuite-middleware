@@ -18,6 +18,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.contexts.Context;
@@ -58,17 +59,17 @@ public class SharedInfostoreJSlobTest {
     @Mock
     private UserPermissionBits permissionBits;
 
-    private Context context = new ContextImpl(999999);
+    private final Context context = new ContextImpl(999999);
 
-    private int maxBodySize = 11111;
+    private final int maxBodySize = 11111;
 
-    private Long infostoreMaxUploadSize = 22222L;
+    private final Long infostoreMaxUploadSize = 22222L;
 
-    private Long attachmentMaxUploadSize = 33333L;
+    private final Long attachmentMaxUploadSize = 33333L;
 
-    private Long quotaUsage = 44444L;
+    private final Long quotaUsage = 44444L;
 
-    private Long maxQuota = 55555L;
+    private final Long maxQuota = 55555L;
 
     @Before
     public void setUp() throws Exception {
@@ -93,13 +94,13 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.mockStatic(FilestoreStorage.class);
         PowerMockito.when(FilestoreStorage.createURI(Matchers.eq(context))).thenReturn(new URI(""));
 
-        
+
         QuotaFileStorageService qfsService = PowerMockito.mock(QuotaFileStorageService.class);
-        Mockito.when(qfsService.getQuotaFileStorage(Matchers.anyInt(), Matchers.anyInt())).thenReturn(quotaFileStorage);
-        
+        Mockito.when(qfsService.getQuotaFileStorage(Matchers.anyInt(), Matchers.anyInt(), Matchers.any(Info.class))).thenReturn(quotaFileStorage);
+
         PowerMockito.mockStatic(FileStorages.class);
         Mockito.when(FileStorages.getQuotaFileStorageService()).thenReturn(qfsService);
-        
+
         PowerMockito.when(quotaFileStorage.getQuota()).thenReturn(maxQuota);
         PowerMockito.when(quotaFileStorage.getUsage()).thenReturn(quotaUsage);
 

@@ -55,7 +55,7 @@ properties:
     type: string
     description: The transport password. **Please see `transport_auth` for the handling of this field.**
   transport_auth:
-    type: integer
+    type: string
     description: Specifies the source for mail transport (SMTP) credentials. Possible values are `mail`, `custom`, and `none`. `mail` signals to use the same credentials as given in associated mail store (IMAP, POP3). `custom` signals that individual credentials are supposed to be used (fields `transport_login`, `transport_password` and/or `transport_oauth` are considered). `none` means the mail transport does not support any authentication mechanism (rare case!)
   transport_starttls:
     type: boolean

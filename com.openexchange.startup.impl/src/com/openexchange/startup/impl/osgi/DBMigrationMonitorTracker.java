@@ -58,8 +58,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.migration.DBMigrationMonitorService;
+import com.openexchange.java.Strings;
 import com.openexchange.startup.SignalStartedService;
-import com.openexchange.startup.impl.SignalStartedServiceImpl;
+import com.openexchange.startup.StaticSignalStartedService;
 
 /**
  *
@@ -118,8 +119,27 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
                     } catch (Exception e) {
                         LOG.error("Error while waiting for configdb/globaldb changes.", e);
                     }
-                    serviceRegistrationRef.set(context.registerService(SignalStartedService.class, new SignalStartedServiceImpl(), null));
-                    LOG.info("Open-Xchange Server initialized. The server should be up and running...");
+
+                    StaticSignalStartedService singleton = StaticSignalStartedService.getInstance();
+                    serviceRegistrationRef.set(context.registerService(SignalStartedService.class, singleton, null));
+
+                    if (StaticSignalStartedService.State.OK == singleton.getState()) {
+                        LOG.info("Open-Xchange Server initialized. The server should be up and running...");
+                    } else {
+                        String message = singleton.getStateInfo(StaticSignalStartedService.INFO_MESSAGE);
+                        if (null == message) {
+                            Throwable error = singleton.getStateInfo(StaticSignalStartedService.INFO_EXCEPTION);
+                            message = null == error ? null : error.getMessage();
+                        }
+
+                        String sep = Strings.getLineSeparator();
+                        if (null == message) {
+                            LOG.error("{}\tFailed to initialize Open-Xchange Server!{}", sep, sep);
+                        } else {
+                            LOG.error("{}\tFailed to initialize Open-Xchange Server: '{}'{}", sep, message, sep);
+                        }
+                    }
+
                 }
             });
 

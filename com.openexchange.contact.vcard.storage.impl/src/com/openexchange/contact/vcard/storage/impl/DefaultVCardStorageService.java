@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.java.Strings;
@@ -149,7 +150,7 @@ public class DefaultVCardStorageService implements VCardStorageService {
             if (null == storageService) {
                 throw VCardStorageExceptionCodes.FILESTORE_DOWN.create();
             }
-            return storageService.getQuotaFileStorage(contextId);
+            return storageService.getQuotaFileStorage(contextId, Info.general());
         } catch (final OXException e) {
             throw VCardStorageExceptionCodes.FILESTORE_DOWN.create(e);
         }

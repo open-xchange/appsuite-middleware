@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -60,13 +61,19 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CalendarHomeSet extends SingleXMLPropertyMixin {
 
+    /** The static path to a user's calendar home */
+    public static final WebdavPath CALENDAR_HOME = new WebdavPath("caldav");
+
+    /**
+     * Initializes a new {@link CalendarHomeSet}.
+     */
     public CalendarHomeSet() {
         super("urn:ietf:params:xml:ns:caldav", "calendar-home-set");
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/caldav/</D:href>";
+        return "<D:href>" + CALENDAR_HOME + "/</D:href>";
     }
 
 }

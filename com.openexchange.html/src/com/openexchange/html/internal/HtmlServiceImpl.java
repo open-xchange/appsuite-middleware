@@ -624,7 +624,9 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_EXTRA_CHAR = Pattern.compile("(<[a-zA-Z_0-9-]++)(/\\s[^>]|[^\\s>/])");
+    private static final Pattern PATTERN_EXTRA_CHAR = Pattern.compile("(<[a-zA-Z_0-9-]++)(/\\s*[^>]|[^\\s>/][^\\s>a-zA-Z_0-9]*)");
+    //                                                                                    ^^^^^^^^^                            Attempts to catch "<img/ ..." constructs
+    //                                                                                                      ^^^^^^^^^^^^^^^^^  Attempts to catch all other bad constructs; e.g. "<a!/...", "<a~..."
 
     /**
      * Attempts to drop any illegal, extraneous character that is trailing a valid tag start sequence;<br>
@@ -637,25 +639,39 @@ public final class HtmlServiceImpl implements HtmlService {
         if (null == html) {
             return html;
         }
-        Matcher m = PATTERN_EXTRA_CHAR.matcher(html);
+
+        String tmp = html;
+        Matcher m = PATTERN_EXTRA_CHAR.matcher(tmp);
         if (!m.find()) {
             /*
              * No extra LT found
              */
             return html;
         }
-        StringBuffer sb = new StringBuffer(html.length());
-        String extraneous;
+
+        StringBuffer sb = new StringBuffer(tmp.length());
         do {
-            extraneous = m.group(2);
-            if (extraneous.length() == 1) {
-                m.appendReplacement(sb, "$1");
-            } else {
-                m.appendReplacement(sb, "$1" + extraneous.substring(1));
-            }
+            sb.setLength(0);
+            String extraneous;
+            do {
+                extraneous = m.group(2);
+                if (extraneous.startsWith("/")) {
+                    m.appendReplacement(sb, "$1" + extraneous.substring(1));
+                } else {
+                    if (m.end() >= tmp.length()) {
+                        m.appendReplacement(sb, "$1");
+                    } else {
+                        boolean appendWS = !Strings.isWhitespace(tmp.charAt(m.end()));
+                        m.appendReplacement(sb, appendWS ? "$1 " : "$1");
+                    }
+                }
+            } while (m.find());
+            m.appendTail(sb);
+
+            tmp = sb.toString();
+            m = PATTERN_EXTRA_CHAR.matcher(tmp);
         } while (m.find());
-        m.appendTail(sb);
-        return sb.toString();
+        return tmp;
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");

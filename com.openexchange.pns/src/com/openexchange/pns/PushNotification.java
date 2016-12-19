@@ -90,6 +90,13 @@ public interface PushNotification {
     int getUserId();
 
     /**
+     * Gets the push token of the client device that triggered the operation causing this notification, if available.
+     *
+     * @return The token of the client triggering the update, or <code>null</code> if not available
+     */
+    String getSourceToken();
+
+    /**
      * Gets the hash code value for this notification.<br>
      * This method is supported for the benefit of hash tables and maps.
      * <p>

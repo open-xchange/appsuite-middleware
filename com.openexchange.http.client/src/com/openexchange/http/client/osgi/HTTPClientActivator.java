@@ -69,8 +69,8 @@ public class HTTPClientActivator extends HousekeepingActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
+	    Services.setServiceLookup(this);
 		final ApacheHTTPClient client = new ApacheHTTPClient(getService(ManagedFileManagement.class));
-		@SuppressWarnings("rawtypes")
 		SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 
 			@Override
@@ -84,7 +84,6 @@ public class HTTPClientActivator extends HousekeepingActivator {
 					HTTPResponseProcessor service) {
 				client.forgetProcessor(service);
 			}
-
 
 		};
 		track(HTTPResponseProcessor.class, listener );
