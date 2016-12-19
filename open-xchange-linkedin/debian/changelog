@@ -1,3 +1,9 @@
+open-xchange-linkedin (7.8.4-0) unstable; urgency=medium
+
+  * prepare for 7.8.4 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 19 Dec 2016 10:04:04 +0100
+
 open-xchange-linkedin (7.8.3-5) stable; urgency=medium
 
   * Second release candidate for 7.8.3 release
