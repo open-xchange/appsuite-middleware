@@ -3647,9 +3647,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private void removeDriveFolderFlags(Context ctx, User user, Connection con) throws StorageException {
         int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
         PreparedStatement stmt = null;
         try {
-            List<Pair<Integer, String>> folderIds = prepareFolders(contextId, user, con);
+            List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
             StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
             for (Pair<Integer, String> pair : folderIds) {
@@ -3667,19 +3668,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw e;
         } finally {
             Databases.closeSQLStuff(stmt);
-//            if (con != null) {
-//                try {
-//                    cache.pushConnectionForContext(contextId, con);
-//                } catch (PoolException exp) {
-//                    log.error("Pool Error pushing ox connection to pool!", exp);
-//                }
-//            }
         }
     }
     
-    private List<Pair<Integer, String>> prepareFolders(int contextId, User user, Connection con) throws StorageException, SQLException {
+    private List<Pair<Integer, String>> prepareFolders(int contextId, int userId, Connection con) throws StorageException, SQLException {
         List<Pair<Integer, String>> result = new ArrayList<>(6);
-        Locale locale = getLocale(contextId, user.getId(), con);
+        Locale locale = getLocale(contextId, userId, con);
         StringHelper translator = StringHelper.valueOf(locale);
         boolean needTranslation = true;
         if (Locale.ENGLISH.equals(locale) || Locale.US.equals(locale)) {
@@ -3690,7 +3684,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             stmt = con.prepareStatement("SELECT fuid, fname, parent FROM oxfolder_tree WHERE cid = ? AND created_from = ? AND module = 8 AND default_flag = 1 AND type IN (20, 21, 22, 23, 24) FOR UPDATE");
             stmt.setInt(1, contextId);
-            stmt.setInt(2, user.getId());
+            stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int folderId = rs.getInt(1);
