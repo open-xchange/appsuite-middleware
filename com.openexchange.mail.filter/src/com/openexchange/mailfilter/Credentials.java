@@ -110,6 +110,18 @@ public class Credentials {
         this(authname, password, userid, contextid, username, null, null);
     }
 
+    /**
+     *
+     * Initializes a new {@link Credentials}.
+     *
+     * @param authname The user name for authentication.
+     * @param password The password.
+     * @param userid The session users user id.
+     * @param contextid The session users context id.
+     * @param username The user name of the effected user which configuration is being touched.
+     * @param subject The kerberos subject
+     * @param oauthToken The oauth token
+     */
     public Credentials(String authname, String password, int userid, int contextid, String username, Subject subject, String oauthToken) {
         super();
         this.authname = authname;
