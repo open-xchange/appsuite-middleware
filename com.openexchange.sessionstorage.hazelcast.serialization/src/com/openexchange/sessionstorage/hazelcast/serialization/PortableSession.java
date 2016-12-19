@@ -175,7 +175,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
             List<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
             Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
             // Add static remote parameters
-            remoteParameterNames.add(PARAM_XOAUTH2_TOKEN);
+            remoteParameterNames.add(PARAM_OAUTH_TOKEN);
             // Add configured remote parameters
             remoteParameterNames.addAll(configuredRemoteParameterNames);
             {

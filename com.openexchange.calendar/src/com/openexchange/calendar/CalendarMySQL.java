@@ -4508,16 +4508,16 @@ public class CalendarMySQL implements CalendarSqlImp {
         return isInvited;
     }
 
-    private final long deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid, final int fid, final Context c, final Connection writecon, final Session so) throws SQLException, OXException {
+    private final long deleteOnlyOneParticipantInPrivateFolder(int oid, int recurrenceId, String uid, String filename, int cid, int userId, int fid, Context c, Connection writecon, Session so) throws SQLException, OXException {
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cid));
         final long lastModified = System.currentTimeMillis();
         final PreparedStatement pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
         try {
             pd.setInt(1, oid);
             pd.setInt(2, cid);
-            pd.setInt(3, uid);
+            pd.setInt(3, userId);
             pd.addBatch();
-            deleteReminder(oid, uid, c, writecon);
+            deleteReminder(oid, userId, c, writecon);
 
             pd.executeBatch();
         } finally {
@@ -4528,16 +4528,16 @@ public class CalendarMySQL implements CalendarSqlImp {
         try {
             pdr.setInt(1, oid);
             pdr.setInt(2, cid);
-            pdr.setInt(3, uid);
+            pdr.setInt(3, userId);
             pdr.setInt(4, Participant.USER);
             pdr.executeUpdate();
             if (!checkForDeletedMasterObject(oid, cid, c)) {
                 final OXFolderAccess ofa = new OXFolderAccess(writecon, c);
                 final int folderType = ofa.getFolderType(fid, so.getUserId());
-                final PreparedStatement pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                final PreparedStatement pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, intfield02, cid, pflag, uid, filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 try {
                     pidm.setTimestamp(1, SQLTools.toTimestamp(lastModified));
-                    pidm.setInt(2, uid);
+                    pidm.setInt(2, userId);
                     pidm.setLong(3, lastModified);
                     pidm.setInt(4, 0);
                     if (folderType == FolderObject.PRIVATE) {
@@ -4546,8 +4546,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                         pidm.setInt(5, fid);
                     }
                     pidm.setInt(6, oid);
-                    pidm.setInt(7, cid);
-                    pidm.setInt(8, 0);
+                    pidm.setInt(7, recurrenceId);
+                    pidm.setInt(8, cid);
+                    pidm.setInt(9, 0);
+                    pidm.setString(10, uid);
+                    pidm.setString(11, filename);
                     pidm.executeUpdate();
                     master_del_update = false;
                 } finally {
@@ -4562,7 +4565,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         try {
             prepid.setInt(1, cid);
             prepid.setInt(2, oid);
-            prepid.setInt(3, uid);
+            prepid.setInt(3, userId);
             prepid.executeUpdate();
         } finally {
             COLLECTION.closePreparedStatement(prepid);
@@ -4571,7 +4574,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         final PreparedStatement pid = writecon.prepareStatement("insert into del_dates_members (object_id, member_uid, pfid, cid, confirm) values (?, ?, ?, ?, ?)");
         try {
             pid.setInt(1, oid);
-            pid.setInt(2, uid);
+            pid.setInt(2, userId);
             pid.setInt(3, fid);
             pid.setInt(4, cid);
             pid.setInt(5, 0);
@@ -4583,7 +4586,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         final PreparedStatement ma = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
         try {
             ma.setLong(1, lastModified);
-            ma.setInt(2, uid);
+            ma.setInt(2, userId);
             ma.setInt(3, oid);
             ma.setInt(4, cid);
             ma.executeUpdate();
@@ -4595,7 +4598,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             final PreparedStatement ddu = writecon.prepareStatement("update del_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
             try {
                 ddu.setLong(1, lastModified);
-                ddu.setInt(2, uid);
+                ddu.setInt(2, userId);
                 ddu.setInt(3, oid);
                 ddu.setInt(4, cid);
                 ddu.executeUpdate();
@@ -4607,7 +4610,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         ao.setObjectID(oid);
         ao.setParentFolderID(fid);
         COLLECTION.triggerEvent(so, CalendarOperation.UPDATE, ao);
-        deleteReminder(oid, uid, c, writecon);
+        deleteReminder(oid, userId, c, writecon);
 
         return lastModified;
     }
@@ -4649,7 +4652,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SQL_SELECT_WHOLE_RECURRENCE = "SELECT " + COLLECTION.getFieldName(Appointment.OBJECT_ID) + " FROM prg_dates WHERE cid = ? AND " + COLLECTION.getFieldName(Appointment.RECURRENCE_ID) + " = ? ORDER BY " + COLLECTION.getFieldName(Appointment.OBJECT_ID);
 
-    private final void deleteOnlyOneRecurringParticipantInPrivateFolder(final int recurrenceId, final int cid, final int uid, final int fid, final Context c, final Connection writecon, final Session so) throws SQLException, OXException {
+    private final void deleteOnlyOneRecurringParticipantInPrivateFolder(int recurrenceId, String uid, String filename, int cid, int userId, int fid, Context c, Connection writecon, Session so) throws SQLException, OXException {
         /*
          * Get all object IDs belonging to specified recurrence ID
          */
@@ -4672,7 +4675,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
         for (final Integer objectId : objectIDs) {
-            deleteOnlyOneParticipantInPrivateFolder(objectId.intValue(), cid, uid, fid, c, writecon, so);
+            deleteOnlyOneParticipantInPrivateFolder(objectId.intValue(), recurrenceId, uid, filename, cid, userId, fid, c, writecon, so);
         }
     }
 
@@ -5028,10 +5031,13 @@ public class CalendarMySQL implements CalendarSqlImp {
                         DBPool.push(ctx, readcon);
                         close_read = false;
                     }
+                    CalendarDataObject dao = edao == null ? cdao : edao;
                     if (COLLECTION.isRecurringMaster(edao == null ? cdao : edao)) {
                         // Delete by recurrence ID
                         deleteOnlyOneRecurringParticipantInPrivateFolder(
                             edao == null ? cdao.getRecurrenceID() : edao.getRecurrenceID(),
+                                dao.getUid(),
+                                dao.getFilename(),
                                 cid,
                                 uid,
                                 fid,
@@ -5042,6 +5048,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                         // Delete by object ID
                         final long lastModified = deleteOnlyOneParticipantInPrivateFolder(
                             oid,
+                            dao.getRecurrenceID(),
+                            dao.getUid(),
+                            dao.getFilename(),
                             cid,
                             uid,
                             fid,

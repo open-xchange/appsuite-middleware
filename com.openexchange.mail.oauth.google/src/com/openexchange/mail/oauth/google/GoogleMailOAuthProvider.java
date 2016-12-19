@@ -58,7 +58,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.ImmutableAutoconfig;
+import com.openexchange.mail.oauth.DefaultTokenInfo;
 import com.openexchange.mail.oauth.MailOAuthProvider;
+import com.openexchange.mail.oauth.TokenInfo;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -106,7 +108,7 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
     }
 
     @Override
-    public String getTokenFor(OAuthAccount oauthAccount, Session session) throws OXException {
+    public TokenInfo getTokenFor(OAuthAccount oauthAccount, Session session) throws OXException {
         // Ensure not expired
         String key = "oauth.google.expiry." + oauthAccount.getId();
 
@@ -117,7 +119,7 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
                 Long stamp = (Long) object;
                 if ((stamp.longValue() - System.currentTimeMillis()) >= REFRESH_THRESHOLD) {
                     // More than 1 minute to go
-                    return oauthAccount.getToken();
+                    return DefaultTokenInfo.newXOAUTH2TokenInfoFor(oauthAccount.getToken());
                 }
 
                 // Expired... Drop cached value.
@@ -131,7 +133,7 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
             if (expirySeconds >= REFRESH_THRESHOLD) {
                 // More than 1 minute to go
                 session.setParameter(key, Long.valueOf(System.currentTimeMillis() + (expirySeconds * 1000)));
-                return oauthAccount.getToken();
+                return DefaultTokenInfo.newXOAUTH2TokenInfoFor(oauthAccount.getToken());
             }
         }
 
@@ -141,7 +143,7 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
         if (null != newAccount) {
             oauthAccountToUse = newAccount;
         }
-        return oauthAccountToUse.getToken();
+        return DefaultTokenInfo.newXOAUTH2TokenInfoFor(oauthAccountToUse.getToken());
     }
 
     @Override

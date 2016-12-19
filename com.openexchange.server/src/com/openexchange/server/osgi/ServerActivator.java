@@ -177,6 +177,7 @@ import com.openexchange.login.listener.LoginListener;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.MailQuotaProvider;
+import com.openexchange.mail.api.AuthenticationFailedHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.attachment.AttachmentTokenService;
@@ -194,6 +195,7 @@ import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.mail.osgi.AuthenticationFailedHandlerServiceImpl;
 import com.openexchange.mail.osgi.MailCapabilityServiceTracker;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.MailSessionCacheInvalidator;
@@ -435,6 +437,12 @@ public final class ServerActivator extends HousekeepingActivator {
         // Mail provider service tracker
         track(CacheEventService.class, new MailSessionCacheInvalidator(context));
         track(MailProvider.class, new MailProviderServiceTracker(context));
+        {
+            AuthenticationFailedHandlerServiceImpl authenticationFailedService = new AuthenticationFailedHandlerServiceImpl(context);
+            rememberTracker(authenticationFailedService);
+            registerService(AuthenticationFailedHandlerService.class, authenticationFailedService);
+            ServerServiceRegistry.getInstance().addService(AuthenticationFailedHandlerService.class, authenticationFailedService);
+        }
         track(MailcapCommandMap.class, new MailcapServiceTracker(context));
         track(CapabilityService.class, new MailCapabilityServiceTracker(context));
         track(AttachmentTokenService.class, new RegistryCustomizer<AttachmentTokenService>(context, AttachmentTokenService.class));

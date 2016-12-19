@@ -209,7 +209,7 @@ public interface Session {
      *
      * @type <code>java.lang.String</code>
      */
-    public static final String PARAM_XOAUTH2_TOKEN = "__session.xoauth2".intern();
+    public static final String PARAM_OAUTH_TOKEN = "__session.oauth".intern();
 
     /**
      * @return the context identifier.

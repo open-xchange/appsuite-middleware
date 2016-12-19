@@ -106,7 +106,7 @@ public class RemoteSession implements PutIfAbsent {
         }
         serializable = map.get("__paramXoauth2Token");
         if (null != serializable) {
-            session.setParameter(PARAM_XOAUTH2_TOKEN, serializable);
+            session.setParameter(PARAM_OAUTH_TOKEN, serializable);
         }
         return session;
     }
@@ -137,7 +137,7 @@ public class RemoteSession implements PutIfAbsent {
         if (null != obj && Serializable.class.isInstance(obj)) {
             map.put("__paramAlternativeId", (Serializable) obj);
         }
-        obj = session.getParameter(PARAM_XOAUTH2_TOKEN);
+        obj = session.getParameter(PARAM_OAUTH_TOKEN);
         if (null != obj && Serializable.class.isInstance(obj)) {
             map.put("__paramXoauth2Token", (Serializable) obj);
         }

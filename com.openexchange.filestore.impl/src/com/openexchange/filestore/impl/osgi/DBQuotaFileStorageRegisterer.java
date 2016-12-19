@@ -144,8 +144,10 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
                 isRegistered = false;
             }
             if (needsUnregistration) {
-                for (ServiceRegistration<?> reg : regs) {
-                    reg.unregister();
+                if (null != regs) {
+                    for (ServiceRegistration<?> reg : regs) {
+                        reg.unregister();
+                    }
                 }
             }
             context.ungetService(reference);

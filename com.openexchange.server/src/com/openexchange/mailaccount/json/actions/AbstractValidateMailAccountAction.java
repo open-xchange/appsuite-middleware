@@ -60,6 +60,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.mail.oauth.TokenInfo;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
@@ -71,9 +73,6 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.utils.MailAccountUtils;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -268,29 +267,23 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
             }
             accountDescription.setLogin(mailAccount.getLogin());
             if (mailAccount.isMailOAuthAble()) {
-                // Do the XOAUTH2 dance...
-                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-                if (null == oauthService) {
-                    throw ServiceExceptionCode.absentService(OAuthService.class);
-                }
+                // Do the OAuth dance...
+                MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
+                TokenInfo tokenInfo = mailOAuthService.getTokenFor(mailAccount.getMailOAuthId(), session);
 
-                OAuthAccount oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
-                accountDescription.setAuthType(AuthType.OAUTH);
-                accountDescription.setPassword(oAuthAccount.getToken());
+                accountDescription.setAuthType(AuthType.parse(tokenInfo.getAuthMechanism()));
+                accountDescription.setPassword(tokenInfo.getToken());
             } else {
                 String encPassword = mailAccount.getPassword();
                 accountDescription.setPassword(MailPasswordUtil.decrypt(encPassword, session, accountId, accountDescription.getLogin(), accountDescription.getMailServer()));
             }
         } else if (accountDescription.isMailOAuthAble()) {
-            // Do the XOAUTH2 dance...
-            OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-            if (null == oauthService) {
-                throw ServiceExceptionCode.absentService(OAuthService.class);
-            }
+            // Do the OAuth dance...
+            MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
+            TokenInfo tokenInfo = mailOAuthService.getTokenFor(accountDescription.getMailOAuthId(), session);
 
-            OAuthAccount oAuthAccount = oauthService.getAccount(accountDescription.getMailOAuthId(), session, session.getUserId(), session.getContextId());
-            accountDescription.setAuthType(AuthType.OAUTH);
-            accountDescription.setPassword(oAuthAccount.getToken());
+            accountDescription.setAuthType(AuthType.parse(tokenInfo.getAuthMechanism()));
+            accountDescription.setPassword(tokenInfo.getToken());
         }
 
         checkNeededFields(accountDescription);
@@ -319,15 +312,12 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
             accountDescription.setTransportLogin(login);
 
             if (mailAccount.isTransportOAuthAble()) {
-                // Do the XOAUTH2 dance...
-                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-                if (null == oauthService) {
-                    throw ServiceExceptionCode.absentService(OAuthService.class);
-                }
+                // Do the OAuth dance...
+                MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
+                TokenInfo tokenInfo = mailOAuthService.getTokenFor(mailAccount.getTransportOAuthId(), session);
 
-                OAuthAccount oAuthAccount = oauthService.getAccount(mailAccount.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
-                accountDescription.setTransportAuthType(AuthType.OAUTH);
-                accountDescription.setTransportPassword(oAuthAccount.getToken());
+                accountDescription.setTransportAuthType(AuthType.parse(tokenInfo.getAuthMechanism()));
+                accountDescription.setTransportPassword(tokenInfo.getToken());
             } else {
                 if (isEmpty(password)) {
                     String encPassword = mailAccount.getTransportPassword();
@@ -345,15 +335,12 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
                 accountDescription.setTransportPassword(password);
             }
         } else if (accountDescription.isTransportOAuthAble()) {
-            // Do the XOAUTH2 dance...
-            OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-            if (null == oauthService) {
-                throw ServiceExceptionCode.absentService(OAuthService.class);
-            }
+            // Do the OAuth dance...
+            MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
+            TokenInfo tokenInfo = mailOAuthService.getTokenFor(accountDescription.getTransportOAuthId(), session);
 
-            OAuthAccount oAuthAccount = oauthService.getAccount(accountDescription.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
-            accountDescription.setTransportAuthType(AuthType.OAUTH);
-            accountDescription.setTransportPassword(oAuthAccount.getToken());
+            accountDescription.setTransportAuthType(AuthType.parse(tokenInfo.getAuthMechanism()));
+            accountDescription.setTransportPassword(tokenInfo.getToken());
         }
     }
 

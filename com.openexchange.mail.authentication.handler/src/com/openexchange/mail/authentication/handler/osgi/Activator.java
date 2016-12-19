@@ -55,12 +55,20 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link Activator}
+ * {@link Activator} - The bundle activator for <code>"com.openexchange.mail.authentication.handler"</code> bundle.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
 public class Activator extends HousekeepingActivator {
+
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -68,9 +76,13 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(AuthenticationFailedHandler.class, new DefaultAuthenticationFailedHandler());
+        registerService(AuthenticationFailedHandler.class, new DefaultAuthenticationFailedHandler(getService(SessiondService.class)));
     }
 
 }

@@ -49,6 +49,11 @@
 
 package com.openexchange.mail.api;
 
+import java.util.EnumSet;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.java.Strings;
+
 /**
  * {@link AuthType} - The authentication type.
  *
@@ -62,9 +67,13 @@ public enum AuthType {
      */
     LOGIN("login"),
     /**
-     * The OAuth authentication type.
+     * The XOAUTH2 authentication type; see <a href="https://developers.google.com/gmail/xoauth2_protocol">https://developers.google.com/gmail/xoauth2_protocol</a>
      */
-    OAUTH("OAuth"),
+    OAUTH("XOAUTH2"),
+    /**
+     * The OAUTHBEARER authentication type; see <a href="https://tools.ietf.org/html/rfc7628">https://tools.ietf.org/html/rfc7628</a>.
+     */
+    OAUTHBEARER("OAUTHBEARER"),
     ;
 
     private final String name;
@@ -74,28 +83,45 @@ public enum AuthType {
     }
 
     /**
-     * Parses specified string into an AuthType.
-     *
-     * @param authTypeStr The string to parse to an AuthType
-     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
-     */
-    public static final AuthType parse(final String authTypeStr) {
-        final AuthType[] values = AuthType.values();
-        for (final AuthType authType : values) {
-            if (authType.name.equalsIgnoreCase(authTypeStr)) {
-                return authType;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Gets the name
      *
      * @return The name
      */
     public String getName() {
         return name;
+    }
+
+    private static final Map<String, AuthType> MAP;
+    static {
+        ImmutableMap.Builder<String, AuthType> builder = ImmutableMap.builder();
+        for (AuthType authType : AuthType.values()) {
+            builder.put(Strings.asciiLowerCase(authType.name), authType);
+        }
+        // Legacy behavior
+        builder.put("oauth", AuthType.OAUTH);
+        MAP = builder.build();
+    }
+
+    /**
+     * Parses specified string into an AuthType.
+     *
+     * @param authTypeStr The string to parse to an AuthType
+     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
+     */
+    public static final AuthType parse(final String authTypeStr) {
+        return null == authTypeStr ? null : MAP.get(Strings.asciiLowerCase(authTypeStr));
+    }
+
+    private static final EnumSet<AuthType> OAUTH_TYPES = EnumSet.of(AuthType.OAUTH, AuthType.OAUTHBEARER);
+
+    /**
+     * Checks if given auth type is one of known OAuth-based types; either XOAUTH2 or OAUTHBEARER.
+     *
+     * @param authType The auth type to check
+     * @return <code>true</code> auth type is one of known OAuth-based types; otherwise <code>false</code>
+     */
+    public static boolean isOAuthType(AuthType authType) {
+        return null != authType && OAUTH_TYPES.contains(authType);
     }
 
 }
