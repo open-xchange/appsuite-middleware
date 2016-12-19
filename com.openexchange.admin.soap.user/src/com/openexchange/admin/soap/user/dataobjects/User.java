@@ -1022,7 +1022,7 @@ public class User {
     
 
     /**
-     * Ruft den Wert der defaultFolderMode-Eigenschaft ab.
+     * Get defaultFolderMode value.
      * 
      * @return
      *      possible object is
@@ -1033,7 +1033,7 @@ public class User {
     }
 
     /**
-     * Legt den Wert der defaultFolderMode-Eigenschaft fest.
+     * Set defaultFolderMode value..
      *
      * @param value
      *     allowed object is
