@@ -9,3 +9,13 @@ array:
       Configcascade_Aware: false
       Related: 
       File: rssmessaging.properties
+  - data:
+      Key: com.openexchange.rss
+      Description: >
+        If set to false disables the rss capability.
+      Default: true
+      Version: 7.2.1
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: 
+      File: rssmessaging.properties
