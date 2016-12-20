@@ -60,6 +60,7 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3843
     ox_remove_property com.openexchange.mail.filter.preferGSSAPI $PFILE
+    ox_add_property com.openexchange.mail.filter.preferredSaslMech "" $PFILE
 fi
 
 %clean
