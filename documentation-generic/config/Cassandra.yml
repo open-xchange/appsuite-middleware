@@ -54,7 +54,7 @@ Same as the <code>DCAwareRoundRobin</code> load balancing policy but with added 
       Description: >
 A policy that defines a default behaviour to adopt when a request fails. There are three retry policies to choose from: <code>defaultRetryPolicy</code>, <code>downgradingConsistencyRetryPolicy</code> and <code>fallthroughRetryPolicy</code> 
 <b><u>defaultRetryPolicy</u></b>
-This policy retries queries in only two cases: <li>On a read timeout, if enough replicas replied but data was not retrieved.</li><li>On a write timeout, if we timeout while writing the distributed log used by batch statements.</li>
+This policy retries queries in only two cases: <ul><li>On a read timeout, if enough replicas replied but data was not retrieved.</li><li>On a write timeout, if we timeout while writing the distributed log used by batch statements.</li></ul>
 This retry policy is conservative in that it will never retry with a different consistency level than the one of the initial operation. 
 In some cases, it may be convenient to use a more aggressive retry policy like <code>downgradingConsistencyRetryPolicy</code>. 
 <u>downgradingConsistencyRetryPolicy</u>
