@@ -81,6 +81,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FileStoreResourceCacheImpl} - The filestore-backed preview cache implementation for documents.
@@ -348,62 +349,77 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         try {
             final ResourceCacheMetadataStore metadataStore = getMetadataStore();
             final DatabaseService dbService = getDBService();
-            final Connection con = dbService.getWritable(contextId);
-            final Set<String> refIds = new HashSet<String>();
-            boolean transactionStarted = false;
-            boolean rollback = false;
+            Set<String> refIds = new HashSet<String>();
             try {
-                long usedContextQuota = metadataStore.getUsedSize(con, contextId);
-                if (globalQuota > 0 && usedContextQuota > globalQuota) {
-                    long neededSpace = usedContextQuota - globalQuota;
-                    long collected = 0L;
+                final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+                do {
+                    Connection con = dbService.getWritable(contextId);
+                    refIds.clear();
+                    condition.resetTransactionRollbackException();
+                    boolean transactionStarted = false;
+                    boolean rollback = false;
+                    try {
+                        long usedContextQuota = metadataStore.getUsedSize(con, contextId);
+                        if (globalQuota > 0 && usedContextQuota > globalQuota) {
+                            long neededSpace = usedContextQuota - globalQuota;
+                            long collected = 0L;
 
-                    Databases.startTransaction(con);
-                    transactionStarted = true;
-                    rollback = true;
-                    List<ResourceCacheMetadata> entries = metadataStore.loadForCleanUp(con, contextId);
-                    Iterator<ResourceCacheMetadata> it = entries.iterator();
-                    while (collected < neededSpace && it.hasNext()) {
-                        ResourceCacheMetadata metadata = it.next();
-                        String refId = metadata.getRefId();
-                        if (refId != null) {
-                            refIds.add(refId);
+                            Databases.startTransaction(con);
+                            transactionStarted = true;
+                            rollback = true;
+
+                            List<ResourceCacheMetadata> entries = metadataStore.loadForCleanUp(con, contextId);
+                            Iterator<ResourceCacheMetadata> it = entries.iterator();
+                            while (collected < neededSpace && it.hasNext()) {
+                                ResourceCacheMetadata metadata = it.next();
+                                String refId = metadata.getRefId();
+                                if (refId != null) {
+                                    refIds.add(refId);
+                                }
+                                collected += (metadata.getSize() > 0 ? metadata.getSize() : 0);
+                            }
+
+                            if (!refIds.isEmpty()) {
+                                metadataStore.removeByRefIds(con, contextId, refIds);
+                            }
+
+                            con.commit();
+                            rollback = false;
                         }
-                        collected += (metadata.getSize() > 0 ? metadata.getSize() : 0);
+                    } catch (SQLException s) {
+                        if (condition.isFailedTransactionRollback(s)) {
+                            refIds.clear();
+                        } else {
+                            LOG.error("Could not align preview cache for context {} to quota.", iContextId, s);
+                        }
+                    } finally {
+                        if (rollback) {
+                            Databases.rollback(con);
+                        }
+                        if (transactionStarted) {
+                            Databases.autocommit(con);
+                        }
+                        if (refIds.isEmpty()) {
+                            dbService.backWritableAfterReading(contextId, con);
+                        } else {
+                            dbService.backWritable(contextId, con);
+                        }
                     }
+                } while (condition.checkRetry());
 
-                    if (!refIds.isEmpty()) {
-                        metadataStore.removeByRefIds(con, contextId, refIds);
-                    }
-                    con.commit();
-                    rollback = false;
+                if (refIds.isEmpty()) {
+                    LOG.debug("No need to align preview cache for context {} to quota.", iContextId);
+                } else {
+                    LOG.debug("Aligning preview cache for context {} to quota.", iContextId);
+                    batchDeleteFiles(refIds, getFileStorage(contextId, quotaAware));
                 }
             } catch (SQLException s) {
                 LOG.error("Could not align preview cache for context {} to quota.", iContextId, s);
-            } finally {
-                if (rollback) {
-                    Databases.rollback(con);
-                }
-                alignmentRequests.remove(iContextId);
-                if (transactionStarted) {
-                    Databases.autocommit(con);
-                }
-
-                if (refIds.isEmpty()) {
-                    dbService.backWritableAfterReading(contextId, con);
-                } else {
-                    dbService.backWritable(contextId, con);
-                }
-            }
-
-            if (refIds.isEmpty()) {
-                LOG.debug("No need to align preview cache for context {} to quota.", iContextId);
-            } else {
-                LOG.debug("Aligning preview cache for context {} to quota.", iContextId);
-                batchDeleteFiles(refIds, getFileStorage(contextId, quotaAware));
             }
         } catch (Exception e) {
             LOG.error("Could not align preview cache for context {} to quota.", iContextId, e);
+        } finally {
+            alignmentRequests.remove(iContextId);
         }
     }
 
