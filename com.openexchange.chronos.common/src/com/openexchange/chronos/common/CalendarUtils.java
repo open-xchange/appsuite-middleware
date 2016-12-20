@@ -53,9 +53,12 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -252,6 +255,23 @@ public class CalendarUtils {
             objectIDs[i] = events.get(i).getId();
         }
         return objectIDs;
+    }
+
+    /**
+     * Maps a collection of events by their identifier.
+     *
+     * @param events The events to map
+     * @return The mapped events
+     */
+    public static Map<Integer, Event> getEventsByID(Collection<Event> events) {
+        if (null == events) {
+            return null;
+        }
+        Map<Integer, Event> eventsByID = new HashMap<Integer, Event>(events.size());
+        for (Event event : events) {
+            eventsByID.put(I(event.getId()), event);
+        }
+        return eventsByID;
     }
 
     /**

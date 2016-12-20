@@ -632,7 +632,8 @@ public class Utils {
                 }
             }
             if (0 < userID && (null == fields || contains(fields, EventField.ALARMS))) {
-                Map<Integer, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(objectIDs, userID);
+                Map<Integer, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(events, userID);
+//                Map<Integer, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(objectIDs, userID);
                 for (Event event : events) {
                     event.setAlarms(alarmsById.get(I(event.getId())));
                 }
@@ -663,7 +664,7 @@ public class Utils {
             event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
         }
         if (null != event && 0 < userID && (null == fields || contains(fields, EventField.ALARMS))) {
-            event.setAlarms(storage.getAlarmStorage().loadAlarms(event.getId(), userID));
+            event.setAlarms(storage.getAlarmStorage().loadAlarms(event, userID));
         }
         return event;
     }

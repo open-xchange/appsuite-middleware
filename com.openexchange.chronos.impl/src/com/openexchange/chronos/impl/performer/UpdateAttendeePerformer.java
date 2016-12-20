@@ -212,8 +212,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * take over all original alarms
                  */
-                for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent.getId()).entrySet()) {
-                    storage.getAlarmStorage().insertAlarms(exceptionEvent.getId(), entry.getKey().intValue(), entry.getValue());
+                for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent).entrySet()) {
+                    storage.getAlarmStorage().insertAlarms(exceptionEvent, entry.getKey().intValue(), entry.getValue());
                 }
                 /*
                  * perform the attendee update

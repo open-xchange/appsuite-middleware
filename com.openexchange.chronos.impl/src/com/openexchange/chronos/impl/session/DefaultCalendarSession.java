@@ -59,6 +59,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.FreeBusyService;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
@@ -112,6 +113,11 @@ public class DefaultCalendarSession implements CalendarSession {
     @Override
     public FreeBusyService getFreeBusyService() {
         return Services.getService(FreeBusyService.class);
+    }
+
+    @Override
+    public RecurrenceService getRecurrenceService() {
+        return Services.getService(RecurrenceService.class);
     }
 
     @Override

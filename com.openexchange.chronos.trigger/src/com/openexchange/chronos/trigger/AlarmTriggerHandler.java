@@ -124,6 +124,8 @@ public class AlarmTriggerHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarResult result) {
+        if (1 == 1)
+            return;
         for (CreateResult creation : result.getCreations()) {
             handleCreation(result.getSession(), creation);
         }
@@ -333,7 +335,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
          */
         Map<Integer, List<ReminderTrigger>> triggersPerUser = new HashMap<Integer, List<ReminderTrigger>>(userAttendees.size());
         CalendarStorage storage = services.getService(CalendarStorageFactory.class).create(session.getContext(), session.getEntityResolver()); //dbprovider?
-        Map<Integer, List<Alarm>> alarmsByUser = storage.getAlarmStorage().loadAlarms(event.getId());
+        Map<Integer, List<Alarm>> alarmsByUser = storage.getAlarmStorage().loadAlarms(event);
         if (null == alarmsByUser || 0 == alarmsByUser.size()) {
             return triggersPerUser;
         }

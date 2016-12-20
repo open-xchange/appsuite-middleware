@@ -162,8 +162,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 /*
                  * take over all original alarms
                  */
-                for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent.getId()).entrySet()) {
-                    storage.getAlarmStorage().insertAlarms(newExceptionEvent.getId(), entry.getKey().intValue(), entry.getValue());
+                for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent).entrySet()) {
+                    storage.getAlarmStorage().insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue());
                 }
                 /*
                  * reload the newly created exception as 'original' & perform the update
@@ -254,12 +254,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * process any alarm updates for the calendar user
          */
+        CollectionUpdate<Alarm, AlarmField> alarmUpdate = null;
         if (updatedEvent.containsAlarms()) {
-            CollectionUpdate<Alarm, AlarmField> alarmUpdate = updateAlarms(originalEvent.getId(), calendarUser, updatedEvent.getAlarms());
+            alarmUpdate = updateAlarms(originalEvent, calendarUser, updatedEvent.getAlarms());
             wasUpdated |= false == alarmUpdate.isEmpty();
         }
         if (wasUpdated) {
-            result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), loadEventData(originalEvent.getId())));
+            UpdateResultImpl updateResult = new UpdateResultImpl(originalEvent, i(folder), loadEventData(originalEvent.getId()));
+            if (null != alarmUpdate && false == alarmUpdate.isEmpty()) {
+                updateResult.setAlarmUpdates(alarmUpdate);
+            }
+            result.addUpdate(updateResult);
         }
     }
 
@@ -393,21 +398,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     /**
      * Updates a calendar user's alarms for a specific event.
      *
-     * @param objectID The identifier of the event to update the alarms in
+     * @param event The event to update the alarms in
      * @param calendarUser The calendar user whose alarms are updated
      * @param updatedAlarms The updated alarms
      * @return A corresponding collection update
      */
-    private CollectionUpdate<Alarm, AlarmField> updateAlarms(int objectID, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
-        List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
+    private CollectionUpdate<Alarm, AlarmField> updateAlarms(Event event, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
+        List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUser.getId());
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, updatedAlarms);
         if (false == alarmUpdates.isEmpty()) {
-            // TODO distinct alarm update
-            storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
-            if (null != updatedAlarms) {
-                storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), updatedAlarms);
-            }
-            List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
+            storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), updatedAlarms);
+            List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUser.getId());
             return AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, newAlarms);
         }
         return alarmUpdates;

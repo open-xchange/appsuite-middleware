@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.tables.AlarmTableUpdateTask;
@@ -81,7 +82,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class, RecurrenceService.class };
     }
 
     @Override

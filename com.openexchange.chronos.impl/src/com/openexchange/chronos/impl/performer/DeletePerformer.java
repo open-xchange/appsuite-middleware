@@ -409,10 +409,10 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * take over all other original alarms
          */
-        for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalMasterEvent.getId()).entrySet()) {
+        for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalMasterEvent).entrySet()) {
             int userID = entry.getKey().intValue();
             if (userID != originalAttendee.getEntity()) {
-                storage.getAlarmStorage().insertAlarms(exceptionEvent.getId(), userID, entry.getValue());
+                storage.getAlarmStorage().insertAlarms(exceptionEvent, userID, entry.getValue());
             }
         }
         result.addCreation(new CreateResultImpl(loadEventData(exceptionEvent.getId())));

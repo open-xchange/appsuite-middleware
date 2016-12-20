@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,15 +63,18 @@ import com.openexchange.exception.OXException;
  */
 public interface AlarmStorage {
 
-    void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
+    void insertAlarms(Event event, int userID, List<Alarm> alarms) throws OXException;
 
-    Map<Integer, List<Alarm>> loadAlarms(int objectID) throws OXException;
+    Map<Integer, List<Alarm>> loadAlarms(Event event) throws OXException;
 
-    List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
+    List<Alarm> loadAlarms(Event event, int userID) throws OXException;
 
-    Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException;
+    Map<Integer, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException;
 
-    void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
+    void updateAlarms(Event event, int userID, List<Alarm> alarms) throws OXException;
+
+    //TODO: redundant?
+    void updateFolderID(int eventID, int userID, int folderID) throws OXException;
 
     /**
      * Deletes all alarms stored for a specific event.

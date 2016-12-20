@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -60,10 +61,10 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
-import com.openexchange.java.Strings;
+import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -193,6 +194,124 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
+     * Gets the duration string for a duration value in a specific time unit.
+     *
+     * @param duration The duration to get the duration string for
+     * @param unit The time unit of the given duration
+     * @return The duration string
+     */
+    public static String getDuration(long duration, TimeUnit unit) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (0 > duration) {
+            stringBuilder.append('-');
+            duration = duration * -1;
+        }
+        stringBuilder.append("PT");
+        long days = unit.toDays(duration);
+        if (0 < days) {
+            stringBuilder.append(days).append('D');
+            duration -= unit.convert(days, TimeUnit.DAYS);
+        }
+        long hours = unit.toHours(duration);
+        if (0 < hours) {
+            stringBuilder.append(hours).append('H');
+            duration -= unit.convert(hours, TimeUnit.HOURS);
+        }
+        long minutes = unit.toMinutes(duration);
+        if (0 < minutes) {
+            stringBuilder.append(minutes).append('M');
+            duration -= unit.convert(minutes, TimeUnit.MINUTES);
+        }
+        long seconds = unit.toSeconds(duration);
+        if (0 < seconds) {
+            stringBuilder.append(seconds).append('S');
+            duration -= unit.convert(seconds, TimeUnit.SECONDS);
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Calculates the actual relative duration of an alarm trigger associated with an event.
+     *
+     * @param trigger The trigger to get the effective trigger time for
+     * @param event The event the trigger's alarm is associated with
+     * @param recurrenceService A reference to the recurrence service
+     * @return The relative trigger duration, or <code>null</code> if not specified in supplied trigger
+     */
+    public static String getTriggerDuration(Trigger trigger, Event event, RecurrenceService recurrenceService) throws OXException {
+        if (null == trigger) {
+            return null;
+        }
+        if (null != trigger.getDuration()) {
+            return trigger.getDuration();
+        }
+        if (null != trigger.getDateTime()) {
+            if (CalendarUtils.isSeriesMaster(event)) {
+                Iterator<Event> iterator = recurrenceService.calculateInstancesRespectExceptions(event, initCalendar(TimeZones.UTC, trigger.getDateTime()), null, null, null);
+                if (iterator.hasNext()) {
+                    return getTriggerDuration(trigger, iterator.next());
+                }
+            } else {
+                return getTriggerDuration(trigger, event);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Calculates the actual relative duration of an alarm trigger associated with an event.
+     *
+     * @param trigger The trigger to get the effective trigger time for
+     * @param event The event the trigger's alarm is associated with
+     * @return The relative trigger duration, or <code>null</code> if not specified in supplied trigger
+     */
+    private static String getTriggerDuration(Trigger trigger, Event event) throws OXException {
+        if (null == trigger) {
+            return null;
+        }
+        if (null != trigger.getDuration()) {
+            return trigger.getDuration();
+        }
+        if (null != trigger.getDateTime()) {
+            Date relatedDate = getRelatedDate(trigger.getRelated(), event);
+            long diff = trigger.getDateTime().getTime() - relatedDate.getTime();
+            return getDuration(diff, TimeUnit.MILLISECONDS);
+        }
+        return null;
+    }
+
+    public static Date getNextTriggerTime(Date startDate, Trigger trigger, Event event, TimeZone timeZone, RecurrenceService recurrenceService) throws OXException {
+        if (CalendarUtils.isSeriesMaster(event)) {
+            Iterator<Event> iterator = recurrenceService.calculateInstancesRespectExceptions(event, initCalendar(timeZone, startDate), null, null, null);
+            while (iterator.hasNext()) {
+                Date triggerTime = getTriggerTime(trigger, iterator.next(), timeZone);
+                if (null == triggerTime) {
+                    return null;
+                } else if (false == triggerTime.before(startDate)) {
+                    return triggerTime;
+                }
+            }
+        }
+        return getTriggerTime(trigger, event, timeZone);
+    }
+
+    //    public static Date getClosestTriggerTime(Date startDate, List<Alarm> alarms, Event event, TimeZone timeZone) throws OXException {
+    //        if (null == alarms || 0 == alarms.size()) {
+    //            return null;
+    //        }
+    //        Date closestTriggerTime = null;
+    //        for (Alarm alarm : alarms) {
+    //            Date triggerTime = getNextTriggerTime(startDate, alarm.getTrigger(), event, timeZone);
+    //            if (null != triggerTime && false == triggerTime.before(startDate) &&
+    //                (null == alarm.getAcknowledged() || false == triggerTime.before(alarm.getAcknowledged())) &&
+    //                (null == closestTriggerTime || triggerTime.before(closestTriggerTime))) {
+    //                closestTriggerTime = triggerTime;
+    //            }
+    //        }
+    //        return closestTriggerTime;
+    //    }
+
+    /**
      * Gets the actual date-time of an event a trigger relates to, i.e. either the event's start- or end-date.
      *
      * @param related The related property of the trigger to get the related date for
@@ -226,26 +345,15 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether a specific alarm represents a <i>snoozed</i>, i.e. there exists another alarm with a matching
+     * Gets a value indicating whether a specific alarm represents a <i>snoozed</i> one, i.e. there exists another alarm with a matching
      * <code>SNOOZE</code> relationship in the supplied alarm collection.
      *
      * @param alarm The alarm to inspect
      * @param alarm A collection holding all alarms associated with the event
-     * @return <code>true</code> if this is the 'snoozed' trigger time, <code>false</code>, otherwise
+     * @return <code>true</code> if this is alarm holds the next ('snoozed') trigger time, <code>false</code>, otherwise
      */
     public static boolean isSnoozed(Alarm alarm, List<Alarm> allAlarms) {
-        RelatedTo relatedTo = alarm.getRelatedTo();
-        if (null != relatedTo && "SNOOZE".equals(relatedTo.getRelType())) {
-            String uid = relatedTo.getValue();
-            if (Strings.isNotEmpty(uid) && null != allAlarms && 0 < allAlarms.size()) {
-                for (Alarm otherAlarm : allAlarms) {
-                    if (uid.equals(otherAlarm.getUid())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return null != alarm.getRelatedTo() && (null == alarm.getRelatedTo().getRelType() || "SNOOZE".equals(alarm.getRelatedTo().getRelType())) && null != find(allAlarms, alarm.getRelatedTo().getValue());
     }
 
 }

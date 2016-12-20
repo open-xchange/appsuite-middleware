@@ -173,6 +173,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
          */
         for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
             updateAttendeeFolderId(originalEvent.getId(), originalAttendee, AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID);
+            storage.getAlarmStorage().updateFolderID(originalEvent.getId(), originalAttendee.getEntity(), i(targetFolder));
         }
         /*
          * take over new public folder id & touch event
@@ -188,6 +189,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
             int folderId = targetCalendarUser.getId() == originalAttendee.getEntity() ? i(targetFolder) : getDefaultCalendarID(originalAttendee.getEntity());
             updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
+            storage.getAlarmStorage().updateFolderID(originalEvent.getId(), originalAttendee.getEntity(), folderId);
         }
         /*
          * ensure to add default calendar user if not already present
@@ -223,6 +225,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                 throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUser.getId()), originalEvent.getId());
             }
             updateAttendeeFolderId(originalEvent.getId(), originalAttendee, i(targetFolder));
+            storage.getAlarmStorage().updateFolderID(originalEvent.getId(), originalAttendee.getEntity(), i(targetFolder));
         } else if (calendarUser.getId() == session.getUser().getId()) {
             /*
              * move from user's own calendar to another one ("reassign"), remove the original default user and
@@ -240,6 +243,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                 } else {
                     int folderId = targetCalendarUser.getId() == originalAttendee.getEntity() ? i(targetFolder) : getDefaultCalendarID(originalAttendee.getEntity());
                     updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
+                    storage.getAlarmStorage().updateFolderID(originalEvent.getId(), originalAttendee.getEntity(), folderId);
                 }
             }
         } else {
@@ -250,6 +254,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
             for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                 int folderId = targetCalendarUser.getId() == originalAttendee.getEntity() ? i(targetFolder) : getDefaultCalendarID(originalAttendee.getEntity());
                 updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
+                storage.getAlarmStorage().updateFolderID(originalEvent.getId(), originalAttendee.getEntity(), folderId);
             }
             /*
              * ensure to add default calendar user of target folder if not already present

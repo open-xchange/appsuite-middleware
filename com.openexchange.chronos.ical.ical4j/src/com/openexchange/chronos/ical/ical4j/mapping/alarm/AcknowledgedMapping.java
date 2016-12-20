@@ -92,7 +92,7 @@ public class AcknowledgedMapping extends AbstractICalMapping<VAlarm, Alarm> {
             object.setAcknowledged(null);
         } else {
             try {
-                object.setAcknowledged(new DateTime(property.getValue()));
+                object.setAcknowledged(new Date(new DateTime(property.getValue()).getTime()));
             } catch (ParseException e) {
                 addConversionWarning(warnings, e, Acknowledged.PROPERTY_NAME, e.getMessage());
             }

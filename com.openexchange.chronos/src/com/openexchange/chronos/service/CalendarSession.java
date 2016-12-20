@@ -112,6 +112,13 @@ public interface CalendarSession extends CalendarParameters {
     FreeBusyService getFreeBusyService();
 
     /**
+     * Gets a reference to the recurrence service.
+     *
+     * @return The recurrence service
+     */
+    RecurrenceService getRecurrenceService();
+
+    /**
      * Logs a debug message with an associated identifier of this particular CalendarSession.
      *
      * @param message The message to be logged

@@ -49,27 +49,51 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.AlarmUtils.filter;
+import static com.openexchange.chronos.common.AlarmUtils.find;
+import static com.openexchange.chronos.common.AlarmUtils.getTriggerTime;
+import static com.openexchange.chronos.common.CalendarUtils.getDateInTimeZone;
+import static com.openexchange.chronos.common.CalendarUtils.isFloating;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.AlarmAction;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RelatedTo;
+import com.openexchange.chronos.Trigger;
+import com.openexchange.chronos.common.AlarmUtils;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link CalendarStorage}
@@ -78,6 +102,9 @@ import com.openexchange.groupware.contexts.Context;
  * @since v7.10.0
  */
 public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
+
+    /** The module identifier used in the <code>reminder</code> table */
+    private static final int REMINDER_MODULE = Types.APPOINTMENT;
 
     /**
      * Initializes a new {@link RdbAlarmStorage}.
@@ -92,11 +119,24 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public Map<Integer, List<Alarm>> loadAlarms(int objectID) throws OXException {
+    public List<Alarm> loadAlarms(Event event, int userID) throws OXException {
+        return loadAlarms(Collections.singletonList(event), userID).get(I(event.getId()));
+    }
+
+    @Override
+    public Map<Integer, List<Alarm>> loadAlarms(Event event) throws OXException {
+        Map<Integer, List<Alarm>> alarmsByUserID = new HashMap<Integer, List<Alarm>>();
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAlarms(connection, context.getContextId(), objectID);
+            Map<Integer, ReminderData> remindersByUserID = selectReminders(connection, context.getContextId(), event.getId());
+            for (Map.Entry<Integer, ReminderData> entry : remindersByUserID.entrySet()) {
+                List<Alarm> alarms = getAlarms(event, i(entry.getKey()), entry.getValue());
+                if (null != alarms) {
+                    alarmsByUserID.put(entry.getKey(), alarms);
+                }
+            }
+            return alarmsByUserID;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
@@ -105,16 +145,20 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public List<Alarm> loadAlarms(int objectID, int userID) throws OXException {
-        return loadAlarms(new int[] { objectID }, userID).get(I(objectID));
-    }
-
-    @Override
-    public Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException {
+    public Map<Integer, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException {
+        Map<Integer, Event> eventsByID = CalendarUtils.getEventsByID(events);
+        Map<Integer, List<Alarm>> alarmsByEventID = new HashMap<Integer, List<Alarm>>(eventsByID.size());
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAlarms(connection, context.getContextId(), objectIDs, userID);
+            Map<Integer, ReminderData> remindersByID = selectReminders(connection, context.getContextId(), eventsByID.keySet(), userID);
+            for (Map.Entry<Integer, ReminderData> entry : remindersByID.entrySet()) {
+                List<Alarm> alarms = getAlarms(eventsByID.get(entry.getKey()), userID, entry.getValue());
+                if (null != alarms) {
+                    alarmsByEventID.put(entry.getKey(), alarms);
+                }
+            }
+            return alarmsByEventID;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
@@ -123,19 +167,17 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException {
-        updateAlarms(objectID, userID, alarms);
-    }
-
-    @Override
-    public void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException {
+    public void insertAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
+        ReminderData reminder = getNextReminder(event, userID, alarms, null);
+        if (null == reminder) {
+            return;
+        }
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            Integer reminder = Event2Appointment.getReminder(alarms);
-            updated += updateReminder(connection, context.getContextId(), objectID, userID, reminder);
+            updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
@@ -145,25 +187,21 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public void deleteAlarms(int objectID, int userID) throws OXException {
-        updateAlarms(objectID, userID, null);
-    }
-
-    @Override
-    public void deleteAlarms(int objectID, int[] userIDs) throws OXException {
-        for (int userID : userIDs) {
-            deleteAlarms(objectID, userID);
-        }
-    }
-
-    @Override
-    public void deleteAlarms(int objectID) throws OXException {
+    public void updateAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += updateReminders(connection, context.getContextId(), objectID, null);
+            ReminderData originalReminder = selectReminder(connection, context.getContextId(), event.getId(), userID);
+            ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
+            if (null == updatedReminder) {
+                updated += deleteReminderMinutes(connection, context.getContextId(), event.getId(), new int[] { userID });
+                updated += deleteReminderTriggers(connection, context.getContextId(), event.getId(), new int[] { userID });
+            } else {
+                updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
+                updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
@@ -172,78 +210,480 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static Map<Integer, List<Alarm>> selectAlarms(Connection connection, int contextID, int[] objectIDs, int userID) throws SQLException {
-        Map<Integer, List<Alarm>> alarmsById = new HashMap<Integer, List<Alarm>>();
+    @Override
+    public void updateFolderID(int eventID, int userID, int folderID) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += updateReminderTriggerFolder(connection, context.getContextId(), eventID, userID, folderID);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void deleteAlarms(int eventID, int userID) throws OXException {
+        deleteAlarms(eventID, new int[] { userID });
+    }
+
+    @Override
+    public void deleteAlarms(int eventID, int[] userIDs) throws OXException {
+        if (null == userIDs || 0 == userIDs.length) {
+            return;
+        }
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += deleteReminderMinutes(connection, context.getContextId(), eventID, userIDs);
+            updated += deleteReminderTriggers(connection, context.getContextId(), eventID, userIDs);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void deleteAlarms(int eventID) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += deleteReminderMinutes(connection, context.getContextId(), eventID);
+            updated += deleteReminderTriggers(connection, context.getContextId(), eventID);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /**
+     * Gets the alarms representing the stored reminder data.
+     *
+     * @param event The event the alarms are associated with
+     * @param userID The identifier of the user
+     * @param reminderData The stored reminder data
+     * @return The alarms, or <code>null</code> if there are none
+     */
+    private List<Alarm> getAlarms(Event event, int userID, ReminderData reminderData) throws OXException {
+        if (null == reminderData) {
+            return null;
+        }
+        /*
+         * construct primary alarm from reminder minutes
+         */
+        Alarm primaryAlarm = new Alarm(new Trigger("-PT" + reminderData.reminderMinutes + 'M'), AlarmAction.DISPLAY);
+        primaryAlarm.setDescription("Alarm");
+        primaryAlarm.setUid(new UUID(context.getContextId(), reminderData.id).toString().toUpperCase());
+        /*
+         * assume alarm is not yet acknowledged if next trigger still matches the primary alarm's regular trigger time
+         */
+        if (0 == reminderData.nextTriggerTime) {
+            return Collections.singletonList(primaryAlarm);
+        }
+        Date acknowledgedGuardian = getAcknowledgedGuardian(reminderData);
+        Date nextRegularTriggerTime = getNextTriggerTime(acknowledgedGuardian, primaryAlarm, event, entityResolver.getTimeZone(userID));
+        if (null == nextRegularTriggerTime) {
+            return Collections.singletonList(primaryAlarm);
+        }
+        if (reminderData.nextTriggerTime == nextRegularTriggerTime.getTime()) {
+            /*
+             * use primary alarm with acknowledged guardian to prevent premature triggers
+             */
+            primaryAlarm.setAcknowledged(acknowledgedGuardian);
+            return Collections.singletonList(primaryAlarm);
+        }
+        /*
+         * assume primary trigger has been snoozed by marking as acknowledged and adding an accompanying snooze trigger for the trigger time
+         */
+        primaryAlarm.setAcknowledged(acknowledgedGuardian);
+        Alarm snoozeAlarm = new Alarm(new Trigger(new Date(reminderData.nextTriggerTime)), primaryAlarm.getAction());
+        snoozeAlarm.setDescription(primaryAlarm.getDescription());
+        snoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", primaryAlarm.getUid()));
+        List<Alarm> alarms = new ArrayList<Alarm>(2);
+        alarms.add(primaryAlarm);
+        alarms.add(snoozeAlarm);
+        return alarms;
+    }
+
+    /**
+     * Evaluates the reminder data to insert for a specific event based on the supplied alarm list.
+     *
+     * @param event The event the alarms are associated with
+     * @param userID The identifier of the user
+     * @param alarms The alarms to derive the reminder data from
+     * @param originalReminder The previously stored reminder data, or <code>null</code> when inserting a new reminder
+     * @return The next reminder, or <code>null</code> if there is none
+     */
+    private ReminderData getNextReminder(Event event, int userID, List<Alarm> alarms, ReminderData originalReminder) throws OXException {
+        /*
+         * consider ACTION=DISPLAY alarms, only
+         */
+        List<Alarm> displayAlarms = filter(alarms, AlarmAction.DISPLAY);
+        if (null == displayAlarms || 0 == displayAlarms.size()) {
+            return null;
+        }
+        /*
+         * distinguish between 'snooze' & regular alarms (via RELTYPE=SNOOZE)
+         */
+        List<Alarm> regularAlarms = new ArrayList<Alarm>();
+        List<Alarm> snoozeAlarms = new ArrayList<Alarm>();
+        for (Alarm alarm : displayAlarms) {
+            if (AlarmUtils.isSnoozed(alarm, displayAlarms)) {
+                snoozeAlarms.add(alarm);
+            } else {
+                regularAlarms.add(alarm);
+            }
+        }
+        TimeZone timeZone = entityResolver.getTimeZone(userID);
+        Alarm snoozeAlarm = chooseNextAlarm(event, originalReminder, snoozeAlarms, timeZone);
+        if (null != snoozeAlarm) {
+            /*
+             * prefer the 'snooze' alarm along with the related 'snoozed' one
+             */
+            Alarm snoozedAlarm = find(regularAlarms, snoozeAlarm.getRelatedTo().getValue());
+            if (null != snoozedAlarm) {
+                Date startDate = null != snoozedAlarm.getAcknowledged() ? snoozedAlarm.getAcknowledged() : null != snoozeAlarm.getAcknowledged() ? snoozeAlarm.getAcknowledged() : new Date();
+                Date nextTriggerTime = getNextTriggerTime(startDate, snoozeAlarm, event, timeZone);
+                if (null != nextTriggerTime) {
+                    int reminderMinutes = getReminderMinutes(snoozedAlarm.getTrigger(), event, timeZone);
+                    return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
+                }
+            }
+        } else {
+            /*
+             * regular alarm, only
+             */
+            Alarm regularAlarm = chooseNextAlarm(event, originalReminder, regularAlarms, timeZone);
+            if (null != regularAlarm) {
+                Date nextTriggerTime = getNextTriggerTime(regularAlarm, event, timeZone);
+                if (null != nextTriggerTime) {
+                    int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event, timeZone);
+                    return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
+                }
+            }
+        }
+        return null;
+    }
+
+    private static int getReminderMinutes(Trigger trigger, Event event, TimeZone timeZone) {
+        Date triggerTime = getTriggerTime(trigger, event, timeZone);
+        Date startTime = isFloating(event) ? getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
+        long duration = startTime.getTime() - triggerTime.getTime();
+        return (int) TimeUnit.MILLISECONDS.toMinutes(duration);
+    }
+
+    private static ReminderData selectReminder(Connection connection, int contextID, int eventID, int userID) throws SQLException, OXException {
         String sql = new StringBuilder()
-            .append("SELECT object_id,reminder FROM prg_dates_members ")
-            .append("WHERE cid=? AND member_uid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
+            .append("SELECT m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
+            .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
+            .append("WHERE m.cid=? AND m.member_uid=? AND m.object_id=?;")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, userID);
-            for (int objectID : objectIDs) {
-                stmt.setInt(parameterIndex++, objectID);
-            }
+            stmt.setInt(parameterIndex++, eventID);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                if (resultSet.next()) {
-                    int reminder = resultSet.getInt("reminder");
-                    if (false == resultSet.wasNull()) {
-                        alarmsById.put(I(resultSet.getInt("object_id")), Collections.singletonList(Appointment2Event.getAlarm(reminder)));
-                    }
-                }
+                return resultSet.next() ? readReminder(resultSet) : null;
             }
         }
-        return alarmsById;
     }
 
-    private static Map<Integer, List<Alarm>> selectAlarms(Connection connection, int contextID, int objectID) throws SQLException {
-        Map<Integer, List<Alarm>> alarmsById = new HashMap<Integer, List<Alarm>>();
+    private static Map<Integer, ReminderData> selectReminders(Connection connection, int contextID, Collection<Integer> eventIDs, int userID) throws SQLException, OXException {
+        Map<Integer, ReminderData> remindersByID = new HashMap<Integer, ReminderData>(eventIDs.size());
         String sql = new StringBuilder()
-            .append("SELECT member_uid,reminder FROM prg_dates_members ")
-            .append("WHERE cid=? AND object_id=?;")
+            .append("SELECT m.object_id,m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
+            .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
+            .append("WHERE m.cid=? AND m.member_uid=? AND m.object_id IN (").append(getParameters(eventIDs.size())).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            stmt.setInt(parameterIndex++, objectID);
+            stmt.setInt(parameterIndex++, userID);
+            for (Integer eventID : eventIDs) {
+                stmt.setInt(parameterIndex++, i(eventID));
+            }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    int reminder = resultSet.getInt("reminder");
-                    if (false == resultSet.wasNull()) {
-                        alarmsById.put(I(resultSet.getInt("member_uid")), Collections.singletonList(Appointment2Event.getAlarm(reminder)));
+                    Integer eventID = I(resultSet.getInt("m.object_id"));
+                    ReminderData reminder = readReminder(resultSet);
+                    if (null != reminder) {
+                        remindersByID.put(eventID, reminder);
                     }
                 }
             }
         }
-        return alarmsById;
+        return remindersByID;
     }
 
-    private static int updateReminder(Connection connection, int contextID, int objectID, int userID, Integer reminder) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid=?;")) {
-            if (null == reminder) {
-                stmt.setNull(1, java.sql.Types.INTEGER);
-            } else {
-                stmt.setInt(1, reminder.intValue());
+    private static Map<Integer, ReminderData> selectReminders(Connection connection, int contextID, int eventID) throws SQLException, OXException {
+        Map<Integer, ReminderData> remindersByUserID = new HashMap<Integer, ReminderData>();
+        String sql = new StringBuilder()
+            .append("SELECT m.member_uid,m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
+            .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
+            .append("WHERE m.cid=? AND m.object_id=?;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, eventID);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    Integer userID = I(resultSet.getInt("m.member_uid"));
+                    ReminderData reminder = readReminder(resultSet);
+                    if (null != reminder) {
+                        remindersByUserID.put(userID, reminder);
+                    }
+                }
             }
+        }
+        return remindersByUserID;
+    }
+
+    private static int insertReminder(Connection connection, int contextID, Event event, int userID, ReminderData reminder) throws SQLException {
+        int updated = 0;
+        try (PreparedStatement stmt = connection.prepareStatement(
+            "INSERT INTO reminder (cid,object_id,last_modified,target_id,module,userid,alarm,recurrence,folder) VALUES (?,?,?,?,?,?,?,?,?);")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, IDGenerator.getId(contextID, Types.REMINDER, connection));
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.setInt(4, event.getId());
+            stmt.setInt(5, Types.APPOINTMENT);
+            stmt.setInt(6, userID);
+            stmt.setTimestamp(7, new Timestamp(reminder.nextTriggerTime));
+            stmt.setInt(8, isSeriesMaster(event) ? 1 : 0);
+            stmt.setInt(9, event.getFolderId());
+            updated += logExecuteUpdate(stmt);
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid=?;")) {
+            stmt.setInt(1, reminder.reminderMinutes);
             stmt.setInt(2, contextID);
-            stmt.setInt(3, objectID);
+            stmt.setInt(3, event.getId());
+            stmt.setInt(4, userID);
+            updated += logExecuteUpdate(stmt);
+        }
+        return updated;
+    }
+
+    private static int updateReminderTrigger(Connection connection, int contextID, Event event, int userID, long triggerTime) throws SQLException {
+        String sql = "INSERT INTO reminder (cid,object_id,last_modified,target_id,module,userid,alarm,recurrence,folder) VALUES (?,?,?,?,?,?,?,?,?) " +
+            "ON DUPLICATE KEY UPDATE last_modified=?,alarm=?,recurrence=?,folder=?;"
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, IDGenerator.getId(contextID, Types.REMINDER, connection));
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.setInt(4, event.getId());
+            stmt.setInt(5, REMINDER_MODULE);
+            stmt.setInt(6, userID);
+            stmt.setTimestamp(7, new Timestamp(triggerTime));
+            stmt.setInt(8, isSeriesMaster(event) ? 1 : 0);
+            stmt.setInt(9, event.getFolderId());
+            stmt.setLong(10, System.currentTimeMillis());
+            stmt.setTimestamp(11, new Timestamp(triggerTime));
+            stmt.setInt(12, isSeriesMaster(event) ? 1 : 0);
+            stmt.setInt(13, event.getFolderId());
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int updateReminderTriggerFolder(Connection connection, int contextID, int eventID, int userID, int folderID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE reminder SET folder=? WHERE cid=? AND target_id=? AND module=? AND userid=?;")) {
+            stmt.setInt(1, folderID);
+            stmt.setInt(2, contextID);
+            stmt.setInt(3, eventID);
+            stmt.setInt(4, REMINDER_MODULE);
+            stmt.setInt(5, userID);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int updateReminderMinutes(Connection connection, int contextID, Event event, int userID, int reminderMinutes) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid=?;")) {
+            stmt.setInt(1, reminderMinutes);
+            stmt.setInt(2, contextID);
+            stmt.setInt(3, event.getId());
             stmt.setInt(4, userID);
             return logExecuteUpdate(stmt);
         }
     }
 
-    private static int updateReminders(Connection connection, int contextID, int objectID, Integer reminder) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=?;")) {
-            if (null == reminder) {
-                stmt.setNull(1, java.sql.Types.INTEGER);
-            } else {
-                stmt.setInt(1, reminder.intValue());
-            }
-            stmt.setInt(2, contextID);
-            stmt.setInt(3, objectID);
+    private static int deleteReminderTriggers(Connection connection, int contextID, int eventID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM reminder WHERE cid=? AND target_id=? AND module=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, eventID);
+            stmt.setInt(3, REMINDER_MODULE);
             return logExecuteUpdate(stmt);
         }
+    }
+
+    private static int deleteReminderTriggers(Connection connection, int contextID, int eventID, int[] userIDs) throws SQLException {
+        String sql = new StringBuilder()
+            .append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id=? AND userid IN (")
+            .append(getParameters(userIDs.length)).append(");")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, REMINDER_MODULE);
+            stmt.setInt(parameterIndex++, eventID);
+            for (Integer userID : userIDs) {
+                stmt.setInt(parameterIndex++, i(userID));
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int deleteReminderMinutes(Connection connection, int contextID, int eventID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=?;")) {
+            stmt.setNull(1, java.sql.Types.INTEGER);
+            stmt.setInt(2, contextID);
+            stmt.setInt(3, eventID);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int deleteReminderMinutes(Connection connection, int contextID, int eventID, int[] userIDs) throws SQLException {
+        String sql = new StringBuilder()
+            .append("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid IN (")
+            .append(getParameters(userIDs.length)).append(");")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, eventID);
+            for (Integer userID : userIDs) {
+                stmt.setInt(parameterIndex++, i(userID));
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Reads reminder data from the supplied result set.
+     *
+     * @param resultSet The result set to read from
+     * @return The reminder data, or <code>null</code> if not set
+     */
+    private static ReminderData readReminder(ResultSet resultSet) throws SQLException, OXException {
+        int reminderMinutes = resultSet.getInt("m.reminder");
+        if (resultSet.wasNull()) {
+            return null;
+        }
+        int reminderID = resultSet.getInt("r.object_id");
+        Timestamp nextTriggerTime = resultSet.getTimestamp("r.alarm");
+        return new ReminderData(reminderID, reminderMinutes, null == nextTriggerTime ? 0L : nextTriggerTime.getTime());
+    }
+
+    private static Date getNextTriggerTime(Alarm alarm, Event event, TimeZone timeZone) {
+        Date startDate;
+        if (isSeriesMaster(event)) {
+            startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
+        } else {
+            startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : event.getStartDate();
+        }
+        return getNextTriggerTime(startDate, alarm, event, timeZone);
+    }
+
+    private static Date getNextTriggerTime(Date startDate, Alarm alarm, Event event, TimeZone timeZone) {
+        try {
+            return AlarmUtils.getNextTriggerTime(startDate, alarm.getTrigger(), event, timeZone, Services.getService(RecurrenceService.class));
+        } catch (OXException e) {
+            LOG.warn("Error determining next trigger time for alarm", e);
+        }
+        return null;
+    }
+
+    /**
+     * Chooses the alarm with the 'nearest' trigger time, that is not yet acknowledged, from a list of multiple alarms.
+     *
+     * @param event The event the alarms are associated with
+     * @param originalReminder The originally stored reminder data in case of updates, or <code>null</code> if not set
+     * @param alarms The alarms to choose from
+     * @param timeZone The timezone to consider when evaluating the next trigger time of <i>floating</i> events
+     * @return The next alarm, or <code>null</code> if there is none
+     */
+    private static Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) {
+        if (null == alarms || 0 == alarms.size()) {
+            return null;
+        }
+        Alarm nearestAlarm = null;
+        Date nearestTriggerTime = null;
+        for (Alarm alarm : alarms) {
+            Date nextTriggerTime = getNextTriggerTime(alarm, event, timeZone);
+            if (null != nextTriggerTime) {
+                if (null != alarm.getAcknowledged() && false == alarm.getAcknowledged().before(nextTriggerTime)) {
+                    /*
+                     * skip acknowledged alarms, but ignore an auto-inserted acknowledged guardian if unchanged during an update
+                     */
+                    Date originalAcknowledgedGuardian = getAcknowledgedGuardian(originalReminder);
+                    if (null == originalAcknowledgedGuardian || false == originalAcknowledgedGuardian.equals(alarm.getAcknowledged())) {
+                        continue;
+                    }
+                }
+                if (null == nearestTriggerTime || nearestTriggerTime.before(nextTriggerTime)) {
+                    nearestAlarm = alarm;
+                    nearestTriggerTime = nextTriggerTime;
+                }
+            }
+        }
+        return nearestAlarm;
+    }
+
+    /**
+     * Gets the date that is used as <i>acknowledged guardian</i> to prevent premature alarm triggers at clients.
+     *
+     * @param triggerTime The trigger time of an alarm
+     * @return The date of the corresponding acknowledged guardian
+     */
+    private static Date getAcknowledgedGuardian(ReminderData reminderData) {
+        if (null != reminderData && 0 < reminderData.nextTriggerTime) {
+            Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, reminderData.nextTriggerTime);
+            calendar.add(Calendar.MINUTE, -1);
+            return calendar.getTime();
+        }
+        return null;
+    }
+
+
+    private static final class ReminderData {
+
+        int reminderMinutes;
+        long nextTriggerTime;
+        int id;
+
+        /**
+         * Initializes a new {@link ReminderData}.
+         *
+         * @param id The identifier of the stored reminder
+         * @param reminderMinutes The reminder minutes, relative to the targeted event's start date
+         * @param nextTriggerTime The next trigger time
+         */
+        ReminderData(int id, int reminderMinutes, long nextTriggerTime) {
+            super();
+            this.id = id;
+            this.reminderMinutes = reminderMinutes;
+            this.nextTriggerTime = nextTriggerTime;
+        }
+
+        @Override
+        public String toString() {
+            return "ReminderData [reminderMinutes=" + reminderMinutes + ", nextTriggerTime=" + new Date(nextTriggerTime) + "]";
+        }
+
     }
 
 }
