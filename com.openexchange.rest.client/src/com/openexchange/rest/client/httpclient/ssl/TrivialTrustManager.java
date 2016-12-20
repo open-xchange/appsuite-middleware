@@ -47,59 +47,38 @@
  *
  */
 
-package com.openexchange.rest.client.osgi;
+package com.openexchange.rest.client.httpclient.ssl;
 
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
-import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
-import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
-import com.openexchange.timer.TimerService;
-
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.X509TrustManager;
 
 /**
- * {@link RestClientActivator}
+ * The No-Op trust manager.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
  */
-public class RestClientActivator extends HousekeepingActivator {
+public final class TrivialTrustManager implements X509TrustManager {
 
     /**
-     * Initializes a new {@link RestClientActivator}.
+     * Initializes a new {@link TrivialTrustManager}.
      */
-    public RestClientActivator() {
+    public TrivialTrustManager() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // No-op
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        RestClientServices.setServices(this);
-        WrappedClientsRegistry.getInstance().setFactoryProvider(getService(SSLSocketFactoryProvider.class));
-        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
-
-        // Avoid annoying WARN logging
-        //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // No-op
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        try {
-            // Clean-up
-            super.stopBundle();
-            // Clear service registry
-            WrappedClientsRegistry.getInstance().setFactoryProvider(null);
-            RestClientServices.setServices(null);
-        } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
-            throw e;
-        }
+    public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
     }
-
 }
