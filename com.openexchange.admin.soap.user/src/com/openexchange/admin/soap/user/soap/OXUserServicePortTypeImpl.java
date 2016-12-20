@@ -2281,7 +2281,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
         soapUser.setPrimaryAccountName(user.getPrimaryAccountName());
-        soapUser.setRemoveDriveFolderFlags(user.isRemoveDriveFolderFlags());
         return soapUser;
     }
 
