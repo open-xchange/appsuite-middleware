@@ -10,3 +10,16 @@ Default is 900000 (15 Minutes).
       Configcascade_Aware: false
       Related: com.openexchange.websockets.enabled
       File: grizzly.properties
+  - data:
+      Key: com.openexchange.http.grizzly.sessionExpiryCheckInterval
+      Description: >
+Specifies the interval in seconds when to check for expired/invalid HTTP sessions
+This value should be aligned to property "com.openexchange.servlet.maxInactiveInterval"
+that defines how long (in seconds) a HTTP session may stay idle/inactive until considered
+as invalid
+Default is 60 seconds
+      Default: 60
+      Version: 7.8.4
+      Reloadable: false
+      Configcascade_Aware: false
+      File: grizzly.properties
