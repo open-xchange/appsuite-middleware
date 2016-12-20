@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -67,6 +68,9 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ChangeCore extends UserFilestoreAbstraction {
+	
+	protected CLIOption removeDriveFolderFlagsOption = null;
+    protected static final String OPT_REMOVE_DRIVE_FOLDER_FLAGS = "remove-drive-folder-flags";
 
     protected final void setOptions(final AdminParser parser) {
 
@@ -83,6 +87,8 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
         setOptionalOptions(parser);
 
         setFurtherOptions(parser);
+        
+        this.removeDriveFolderFlagsOption = setLongOpt(parser, OPT_REMOVE_DRIVE_FOLDER_FLAGS, "Remove the default folder flags for media folders", false, false);
 
         parser.allowDynamicOptions();
     }
@@ -136,6 +142,10 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
 
             // Dynamic Options
             applyDynamicOptionsToUser(parser, usr);
+            
+            if (parser.hasOption(this.removeDriveFolderFlagsOption)) {
+            	usr.setRemoveDriveFolderFlags(true);
+            }
 
             // finally do change call last (must be done last because else we cannot
             // change admin password

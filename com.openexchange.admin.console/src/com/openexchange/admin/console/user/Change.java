@@ -117,7 +117,6 @@ public class Change extends ChangeCore {
         setCapsToDrop(parser);
         setPersonal(parser);
         setUserQuotaOption(parser, false);
-        setRemoveDriveFolderFlagsOption(parser);
     }
 
 }
