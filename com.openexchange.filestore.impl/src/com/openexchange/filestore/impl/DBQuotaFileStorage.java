@@ -504,9 +504,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
+        if (null == identifiers || identifiers.length == 0) {
+            return Collections.emptySet();
+        }
+
         Map<String, Long> fileSizes = new HashMap<String, Long>();
         SortedSet<String> set = new TreeSet<String>();
-        for (String identifier : new LinkedHashSet<>(Arrays.asList(identifiers))) {
+        for (String identifier : newLinkedHashSetFor(identifiers)) {
             boolean deleted;
             try {
                 // Get size before attempting delete. File is not found afterwards
@@ -529,6 +533,16 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             sum += fileSize.longValue();
         }
         decUsage(Arrays.asList(identifiers), sum);
+        return set;
+    }
+
+    private static LinkedHashSet<String> newLinkedHashSetFor(String[] identifiers) {
+        LinkedHashSet<String> set = new LinkedHashSet<>();
+        for (String identifier : identifiers) {
+            if (null != identifier) {
+                set.add(identifier);
+            }
+        }
         return set;
     }
 
