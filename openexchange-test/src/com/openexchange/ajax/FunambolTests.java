@@ -68,16 +68,6 @@ public class FunambolTests extends AbstractAJAXSession {
     }
 
     @Test
-    public void testLoginAndLogout() {
-        /*
-         * Login Request: http://oxptftest.schlund.de/ajax/login?action=login Logout Request: http://192.168.0.76/ajax/login?
-         * action=logout&session=887e15e1497fddf59e67ba0450a346e0
-         */
-
-        // not implemented: Every single test does log in and out
-    }
-
-    @Test
     public void testGetAllContactsWithColumns() throws Exception {
         /*
          * Request: http://192.168.0.76/ajax/contacts? action=all&session=3b0b1d04035e8d1cfa19918228ca69b7&folder=38&columns=1%2C4%2C5% 2C20

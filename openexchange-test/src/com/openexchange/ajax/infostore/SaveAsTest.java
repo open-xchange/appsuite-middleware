@@ -27,7 +27,8 @@ public class SaveAsTest extends InfostoreAJAXTest {
     @Test
     public void testBasic() throws Exception {
         final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
-        final String id = saveAs(getWebConversation(), getHostName(), sessionId, attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
+        
+        final String id = itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
 
         clean.add(id);
 
@@ -44,7 +45,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
         InputStream is2 = null;
         try {
             is = new FileInputStream(upload);
-            is2 = document(getWebConversation(), getHostName(), sessionId, id, 1);
+            is2 = itm.document(Integer.toString(folderId), id, "1");
             OXTestToolkit.assertSameContent(is, is2);
         } finally {
             if (is != null) {
@@ -68,7 +69,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
     public void virtualFolder(int folderId) throws Exception {
         final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
         try {
-            final String id = saveAs(getWebConversation(), getHostName(), sessionId, attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
+            final String id = itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
 
             clean.add(id);
             fail("Expected IOException when trying to save attachment in virtual infostore folder");

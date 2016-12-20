@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -72,13 +73,14 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.URLParameter;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class LockTest extends InfostoreAJAXTest {
 
@@ -106,18 +108,18 @@ public class LockTest extends InfostoreAJAXTest {
         String c = data.getId();
         clean.add(c);
 
-        Response res = this.update(getWebConversation(), getHostName(), sessionId, c, Long.MAX_VALUE, m(), testFile, "text/plain");
-        assertNoError(res);
+        com.openexchange.file.storage.File org = itm.getAction(c);
+        itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-        res = this.update(getWebConversation(), getHostName(), sessionId, c, Long.MAX_VALUE, m(), testFile, "text/plain");
-        assertNoError(res);
+        itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-        res = this.update(getWebConversation(), getHostName(), sessionId, c, Long.MAX_VALUE, m(), testFile, "text/plain");
-        assertNoError(res);
+        itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-        res = this.update(getWebConversation(), getHostName(), sessionId, c, Long.MAX_VALUE, m(), testFile, "text/plain");
-        assertNoError(res);
-
+        itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
     }
 
     @After
@@ -129,120 +131,119 @@ public class LockTest extends InfostoreAJAXTest {
         }
     }
 
-    //FIXME MS re-add later
-    //    @Test
-    //    public void testLock() throws Exception {
-    //
-    //        Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0), -1);
-    //        final Date ts = res.getTimestamp();
-    //
-    //        res = lock(getWebConversation(), getHostName(), sessionId, clean.get(0));
-    //        assertNoError(res);
-    //        assertNotNull(res.getTimestamp());
-    //
-    //        res = get(getWebConversation(), getHostName(), sessionId, clean.get(0), -1);
-    //        assertNoError(res);
-    //        assertLocked((JSONObject) res.getData());
-    //
-    //        // BUG 4232
-    //
-    //        res = updates(getWebConversation(), getHostName(), sessionId, folderId, new int[] { Metadata.ID }, ts.getTime());
-    //
-    //        final JSONArray modAndDel = (JSONArray) res.getData();
-    //        final JSONArray mod = modAndDel.getJSONArray(0);
-    //
-    //        assertEquals(1, mod.length());
-    //        assertEquals(clean.get(0), mod.getString(0));
-    //
-    //        final String sessionId2 = this.getSecondSessionId();
-    //
-    //        // Object may not be modified
-    //        res = update(getSecondWebConversation(), getHostName(), sessionId2, clean.get(0), Long.MAX_VALUE, m("title", "Hallo"));
-    //        assertTrue(res.hasError());
-    //
-    //        // Bug #????
-    //        // Object may not be moved
-    //
-    //        final int userId2 = getClient2().getValues().getUserId();
-    //        final int folderId2 = getClient2().getValues().getPrivateInfostoreFolder();
-    //
-    //        res = update(getSecondWebConversation(), getHostName(), sessionId2, clean.get(0), Long.MAX_VALUE, m("folder_id", "" + folderId2));
-    //        assertTrue(res.hasError());
-    //
-    //        // Object may not be removed
-    //        JSONObject response = deleteGetResponse(getSecondWebConversation(), null, getHostName(), sessionId2, Long.MAX_VALUE, new String[][] { { String.valueOf(folderId), clean.get(0) } });
-    //        assertTrue(response.has("error"));
-    //
-    //        // Versions may not be removed
-    //        int[] notDetached = detach(getSecondWebConversation(), getHostName(), sessionId2, Long.MAX_VALUE, clean.get(0), new int[] { 4 });
-    //        assertEquals(1, notDetached.length);
-    //        assertEquals(4, notDetached[0]);
-    //
-    //        // Object may not be locked
-    //        res = lock(getSecondWebConversation(), getHostName(), sessionId2, clean.get(0));
-    //        assertTrue(res.hasError());
-    //
-    //        // Object may not be unlocked
-    //
-    //        res = unlock(getSecondWebConversation(), getHostName(), sessionId2, clean.get(0));
-    //        assertTrue(res.hasError());
-    //
-    //        // Lock owner may update
-    //        res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("title", "Hallo"));
-    //        assertNoError(res);
-    //
-    //        res = get(getWebConversation(), getHostName(), sessionId, clean.get(0), -1);
-    //        final JSONObject o = (JSONObject) res.getData();
-    //
-    //        assertEquals("Hallo", o.get("title"));
-    //
-    //        //Lock owner may detach
-    //        notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[] { 4 });
-    //        assertEquals(0, notDetached.length);
-    //
-    //        //Lock owner may remove
-    //        String[] notDeleted = delete(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, new String[][] { { String.valueOf(folderId), clean.get(0) } });
-    //        assertEquals(0, notDeleted.length);
-    //        clean.remove(0);
-    //
-    //    }
+    @Test
+    public void testLock() throws Exception {
+        String id = clean.get(0);
+        itm.getAction(id);
+
+        itm.lock(id);
+        assertFalse(itm.getLastResponse().hasError());
+        assertNotNull(itm.getLastResponse().getTimestamp());
+
+        com.openexchange.file.storage.File file = itm.getAction(id);
+        Date ts = itm.getLastResponse().getTimestamp();
+        assertFalse(itm.getLastResponse().hasError());
+        assertLocked((JSONObject) itm.getLastResponse().getData());
+
+        // BUG 4232
+        itm.updateAction(file, new Field[] { Field.ID }, new Date(ts.getTime()));
+
+        final JSONArray modAndDel = (JSONArray) itm.getLastResponse().getData();
+        final JSONArray mod = modAndDel.getJSONArray(0);
+
+        assertEquals(1, mod.length());
+        assertEquals(id, mod.getString(0));
+
+        itm.setClient(getClient2());
+        // Object may not be modified
+        file.setTitle("Hallo");
+        itm.updateAction(file, new Field[] { Field.ID, Field.TITLE }, new Date(Long.MAX_VALUE));
+        assertTrue(itm.getLastResponse().hasError());
+
+        // Bug #????
+        // Object may not be moved
+
+        final int userId2 = getClient2().getValues().getUserId();
+        final int folderId2 = getClient2().getValues().getPrivateInfostoreFolder();
+        itm.updateAction(file, new Field[] { Field.ID, Field.FOLDER_ID }, new Date(Long.MAX_VALUE));
+        assertTrue(itm.getLastResponse().hasError());
+
+        // Object may not be removed
+        itm.deleteAction(Collections.singletonList(id), Collections.singletonList(folderId), new Date(Long.MAX_VALUE));
+        assertTrue(itm.getLastResponse().hasError());
+
+        // Versions may not be removed
+        ftm.detach(id, new Date(Long.MAX_VALUE), new int[] { 4 });
+//      TODO
+//        int[] notDetached = detach(getSecondWebConversation(), getHostName(), sessionId2, Long.MAX_VALUE, id, new int[] { 4 });
+//        assertEquals(1, notDetached.length);
+//        assertEquals(4, notDetached[0]);
+
+        itm.lock(id);
+        // Object may not be locked
+        assertTrue(itm.getLastResponse().hasError());
+
+        // Object may not be unlocked
+        itm.unlock(id);
+        assertTrue(itm.getLastResponse().hasError());
+
+        itm.setClient(getClient());
+        // Lock owner may update
+        file.setTitle("Hallo");
+        itm.updateAction(file, new Field[] { Field.ID, Field.TITLE }, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
+
+        com.openexchange.file.storage.File reload = itm.getAction(id);
+
+        assertEquals("Hallo", reload.getTitle());
+
+        //Lock owner may detach
+        ftm.detach(id, new Date(Long.MAX_VALUE), new int[] { 4 });
+//        TODO
+//        notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, id, new int[] { 4 });
+//        assertEquals(0, notDetached.length);
+
+        //Lock owner may remove
+        itm.deleteAction(Collections.singletonList(id), Collections.singletonList(folderId), new Date(Long.MAX_VALUE));
+        clean.remove(0);
+    }
 
     @Test
     public void testUnlock() throws Exception {
-        Response res = lock(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
+        String id = clean.get(0);
+        itm.lock(id);
+        assertFalse(itm.getLastResponse().hasError());
 
-        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
+        com.openexchange.file.storage.File file = itm.getAction(id);
         assertLocked(file);
 
         // Lock owner may relock
-        res = lock(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
+        itm.lock(id);
+        assertFalse(itm.getLastResponse().hasError());
 
         // Lock owner may unlock (duh!)
-        res = unlock(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
-        assertNotNull(res.getTimestamp());
+        itm.unlock(id);
+        assertFalse(itm.getLastResponse().hasError());
+        assertNotNull(itm.getLastResponse().getTimestamp());
 
-        file = itm.getAction(clean.get(0));
+        file = itm.getAction(id);
         assertUnlocked(file);
 
-        final String sessionId2 = getSecondSessionId();
-
-        res = lock(getSecondWebConversation(), getHostName(), sessionId2, clean.get(0));
-        assertNoError(res);
+        itm.setClient(getClient2());
+        itm.lock(id);
+        assertFalse(itm.getLastResponse().hasError());
 
         file.setTitle("Hallo");
-        UpdateInfostoreResponse result = update(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, Long.MAX_VALUE);
-        assertTrue(result.hasError());
+        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
+        assertTrue(itm.getLastResponse().hasError());
 
         // Owner may unlock
-        res = unlock(getWebConversation(), getHostName(), sessionId, clean.get(0));
-        assertNoError(res);
+        itm.setClient(getClient());
+        itm.unlock(id);
+        assertFalse(itm.getLastResponse().hasError());
 
-        file = itm.getAction(clean.get(0));
+        file = itm.getAction(id);
         assertUnlocked(file);
-
     }
 
     public static void assertLocked(final com.openexchange.file.storage.File file) throws JSONException {
@@ -319,5 +320,14 @@ public class LockTest extends InfostoreAJAXTest {
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
     private static final String FOLDER_URL = "/ajax/folders";
+
+    public static void assertLocked(final JSONObject o) throws JSONException {
+        final long locked = o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName());
+        assertFalse("This must be != 0: " + locked, 0 == locked);
+    }
+
+    public static void assertUnlocked(final JSONObject o) throws JSONException {
+        assertEquals(0, o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName()));
+    }
 
 }

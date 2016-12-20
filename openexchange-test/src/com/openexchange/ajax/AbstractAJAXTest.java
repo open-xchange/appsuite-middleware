@@ -65,7 +65,6 @@ import org.xml.sax.SAXException;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
-import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
@@ -284,16 +283,6 @@ public abstract class AbstractAJAXTest {
 
     protected String gS(final WebConversation webConv, final String url) throws MalformedURLException, IOException, SAXException {
         final GetMethodWebRequest m = new GetMethodWebRequest(url);
-        final WebResponse resp = webConv.getResponse(m);
-        return resp.getText();
-    }
-
-    protected String pS(final WebConversation webConv, final String url, final Map<String, String> data) throws MalformedURLException, IOException, SAXException {
-        final PostMethodWebRequest m = new PostMethodWebRequest(url);
-
-        for (final String key : data.keySet()) {
-            m.setParameter(key, data.get(key));
-        }
         final WebResponse resp = webConv.getResponse(m);
         return resp.getText();
     }

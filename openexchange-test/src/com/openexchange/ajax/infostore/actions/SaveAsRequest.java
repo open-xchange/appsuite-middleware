@@ -47,99 +47,75 @@
  *
  */
 
-package com.openexchange.ajax.resource.actions;
+package com.openexchange.ajax.infostore.actions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.infostore.thirdparty.actions.AbstractFileRequest;
 
 /**
- * {@link ResourceGetRequest}
+ * 
+ * {@link SaveAsRequest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public final class ResourceGetRequest extends AbstractResourceRequest<ResourceGetResponse> {
+public class SaveAsRequest extends AbstractFileRequest<SaveAsResponse> {
 
-    private final boolean failOnError;
+    private final String folderId;
+    private final int attached;
+    private final int module;
+    private final int attachment;
+    private Map<String, String> body;
 
-    private final int resourceId;
-
-    /**
-     * Initializes a new {@link ResourceGetRequest}
-     *
-     * @param failOnError
-     *            <code>true</code> to fail on error; otherwise
-     *            <code>false</code>
-     */
-    public ResourceGetRequest(final int resourceId, final boolean failOnError) {
-        super();
-        this.resourceId = resourceId;
-        this.failOnError = failOnError;
+    public SaveAsRequest(final String folderId, final int attached, final int module, final int attachment, final Map<String, String> body) {
+        super(true);
+        this.folderId = folderId;
+        this.attached = attached;
+        this.module = module;
+        this.attachment = attachment;
+        this.body = body;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
-        return Method.GET;
+        return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
-    public Parameter[] getParameters() {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
-        params.add(new Parameter(AJAXServlet.PARAMETER_ID, resourceId));
+    public JSONObject getBody() throws IOException, JSONException {
+        return toJSONArgs(body);
+    }
+
+    @Override
+    public SaveAsParser getParser() {
+        return new SaveAsParser(true);
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> params = new ArrayList<>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "saveAs"));
+        if (this.folderId != null) {
+            params.add(new Parameter("id", folderId));
+        }
+        params.add(new Parameter("attached", this.attached));
+        params.add(new Parameter("module", this.module));
+        params.add(new Parameter("attachment", this.attachment));
+
         return params.toArray(new Parameter[params.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public ResourceGetParser getParser() {
-        return new ResourceGetParser(failOnError);
-    }
-
-    private static final class ResourceGetParser extends AbstractAJAXParser<ResourceGetResponse> {
-
-        /**
-         * Default constructor.
-         */
-        ResourceGetParser(final boolean failOnError) {
-            super(failOnError);
+    private JSONObject toJSONArgs(final Map<String, String> modified) throws JSONException {
+        final JSONObject obj = new JSONObject();
+        for (final String attr : modified.keySet()) {
+            obj.put(attr, modified.get(attr));
         }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected ResourceGetResponse createResponse(final Response response) throws JSONException {
-            return new ResourceGetResponse(response);
-        }
+        return obj;
     }
-
 }

@@ -71,12 +71,18 @@ public class GetDocumentRequest extends AbstractInfostoreRequest<GetDocumentResp
     private final String folder;
     private final String version;
     private Parameter[] additionalParameters;
+    private String mimeType;
 
     public GetDocumentRequest(String folder, String id, String version) {
+        this(folder, id, version, null);
+    }
+        
+    public GetDocumentRequest(String folder, String id, String version, String mimeType) {
         super();
         this.folder = folder;
         this.id = id;
         this.version = version;
+        this.mimeType = mimeType;
     }
 
     public GetDocumentRequest(String folder, String id) {
@@ -105,6 +111,9 @@ public class GetDocumentRequest extends AbstractInfostoreRequest<GetDocumentResp
         }
         if (null != additionalParameters) {
             params.add(additionalParameters);
+        }
+        if (mimeType != null) {
+            params.add(AJAXServlet.PARAMETER_CONTENT_TYPE, this.mimeType);
         }
         return params.toArray();
     }

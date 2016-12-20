@@ -51,13 +51,11 @@ package com.openexchange.ajax.folder.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.infostore.thirdparty.actions.AbstractFileRequest;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.search.Order;
 
 /**
  * 
@@ -70,18 +68,19 @@ public class VersionsRequest extends AbstractFileRequest<VersionsResponse> {
 
     private final String folderId;
     private final int[] columns;
+    private final int sort;
+    private final Order order;
 
-    public VersionsRequest(String folderId, Field[] fields) {
+    public VersionsRequest(String folderId, int[] fields) {
+        this(folderId, fields, -1, null);
+    }
+
+    public VersionsRequest(String folderId, int[] fields, int sort, Order order) {
         super(true);
+        this.sort = sort;
+        this.order = order;
         this.folderId = folderId;
-
-        List<Integer> columnNumbers = new ArrayList<Integer>(fields.length);
-        for (Field field : fields) {
-            columnNumbers.add(field.getNumber());
-        }
-        int[] primitive = ArrayUtils.toPrimitive(columnNumbers.toArray(new Integer[columnNumbers.size()]));
-        Arrays.sort(primitive);
-        this.columns = primitive;
+        this.columns = fields;
     }
 
     @Override
@@ -109,6 +108,12 @@ public class VersionsRequest extends AbstractFileRequest<VersionsResponse> {
         if ((this.columns != null) && (this.columns.length > 0)) {
             String colsArray2String = com.openexchange.tools.URLParameter.colsArray2String(this.columns);
             params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, colsArray2String));
+        }
+        if (this.sort != -1) {
+            params.add(new Parameter("sort", this.sort));
+        }
+        if (this.order != null) {
+            params.add(new Parameter("order", this.order.toString()));
         }
         return params.toArray(new Parameter[params.size()]);
     }

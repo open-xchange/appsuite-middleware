@@ -62,6 +62,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.DetachRequest;
+import com.openexchange.ajax.folder.actions.DetachResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -407,6 +409,12 @@ public class FolderTestManager implements TestManager {
         final FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
+    }
+
+    public void detach(String id, Date timestamp, int[] versions) throws OXException, IOException, JSONException {
+        DetachRequest request = new DetachRequest(id, timestamp, versions);
+        DetachResponse response = client.execute(request);
+        lastResponse = response;
     }
 
     /**

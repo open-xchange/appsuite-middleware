@@ -51,12 +51,12 @@ package com.openexchange.ajax.framework;
 
 import java.io.IOException;
 import org.json.JSONException;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * This class implements the temporary memory of an AJAX client and provides some convenience methods to determine user specific values for
@@ -100,11 +100,6 @@ public class AJAXClient {
         }
         session = new AJAXSession();
         session.setId(execute(new LoginRequest(user.getLogin(), user.getPassword(), LoginTools.generateAuthId(), null == client ? AJAXClient.class.getName() : client, VERSION)).getSessionId());
-    }
-
-    public AJAXClient() throws OXException {
-        super();
-        session = new AJAXSession();
     }
 
     /**

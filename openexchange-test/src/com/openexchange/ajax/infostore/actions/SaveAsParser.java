@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,66 +49,26 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import java.io.IOException;
-import java.io.InputStream;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link GetDocumentResponse}
+ * {@link SaveAsParser}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public class GetDocumentResponse extends AbstractAJAXResponse {
+public class SaveAsParser extends AbstractAJAXParser<SaveAsResponse> {
 
-    private final HttpResponse response;
-    private final HttpEntity entity;
-
-    public GetDocumentResponse(HttpResponse response) {
-        super(null);
-        this.response = response;
-        this.entity = response.getEntity();
-    }
-
-    public int getStatusCode() {
-        return response.getStatusLine().getStatusCode();
-    }
-
-    public String getContentType() {
-        return entity.getContentType().getValue();
-    }
-
-    public InputStream getContent() throws IllegalStateException, IOException {
-        return null != entity ? entity.getContent() : null;
-    }
-
-    public byte[] getContentAsByteArray() throws IOException {
-        return null != entity ? EntityUtils.toByteArray(entity) : null;
-    }
-
-    public long getContentLength() {
-        return null != entity ? entity.getContentLength() : 0L;
+    protected SaveAsParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    public Object getData() {
-        try {
-            return getContent();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public boolean hasError() {
-        return HttpServletResponse.SC_OK != getStatusCode();
-    }
-
-    public HttpResponse getHttpResponse() {
-        return response;
+    protected SaveAsResponse createResponse(Response response) throws JSONException {
+        SaveAsResponse versionsResponse = new SaveAsResponse(response);
+        return versionsResponse;
     }
 
 }

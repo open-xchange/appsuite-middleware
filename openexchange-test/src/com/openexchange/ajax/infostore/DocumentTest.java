@@ -7,9 +7,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.ajax.infostore.actions.GetDocumentResponse;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;
 
@@ -37,7 +36,7 @@ public class DocumentTest extends InfostoreAJAXTest {
         InputStream is2 = null;
         try {
             is = new FileInputStream(upload);
-            is2 = document(getWebConversation(), getHostName(), sessionId, id, -1);
+            is2 = itm.document(Integer.toString(folderId), id, "-1");
 
             OXTestToolkit.assertSameContent(is, is2);
         } finally {
@@ -52,13 +51,13 @@ public class DocumentTest extends InfostoreAJAXTest {
 
     @Test
     public void testContentType() throws Exception {
-        GetMethodWebRequest req = documentRequest(sessionId, getHostName(), id, -1, "application/octet-stream");
-        WebResponse resp = getWebConversation().getResource(req);
-        assertEquals("application/octet-stream", resp.getContentType());
+        itm.document(Integer.toString(folderId), id, "-1", "application/octet-stream");
+        String contentType = ((GetDocumentResponse) itm.getLastResponse()).getContentType();
+        assertEquals("application/octet-stream", contentType);
 
-        req = documentRequest(sessionId, getHostName(), id, -1, null);
-        resp = getWebConversation().getResource(req);
-        assertEquals("text/plain", resp.getContentType());
+        itm.document(Integer.toString(folderId), id, "-1", null);
 
+        contentType = ((GetDocumentResponse) itm.getLastResponse()).getContentType();
+        assertEquals("text/plain", contentType);
     }
 }

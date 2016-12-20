@@ -152,7 +152,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
     }
 
     private void assertExistingVersions(String id, int expectedVersions) throws OXException, IOException, JSONException {
-        Field[] fields = new Field[] { Field.NUMBER_OF_VERSIONS, Field.VERSION, Field.CURRENT_VERSION, Field.CREATED_BY };
+        int[] fields = new int[] { Field.NUMBER_OF_VERSIONS.getNumber(), Field.VERSION.getNumber(), Field.CURRENT_VERSION.getNumber(), Field.CREATED_BY.getNumber() };
         VersionsResponse versions = getClient().execute(new VersionsRequest(id, fields));
         assertEquals("Wrong number of versions", expectedVersions, versions.getVersions().size());
     }

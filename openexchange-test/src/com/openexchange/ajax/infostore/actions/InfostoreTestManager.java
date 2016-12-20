@@ -50,23 +50,33 @@
 package com.openexchange.ajax.infostore.actions;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.folder.actions.VersionsRequest;
+import com.openexchange.ajax.folder.actions.VersionsResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
 
 /**
@@ -170,6 +180,7 @@ public class InfostoreTestManager {
         GetInfostoreConfigRequest req = new GetInfostoreConfigRequest(name);
         req.setFailOnError(getFailOnError());
         AbstractAJAXResponse resp = getClient().execute(req);
+        lastResponse = resp;
         return resp.getResponse().getData();
     }
 
@@ -216,6 +227,96 @@ public class InfostoreTestManager {
         return getResponse.getDocumentMetadata();
     }
 
+    public List<File> getAll(int folderId) throws OXException, JSONException, IOException {
+        int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL };
+        AllInfostoreRequest allRequest = new AllInfostoreRequest(folderId, columns, Metadata.ID, Order.DESCENDING);
+        AbstractColumnsResponse response = getClient().execute(allRequest);
+        lastResponse = response;
+
+        List<File> found = new ArrayList<>();
+        for (Object[] doc : response.getArray()) {
+            File file = new DefaultFile();
+            int docId = Integer.parseInt((String) doc[response.getColumnPos(Metadata.ID)]);
+            file.setId(Integer.toString(docId));
+            String title = (String) doc[response.getColumnPos(Metadata.TITLE)];
+            file.setTitle(title);
+            String description = (String) doc[response.getColumnPos(Metadata.DESCRIPTION)];
+            file.setDescription(description);
+            String url = (String) doc[response.getColumnPos(Metadata.URL)];
+            file.setURL(url);
+
+            file.setTitle(Integer.toString(folderId));
+            found.add(file);
+        }
+        return found;
+    }
+
+    public List<File> versions(final String objectId, final int[] cols) throws MalformedURLException, JSONException, IOException, OXException {
+        VersionsRequest request = new VersionsRequest(objectId, cols);
+        VersionsResponse response = getClient().execute(request);
+        lastResponse = response;
+        return response.getVersions();
+    }
+
+    public List<File> versions(final String objectId, final int[] cols, int sort, Order order) throws MalformedURLException, JSONException, IOException, OXException {
+        VersionsRequest request = new VersionsRequest(objectId, cols, sort, order);
+        VersionsResponse response = getClient().execute(request);
+        lastResponse = response;
+        return response.getVersions();
+    }
+
+    public String saveAs(final int folderId, final int attached, final int module, final int attachment, final Map<String, String> fields) throws MalformedURLException, IOException, JSONException, OXException {
+        SaveAsRequest request = new SaveAsRequest(Integer.toString(folderId), attached, module, attachment, fields);
+        SaveAsResponse response = getClient().execute(request);
+        lastResponse = response;
+        return response.getData().toString();
+    }
+
+    public void revert(final String id) throws MalformedURLException, IOException, JSONException, OXException {
+        RevertRequest request = new RevertRequest(id);
+        RevertResponse response = getClient().execute(request);
+        lastResponse = response;
+    }
+
+    public InputStream document(final String folderId, String id, String version) throws MalformedURLException, IOException, JSONException, OXException {
+        return document(folderId, id, version, null);
+    }
+
+    public InputStream document(final String folderId, String id, String version, String mimeType) throws MalformedURLException, IOException, JSONException, OXException {
+        GetDocumentRequest request = new GetDocumentRequest(folderId, id, version, mimeType);
+        GetDocumentResponse response = getClient().execute(request);
+        lastResponse = response;
+        return response.getContent();
+    }
+
+    public Object[][] list(final List<ListItem> items, final int[] cols) throws MalformedURLException, IOException, JSONException, OXException {
+        ListInfostoreRequest request = new ListInfostoreRequest(items, cols, failOnError);
+        ListInfostoreResponse response = getClient().execute(request);
+        lastResponse = response;
+        return response.getArray();
+    }
+
+    public Object[][] list(String[][] infostore_ids, int[] cols) throws MalformedURLException, IOException, JSONException, OXException {
+        List<ListItem> items = new ArrayList<>();
+        for (String[] infostoreId : infostore_ids) {
+            for (int i = 0; i < infostoreId.length; i++)
+                items.add(new ListItem(infostoreId[i], infostoreId[i++]));
+        }
+        return list(items, cols);
+    }
+
+    public void lock(String id) throws OXException, IOException, JSONException {
+        LockRequest request = new LockRequest(id);
+        LockResponse response = getClient().execute(request);
+        lastResponse = response;
+    }
+
+    public void unlock(String id) throws OXException, IOException, JSONException {
+        UnlockRequest request = new UnlockRequest(id);
+        UnlockResponse response = getClient().execute(request);
+        lastResponse = response;
+    }
+
     public File newDocument(int folderId) {
         return this.newDocument(folderId, null);
     }
@@ -232,4 +333,23 @@ public class InfostoreTestManager {
         doc.setFileName("contact_image.png");
         return doc;
     }
+
+    public List<File> search(final String query, final int[] columns, final int folderId, final int sort, final Order order) throws MalformedURLException, JSONException, IOException, SAXException, OXException {
+        SearchInfostoreRequest request = new SearchInfostoreRequest(folderId, query, columns, sort, order);
+        SearchInfostoreResponse response = getClient().execute(request);
+        lastResponse = response;
+        JSONArray foundFiles = (JSONArray) response.getData();
+
+        List<File> found = new ArrayList<>();
+        for (Object object : foundFiles) {
+            File file = new DefaultFile();
+
+            //            TODO
+            //            file.
+
+            found.add(file);
+        }
+        return found;
+    }
+
 }

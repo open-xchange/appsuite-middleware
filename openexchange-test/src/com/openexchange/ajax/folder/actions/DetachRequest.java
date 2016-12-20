@@ -47,99 +47,80 @@
  *
  */
 
-package com.openexchange.ajax.resource.actions;
+package com.openexchange.ajax.folder.actions;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.infostore.thirdparty.actions.AbstractFileRequest;
 
 /**
- * {@link ResourceGetRequest}
+ * 
+ * {@link DetachRequest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public final class ResourceGetRequest extends AbstractResourceRequest<ResourceGetResponse> {
+public class DetachRequest extends AbstractFileRequest<DetachResponse> {
 
-    private final boolean failOnError;
+    private final String id;
+    private final Date timestamp;
+    private final int[] versions;
 
-    private final int resourceId;
-
-    /**
-     * Initializes a new {@link ResourceGetRequest}
-     *
-     * @param failOnError
-     *            <code>true</code> to fail on error; otherwise
-     *            <code>false</code>
-     */
-    public ResourceGetRequest(final int resourceId, final boolean failOnError) {
-        super();
-        this.resourceId = resourceId;
-        this.failOnError = failOnError;
+    public DetachRequest(String id, Date timestamp) {
+        this(id, timestamp, null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
+    public DetachRequest(String id, Date timestamp, final int[] versions) {
+        super(true);
+        this.id = id;
+        this.timestamp = timestamp;
+        this.versions = versions;
+    }
+
     @Override
-    public Object getBody() throws JSONException {
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    @Override
+    public JSONArray getBody() throws IOException, JSONException {
+        if (this.versions != null) {
+            final StringBuffer data = new StringBuffer("[");
+
+            if (versions.length > 0) {
+                for (final int id : versions) {
+                    data.append(id);
+                    data.append(',');
+                }
+                data.deleteCharAt(data.length() - 1);
+            }
+
+            data.append(']');
+            return new JSONArray(data.toString());
+        }
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
-    public Method getMethod() {
-        return Method.GET;
+    public DetachParser getParser() {
+        return new DetachParser(true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
-    public Parameter[] getParameters() {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
-        params.add(new Parameter(AJAXServlet.PARAMETER_ID, resourceId));
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> params = new ArrayList<>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "detach"));
+        if (this.id != null) {
+            params.add(new Parameter("id", id));
+        }
+        if (this.timestamp != null) {
+            params.add(new Parameter("timestamp", timestamp.getTime()));
+        }
         return params.toArray(new Parameter[params.size()]);
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public ResourceGetParser getParser() {
-        return new ResourceGetParser(failOnError);
-    }
-
-    private static final class ResourceGetParser extends AbstractAJAXParser<ResourceGetResponse> {
-
-        /**
-         * Default constructor.
-         */
-        ResourceGetParser(final boolean failOnError) {
-            super(failOnError);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected ResourceGetResponse createResponse(final Response response) throws JSONException {
-            return new ResourceGetResponse(response);
-        }
-    }
-
 }

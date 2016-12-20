@@ -77,7 +77,8 @@ public class CopyTest extends InfostoreAJAXTest {
 
     @Test
     public void testCopy() throws Exception {
-        final String id = copy(getWebConversation(), getHostName(), sessionId, clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m());
+        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
+        final String id = itm.copyAction(clean.get(0), Integer.toString(folderId), file);
         clean.add(id);
 
         com.openexchange.file.storage.File orig = itm.getAction(clean.get(0));
@@ -104,7 +105,9 @@ public class CopyTest extends InfostoreAJAXTest {
         String id = data.getId();
         clean.add(id);
         //FIXME Bug 4120
-        final String copyId = copy(getWebConversation(), getHostName(), sessionId, id, String.valueOf(folderId), Long.MAX_VALUE, m("filename", "other.properties"));
+        com.openexchange.file.storage.File reload = itm.getAction(id);
+        reload.setFileName("other.properties");
+        final String copyId = itm.copyAction(clean.get(0), Integer.toString(folderId), reload);
         clean.add(copyId);
 
         com.openexchange.file.storage.File file = itm.getAction(id);
@@ -119,7 +122,7 @@ public class CopyTest extends InfostoreAJAXTest {
         InputStream is2 = null;
         try {
             is = new FileInputStream(upload);
-            is2 = document(getWebConversation(), getHostName(), sessionId, copyId, 1);
+            is2 = itm.document(Integer.toString(folderId), copyId, "1");
 
             OXTestToolkit.assertSameContent(is, is2);
         } finally {
@@ -134,11 +137,14 @@ public class CopyTest extends InfostoreAJAXTest {
 
     @Test
     public void testModifyingCopy() throws Exception {
-        final String id = copy(getWebConversation(), getHostName(), sessionId, clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m("title", "copy"));
-        clean.add(id);
+        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
+        file.setTitle("copy");
+
+        final String copyId = itm.copyAction(clean.get(0), Integer.toString(folderId), file);
+        clean.add(copyId);
 
         com.openexchange.file.storage.File orig = itm.getAction(clean.get(0));
-        com.openexchange.file.storage.File copy = itm.getAction(id);
+        com.openexchange.file.storage.File copy = itm.getAction(copyId);
 
         Map<String, Object> meta = orig.getMeta();
         for (Map.Entry<String, Object> entry : meta.entrySet()) {
@@ -154,7 +160,9 @@ public class CopyTest extends InfostoreAJAXTest {
     @Test
     public void testUploadCopy() throws Exception {
         final File upload = new File(TestInit.getTestProperty("webdavPropertiesFile"));
-        final String id = copy(getWebConversation(), getHostName(), sessionId, clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m("title", "copy"), upload, "text/plain");
+        com.openexchange.file.storage.File org = itm.getAction(clean.get(0));
+        org.setTitle("copy");
+        final String id = itm.copyAction(clean.get(0), String.valueOf(folderId), org);
         clean.add(id);
 
         com.openexchange.file.storage.File copy = itm.getAction(id);
@@ -175,8 +183,11 @@ public class CopyTest extends InfostoreAJAXTest {
     //Bug 4269
     public void virtualFolderTest() throws Exception {
         try {
-            final String id = copy(getWebConversation(), getHostName(), sessionId, clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m("folder_id", "" + folderId));
-            clean.add(id);
+            com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
+            file.setFolderId("" + folderId);
+
+            final String copyId = itm.copyAction(clean.get(0), Integer.toString(folderId), file);
+            clean.add(copyId);
             fail("Expected IOException");
         } catch (final JSONException x) {
             assertTrue(x.getMessage(), x.getMessage().contains("IFO-1700"));

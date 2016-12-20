@@ -10,9 +10,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Date;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.test.TestInit;
 
 public class NewTest extends InfostoreAJAXTest {
@@ -53,7 +53,7 @@ public class NewTest extends InfostoreAJAXTest {
         InputStream is2 = null;
         try {
             is = new FileInputStream(upload);
-            is2 = document(getWebConversation(), getHostName(), sessionId, id, 1);
+            is2 = itm.document(Integer.toString(folderId), id, "1");
 
         } finally {
             if (is != null) {
@@ -155,10 +155,10 @@ public class NewTest extends InfostoreAJAXTest {
 
         final String id = clean.get(0);
 
-        Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");
-        assertNoError(res);
+        com.openexchange.file.storage.File org = itm.getAction(id);
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-        
         com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
         data.setFileMIMEType("text/plain");
         data.setDescription("other_desc");
