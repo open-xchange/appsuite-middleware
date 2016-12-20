@@ -384,6 +384,20 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
+## Saml 
+
+| Key | <span style="font-weight:normal">com.openexchange.saml.enableSessionIndexAutoLogin</span> |
+|:----------------|:--------|
+| __Description__ | Specifies whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | saml.properties  |
+
+---
+
+
 ## SSL 
 
 | Key | <span style="font-weight:normal">com.openexchange.net.ssl.default.truststore.enabled</span> |
