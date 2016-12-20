@@ -51,11 +51,8 @@ package com.openexchange.push.mail.notify;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.push.mail.notify.osgi.Services;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link MailNotifyPushDeleteListener} - Delete listener for the push bundle.
@@ -76,14 +73,8 @@ public final class MailNotifyPushDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        int userId = event.getId();
-        Context context = event.getContext();
-
-        UserPermissionService userPermissionService = Services.optService(UserPermissionService.class);
-        boolean hasWebMail = userPermissionService == null ? false : userPermissionService.getUserPermissionBits(readCon, userId, context).hasWebMail();
-        
-        if (hasWebMail && (DeleteEvent.TYPE_USER == event.getType())) {
-            registry.purgeUserPushListener(context.getContextId(), userId);
+        if (DeleteEvent.TYPE_USER == event.getType()) {
+            registry.purgeUserPushListener(event.getContext().getContextId(), event.getId());
         }
     }
 

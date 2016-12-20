@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
 
@@ -100,7 +101,7 @@ public final class QuotaFileStorage extends FileStorage {
 
     private QuotaFileStorage(URI uri, Context ctx, QuotaFileStorageService qfss) throws OXException {
         super();
-        delegateQuotaFileStorage = qfss.getQuotaFileStorage(ctx.getContextId());
+        delegateQuotaFileStorage = qfss.getQuotaFileStorage(ctx.getContextId(), Info.general());
     }
 
     private com.openexchange.filestore.QuotaFileStorage getDelegateQuotaFileStorage() {
@@ -124,7 +125,7 @@ public final class QuotaFileStorage extends FileStorage {
         getDelegateQuotaFileStorage().recalculateUsage(filesToIgnore);
     }
 
-    public long getQuota() {
+    public long getQuota() throws OXException {
         return getDelegateQuotaFileStorage().getQuota();
     }
 

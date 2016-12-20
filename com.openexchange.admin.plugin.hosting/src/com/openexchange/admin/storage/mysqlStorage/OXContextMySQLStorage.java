@@ -2633,13 +2633,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             con = cache.getWriteConnectionForConfigDB();
 
-            // Get the database pool identifier from the specified target cluster identifier
+            // Get the database pool identifiers from the specified target cluster identifier
             String getPoolIds = "SELECT read_db_pool_id, write_db_pool_id FROM db_cluster WHERE cluster_id = ?";
             stmt = con.prepareStatement(getPoolIds);
             stmt.setInt(1, targetClusterId);
             rs = stmt.executeQuery();
-            final int writeDbPoolId;
-            final int readDbPoolId;
+            int writeDbPoolId;
+            int readDbPoolId;
             if (rs.next()) {
                 readDbPoolId = rs.getInt(1);
                 writeDbPoolId = rs.getInt(2);
@@ -2648,6 +2648,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new StorageException("The specified target cluster id '" + targetClusterId + "' has no database pool references");
             }
             stmt.close();
+
+            // Select the identifier from write-pool as read-pool in case the one from read-pool is 0 (zero)
+            // This matches the behavior from OXContextMySQLStorageCommon.fillContextAndServer2DBPool(Context, Connection, Database)
+            if (readDbPoolId <= 0) {
+                readDbPoolId = writeDbPoolId;
+            }
 
             // Update the relevant references
             String query = "UPDATE context_server2db_pool SET write_db_pool_id = ?, read_db_pool_id = ?, db_schema = ? WHERE db_schema = ?";

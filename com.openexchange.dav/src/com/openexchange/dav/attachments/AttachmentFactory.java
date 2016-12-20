@@ -103,7 +103,7 @@ public class AttachmentFactory extends DAVFactory {
     }
 
     @Override
-    protected String getURLPrefix() {
+    public String getURLPrefix() {
         return "/attachments/";
     }
 

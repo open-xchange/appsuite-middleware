@@ -73,6 +73,7 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -384,7 +385,7 @@ public class DatabaseImpl extends DBService {
             releaseReadConnection(ctx, con);
             con = null;
 
-            FileStorage fs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, ctx.getContextId());
+            FileStorage fs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, ctx.getContextId(), Info.drive(folderOwner));
             return fs.getFile(fileStorageLoaction);
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
@@ -1652,7 +1653,7 @@ public class DatabaseImpl extends DBService {
     }
 
     protected FileStorage getFileStorage(int folderOwner, int contextId) throws OXException {
-        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, contextId);
+        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, contextId, Info.drive(folderOwner));
     }
 
     @Override

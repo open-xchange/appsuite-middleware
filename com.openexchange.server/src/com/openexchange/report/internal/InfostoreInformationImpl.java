@@ -65,6 +65,7 @@ import java.util.Set;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.ldap.UserExceptionCode;
@@ -203,7 +204,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         HashMap<String, Integer> filestoreMap = new HashMap<>();
         for (Entry<Integer, List<Integer>> contexts : usersInContext.entrySet()) {
             for (Integer userId : contexts.getValue()) {
-                QuotaFileStorage userStorage = storageService.getQuotaFileStorage(userId, contexts.getKey());
+                QuotaFileStorage userStorage = storageService.getQuotaFileStorage(userId, contexts.getKey(), Info.drive(userId));
                 long quota = userStorage.getQuota();
                 Long percent = quota < 0 ? 0 : (quota == 0 ? 100 : userStorage.getUsage() * 100 / quota);
                 filestoreMap.put(userStorage.getUri().toString(), percent.intValue());

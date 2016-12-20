@@ -84,19 +84,21 @@ public abstract class SpamHandler {
     public final boolean equals(final Object obj) {
         if (this == obj) {
             return true;
-        } else if (obj == null) {
-            return false;
-        } else if (!(obj instanceof SpamHandler)) {
+        }
+        if (!(obj instanceof SpamHandler)) {
             return false;
         }
-        final SpamHandler other = (SpamHandler) obj;
-        if (getSpamHandlerName() == null) {
+
+        SpamHandler other = (SpamHandler) obj;
+        String myName = getSpamHandlerName();
+        if (myName == null) {
             if (other.getSpamHandlerName() != null) {
                 return false;
             }
-        } else if (!getSpamHandlerName().equals(other.getSpamHandlerName())) {
+        } else if (!myName.equals(other.getSpamHandlerName())) {
             return false;
         }
+
         return true;
     }
 
@@ -112,10 +114,12 @@ public abstract class SpamHandler {
      * <p>
      * Implementations may override this method to change the default behavior.
      *
+     * @param session The associated session to check for
      * @return <code>true</code> to create the confirmed-spam folder during check for default mail folders; otherwise <code>false</code> to
      *         not create the folder
+     * @throws OXException If check fails
      */
-    public boolean isCreateConfirmedSpam() {
+    public boolean isCreateConfirmedSpam(Session session) throws OXException {
         return true;
     }
 
@@ -126,10 +130,12 @@ public abstract class SpamHandler {
      * <p>
      * Implementations may override this method to change the default behavior.
      *
+     * @param session The associated session to check for
      * @return <code>true</code> to create the confirmed-ham folder during check for default mail folders; otherwise <code>false</code> to
      *         not create the folder
+     * @throws OXException If check fails
      */
-    public boolean isCreateConfirmedHam() {
+    public boolean isCreateConfirmedHam(Session session) throws OXException {
         return true;
     }
 
@@ -139,10 +145,12 @@ public abstract class SpamHandler {
      * <p>
      * Implementations may override this method to change the default behavior.
      *
+     * @param session The associated session to check for
      * @return <code>true</code> to automatically unsubscribe the confirmed-spam/confirmed-ham folders; otherwise <code>false</code> to
      *         leave subscription status unchanged.
+     * @throws OXException If check fails
      */
-    public boolean isUnsubscribeSpamFolders() {
+    public boolean isUnsubscribeSpamFolders(Session session) throws OXException {
         return true;
     }
 
@@ -168,7 +176,7 @@ public abstract class SpamHandler {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-            if (isCreateConfirmedSpam()) {
+            if (isCreateConfirmedSpam(session)) {
                 final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
                 mailAccess.getMessageStorage().copyMessages(fullName, confirmedSpamFullname, mailIDs, true);
             }

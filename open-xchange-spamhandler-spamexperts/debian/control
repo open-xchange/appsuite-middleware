@@ -10,6 +10,5 @@ Package: open-xchange-spamhandler-spamexperts
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Conflicts: open-xchange-spamhandler-default
 Provides: open-xchange-spamhandler
 Description: The Open-Xchange Spamexperts Plugin

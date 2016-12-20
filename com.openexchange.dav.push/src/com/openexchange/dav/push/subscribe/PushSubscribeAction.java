@@ -47,72 +47,39 @@
  *
  */
 
-package com.openexchange.spamhandler.spamassassin.osgi;
+package com.openexchange.dav.push.subscribe;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.dav.actions.POSTAction;
+import com.openexchange.webdav.action.WebdavRequest;
+import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link PushSubscribeAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.4
  */
-public final class Services {
+public class PushSubscribeAction extends POSTAction {
 
     /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
-    }
-
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
+     * Initializes a new {@link PushSubscribeAction}.
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @param factory The factory
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
+    public PushSubscribeAction(PushSubscribeFactory factory) {
+        super(factory.getProtocol());
+	}
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.spamhandler.spamassassin\" not started?");
+	@Override
+	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        /*
+         * handle push subscribe action
+         */
+        if (false == requireResource(request, PushSubscribeResource.class).handle(request, response)) {
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
-    }
+	}
 
 }

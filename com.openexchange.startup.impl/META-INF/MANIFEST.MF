@@ -6,6 +6,7 @@ Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.database.migration,
+ com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.startup,
  org.osgi.framework,

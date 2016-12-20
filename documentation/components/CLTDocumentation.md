@@ -5,7 +5,7 @@ Title: Command Line Tool Documentation
 This document provides extended informations about some of the command line tools of the OX middleware.
 
 
-## List capabilities and configurations
+# List capabilities and configurations
 
 The OX middleware provides this clt's to list capabilities or configurations:
 

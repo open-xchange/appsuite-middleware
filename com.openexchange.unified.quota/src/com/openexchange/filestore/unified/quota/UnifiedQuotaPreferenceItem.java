@@ -47,89 +47,74 @@
  *
  */
 
-package com.openexchange.spamhandler.spamexperts.osgi;
+package com.openexchange.filestore.unified.quota;
 
-import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link Services} - Provides static access to tracked services.
+ * {@link UnifiedQuotaPreferenceItem}
  *
- * @since v7.8.3
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public class Services {
+public class UnifiedQuotaPreferenceItem implements PreferencesItemService, ConfigTreeEquivalent{
+
+    private static final String CONFIG = "com.openexchange.unified.quota.enabled";
+    final ServiceLookup services;
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link UnifiedQuotaPreferenceItem}.
      */
-    private Services() {
+    public UnifiedQuotaPreferenceItem(ServiceLookup services) {
         super();
+        this.services=services;
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    @Override
+    public String[] getPath() {
+        return new String[] { "unifiedquota" };
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    @Override
+    public IValueHandler getSharedValue() {
+       return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+
+                ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
+                ConfigView view = factory.getView(user.getId(), ctx.getContextId());
+                boolean enabled = view.opt(CONFIG, boolean.class, false);
+                setting.setSingleValue(enabled);
+            }
+        };
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.spamhandler.spamexperts\" not started?");
-        }
-        return serviceLookup.getService(clazz);
+    @Override
+    public String getConfigTreePath() {
+       return "unifiedquota";
     }
 
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Requires the specified service
-     *
-     * @param clazz The service's class
-     * @return The service instance
-     * @throws OXException If such a service is not available
-     */
-    public static <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
-        S service = optService(clazz);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(clazz);
-        }
-        return service;
+    @Override
+    public String getJslobPath() {
+        return "io.ox/core//unifiedquota";
     }
 
 }

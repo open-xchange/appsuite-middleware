@@ -317,7 +317,14 @@ public abstract class MailConfig {
         return mailConfig;
     }
 
-    private static User getUser(Session session) throws OXException {
+    /**
+     * Gets the user associated with specified session.
+     *
+     * @param session The session
+     * @return The user
+     * @throws OXException If user cannot be returned
+     */
+    protected static User getUser(Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }

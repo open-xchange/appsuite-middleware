@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.pns.subscription.storage
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: 
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.cache,
  com.google.common.collect,
  com.openexchange.caching,
  com.openexchange.caching.events,
@@ -27,8 +29,9 @@ Import-Package:
  com.openexchange.threadpool.behavior,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
+ com.openexchange.tools.update,
  org.osgi.framework,
- org.osgi.service.event;version="1.3.1",
+ org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.pns.subscription.storage.osgi.PushSubscriptionRegistryActivator

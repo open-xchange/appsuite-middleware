@@ -47,38 +47,69 @@
  *
  */
 
-package com.openexchange.spamhandler.parallels;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.custom.parallels.impl.ParallelsOptions;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateConcurrency;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link Configuration}
+ * {@link MailAccountExtendPasswordTask} - Extends "password" column of the mail/transport account tables.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Configuration {
+public final class MailAccountExtendPasswordTask extends UpdateTaskAdapter {
 
-    private final int port;
-    private final int xmlPort;
-
-    private Configuration(int port, int xmlPort) {
+    public MailAccountExtendPasswordTask() {
         super();
-        this.port = port;
-        this.xmlPort = xmlPort;
     }
 
-    public static Configuration getInstance(ConfigurationService configService) {
-        int port = configService.getIntProperty("com.openexchange.spamhandler.spamassassin.port", 783);
-        int xmlPort = configService.getIntProperty(ParallelsOptions.PROPERTY_ANTISPAM_XMLRPC_PORT, 3100);
-        return new Configuration(port, xmlPort);
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(UpdateConcurrency.BLOCKING);
     }
 
-    public int getPort() {
-        return port;
+    @Override
+    public String[] getDependencies() {
+        return new String[] { MailAccountAddArchiveTask.class.getName() };
     }
 
-    public int getXmlPort() {
-        return xmlPort;
+    @Override
+    public void perform(final PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+        Connection con = Database.getNoTimeout(contextId, true);
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            if (128 == Tools.getVarcharColumnSize("password", "user_mail_account", con)) {
+                Tools.changeVarcharColumnSize("password", 256, "user_mail_account", con);
+            }
+
+            if (128 == Tools.getVarcharColumnSize("password", "user_transport_account", con)) {
+                Tools.changeVarcharColumnSize("password", 256, "user_transport_account", con);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Database.backNoTimeout(contextId, true, con);
+        }
     }
+
 }

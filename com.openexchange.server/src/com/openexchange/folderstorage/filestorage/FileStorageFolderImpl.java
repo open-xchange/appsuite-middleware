@@ -99,6 +99,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
     private static final String CAPABILITY_ZIPPABLE_FOLDER = Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name());
     private static final String CAPABILITY_FILE_VERSIONS = Strings.asciiLowerCase(FileStorageCapability.FILE_VERSIONS.name());
     private static final String CAPABILITY_EXTENDED_METADATA = Strings.asciiLowerCase(FileStorageCapability.EXTENDED_METADATA.name());
+    private static final String CAPABILITY_LOCKS = Strings.asciiLowerCase(FileStorageCapability.LOCKS.name());
 
     /**
      * <code>"9"</code>
@@ -278,7 +279,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         Set<String> supportedCapabilities = fsFolder.getCapabilities();
         if (optCheckCapability(fsFolder.getId(), FileStorageCapability.ZIPPABLE_FOLDER, folderAccess)) {
             if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(2);
+                supportedCapabilities = new LinkedHashSet<>(4);
             } else {
                 supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
             }
@@ -286,7 +287,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         }
         if (optCheckCapability(fsFolder.getId(), FileStorageCapability.FILE_VERSIONS, folderAccess)) {
             if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(2);
+                supportedCapabilities = new LinkedHashSet<>(4);
             } else {
                 supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
             }
@@ -294,11 +295,19 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         }
         if (optCheckCapability(fsFolder.getId(), FileStorageCapability.EXTENDED_METADATA, folderAccess)) {
             if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(2);
+                supportedCapabilities = new LinkedHashSet<>(4);
             } else {
                 supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
             }
             supportedCapabilities.add(CAPABILITY_EXTENDED_METADATA);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.LOCKS, folderAccess)) {
+            if (null == supportedCapabilities) {
+                supportedCapabilities = new LinkedHashSet<>(4);
+            } else {
+                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
+            }
+            supportedCapabilities.add(CAPABILITY_LOCKS);
         }
         this.supportedCapabilities = supportedCapabilities;
         lastModified = fsFolder.getLastModifiedDate();

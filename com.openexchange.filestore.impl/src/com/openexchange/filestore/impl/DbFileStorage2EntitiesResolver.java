@@ -72,6 +72,7 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorage2EntitiesResolver;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.impl.osgi.Services;
@@ -102,24 +103,24 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
         List<FileStorage> fileStorages = new LinkedList<FileStorage>();
         if (quotaAware) {
             // Add the one used by context itself
-            fileStorages.add(qfsService.getQuotaFileStorage(contextId));
+            fileStorages.add(qfsService.getQuotaFileStorage(contextId, Info.administrative()));
 
             // Add the ones referenced by context's users
             Set<FsInfo> infos = retrieveFileStoragesFromUsers(contextId, databaseService);
             for (FsInfo fsInfo : infos) {
-                fileStorages.add(qfsService.getQuotaFileStorage(fsInfo.owner, contextId));
+                fileStorages.add(qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.administrative()));
             }
         } else {
             // Get raw service to obtain non-quota-aware instances
             FileStorageService fsService = FileStorages.getFileStorageService();
 
             // Add the one used by context itself
-            fileStorages.add(fsService.getFileStorage(qfsService.getQuotaFileStorage(contextId).getUri()));
+            fileStorages.add(fsService.getFileStorage(qfsService.getQuotaFileStorage(contextId, Info.administrative()).getUri()));
 
             //Add the ones referenced by context's users
             Set<FsInfo> infos = retrieveFileStoragesFromUsers(contextId, databaseService);
             for (FsInfo fsInfo : infos) {
-                fileStorages.add(fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId).getUri()));
+                fileStorages.add(fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.administrative()).getUri()));
             }
         }
 
@@ -168,13 +169,13 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
         if (quotaAware) {
             // Add the one used by context itself
-            return qfsService.getQuotaFileStorage(contextId);
+            return qfsService.getQuotaFileStorage(contextId, Info.general());
         } else {
             // Get raw service to obtain non-quota-aware instances
             FileStorageService fsService = FileStorages.getFileStorageService();
 
             // Add the one used by context itself
-            return fsService.getFileStorage(qfsService.getQuotaFileStorage(contextId).getUri());
+            return fsService.getFileStorage(qfsService.getQuotaFileStorage(contextId, Info.administrative()).getUri());
         }
     }
 
@@ -241,7 +242,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
     /**
      * Fetches all context identifiers from the config database
-     * 
+     *
      * @param configDBCon The config database connection
      * @return An array with all context identifiers
      * @throws OXException
@@ -266,7 +267,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
     /**
      * Adds to the specified set all context identifiers that are using the specified file storage
-     * 
+     *
      * @param fileStorageId The file storage identifier
      * @param usingContexts The set of the context identifiers
      * @param configDBCon The configDB connection
@@ -291,7 +292,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
     /**
      * Adds to the specified set all file storage identifiers that are being used by the specified context
-     * 
+     *
      * @param contextId The context identifier
      * @param usedFileStorages The file storages id set
      * @param configDBCon The configDB connection
@@ -367,7 +368,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.FileStorage2UsersResolver#getIdsOfUsersUsing(int)
      */
     @Override
@@ -407,7 +408,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.FileStorage2UsersResolver#getFileStoragesUsedBy(int, int, boolean)
      */
     @Override
@@ -419,10 +420,10 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
             FsInfo fsInfo = retrieveFileStoragesFromUser(contextId, userId, schemaCon);
 
             if (quotaAware) {
-                return qfsService.getQuotaFileStorage(fsInfo.owner, contextId);
+                return qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.drive(userId));
             } else {
                 FileStorageService fsService = FileStorages.getFileStorageService();
-                return fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId).getUri());
+                return fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.administrative()).getUri());
             }
 
         } finally {
@@ -432,7 +433,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
     /**
      * Adds the users using the specified file storage
-     * 
+     *
      * @param fileStorageId The file storage identifier
      * @param users A map with all users using that file storage
      * @param schemaCon The schema connection
@@ -460,7 +461,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
     /**
      * Retrieves the file storage information for the specified user
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param schemaCon The schema connection

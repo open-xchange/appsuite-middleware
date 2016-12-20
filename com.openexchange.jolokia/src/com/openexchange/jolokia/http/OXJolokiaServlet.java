@@ -51,10 +51,11 @@ package com.openexchange.jolokia.http;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import org.apache.felix.http.base.internal.handler.ServletConfigImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.restrictor.Restrictor;
@@ -63,7 +64,7 @@ import com.openexchange.jolokia.log.OXJolokiaLogHandler;
 
 
 /**
- * 
+ *
  * Extends {@link JolokiaServlet} to add {@link OXJolokiaLogHandler} as Jolokias default logger
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -100,13 +101,104 @@ public class OXJolokiaServlet extends JolokiaServlet {
                 map.put(keyS, pServletConfig.getInitParameter(keyS)); // Put known attributes into map
             }
         }
-        
+
         // Add the OXJolokiaLogHandler to map
         map.put(ConfigKey.LOGHANDLER_CLASS.toString(), OXJolokiaLogHandler.class.getName());
 
-        // Generate new servlet config and let Jolokia do its work 
-        ServletConfigImpl servletConfigWithOXLogger = new ServletConfigImpl(pServletConfig.getServletName(), pServletConfig.getServletContext(), map);
+        // Generate new servlet config and let Jolokia do its work
+        SimpleServletConfig servletConfigWithOXLogger = new SimpleServletConfig(pServletConfig.getServletName(), pServletConfig.getServletContext(), map);
         super.init(servletConfigWithOXLogger);
+    }
+
+    private static final class SimpleServletConfig implements ServletConfig {
+
+        private final String servletName;
+        private final ServletContext servletContext;
+        private final Map<String, String> initParameters;
+
+        /**
+         * Initializes a new {@link SimpleServletConfig}.
+         */
+        SimpleServletConfig(String servletName, ServletContext servletContext, Map<String, String> initParameters) {
+            super();
+            this.servletName = servletName;
+            this.servletContext = servletContext;
+            this.initParameters = initParameters;
+        }
+
+        @Override
+        public String getServletName() {
+            return servletName;
+        }
+
+        @Override
+        public ServletContext getServletContext() {
+            return servletContext;
+        }
+
+        @Override
+        public String getInitParameter(String name) {
+            return null == name ? null : initParameters.get(name);
+        }
+
+        @Override
+        public Enumeration<String> getInitParameterNames() {
+            return new IteratorEnumeration<String>(initParameters.keySet().iterator());
+        }
+
+    }
+
+    private static class IteratorEnumeration<E> implements Enumeration<E> {
+
+        /** The iterator being decorated. */
+        private final Iterator<E> iterator;
+
+        /**
+         * Constructs a new <code>IteratorEnumeration</code> that will use the given iterator.
+         *
+         * @param iterator  the iterator to use
+         */
+        IteratorEnumeration(Iterator<E> iterator ) {
+            super();
+            this.iterator = iterator;
+        }
+
+        // Iterator interface
+        //-------------------------------------------------------------------------
+
+        /**
+         *  Returns true if the underlying iterator has more elements.
+         *
+         *  @return true if the underlying iterator has more elements
+         */
+        @Override
+        public boolean hasMoreElements() {
+            return iterator.hasNext();
+        }
+
+        /**
+         *  Returns the next element from the underlying iterator.
+         *
+         *  @return the next element from the underlying iterator.
+         *  @throws java.util.NoSuchElementException  if the underlying iterator has no
+         *    more elements
+         */
+        @Override
+        public E nextElement() {
+            return iterator.next();
+        }
+
+        // Properties
+        //-------------------------------------------------------------------------
+
+        /**
+         *  Returns the underlying iterator.
+         *
+         *  @return the underlying iterator
+         */
+        public Iterator<E> getIterator() {
+            return iterator;
+        }
     }
 
 }

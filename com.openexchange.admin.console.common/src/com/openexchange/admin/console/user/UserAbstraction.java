@@ -2055,6 +2055,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
     }
 
+    protected void parseAndSetPrimaryAccountName(final AdminParser parser, final User usr) {
+        String primaryAccountName = (String) parser.getOptionValue(this.primaryAccountNameOption);
+        if (null != primaryAccountName) {
+            usr.setPrimaryAccountName(primaryAccountName);
+        }
+    }
+
     protected void parseAndSetDisplayName(final AdminParser parser, final User usr) {
         this.displayName = (String) parser.getOptionValue(this.displayNameOption);
         if (null != this.displayName) {
@@ -2493,6 +2500,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
+    }
+
+    protected final void setPrimaryAccountOption(AdminParser parser){
+        this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
     }
 
     protected final void setGui_Spam_option(final AdminParser admp){

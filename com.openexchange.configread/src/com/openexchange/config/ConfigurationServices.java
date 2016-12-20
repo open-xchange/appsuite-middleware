@@ -122,7 +122,7 @@ public class ConfigurationServices {
             Yaml yaml = new Yaml();
             return yaml.load(reader);
         } catch (YAMLException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
+            throw new IllegalArgumentException("Failed to load YAML file '" + file + ". Please fix any syntax errors in it.", e);
         } finally {
             Streams.close(reader);
         }
@@ -145,7 +145,7 @@ public class ConfigurationServices {
             Yaml yaml = new Yaml();
             return yaml.load(in);
         } catch (YAMLException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
+            throw new IllegalArgumentException("Failed to read YAML content from given input stream.", e);
         } finally {
             Streams.close(in);
         }

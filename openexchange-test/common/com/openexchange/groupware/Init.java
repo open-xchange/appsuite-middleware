@@ -191,7 +191,6 @@ import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.impl.PhoneNumberParserServiceImpl;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
-import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
@@ -858,7 +857,7 @@ public final class Init {
         serviceLookup.add(UserService.class, userService);
         com.openexchange.filestore.impl.osgi.Services.setServiceLookup(serviceLookup);
 
-        DBQuotaFileStorageService qfss = new DBQuotaFileStorageService(null, fileStorageStarter);
+        DBQuotaFileStorageService qfss = new DBQuotaFileStorageService(null, null, null, fileStorageStarter);
         QuotaFileStorage.setQuotaFileStorageStarter(qfss);
         InfostoreFacadeImpl.setQuotaFileStorageService(qfss);
         services.put(QuotaFileStorageService.class, qfss);
@@ -931,9 +930,6 @@ public final class Init {
     private static void startAndInjectSpamHandler() {
         if (null == SpamHandlerRegistry.getSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName())) {
             SpamHandlerRegistry.registerSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName(), DefaultSpamHandler.getInstance());
-        }
-        if (null == SpamHandlerRegistry.getSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName())) {
-            SpamHandlerRegistry.registerSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName(), SpamAssassinSpamHandler.getInstance());
         }
     }
 

@@ -280,12 +280,12 @@ public class IMAPDefaultFolderChecker {
         if (null != arr) {
             if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
                 SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId);
-                if (!spamHandler.isCreateConfirmedHam()) {
+                if (!spamHandler.isCreateConfirmedHam(session)) {
                     return retval;
                 }
             } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
                 SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId);
-                if (!spamHandler.isCreateConfirmedSpam()) {
+                if (!spamHandler.isCreateConfirmedSpam(session)) {
                     return retval;
                 }
             }
@@ -636,14 +636,14 @@ public class IMAPDefaultFolderChecker {
 
                 // Check folder & return its full name
                 if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
-                    if (spamHandler.isCreateConfirmedHam()) {
-                        checkedFullName = checkFullNameFor(index, namespace, specialUseInfo, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified, accountChanged);
+                    if (spamHandler.isCreateConfirmedHam(session)) {
+                        checkedFullName = checkFullNameFor(index, namespace, specialUseInfo, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders(session) ? 0 : -1, modified, accountChanged);
                     } else {
                         LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", name);
                     }
                 } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
-                    if (spamHandler.isCreateConfirmedSpam()) {
-                        checkedFullName = checkFullNameFor(index, namespace, specialUseInfo, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified, accountChanged);
+                    if (spamHandler.isCreateConfirmedSpam(session)) {
+                        checkedFullName = checkFullNameFor(index, namespace, specialUseInfo, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders(session) ? 0 : -1, modified, accountChanged);
                     } else {
                         LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", name);
                     }

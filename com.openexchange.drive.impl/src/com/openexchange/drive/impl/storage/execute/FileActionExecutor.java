@@ -167,7 +167,17 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
     protected void execute(AbstractAction<FileVersion> action) throws OXException {
         switch (action.getAction()) {
         case REMOVE:
-            remove(action);
+            try {
+                remove(action);
+            } catch (OXException e) {
+                LOG.warn("Got exception during server-side execution of remove action: {}\nSession: {}, path: {}, action: {}",
+                    e.getMessage(), session, path, action, e);
+                if (DriveUtils.indicatesLockedContents(e)) {
+                    addNewActionsForClient(DriveUtils.handleLockedContents(session, e, path, action.getVersion(), null));
+                } else {
+                    throw e;
+                }
+            }
             break;
         case DOWNLOAD:
             try {
@@ -190,7 +200,9 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             } catch (OXException e) {
                 LOG.warn("Got exception during server-side execution of edit action: {}\nSession: {}, path: {}, action: {}",
                     e.getMessage(), session, path, action, e);
-                if (DriveUtils.indicatesFailedSave(e)) {
+                if (DriveUtils.indicatesLockedContents(e)) {
+                    addNewActionsForClient(DriveUtils.handleLockedContents(session, e, path, action.getVersion(), action.getNewVersion()));
+                } else if (DriveUtils.indicatesFailedSave(e)) {
                     addNewActionForClient(new ErrorFileAction(null, action.getNewVersion(), null, path, e, true));
                 } else {
                     throw e;

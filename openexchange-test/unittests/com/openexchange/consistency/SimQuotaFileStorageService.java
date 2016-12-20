@@ -51,6 +51,7 @@ package com.openexchange.consistency;
 
 import java.net.URI;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.StorageInfo;
@@ -80,13 +81,13 @@ public class SimQuotaFileStorageService implements QuotaFileStorageService {
     }
 
     @Override
-    public QuotaFileStorage getQuotaFileStorage(int contextId) throws OXException {
+    public QuotaFileStorage getQuotaFileStorage(int contextId, Info info) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public QuotaFileStorage getQuotaFileStorage(int userId, int contextId) throws OXException {
+    public QuotaFileStorage getQuotaFileStorage(int userId, int contextId, Info info) throws OXException {
         return fileStorage;
     }
 

@@ -9,7 +9,7 @@ With v7.8.3 the Open-Xchange Server supports to specify a Java KeyStore containi
 This feature is included in ``open-xchange-core`` package. Thus, no additional packages are required being installed.
 
 # Configuration
-Default with v7.8.3 is to trust all TLS certificates as before. It is possible to trust only certificates in JVM's default trust store. It is also possible to define a custom trust store to extend the set of trusted certificates or to specify the desired protocols and cipher suites or enable hostname verification. A whitelist can be used to maintain a list of hostnames and/or IP ranges to bypass certificate validation. The new properties are explained in the [configuration section](https://documentation.open-xchange.com/latest/middleware/configuration/properties.html#SSL).
+Default with v7.8.3 is to trust all TLS certificates as before. It is possible to trust only certificates in JVM's default trust store. It is also possible to define a custom trust store to extend the set of trusted certificates or to specify the desired protocols and cipher suites or enable hostname verification. A whitelist can be used to maintain a list of hostnames and/or IP ranges to bypass certificate validation. The new properties are explained in the [configuration section](https://documentation.open-xchange.com/7.8.3/middleware/configuration/properties.html#ssl).
 
 # Quickstart
 

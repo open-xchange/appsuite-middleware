@@ -625,6 +625,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
         Object lock = lockFor(credentials);
         synchronized (lock) {
             final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, true);
+            sieveHandler.setConnectTimeout(1500);
+            sieveHandler.setReadTimeout(2000);
             HostAndPort key = new HostAndPort(sieveHandler.getSieveHost(), sieveHandler.getSievePort());
             try {
                 Capabilities capabilities = staticCapabilities.get(key, new Callable<Capabilities>() {
