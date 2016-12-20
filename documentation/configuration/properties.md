@@ -746,6 +746,16 @@ If you would like to add a reference to another property use the following appro
 | __File__ | rssmessaging.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.rss</span> |
+|:----------------|:--------|
+| __Description__ |         If set to false disables the rss capability.<br> |
+| __Default__ | true  |
+| __Version__ | 7.2.1  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | rssmessaging.properties  |
+
+---
 
 
 ## Saml 
