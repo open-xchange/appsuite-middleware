@@ -3651,6 +3651,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         int userId = user.getId().intValue();
         PreparedStatement stmt = null;
         try {
+            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            Cache cache = cacheService.getCache("OXFolderCache");
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
             StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
@@ -3659,6 +3661,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, pair.getFirst());
                 stmt.addBatch();
+                cache.remove(cacheService.newCacheKey(contextId, pair.getFirst().intValue()));
             }
             stmt.executeBatch();
         } catch (SQLException e) {
@@ -3667,12 +3670,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (RuntimeException e) {
             log.error("", e);
             throw e;
+        } catch (OXException e) {
+            log.error("Cache Error", e);
+            throw new StorageException(e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
     }
     
-    private List<Pair<Integer, String>> prepareFolders(int contextId, int userId, Connection con) throws StorageException, SQLException {
+    private List<Pair<Integer, String>> prepareFolders(int contextId, int userId, Connection con) throws SQLException {
         List<Pair<Integer, String>> result = new ArrayList<>(6);
         String language = getLanguage(contextId, userId, con);
         Locale locale = LocaleTools.getLocale(language);

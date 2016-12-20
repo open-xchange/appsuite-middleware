@@ -2253,7 +2253,6 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setUserfield18(user.getUserfield18());
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
-        soapUser.setRemoveDriveFolderFlags(user.isRemoveDriveFolderFlags());
         return soapUser;
     }
 
