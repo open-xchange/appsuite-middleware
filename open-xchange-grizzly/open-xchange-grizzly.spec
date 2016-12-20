@@ -76,6 +76,16 @@ if [ ${1:-0} -eq 2 ]; then
     ox_remove_property com.openexchange.http.grizzly.ping $PFILE
     ox_remove_property com.openexchange.http.grizzly.pingDelay $PFILE
     ox_remove_property com.openexchange.http.grizzly.maxPingCount $PFILE
+
+    # SoftwareChange_Request-3828
+    if ! grep "documented properties" $PFILE > /dev/null; then
+        cat<<EOF >> $PFILE
+### HTTP session
+################################################################################
+
+# Please see documented properties at https://documentation.open-xchange.com/latest/middleware/configuration/properties.html#grizzly
+EOF
+    fi
 fi
 
 %clean
