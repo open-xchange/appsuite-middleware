@@ -372,6 +372,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         gui_spam_filter_capabilities_enabled(OPT_GUI_LONG, false),
         add_config(OPT_CONFIG_LONG, false),
         remove_config(OPT_REMOVE_CONFIG_LONG, false),
+        primary_account_name(OPT_PRIMARY_ACCOUNT_NAME, false),
         ;
 
         private final String string;
@@ -579,10 +580,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_DEFAULTSENDERADDRESS_LONG = "defaultsenderaddress";
     protected static final String OPT_COUNTRY_BUSINESS_LONG = "country_business";
     protected static final String OPT_FOLDERTREE_LONG = "foldertree";
+    protected static final String OPT_DRIVE_FOLDER_MODE_LONG = "drive-folder-mode";
     protected static final String OPT_TITLE_LONG = "title";
     protected static final String OPT_POSITION_LONG = "position";
-
-
 
     protected static final String JAVA_UTIL_TIME_ZONE = "java.util.TimeZone";
     protected static final String PASSWORDMECH_CLASS = "com.openexchange.admin.rmi.dataobjects.User$PASSWORDMECH";
@@ -677,9 +677,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_CONFIG_LONG = "config";
     protected static final String OPT_REMOVE_CONFIG_LONG = "remove-config";
     protected static final String OPT_PRIMARY_ACCOUNT_NAME = "primary-account-name";
-    
-    protected CLIOption removeDriveFolderFlagsOption = null;
-    protected static final String OPT_REMOVE_DRIVE_FOLDER_FLAGS = "remove-drive-folder-flags";
 
     // For right error output
     protected String username = null;
@@ -786,8 +783,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption defaultsenderaddressOption;
     private CLIOption country_businessOption;
     private CLIOption foldertreeOption;
+    private CLIOption driveFolderModeOption;
     private CLIOption titleOption;
     private CLIOption positionOption;
+    private CLIOption primaryAccountNameOption;
 
     protected HashMap<String, CSVConstants> constantsMap;
 
@@ -1869,10 +1868,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         // Their values are set through AdminParser's dynamic options!
         this.removeConfigOption_NO_READ = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter'", false, false);
     }
-    
-    protected final void setRemoveDriveFolderFlagsOption(final AdminParser adminParser) {
-        this.removeDriveFolderFlagsOption = setLongOpt(adminParser, OPT_REMOVE_DRIVE_FOLDER_FLAGS, "Remove the default folder flags for media folders", false, false);
-    }
 
     /**
      * @param theMethods
@@ -2387,7 +2382,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         setConfigOption(parser);
         setRemoveConfigOption(parser);
-        setRemoveDriveFolderFlagsOption(parser);
 
         this.email1Option = setLongOpt(parser, OPT_EMAIL1_LONG, "stringvalue", "Email1", true, false, true);
         this.mailenabledOption = setSettableBooleanLongOpt(parser, OPT_MAILENABLED_LONG, "true / false", "Mailenabled", true, false, true);
@@ -2492,9 +2486,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.mail_folder_confirmed_spam_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, "stringvalue", "Mail_folder_confirmed_spam_name", true, false, true);
         this.defaultsenderaddressOption = setLongOpt(parser, OPT_DEFAULTSENDERADDRESS_LONG, "stringvalue", "DefaultSenderAddress", true, false, true);
         this.foldertreeOption = setIntegerLongOpt(parser, OPT_FOLDERTREE_LONG, "intvalue", "FolderTree", true, false, true);
-
+        this.driveFolderModeOption = setLongOpt(parser, OPT_DRIVE_FOLDER_MODE_LONG, "stringvalue", "The mode how the default drive folders should be created. 'default', 'default-deletable', 'no-default-folders'. If not selected, 'default' is applied.", true, false, true);
+        this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
+    }
+
+    protected final void setPrimaryAccountOption(AdminParser parser){
+        this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
     }
 
     protected final void setGui_Spam_option(final AdminParser admp){
@@ -3358,6 +3357,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             final Integer value = (Integer)parser.getOptionValue(foldertreeOption);
             if (null != value) {
                 usr.setFolderTree(value);
+            }
+        }
+        {
+            String value = (String) parser.getOptionValue(driveFolderModeOption);
+            if (null != value) {
+                usr.setDriveFolderMode(value);
             }
         }
         {
