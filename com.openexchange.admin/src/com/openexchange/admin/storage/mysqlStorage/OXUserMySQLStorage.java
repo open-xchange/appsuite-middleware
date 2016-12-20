@@ -1033,7 +1033,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
                 }
             }
-            
+
             if (usrdata.isRemoveDriveFolderFlags()) {
                 removeDriveFolderFlags(ctx, usrdata, con);
             }
@@ -3112,17 +3112,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
+                int contextId = ctx.getId().intValue();
                 Connection con = null;
                 condition.resetTransactionRollbackException();
                 boolean rollback = false;
                 try {
-                    con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
+                    con = cache.getConnectionForContextNoTimeout(contextId);
                     DBUtils.startTransaction(con);
                     rollback = true;
+
+                    lock(contextId, con);
+
                     delete(ctx, users, destUser, con);
                     for (final User user : users) {
                         log.info("User {} deleted!", user.getId());
                     }
+
                     con.commit();
                     rollback = false;
                 } catch (final PoolException e) {
@@ -3148,7 +3153,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     }
                     DBUtils.autocommit(con);
                     try {
-                        cache.pushConnectionForContextNoTimeout(ctx.getId().intValue(), con);
+                        cache.pushConnectionForContextNoTimeout(contextId, con);
                     } catch (final PoolException e) {
                         log.error("Pool Error pushing ox write connection to pool!", e);
                     }
@@ -3676,7 +3681,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             Databases.closeSQLStuff(stmt);
         }
     }
-    
+
     private List<Pair<Integer, String>> prepareFolders(int contextId, int userId, Connection con) throws SQLException {
         List<Pair<Integer, String>> result = new ArrayList<>(6);
         String language = getLanguage(contextId, userId, con);
@@ -3728,7 +3733,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             Databases.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     private String getLanguage(int contextId, int userId, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -3742,7 +3747,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 language = rs.getString(1);
                 if (Strings.isNotEmpty(language)) {
                     return language;
-                } 
+                }
             }
             return Locale.getDefault().getLanguage();
         } finally {
