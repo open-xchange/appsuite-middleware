@@ -487,6 +487,18 @@ If you would like to add a reference to another property use the following appro
 | __File__ | grizzly.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.http.grizzly.sessionExpiryCheckInterval</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the interval in seconds when to check for expired/invalid HTTP sessions<br>This value should be aligned to property "com.openexchange.servlet.maxInactiveInterval"<br>that defines how long (in seconds) a HTTP session may stay idle/inactive until considered<br>as invalid<br> |
+| __Default__ | is 60 seconds  |
+ |
+| __Default__ | 60  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | grizzly.properties  |
+
+---
 
 
 ## Mail 
