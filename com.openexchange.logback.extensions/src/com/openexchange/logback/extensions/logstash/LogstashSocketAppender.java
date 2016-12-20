@@ -55,14 +55,18 @@ import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.SocketFactory;
 import com.openexchange.exception.OXException;
@@ -74,6 +78,8 @@ import ch.qos.logback.core.net.AbstractSocketAppender;
 import ch.qos.logback.core.net.DefaultSocketConnector;
 import ch.qos.logback.core.net.SocketConnector;
 import ch.qos.logback.core.net.SocketConnector.ExceptionHandler;
+import ch.qos.logback.core.spi.FilterReply;
+import ch.qos.logback.core.status.WarnStatus;
 import ch.qos.logback.core.util.CloseUtil;
 import ch.qos.logback.core.util.Duration;
 
@@ -90,6 +96,9 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     private static final AtomicReference<LogstashSocketAppender> REF = new AtomicReference<LogstashSocketAppender>();
 
     private static final float LOAD_FACTOR = 0.67f;
+    private static final int ACCEPT_TIMEOUT_CONNECTION = 10000;
+
+    private static final Object PRESENT = new Object();
 
     private int port;
     private String remoteHost;
@@ -112,6 +121,15 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     private Encoder<ILoggingEvent> encoder;
 
     private Boolean alwaysPersistEvents;
+    private Boolean keepAlive;
+
+    /**
+     * The guard prevents an appender from repeatedly calling its own doAppend method.
+     */
+    private final ConcurrentMap<Thread, Object> guard = new ConcurrentHashMap<Thread, Object>(32, 0.9F, 1);
+
+    private final AtomicInteger statusRepeatCount = new AtomicInteger(0);
+    private final AtomicInteger exceptionCount = new AtomicInteger(0);
 
     /**
      * Get the appender's instance
@@ -186,10 +204,14 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * <li>com.openexchange.logback.extensions.logstash.alwaysPersistEvents</li>
      * <li>com.openexchange.logback.extensions.logstash.socketTimeout</li>
      * <li>com.openexchange.logback.extensions.logstash.loadFactor</li>
+     * <li>com.openexchange.logback.extensions.logstash.keepAlive</li>
+     * <li>com.openexchange.logback.extensions.logstash.acceptConnectionTimeout</li>
      * </ul>
      */
     private void setOptionalProperties() {
+        // Always persist events
         alwaysPersistEvents = Boolean.parseBoolean(context.getProperty("com.openexchange.logback.extensions.logstash.alwaysPersistEvents"));
+        // Load factor and load threshold
         {
             String value = context.getProperty("com.openexchange.logback.extensions.logstash.loadFactor");
             if (value == null || !(value instanceof String)) {
@@ -204,6 +226,23 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                 }
             }
             loadThreshold = (int) (loadFactor * queueSize);
+        }
+        // Socket keep alive
+        keepAlive = Boolean.parseBoolean(context.getProperty("com.openexchange.logback.extensions.logstash.keepAlive"));
+        // Accept connection timeout
+        {
+            String property = context.getProperty("com.openexchange.logback.extensions.logstash.acceptConnectionTimeout");
+            if (property == null || !(property instanceof String)) {
+                logWarn("'com.openexchange.logback.extensions.logstash.acceptConnectionTimeout' property is not defined in the configuration file. Falling back to default value of '" + ACCEPT_TIMEOUT_CONNECTION + "'");
+                acceptConnectionTimeout = ACCEPT_TIMEOUT_CONNECTION;
+            } else {
+                try {
+                    acceptConnectionTimeout = Integer.parseInt(property);
+                } catch (NumberFormatException e) {
+                    logWarn("The value of 'com.openexchange.logback.extensions.logstash.acceptConnectionTimeout' is not a parsable integer. Falling back to default value of '" + ACCEPT_TIMEOUT_CONNECTION + "'");
+                    acceptConnectionTimeout = ACCEPT_TIMEOUT_CONNECTION;
+                }
+            }
         }
     }
 
@@ -262,10 +301,8 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Runnable#run()
+    /**
+     * Establishes a connection to the logstash server
      */
     @Override
     public final void run() {
@@ -284,6 +321,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                         continue;
                     }
 
+                    // Connection is open, begin dispatching events
                     dispatchEvents();
                 } catch (Exception e) {
                     handleConnectionException(e);
@@ -295,19 +333,20 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     }
 
     /**
-     * Dispatch the events to the remote host
-     * 
-     * @throws InterruptedException
-     * @throws IOException
+     * Dispatch the events to the remote host. This method uses at its core a <code>while(true)</code> loop
+     * and assumes that the connection is open. If a connection error is occurred, the dispatching is aborted,
+     * the event that failed to be dispatched is been put back in the queue. The appender will retry sending
+     * that event when the connection is re-established.
      */
-    private void dispatchEvents() throws InterruptedException, IOException {
+    private void dispatchEvents() {
+        ILoggingEvent event = null;
         try {
             socket.setSoTimeout(acceptConnectionTimeout);
             OutputStream oos = new BufferedOutputStream(socket.getOutputStream());
             encoder.init(oos);
             logInfo("Dispatching events...");
             while (true) {
-                ILoggingEvent event = queue.take();
+                event = queue.take();
                 encoder.doEncode(event);
                 oos.flush();
             }
@@ -319,6 +358,46 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             CloseUtil.closeQuietly(socket);
             socket = null;
             logError("Connection to " + peerId + " closed.");
+            doAppend(event);
+        }
+    }
+
+    static final int ALLOWED_REPEATS = 5;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see ch.qos.logback.core.AppenderBase#doAppend(java.lang.Object)
+     */
+    @Override
+    public void doAppend(ILoggingEvent eventObject) {
+        // WARNING: The guard check MUST be the first statement in the doAppend() method.
+        Thread currentThread = Thread.currentThread();
+        if (null != guard.putIfAbsent(currentThread, PRESENT)) {
+            return;
+        }
+
+        try {
+            if (!this.started) {
+                if (statusRepeatCount.getAndIncrement() < ALLOWED_REPEATS) {
+                    addStatus(new WarnStatus("Attempted to append to non started appender [" + name + "].", this));
+                }
+                return;
+            }
+
+            if (getFilterChainDecision(eventObject) == FilterReply.DENY) {
+                return;
+            }
+
+            // ok, we now invoke derived class' implementation of append
+            this.append(eventObject);
+        } catch (Exception e) {
+            if (exceptionCount.getAndIncrement() < ALLOWED_REPEATS) {
+                addError("Appender [" + name + "] failed to append.", e);
+            }
+        } finally {
+            // Remove previously acquired guard
+            guard.remove(currentThread);
         }
     }
 
@@ -422,10 +501,12 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * @return A socket
      * @throws ExecutionException
      * @throws InterruptedException
+     * @throws SocketException
      */
-    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException {
+    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException, SocketException {
         logInfo("Trying to connect to " + peerId + "...");
         Socket s = connectorTask.get();
+        s.setKeepAlive(keepAlive.booleanValue());
         logInfo("Connection established to " + peerId + ".");
         connectorTask = null;
         return s;
@@ -438,18 +519,28 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * @throws IOException
      */
     private void cleanQueueIfNecessary() throws IOException {
-        final int qSize = queue.size();
-        final String message = "Event queue holds " + qSize + " events.";
-        if (qSize > loadThreshold) {
+        int qSize = queue.size();
+        if (qSize < loadThreshold) {
+            String message = "Event queue holds " + qSize + " log events.";
+            logInfo(message + " Not flushing yet. Load threshold of " + loadThreshold + " is not reached.");
+            return;
+        }
+
+        synchronized (this) {
+            qSize = queue.size();
+            if (qSize < loadThreshold) {
+                logDebug("Another thread flushed the queue in the meantime.");
+                return;
+            }
+
+            String message = "Event queue holds " + qSize + " log events.";
             if (alwaysPersistEvents) {
                 logInfo(message + " Load threshold of " + loadThreshold + " is reached. Flushing...");
                 flushQueue(qSize);
             } else {
                 queue.clear();
-                logInfo("Event queue is empty.");
+                logInfo("Cleared event queue. Discarded " + qSize + " log events.");
             }
-        } else {
-            logInfo(message + " Not flushing yet. Load threshold of " + loadThreshold + " is not reached.");
         }
     }
 
@@ -630,6 +721,16 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      */
     private void logError(String message, Throwable... t) {
         log(Level.ERROR, message, t);
+    }
+
+    /**
+     * Log DEBUG helper
+     *
+     * @param message The message
+     * @param t The exception(s)
+     */
+    private void logDebug(String message, Throwable... t) {
+        log(Level.DEBUG, message, t);
     }
 
     /**
