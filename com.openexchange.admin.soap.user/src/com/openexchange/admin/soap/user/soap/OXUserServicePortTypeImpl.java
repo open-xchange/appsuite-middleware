@@ -2105,6 +2105,11 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         if (tmp != null) {
             user.setPrimaryAccountName(tmp);
         }
+        
+        Boolean bool_tmp = soapUser.isRemoveDriveFolderFlags();
+        if (bool_tmp != null) {
+            user.setRemoveDriveFolderFlags(bool_tmp);
+        }
 
         SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
         if (null != userAttributes) {

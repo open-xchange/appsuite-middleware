@@ -379,5 +379,4 @@ public abstract class OXUserStorageInterface {
      */
     public abstract void deleteAllRecoveryData (final Context ctx, final Connection con ) throws StorageException;
 
-
 }

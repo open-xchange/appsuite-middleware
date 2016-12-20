@@ -116,6 +116,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -135,7 +136,10 @@ import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.i18n.LocaleTools;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -1028,6 +1032,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 } else {
                     tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
                 }
+            }
+            
+            if (usrdata.isRemoveDriveFolderFlags()) {
+                removeDriveFolderFlags(ctx, usrdata, con);
             }
 
             // update the user mail settings
@@ -3634,6 +3642,111 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
+        }
+    }
+
+    private void removeDriveFolderFlags(Context ctx, User user, Connection con) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
+        PreparedStatement stmt = null;
+        try {
+            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            Cache cache = cacheService.getCache("OXFolderCache");
+            List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
+            StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
+            stmt = con.prepareStatement(sb.toString());
+            for (Pair<Integer, String> pair : folderIds) {
+                stmt.setString(1, pair.getSecond());
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, pair.getFirst());
+                stmt.addBatch();
+                cache.remove(cacheService.newCacheKey(contextId, pair.getFirst().intValue()));
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } catch (OXException e) {
+            log.error("Cache Error", e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+    
+    private List<Pair<Integer, String>> prepareFolders(int contextId, int userId, Connection con) throws SQLException {
+        List<Pair<Integer, String>> result = new ArrayList<>(6);
+        String language = getLanguage(contextId, userId, con);
+        Locale locale = LocaleTools.getLocale(language);
+        StringHelper helper = StringHelper.valueOf(locale);
+        boolean needTranslation = true;
+        if (Locale.ENGLISH.equals(locale) || Locale.US.equals(locale)) {
+            needTranslation = false;
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT fuid, fname, parent FROM oxfolder_tree WHERE cid = ? AND created_from = ? AND module = 8 AND default_flag = 1 AND type IN (20, 21, 22, 23, 24) FOR UPDATE");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                int folderId = rs.getInt(1);
+                String name = rs.getString(2);
+                String translatedName = name;
+                if (needTranslation) {
+                    int parent = rs.getInt(3);
+                    translatedName = helper.getString(name);
+                    int i = 1;
+                    while (existsFolder(contextId, parent, folderId, translatedName, con)) {
+                        translatedName = FileStorageUtility.enhance(translatedName, i++);
+                    }
+                }
+                result.add(new Pair<Integer, String>(folderId, translatedName));
+            }
+            return result;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private boolean existsFolder(int contextId, int parent, int folderId, String name, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ? AND fuid <> ? AND fname = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, parent);
+            stmt.setInt(3, folderId);
+            stmt.setString(4, name);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+    
+    private String getLanguage(int contextId, int userId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT preferredLanguage FROM user WHERE cid = ? AND id = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            String language;
+            if (rs.next()) {
+                language = rs.getString(1);
+                if (Strings.isNotEmpty(language)) {
+                    return language;
+                } 
+            }
+            return Locale.getDefault().getLanguage();
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 }
