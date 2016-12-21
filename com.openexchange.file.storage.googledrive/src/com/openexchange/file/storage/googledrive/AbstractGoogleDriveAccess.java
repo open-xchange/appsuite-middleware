@@ -146,6 +146,10 @@ public abstract class AbstractGoogleDriveAccess {
             return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, identifier, "");
         }
 
+        if (SC_CONFLICT == e.getStatusCode()) {
+            return FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
+        }
+
         if (SC_BAD_REQUEST == e.getStatusCode()) {
             if (hasInvalidGrant(e)) {
                 return createInvalidAccessTokenException();
@@ -175,7 +179,7 @@ public abstract class AbstractGoogleDriveAccess {
 
     /**
      * Creates an access token invalid {@link OXException}
-     * 
+     *
      * @return The {@link OXException}
      */
     private OXException createInvalidAccessTokenException() {
@@ -187,7 +191,7 @@ public abstract class AbstractGoogleDriveAccess {
 
     /**
      * Determines whether the specified {@link HttpResponseException} is caused due to an 'invalid_grant'.
-     * 
+     *
      * @param e The {@link HttpResponseException}
      * @return <code>true</code> if the exception was caused due to an 'invalid_grant'; <code>false</code>
      *         otherwise
