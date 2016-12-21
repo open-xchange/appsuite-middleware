@@ -63,6 +63,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -214,6 +215,23 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 if (FileStorageFileAccess.NEW != file.getId()) {
                     savedFile.setId(file.getId());
                     if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName())) {
+                        /*
+                         * first check if there is already such a file
+                         */
+                        {
+                            String fileName = file.getFileName();
+                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0);
+                            boolean found = false;
+                            for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
+                                if (it.next().getFileName().equals(fileName)) {
+                                    found = true;
+                                }
+                            }
+
+                            if (found) {
+                                throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
+                            }
+                        }
                         savedFile.setTitle(file.getFileName());
                         savedFile = drive.files().patch(file.getId(), savedFile).execute();
                     }
@@ -245,7 +263,33 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         }
                     }
                 } else {
-                    savedFile.setTitle(file.getFileName());
+                    /*
+                     * first check if there is already such a file
+                     */
+                    String fileNameToUse = null;
+                    {
+                        List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
+                        String name = file.getFileName();
+                        String fileName = name;
+                        int count = 0;
+
+                        while (null == fileNameToUse) {
+                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            boolean found = false;
+                            for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
+                                if (it.next().getFileName().equals(fileName)) {
+                                    found = true;
+                                }
+                            }
+
+                            if (found) {
+                                fileName = FileStorageUtility.enhance(name, ++count);
+                            } else {
+                                fileNameToUse = fileName;
+                            }
+                        }
+                    }
+                    savedFile.setTitle(fileNameToUse);
                     savedFile = drive.files().insert(savedFile).execute();
                 }
                 return new IDTuple(file.getFolderId(), savedFile.getId());

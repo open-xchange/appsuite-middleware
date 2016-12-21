@@ -189,6 +189,15 @@ public final class GoogleDriveAccess {
     }
 
     /**
+     * Gets the Google OAuth account
+     *
+     * @return The Google OAuth account
+     */
+    public OAuthAccount getGoogleAccount() {
+        return googleAccount;
+    }
+
+    /**
      * Ensures this access is not expired
      *
      * @param session The associated session
