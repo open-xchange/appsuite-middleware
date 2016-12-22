@@ -122,7 +122,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     @Before
     public void before() throws Exception {
-        setUp();
+        super.setUp();
         setUpConfiguration(getClient(), false);
 
         switch (packageScheme) {

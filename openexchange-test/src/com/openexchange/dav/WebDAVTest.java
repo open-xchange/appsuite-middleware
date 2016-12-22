@@ -79,7 +79,6 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -92,7 +91,7 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.oauth.provider.AbstractOAuthTest;
 import com.openexchange.ajax.oauth.provider.OAuthSession;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
@@ -107,9 +106,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link WebDAVTest} - Common base class for WebDAV tests
@@ -117,7 +113,7 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class WebDAVTest {
+public abstract class WebDAVTest extends AbstractAJAXSession {
 
     private static final boolean AUTODISCOVER_AUTH = false;
 
@@ -126,8 +122,6 @@ public abstract class WebDAVTest {
     private List<FolderObject> foldersToCleanUp;
 
     private Map<Long, WebDAVClient> webDAVClients;
-
-    private AJAXClient client;
 
     @BeforeClass
     public static void prepareFramework() throws OXException {
@@ -146,10 +140,6 @@ public abstract class WebDAVTest {
 
     @Parameter(value = 0)
     public String authMethod;
-
-    protected TestContext testContext;
-
-    protected TestUser testUser;
 
     protected static Iterable<Object[]> availableAuthMethods() {
         if (false == AUTODISCOVER_AUTH) {
@@ -218,36 +208,12 @@ public abstract class WebDAVTest {
 
     @Before
     public void setUp() throws Exception {
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        testUser = testContext.acquireUser();
-
-        client = new AJAXClient(testUser);
+        super.setUp();
 
         this.webDAVClients = new HashMap<Long, WebDAVClient>();
         getAJAXClient().setHostname(getHostname());
         getAJAXClient().setProtocol(getProtocol());
         this.foldersToCleanUp = new ArrayList<FolderObject>();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != client) {
-                cleanupFolders();
-                client.logout();
-                client = null;
-            }
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
-    }
-
-    public AJAXSession getSession() {
-        return client.getSession();
-    }
-
-    protected AJAXClient getClient() {
-        return client;
     }
 
     protected abstract String getDefaultUserAgent();
@@ -295,7 +261,7 @@ public abstract class WebDAVTest {
      * @throws JSONException
      */
     protected FolderObject getFolder(String folderName) throws OXException, IOException, JSONException {
-        VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
+        VisibleFoldersResponse response = getClient().execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
         FolderObject folder = findByName(response.getPrivateFolders(), folderName);
         if (null == folder) {
             folder = findByName(response.getPublicFolders(), folderName);
@@ -304,7 +270,7 @@ public abstract class WebDAVTest {
             }
         }
         if (null != folder) {
-            folder = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
+            folder = getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
         }
         return folder;
     }
@@ -319,7 +285,7 @@ public abstract class WebDAVTest {
      * @throws JSONException
      */
     protected FolderObject getCalendarFolder(String folderName) throws OXException, IOException, JSONException {
-        VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, "calendar", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
+        VisibleFoldersResponse response = getClient().execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, "calendar", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
         FolderObject folder = findByName(response.getPrivateFolders(), folderName);
         if (null == folder) {
             folder = findByName(response.getPublicFolders(), folderName);
@@ -328,7 +294,7 @@ public abstract class WebDAVTest {
             }
         }
         if (null != folder) {
-            folder = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
+            folder = getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
         }
         return folder;
     }
