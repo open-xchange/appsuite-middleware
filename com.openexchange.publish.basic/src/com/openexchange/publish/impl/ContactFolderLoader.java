@@ -99,7 +99,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
     	    List<Contact> list = new LinkedList<Contact>();
     		while (searchIterator.hasNext()) {
                 Contact next = searchIterator.next();
-                if (false == next.getMarkAsDistribtuionlist()) {
+                if (null != next && false == next.getMarkAsDistribtuionlist()) {
                     list.add(null != escapeMode && EscapeMode.NONE != escapeMode ? new EscapingContact(next, escapeMode) : next);
                 }
     		}
