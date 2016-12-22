@@ -65,15 +65,14 @@ import org.glassfish.grizzly.websockets.WebSocketListener;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.AbstractGrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketUtils;
-import com.openexchange.websockets.grizzly.SessionInfo;
 import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
 
 /**
@@ -237,7 +236,8 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
 
     @Override
     protected void closeSocketSafe(DefaultSessionBoundWebSocket webSocket) {
-        remoteDistributor.removeWebSocket(webSocket);
+        WebSocketInfo socketInfo = WebSocketInfo.builder().connectionId(webSocket.getConnectionId()).contextId(webSocket.getContextId()).path(webSocket.getPath()).userId(webSocket.getUserId()).build();
+        ThreadPools.submitElseExecute(new RemoteWebSocketModifierTask(socketInfo, remoteDistributor, false));
         super.closeSocketSafe(webSocket);
     }
 
@@ -345,7 +345,8 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
             }
         }
 
-        remoteDistributor.addWebSocket(sessionBoundSocket);
+        WebSocketInfo socketInfo = WebSocketInfo.builder().connectionId(sessionBoundSocket.getConnectionId()).contextId(sessionBoundSocket.getContextId()).path(sessionBoundSocket.getPath()).userId(sessionBoundSocket.getUserId()).build();
+        ThreadPools.submitElseExecute(new RemoteWebSocketModifierTask(socketInfo, remoteDistributor, true));
     }
 
     @Override
@@ -388,6 +389,32 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
             for (DefaultSessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
                 sessionBoundSocket.remove(grizzlyWebSocketListener);
             }
+        }
+    }
+
+    // -------------------------------------------- Helper classes ----------------------------------------------------------
+
+    private static final class RemoteWebSocketModifierTask extends AbstractTask<Void> {
+
+        private final WebSocketInfo socketInfo;
+        private final RemoteWebSocketDistributor remoteDistributor;
+        private final boolean add;
+
+        RemoteWebSocketModifierTask(WebSocketInfo socketInfo, RemoteWebSocketDistributor remoteDistributor, boolean add) {
+            super();
+            this.socketInfo = socketInfo;
+            this.remoteDistributor = remoteDistributor;
+            this.add = add;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            if (add) {
+                remoteDistributor.addWebSocket(socketInfo);
+            } else {
+                remoteDistributor.removeWebSocket(socketInfo);
+            }
+            return null;
         }
     }
 

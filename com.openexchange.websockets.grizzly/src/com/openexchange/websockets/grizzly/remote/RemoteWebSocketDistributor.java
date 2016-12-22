@@ -108,6 +108,13 @@ public interface RemoteWebSocketDistributor  {
     void addWebSocket(WebSocket socket);
 
     /**
+     * Adds a connected Web Socket.
+     *
+     * @param socketInfo The Web Socket info
+     */
+    void addWebSocket(WebSocketInfo socketInfo);
+
+    /**
      * Adds connected Web Sockets.
      *
      * @param sockets The Web Sockets
@@ -120,6 +127,13 @@ public interface RemoteWebSocketDistributor  {
      * @param socket The Web Socket
      */
     void removeWebSocket(WebSocket socket);
+
+    /**
+     * Removes a closed Web Socket.
+     *
+     * @param socketInfo The Web Socket info
+     */
+    void removeWebSocket(WebSocketInfo socketInfo);
 
     /**
      * Starts the cleaner task for given user.
