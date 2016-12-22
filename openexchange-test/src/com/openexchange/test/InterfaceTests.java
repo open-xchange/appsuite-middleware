@@ -117,7 +117,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
      * TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
      * com.openexchange.webdav.client.NaughtyClientTest.class,
      */
-    com.openexchange.ajax.FunambolTests.class,
     com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class,
     com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class,
 //    com.openexchange.ajax.contact.AggregatingContactTest.class,

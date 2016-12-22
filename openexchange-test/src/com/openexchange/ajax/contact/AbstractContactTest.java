@@ -65,6 +65,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
@@ -124,16 +125,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     protected TimeZone tz;
 
-    /**
-     * Initializes a new {@link AbstractContactTest}.
-     *
-     * @param name
-     */
-    protected AbstractContactTest() {
-        super();
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
