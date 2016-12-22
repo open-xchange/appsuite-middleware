@@ -104,7 +104,6 @@ public class TestContextPool {
         }
         contextWatcher.get().contextSuccessfullyReturned(context);
         if (contexts.contains(context)) {
-            LOG.info("Context {} formerly acquired by class {} has already been returned.", context.getName(), context.getAcquiredBy());
             return;
         }
         try {

@@ -63,7 +63,7 @@ public class TestContextWatcher implements Runnable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TestContextWatcher.class);
 
-    private static final long MAX_TIME_TO_USE = 30000;
+    private static final long MAX_TIME_TO_USE = 60000;
 
     private final ConcurrentHashMap<TestContext, Long> contextsInUse = new ConcurrentHashMap<>();
 
