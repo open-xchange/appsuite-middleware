@@ -47,59 +47,72 @@
  *
  */
 
-package com.openexchange.ajax.appointment.bugtests;
+package com.openexchange.ajax.attach.actions;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertTrue;
-import java.util.Date;
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.AttachmentTest;
-import com.openexchange.ajax.attach.AttachmentTools;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.Appointment;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 
 /**
- * {@link Bug16249Test}
+ * 
+ * {@link DetachRequest}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public class Bug16249Test extends AttachmentTest {
+public class DetachRequest extends AbstractAttachmentRequest<DetachResponse> {
 
-    private int folderId;
+    private final int moduleId;
 
-    private int appointmentId;
+    private final int folderId;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    private final int attachedId;
 
-        folderId = getClient().getValues().getPrivateAppointmentFolder();
+    private final int[] versions;
+
+    public DetachRequest(final int folder, final int attached, final int module, final int[] versions) {
+        super();
+        this.moduleId = module;
+        this.versions = versions;
+        this.folderId = folder;
+        this.attachedId = attached;
     }
 
-    @Test
-    public void testBug16249() throws Exception {
-        Appointment a = new Appointment();
-        a.setTitle("Bug 16249 Test");
-        a.setStartDate(D("01.07.2010 08:00"));
-        a.setEndDate(D("01.07.2010 09:00"));
-        a.setParentFolderID(folderId);
-        a.setIgnoreConflicts(true);
-        
-        catm.insert(a);
-        Date beforeAttach = catm.get(a).getLastModified();
+    @Override
+    public JSONArray getBody() throws JSONException {
+        if (versions != null) {
+            final StringBuffer data = new StringBuffer("[");
+            for (final int id : versions) {
+                data.append(id);
+                data.append(',');
+            }
+            data.setLength(data.length() - 1);
+            data.append(']');
+            return new JSONArray(data.toString());
+        }
+        return null;
+    }
 
-        int attachmentId = atm.attach(folderId, appointmentId , AttachmentTools.determineModule(a), testFile.getName(), FileUtils.openInputStream(testFile), null);
-        
-        Date afterAttach = catm.get(folderId, appointmentId).getLastModified();
+    @Override
+    public Method getMethod() {
+        return Method.PUT;
+    }
 
-        atm.detach(folderId, appointmentId, Types.APPOINTMENT, new int[] { attachmentId });
+    @Override
+    public Parameter[] getParameters() throws JSONException {
+        List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DETACH));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_MODULE, moduleId));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, attachedId));
 
-        Date afterDetach = catm.get(folderId, appointmentId).getLastModified();
+        return parameters.toArray(new Parameter[parameters.size()]);
+    }
 
-        assertTrue("Wrong last modified after attach", beforeAttach.compareTo(afterAttach) < 0);
-        assertTrue("Wrong last modified after detach", beforeAttach.compareTo(afterDetach) < 0);
-        assertTrue("Wrong last modified after detach", afterAttach.compareTo(afterDetach) < 0);
+    @Override
+    public DetachParser getParser() {
+        return new DetachParser(true);
     }
 }

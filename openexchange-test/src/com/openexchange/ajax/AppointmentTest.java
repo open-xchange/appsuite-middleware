@@ -85,13 +85,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     protected static final String APPOINTMENT_URL = "/ajax/calendar";
 
-    protected static int appointmentFolderId = -1;
+    protected int appointmentFolderId = -1;
 
-    protected static long startTime = 0;
+    protected long startTime = 0;
 
-    protected static long endTime = 0;
+    protected long endTime = 0;
 
-    protected static final long dayInMillis = 86400000;
+    protected final long dayInMillis = 86400000;
 
     protected String userParticipant2 = null;
 
@@ -116,7 +116,6 @@ public class AppointmentTest extends AbstractAJAXTest {
         try {
             appointmentFolderId = getClient().getValues().getPrivateAppointmentFolder();
             userId = getClient().getValues().getUserId();
-
             timeZone = getClient().getValues().getTimeZone();
 
             LOG.debug(new StringBuilder().append("use timezone: ").append(timeZone).toString());

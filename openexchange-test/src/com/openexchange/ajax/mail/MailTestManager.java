@@ -98,13 +98,14 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
+import com.openexchange.test.TestManager;
 
 /**
  * {@link MailTestManager}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class MailTestManager {
+public class MailTestManager implements TestManager {
 
     private final List<MailCleaner> cleaningSteps;
 
@@ -450,6 +451,7 @@ public class MailTestManager {
     /**
      * Deletes all mails that where created during this process.
      */
+    @Override
     public void cleanUp() {
         for (MailCleaner cleanup : cleaningSteps) {
             try {
@@ -535,5 +537,29 @@ public class MailTestManager {
         TestMail result = get(folder, id);
         lastResponse = response;
         return result;
+    }
+
+    @Override
+    public boolean getFailOnError() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean doesFailOnError() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean hasLastException() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Throwable getLastException() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

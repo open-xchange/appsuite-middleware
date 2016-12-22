@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.attach.actions;
 
-import com.openexchange.ajax.container.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
@@ -60,15 +63,19 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 public class GetDocumentResponse extends AbstractAJAXResponse {
 
     private final int contentLength;
+    private HttpResponse httpResponse;
+    private HttpEntity entity;
 
     /**
      * Initializes a new {@link GetDocumentResponse}.
      * 
      * @param response
      */
-    public GetDocumentResponse(Response response, int cl) {
-        super(response);
+    public GetDocumentResponse(HttpResponse response, int cl) {
+        super(null);
+        httpResponse = response;
         contentLength = cl;
+        this.entity = response.getEntity();
     }
 
     /**
@@ -78,5 +85,22 @@ public class GetDocumentResponse extends AbstractAJAXResponse {
      */
     public int getContentLength() {
         return contentLength;
+    }
+
+    public String getContentType() {
+        return entity.getContentType().getValue();
+    }
+
+    public InputStream getContent() throws IllegalStateException, IOException {
+        return null != entity ? entity.getContent() : null;
+    }
+
+    @Override
+    public Object getData() {
+        try {
+            return getContent();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

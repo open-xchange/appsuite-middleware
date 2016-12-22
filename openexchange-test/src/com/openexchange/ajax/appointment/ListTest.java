@@ -162,7 +162,7 @@ public class ListTest extends AppointmentTest {
 
         final int userParticipantId = cotm.searchAction(userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), groupParticipant)[0].getIdentifier();
-        final int resourceParticipantId = rtm.search(resourceParticipant).get(0).getIdentifier();
+        final int resourceParticipantId = resTm.search(resourceParticipant).get(0).getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);

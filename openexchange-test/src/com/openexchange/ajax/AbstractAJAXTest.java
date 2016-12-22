@@ -50,10 +50,11 @@
 package com.openexchange.ajax;
 
 import static org.junit.Assert.assertFalse;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.json.JSONException;
@@ -65,7 +66,6 @@ import org.xml.sax.SAXException;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
-import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
@@ -83,8 +83,10 @@ import com.openexchange.test.AttachmentTestManager;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.ReminderTestManager;
 import com.openexchange.test.ResourceTestManager;
 import com.openexchange.test.TaskTestManager;
+import com.openexchange.test.TestManager;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -141,11 +143,15 @@ public abstract class AbstractAJAXTest {
 
     protected InfostoreTestManager itm;
 
-    protected ResourceTestManager rtm;
+    protected ResourceTestManager resTm;
+
+    protected ReminderTestManager remTm;
 
     protected MailTestManager mtm;
 
     protected AttachmentTestManager atm;
+
+    private List<TestManager> testManager = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
@@ -158,34 +164,38 @@ public abstract class AbstractAJAXTest {
             testUser2 = testContext.acquireUser();
             client = new AJAXClient(testUser);
             client2 = new AJAXClient(testUser2);
-            
+
             ftm = new FolderTestManager(client);
+            testManager.add(ftm);
             catm = new CalendarTestManager(client);
+            testManager.add(catm);
             cotm = new ContactTestManager(client);
+            testManager.add(cotm);
             ttm = new TaskTestManager(client);
+            testManager.add(ttm);
             itm = new InfostoreTestManager(client);
-            rtm = new ResourceTestManager(client);
+            testManager.add(itm);
+            resTm = new ResourceTestManager(client);
+            testManager.add(resTm);
+            remTm = new ReminderTestManager(client);
+            testManager.add(remTm);
             mtm = new MailTestManager(client);
+            testManager.add(mtm);
             atm = new AttachmentTestManager(client);
+            testManager.add(atm);
         } catch (final OXException ex) {
             ex.printStackTrace();
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @After
     public void tearDown() throws Exception {
         try {
-            ftm.cleanUp();
-            catm.cleanUp();
-            cotm.cleanUp();
-            ttm.cleanUp();
-            itm.cleanUp();
-            rtm.cleanUp();
-            mtm.cleanUp();
-            atm.cleanUp();
+            for (TestManager manager : testManager) {
+                if (manager != null) {
+                    manager.cleanUp();
+                }
+            }
         } finally {
             TestContextPool.backContext(testContext);
         }
@@ -268,19 +278,6 @@ public abstract class AbstractAJAXTest {
     }
 
     // Query methods
-
-    protected String putS(final WebConversation webConv, final String url, final String body) throws MalformedURLException, IOException, SAXException {
-        final PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)), "text/javascript; charset=UTF-8");
-        final WebResponse resp = webConv.getResponse(m);
-        String text = resp.getText();
-        return text;
-    }
-
-    protected JSONObject put(final WebConversation webConv, final String url, final String body) throws MalformedURLException, JSONException, IOException, SAXException {
-        final JSONObject o = new JSONObject(putS(webConv, url, body));
-        return o;
-    }
-
     protected String gS(final WebConversation webConv, final String url) throws MalformedURLException, IOException, SAXException {
         final GetMethodWebRequest m = new GetMethodWebRequest(url);
         final WebResponse resp = webConv.getResponse(m);
@@ -289,14 +286,6 @@ public abstract class AbstractAJAXTest {
 
     protected Response gT(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
         final String res = gS(webConv, url);
-        if ("".equals(res.trim())) {
-            return null;
-        }
-        return Response.parse(res);
-    }
-
-    protected Response putT(final WebConversation webConv, final String url, final String data) throws MalformedURLException, JSONException, IOException, SAXException {
-        final String res = putS(webConv, url, data);
         if ("".equals(res.trim())) {
             return null;
         }
@@ -332,18 +321,6 @@ public abstract class AbstractAJAXTest {
             return host;
         }
         return "http://" + host;
-    }
-
-    public static final boolean containsTestArg(final String arg) {
-        return testArgsMap.containsKey(arg);
-    }
-
-    public static final String getTestArg(final String arg) {
-        return testArgsMap.get(arg);
-    }
-
-    public static final void putTestArg(final String arg, final String value) {
-        testArgsMap.put(arg, value);
     }
 
     public AJAXClient getClient() {

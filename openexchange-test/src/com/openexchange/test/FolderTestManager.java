@@ -393,8 +393,7 @@ public class FolderTestManager implements TestManager {
 
     public FolderObject[] listRootFoldersOnServer() {
         final Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
-        final RootRequest request = new RootRequest(EnumAPI.OX_OLD, new int[] { FolderObject.OBJECT_ID }, ignoreMailFolders);
+        final RootRequest request = new RootRequest(EnumAPI.OX_OLD, new int[] { FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS }, ignoreMailFolders);
         try {
             final ListResponse response = client.execute(request);
             setLastResponse(response);
@@ -604,4 +603,15 @@ public class FolderTestManager implements TestManager {
     public boolean hasLastException() {
         return this.lastException != null;
     }
+    
+    public static FolderObject createNewFolderObject(String name, int module, int type, int createdBy, int parentFolder) {
+        FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setModule(module);
+        folder.setType(type);
+        folder.setCreatedBy(createdBy);
+        folder.setParentFolderID(parentFolder);
+        return folder;
+    }
+
 }

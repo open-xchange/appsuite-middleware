@@ -8,7 +8,6 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -22,13 +21,12 @@ public class MultipleTest extends AppointmentTest {
         final Appointment appointmentObj = createAppointmentObject("testMultipleInsert");
         appointmentObj.setIgnoreConflicts(true);
 
-        final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
         final InsertRequest insertRequest1 = new InsertRequest(appointmentObj, timeZone, true);
         final InsertRequest insertRequest2 = new InsertRequest(appointmentObj, timeZone, true);
         final InsertRequest insertRequest3 = new InsertRequest(appointmentObj, timeZone, true);
 
         final MultipleRequest multipleInsertRequest = MultipleRequest.create(new AJAXRequest[] { insertRequest1, insertRequest2, insertRequest3 });
-        final MultipleResponse multipleInsertResponse = (MultipleResponse) Executor.execute(ajaxSession, multipleInsertRequest);
+        final MultipleResponse multipleInsertResponse = (MultipleResponse) Executor.execute(getClient(), multipleInsertRequest);
 
         assertFalse("first insert request has errors: ", multipleInsertResponse.getResponse(0).hasError());
         assertFalse("second insert request has errors: ", multipleInsertResponse.getResponse(1).hasError());
@@ -46,7 +44,7 @@ public class MultipleTest extends AppointmentTest {
         final DeleteRequest deleteRequest3 = new DeleteRequest(objectId3, appointmentFolderId, modified);
 
         MultipleRequest.create(new AJAXRequest[] { deleteRequest1, deleteRequest2, deleteRequest3 });
-        final MultipleResponse multipleDeleteResponse = (MultipleResponse) Executor.execute(ajaxSession, multipleInsertRequest);
+        final MultipleResponse multipleDeleteResponse = (MultipleResponse) Executor.execute(getClient(), multipleInsertRequest);
 
         assertFalse("first delete request has errors: ", multipleDeleteResponse.getResponse(0).hasError());
         assertFalse("second delete request has errors: ", multipleDeleteResponse.getResponse(1).hasError());

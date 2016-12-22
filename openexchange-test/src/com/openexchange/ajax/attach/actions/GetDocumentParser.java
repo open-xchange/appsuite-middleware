@@ -67,6 +67,9 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
 
     private int contentLength;
+    
+    private HttpResponse httpResponse;
+
 
     /**
      * Initializes a new {@link GetDocumentParser}.
@@ -99,6 +102,7 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
      */
     @Override
     public String checkResponse(HttpResponse response, HttpRequest request) throws ParseException, IOException {
+        httpResponse = response;
         Header[] headers = response.getAllHeaders();
         for (Header h : headers) {
             if (h.getName().equals("Content-Length")) {
@@ -116,7 +120,7 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
      */
     @Override
     protected GetDocumentResponse createResponse(Response response) throws JSONException {
-        GetDocumentResponse r = new GetDocumentResponse(response, contentLength);
+        GetDocumentResponse r = new GetDocumentResponse(httpResponse, contentLength);
         return r;
     }
 

@@ -56,6 +56,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.Assert;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -84,6 +85,7 @@ public class TestContextPool {
         synchronized (TestContextPool.class) {
             try {
                 TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
+                Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
                 context.setAcquiredBy(acquiredBy);
                 contextWatcher.get().contextInUse(context);
                 //                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());

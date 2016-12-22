@@ -6,6 +6,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.reminder.actions.RangeRequest;
+import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
 
@@ -51,7 +54,9 @@ public class Bug6408Test extends ReminderTest {
         reminderObj.setFolder(folderId);
         reminderObj.setDate(new Date(startTime - (alarmMinutes * 60 * 1000)));
 
-        ReminderObject[] reminderArray = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
+        final RangeRequest request = new RangeRequest(c.getTime());
+        RangeResponse response = Executor.execute(getClient(), request);
+        ReminderObject[] reminderArray = response.getReminder(timeZone);
 
         int pos = -1;
         for (int a = 0; a < reminderArray.length; a++) {
@@ -73,7 +78,8 @@ public class Bug6408Test extends ReminderTest {
 
         catm.update(folderId, appointmentObj);
 
-        reminderArray = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
+        response = Executor.execute(getClient(), request);
+        reminderArray = response.getReminder(timeZone);
 
         boolean found = false;
 
@@ -89,6 +95,6 @@ public class Bug6408Test extends ReminderTest {
 
         assertTrue("no reminder find for target id " + targetId + " in response", found);
 
-        deleteReminder(getWebConversation(), reminderArray[pos].getObjectId(), getHostName(), getSessionId());
+        remTm.delete(reminderArray[pos]);
     }
 }

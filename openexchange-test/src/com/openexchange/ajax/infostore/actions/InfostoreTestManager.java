@@ -78,11 +78,12 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.test.TestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class InfostoreTestManager {
+public class InfostoreTestManager implements TestManager {
 
     private final Set<File> createdEntities;
 
@@ -113,26 +114,33 @@ public class InfostoreTestManager {
         return client;
     }
 
+    @Override
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
 
+    @Override
     public boolean getFailOnError() {
         return failOnError;
     }
 
+    @Override
     public AbstractAJAXResponse getLastResponse() {
         return lastResponse;
     }
 
-    public void cleanUp() throws OXException, IOException, SAXException, JSONException {
+    @Override
+    public void cleanUp() {
         List<String> objectIDs = new ArrayList<String>(createdEntities.size());
         List<String> folderIDs = new ArrayList<String>(createdEntities.size());
         for (File metadata : createdEntities) {
             objectIDs.add(metadata.getId());
             folderIDs.add(metadata.getFolderId());
         }
-        deleteAction(objectIDs, folderIDs, new Date(Long.MAX_VALUE), Boolean.TRUE);
+        try {
+            deleteAction(objectIDs, folderIDs, new Date(Long.MAX_VALUE), Boolean.TRUE);
+        } catch (Exception e) {
+        }
         createdEntities.clear();
     }
 
@@ -350,6 +358,24 @@ public class InfostoreTestManager {
             found.add(file);
         }
         return found;
+    }
+
+    @Override
+    public boolean doesFailOnError() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean hasLastException() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Throwable getLastException() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

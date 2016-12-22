@@ -49,37 +49,39 @@
 
 package com.openexchange.test;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.attach.actions.AttachRequest;
-import com.openexchange.ajax.attach.actions.AttachResponse;
-import com.openexchange.ajax.attach.actions.DetachRequest;
-import com.openexchange.ajax.attach.actions.DetachResponse;
-import com.openexchange.ajax.attach.actions.GetDocumentResponse;
-import com.openexchange.ajax.attach.actions.GetResponse;
-import com.openexchange.ajax.attach.actions.ListRequest;
-import com.openexchange.ajax.attach.actions.ListResponse;
+import org.json.JSONObject;
+import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
+import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.reminder.actions.DeleteRequest;
+import com.openexchange.ajax.reminder.actions.UpdatesRequest;
+import com.openexchange.ajax.reminder.actions.UpdatesResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
- * {@link AttachmentTestManager}
+ * 
+ * {@link ReminderTestManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class AttachmentTestManager implements TestManager {
-
-    protected List<CommonObject> createdEntities = new ArrayList<CommonObject>();
+public class ReminderTestManager implements TestManager {
 
     private AJAXClient client;
+
+    private final List<ReminderObject> createdEntities = new ArrayList<ReminderObject>();
 
     private TimeZone timezone;
 
@@ -89,7 +91,17 @@ public class AttachmentTestManager implements TestManager {
 
     private Exception lastException;
 
-    public AttachmentTestManager(AJAXClient client) {
+    private Date lastModification;
+
+    public TimeZone getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(TimeZone timezone) {
+        this.timezone = timezone;
+    }
+
+    public ReminderTestManager(AJAXClient client) {
         this.setClient(client);
 
         try {
@@ -105,14 +117,6 @@ public class AttachmentTestManager implements TestManager {
                 timezone = TimeZone.getTimeZone("Europe/Berlin");
             }
         }
-    }
-
-    public TimeZone getTimezone() {
-        return timezone;
-    }
-
-    public void setTimezone(TimeZone timezone) {
-        this.timezone = timezone;
     }
 
     public void setClient(AJAXClient client) {
@@ -162,67 +166,70 @@ public class AttachmentTestManager implements TestManager {
         return lastException != null;
     }
 
+    public void setLastModification(Date lastModification) {
+        this.lastModification = lastModification;
+    }
+
+    public Date getLastModification() {
+        return lastModification;
+    }
+
     @Override
     public void cleanUp() {
-        for (CommonObject attachments : this.createdEntities) {
-         //TODO MS re-add   
+        for (ReminderObject reminder : new ArrayList<ReminderObject>(createdEntities)) {
+            delete(reminder);
         }
     }
 
-    public int attach(CommonObject attachment, String fileName, InputStream data, String mimeType) throws OXException, IOException, JSONException {
-        AttachRequest attachRequest = new AttachRequest(attachment, fileName, data, mimeType);
-        AttachResponse response = client.execute(attachRequest);
-        extractInfo(response);
-        if (doesFailOnError() || response.getId() != 0) {
-            createdEntities.add(attachment);
-        }
-        return response.getId();
+    public void delete(ReminderObject reminder) {
+        DeleteRequest request = new DeleteRequest(reminder, true);
+        CommonDeleteResponse deleteResponse = execute(request);
+        setLastResponse(deleteResponse);
     }
 
-    public int attach(int folderId, int objectId, int moduleId, String fileName, InputStream data, String mimeType) throws OXException, IOException, JSONException {
-        AttachRequest attachRequest = new AttachRequest(folderId, objectId, moduleId, fileName, data, mimeType);
-        AttachResponse response = client.execute(attachRequest);
-        extractInfo(response);
-        if (doesFailOnError() || response.getId() != 0) {
-            //TODO MS
-//            createdEntities.add(attachment);
+    private <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
+        try {
+            return getClient().execute(request);
+        } catch (OXException e) {
+            setLastException(e);
+            if (failOnError) {
+                fail("AjaxException during task creation: " + e.getLocalizedMessage());
+            }
+        } catch (IOException e) {
+            setLastException(e);
+            if (failOnError) {
+                fail("IOException during task creation: " + e.getLocalizedMessage());
+            }
+        } catch (JSONException e) {
+            setLastException(e);
+            if (failOnError) {
+                fail("JsonException during task creation: " + e.getLocalizedMessage());
+            }
         }
-        return response.getId();
+        return null;
     }
 
-    public void detach(int folder, int attached, int module, int[] versions) throws OXException, IOException, JSONException {
-        DetachRequest detachRequest = new DetachRequest(folder, attached, module, versions);
-        DetachResponse response = client.execute(detachRequest);
-        extractInfo(response);
-    }
-    
-    public void list(int folderId, int objectId, int moduleId, int[] attachmentIds, int[] columns) throws OXException, IOException, JSONException {
-        ListRequest listRequest = new ListRequest(folderId, objectId, moduleId, attachmentIds, columns);
-        ListResponse response = client.execute(listRequest);
-        extractInfo(response);
-    }
-    
-    public AttachmentMetadata get(int folderId, int attached, int module, int id) throws OXException, IOException, JSONException {
-        com.openexchange.ajax.attach.actions.GetRequest request = new com.openexchange.ajax.attach.actions.GetRequest(folderId, attached, module, id);
-        GetResponse response = client.execute(request);
+    public List<ReminderObject> updates(Date timestamp) throws JSONException, OXException {
+        UpdatesRequest request = new UpdatesRequest(timestamp);
+        UpdatesResponse updatesResponse = execute(request);
+        setLastResponse(updatesResponse);
         
-        extractInfo(response);
-        return response.getAttachment();
-    }
+        final JSONArray jsonArray = (JSONArray)updatesResponse.getData();
+        List<ReminderObject> reminder = new ArrayList<>(jsonArray.length());
+        for (int a = 0; a < jsonArray.length(); a++) {
+            ReminderObject object = new ReminderObject();
+            final JSONObject jsonReminder = jsonArray.getJSONObject(a);
 
-    private void extractInfo(AbstractAJAXResponse response) {
-        setLastResponse(response);
-        if (response.hasError()) {
-            setLastException(response.getException());
+            object.setObjectId(DataParser.parseInt(jsonReminder, ReminderFields.ID));
+            object.setTargetId(DataParser.parseInt(jsonReminder, ReminderFields.TARGET_ID));
+            object.setFolder(DataParser.parseInt(jsonReminder, ReminderFields.FOLDER));
+//            object.setDate(DataParser.parseTime(jsonReminder, ReminderFields.ALARM, timeZone));
+            object.setLastModified(DataParser.parseDate(jsonReminder, ReminderFields.LAST_MODIFIED));
+            object.setUser(DataParser.parseInt(jsonReminder, ReminderFields.USER_ID));
+            object.setRecurrenceAppointment(DataParser.parseBoolean(jsonReminder, ReminderFields.RECURRENCE_APPOINTMENT));
+            reminder.add(object);
         }
-    }
-
-    public InputStream document(int folderId, int attachedId, int moduleId, int id) throws IllegalStateException, IOException, OXException, JSONException {
-        com.openexchange.ajax.attach.actions.GetDocumentRequest request = new com.openexchange.ajax.attach.actions.GetDocumentRequest(folderId, id, moduleId, attachedId);
-        GetDocumentResponse response = client.execute(request);
-
-        extractInfo(response);
-        return response.getContent();
+        return reminder;
     }
 
 }

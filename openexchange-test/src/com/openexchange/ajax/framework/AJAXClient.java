@@ -90,13 +90,16 @@ public class AJAXClient {
 
     public AJAXClient(TestUser user, String client) throws OXException, OXException, IOException, JSONException {
         super();
-        
+
         if (hostname == null) {
             this.hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
         }
 
         if (protocol == null) {
             this.protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+            if (this.protocol == null) {
+                this.protocol = "http";
+            }
         }
         session = new AJAXSession();
         session.setId(execute(new LoginRequest(user.getLogin(), user.getPassword(), LoginTools.generateAuthId(), null == client ? AJAXClient.class.getName() : client, VERSION)).getSessionId());

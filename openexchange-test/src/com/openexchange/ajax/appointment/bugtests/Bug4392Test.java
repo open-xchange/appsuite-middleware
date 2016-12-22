@@ -9,17 +9,8 @@ import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 
 public class Bug4392Test extends AppointmentTest {
-
-    private final static int[] _appointmentFields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE
-    };
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4392Test.class);
 
     /**
      * This test case check the until date of recurrence appointments

@@ -81,10 +81,6 @@ public class AJAXSession {
         this(newWebConversation(), newHttpClient(), null);
     }
 
-    public AJAXSession(final WebConversation conversation, String hostname, final String id) {
-        this(conversation, newHttpClient(conversation, hostname), id);
-    }
-
     public AJAXSession(WebConversation conversation, DefaultHttpClient httpClient, String id) {
         super();
         this.conversation = conversation;

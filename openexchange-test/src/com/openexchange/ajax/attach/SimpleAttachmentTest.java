@@ -116,18 +116,4 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
     public void testQuota() throws Exception {
         doQuota();
     }
-    /*
-     * @Test
-     * public void testMany() throws Exception {
-     * while(true) {
-     * upload();
-     * }
-     * }
-     */
-
-    @Test
-    public void testDatasource() throws Exception {
-        doDatasource();
-    }
-
 }

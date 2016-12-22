@@ -52,28 +52,22 @@ package com.openexchange.ajax.attach;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
-import org.xml.sax.SAXException;
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AttachmentTest;
+import com.openexchange.ajax.attach.actions.GetDocumentResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
@@ -241,9 +235,9 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
         final int[] ids = new int[] { clean.get(0).getId(), clean.get(2).getId(), clean.get(4).getId()
         };
-
-        final Response res = list(getWebConversation(), sessionId, folderId, attachedId, moduleId, ids, new int[] { AttachmentField.ID, AttachmentField.FILENAME });
-        assertNoError(res);
+        atm.list(folderId, attachedId, moduleId, ids, new int[] { AttachmentField.ID, AttachmentField.FILENAME });
+        final AbstractAJAXResponse res = atm.getLastResponse();
+        assertFalse(res.hasError());
         final JSONArray arrayOfArrays = (JSONArray) res.getData();
 
         assertEquals(ids.length, arrayOfArrays.length());
@@ -296,7 +290,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         InputStream local = null;
 
         try {
-            data = document(getWebConversation(), sessionId, folderId, attachedId, moduleId, clean.get(0).getId());
+            data = atm.document(folderId, attachedId, moduleId, clean.get(0).getId());
             OXTestToolkit.assertSameContent(local = new FileInputStream(testFile), data);
         } finally {
             if (data != null) {
@@ -307,14 +301,13 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
             }
         }
 
-        GetMethodWebRequest req = documentRequest(sessionId, folderId, attachedId, moduleId, clean.get(0).getId(), null);
-        WebResponse resp = getWebConversation().getResource(req);
-        assertEquals("application/octet-stream", resp.getContentType());
+        com.openexchange.ajax.attach.actions.GetDocumentRequest request = new com.openexchange.ajax.attach.actions.GetDocumentRequest(folderId, clean.get(0).getId(), moduleId, attachedId);
+        GetDocumentResponse response = getClient().execute(request);
+        assertEquals("application/octet-stream", response.getContentType());
 
-        req = documentRequest(sessionId, folderId, attachedId, moduleId, clean.get(0).getId(), "application/octet-stream");
-        resp = getWebConversation().getResource(req);
-        assertEquals("application/octet-stream", resp.getContentType());
-
+        request = new com.openexchange.ajax.attach.actions.GetDocumentRequest(folderId, clean.get(0).getId(), moduleId, attachedId, "application/octet-stream");
+        response = getClient().execute(request);
+        assertEquals("application/octet-stream", response.getContentType());
     }
 
     protected void doNotExists() throws Exception {
@@ -366,49 +359,17 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         assertEquals(useAfter - use, ((JSONObject) res.getData()).get("file_size"));
     }
 
-    protected void doDatasource() throws MalformedURLException, JSONException, IOException, SAXException, OXException {
-        // Action attach in a regular PUT may contain a datasource field
-        // Note that POST must always contain a file upload field and may never contain a datasource field. Maybe, anyway. Whatever.
-
-        final Map<String, Object> datasourceDefinition = new HashMap<String, Object>();
-
-        datasourceDefinition.put("identifier", "com.openexchange.url.mail.attachment");
-        datasourceDefinition.put("url", "http://one-finger-salute.org/img/middle_finger.png");
-
-        Response res = attach(getWebConversation(), sessionId, folderId, attachedId, moduleId, datasourceDefinition);
-
-        final AttachmentMetadata attachment = new AttachmentImpl();
-        attachment.setFolderId(folderId);
-        attachment.setAttachedId(attachedId);
-        attachment.setModuleId(moduleId);
-        {
-            final OXException exception = res.getException();
-            if (null != exception) {
-                final StringWriter writer = new StringWriter(512);
-                exception.printStackTrace(new PrintWriter(writer));
-                // Let it fail...
-                assertNull("An exception occurred: " + writer.toString(), exception);
-            }
-        }
-        final Integer data = (Integer) res.getData();
-        assertNotNull("Response's data is null.", data);
-        attachment.setId(data.intValue());
-        clean.add(attachment);
-
-        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, clean.get(0).getId());
-        assertFalse(atm.getLastResponse().hasError()); // Good enough
-    }
-
     public void upload() throws Exception {
         final AttachmentMetadata attachment = new AttachmentImpl();
         attachment.setFolderId(folderId);
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
+        
+        atm.attach(folderId, attachedId, moduleId, testFile.getAbsolutePath(), FileUtils.openInputStream(testFile), null);
 
-        final Response res = attach(getWebConversation(), sessionId, folderId, attachedId, moduleId, testFile);
-        assertNoError(res);
+        assertFalse(atm.getLastResponse().hasError());
 
-        attachment.setId(((JSONArray) res.getData()).getInt(0));
+        attachment.setId(((JSONArray) atm.getLastResponse().getData()).getInt(0));
         clean.add(attachment);
     }
 

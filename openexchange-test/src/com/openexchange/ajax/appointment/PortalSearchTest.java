@@ -8,7 +8,6 @@ import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.NewAppointmentSearchRequest;
 import com.openexchange.ajax.appointment.action.NewAppointmentSearchResponse;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -17,8 +16,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 
 public class PortalSearchTest extends AppointmentTest {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PortalSearchTest.class);
 
     private final int[] columns = { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL
     };
@@ -44,9 +41,8 @@ public class PortalSearchTest extends AppointmentTest {
         final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
 
-        final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
         final NewAppointmentSearchRequest request = new NewAppointmentSearchRequest(start, end, 10000, timeZone, columns);
-        final NewAppointmentSearchResponse response = Executor.execute(ajaxSession, request);
+        final NewAppointmentSearchResponse response = Executor.execute(getClient(), request);
 
         if (response.hasError()) {
             throw new Exception("json error: " + response.getResponse().getErrorMessage());

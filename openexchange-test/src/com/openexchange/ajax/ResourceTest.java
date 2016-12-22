@@ -11,13 +11,13 @@ public class ResourceTest extends AbstractAJAXTest {
 
     @Test
     public void testSearch() throws Exception {
-        final List<Resource> resources = rtm.search("*");
+        final List<Resource> resources = resTm.search("*");
         assertTrue("resource array size is not > 0", resources.size() > 0);
     }
 
     @Test
     public void testList() throws Exception {
-        List<Resource> resources = rtm.search("*");
+        List<Resource> resources = resTm.search("*");
         assertTrue("resource array size is not > 0", resources.size() > 0);
 
         final int[] id = new int[resources.size()];
@@ -25,15 +25,15 @@ public class ResourceTest extends AbstractAJAXTest {
             id[a] = resources.get(a).getIdentifier();
         }
 
-        resources = rtm.list(id);
+        resources = resTm.list(id);
         assertTrue("resource array size is not > 0", resources.size() > 0);
     }
 
     @Test
     public void testGet() throws Exception {
-        final List<Resource> resources = rtm.search("*");
+        final List<Resource> resources = resTm.search("*");
         assertTrue("resource array size is not > 0", resources.size() > 0);
-        Resource res = rtm.get(resources.get(0).getIdentifier());
+        Resource res = resTm.get(resources.get(0).getIdentifier());
         assertNotNull(res);
     }
 }

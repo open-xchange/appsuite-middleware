@@ -47,59 +47,60 @@
  *
  */
 
-package com.openexchange.ajax.appointment.bugtests;
+package com.openexchange.ajax.reminder.actions;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertTrue;
-import java.util.Date;
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.AttachmentTest;
-import com.openexchange.ajax.attach.AttachmentTools;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.Appointment;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.parser.ReminderParser;
+import com.openexchange.ajax.reminder.ReminderTools;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link Bug16249Test}
+ * 
+ * {@link UpdatesResponse}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public class Bug16249Test extends AttachmentTest {
+public class UpdatesResponse extends AbstractAJAXResponse {
 
-    private int folderId;
+    private List<ReminderObject> reminders;
 
-    private int appointmentId;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        folderId = getClient().getValues().getPrivateAppointmentFolder();
+    /**
+     * @param response
+     */
+    UpdatesResponse(final Response response) {
+        super(response);
     }
 
-    @Test
-    public void testBug16249() throws Exception {
-        Appointment a = new Appointment();
-        a.setTitle("Bug 16249 Test");
-        a.setStartDate(D("01.07.2010 08:00"));
-        a.setEndDate(D("01.07.2010 09:00"));
-        a.setParentFolderID(folderId);
-        a.setIgnoreConflicts(true);
-        
-        catm.insert(a);
-        Date beforeAttach = catm.get(a).getLastModified();
+    public ReminderObject[] getReminder(final TimeZone timeZone) throws OXException {
+        if (null == reminders) {
+            final ReminderParser parser = new ReminderParser(timeZone);
+            final JSONArray array = (JSONArray) getData();
+            reminders = new ArrayList<ReminderObject>(array.length());
+            for (int i = 0; i < array.length(); i++) {
+                try {
+                    final JSONObject jremind = array.getJSONObject(i);
+                    final ReminderObject reminder = new ReminderObject();
+                    parser.parse(reminder, jremind);
+                    reminders.add(reminder);
+                } catch (final JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(array.toString());
+                }
+            }
+        }
+        return reminders.toArray(new ReminderObject[reminders.size()]);
+    }
 
-        int attachmentId = atm.attach(folderId, appointmentId , AttachmentTools.determineModule(a), testFile.getName(), FileUtils.openInputStream(testFile), null);
-        
-        Date afterAttach = catm.get(folderId, appointmentId).getLastModified();
-
-        atm.detach(folderId, appointmentId, Types.APPOINTMENT, new int[] { attachmentId });
-
-        Date afterDetach = catm.get(folderId, appointmentId).getLastModified();
-
-        assertTrue("Wrong last modified after attach", beforeAttach.compareTo(afterAttach) < 0);
-        assertTrue("Wrong last modified after detach", beforeAttach.compareTo(afterDetach) < 0);
-        assertTrue("Wrong last modified after detach", afterAttach.compareTo(afterDetach) < 0);
+    public ReminderObject getReminderByTarget(final TimeZone timeZone, final int targetId) throws OXException {
+        return ReminderTools.searchByTarget(getReminder(timeZone), targetId);
     }
 }

@@ -77,6 +77,16 @@ public class AttachRequest extends AbstractAttachmentRequest<AttachResponse> {
 
     private final String mimeType;
 
+    public AttachRequest(int folderId, int objectId, int moduleId, String fileName, InputStream data, String mimeType) {
+        super();
+        this.moduleId = moduleId;
+        this.folderId = folderId;
+        this.attachedId = objectId;
+        this.fileName = fileName;
+        this.data = data;
+        this.mimeType = mimeType;    }
+
+        
     public AttachRequest(CommonObject obj, String fileName, InputStream data, String mimeType) {
         super();
         moduleId = AttachmentTools.determineModule(obj);

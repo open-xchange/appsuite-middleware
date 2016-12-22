@@ -55,7 +55,6 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.groupware.container.CommonObject;
 
 /**
  * {@link GetDocumentRequest}
@@ -70,30 +69,43 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
 
     private final int folderID;
 
-    private final boolean failOnError;
+    private boolean failOnError;
 
-    private final String contentType;
+    private String contentType;
 
     private final int attachmentID;
 
-    private final int off;
+    private int off;
 
-    private final int len;
+    private int len;
+
+    public GetDocumentRequest(int folder, int objectId, int module, int attachment) {
+        this(folder, objectId, module, attachment, null);
+    }
+
+    public GetDocumentRequest(int folder, int objectId, int module, int attachment, String contentType) {
+        folderID = folder;
+        attached = objectId;
+        moduleID = module;
+        attachmentID = attachment;
+        off = -1;
+        len = -1;
+        contentType = contentType;
+    }
 
     /**
      * Initializes a new {@link GetDocumentRequest}.
      */
-    public GetDocumentRequest(CommonObject co, int mid, String ct, int fid, int aid, int off, int len, boolean foe) {
+    public GetDocumentRequest(int objectId, int module, String lContentType, int folder, int attachment, int off, int len, boolean lFailOnError) {
         super();
-        attached = co.getObjectID();
-        moduleID = mid;
-        folderID = fid;
-        failOnError = foe;
-        contentType = ct;
-        attachmentID = aid;
+        this.attached = objectId;
+        this.moduleID = module;
+        this.folderID = folder;
+        this.failOnError = lFailOnError;
+        this.contentType = lContentType;
+        this.attachmentID = attachment;
         this.off = off;
         this.len = len;
-
     }
 
     /*
@@ -116,12 +128,18 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         List<Parameter> parameters = new ArrayList<Parameter>();
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DOCUMENT));
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_MODULE, moduleID));
-        parameters.add(new URLParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, contentType));
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderID));
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ID, attachmentID));
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, attached));
-        parameters.add(new URLParameter("off", off));
-        parameters.add(new URLParameter("len", len));
+        if (contentType != null) {
+            parameters.add(new URLParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, contentType));
+        }
+        if (off != -1) {
+            parameters.add(new URLParameter("off", off));
+        }
+        if (len != -1) {
+            parameters.add(new URLParameter("len", len));
+        }
 
         return parameters.toArray(new Parameter[parameters.size()]);
     }

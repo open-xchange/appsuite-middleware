@@ -47,59 +47,22 @@
  *
  */
 
-package com.openexchange.ajax.appointment.bugtests;
+package com.openexchange.ajax.reminder.actions;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertTrue;
-import java.util.Date;
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.AttachmentTest;
-import com.openexchange.ajax.attach.AttachmentTools;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 
 /**
- * {@link Bug16249Test}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class Bug16249Test extends AttachmentTest {
+public class DeleteResponse extends CommonDeleteResponse {
 
-    private int folderId;
-
-    private int appointmentId;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        folderId = getClient().getValues().getPrivateAppointmentFolder();
+    /**
+     * @param response
+     */
+    public DeleteResponse(final Response response) {
+        super(response);
     }
 
-    @Test
-    public void testBug16249() throws Exception {
-        Appointment a = new Appointment();
-        a.setTitle("Bug 16249 Test");
-        a.setStartDate(D("01.07.2010 08:00"));
-        a.setEndDate(D("01.07.2010 09:00"));
-        a.setParentFolderID(folderId);
-        a.setIgnoreConflicts(true);
-        
-        catm.insert(a);
-        Date beforeAttach = catm.get(a).getLastModified();
-
-        int attachmentId = atm.attach(folderId, appointmentId , AttachmentTools.determineModule(a), testFile.getName(), FileUtils.openInputStream(testFile), null);
-        
-        Date afterAttach = catm.get(folderId, appointmentId).getLastModified();
-
-        atm.detach(folderId, appointmentId, Types.APPOINTMENT, new int[] { attachmentId });
-
-        Date afterDetach = catm.get(folderId, appointmentId).getLastModified();
-
-        assertTrue("Wrong last modified after attach", beforeAttach.compareTo(afterAttach) < 0);
-        assertTrue("Wrong last modified after detach", beforeAttach.compareTo(afterDetach) < 0);
-        assertTrue("Wrong last modified after detach", afterAttach.compareTo(afterDetach) < 0);
-    }
 }

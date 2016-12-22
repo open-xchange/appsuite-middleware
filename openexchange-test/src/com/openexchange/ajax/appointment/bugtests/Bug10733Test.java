@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Appointment;
@@ -36,10 +35,9 @@ public class Bug10733Test extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
         final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, false);
 
-        final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);
+        final CommonInsertResponse insertResponse = Executor.execute(getClient(), insertRequest);
         final boolean hasError = insertResponse.hasError();
         assertTrue("error message expected", hasError);
 

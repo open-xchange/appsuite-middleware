@@ -121,7 +121,7 @@ public class Bug30701Test {
     @Test
     public void testGetDocumentWithOffLenParameter() throws OXException, IOException, JSONException {
         final int length = 8;
-        GetDocumentRequest getDocReq = new GetDocumentRequest(contactA, 7, "text/plain", folderID, attachmentID, 5, length, true);
+        GetDocumentRequest getDocReq = new GetDocumentRequest(contactA.getObjectID(), 7, "text/plain", folderID, attachmentID, 5, length, true);
         GetDocumentResponse getDocResp = client.execute(getDocReq);
         assertEquals("Wrong Content-Length in response", length, getDocResp.getContentLength());
     }

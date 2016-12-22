@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,14 +88,14 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(SMSExceptionCode.NOT_SENT));
 
         // Expecting an SENT_QUOTA_EXCEEDED exeption
         response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED));
 
         // Wait until user should be able to send sms again 
         Thread.sleep(11000);
@@ -104,7 +104,7 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(SMSExceptionCode.NOT_SENT));
     }
 
     @Override
