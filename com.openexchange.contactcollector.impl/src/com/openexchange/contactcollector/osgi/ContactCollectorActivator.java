@@ -73,6 +73,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link BundleActivator Activator} for contact collector.
@@ -94,7 +95,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
-            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class };
+            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class, UserPermissionService.class };
     }
 
     @Override
