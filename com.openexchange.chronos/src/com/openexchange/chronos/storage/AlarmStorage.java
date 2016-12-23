@@ -76,6 +76,8 @@ public interface AlarmStorage {
     //TODO: redundant?
     void updateFolderID(int eventID, int userID, int folderID) throws OXException;
 
+    void updateAlarms(Event event) throws OXException;
+
     /**
      * Deletes all alarms stored for a specific event.
      *

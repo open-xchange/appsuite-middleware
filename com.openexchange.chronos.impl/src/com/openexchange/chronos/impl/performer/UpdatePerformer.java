@@ -259,6 +259,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             alarmUpdate = updateAlarms(originalEvent, calendarUser, updatedEvent.getAlarms());
             wasUpdated |= false == alarmUpdate.isEmpty();
         }
+        /*
+         * update any stored alarm triggers of all users if required
+         */
+        if (null != eventUpdate && needsAlarmTriggerUpdate(eventUpdate)) {
+            Event changedEvent = storage.getEventStorage().loadEvent(originalEvent.getId(), null);
+            storage.getAlarmStorage().updateAlarms(changedEvent);
+        }
         if (wasUpdated) {
             UpdateResultImpl updateResult = new UpdateResultImpl(originalEvent, i(folder), loadEventData(originalEvent.getId()));
             if (null != alarmUpdate && false == alarmUpdate.isEmpty()) {
@@ -363,6 +370,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             return true;
         }
         return false;
+    }
+
+    private boolean needsAlarmTriggerUpdate(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
+        return eventUpdate.containsAnyChangeOf(new EventField[] {
+            EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
+        });
     }
 
     private void updateAttendees(Event originalEvent, Event updatedEvent) throws OXException {

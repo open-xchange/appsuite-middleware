@@ -211,6 +211,29 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
+    public void updateAlarms(Event event) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            Map<Integer, ReminderData> reminders = selectReminders(connection, context.getContextId(), event.getId());
+            for (Map.Entry<Integer, ReminderData> entry : reminders.entrySet()) {
+                int userID = entry.getKey().intValue();
+                ReminderData resetedReminderData = new ReminderData(entry.getValue().id, entry.getValue().reminderMinutes, 0L);
+                List<Alarm> resetedAlarms = getAlarms(event, userID, resetedReminderData);
+                ReminderData updatedReminder = getNextReminder(event, userID, resetedAlarms, resetedReminderData);
+                updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
     public void updateFolderID(int eventID, int userID, int folderID) throws OXException {
         int updated = 0;
         Connection connection = null;
