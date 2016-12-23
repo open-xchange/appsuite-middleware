@@ -59,10 +59,25 @@ import java.util.Map;
  */
 public interface ICalProperty {
 
+    /**
+     * Gets the property name.
+     *
+     * @return The property name
+     */
     String getName();
 
+    /**
+     * Gets the property value.
+     *
+     * @return The property value
+     */
     String getValue();
 
+    /**
+     * Gets a map of additional property parameters.
+     *
+     * @return The property parameters, or <code>null</code> if not set
+     */
     Map<String, String> getParameters();
 
 }

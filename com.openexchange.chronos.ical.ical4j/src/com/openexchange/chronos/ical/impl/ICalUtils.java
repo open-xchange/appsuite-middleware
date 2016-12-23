@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.ical.DefaultICalProperty;
@@ -69,6 +70,7 @@ import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.CalendarParser;
@@ -196,9 +198,25 @@ public class ICalUtils {
         }
         List<ICalProperty> iCalProperties = new ArrayList<ICalProperty>(propertyNames.length);
         for (String propertyName : propertyNames) {
-            iCalProperties.addAll(importProperties(component.getProperties(propertyName)));
+            iCalProperties.addAll(importProperties(getProperties(component, propertyName)));
         }
         return iCalProperties;
+    }
+
+    private static PropertyList getProperties(Component component, String propertyName) {
+        if (-1 == propertyName.indexOf('*')) {
+            return component.getProperties(propertyName);
+        }
+        Pattern pattern = Pattern.compile(Strings.wildcardToRegex(propertyName));
+        PropertyList matchingProperties = new PropertyList();
+        PropertyList properties = component.getProperties();
+        for (int i = 0; i < properties.size(); i++) {
+            Property property = (Property) properties.get(i);
+            if (null != property.getName() && pattern.matcher(property.getName()).matches()) {
+                matchingProperties.add(property);
+            }
+        }
+        return matchingProperties;
     }
 
     static List<ICalProperty> importProperties(PropertyList propertyList) {

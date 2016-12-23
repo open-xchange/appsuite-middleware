@@ -349,11 +349,26 @@ public class AlarmUtils extends CalendarUtils {
      * <code>SNOOZE</code> relationship in the supplied alarm collection.
      *
      * @param alarm The alarm to inspect
-     * @param alarm A collection holding all alarms associated with the event
-     * @return <code>true</code> if this is alarm holds the next ('snoozed') trigger time, <code>false</code>, otherwise
+     * @param allAlarms A collection holding all alarms associated with the event
+     * @return <code>true</code> if this alarm holds the next ('snoozed') trigger time, <code>false</code>, otherwise
      */
     public static boolean isSnoozed(Alarm alarm, List<Alarm> allAlarms) {
-        return null != alarm.getRelatedTo() && (null == alarm.getRelatedTo().getRelType() || "SNOOZE".equals(alarm.getRelatedTo().getRelType())) && null != find(allAlarms, alarm.getRelatedTo().getValue());
+        return null != getSnoozedAlarm(alarm, allAlarms);
+    }
+
+    /**
+     * Gets the alarm that has been snoozed and replaced by this snooze alarm, i.e. looks up another alarm with a matching
+     * <code>SNOOZE</code> relationship in the supplied alarm collection.
+     *
+     * @param alarm The possible 'snooze' alarm to inspect
+     * @param allAlarms A collection holding all alarms associated with the event
+     * @return The alarm that has been snoozed by the supplied alarm, or <code>null</code> if matching alarm found
+     */
+    public static Alarm getSnoozedAlarm(Alarm alarm, List<Alarm> allAlarms) {
+        if (null != alarm.getRelatedTo() && (null == alarm.getRelatedTo().getRelType() || "SNOOZE".equals(alarm.getRelatedTo().getRelType()))) {
+            return find(allAlarms, alarm.getRelatedTo().getValue());
+        }
+        return null;
     }
 
 }
