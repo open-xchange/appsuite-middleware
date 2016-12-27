@@ -163,6 +163,25 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
+     * Looks up a specific alarm in a collection of alarms based on its trigger.
+     *
+     * @param alarms The alarms to search
+     * @param trigger The trigger of the alarm to lookup
+     * @return The matching alarm, or <code>null</code> if not found
+     */
+    public static Alarm find(Collection<Alarm> alarms, Trigger trigger) {
+        if (null == alarms) {
+            return null;
+        }
+        for (Alarm alarm : alarms) {
+            if (trigger.equals(alarm.getTrigger())) {
+                return alarm;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Calculates the actual time of an alarm trigger associated with an event.
      *
      * @param trigger The trigger to get the effective trigger time for
