@@ -163,7 +163,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * track update & return result
          */
-        result.addUpdate(new UpdateResultImpl(originalEvent, i(targetFolder), loadEventData(originalEvent.getId())));
+        result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
         return result;
     }
 

@@ -56,7 +56,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -267,11 +266,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmStorage().updateAlarms(changedEvent);
         }
         if (wasUpdated) {
-            UpdateResultImpl updateResult = new UpdateResultImpl(originalEvent, i(folder), loadEventData(originalEvent.getId()));
-            if (null != alarmUpdate && false == alarmUpdate.isEmpty()) {
-                updateResult.setAlarmUpdates(alarmUpdate);
-            }
-            result.addUpdate(updateResult);
+            result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
         }
     }
 

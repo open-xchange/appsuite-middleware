@@ -47,36 +47,59 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.impl;
 
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link UpdateResult}
+ * {@link EventUpdateImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends ItemUpdate<Event, EventField> {
+public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implements EventUpdate {
+
+    private final CollectionUpdate<Alarm, AlarmField> alarmUpdates;
+    private final CollectionUpdate<Attendee, AttendeeField> attendeeUpdates;
 
     /**
-     * Gets the attendee-related modifications performed through the update operation.
+     * Initializes a new {@link EventUpdateImpl}.
      *
-     * @return The attendee updates, or an empty collection update if there were no attendee-related changes
+     * @param original The original event
+     * @param update The updated event
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences
+     * @return The event update providing the differences
      */
-    CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates();
+    public EventUpdateImpl(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
+        this(original, update, EventMapper.getInstance().getDifferentFields(original, update, considerUnset, ignoredFields));
+    }
 
-    /**
-     * Gets the alarm-related modifications performed through the update operation. Only alarms of the actual calendar user are considered.
-     *
-     * @return The alarm updates, or an empty collection update if there were no alarm-related changes
-     * @see #getCalendarUser()
-     */
-    CollectionUpdate<Alarm, AlarmField> getAlarmUpdates();
+    private EventUpdateImpl(Event originalEvent, Event updatedEvent, Set<EventField> updatedFields) throws OXException {
+        super(originalEvent, updatedEvent, updatedFields);
+        this.alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(
+            null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
+        this.attendeeUpdates = AttendeeMapper.getInstance().getAttendeeUpdate(
+            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
+    }
+
+    @Override
+    public CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates() {
+        return attendeeUpdates;
+    }
+
+    @Override
+    public CollectionUpdate<Alarm, AlarmField> getAlarmUpdates() {
+        return alarmUpdates;
+    }
 
 }

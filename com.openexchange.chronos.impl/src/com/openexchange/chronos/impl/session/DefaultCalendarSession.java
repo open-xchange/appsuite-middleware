@@ -57,6 +57,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -85,6 +86,7 @@ public class DefaultCalendarSession implements CalendarSession {
     private final HostData hostData;
 
     private static final Logger SESSION_LOGGER = LoggerFactory.getLogger("calendar-session-logger");
+    private static final CalendarUtilities CALENDAR_UTILITIES = new DefaultCalendarUtilities();
 
     /**
      * Initializes a new {@link DefaultCalendarSession}.
@@ -118,6 +120,11 @@ public class DefaultCalendarSession implements CalendarSession {
     @Override
     public RecurrenceService getRecurrenceService() {
         return Services.getService(RecurrenceService.class);
+    }
+
+    @Override
+    public CalendarUtilities getUtilities() {
+        return CALENDAR_UTILITIES;
     }
 
     @Override

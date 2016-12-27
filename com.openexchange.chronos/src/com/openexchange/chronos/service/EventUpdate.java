@@ -57,12 +57,12 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 
 /**
- * {@link UpdateResult}
+ * {@link EventUpdate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends ItemUpdate<Event, EventField> {
+public interface EventUpdate extends ItemUpdate<Event, EventField> {
 
     /**
      * Gets the attendee-related modifications performed through the update operation.

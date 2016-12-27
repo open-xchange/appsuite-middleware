@@ -47,36 +47,41 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.impl.session;
 
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.impl.EventUpdateImpl;
+import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link UpdateResult}
+ * {@link DefaultCalendarUtilities}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends ItemUpdate<Event, EventField> {
+public class DefaultCalendarUtilities implements CalendarUtilities {
 
     /**
-     * Gets the attendee-related modifications performed through the update operation.
-     *
-     * @return The attendee updates, or an empty collection update if there were no attendee-related changes
+     * Initializes a new {@link DefaultCalendarUtilities}.
      */
-    CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates();
+    public DefaultCalendarUtilities() {
+        super();
+    }
 
-    /**
-     * Gets the alarm-related modifications performed through the update operation. Only alarms of the actual calendar user are considered.
-     *
-     * @return The alarm updates, or an empty collection update if there were no alarm-related changes
-     * @see #getCalendarUser()
-     */
-    CollectionUpdate<Alarm, AlarmField> getAlarmUpdates();
+    @Override
+    public UpdateResult compare(Event originalEvent, Event updatedEvent) throws OXException {
+
+        return new UpdateResultImpl(originalEvent, updatedEvent);
+    }
+
+    @Override
+    public EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
+        return new EventUpdateImpl(original, update, considerUnset, ignoredFields);
+    }
 
 }

@@ -49,34 +49,29 @@
 
 package com.openexchange.chronos.service;
 
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link UpdateResult}
+ * {@link CalendarUtilities}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends ItemUpdate<Event, EventField> {
+public interface CalendarUtilities {
+
+    UpdateResult compare(Event originalEvent, Event updatedEvent) throws OXException;
 
     /**
-     * Gets the attendee-related modifications performed through the update operation.
+     * Compares all properties of an event to another one.
      *
-     * @return The attendee updates, or an empty collection update if there were no attendee-related changes
+     * @param original The original event
+     * @param update The updated event
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences
+     * @return The event update providing the differences
      */
-    CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates();
-
-    /**
-     * Gets the alarm-related modifications performed through the update operation. Only alarms of the actual calendar user are considered.
-     *
-     * @return The alarm updates, or an empty collection update if there were no alarm-related changes
-     * @see #getCalendarUser()
-     */
-    CollectionUpdate<Alarm, AlarmField> getAlarmUpdates();
+    EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException;
 
 }

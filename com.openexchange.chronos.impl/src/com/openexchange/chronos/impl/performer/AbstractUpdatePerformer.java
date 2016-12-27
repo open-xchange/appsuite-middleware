@@ -165,7 +165,7 @@ public abstract class AbstractUpdatePerformer {
         eventUpdate.setChangeExceptionDates(changeExceptionDates);
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
         storage.getEventStorage().updateEvent(eventUpdate);
-        result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), loadEventData(originalMasterEvent.getId())));
+        result.addUpdate(new UpdateResultImpl(originalMasterEvent, loadEventData(originalMasterEvent.getId())));
     }
 
     /**

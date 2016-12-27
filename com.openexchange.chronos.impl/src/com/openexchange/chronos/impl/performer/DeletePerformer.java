@@ -286,7 +286,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
          * 'touch' event & add track update result
          */
         touch(objectID);
-        result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), loadEventData(objectID)));
+        result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(objectID)));
     }
 
     /**
@@ -342,7 +342,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
         storage.getEventStorage().updateEvent(eventUpdate);
         Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-        result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), updatedMasterEvent));
+        result.addUpdate(new UpdateResultImpl(originalMasterEvent, updatedMasterEvent));
     }
 
     /**
@@ -382,7 +382,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
          */
         Event originalMasterEvent = loadEventData(seriesID);
         touch(seriesID);
-        result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), loadEventData(seriesID)));
+        result.addUpdate(new UpdateResultImpl(originalMasterEvent, loadEventData(seriesID)));
     }
 
     /**

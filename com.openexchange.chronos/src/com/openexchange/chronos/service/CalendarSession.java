@@ -119,6 +119,13 @@ public interface CalendarSession extends CalendarParameters {
     RecurrenceService getRecurrenceService();
 
     /**
+     * Provides access to additional calendar utilities.
+     *
+     * @return The utilities
+     */
+    CalendarUtilities getUtilities();
+
+    /**
      * Logs a debug message with an associated identifier of this particular CalendarSession.
      *
      * @param message The message to be logged

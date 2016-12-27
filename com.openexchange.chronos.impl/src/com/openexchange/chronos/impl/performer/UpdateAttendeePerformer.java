@@ -159,33 +159,29 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         Attendee attendeeUpdate = prepareAttendeeUpdate(originalEvent, originalAttendee, attendee);
         if (null == attendeeUpdate) {
             //TODO or throw?
-            result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), originalEvent));
+            result.addUpdate(new UpdateResultImpl(originalEvent, originalEvent));
             return;
         }
-        int updatedFolderID;
         if (attendeeUpdate.containsFolderID()) {
             /*
              * store tombstone references in case of a move operation for the attendee
              */
-            updatedFolderID = attendeeUpdate.getFolderID();
             storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
             storage.getAttendeeStorage().insertTombstoneAttendee(originalEvent.getId(), AttendeeMapper.getInstance().getTombstone(originalAttendee));
-        } else {
-            updatedFolderID = i(folder);
         }
         /*
          * update attendee & 'touch' the corresponding event
          */
         storage.getAttendeeStorage().updateAttendee(originalEvent.getId(), attendeeUpdate);
         touch(originalEvent.getId());
-        result.addUpdate(new UpdateResultImpl(originalEvent, updatedFolderID, loadEventData(originalEvent.getId())));
+        result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
         if (isSeriesException(originalEvent)) {
             /*
              * also 'touch' the series master in case of an exception update
              */
             Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
             touch(originalEvent.getSeriesId());
-            result.addUpdate(new UpdateResultImpl(originalMasterEvent, updatedFolderID, loadEventData(originalEvent.getSeriesId())));
+            result.addUpdate(new UpdateResultImpl(originalMasterEvent, loadEventData(originalEvent.getSeriesId())));
         }
     }
 
