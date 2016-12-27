@@ -39,7 +39,7 @@ public class Bug20896Test_AlarmsChange extends ManagedAppointmentTest {
                 continue;
             }
             int id = json.getInt("id");
-            Appointment appointment = calendarManager.get(fid, id);
+            Appointment appointment = catm.get(fid, id);
             assertEquals("Problem with '" + appointment.getTitle() + "'", expectations[i], appointment.getAlarm());
         }
     }

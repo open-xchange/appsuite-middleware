@@ -54,16 +54,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug35687Test}
@@ -72,28 +68,17 @@ import com.openexchange.test.FolderTestManager;
  */
 public class Bug35687Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
-    private FolderTestManager ftm;
-    private AJAXClient client2;
     private FolderObject folder;
     private Appointment app;
-
-    public Bug35687Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        client2 = new AJAXClient(testContext.acquireUser());
-
-        ctm = new CalendarTestManager(getClient());
-        ftm = new FolderTestManager(getClient());
-        folder = ftm.generateSharedFolder("Bug35687Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId());
+        folder = ftm.generateSharedFolder("Bug35687Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), getClient2().getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
 
-        ctm.setClient(client2);
+        catm.setClient(getClient2());
 
         int nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
@@ -105,28 +90,17 @@ public class Bug35687Test extends AbstractAJAXSession {
         app.setAlarm(15);
         app.setIgnoreConflicts(true);
 
-        app = ctm.insert(app);
+        app = catm.insert(app);
         System.out.println("hello");
     }
 
     @Test
     public void testBug35687() throws Exception {
-        Appointment loaded = ctm.get(app);
+        Appointment loaded = catm.get(app);
         assertEquals("Wrong alarm value", 15, loaded.getAlarm());
 
-        List<Appointment> listAppointment = ctm.list(new ListIDs(folder.getObjectID(), app.getObjectID()), new int[] { Appointment.ALARM });
+        List<Appointment> listAppointment = catm.list(new ListIDs(folder.getObjectID(), app.getObjectID()), new int[] { Appointment.ALARM });
         assertTrue("Missing alarm value for list request.", listAppointment.get(0).containsAlarm());
         assertEquals("Wrong alarm value for list request.", 15, listAppointment.get(0).getAlarm());
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-            ftm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

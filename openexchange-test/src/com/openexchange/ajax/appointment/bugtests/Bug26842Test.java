@@ -51,15 +51,13 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug26842Test}
@@ -70,19 +68,13 @@ public class Bug26842Test extends AbstractAJAXSession {
 
     private FolderObject folder;
 
-    private FolderTestManager ftm;
-
-    private CalendarTestManager ctm;
-
     public Bug26842Test() {
         super();
     }
 
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        ftm = new FolderTestManager(getClient());
-        ctm = new CalendarTestManager(getClient());
-        ctm.setFailOnError(true);
         folder = ftm.generatePublicFolder("26842-" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
         OCLPermission permission = new OCLPermission();
@@ -105,19 +97,9 @@ public class Bug26842Test extends AbstractAJAXSession {
         app.setParentFolderID(folder.getObjectID());
         app.setIgnoreConflicts(true);
 
-        ctm.insert(app);
-        Appointment appointment = ctm.get(app.getParentFolderID(), app.getObjectID());
+        catm.insert(app);
+        Appointment appointment = catm.get(app.getParentFolderID(), app.getObjectID());
         assertEquals("Wrong participants.", getClient().getValues().getUserId(), appointment.getParticipants()[0].getIdentifier());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-            ftm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

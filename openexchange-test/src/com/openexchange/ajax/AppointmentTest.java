@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -138,9 +139,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
             resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
         } catch (final Exception ex) {
-            ex.printStackTrace();
-
-            throw new Exception(ex);
+            fail(ex.getMessage());
         }
     }
 

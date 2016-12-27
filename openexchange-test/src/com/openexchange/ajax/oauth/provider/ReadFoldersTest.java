@@ -112,8 +112,6 @@ import com.openexchange.test.FolderTestManager;
 @RunWith(Parameterized.class)
 public class ReadFoldersTest extends AbstractOAuthTest {
 
-    private FolderTestManager ftm;
-
     private UserValues values;
 
     private AJAXClient ajaxClient2;
@@ -181,7 +179,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     private int privateFolderId() throws OXException, IOException, JSONException {
-        return privateFolderId(ajaxClient);
+        return privateFolderId(getClient());
     }
 
     private int privateFolderId(AJAXClient client) throws OXException, IOException, JSONException {
@@ -198,10 +196,10 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     @Before
     public void setUp() throws Exception {
-        ftm = new FolderTestManager(ajaxClient);
-        values = ajaxClient.getValues();
+        super.setUp();
+        values = getClient().getValues();
         userId = values.getUserId();
-        GetResponse getResponse = ajaxClient.execute(new GetRequest(userId, TimeZones.UTC));
+        GetResponse getResponse = getClient().execute(new GetRequest(userId, TimeZones.UTC));
         int[] userGroups = getResponse.getUser().getGroups();
         groups = new HashSet<>();
         groups.add(GroupStorage.GROUP_ZERO_IDENTIFIER);
@@ -231,8 +229,8 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         sharedSubfolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared " + contentType.toString() + " " + System.currentTimeMillis(), moduleId(), privateFolderId(ajaxClient2), ajaxClient2.getValues().getUserId(), userId);
         ftm2.insertFoldersOnServer(new FolderObject[] { sharedSubfolder });
 
-        client.logout();
-        client = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
+        oAuthClient.logout();
+        oAuthClient = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
     }
 
     @Test
@@ -300,7 +298,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         Set<Integer> expectedFolderIds = new HashSet<>();
         VisibleFoldersRequest request = new VisibleFoldersRequest(api, contentType.toString());
         request.setAltNames(altNames);
-        VisibleFoldersResponse response = client.execute(request);
+        VisibleFoldersResponse response = oAuthClient.execute(request);
         assertNoErrorsAndWarnings(response);
 
         // private
@@ -329,7 +327,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     public void testUpdates() throws Exception {
         UpdatesRequest request = new UpdatesRequest(api, ListRequest.DEFAULT_COLUMNS, -1, null, new Date(privateSubfolder.getLastModified().getTime() - 1000), Ignore.NONE);
         request.setAltNames(altNames);
-        FolderUpdatesResponse updatesResponse = client.execute(request);
+        FolderUpdatesResponse updatesResponse = oAuthClient.execute(request);
         assertNoErrorsAndWarnings(updatesResponse);
         List<FolderObject> folders = updatesResponse.getFolders();
         assertContentTypeAndPermissions(folders);
@@ -344,7 +342,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     public void testPath() throws Exception {
         PathRequest request = new PathRequest(api, Integer.toString(privateSubfolder.getObjectID()));
         request.setAltNames(altNames);
-        PathResponse pathResponse = client.execute(request);
+        PathResponse pathResponse = oAuthClient.execute(request);
         assertNoErrorsAndWarnings(pathResponse);
         List<FolderObject> folders = toList(pathResponse.getFolder());
         assertContentTypeAndPermissions(folders);
@@ -372,7 +370,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         for (int folderId : folderIds) {
             com.openexchange.ajax.folder.actions.GetRequest request = new com.openexchange.ajax.folder.actions.GetRequest(api, folderId);
             request.setAltNames(altNames);
-            com.openexchange.ajax.folder.actions.GetResponse response = client.execute(request);
+            com.openexchange.ajax.folder.actions.GetResponse response = oAuthClient.execute(request);
             assertNoErrorsAndWarnings(response);
             assertContentTypeAndPermissions(response.getFolder());
         }
@@ -386,7 +384,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
             ContentType invalidContentType = S2CT.get(invalidScope);
             VisibleFoldersRequest request = new VisibleFoldersRequest(api, invalidContentType.toString(), VisibleFoldersRequest.DEFAULT_COLUMNS, false);
             request.setAltNames(altNames);
-            VisibleFoldersResponse response = client.execute(request);
+            VisibleFoldersResponse response = oAuthClient.execute(request);
             assertFolderNotVisibleError(response, invalidScope);
         }
     }
@@ -401,7 +399,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
             // for the according OAuth client because of insufficient scope
             VisibleFoldersRequest allRequest = new VisibleFoldersRequest(api, invalidContentType.toString(), VisibleFoldersRequest.DEFAULT_COLUMNS, false);
             allRequest.setAltNames(altNames);
-            VisibleFoldersResponse allResponse = ajaxClient.execute(allRequest);
+            VisibleFoldersResponse allResponse = getClient().execute(allRequest);
             assertNoErrorsAndWarnings(allResponse);
             List<FolderObject> allFolders = new LinkedList<>();
             allFolders.addAll(toList(allResponse.getPrivateFolders()));
@@ -412,11 +410,11 @@ public class ReadFoldersTest extends AbstractOAuthTest {
                 if (folder.getObjectID() < 0) {
                     com.openexchange.ajax.folder.actions.GetRequest getRequest = new com.openexchange.ajax.folder.actions.GetRequest(api, folder.getFullName(), false);
                     getRequest.setAltNames(altNames);
-                    response = client.execute(getRequest);
+                    response = oAuthClient.execute(getRequest);
                 } else {
                     com.openexchange.ajax.folder.actions.GetRequest getRequest = new com.openexchange.ajax.folder.actions.GetRequest(api, folder.getObjectID(), false);
                     getRequest.setAltNames(altNames);
-                    response = client.execute(getRequest);
+                    response = oAuthClient.execute(getRequest);
                 }
 
                 assertFolderNotVisibleError(response, invalidScope);
@@ -458,7 +456,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     private List<FolderObject> listFolders(AJAXRequest<ListResponse> request) throws OXException, IOException, JSONException {
-        ListResponse response = client.execute(request);
+        ListResponse response = oAuthClient.execute(request);
         assertNoErrorsAndWarnings(response);
         List<FolderObject> folders = new ArrayList<>();
         Iterator<FolderObject> it = response.getFolder();
@@ -499,10 +497,6 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     @After
     public void tearDown() throws Exception {
         try {
-            if (ftm != null) {
-                ftm.cleanUp();
-            }
-
             if (ftm2 != null) {
                 ftm2.cleanUp();
             }

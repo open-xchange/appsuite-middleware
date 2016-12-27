@@ -41,8 +41,8 @@ public class Bug20718Test_JumpDuringDstCrossing extends ManagedAppointmentTest {
 
         int objectID = Integer.parseInt(imports[0].getObjectId());
 
-        Appointment summer = calendarManager.get(folder.getObjectID(), objectID, 1);
-        Appointment winter = calendarManager.get(folder.getObjectID(), objectID, 4);
+        Appointment summer = catm.get(folder.getObjectID(), objectID, 1);
+        Appointment winter = catm.get(folder.getObjectID(), objectID, 4);
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(summer.getStartDate());

@@ -69,7 +69,7 @@ public class Bug20980Test_DateOnMissingDSTHour extends ManagedAppointmentTest {
         series.setEndDate(D("30/3/2008 02:00", utc));
         series.setTitle("A daily series");
         series.setParentFolderID(fid);
-        calendarManager.insert(series);
+        catm.insert(series);
 
         Date lastMod = series.getLastModified();
         for (int i = 1; i < 3; i++) {
@@ -79,9 +79,9 @@ public class Bug20980Test_DateOnMissingDSTHour extends ManagedAppointmentTest {
             changeEx.setLastModified(lastMod);
             changeEx.setRecurrencePosition(i);
             changeEx.setTitle("Element # " + i + " of series that has different name");
-            calendarManager.update(changeEx);
-            assertNull("Problem with update #" + i, calendarManager.getLastException());
-            lastMod = new Date(calendarManager.getLastModification().getTime() + 1);
+            catm.update(changeEx);
+            assertNull("Problem with update #" + i, catm.getLastException());
+            lastMod = new Date(catm.getLastModification().getTime() + 1);
         }
     }
 

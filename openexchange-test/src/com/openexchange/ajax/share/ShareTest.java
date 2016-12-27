@@ -924,8 +924,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
             List<String> folderIDs = new ArrayList<String>();
             List<String> fileIDs = new ArrayList<String>();
             for (File file : files) {
-                folderIDs.add(file.getFolderId());
-                fileIDs.add(file.getId());
+                if (file != null) {
+                    folderIDs.add(file.getFolderId());
+                    fileIDs.add(file.getId());
+                }
             }
             DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileIDs, folderIDs, futureTimestamp());
             deleteInfostoreRequest.setHardDelete(Boolean.TRUE);

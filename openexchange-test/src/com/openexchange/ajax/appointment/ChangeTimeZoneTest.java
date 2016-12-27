@@ -58,7 +58,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link ChangeTimeZoneTest}
@@ -71,14 +70,12 @@ public class ChangeTimeZoneTest extends AbstractAJAXSession {
     private final TimeZone UTC = TimeZone.getTimeZone("UTC");
     private final TimeZone BERLIN = TimeZone.getTimeZone("Europe/Berlin");
     private final TimeZone US = TimeZone.getTimeZone("US/Eastern");
-    private CalendarTestManager ctm;
     private Appointment app;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(getClient());
         app = new Appointment();
         app.setTitle("ChangeTimeZoneTest");
         app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -86,16 +83,16 @@ public class ChangeTimeZoneTest extends AbstractAJAXSession {
         app.setEndDate(D("01.04.2015 09:00", UTC));
         app.setTimezone("Europe/Berlin");
 
-        ctm.insert(app);
+        catm.insert(app);
     }
 
     @Test
     public void testSimpleTimeZoneChange() throws Exception {
         app.setLastModified(new Date(Long.MAX_VALUE));
         app.setTimezone("US/Eastern");
-        ctm.update(app);
+        catm.update(app);
 
-        Appointment loaded = ctm.get(getClient().getValues().getPrivateAppointmentFolder(), app.getObjectID());
+        Appointment loaded = catm.get(getClient().getValues().getPrivateAppointmentFolder(), app.getObjectID());
         assertEquals("Wrong tmezone.", "US/Eastern", loaded.getTimezone());
         assertTrue(true);
     }

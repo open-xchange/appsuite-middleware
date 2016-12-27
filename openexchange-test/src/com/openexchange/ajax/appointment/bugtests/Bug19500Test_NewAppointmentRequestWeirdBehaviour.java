@@ -24,10 +24,10 @@ public class Bug19500Test_NewAppointmentRequestWeirdBehaviour extends ManagedApp
         series.setOccurrence(numOccurences);
         series.setTitle("Bug 19500 Series");
         series.setStartDate(start);
-        calendarManager.insert(series);
+        catm.insert(series);
 
-        List<Appointment> list1 = calendarManager.newappointments(start, end, 5, Appointment.ALL_COLUMNS);
-        List<Appointment> list2 = calendarManager.newappointments(start, end, 5, Appointment.ALL_COLUMNS);
+        List<Appointment> list1 = catm.newappointments(start, end, 5, Appointment.ALL_COLUMNS);
+        List<Appointment> list2 = catm.newappointments(start, end, 5, Appointment.ALL_COLUMNS);
 
         assertEquals("Expected correct length", numOccurences, list2.size());
         assertEquals("Expected same length", list1.size(), list2.size());

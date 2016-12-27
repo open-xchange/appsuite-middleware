@@ -52,7 +52,6 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertFalse;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -69,17 +68,11 @@ public class Bug32278Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    private CalendarTestManager ctm;
-
-    public Bug32278Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(getClient());
+        catm = new CalendarTestManager(getClient());
         appointment = new Appointment();
         appointment.setTitle("Bug 32278 Test");
         appointment.setStartDate(D("01.05.2014 08:00"));
@@ -93,27 +86,17 @@ public class Bug32278Test extends AbstractAJAXSession {
 
     @Test
     public void testBug() throws Exception {
-        ctm.insert(appointment);
+        catm.insert(appointment);
         appointment.setRecurrenceType(Appointment.NO_RECURRENCE);
         appointment.removeInterval();
         appointment.removeOccurrence();
 
-        ctm.update(appointment);
+        catm.update(appointment);
 
-        List<Appointment> list = ctm.list(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] { Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION });
+        List<Appointment> list = catm.list(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] { Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION });
         for (Appointment app : list) {
             assertFalse("No recurrence ID expected.", app.containsRecurrenceID());
             assertFalse("No recurrence position expected.", app.containsRecurrencePosition());
         }
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

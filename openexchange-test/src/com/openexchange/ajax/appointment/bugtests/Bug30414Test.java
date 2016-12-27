@@ -53,14 +53,12 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug30414Test}
@@ -69,20 +67,13 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug30414Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
     private Appointment series;
     private Appointment single;
     private int nextYear;
 
-    public Bug30414Test() {
-        super();
-    }
-
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(getClient());
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
         single = new Appointment();
@@ -91,7 +82,7 @@ public class Bug30414Test extends AbstractAJAXSession {
         single.setEndDate(D("03.02." + nextYear + " 09:00"));
         single.setIgnoreConflicts(true);
         single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm.insert(single);
+        catm.insert(single);
 
         series = new Appointment();
         series.setTitle("Bug 30414 series appointment.");
@@ -102,12 +93,12 @@ public class Bug30414Test extends AbstractAJAXSession {
         series.setOccurrence(3);
         series.setIgnoreConflicts(true);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm.insert(series);
+        catm.insert(series);
     }
 
     @Test
     public void testBug30414() throws Exception {
-        Appointment exception2 = ctm.createIdentifyingCopy(series);
+        Appointment exception2 = catm.createIdentifyingCopy(series);
         exception2.setStartDate(D("02.02." + nextYear + " 08:00"));
         exception2.setEndDate(D("02.02." + nextYear + " 09:00"));
         exception2.setRecurrencePosition(2);
@@ -120,9 +111,9 @@ public class Bug30414Test extends AbstractAJAXSession {
         exception.setEndDate(D("02.02." + nextYear + " 09:00"));
         exception.setRecurrenceType(Appointment.NO_RECURRENCE);
         exception.setRecurrencePosition(2);
-        ctm.update(exception);
+        catm.update(exception);
 
-        List<ConflictObject> conflicts = ((UpdateResponse) ctm.getLastResponse()).getConflicts();
+        List<ConflictObject> conflicts = ((UpdateResponse) catm.getLastResponse()).getConflicts();
         boolean foundBadConflict = false;
         if (conflicts != null) {
             for (ConflictObject co : conflicts) {
@@ -134,15 +125,4 @@ public class Bug30414Test extends AbstractAJAXSession {
         }
         assertFalse("Found conflict", foundBadConflict);
     }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

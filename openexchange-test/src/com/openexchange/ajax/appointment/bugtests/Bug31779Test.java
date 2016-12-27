@@ -74,8 +74,6 @@ public class Bug31779Test extends AbstractAJAXSession {
 
     private AJAXClient client2;
 
-    private CalendarTestManager ctm1;
-
     private int nextYear;
 
     private Appointment appointment;
@@ -89,9 +87,7 @@ public class Bug31779Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
-        ctm1 = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(client2);
+        ctm2 = new CalendarTestManager(getClient2());
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         appointment = new Appointment();
@@ -107,7 +103,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
 
-        ctm1.insert(appointment);
+        catm.insert(appointment);
     }
 
     /**
@@ -123,7 +119,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
         exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm1.delete(ctm1.createIdentifyingCopy(exception));
+        catm.delete(catm.createIdentifyingCopy(exception));
         exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
         Appointment loadedException = ctm2.get(exception);
         assertNull("No object expected.", loadedException);
@@ -145,7 +141,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         ctm2.update(exception);
         ctm2.delete(ctm2.createIdentifyingCopy(exception));
         exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        Appointment loadedException = ctm1.get(exception);
+        Appointment loadedException = catm.get(exception);
         assertNotNull("Object expected.", loadedException);
         assertEquals("Wrong creator.", getClient().getValues().getUserId(), loadedException.getCreatedBy());
         assertEquals("Wrong changer.", client2.getValues().getUserId(), loadedException.getModifiedBy());
@@ -154,7 +150,6 @@ public class Bug31779Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm1.cleanUp();
             ctm2.cleanUp();
         } finally {
             super.tearDown();

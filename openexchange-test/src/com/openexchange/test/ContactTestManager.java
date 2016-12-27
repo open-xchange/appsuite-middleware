@@ -166,7 +166,7 @@ public class ContactTestManager implements TestManager {
         return contactParser;
     }
 
-    public ContactTestManager(final AJAXClient client) throws OXException, IOException, SAXException, JSONException {
+    public ContactTestManager(final AJAXClient client) throws OXException, IOException, JSONException {
         this.setClient(client);
         this.setTimeZone(client.getValues().getTimeZone());
         setCreatedEntities(new LinkedList<Contact>());

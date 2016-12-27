@@ -73,7 +73,6 @@ import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -93,22 +92,16 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 public class ConfirmationsTest extends AbstractAJAXSession {
 
     private static final int[] COLUMNS = { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.CONFIRMATIONS };
-    private AJAXClient client;
     private int folderId;
     private TimeZone tz;
     private Appointment appointment;
     private ExternalUserParticipant participant;
 
-    public ConfirmationsTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        folderId = client.getValues().getPrivateAppointmentFolder();
-        tz = client.getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
+        tz = getClient().getValues().getTimeZone();
         appointment = new Appointment();
         appointment.setTitle("Test appointment for testing confirmations");
         Calendar calendar = TimeTools.createCalendar(tz);
@@ -123,13 +116,13 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         participant = new ExternalUserParticipant("external2@example.com");
         participant.setDisplayName("External user 2");
         appointment.addParticipant(participant);
-        client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
+        getClient().execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            client.execute(new DeleteRequest(appointment));
+            getClient().execute(new DeleteRequest(appointment));
         } finally {
             super.tearDown();
         }
@@ -137,7 +130,7 @@ public class ConfirmationsTest extends AbstractAJAXSession {
 
     @Test
     public void testGet() throws Throwable {
-        GetResponse response = client.execute(new GetRequest(appointment));
+        GetResponse response = getClient().execute(new GetRequest(appointment));
         Appointment test = response.getAppointment(tz);
         checkConfirmations(extractExternal(appointment.getParticipants()), test.getConfirmations());
     }
@@ -158,7 +151,7 @@ public class ConfirmationsTest extends AbstractAJAXSession {
 
     @Test
     public void testAll() throws Throwable {
-        CommonAllResponse response = client.execute(new AllRequest(folderId, COLUMNS, appointment.getStartDate(), appointment.getEndDate(), tz));
+        CommonAllResponse response = getClient().execute(new AllRequest(folderId, COLUMNS, appointment.getStartDate(), appointment.getEndDate(), tz));
         checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
     }
 
@@ -176,13 +169,13 @@ public class ConfirmationsTest extends AbstractAJAXSession {
 
     @Test
     public void testList() throws Throwable {
-        CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] { folderId, appointment.getObjectID() }), COLUMNS));
+        CommonListResponse response = getClient().execute(new ListRequest(ListIDs.l(new int[] { folderId, appointment.getObjectID() }), COLUMNS));
         checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
     }
 
     @Test
     public void testSearch() throws Throwable {
-        SearchResponse response = client.execute(new SearchRequest("*", folderId, COLUMNS));
+        SearchResponse response = getClient().execute(new SearchRequest("*", folderId, COLUMNS));
         checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
     }
 
@@ -212,15 +205,15 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         participant = new ExternalUserParticipant("external3@example.com");
         participant.setDisplayName("External user 3");
         updated.addParticipant(participant);
-        UpdateResponse response = client.execute(new UpdateRequest(updated, tz));
+        UpdateResponse response = getClient().execute(new UpdateRequest(updated, tz));
         appointment.setLastModified(response.getTimestamp());
-        GetResponse response2 = client.execute(new GetRequest(appointment));
+        GetResponse response2 = getClient().execute(new GetRequest(appointment));
         checkConfirmations(extractExternal(updated.getParticipants()), response2.getAppointment(tz).getConfirmations());
-        CommonAllResponse response3 = client.execute(new AllRequest(folderId, COLUMNS, appointment.getStartDate(), appointment.getEndDate(), tz));
+        CommonAllResponse response3 = getClient().execute(new AllRequest(folderId, COLUMNS, appointment.getStartDate(), appointment.getEndDate(), tz));
         checkConfirmations(extractExternal(updated.getParticipants()), findConfirmations(response3));
-        CommonListResponse response4 = client.execute(new ListRequest(ListIDs.l(new int[] { folderId, appointment.getObjectID() }), COLUMNS));
+        CommonListResponse response4 = getClient().execute(new ListRequest(ListIDs.l(new int[] { folderId, appointment.getObjectID() }), COLUMNS));
         checkConfirmations(extractExternal(updated.getParticipants()), findConfirmations(response4));
-        SearchResponse response5 = client.execute(new SearchRequest("*", folderId, COLUMNS));
+        SearchResponse response5 = getClient().execute(new SearchRequest("*", folderId, COLUMNS));
         checkConfirmations(extractExternal(updated.getParticipants()), findConfirmations(response5));
     }
 }

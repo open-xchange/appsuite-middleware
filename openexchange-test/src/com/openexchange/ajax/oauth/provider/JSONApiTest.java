@@ -81,7 +81,7 @@ public class JSONApiTest extends AbstractOAuthTest {
     @Test
     public void testAllAndRevoke() throws Exception {
         new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE));
-        AllResponse allResponse = ajaxClient.execute(new AllRequest());
+        AllResponse allResponse = getClient().execute(new AllRequest());
         List<GrantView> grantViews = allResponse.getGrantViews();
         GrantView expected = null;
         for (GrantView grant : grantViews) {
@@ -94,10 +94,10 @@ public class JSONApiTest extends AbstractOAuthTest {
         Assert.assertEquals(3, expected.getScope().size());
 
         // revoke access for application
-        ajaxClient.execute(new RevokeRequest(expected.getClient().getId()));
+        getClient().execute(new RevokeRequest(expected.getClient().getId()));
 
         // assert it does not appear anymore in all response
-        allResponse = ajaxClient.execute(new AllRequest());
+        allResponse = getClient().execute(new AllRequest());
         grantViews = allResponse.getGrantViews();
         for (GrantView grant : grantViews) {
             Assert.assertFalse(grant.getClient().getId().equals(clientApp.getId()));

@@ -101,24 +101,24 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
     @After
     public void tearDown() throws Exception {
         try {
-        if (oldData != null) {
-            // change back to old value if present
-            Map<String, Object> map = oldData.asMap();
-            Map<String, String> newMap = new HashMap<>();
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                try {
-                    newMap.put(entry.getKey(), (String) entry.getValue());
-                } catch (ClassCastException cce) {
-                    //should never be the case
-                    return;
+            if (oldData != null) {
+                // change back to old value if present
+                Map<String, Object> map = oldData.asMap();
+                Map<String, String> newMap = new HashMap<>();
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    try {
+                        newMap.put(entry.getKey(), (String) entry.getValue());
+                    } catch (ClassCastException cce) {
+                        //should never be the case
+                        return;
+                    }
+                }
+                if (!map.isEmpty()) {
+                    ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, "server", getReloadables());
+                    ChangePropertiesResponse response = getClient().execute(req);
+                    oldData = ResponseWriter.getJSON(response.getResponse());
                 }
             }
-            if (!map.isEmpty()) {
-                ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, "server", getReloadables());
-                ChangePropertiesResponse response = getClient().execute(req);
-                oldData = ResponseWriter.getJSON(response.getResponse());
-            }
-        }
         } finally {
             super.tearDown();
         }

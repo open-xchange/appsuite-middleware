@@ -71,7 +71,7 @@ public class ICalAppointmentExportTest extends ManagedAppointmentTest {
         appointmentObj.setParentFolderID(folderID);
         appointmentObj.setIgnoreConflicts(true);
 
-        calendarManager.insert(appointmentObj);
+        catm.insert(appointmentObj);
         ICalExportRequest exportRequest = new ICalExportRequest(folderID);
         ICalExportResponse response = getClient().execute(exportRequest);
 

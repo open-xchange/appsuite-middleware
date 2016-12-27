@@ -54,7 +54,6 @@ import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -64,8 +63,6 @@ import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug26350Test}
@@ -74,30 +71,19 @@ import com.openexchange.test.FolderTestManager;
  */
 public class Bug26350Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm1;
-
     private final int cycles = 3;
 
     private final int chunkSize = 20;
 
     private List<List<Integer>> ids;
 
-    private FolderTestManager ftm;
-
     private FolderObject folder;
-
-    public Bug26350Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         ids = new ArrayList<List<Integer>>();
 
-        ctm1 = new CalendarTestManager(getClient());
-        ctm1.setFailOnError(true);
-        ftm = new FolderTestManager(getClient());
         folder = ftm.generatePrivateFolder("Bug26350 Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(folder);
     }
@@ -113,7 +99,7 @@ public class Bug26350Test extends AbstractAJAXSession {
                 app.setEndDate(D("13.06.2013 09:00"));
                 app.setParentFolderID(folder.getObjectID());
                 app.setIgnoreConflicts(true);
-                Appointment insert = ctm1.insert(app);
+                Appointment insert = catm.insert(app);
                 chunkIds.add(insert.getObjectID());
             }
             ids.add(chunkIds);
@@ -133,16 +119,4 @@ public class Bug26350Test extends AbstractAJAXSession {
         }
 
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm1.cleanUp();
-            ftm.cleanUp();
-            getClient().logout();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

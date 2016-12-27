@@ -65,7 +65,6 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug38079Test}
@@ -75,7 +74,6 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug38079Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
     private Appointment appointment;
     private String origTimeZone;
 
@@ -91,7 +89,6 @@ public class Bug38079Test extends AbstractAJAXSession {
         GetResponse getResponse = getClient().execute(getRequest);
         origTimeZone = getResponse.getString();
 
-        ctm = new CalendarTestManager(getClient());
         appointment = new Appointment();
         appointment.setTitle("Bug 38079 Test");
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -289,13 +286,13 @@ public class Bug38079Test extends AbstractAJAXSession {
         appointment.setMonth(month);
         appointment.setStartDate(D("05.05.2015 08:00", tz));
         appointment.setEndDate(D("05.05.2015 09:00", tz));
-        ctm.setTimezone(tz);
-        ctm.insert(appointment);
+        catm.setTimezone(tz);
+        catm.insert(appointment);
         int year = 2015;
         if (month < Calendar.MAY) {
             year++;
         }
-        Appointment loadedAppointment = ctm.get(appointment.getParentFolderID(), appointment.getObjectID());
+        Appointment loadedAppointment = catm.get(appointment.getParentFolderID(), appointment.getObjectID());
         assertEquals("Wrong start for month " + (month + 1), D("16." + (month + 1) + "." + year + " 08:00", tz), loadedAppointment.getStartDate());
         assertEquals("Wrong end for month " + (month + 1), D("16." + (month + 1) + "." + year + " 09:00", tz), loadedAppointment.getEndDate());
     }
@@ -303,7 +300,6 @@ public class Bug38079Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm.cleanUp();
             SetRequest setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
             getClient().execute(setRequest);
         } finally {

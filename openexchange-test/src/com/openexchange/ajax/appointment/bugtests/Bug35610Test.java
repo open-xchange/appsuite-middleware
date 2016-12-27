@@ -56,7 +56,6 @@ import java.util.Date;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -70,27 +69,17 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug35610Test extends AbstractAJAXSession {
 
-    private AJAXClient client2;
-
-    private CalendarTestManager ctm1;
-
     private CalendarTestManager ctm2;
 
     private Appointment app;
 
     private int nextYear;
 
-    public Bug35610Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        client2 = new AJAXClient(testContext.acquireUser());
-        ctm1 = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(client2);
+        ctm2 = new CalendarTestManager(getClient2());
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
@@ -102,7 +91,7 @@ public class Bug35610Test extends AbstractAJAXSession {
         app.setInterval(1);
         app.setOccurrence(5);
         UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         app.setParticipants(new Participant[] { user1, user2 });
         app.setUsers(new UserParticipant[] { user1, user2 });
         app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -111,10 +100,10 @@ public class Bug35610Test extends AbstractAJAXSession {
 
     @Test
     public void testTimeChange() throws Exception {
-        ctm1.insert(app);
+        catm.insert(app);
         ctm2.confirm(app, Appointment.ACCEPT, "yay");
 
-        Appointment exception = ctm1.createIdentifyingCopy(app);
+        Appointment exception = catm.createIdentifyingCopy(app);
         exception.setRecurrenceType(Appointment.NO_RECURRENCE);
         exception.removeInterval();
         exception.removeOccurrence();
@@ -124,14 +113,14 @@ public class Bug35610Test extends AbstractAJAXSession {
         exception.setLastModified(new Date(Long.MAX_VALUE));
         exception.setIgnoreConflicts(true);
 
-        ctm1.update(exception);
+        catm.update(exception);
 
-        Appointment loadedException = ctm1.get(exception);
+        Appointment loadedException = catm.get(exception);
         for (UserParticipant up : loadedException.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status.", Appointment.ACCEPT, up.getConfirm());
             }
-            if (up.getIdentifier() == client2.getValues().getUserId()) {
+            if (up.getIdentifier() == getClient2().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status.", Appointment.NONE, up.getConfirm());
             }
         }
@@ -139,10 +128,10 @@ public class Bug35610Test extends AbstractAJAXSession {
 
     @Test
     public void testNoTimeChange() throws Exception {
-        ctm1.insert(app);
+        catm.insert(app);
         ctm2.confirm(app, Appointment.ACCEPT, "yay");
 
-        Appointment exception = ctm1.createIdentifyingCopy(app);
+        Appointment exception = catm.createIdentifyingCopy(app);
         exception.setRecurrenceType(Appointment.NO_RECURRENCE);
         exception.removeInterval();
         exception.removeOccurrence();
@@ -152,14 +141,14 @@ public class Bug35610Test extends AbstractAJAXSession {
         exception.setLastModified(new Date(Long.MAX_VALUE));
         exception.setIgnoreConflicts(true);
 
-        ctm1.update(exception);
+        catm.update(exception);
 
-        Appointment loadedException = ctm1.get(exception);
+        Appointment loadedException = catm.get(exception);
         for (UserParticipant up : loadedException.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status.", Appointment.ACCEPT, up.getConfirm());
             }
-            if (up.getIdentifier() == client2.getValues().getUserId()) {
+            if (up.getIdentifier() == getClient2().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status.", Appointment.ACCEPT, up.getConfirm());
             }
         }
@@ -168,7 +157,6 @@ public class Bug35610Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm1.cleanUp();
             ctm2.cleanUp();
         } finally {
             super.tearDown();

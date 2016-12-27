@@ -193,10 +193,10 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         Appointment exception = positiveAssertionOnChangeException.getChangeException();
         Appointment series = positiveAssertionOnChangeException.getSeries();
-        calendarManager.confirm(exception, Appointment.TENTATIVE, "Changing change exception only");
+        catm.confirm(exception, Appointment.TENTATIVE, "Changing change exception only");
 
-        exception = calendarManager.get(exception);
-        series = calendarManager.get(series);
+        exception = catm.get(exception);
+        series = catm.get(series);
 
         int actualConfirmationForException = exception.getUsers()[0].getConfirm();
         int actualConfirmationForSeries = series.getUsers()[0].getConfirm();
@@ -222,7 +222,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         positiveAssertionOnUpdate.check(exception, changes, new Expectations(changes));
 
-        Appointment actual = calendarManager.get(app);
+        Appointment actual = catm.get(app);
         assertFalse("Making an exception a whole-day-appointment should not make the series that, too", actual.getFullTime());
     }
 
@@ -241,7 +241,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         changes = new Changes();
 
-        Resource res = resourceManager.search("*").get(0);
+        Resource res = resTm.search("*").get(0);
 
         ResourceParticipant resParticipant = new ResourceParticipant(res);
         Participant[] participants = new ResourceParticipant[] { resParticipant };
@@ -249,8 +249,8 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         positiveAssertionOnUpdate.check(exception, changes, new Expectations()); //yepp doing this only to perform update, not to compare fields at all
 
-        exception = calendarManager.get(exception); //update exception from server
-        series = calendarManager.get(series); //update series from server
+        exception = catm.get(exception); //update exception from server
+        series = catm.get(series); //update series from server
         assertTrue("Should contain the resource in the change exception", java.util.Arrays.asList(exception.getParticipants()).contains(resParticipant));
         assertFalse("Should not contain the resource in the whole series", java.util.Arrays.asList(series.getParticipants()).contains(resParticipant));
     }
@@ -280,8 +280,8 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         positiveAssertionOnUpdate.check(exception, changes, new Expectations());
 
-        exception = calendarManager.get(exception); //update exception from server
-        series = calendarManager.get(series); //update series from server
+        exception = catm.get(exception); //update exception from server
+        series = catm.get(series); //update series from server
         assertTrue("Should contain the participant in the change exception", java.util.Arrays.asList(exception.getParticipants()).contains(userParticipant));
         assertFalse("Should not contain the participant in the whole series", java.util.Arrays.asList(series.getParticipants()).contains(userParticipant));
     }
@@ -302,11 +302,11 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         Appointment series = positiveAssertionOnChangeException.getSeries().clone();
 
-        calendarManager.createDeleteException(folder.getObjectID(), series.getObjectID(), recurrencePos);
-        assertTrue("Should get exception when trying to get create delete exception on top of change exception", calendarManager.hasLastException());
+        catm.createDeleteException(folder.getObjectID(), series.getObjectID(), recurrencePos);
+        assertTrue("Should get exception when trying to get create delete exception on top of change exception", catm.hasLastException());
 
         OXException expected = new OXException(11);
-        OXException actual = (OXException) calendarManager.getLastException();
+        OXException actual = (OXException) catm.getLastException();
         assertTrue("Expecting " + expected + ", but got " + actual, expected.similarTo(actual));
     }
 
@@ -315,10 +315,10 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
-        calendarManager.insert(app);
+        catm.insert(app);
 
         int recurrencePos = 2;
-        calendarManager.createDeleteException(app, recurrencePos);
+        catm.createDeleteException(app, recurrencePos);
 
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, recurrencePos);
@@ -333,16 +333,16 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
-        calendarManager.insert(app);
+        catm.insert(app);
 
-        Appointment changeEx = calendarManager.createIdentifyingCopy(app);
+        Appointment changeEx = catm.createIdentifyingCopy(app);
         changeEx.setNumberOfAttachments(23);
         changeEx.setRecurrencePosition(2);
         changeEx.setTitle("Bla");
         changeEx.setRecurrenceType(CalendarObject.NO_RECURRENCE);
-        calendarManager.update(changeEx);
+        catm.update(changeEx);
 
-        Appointment loaded = calendarManager.get(changeEx);
+        Appointment loaded = catm.get(changeEx);
 
         assertEquals(0, loaded.getNumberOfAttachments());
     }

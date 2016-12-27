@@ -53,10 +53,8 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -72,9 +70,7 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug29566Test extends AbstractAJAXSession {
 
-    private AJAXClient client2;
-    private CalendarTestManager ctm;
-    private CalendarTestManager ctm2;
+    private CalendarTestManager catm2;
     private Appointment appointment;
 
     public Bug29566Test() {
@@ -85,10 +81,7 @@ public class Bug29566Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        client2 = new AJAXClient(testContext.acquireUser());
-
-        ctm = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(client2);
+        catm2 = new CalendarTestManager(getClient2());
 
         appointment = new Appointment();
         appointment.setStartDate(D("18.11.2013 08:00"));
@@ -117,25 +110,25 @@ public class Bug29566Test extends AbstractAJAXSession {
         appointment.setUid(uid);
         String organizer = "test@extern.example.invalid";
         appointment.setOrganizer(organizer);
-        ctm.insert(appointment);
+        catm.insert(appointment);
 
         Appointment clone = appointment.clone();
 
         if (!shared) {
-            clone.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
 
-        ctm2.update(clone);
+        catm2.update(clone);
 
-        assertFalse("No error expected.", ctm2.getLastResponse().hasError());
+        assertFalse("No error expected.", catm2.getLastResponse().hasError());
 
-        Appointment loaded = ctm.get(appointment);
+        Appointment loaded = catm.get(appointment);
         assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
         assertEquals("Expected two users.", 2, loaded.getUsers().length);
 
@@ -156,24 +149,24 @@ public class Bug29566Test extends AbstractAJAXSession {
         appointment.setUid(uid);
         String organizer = "test@extern.example.invalid";
         appointment.setOrganizer(organizer);
-        ctm.insert(appointment);
+        catm.insert(appointment);
 
         Appointment clone = appointment.clone();
         clone.removeOrganizer();
         clone.removeUid();
 
         if (!shared) {
-            clone.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
 
-        ctm2.update(clone);
-        AbstractAJAXResponse updateResponse = ctm2.getLastResponse();
+        catm2.update(clone);
+        AbstractAJAXResponse updateResponse = catm2.getLastResponse();
         assertTrue("Should fail.", updateResponse.hasError());
         assertEquals("Wrong error.", shared ? OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber() : OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber(), updateResponse.getException().getCode());
     }
@@ -193,23 +186,23 @@ public class Bug29566Test extends AbstractAJAXSession {
         appointment.setUid(uid);
         String organizer = "test@extern.example.invalid";
         appointment.setOrganizer(organizer);
-        ctm.insert(appointment);
+        catm.insert(appointment);
 
         Appointment clone = appointment.clone();
         clone.removeUid();
 
         if (!shared) {
-            clone.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
 
-        ctm2.update(clone);
-        AbstractAJAXResponse updateResponse = ctm2.getLastResponse();
+        catm2.update(clone);
+        AbstractAJAXResponse updateResponse = catm2.getLastResponse();
         assertTrue("Should fail.", updateResponse.hasError());
         assertEquals("Wrong error.", shared ? OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber() : OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber(), updateResponse.getException().getCode());
     }
@@ -229,34 +222,25 @@ public class Bug29566Test extends AbstractAJAXSession {
         appointment.setUid(uid);
         String organizer = "test@extern.example.invalid";
         appointment.setOrganizer(organizer);
-        ctm.insert(appointment);
+        catm.insert(appointment);
 
         Appointment clone = appointment.clone();
         clone.removeOrganizer();
 
         if (!shared) {
-            clone.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
 
-        ctm2.update(clone);
-        AbstractAJAXResponse updateResponse = ctm2.getLastResponse();
+        catm2.update(clone);
+        AbstractAJAXResponse updateResponse = catm2.getLastResponse();
         assertTrue("Should fail.", updateResponse.hasError());
         assertEquals("Wrong error.", shared ? OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber() : OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber(), updateResponse.getException().getCode());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     private String generateUid() {

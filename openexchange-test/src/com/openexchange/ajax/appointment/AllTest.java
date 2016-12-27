@@ -28,8 +28,6 @@ import com.openexchange.java.util.TimeZones;
 
 public class AllTest extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
-
     private static final int[] SIMPLE_COLUMNS = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };
 
     @Test

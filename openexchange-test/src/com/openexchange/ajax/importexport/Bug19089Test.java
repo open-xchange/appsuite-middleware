@@ -80,7 +80,7 @@ public class Bug19089Test extends ManagedAppointmentTest {
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setIgnoreConflicts(true);
 
-        calendarManager.insert(appointment);
+        catm.insert(appointment);
     }
 
     @Test

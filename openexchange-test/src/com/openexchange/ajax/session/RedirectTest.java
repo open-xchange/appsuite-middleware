@@ -69,7 +69,6 @@ import com.openexchange.ajax.session.actions.StoreRequest;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.Init;
 import com.openexchange.java.Strings;
 import com.openexchange.login.ConfigurationProperty;
@@ -84,7 +83,7 @@ public class RedirectTest extends AbstractAJAXSession {
 
     @Before
     public void setUp() throws Exception {
-        AJAXConfig.init();
+        super.setUp();
         Init.injectProperty();
         ConfigurationService configService = new ConfigurationImpl(Collections.<ReinitializableConfigProviderService> emptyList());
         final String value = configService.getProperty(ConfigurationProperty.INSECURE.getPropertyName(), ConfigurationProperty.INSECURE.getDefaultValue());

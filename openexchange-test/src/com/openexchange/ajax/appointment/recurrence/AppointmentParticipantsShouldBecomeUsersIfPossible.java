@@ -27,8 +27,8 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
         appointment.addParticipant(new ExternalUserParticipant(user2email));
         appointment.addParticipant(new UserParticipant(user2id));
 
-        calendarManager.insert(appointment);
-        Appointment actual = calendarManager.get(appointment);
+        catm.insert(appointment);
+        Appointment actual = catm.get(appointment);
 
         boolean foundAsExternal = false, foundAsInternal = false;
 
@@ -57,8 +57,8 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
         Appointment appointment = generateDailyAppointment();
         appointment.addParticipant(new ExternalUserParticipant(user1email));
 
-        calendarManager.insert(appointment);
-        Appointment actual = calendarManager.get(appointment);
+        catm.insert(appointment);
+        Appointment actual = catm.get(appointment);
 
         boolean foundAsExternal = false;
         int foundAsInternal = 0;
@@ -82,13 +82,12 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatchesAfterUpdateToo() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
-        int user2id = client2.getValues().getUserId();
-        GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
+        int user2id = getClient2().getValues().getUserId();
+        GetResponse response = getClient2().execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();
 
         Appointment appointment = generateDailyAppointment();
-        Appointment result = calendarManager.insert(appointment);
+        Appointment result = catm.insert(appointment);
 
         Appointment update = new Appointment();
         update.setLastModified(result.getLastModified());
@@ -97,9 +96,9 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
         update.addParticipant(new ExternalUserParticipant(user2email));
         update.addParticipant(new UserParticipant(user2id));
 
-        calendarManager.update(update);
+        catm.update(update);
 
-        Appointment actual = calendarManager.get(appointment);
+        Appointment actual = catm.get(appointment);
 
         boolean foundAsExternal = false, foundAsInternal = false;
 

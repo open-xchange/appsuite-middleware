@@ -57,7 +57,6 @@ import java.util.Date;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -72,8 +71,6 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug38404Test extends AbstractAJAXSession {
 
-    private AJAXClient client2;
-    private CalendarTestManager ctm1;
     private CalendarTestManager ctm2;
     private Appointment appointment;
 
@@ -85,16 +82,14 @@ public class Bug38404Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        client2 = new AJAXClient(testContext.acquireUser());
-        ctm1 = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(client2);
+        ctm2 = new CalendarTestManager(getClient2());
 
         appointment = new Appointment();
         appointment.setTitle("Bug 38404");
         appointment.setStartDate(D("10.08.2015 08:00"));
         appointment.setEndDate(D("10.08.2015 09:00"));
         UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -103,27 +98,27 @@ public class Bug38404Test extends AbstractAJAXSession {
 
     @Test
     public void testBug38404() throws Exception {
-        ctm1.insert(appointment);
+        catm.insert(appointment);
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setDays(Appointment.TUESDAY + Appointment.WEDNESDAY + Appointment.THURSDAY);
         appointment.setInterval(2);
-        ctm1.update(appointment);
-        appointment.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        catm.update(appointment);
+        appointment.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         ctm2.confirm(appointment, Appointment.ACCEPT, "yes", 1);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        Appointment loaded = ctm1.get(appointment);
+        Appointment loaded = catm.get(appointment);
         assertNotNull("Missing change exception.", loaded.getChangeException());
         assertEquals("Wrong amount of change exceptions.", 1, loaded.getChangeException().length);
         assertEquals("Wrong amount of participants.", 2, loaded.getUsers().length);
         for (UserParticipant up : loaded.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
-            } else if (up.getIdentifier() == client2.getValues().getUserId()) {
+            } else if (up.getIdentifier() == getClient2().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.NONE, up.getConfirm());
             }
         }
 
-        Appointment[] all = ctm2.all(client2.getValues().getPrivateAppointmentFolder(), D("11.08.2015 08:00"), D("11.08.2015 09:00"));
+        Appointment[] all = ctm2.all(getClient2().getValues().getPrivateAppointmentFolder(), D("11.08.2015 08:00"), D("11.08.2015 09:00"));
         int exceptionId = 0;
         for (Appointment app : all) {
             if (app.getRecurrenceID() == appointment.getObjectID() && app.getRecurrenceID() != app.getObjectID()) {
@@ -132,41 +127,41 @@ public class Bug38404Test extends AbstractAJAXSession {
             }
         }
         assertFalse("Unable to find exception.", exceptionId == 0);
-        Appointment loadedException = ctm2.get(client2.getValues().getPrivateAppointmentFolder(), exceptionId);
+        Appointment loadedException = ctm2.get(getClient2().getValues().getPrivateAppointmentFolder(), exceptionId);
         assertEquals("Wrong amount of participants.", 2, loadedException.getUsers().length);
         for (UserParticipant up : loadedException.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
-            } else if (up.getIdentifier() == client2.getValues().getUserId()) {
+            } else if (up.getIdentifier() == getClient2().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
             }
         }
 
         Appointment updateAlarm = new Appointment();
         updateAlarm.setObjectID(appointment.getObjectID());
-        updateAlarm.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        updateAlarm.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         updateAlarm.setAlarm(15);
         updateAlarm.setLastModified(new Date(Long.MAX_VALUE));
         ctm2.update(updateAlarm);
 
-        loaded = ctm1.get(appointment);
+        loaded = catm.get(appointment);
         assertNotNull("Missing change exception.", loaded.getChangeException());
         assertEquals("Wrong amount of change exceptions.", 1, loaded.getChangeException().length);
         assertEquals("Wrong amount of participants.", 2, loaded.getUsers().length);
         for (UserParticipant up : loaded.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
-            } else if (up.getIdentifier() == client2.getValues().getUserId()) {
+            } else if (up.getIdentifier() == getClient2().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.NONE, up.getConfirm());
             }
         }
 
-        loadedException = ctm2.get(client2.getValues().getPrivateAppointmentFolder(), exceptionId);
+        loadedException = ctm2.get(getClient2().getValues().getPrivateAppointmentFolder(), exceptionId);
         assertEquals("Wrong amount of participants.", 2, loadedException.getUsers().length);
         for (UserParticipant up : loadedException.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
-            } else if (up.getIdentifier() == client2.getValues().getUserId()) {
+            } else if (up.getIdentifier() == getClient2().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
             }
         }
@@ -177,8 +172,8 @@ public class Bug38404Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setDays(Appointment.TUESDAY + Appointment.WEDNESDAY + Appointment.THURSDAY);
         appointment.setInterval(2);
-        ctm1.insert(appointment);
-        Appointment loaded = ctm1.get(appointment);
+        catm.insert(appointment);
+        Appointment loaded = catm.get(appointment);
         assertEquals("Wrong start.", D("11.08.2015 08:00"), loaded.getStartDate());
         assertEquals("Wrong end.", D("11.08.2015 09:00"), loaded.getEndDate());
     }
@@ -186,7 +181,7 @@ public class Bug38404Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm1.cleanUp();
+            catm.cleanUp();
             ctm2.cleanUp();
         } finally {
             super.tearDown();

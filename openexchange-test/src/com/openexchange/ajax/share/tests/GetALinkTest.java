@@ -95,15 +95,6 @@ public class GetALinkTest extends ShareTest {
     private FolderObject infostore;
     private DefaultFile file;
 
-    /**
-     * Initializes a new {@link GetALinkTest}.
-     * 
-     * @param name
-     */
-    public GetALinkTest(String name) {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

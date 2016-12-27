@@ -69,6 +69,7 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setLastModified(new Date(System.currentTimeMillis() + APPEND_MODIFIED));
 
         catm.update(appointmentFolderId, appointmentObj);
         int newObjectId = appointmentObj.getObjectID();

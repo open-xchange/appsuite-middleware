@@ -23,7 +23,7 @@ public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest 
         assertEquals(1, arr.length());
 
         JSONObject jsonObject = arr.getJSONObject(0);
-        Appointment actual = calendarManager.get(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
+        Appointment actual = catm.get(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
         Calendar startDate = Calendar.getInstance();
         startDate.setTime(actual.getStartDate());
         //NOTE: Completely irrelevant. Date format not allowed. 

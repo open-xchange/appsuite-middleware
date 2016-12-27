@@ -51,14 +51,11 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug30142Test}
@@ -66,10 +63,6 @@ import com.openexchange.test.FolderTestManager;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug30142Test extends AbstractAJAXSession {
-
-    private CalendarTestManager ctm;
-
-    private FolderTestManager ftm;
 
     private FolderObject folder;
 
@@ -83,8 +76,6 @@ public class Bug30142Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(getClient());
-        ftm = new FolderTestManager(getClient());
         folder = ftm.generatePrivateFolder("Bug 30142 " + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(folder);
 
@@ -94,28 +85,18 @@ public class Bug30142Test extends AbstractAJAXSession {
         appointment.setEndDate(D("01.12.2013 09:00"));
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setIgnoreConflicts(true);
-        ctm.insert(appointment);
+        catm.insert(appointment);
 
     }
 
     @Test
     public void testBug30142() throws Exception {
-        Appointment update = ctm.createIdentifyingCopy(appointment);
+        Appointment update = catm.createIdentifyingCopy(appointment);
         update.setCategories("Test");
-        ctm.update(update);
+        catm.update(update);
 
-        Appointment loaded = ctm.get(folder.getObjectID(), appointment.getObjectID());
+        Appointment loaded = catm.get(folder.getObjectID(), appointment.getObjectID());
         assertEquals("Missing category.", "Test", loaded.getCategories());
         assertEquals("Bad folder id.", loaded.getParentFolderID(), folder.getObjectID());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ftm.cleanUp();
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 }

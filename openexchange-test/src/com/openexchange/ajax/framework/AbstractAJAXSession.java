@@ -54,15 +54,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
+import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.ResourceTestManager;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 
 @RunWith(ConcurrentTestRunner.class)
+@Concurrent(count = 10)
 public abstract class AbstractAJAXSession {
 
     private AJAXClient client;
@@ -71,10 +73,10 @@ public abstract class AbstractAJAXSession {
     protected TestUser admin;
     protected TestUser testUser;
     protected TestUser testUser2;
-    
+
     protected CalendarTestManager catm;
     protected ContactTestManager cotm;
-    protected ResourceTestManager rtm;
+    protected FolderTestManager ftm;
 
     /**
      * Default constructor.
@@ -92,6 +94,7 @@ public abstract class AbstractAJAXSession {
     protected final AJAXClient getClient2() {
         return client2;
     }
+
     /**
      * Gets the client identifier to use when performing a login
      *
@@ -114,22 +117,33 @@ public abstract class AbstractAJAXSession {
         client = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);
         client2 = null == clientId ? new AJAXClient(testUser2) : new AJAXClient(testUser2, clientId);
         admin = testContext.getAdmin();
-        
+
         catm = new CalendarTestManager(client);
         cotm = new ContactTestManager(client);
-        rtm = new ResourceTestManager(client);
+        ftm = new FolderTestManager(client);
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            catm.cleanUp();
-            cotm.cleanUp();
-            rtm.cleanUp();
+            if (catm != null) {
+                catm.cleanUp();
+            }
+            if (cotm != null) {
+                cotm.cleanUp();
+            }
+            if (ftm != null) {
+                ftm.cleanUp();
+            }
             if (client != null) {
                 // Client can be null if setUp() fails
                 client.logout();
                 client = null;
+            }
+            if (client2 != null) {
+                // Client can be null if setUp() fails
+                client2.logout();
+                client2 = null;
             }
         } finally {
             TestContextPool.backContext(testContext);

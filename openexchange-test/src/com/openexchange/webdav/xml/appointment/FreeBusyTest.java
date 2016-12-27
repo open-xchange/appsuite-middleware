@@ -85,10 +85,6 @@ public class FreeBusyTest extends ManagedAppointmentTest {
     private int contextId;
     private final DateFormat formatter = new SimpleDateFormat("yyyyMMdd"); //used by freebusy.java
 
-    public FreeBusyTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -126,7 +122,7 @@ public class FreeBusyTest extends ManagedAppointmentTest {
 
     private void checkFreeBusy(Appointment app, int expectedState) throws OXException, Exception {
         app.setShownAs(expectedState);
-        calendarManager.insert(appointment);
+        catm.insert(appointment);
         int actualState = getFreeBusyState(app);
         assertEquals("Wrong free/busy state", expectedState, actualState);
     }

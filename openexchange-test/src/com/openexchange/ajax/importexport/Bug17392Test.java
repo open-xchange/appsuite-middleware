@@ -51,7 +51,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
         assertEquals(1, data.length());
         JSONObject jsonObject = data.getJSONObject(0);
 
-        return calendarManager.get(jsonObject.getInt(AppointmentFields.FOLDER_ID), jsonObject.getInt(AppointmentFields.ID));
+        return catm.get(jsonObject.getInt(AppointmentFields.FOLDER_ID), jsonObject.getInt(AppointmentFields.ID));
     }
 
     @Before
@@ -127,7 +127,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
         calendar.add(Calendar.HOUR, 1);
         app.setEndDate(calendar.getTime());
 
-        calendarManager.insert(app);
+        catm.insert(app);
 
         ICalExportRequest request = new ICalExportRequest(folder.getObjectID());
         ICalExportResponse response = getClient().execute(request);
@@ -157,7 +157,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
         app.setRecurrenceCount(2);
         app.setInterval(1);
         app.setDayInMonth(startingpoint.get(Calendar.DAY_OF_MONTH));
-        calendarManager.insert(app);
+        catm.insert(app);
 
         //export
         AJAXRequest<?> request = new ICalExportRequest(folder.getObjectID());
@@ -165,7 +165,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
         String ical = (String) response.getData();
 
         //remove original
-        calendarManager.delete(app);
+        catm.delete(app);
 
         //import again
         request = new ICalImportRequest(folder.getObjectID(), ical);

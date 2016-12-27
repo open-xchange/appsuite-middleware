@@ -55,11 +55,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -67,7 +65,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug32385Test}
@@ -76,50 +73,37 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug32385Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
-
     private Appointment appointment;
-
-    private AJAXClient client1;
-
-    private AJAXClient client2;
-
-    public Bug32385Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(getClient());
-        client1 = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
 
         FolderObject sharedFolder = new FolderObject();
-        sharedFolder.setObjectID(client2.getValues().getPrivateAppointmentFolder());
+        sharedFolder.setObjectID(getClient2().getValues().getPrivateAppointmentFolder());
         sharedFolder.setLastModified(new Date(Long.MAX_VALUE));
-        sharedFolder.setPermissionsAsArray(new OCLPermission[] { ocl(client1.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+        sharedFolder.setPermissionsAsArray(new OCLPermission[] { ocl(getClient().getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(getClient2().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
-        CommonInsertResponse response = client2.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder));
+        CommonInsertResponse response = getClient2().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder));
         response.fillObject(sharedFolder);
 
         appointment = new Appointment();
         appointment.setTitle("Bug 32385 Test");
         appointment.setStartDate(D("01.05.2014 08:00"));
         appointment.setEndDate(D("01.05.2014 09:00"));
-        UserParticipant user1 = new UserParticipant(client1.getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
-        appointment.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
 
-        ctm.insert(appointment);
+        catm.insert(appointment);
     }
 
     @Test
     public void testBug32385() throws Exception {
-        List<Appointment> newappointments = ctm.newappointments(D("01.05.2014 00:00", TimeZone.getTimeZone("UTC")), D("02.05.2014 00:00", TimeZone.getTimeZone("UTC")), 999, new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID });
+        List<Appointment> newappointments = catm.newappointments(D("01.05.2014 00:00", TimeZone.getTimeZone("UTC")), D("02.05.2014 00:00", TimeZone.getTimeZone("UTC")), 999, new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID });
 
         int count = 0;
         String inFolder = "";
@@ -132,14 +116,4 @@ public class Bug32385Test extends AbstractAJAXSession {
 
         assertEquals("Wrong amount of appointments found (in Folder " + inFolder + ")", 1, count);
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

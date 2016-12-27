@@ -77,26 +77,19 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug41794Test extends AbstractAJAXSession {
 
-    private AJAXClient client2;
     private AJAXClient client3;
-    private CalendarTestManager ctm1;
     private CalendarTestManager ctm2;
     private CalendarTestManager ctm3;
     private String groupParticipant;
     private Appointment appointment;
 
-    public Bug41794Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
         client3 = new AJAXClient(testContext.acquireUser());
         groupParticipant = testContext.getGroupParticipants().get(0);
-        ctm1 = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(client2);
+        catm = new CalendarTestManager(getClient());
+        ctm2 = new CalendarTestManager(getClient2());
         ctm3 = new CalendarTestManager(client3);
 
         appointment = new Appointment();
@@ -113,15 +106,15 @@ public class Bug41794Test extends AbstractAJAXSession {
 
     @Test
     public void testBug41794() throws Exception {
-        ctm1.insert(appointment);
+        catm.insert(appointment);
 
-        appointment.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         ctm2.delete(appointment);
 
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        Appointment loadedAppointment = ctm1.get(appointment);
+        Appointment loadedAppointment = catm.get(appointment);
         for (UserParticipant up : loadedAppointment.getUsers()) {
-            if (up.getIdentifier() == client2.getValues().getUserId()) {
+            if (up.getIdentifier() == getClient2().getValues().getUserId()) {
                 fail("Did not expect participant.");
             }
         }
@@ -134,9 +127,9 @@ public class Bug41794Test extends AbstractAJAXSession {
         ctm3.update(loadedAppointment);
 
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        loadedAppointment = ctm1.get(appointment);
+        loadedAppointment = catm.get(appointment);
         for (UserParticipant up : loadedAppointment.getUsers()) {
-            if (up.getIdentifier() == client2.getValues().getUserId()) {
+            if (up.getIdentifier() == getClient2().getValues().getUserId()) {
                 fail("Did not expect participant: " + up.getIdentifier());
             }
         }
@@ -145,7 +138,6 @@ public class Bug41794Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm1.cleanUp();
             ctm2.cleanUp();
             ctm3.cleanUp();
         } finally {

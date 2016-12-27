@@ -51,12 +51,10 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug32465Test}
@@ -65,23 +63,11 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug32465Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
-
     private Appointment appointment;
-
-    /**
-     * Initializes a new {@link Bug32465Test}.
-     * 
-     * @param name
-     */
-    public Bug32465Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(getClient());
         appointment = new Appointment();
         appointment.setTitle("Bug 32465 Test");
         appointment.setStartDate(D("01.06.2014 00:00", TimeZone.getTimeZone("UTC")));
@@ -92,26 +78,16 @@ public class Bug32465Test extends AbstractAJAXSession {
         appointment.setOccurrence(12);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        ctm.insert(appointment);
+        catm.insert(appointment);
     }
 
     @Test
     public void testBug32465() throws Exception {
         appointment.setOccurrence(13);
-        ctm.update(appointment);
+        catm.update(appointment);
 
-        Appointment loadedAppointment = ctm.get(appointment);
+        Appointment loadedAppointment = catm.get(appointment);
         System.out.println(loadedAppointment.getStartDate());
         System.out.println(loadedAppointment.getEndDate());
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

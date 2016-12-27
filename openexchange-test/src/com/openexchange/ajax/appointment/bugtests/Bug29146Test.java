@@ -51,14 +51,12 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug29146Test}
@@ -69,8 +67,6 @@ public class Bug29146Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    private CalendarTestManager ctm;
-
     public Bug29146Test() {
         super();
     }
@@ -78,8 +74,6 @@ public class Bug29146Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        ctm = new CalendarTestManager(getClient());
 
         appointment = new Appointment();
         appointment.setStartDate(D("18.11.2013 08:00"));
@@ -95,19 +89,10 @@ public class Bug29146Test extends AbstractAJAXSession {
 
     @Test
     public void testInitialParticipantStatus() throws Exception {
-        ctm.insert(appointment);
+        catm.insert(appointment);
 
-        Appointment loadedAppointment = ctm.get(appointment);
+        Appointment loadedAppointment = catm.get(appointment);
         UserParticipant participant = loadedAppointment.getUsers()[0];
         assertEquals("Wrong confirm status.", Appointment.NONE, participant.getConfirm());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 }

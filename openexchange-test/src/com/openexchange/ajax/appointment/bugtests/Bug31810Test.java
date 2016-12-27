@@ -58,7 +58,6 @@ import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug31810Test}
@@ -67,7 +66,6 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug31810Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
     private int nextYear;
     private Appointment single;
     private Appointment conflict;
@@ -80,7 +78,6 @@ public class Bug31810Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(getClient());
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         single = new Appointment();
         single.setTitle("Bug 31810 appointment.");
@@ -88,7 +85,7 @@ public class Bug31810Test extends AbstractAJAXSession {
         single.setEndDate(D("03.03." + nextYear + " 09:00"));
         single.setIgnoreConflicts(true);
         single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm.insert(single);
+        catm.insert(single);
 
         conflict = new Appointment();
         conflict.setTitle("Bug 31810 appointment.");
@@ -97,15 +94,15 @@ public class Bug31810Test extends AbstractAJAXSession {
         conflict.setIgnoreConflicts(false);
         conflict.setShownAs(Appointment.FREE);
         conflict.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm.insert(conflict);
+        catm.insert(conflict);
     }
 
     @Test
     public void testBug31810() throws Exception {
         conflict.setFullTime(true);
         conflict.removeShownAs();
-        ctm.update(conflict);
-        List<ConflictObject> conflicts = ctm.getLastResponse().getConflicts();
+        catm.update(conflict);
+        List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
         assertFalse("No conflict expected.", conflicts != null && conflicts.size() > 1);
     }
 }

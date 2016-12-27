@@ -117,8 +117,6 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
 
     protected int userId = 0;
 
-    protected AJAXClient client;
-
     protected TimeZone timezone;
 
     protected AppointmentRangeGenerator appointmentRangeGenerator;
@@ -127,10 +125,9 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        client = getClient();
-        appointmentFolderId = client.getValues().getPrivateAppointmentFolder();
-        userId = client.getValues().getUserId();
-        timezone = client.getValues().getTimeZone();
+        appointmentFolderId = getClient().getValues().getPrivateAppointmentFolder();
+        userId = getClient().getValues().getUserId();
+        timezone = getClient().getValues().getTimeZone();
 
         final Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -216,7 +213,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     public Appointment persistAppointment(AJAXClient selectedClient, Appointment appointment) throws Exception {
         if (selectedClient == null) {
-            selectedClient = client;
+            selectedClient = getClient();
         }
         return persistSeveral(Collections.singletonList(appointment)).get(0);
     }
@@ -246,7 +243,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     public List<Appointment> persistSeveral(AJAXClient selectedClient, List<Appointment> newAppointments) throws Exception {
         if (selectedClient == null) {
-            selectedClient = client;
+            selectedClient = getClient();
         }
         int numberOfAppointments = newAppointments.size();
         List<InsertRequest> insertAppointmentRequests = new ArrayList<InsertRequest>(numberOfAppointments);
@@ -254,7 +251,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
             insertAppointmentRequests.add(new InsertRequest(appointment, timezone));
         }
         MultipleRequest<AppointmentInsertResponse> multipleRequest = MultipleRequest.create(insertAppointmentRequests.toArray(new InsertRequest[numberOfAppointments]));
-        MultipleResponse<AppointmentInsertResponse> multipleResponse = client.execute(multipleRequest);
+        MultipleResponse<AppointmentInsertResponse> multipleResponse = getClient().execute(multipleRequest);
         return updateAppointmentsWithTimeAndId(newAppointments, multipleResponse);
     }
 
@@ -281,7 +278,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
             updateRequests[i] = new UpdateRequest(appointment, timezone);
         }
         MultipleRequest<UpdateResponse> multipleUpdate = MultipleRequest.create(updateRequests);
-        MultipleResponse<UpdateResponse> multipleResponse = client.executeSafe(multipleUpdate);
+        MultipleResponse<UpdateResponse> multipleResponse = getClient().executeSafe(multipleUpdate);
         for (int i = 0; i < numAppointments; i++) {
             appointments[i].setLastModified(multipleResponse.getResponse(i).getTimestamp());
         }
@@ -304,7 +301,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     public void updateAppointmentsWithOrigin(AJAXClient selectedClient, List<Pair<Appointment, FolderObject>> appointments) {
         if (selectedClient == null) {
-            selectedClient = client;
+            selectedClient = getClient();
         }
         int numAppointments = appointments.size();
         UpdateRequest[] updateRequests = new UpdateRequest[numAppointments];
@@ -327,7 +324,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     public void updateAppointments(AJAXClient selectedClient, Appointment... appointments) {
         if (selectedClient == null) {
-            selectedClient = client;
+            selectedClient = getClient();
         }
         int numAppointments = appointments.length;
         UpdateRequest[] updateRequests = new UpdateRequest[numAppointments];
@@ -358,7 +355,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      * @param appointments The appointments to delete
      */
     public void deleteAppointments(Appointment... appointments) {
-        deleteAppointments(client, appointments);
+        deleteAppointments(getClient(), appointments);
     }
 
     /**
@@ -369,7 +366,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     public void deleteAppointments(AJAXClient selectedClient, Appointment... appointments) {
         if (selectedClient == null) {
-            selectedClient = client;
+            selectedClient = getClient();
         }
 
         int numContacts = appointments.length;
@@ -379,7 +376,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
             deleteRequests[i] = new DeleteRequest(appointment);
         }
         MultipleRequest<CommonDeleteResponse> multipleDelete = MultipleRequest.create(deleteRequests);
-        client.executeSafe(multipleDelete);
+        getClient().executeSafe(multipleDelete);
     }
 
     /**
@@ -428,7 +425,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     public AppointmentUpdatesResponse listModifiedAppointments(AJAXClient selectedClient, final int inFolder, int[] cols, final Date lastModified, Ignore ignore, boolean showPrivate) throws Exception {
         if (selectedClient == null) {
-            selectedClient = client;
+            selectedClient = getClient();
         }
         final UpdatesRequest request = new UpdatesRequest(inFolder, cols, lastModified, false, showPrivate, Ignore.NONE);
         final AppointmentUpdatesResponse response = selectedClient.execute(request);
@@ -464,7 +461,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     protected void deleteCalendarFolder(AJAXClient selectedClient, FolderObject folder) throws Exception {
         if (selectedClient == null) {
-            selectedClient = client;
+            selectedClient = getClient();
         }
         selectedClient.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
 
@@ -523,7 +520,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     public Appointment getAppointment(AJAXClient selectedClient, int folderId, int appointmentId) throws Exception {
         if (selectedClient == null) {
-            selectedClient = client;
+            selectedClient = getClient();
         }
         final GetRequest getRequest = new GetRequest(folderId, appointmentId);
         final GetResponse getResponse = selectedClient.execute(getRequest);

@@ -51,12 +51,10 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug30118Test}
@@ -64,8 +62,6 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug30118Test extends AbstractAJAXSession {
-
-    private CalendarTestManager ctm;
 
     private Appointment appointment;
 
@@ -82,7 +78,6 @@ public class Bug30118Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(getClient());
         appointment = new Appointment();
         appointment.setTitle("Bug 30118 Test");
         appointment.setStartDate(D("17.12.2013 08:00"));
@@ -96,9 +91,9 @@ public class Bug30118Test extends AbstractAJAXSession {
 
     @Test
     public void testBug30118() throws Exception {
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
+        catm.insert(appointment);
+        catm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
+        Appointment loaded = catm.get(appointment);
         assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
     }
 
@@ -107,9 +102,9 @@ public class Bug30118Test extends AbstractAJAXSession {
         appointment.setStartDate(D("17.12.2013 00:00"));
         appointment.setEndDate(D("18.12.2013 00:00"));
         appointment.setFullTime(true);
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
+        catm.insert(appointment);
+        catm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
+        Appointment loaded = catm.get(appointment);
         assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
     }
 
@@ -118,19 +113,9 @@ public class Bug30118Test extends AbstractAJAXSession {
         appointment.setStartDate(D("17.12.2013 00:00"));
         appointment.setEndDate(D("19.12.2013 00:00"));
         appointment.setFullTime(true);
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
+        catm.insert(appointment);
+        catm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
+        Appointment loaded = catm.get(appointment);
         assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

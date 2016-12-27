@@ -92,6 +92,8 @@ public class LockTest extends InfostoreAJAXTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
+        
         testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         sessionId = getSessionId();
         // Copied-without-thinking from FolderTest

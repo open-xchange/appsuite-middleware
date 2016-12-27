@@ -78,7 +78,7 @@ public class HttpAuthTest extends AbstractAJAXSession {
 
     @Before
     public void setUp() throws Exception {
-        AJAXConfig.init();
+        super.setUp();
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);
     }

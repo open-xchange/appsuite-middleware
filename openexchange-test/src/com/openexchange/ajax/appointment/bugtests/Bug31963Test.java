@@ -52,15 +52,12 @@ package com.openexchange.ajax.appointment.bugtests;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.List;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug31963Test}
@@ -70,32 +67,6 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug31963Test extends AbstractAJAXSession {
-
-    private CalendarTestManager ctm;
-
-    /**
-     * Initializes a new {@link Bug31963Test}.
-     *
-     * @param name The test name
-     */
-    public Bug31963Test() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        ctm = new CalendarTestManager(getClient());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
 
     @Test
     public void testNotConflictingAppointment() throws Exception {
@@ -111,7 +82,7 @@ public class Bug31963Test extends AbstractAJAXSession {
         appointment.setEndDate(TimeTools.D("29.04." + nextYear + " 00:00", TimeZones.UTC));
         appointment.setFullTime(true);
         appointment.setIgnoreConflicts(true);
-        appointment = ctm.insert(appointment);
+        appointment = catm.insert(appointment);
         /*
          * create appointment an hour before in user's timezone and check for conflicts
          */
@@ -121,8 +92,8 @@ public class Bug31963Test extends AbstractAJAXSession {
         notConflictingAppointment.setStartDate(TimeTools.D("27.04." + nextYear + " 23:00", getClient().getValues().getTimeZone()));
         notConflictingAppointment.setEndDate(TimeTools.D("28.04." + nextYear + " 00:00", getClient().getValues().getTimeZone()));
         notConflictingAppointment.setIgnoreConflicts(false);
-        ctm.insert(notConflictingAppointment);
-        List<ConflictObject> conflicts = ctm.getLastResponse().getConflicts();
+        catm.insert(notConflictingAppointment);
+        List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
         assertTrue("conflicts detected", null == conflicts || 0 == conflicts.size());
         /*
          * create appointment an hour after in user's timezone and check for conflicts
@@ -133,8 +104,8 @@ public class Bug31963Test extends AbstractAJAXSession {
         notConflictingAppointment.setStartDate(TimeTools.D("29.04." + nextYear + " 00:00", getClient().getValues().getTimeZone()));
         notConflictingAppointment.setEndDate(TimeTools.D("29.04." + nextYear + " 01:00", getClient().getValues().getTimeZone()));
         notConflictingAppointment.setIgnoreConflicts(false);
-        ctm.insert(notConflictingAppointment);
-        conflicts = ctm.getLastResponse().getConflicts();
+        catm.insert(notConflictingAppointment);
+        conflicts = catm.getLastResponse().getConflicts();
         assertTrue("conflicts detected", null == conflicts || 0 == conflicts.size());
         /*
          * create a (really) conflicting appointment in user's timezone and check for conflicts
@@ -145,8 +116,8 @@ public class Bug31963Test extends AbstractAJAXSession {
         conflictingAppointment.setStartDate(TimeTools.D("28.04." + nextYear + " 00:00", getClient().getValues().getTimeZone()));
         conflictingAppointment.setEndDate(TimeTools.D("28.04." + nextYear + " 01:00", getClient().getValues().getTimeZone()));
         conflictingAppointment.setIgnoreConflicts(false);
-        ctm.insert(conflictingAppointment);
-        conflicts = ctm.getLastResponse().getConflicts();
+        catm.insert(conflictingAppointment);
+        conflicts = catm.getLastResponse().getConflicts();
         assertTrue("no conflicts detected", null != conflicts && 0 < conflicts.size());
         /*
          * create another (really) conflicting appointment in user's timezone and check for conflicts
@@ -157,8 +128,8 @@ public class Bug31963Test extends AbstractAJAXSession {
         conflictingAppointment.setStartDate(TimeTools.D("28.04." + nextYear + " 23:00", getClient().getValues().getTimeZone()));
         conflictingAppointment.setEndDate(TimeTools.D("29.04." + nextYear + " 00:00", getClient().getValues().getTimeZone()));
         conflictingAppointment.setIgnoreConflicts(false);
-        ctm.insert(conflictingAppointment);
-        conflicts = ctm.getLastResponse().getConflicts();
+        catm.insert(conflictingAppointment);
+        conflicts = catm.getLastResponse().getConflicts();
         assertTrue("no conflicts detected", null != conflicts && 0 < conflicts.size());
     }
 

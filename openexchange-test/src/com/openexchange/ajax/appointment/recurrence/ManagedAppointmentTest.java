@@ -52,7 +52,6 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
@@ -68,20 +67,11 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.ResourceTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class ManagedAppointmentTest extends AppointmentTest {
-
-    protected CalendarTestManager calendarManager;
-
-    protected FolderTestManager folderManager;
-
-    protected ResourceTestManager resourceManager;
 
     protected FolderObject folder;
 
@@ -107,42 +97,24 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
 
     protected PositiveAssertionOnDeleteException positiveAssertionOnDeleteException;
 
-    public ManagedAppointmentTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        calendarManager = new CalendarTestManager(getClient());
-        folderManager = new FolderTestManager(getClient());
-        resourceManager = new ResourceTestManager(getClient());
         UserValues values = getClient().getValues();
         userTimeZone = values.getTimeZone();
-        this.folder = folderManager.generatePublicFolder("MAT_" + (new Date()).getTime(), Module.CALENDAR.getFolderConstant(), values.getPrivateAppointmentFolder(), values.getUserId());
-        folder = folderManager.insertFolderOnServer(folder);
+        this.folder = ftm.generatePublicFolder("MAT_" + (new Date()).getTime(), Module.CALENDAR.getFolderConstant(), values.getPrivateAppointmentFolder(), values.getUserId());
+        folder = ftm.insertFolderOnServer(folder);
 
-        this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(calendarManager, folder.getObjectID());
-        this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(calendarManager, folder.getObjectID());
-        this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(calendarManager, folder.getObjectID());
-        this.negativeAssertionOnDeleteException = new NegativeAssertionOnDeleteException(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnCreateAndUpdate = new PositiveAssertionOnCreateAndUpdate(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdateOnly(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnChangeException = new PositiveAssertionOnChangeException(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(calendarManager, folder.getObjectID());
+        this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(catm, folder.getObjectID());
+        this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(catm, folder.getObjectID());
+        this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(catm, folder.getObjectID());
+        this.negativeAssertionOnDeleteException = new NegativeAssertionOnDeleteException(catm, folder.getObjectID());
+        this.positiveAssertionOnCreateAndUpdate = new PositiveAssertionOnCreateAndUpdate(catm, folder.getObjectID());
+        this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(catm, folder.getObjectID());
+        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdateOnly(catm, folder.getObjectID());
+        this.positiveAssertionOnChangeException = new PositiveAssertionOnChangeException(catm, folder.getObjectID());
+        this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(catm, folder.getObjectID());
 
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            calendarManager.cleanUp();
-            folderManager.cleanUp();
-            resourceManager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     protected Appointment generateDailyAppointment() {

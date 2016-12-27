@@ -71,11 +71,11 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * US 1601 on server side (TA1698)
@@ -114,8 +114,8 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         client2 = new AJAXClient(user2);
         UserValues values = client1.getValues();
         int module = Module.CALENDAR.getFolderConstant();
-        sharedFolder = folderManager.generateSharedFolder("us1601_shared_" + (new Date().getTime()), module, values.getPrivateAppointmentFolder(), new int[] { values.getUserId(), client2.getValues().getUserId() });
-        folderManager.insertFolderOnServer(sharedFolder);
+        sharedFolder = ftm.generateSharedFolder("us1601_shared_" + (new Date().getTime()), module, values.getPrivateAppointmentFolder(), new int[] { values.getUserId(), client2.getValues().getUserId() });
+        ftm.insertFolderOnServer(sharedFolder);
 
         start = D("13.01.2010 07:00");
         end = D("13.01.2010 07:30");
@@ -129,7 +129,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         privateAppointment.setStartDate(start);
         privateAppointment.setEndDate(end);
         privateAppointment.setPrivateFlag(true);
-        calendarManager.insert(privateAppointment);
+        catm.insert(privateAppointment);
         privateAppointmentID = privateAppointment.getObjectID();
 
         publicAppointmentTitle = "This should be public";
@@ -139,7 +139,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         publicAppointment.setStartDate(start);
         publicAppointment.setEndDate(end);
         publicAppointment.setPrivateFlag(false);
-        calendarManager.insert(publicAppointment);
+        catm.insert(publicAppointment);
         publicAppointmentID = publicAppointment.getObjectID();
     }
 

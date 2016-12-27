@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -64,6 +65,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
+import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
@@ -99,6 +101,7 @@ import com.openexchange.test.pool.TestUser;
  */
 @Deprecated
 @RunWith(ConcurrentTestRunner.class)
+@Concurrent(count = 10)
 public abstract class AbstractAJAXTest {
 
     public static final String PROTOCOL = "http://";
@@ -110,8 +113,6 @@ public abstract class AbstractAJAXTest {
     protected static final String jsonTagTimestamp = "timestamp";
 
     protected static final String jsonTagError = "error";
-
-    private static final Map<String, String> testArgsMap = new HashMap<String, String>();
 
     private String hostName = null;
 
@@ -138,7 +139,7 @@ public abstract class AbstractAJAXTest {
     protected CalendarTestManager catm;
 
     protected ContactTestManager cotm;
-    
+
     protected TaskTestManager ttm;
 
     protected InfostoreTestManager itm;
@@ -183,8 +184,8 @@ public abstract class AbstractAJAXTest {
             testManager.add(mtm);
             atm = new AttachmentTestManager(client);
             testManager.add(atm);
-        } catch (final OXException ex) {
-            ex.printStackTrace();
+        } catch (final OXException | IOException | JSONException ex) {
+            fail(ex.getMessage());
         }
     }
 

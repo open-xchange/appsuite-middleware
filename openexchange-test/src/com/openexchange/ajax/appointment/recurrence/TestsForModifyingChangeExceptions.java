@@ -81,7 +81,7 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         app = generateDailyAppointment();
         app.setOccurrence(3);
 
-        calendarManager.insert(app);
+        catm.insert(app);
 
         changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, exceptionPosition);
@@ -90,7 +90,7 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
         update = app.clone();
         changes.update(update);
-        calendarManager.update(update);
+        catm.update(update);
 
     }
 
@@ -106,10 +106,10 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         secondUpdate.setLastModified(update.getLastModified());
         secondChange.update(secondUpdate);
 
-        calendarManager.update(secondUpdate);
+        catm.update(secondUpdate);
 
-        assertTrue("Should get exception when trying to make a change exception a series", calendarManager.hasLastException());
-        assertEquals("Should have correct exception", 99, ((OXException) calendarManager.getLastException()).getCode());
+        assertTrue("Should get exception when trying to make a change exception a series", catm.hasLastException());
+        assertEquals("Should have correct exception", 99, ((OXException) catm.getLastException()).getCode());
     }
 
     @Test
@@ -121,8 +121,8 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         secondUpdate.setRecurrencePosition(exceptionPosition);
         secondUpdate.setRecurrenceType(Appointment.MONTHLY);
 
-        calendarManager.delete(secondUpdate);
+        catm.delete(secondUpdate);
 
-        assertFalse("Should get no error when trying to delete a change exception", calendarManager.hasLastException());
+        assertFalse("Should get no error when trying to delete a change exception", catm.hasLastException());
     }
 }

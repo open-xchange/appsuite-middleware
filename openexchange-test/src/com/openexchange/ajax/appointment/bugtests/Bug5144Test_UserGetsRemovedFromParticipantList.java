@@ -58,7 +58,6 @@ import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -71,28 +70,27 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
 
     @Test
     public void testIt() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int uid1 = getClient().getValues().getUserId();
-        int uid2 = client2.getValues().getUserId();
+        int uid2 = getClient2().getValues().getUserId();
 
-        UserParticipant other = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant other = new UserParticipant(getClient2().getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);
         int fid1 = folder.getObjectID();
 
         Appointment app = AbstractAssertion.generateDefaultAppointment(fid1);
         app.addParticipant(other);
 
-        calendarManager.insert(app);
+        catm.insert(app);
 
         int appId = app.getObjectID();
-        int fid2 = client2.getValues().getPrivateAppointmentFolder();
+        int fid2 = getClient2().getValues().getPrivateAppointmentFolder();
 
-        GetResponse getResponse = client2.execute(new GetRequest(fid2, appId));
+        GetResponse getResponse = getClient2().execute(new GetRequest(fid2, appId));
         Date lastMod = getResponse.getTimestamp();
 
-        client2.execute(new DeleteRequest(appId, fid2, lastMod));
+        getClient2().execute(new DeleteRequest(appId, fid2, lastMod));
 
-        Appointment actual = calendarManager.get(app);
+        Appointment actual = catm.get(app);
 
         Participant[] participants = actual.getParticipants();
 

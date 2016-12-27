@@ -55,8 +55,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -68,7 +67,6 @@ import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.tasks.json.TaskActionFactory;
-import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 
@@ -78,48 +76,39 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public abstract class AbstractOAuthTest {
+public abstract class AbstractOAuthTest extends AbstractAJAXSession {
 
     protected ClientDto clientApp;
 
-    protected OAuthClient client;
-
-    protected AJAXClient ajaxClient;
+    protected OAuthClient oAuthClient;
 
     protected Scope scope;
 
-    protected TestContext testContext;
-
-    protected TestUser testUser;
-
     protected AbstractOAuthTest(Scope scope) throws OXException {
         super();
-        AJAXConfig.init();
-        ProvisioningSetup.init();
         this.scope = scope;
     }
 
     @Before
-    public void before() throws Exception {
+    public void setUp() throws Exception {
+        super.setUp();
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         // register client application
         clientApp = registerTestClient();
         if (scope == null) {
             scope = Scope.parseScope(clientApp.getDefaultScope());
         }
-        testUser = testContext.acquireUser();
-        client = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
-        ajaxClient = new AJAXClient(testUser);
+        oAuthClient = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            ajaxClient.logout();
-            client.logout();
+            getClient().logout();
+            oAuthClient.logout();
             unregisterTestClient(clientApp);
         } finally {
-            TestContextPool.backContext(testContext);
+            super.tearDown();
         }
     }
 

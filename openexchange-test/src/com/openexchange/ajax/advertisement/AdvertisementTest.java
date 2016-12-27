@@ -121,7 +121,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
     }
 
     @Before
-    public void before() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration(getClient(), false);
 

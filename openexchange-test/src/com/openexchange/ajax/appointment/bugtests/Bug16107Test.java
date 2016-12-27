@@ -96,7 +96,7 @@ public class Bug16107Test extends ManagedAppointmentTest {
         updateAppointment.setRecurringStart(D("24.05.2010 00:00").getTime());
         updateAppointment.setUntil(D("11.06.2010 07:30"));
 
-        calendarManager.insert(startAppointment);
+        catm.insert(startAppointment);
         link(startAppointment, updateAppointment);
         updateAppointment.setRecurrenceID(startAppointment.getObjectID());
     }
@@ -138,10 +138,10 @@ public class Bug16107Test extends ManagedAppointmentTest {
         Appointment[] all;
         int count = 0;
 
-        //        all = calendarManager.all(folder.getObjectID(), start, end, new int[]{1,20,207,206,2});
+        //        all = catm.all(folder.getObjectID(), start, end, new int[]{1,20,207,206,2});
         //        assertEquals("AllRequest should find starting appointment in "+name, 1, all.length);
         //
-        //        has = calendarManager.has(start, end);
+        //        has = catm.has(start, end);
         //        count = 0;
         //        for(boolean b : has)
         //            if(b) count++;
@@ -149,12 +149,12 @@ public class Bug16107Test extends ManagedAppointmentTest {
         //        assertEquals("HasRequest should find the right amount of occurences "+name, occurences, count);
         //
 
-        calendarManager.update(updateAppointment);
+        catm.update(updateAppointment);
 
-        all = calendarManager.all(folder.getObjectID(), start, end, new int[] { 1, 20, 207, 206, 2 });
+        all = catm.all(folder.getObjectID(), start, end, new int[] { 1, 20, 207, 206, 2 });
         assertEquals("AllRequest should find updated appointment in " + name, 1, all.length);
 
-        has = calendarManager.has(start, end);
+        has = catm.has(start, end);
         count = 0;
         for (boolean b : has) {
             if (b) {

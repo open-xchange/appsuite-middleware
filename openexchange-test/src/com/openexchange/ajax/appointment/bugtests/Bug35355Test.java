@@ -72,13 +72,9 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug35355Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm1;
-
     private CalendarTestManager ctm3;
 
     private Appointment appointment;
-
-    private AJAXClient client2;
 
     private AJAXClient client3;
 
@@ -104,16 +100,13 @@ public class Bug35355Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        client2 = new AJAXClient(testContext.acquireUser());
         client3 = new AJAXClient(testContext.acquireUser());
 
         up1 = new UserParticipant(getClient().getValues().getUserId());
-        up2 = new UserParticipant(client2.getValues().getUserId());
+        up2 = new UserParticipant(getClient2().getValues().getUserId());
         up3 = new UserParticipant(client3.getValues().getUserId());
         resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(getClient()));
 
-        ctm1 = new CalendarTestManager(getClient());
-        ctm1.setFailOnError(true);
         ctm3 = new CalendarTestManager(client3);
         ctm3.setFailOnError(true);
 
@@ -130,7 +123,7 @@ public class Bug35355Test extends AbstractAJAXSession {
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
         appointment.setParticipants(new Participant[] { up1, up2, resourceParticipant });
-        ctm1.insert(appointment);
+        catm.insert(appointment);
 
         // Remove resource on a specific exception
         exception = new Appointment();
@@ -143,7 +136,7 @@ public class Bug35355Test extends AbstractAJAXSession {
         exception.setRecurrencePosition(2);
         exception.setParticipants(new Participant[] { up1, up2 });
         exception.setIgnoreConflicts(true);
-        ctm1.update(exception);
+        catm.update(exception);
 
         // Third party creates appointment with resource on exception position
         blockingApp = new Appointment();
@@ -171,14 +164,13 @@ public class Bug35355Test extends AbstractAJAXSession {
         updateSeries.setOccurrence(3);
         updateSeries.setLastModified(new Date(Long.MAX_VALUE));
         updateSeries.setParticipants(new Participant[] { up1, resourceParticipant });
-        ctm1.update(updateSeries);
-        assertFalse("No conflict expected.", ctm1.getLastResponse().hasConflicts());
+        catm.update(updateSeries);
+        assertFalse("No conflict expected.", catm.getLastResponse().hasConflicts());
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            ctm1.cleanUp();
             ctm3.cleanUp();
         } finally {
             super.tearDown();

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.attach.actions;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -70,8 +69,8 @@ public class DetachParser extends AbstractAJAXParser<DetachResponse> {
     @Override
     protected DetachResponse createResponse(Response response) throws JSONException {
         final DetachResponse retval = new DetachResponse(response);
-        final JSONArray data = (JSONArray) response.getData();
-        final int objectId = data.getInt(0);
+        final String data = (String) response.getData();
+        final int objectId = Integer.parseInt(data);
         if (isFailOnError()) {
             assertTrue("Problem while inserting object.", objectId > 0);
         }

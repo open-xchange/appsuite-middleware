@@ -52,7 +52,6 @@ package com.openexchange.ajax.appointment.bugtests;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -62,7 +61,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug39571Test}
@@ -72,14 +70,9 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug39571Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
     private Appointment series;
     private int nextYear;
     private Appointment single;
-
-    public Bug39571Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -90,7 +83,6 @@ public class Bug39571Test extends AbstractAJAXSession {
         UserParticipant up1 = new UserParticipant(getClient().getValues().getUserId());
         ResourceParticipant resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(getClient()));
 
-        ctm = new CalendarTestManager(getClient());
         series = new Appointment();
         series.setTitle("Bug 39571 Series");
         series.setStartDate(TimeTools.D("01.08." + nextYear + " 08:00"));
@@ -101,7 +93,7 @@ public class Bug39571Test extends AbstractAJAXSession {
         series.setParticipants(new Participant[] { up1, resourceParticipant });
         series.setIgnoreConflicts(true);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm.insert(series);
+        catm.insert(series);
 
         single = new Appointment();
         single.setTitle("Bug 39571 Single");
@@ -110,31 +102,21 @@ public class Bug39571Test extends AbstractAJAXSession {
         single.setParticipants(new Participant[] { up1, resourceParticipant });
         single.setIgnoreConflicts(true);
         single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm.insert(single);
+        catm.insert(single);
     }
 
     @Test
     public void testBug39571() throws Exception {
-        Appointment exception = ctm.createIdentifyingCopy(series);
+        Appointment exception = catm.createIdentifyingCopy(series);
         exception.setStartDate(TimeTools.D("02.08." + nextYear + " 06:00"));
         exception.setEndDate(TimeTools.D("02.08." + nextYear + " 06:30"));
         exception.setRecurrencePosition(2);
-        ctm.update(exception);
+        catm.update(exception);
 
         series.setStartDate(TimeTools.D("01.08." + nextYear + " 09:00"));
         series.setEndDate(TimeTools.D("01.08." + nextYear + " 09:30"));
         series.setLastModified(new Date(Long.MAX_VALUE));
-        ctm.update(series);
-        assertTrue("Excpected conflicting ressource.", ctm.getLastResponse().hasConflicts());
+        catm.update(series);
+        assertTrue("Excpected conflicting ressource.", catm.getLastResponse().hasConflicts());
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

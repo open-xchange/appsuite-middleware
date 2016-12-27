@@ -60,7 +60,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
@@ -79,17 +78,12 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug33242Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
 
-    private CalendarTestManager ctm2;
+    private CalendarTestManager catm2;
 
     private Appointment series;
 
     private Appointment single;
-
-    private AJAXClient client1;
-
-    private AJAXClient client2;
 
     private String groupParticipant;
 
@@ -107,11 +101,7 @@ public class Bug33242Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
-
-        ctm = new CalendarTestManager(client1);
-        ctm2 = new CalendarTestManager(client2);
+        catm2 = new CalendarTestManager(getClient2());
 
         groupParticipant = testContext.getGroupParticipants().get(0);
 
@@ -134,22 +124,22 @@ public class Bug33242Test extends AbstractAJAXSession {
         series.setOccurrence(5);
         series.setInterval(1);
 
-        UserParticipant userPart = new UserParticipant(client1.getValues().getUserId());
+        UserParticipant userPart = new UserParticipant(getClient().getValues().getUserId());
         GroupParticipant groupPart = getGroupParticipant(groupParticipant);
 
         series.setParticipants(new Participant[] { userPart, groupPart });
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         series.setIgnoreConflicts(true);
 
-        ctm.insert(series);
+        catm.insert(series);
 
-        exception = ctm.createIdentifyingCopy(series);
-        exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        exception = catm.createIdentifyingCopy(series);
+        exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
 
-        ctm.setFailOnError(true);
-        ctm2.setFailOnError(true);
+        catm.setFailOnError(true);
+        catm2.setFailOnError(true);
     }
 
     /**
@@ -164,17 +154,17 @@ public class Bug33242Test extends AbstractAJAXSession {
         single.setStartDate(D("06.08." + nextYear + " 18:00"));
         single.setEndDate(D("06.08." + nextYear + " 19:00"));
 
-        UserParticipant userPart = new UserParticipant(client1.getValues().getUserId());
+        UserParticipant userPart = new UserParticipant(getClient().getValues().getUserId());
         GroupParticipant groupPart = getGroupParticipant(groupParticipant);
 
         single.setParticipants(new Participant[] { userPart, groupPart });
-        single.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         single.setIgnoreConflicts(true);
 
-        ctm.insert(single);
+        catm.insert(single);
 
-        ctm.setFailOnError(true);
-        ctm2.setFailOnError(true);
+        catm.setFailOnError(true);
+        catm2.setFailOnError(true);
     }
 
     /**
@@ -193,16 +183,16 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteByCreator() throws Exception {
-        exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
 
         // This should fail if not possible
-        ctm.delete(exception);
+        catm.delete(exception);
 
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        Appointment creatorAppointment = ctm.get(series);
-        series.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
-        Appointment groupMemberAppointment = ctm2.get(series);
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        Appointment creatorAppointment = catm.get(series);
+        series.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        Appointment groupMemberAppointment = catm2.get(series);
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getDeleteException());
         assertNotNull(groupMemberAppointment.getDeleteException());
         assertSame(creatorAppointment.getDeleteException().length, 1);
@@ -213,16 +203,16 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteByGroupMember() throws Exception {
-        exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
 
         // This should fail if not possible
-        ctm2.delete(exception);
+        catm2.delete(exception);
 
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        Appointment creatorAppointment = ctm.get(series);
-        series.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
-        Appointment groupMemberAppointment = ctm2.get(series);
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        Appointment creatorAppointment = catm.get(series);
+        series.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        Appointment groupMemberAppointment = catm2.get(series);
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
         assertNotNull(groupMemberAppointment.getChangeException());
         assertSame(creatorAppointment.getChangeException().length, 1);
@@ -230,12 +220,12 @@ public class Bug33242Test extends AbstractAJAXSession {
         assertNull(creatorAppointment.getDeleteException());
         assertNull(groupMemberAppointment.getDeleteException());
 
-        List<Appointment> checkAppointment = ctm.getChangeExceptions(client1.getValues().getPrivateAppointmentFolder(), series.getObjectID(), Appointment.ALL_COLUMNS);
+        List<Appointment> checkAppointment = catm.getChangeExceptions(getClient().getValues().getPrivateAppointmentFolder(), series.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull(checkAppointment);
         assertSame(checkAppointment.size(), 1);
         boolean found = false;
         for (Participant p : checkAppointment.get(0).getParticipants()) {
-            if (p.getIdentifier() == client1.getValues().getUserId()) {
+            if (p.getIdentifier() == getClient().getValues().getUserId()) {
                 found = true;
             }
         }
@@ -244,17 +234,17 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteByCreaterWithUpdate() throws Exception {
-        exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        ctm.update(exception);
+        exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        catm.update(exception);
 
         // This should fail if not possible
-        ctm.delete(exception);
+        catm.delete(exception);
 
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        Appointment creatorAppointment = ctm.get(series);
-        series.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
-        Appointment groupMemberAppointment = ctm2.get(series);
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        Appointment creatorAppointment = catm.get(series);
+        series.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        Appointment groupMemberAppointment = catm2.get(series);
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getDeleteException());
         assertNotNull(groupMemberAppointment.getDeleteException());
         assertSame(creatorAppointment.getDeleteException().length, 1);
@@ -265,17 +255,17 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteByGroupMemberWithUpdate() throws Exception {
-        exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
-        ctm2.update(exception);
+        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        catm2.update(exception);
 
         // This should fail if not possible
-        ctm2.delete(exception);
+        catm2.delete(exception);
 
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        Appointment creatorAppointment = ctm.get(series);
-        series.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
-        Appointment groupMemberAppointment = ctm2.get(series);
-        series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        Appointment creatorAppointment = catm.get(series);
+        series.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        Appointment groupMemberAppointment = catm2.get(series);
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
         assertNotNull(groupMemberAppointment.getChangeException());
         assertSame(creatorAppointment.getChangeException().length, 1);
@@ -283,14 +273,14 @@ public class Bug33242Test extends AbstractAJAXSession {
         assertNull(creatorAppointment.getDeleteException());
         assertNull(groupMemberAppointment.getDeleteException());
 
-        Appointment copy = ctm.createIdentifyingCopy(series);
+        Appointment copy = catm.createIdentifyingCopy(series);
         copy.setRecurrencePosition(2);
-        Appointment checkAppointment = ctm.get(copy);
+        Appointment checkAppointment = catm.get(copy);
         assertNotNull(checkAppointment);
 
         boolean found = false;
         for (UserParticipant up : checkAppointment.getUsers()) {
-            if (up.getIdentifier() == client1.getValues().getUserId()) {
+            if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 found = true;
             }
         }
@@ -299,26 +289,26 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteByGroupMemberSingle() throws Exception {
-        single.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        single.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         // This should fail if not possible
-        ctm2.delete(single);
+        catm2.delete(single);
     }
 
     @Test
     public void testDeleteByCreaterSingle() throws Exception {
-        single.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         // This should fail if not possible
-        ctm.delete(single);
+        catm.delete(single);
     }
 
     @Override
     public void tearDown() throws Exception {
         try {
-            series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-            exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-            single.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-            ctm.cleanUp();
-            ctm2.cleanUp();
+            series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+            exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+            single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+            catm.cleanUp();
+            catm2.cleanUp();
         } finally {
             super.tearDown();
         }

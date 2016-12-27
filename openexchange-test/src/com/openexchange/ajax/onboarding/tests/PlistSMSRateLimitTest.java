@@ -71,13 +71,6 @@ import com.openexchange.sms.SMSExceptionCode;
  */
 public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
 
-    /**
-     * Initializes a new {@link PlistSMSRateLimitTest}.
-     * 
-     * @param name
-     */
-    public PlistSMSRateLimitTest() {}
-
     @Test
     public void testRateLimit() throws OXException, IOException, JSONException, InterruptedException {
         String jsonString = "{\"sms\":\"+49276183850\"}";

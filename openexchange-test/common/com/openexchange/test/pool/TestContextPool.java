@@ -70,7 +70,6 @@ public class TestContextPool {
 
     private static BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(50);
 
-    //    private TestContextWatcher contextWatcher = new TestContextWatcher(contexts);
     private static AtomicReference<TestContextWatcher> contextWatcher = new AtomicReference<>();
 
     private static AtomicBoolean watcherInitialized = new AtomicBoolean(false);
@@ -88,7 +87,7 @@ public class TestContextPool {
                 Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
                 context.setAcquiredBy(acquiredBy);
                 contextWatcher.get().contextInUse(context);
-                //                LOG.info("Context '{}' with id {} has been acquired.", context.getName(), context.getId(), new Throwable());
+                LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
                 return context;
             } catch (InterruptedException e) {
                 // should not happen

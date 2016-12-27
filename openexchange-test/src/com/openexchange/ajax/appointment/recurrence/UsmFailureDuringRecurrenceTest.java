@@ -77,7 +77,7 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
     public void setUp() throws Exception {
         super.setUp();
         app = generateYearlyAppointment();
-        calendarManager.setTimezone(TimeZone.getTimeZone("UTC"));
+        catm.setTimezone(TimeZone.getTimeZone("UTC"));
     }
 
     //I think the message should be more like "Bullshit, you cannot make a change exception a series"    @Test
@@ -159,10 +159,10 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         app.setStartDate(D("31.12.2025 00:00"));
         app.setEndDate(D("31.12.2025 01:00"));
 
-        calendarManager.insert(app);
+        catm.insert(app);
         app.setRecurrencePosition(1);
-        calendarManager.delete(app, false);
-        assertTrue("Should fail", calendarManager.hasLastException());
+        catm.delete(app, false);
+        assertTrue("Should fail", catm.hasLastException());
         /*
          * won't go further because exception is not wrapped nicely,
          * so this is just a boring JSON exception on the client side.
@@ -170,47 +170,47 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
     }
 
     private void succeedTest(Changes changes, Expectations expectationsForSeries, Expectations expectationsForException) throws OXException {
-        calendarManager.insert(app);
-        assertFalse("Creation was expected to work", calendarManager.hasLastException());
+        catm.insert(app);
+        assertFalse("Creation was expected to work", catm.hasLastException());
 
         Appointment update = new Appointment();
         update.setParentFolderID(app.getParentFolderID());
         update.setObjectID(app.getObjectID());
         update.setLastModified(app.getLastModified());
         changes.update(update);
-        calendarManager.update(update);
+        catm.update(update);
 
         if (update.containsRecurrencePosition()) {
             assertFalse("Appointment and change exception should have different IDs", app.getObjectID() == update.getObjectID());
         }
 
-        assertFalse("Update was expected to work", calendarManager.hasLastException());
+        assertFalse("Update was expected to work", catm.hasLastException());
 
         if (expectationsForSeries != null) {
-            Appointment actualSeries = calendarManager.get(app);
-            assertFalse("Getting the series was expected to work", calendarManager.hasLastException());
+            Appointment actualSeries = catm.get(app);
+            assertFalse("Getting the series was expected to work", catm.hasLastException());
             expectationsForSeries.verify("[series]", actualSeries);
         }
 
         if (expectationsForException != null) {
-            Appointment actualChangeException = calendarManager.get(update);
-            assertFalse("Getting the update was expected to work", calendarManager.hasLastException());
+            Appointment actualChangeException = catm.get(update);
+            assertFalse("Getting the update was expected to work", catm.hasLastException());
             expectationsForException.verify("[change exception]", actualChangeException);
         }
     }
 
     private void failTest(Changes changes, String errorCode) {
-        calendarManager.insert(app);
+        catm.insert(app);
 
         Appointment update = new Appointment();
         update.setParentFolderID(app.getParentFolderID());
         update.setObjectID(app.getObjectID());
         update.setLastModified(app.getLastModified());
         changes.update(update);
-        calendarManager.update(update);
+        catm.update(update);
 
-        assertTrue("Was expected to fail", calendarManager.hasLastException());
-        Exception exception = calendarManager.getLastException();
+        assertTrue("Was expected to fail", catm.hasLastException());
+        Exception exception = catm.getLastException();
         assertTrue("Expected message was " + errorCode + ", but got: " + exception.getMessage(), exception.getMessage().contains(errorCode));
     }
 
