@@ -64,6 +64,23 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class GrizzlOXExecutorService extends GrizzlyExecutorService {
 
+    /**
+     * @return {@link GrizzlyExecutorService}
+     */
+    public static GrizzlOXExecutorService createInstance() {
+        return createInstance(ThreadPoolConfig.defaultConfig());
+    }
+
+    /**
+     * @param cfg {@link ThreadPoolConfig}
+     * @return {@link GrizzlyExecutorService}
+     */
+    public static GrizzlOXExecutorService createInstance(ThreadPoolConfig cfg) {
+        return new GrizzlOXExecutorService(cfg);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
     // protected volatile ThreadPoolConfig config;
     // private ThreadPoolService threadPoolService;
     private final ExecutorService executorService;
@@ -80,21 +97,6 @@ public class GrizzlOXExecutorService extends GrizzlyExecutorService {
             throw new IllegalStateException(String.format("The following needed service is missing: \"%1$s\"", ThreadPoolService.class.getSimpleName()));
         }
         this.executorService = threadPoolService.getExecutor();
-    }
-
-    /**
-     * @return {@link GrizzlyExecutorService}
-     */
-    public static GrizzlOXExecutorService createInstance() {
-        return createInstance(ThreadPoolConfig.defaultConfig());
-    }
-
-    /**
-     * @param cfg {@link ThreadPoolConfig}
-     * @return {@link GrizzlyExecutorService}
-     */
-    public static GrizzlOXExecutorService createInstance(ThreadPoolConfig cfg) {
-        return new GrizzlOXExecutorService(cfg);
     }
 
     @Override
