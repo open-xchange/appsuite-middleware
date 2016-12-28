@@ -74,6 +74,10 @@ public enum EventField {
      */
     UID,
     /**
+     * The filename of the event.
+     */
+    FILENAME,
+    /**
      * The sequence number of the event.
      */
     SEQUENCE,

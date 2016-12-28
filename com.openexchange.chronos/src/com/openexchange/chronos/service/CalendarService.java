@@ -86,6 +86,17 @@ public interface CalendarService {
     int resolveByUID(CalendarSession session, String uid) throws OXException;
 
     /**
+     * Resolves a resource filename to the identifier of an existing event. The lookup is performed context-wise, independently of the
+     * current session user's access rights. If an event series with change exceptions is matched, the identifier of the recurring
+     * <i>master</i> event is returned.
+     *
+     * @param session The calendar session
+     * @param filename The filename to resolve
+     * @return The identifier of the resolved event, or <code>0</code> if not found
+     */
+    int resolveByFilename(CalendarSession session, String filename) throws OXException;
+
+    /**
      * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
      * contents. Distinct object access permissions (e.g. "read own") are not considered.
      *

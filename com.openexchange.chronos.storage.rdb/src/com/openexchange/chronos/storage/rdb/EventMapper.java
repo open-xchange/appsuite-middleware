@@ -199,11 +199,11 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removePublicFolderId();
             }
         });
-		mappings.put(EventField.UID, new VarCharMapping<Event>("uid", "UID") {
+        mappings.put(EventField.UID, new VarCharMapping<Event>("uid", "UID") {
 
             @Override
             public void set(Event event, String value) {
-            	event.setUid(value);
+                event.setUid(value);
             }
 
             @Override
@@ -216,10 +216,32 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 return event.getUid();
             }
 
-			@Override
-			public void remove(Event event) {
-				event.removeUid();
-			}
+            @Override
+            public void remove(Event event) {
+                event.removeUid();
+            }
+        });
+        mappings.put(EventField.FILENAME, new VarCharMapping<Event>("filename", "Filename") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setFilename(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsFilename();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getFilename();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeFilename();
+            }
         });
         mappings.put(EventField.SEQUENCE, new IntegerMapping<Event>("sequence", "Sequence") {
 

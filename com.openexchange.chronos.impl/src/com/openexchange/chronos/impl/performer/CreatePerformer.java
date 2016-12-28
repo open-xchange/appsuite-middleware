@@ -194,7 +194,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * copy over further (unchecked) event fields
          */
-        EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES);
+        EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME);
         return event;
     }
 

@@ -65,6 +65,7 @@ import com.openexchange.chronos.impl.performer.DeletePerformer;
 import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
+import com.openexchange.chronos.impl.performer.ResolveFilenamePerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
@@ -138,6 +139,17 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected Integer execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return I(new ResolveUidPerformer(session, storage).perform(uid));
+            }
+        }.executeQuery().intValue();
+    }
+
+    @Override
+    public int resolveByFilename(CalendarSession session, final String filename) throws OXException {
+        return new StorageOperation<Integer>(session) {
+
+            @Override
+            protected Integer execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return I(new ResolveFilenamePerformer(session, storage).perform(filename));
             }
         }.executeQuery().intValue();
     }

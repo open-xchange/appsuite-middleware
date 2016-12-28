@@ -130,7 +130,7 @@ public class Utils {
         EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
         EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
         EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
-        EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP, EventField.UID
+        EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP, EventField.UID, EventField.FILENAME
     };
 
     /**
@@ -502,7 +502,7 @@ public class Utils {
      * @return The sorted events
      */
     public static List<Event> sortEvents(List<Event> events, SortOptions sortOptions) {
-        if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) || 
+        if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) ||
             null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
             return events;
         }

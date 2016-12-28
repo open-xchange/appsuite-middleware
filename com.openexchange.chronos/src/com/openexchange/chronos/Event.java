@@ -70,6 +70,7 @@ public class Event {
     private int folderId;
     private int publicFolderId;
     private String uid;
+    private String filename;
 
     private int sequence;
     private Date created;
@@ -103,9 +104,6 @@ public class Event {
 
     private List<Attachment> attachments;
     private List<Alarm> alarms;
-
-    //    private String filename;
-    //    private String iCalId;
 
     private final EnumSet<EventField> setFields;
 
@@ -269,6 +267,42 @@ public class Event {
      */
     public boolean containsUid() {
         return setFields.contains(EventField.UID);
+    }
+
+    /**
+     * Gets the filename of the event.
+     *
+     * @return The filename
+     */
+    public String getFilename() {
+        return filename;
+    }
+
+    /**
+     * Sets the filename of the event.
+     *
+     * @param value The filename to set
+     */
+    public void setFilename(String value) {
+        filename = value;
+        setFields.add(EventField.FILENAME);
+    }
+
+    /**
+     * Removes the filename of the event.
+     */
+    public void removeFilename() {
+        filename = null;
+        setFields.remove(EventField.FILENAME);
+    }
+
+    /**
+     * Gets a value indicating whether the filename of the event has been set or not.
+     *
+     * @return <code>true</code> if the filename is set, <code>false</code>, otherwise
+     */
+    public boolean containsFilename() {
+        return setFields.contains(EventField.FILENAME);
     }
 
     /**
@@ -1360,6 +1394,9 @@ public class Event {
         if (containsEndTimeZone()) {
             clone.setEndTimeZone(getEndTimeZone());
         }
+        if (containsFilename()) {
+            clone.setFilename(getFilename());
+        }
         if (containsFolderId()) {
             clone.setFolderId(getFolderId());
         }
@@ -1440,6 +1477,7 @@ public class Event {
         result = prime * result + ((description == null) ? 0 : description.hashCode());
         result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
         result = prime * result + ((endTimeZone == null) ? 0 : endTimeZone.hashCode());
+        result = prime * result + ((filename == null) ? 0 : filename.hashCode());
         result = prime * result + id;
         result = prime * result + ((lastModified == null) ? 0 : lastModified.hashCode());
         result = prime * result + ((location == null) ? 0 : location.hashCode());
@@ -1524,6 +1562,11 @@ public class Event {
             if (other.endTimeZone != null)
                 return false;
         } else if (!endTimeZone.equals(other.endTimeZone))
+            return false;
+        if (filename == null) {
+            if (other.filename != null)
+                return false;
+        } else if (!filename.equals(other.filename))
             return false;
         if (id != other.id)
             return false;
