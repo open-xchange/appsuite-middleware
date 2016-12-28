@@ -150,17 +150,26 @@ public class ProvisioningSetup {
             try {
                 TestContext context = new TestContext(contextName, i);
                 context.setAdmin(new TestUser(oxadmin, contextName, password));
-                String userId2 = filter.get(prefix + USER2_IDENTIFIER).toString();
-                context.addUser(new TestUser(userId2, contextName, password));
-                String userId3 = filter.get(prefix + USER3_IDENTIFIER).toString();
-                context.addUser(new TestUser(userId3, contextName, password));
-                String userId4 = filter.get(prefix + USER4_IDENTIFIER).toString();
-                context.addUser(new TestUser(userId4, contextName, password));
 
                 String userId1 = filter.get(prefix + USER1_IDENTIFIER).toString();
                 TestUser testUser = new TestUser(userId1, contextName, password);
                 context.addUser(testUser);
                 startSMTPMockServer(testUser);
+
+                String userId2 = filter.get(prefix + USER2_IDENTIFIER).toString();
+                TestUser testUser2 = new TestUser(userId2, contextName, password);
+                context.addUser(testUser2);
+                startSMTPMockServer(testUser2);
+                
+                String userId3 = filter.get(prefix + USER3_IDENTIFIER).toString();
+                TestUser testUser3 = new TestUser(userId3, contextName, password);
+                context.addUser(testUser3);
+                startSMTPMockServer(testUser3);
+
+                String userId4 = filter.get(prefix + USER4_IDENTIFIER).toString();
+                TestUser testUser4 = new TestUser(userId4, contextName, password);
+                context.addUser(testUser4);
+                startSMTPMockServer(testUser4);
                 
                 context.addGroupParticipant(filter.get(prefix + GROUP_PARTICIPANT_IDENTIFIER).toString());
 

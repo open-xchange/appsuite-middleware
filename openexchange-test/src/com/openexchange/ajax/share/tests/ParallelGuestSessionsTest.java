@@ -70,15 +70,6 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class ParallelGuestSessionsTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link ParallelGuestSessionsTest}.
-     *
-     * @param name The test name
-     */
-    public ParallelGuestSessionsTest() {
-        super();
-    }
-
     @Test
     public void testParallelInvitedGuestSessions() throws Exception {
         int module = randomModule();
