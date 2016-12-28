@@ -98,6 +98,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.log.LogProperties;
+import com.openexchange.marker.OXThreadMarker;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -215,7 +216,13 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 try {
                     updateMappingInfo(request, alias, originalAlias);
 
-                    httpHandler.service(request, response);
+                    OXThreadMarker threadMarker = threadMarker();
+                    threadMarker.setHttpRequestProcessing(true);
+                    try {
+                        httpHandler.service(request, response);
+                    } finally {
+                        threadMarker.setHttpRequestProcessing(false);
+                    }
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
@@ -707,6 +714,24 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         public String generate(Request request, int status, String reasonPhrase, String description, Throwable exception) {
             return com.openexchange.tools.servlet.http.Tools.getErrorPage(status, reasonPhrase, description);
         }
+    }
+
+    private static final OXThreadMarker DUMMY = new OXThreadMarker() {
+
+        @Override
+        public void setHttpRequestProcessing(boolean httpProcessing) {
+            // Nothing
+        }
+
+        @Override
+        public boolean isHttpRequestProcessing() {
+            return false;
+        }
+    };
+
+    private static OXThreadMarker threadMarker() {
+        Thread t = Thread.currentThread();
+        return t instanceof OXThreadMarker ? (OXThreadMarker) t : DUMMY;
     }
 
 }

@@ -47,32 +47,55 @@
  *
  */
 
-package com.openexchange.http.grizzly.threadpool;
+package org.glassfish.grizzly.http.server;
 
-import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
+import java.util.concurrent.Semaphore;
 
 /**
- * {@link GrizzlOXThreadPoolConfig} Configuration for the GrizzlOXThreadPool.
+ * {@link HttpHandlerGuard} - A guard that controls the number of threads that are allowed to concurrently process a HTTP request.
  *
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class GrizzlOXThreadPoolConfig {
+public class HttpHandlerGuard {
 
-    private static ThreadPoolConfig createDefault() {
-        ThreadPoolConfig threadPoolConfig = ThreadPoolConfig.defaultConfig();
-        threadPoolConfig.setPoolName("GrizzlOX");
-        return threadPoolConfig;
-    }
-
-    private static final ThreadPoolConfig DEFAULT = createDefault();
+    private final Semaphore semaphore;
 
     /**
-     * Gets the default
+     * Initializes a new {@link HttpHandlerGuard}.
      *
-     * @return The default
+     * @param permits The initial number of permits available. Must not be equal to or less than zero.
+     * @throws IllegalArgumentException If permits is negative or equal to zero
      */
-    public static ThreadPoolConfig getDefault() {
-        return DEFAULT;
+    public HttpHandlerGuard(int permits) {
+        super();
+        if (permits <= 0) {
+            throw new IllegalArgumentException();
+        }
+        semaphore = new Semaphore(permits);
+    }
+
+    /**
+     * Acquires a permit from this guard, only if one is available at the time of invocation.
+     * <p>
+     * Acquires a permit, if one is available and returns immediately, with the value {@code true},
+     * reducing the number of available permits by one.
+     * <p>
+     * If no permit is available then this method will return immediately with the value {@code false}.
+     *
+     * @return {@code true} if a permit was acquired and {@code false} otherwise
+     */
+    public boolean tryAcquire() {
+        return semaphore.tryAcquire();
+    }
+
+    /**
+     * Releases a permit, returning it to this guard.
+     * <p>
+     * Thus increasing the number of available permits by one.
+     */
+    public void release() {
+        semaphore.release();
     }
 
 }

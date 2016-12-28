@@ -50,7 +50,6 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
@@ -79,7 +78,7 @@ import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
-import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
+import com.openexchange.http.grizzly.threadpool.GrizzlyExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
@@ -142,6 +141,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
             ConfigurationService configurationService = getService(ConfigurationService.class);
+            ThreadPoolService threadPool = getService(ThreadPoolService.class);
             trackService(DispatcherPrefixService.class);
 
             log.info("Starting Grizzly server.");
@@ -178,7 +178,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             // Set the transport
             {
-                TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(configurationService);
+                TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(configurationService, threadPool);
                 networkListener.setTransport(configuredTcpNioTransport);
             }
 
@@ -223,7 +223,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 networkSslListener.setSessionManager(sessionManager);
                 networkSslListener.setSSLEngineConfig(createSslConfiguration(grizzlyConfig));
                 networkSslListener.setSecure(true);
-                TCPNIOTransport configuredTcpNioTransportSsl = buildTcpNioTransport(configurationService);
+                TCPNIOTransport configuredTcpNioTransportSsl = buildTcpNioTransport(configurationService, threadPool);
                 networkSslListener.setTransport(configuredTcpNioTransportSsl);
                 if (grizzlyConfig.isWebsocketsEnabled()) {
                     networkSslListener.registerAddOn(new WebSocketAddOn());
@@ -294,10 +294,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
      * Builds a TCPNIOTransport using {c.o}.threadpool
      *
      * @param configurationService The configuration service to use to read settings for TCP NIO connections
+     * @param threadPool The thread pool to use
      * @return The configured <code>TCPNIOTransport</code> instance
      * @throws OXException If the transport cannot be build
      */
-    private TCPNIOTransport buildTcpNioTransport(ConfigurationService configurationService) throws OXException {
+    private TCPNIOTransport buildTcpNioTransport(ConfigurationService configurationService, ThreadPoolService threadPool) throws OXException {
         if (getService(ThreadPoolService.class) == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
         }
@@ -324,8 +325,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                                     .build();
 
         // Apply ExecutorService backed by {c.o}.threadpool
-        ExecutorService executor = GrizzlOXExecutorService.createInstance();
-        transport.setWorkerThreadPool(executor);
+        transport.setWorkerThreadPool(new GrizzlyExecutorService(threadPool));
         return transport;
     }
 

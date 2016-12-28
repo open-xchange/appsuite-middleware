@@ -49,54 +49,38 @@
 
 package com.openexchange.http.grizzly.threadpool;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.glassfish.grizzly.threadpool.GrizzlyExecutorService;
-import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
-import com.openexchange.http.grizzly.osgi.Services;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link GrizzlOXExecutorService}
+ * {@link GrizzlyExecutorService}
  *
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GrizzlOXExecutorService extends GrizzlyExecutorService {
+public class GrizzlyExecutorService implements ExecutorService {
 
-    /**
-     * @return {@link GrizzlyExecutorService}
-     */
-    public static GrizzlOXExecutorService createInstance() {
-        return createInstance(ThreadPoolConfig.defaultConfig());
-    }
-
-    /**
-     * @param cfg {@link ThreadPoolConfig}
-     * @return {@link GrizzlyExecutorService}
-     */
-    public static GrizzlOXExecutorService createInstance(ThreadPoolConfig cfg) {
-        return new GrizzlOXExecutorService(cfg);
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    // protected volatile ThreadPoolConfig config;
-    // private ThreadPoolService threadPoolService;
     private final ExecutorService executorService;
 
     /**
-     * Initializes a new {@link GrizzlOXExecutorService}.
+     * Initializes a new {@link GrizzlyExecutorService}.
      *
      * @param config
      */
-    public GrizzlOXExecutorService(ThreadPoolConfig config) {
-        super(config);
-        ThreadPoolService threadPoolService = Services.optService(ThreadPoolService.class);
-        if (threadPoolService == null) {
-            throw new IllegalStateException(String.format("The following needed service is missing: \"%1$s\"", ThreadPoolService.class.getSimpleName()));
-        }
-        this.executorService = threadPoolService.getExecutor();
+    public GrizzlyExecutorService(ThreadPoolService threadPool) {
+        super();
+        this.executorService = threadPool.getExecutor();
+    }
+
+    @Override
+    public void execute(Runnable command) {
+        executorService.execute(command);
     }
 
     @Override
@@ -120,13 +104,43 @@ public class GrizzlOXExecutorService extends GrizzlyExecutorService {
     }
 
     @Override
-    public void execute(Runnable r) {
-        executorService.execute(r);
+    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        return executorService.awaitTermination(timeout, unit);
     }
 
     @Override
-    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-        return executorService.awaitTermination(timeout, unit);
+    public <T> Future<T> submit(Callable<T> task) {
+        return executorService.submit(task);
+    }
+
+    @Override
+    public <T> Future<T> submit(Runnable task, T result) {
+        return executorService.submit(task, result);
+    }
+
+    @Override
+    public Future<?> submit(Runnable task) {
+        return executorService.submit(task);
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+        return executorService.invokeAll(tasks);
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+        return executorService.invokeAll(tasks, timeout, unit);
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+        return executorService.invokeAny(tasks);
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        return executorService.invokeAny(tasks, timeout, unit);
     }
 
 }
