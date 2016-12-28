@@ -78,9 +78,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         final int userId = getClient().getValues().getUserId();
         this.folderId = createFolderForTest(userId);
 
-//        com.openexchange.file.storage.File createdFile = createFileOnServer(folderId, "test knowledge", "text/javascript");
-//
-//        com.openexchange.file.storage.File createdFile2 = createFileOnServer(folderId, "test url", "text/javascript");
+        itm.createFileOnServer(folderId, "Title", "text/javascript");
+        //        com.openexchange.file.storage.File createdFile2 = createFileOnServer(folderId, "test url", "text/javascript");
     }
 
     private int createFolderForTest(final int userId) throws JSONException, OXException, IOException {

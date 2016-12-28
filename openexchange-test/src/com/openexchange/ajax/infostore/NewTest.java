@@ -154,7 +154,7 @@ public class NewTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
-
+        
         com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
         data.setFileMIMEType("text/plain");
         data.setDescription("other_desc");

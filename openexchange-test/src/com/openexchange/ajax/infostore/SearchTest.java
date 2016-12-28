@@ -17,21 +17,28 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.common.collect.Iterables;
-import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
 
-public class SearchTest extends InfostoreAJAXTest {
+public class SearchTest extends AbstractAJAXTest {
 
     protected String[] all = null;
-    private static final int[] COLS = new int[] { Metadata.TITLE, Metadata.DESCRIPTION };
+
+    protected int folderId;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
+
+        final int userId = getClient().getValues().getUserId();
+        this.folderId = createFolderForTest(userId);
 
         all = new String[26];
 
@@ -42,6 +49,12 @@ public class SearchTest extends InfostoreAJAXTest {
             itm.newAction(tempFile);
             all[i] = "Test " + i;
         }
+    }
+    
+    private int createFolderForTest(final int userId) throws JSONException, OXException, IOException {
+        final int parent = getClient().getValues().getPrivateInfostoreFolder();
+        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + System.currentTimeMillis(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
+        return ftm.insertFolderOnServer(folder).getObjectID();
     }
 
     @Test
