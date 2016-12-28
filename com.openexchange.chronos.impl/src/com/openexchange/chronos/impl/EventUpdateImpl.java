@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
@@ -81,7 +84,7 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
      * @return The event update providing the differences
      */
     public EventUpdateImpl(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
-        this(original, update, EventMapper.getInstance().getDifferentFields(original, update, considerUnset, ignoredFields));
+        this(original, update, getDifferentFields(original, update, considerUnset, ignoredFields));
     }
 
     private EventUpdateImpl(Event originalEvent, Event updatedEvent, Set<EventField> updatedFields) throws OXException {
@@ -100,6 +103,19 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
     @Override
     public CollectionUpdate<Alarm, AlarmField> getAlarmUpdates() {
         return alarmUpdates;
+    }
+
+    private static Set<EventField> getDifferentFields(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
+        if (null == original) {
+            if (null == update) {
+                return Collections.emptySet();
+            }
+            return new HashSet<EventField>(Arrays.asList(EventMapper.getInstance().getAssignedFields(update)));
+        }
+        if (null == update) {
+            return new HashSet<EventField>(Arrays.asList(EventMapper.getInstance().getAssignedFields(original)));
+        }
+        return EventMapper.getInstance().getDifferentFields(original, update, considerUnset, ignoredFields);
     }
 
 }

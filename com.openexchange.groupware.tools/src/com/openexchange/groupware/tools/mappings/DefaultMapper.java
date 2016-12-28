@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link DefaultMapper} - Abstract {@link Mapping} implementation.
@@ -129,6 +130,27 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
             }
         }
         return differentFields.toArray(newArray(differentFields.size()));
+    }
+
+    @Override
+    public Set<E> getDifferentFields(O original, O update, boolean considerUnset, E... ignoredFields) throws OXException {
+        if (null == original) {
+            throw new IllegalArgumentException("original");
+        }
+        if (null == update) {
+            throw new IllegalArgumentException("update");
+        }
+        Set<E> differentFields = new HashSet<E>();
+        for (Entry<E, ? extends Mapping<? extends Object, O>> entry : getMappings().entrySet()) {
+            if (null != ignoredFields && Arrays.contains(ignoredFields, entry.getKey())) {
+                continue;
+            }
+            Mapping<? extends Object, O> mapping = entry.getValue();
+            if (mapping.isSet(update) && ((considerUnset || mapping.isSet(original)) && false == mapping.equals(original, update))) {
+                differentFields.add(entry.getKey());
+            }
+        }
+        return differentFields;
     }
 
 	@Override

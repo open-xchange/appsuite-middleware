@@ -55,10 +55,8 @@ import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -138,35 +136,6 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         }
         return delta;
-    }
-
-    /**
-     * Gets all event fields that are different in the supplied events.
-     *
-     * @param original The original object
-     * @param update The updated object
-     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
-     * @param ignoredFields Fields to ignore when determining the differences
-     * @return The different fields
-     */
-    public Set<EventField> getDifferentFields(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
-        if (null == original) {
-            throw new IllegalArgumentException("original");
-        }
-        if (null == update) {
-            throw new IllegalArgumentException("update");
-        }
-        Set<EventField> fields = new HashSet<EventField>();
-        for (Entry<EventField, ? extends Mapping<? extends Object, Event>> entry : getMappings().entrySet()) {
-            if (Arrays.contains(ignoredFields, entry.getKey())) {
-                continue;
-            }
-            Mapping<? extends Object, Event> mapping = entry.getValue();
-            if (mapping.isSet(update) && ((considerUnset || mapping.isSet(original)) && false == mapping.equals(original, update))) {
-                fields.add(entry.getKey());
-            }
-        }
-        return fields;
     }
 
     /**

@@ -316,7 +316,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return Collections.singletonList(primaryAlarm);
         }
         Date acknowledgedGuardian = getAcknowledgedGuardian(reminderData);
-        Date nextRegularTriggerTime = getNextTriggerTime(acknowledgedGuardian, primaryAlarm, event, entityResolver.getTimeZone(userID));
+        Date nextRegularTriggerTime = optNextTriggerTime(event, primaryAlarm, entityResolver.getTimeZone(userID), acknowledgedGuardian);
         if (null == nextRegularTriggerTime) {
             return Collections.singletonList(primaryAlarm);
         }
@@ -377,8 +377,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
              */
             Alarm snoozedAlarm = find(regularAlarms, snoozeAlarm.getRelatedTo().getValue());
             if (null != snoozedAlarm) {
-                Date startDate = null != snoozedAlarm.getAcknowledged() ? snoozedAlarm.getAcknowledged() : null != snoozeAlarm.getAcknowledged() ? snoozeAlarm.getAcknowledged() : new Date();
-                Date nextTriggerTime = getNextTriggerTime(startDate, snoozeAlarm, event, timeZone);
+                Date nextTriggerTime = optNextTriggerTime(event, snoozeAlarm, timeZone, snoozedAlarm.getAcknowledged());
                 if (null != nextTriggerTime) {
                     int reminderMinutes = getReminderMinutes(snoozedAlarm.getTrigger(), event, timeZone);
                     return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
@@ -390,7 +389,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
              */
             Alarm regularAlarm = chooseNextAlarm(event, originalReminder, regularAlarms, timeZone);
             if (null != regularAlarm) {
-                Date nextTriggerTime = getNextTriggerTime(regularAlarm, event, timeZone);
+                Date nextTriggerTime = optNextTriggerTime(event, regularAlarm, timeZone);
                 if (null != nextTriggerTime) {
                     int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event, timeZone);
                     return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
@@ -611,19 +610,44 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return new ReminderData(reminderID, reminderMinutes, null == nextTriggerTime ? 0L : nextTriggerTime.getTime());
     }
 
-    private static Date getNextTriggerTime(Alarm alarm, Event event, TimeZone timeZone) {
-        Date startDate;
-        if (isSeriesMaster(event)) {
-            startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
-        } else {
-            startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : event.getStartDate();
-        }
-        return getNextTriggerTime(startDate, alarm, event, timeZone);
+    /**
+     * Determines the next date-time for a specific alarm trigger associated with an event.
+     * <p/>
+     * For non-recurring events, this is always the static time of the alarm's trigger.
+     * <p/>
+     * For event series, the trigger is calculated for the <i>next</i> occurrence after a certain start date, which may be either passed
+     * in <code>startDate</code>, or is either the last acknowledged date of the alarm or the current server time.
+     *
+     * @param event The event the alarm is associated with
+     * @param alarm The alarm associated with the event
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @return The next trigger time, or <code>null</code> if there is none
+     */
+    private static Date optNextTriggerTime(Event event, Alarm alarm, TimeZone timeZone) {
+        return optNextTriggerTime(event, alarm, timeZone, null);
     }
 
-    private static Date getNextTriggerTime(Date startDate, Alarm alarm, Event event, TimeZone timeZone) {
+    /**
+     * Determines the next date-time for a specific alarm trigger associated with an event.
+     * <p/>
+     * For non-recurring events, this is always the static time of the alarm's trigger.
+     * <p/>
+     * For event series, the trigger is calculated for the <i>next</i> occurrence after a certain start date, which may be supplied
+     * directly via the <code>startDate</code> argument, or is either the last acknowledged date of the alarm or the current server time.
+     *
+     * @param event The event the alarm is associated with
+     * @param alarm The alarm associated with the event
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @param startDate The start date marking the lower (inclusive) limit for the actual event occurrence to begin, or <code>null</code>
+     *            to select automatically
+     * @return The next trigger time, or <code>null</code> if there is none
+     */
+    private static Date optNextTriggerTime(Event event, Alarm alarm, TimeZone timeZone, Date startDate) {
+        if (false == isSeriesMaster(event)) {
+            return AlarmUtils.getTriggerTime(alarm.getTrigger(), event, timeZone);
+        }
         try {
-            return AlarmUtils.getNextTriggerTime(startDate, alarm.getTrigger(), event, timeZone, Services.getService(RecurrenceService.class));
+            return AlarmUtils.getNextTriggerTime(event, alarm, startDate, timeZone, Services.getService(RecurrenceService.class));
         } catch (OXException e) {
             LOG.warn("Error determining next trigger time for alarm", e);
         }
@@ -646,7 +670,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Alarm nearestAlarm = null;
         Date nearestTriggerTime = null;
         for (Alarm alarm : alarms) {
-            Date nextTriggerTime = getNextTriggerTime(alarm, event, timeZone);
+            Date nextTriggerTime = optNextTriggerTime(event, alarm, timeZone);
             if (null != nextTriggerTime) {
                 if (null != alarm.getAcknowledged() && false == alarm.getAcknowledged().before(nextTriggerTime)) {
                     /*

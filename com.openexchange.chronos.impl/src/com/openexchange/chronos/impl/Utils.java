@@ -502,7 +502,8 @@ public class Utils {
      * @return The sorted events
      */
     public static List<Event> sortEvents(List<Event> events, SortOptions sortOptions) {
-        if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) || null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
+        if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) || 
+            null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
             return events;
         }
         Collections.sort(events, getComparator(sortOptions.getSortOrders()));
@@ -633,7 +634,6 @@ public class Utils {
             }
             if (0 < userID && (null == fields || contains(fields, EventField.ALARMS))) {
                 Map<Integer, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(events, userID);
-//                Map<Integer, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(objectIDs, userID);
                 for (Event event : events) {
                     event.setAlarms(alarmsById.get(I(event.getId())));
                 }

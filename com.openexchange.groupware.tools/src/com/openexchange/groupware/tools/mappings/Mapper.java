@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tools.mappings;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 
 /**
@@ -107,6 +108,17 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
      * @return The different fields, or an empty array if there are no differences
      */
     E[] getDifferentFields(O original, O update) throws OXException;
+
+    /**
+     * Determines the differences between one object and another one. Only <i>set</i> properties in the second object are considered.
+     *
+     * @param original The original object
+     * @param update The updated object
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences
+     * @return The different fields, or an empty set if there are no differences
+     */
+    Set<E> getDifferentFields(O original, O update, boolean considerUnset, E... ignoredFields) throws OXException;
 
 	/**
 	 * Gets an array of all mapped fields that are set in the supplied object.

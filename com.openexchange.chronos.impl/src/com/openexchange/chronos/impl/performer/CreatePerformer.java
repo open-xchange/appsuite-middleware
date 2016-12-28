@@ -132,6 +132,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         storage.getEventStorage().insertEvent(newEvent);
         storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
+            newEvent.setFolderId(i(folder));
             storage.getAlarmStorage().insertAlarms(newEvent, calendarUser.getId(), event.getAlarms());
         }
         result.addCreation(new CreateResultImpl(loadEventData(newEvent.getId())));

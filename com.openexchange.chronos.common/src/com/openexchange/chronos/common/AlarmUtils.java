@@ -299,36 +299,40 @@ public class AlarmUtils extends CalendarUtils {
         return null;
     }
 
-    public static Date getNextTriggerTime(Date startDate, Trigger trigger, Event event, TimeZone timeZone, RecurrenceService recurrenceService) throws OXException {
-        if (CalendarUtils.isSeriesMaster(event)) {
-            Iterator<Event> iterator = recurrenceService.calculateInstancesRespectExceptions(event, initCalendar(timeZone, startDate), null, null, null);
-            while (iterator.hasNext()) {
-                Date triggerTime = getTriggerTime(trigger, iterator.next(), timeZone);
-                if (null == triggerTime) {
-                    return null;
-                } else if (false == triggerTime.before(startDate)) {
-                    return triggerTime;
-                }
+    /**
+     * Calculates the next date-time for a specific alarm trigger associated with an event series.
+     * <p/>
+     * The trigger is calculated for the <i>next</i> occurrence after a certain start date, which may be supplied directly via the
+     * <code>startDate</code> argument, or is either the last acknowledged date of the alarm or the current server time.
+     *
+     * @param seriesMaster The series master event the alarm is associated with
+     * @param alarm The alarm
+     * @param startDate The start date marking the lower (inclusive) limit for the actual event occurrence to begin, or <code>null</code>
+     *            to select automatically
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @param recurrenceService A reference to the recurrence service
+     * @return The next trigger time, or <code>null</code> if there is none
+     */
+    public static Date getNextTriggerTime(Event seriesMaster, Alarm alarm, Date startDate, TimeZone timeZone, RecurrenceService recurrenceService) throws OXException {
+        if (null == startDate) {
+            startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
+        }
+        Iterator<Event> iterator = recurrenceService.calculateInstancesRespectExceptions(seriesMaster, initCalendar(TimeZones.UTC, startDate), null, null, null);
+        while (iterator.hasNext()) {
+            Event occurrence = iterator.next();
+            if (occurrence.getStartDate().before(startDate)) {
+                continue;
+            }
+            Date triggerTime = getTriggerTime(alarm.getTrigger(), occurrence, timeZone);
+            if (null == triggerTime) {
+                return null;
+            }
+            if (null == alarm.getAcknowledged() || alarm.getAcknowledged().before(triggerTime)) {
+                return triggerTime;
             }
         }
-        return getTriggerTime(trigger, event, timeZone);
+        return null;
     }
-
-    //    public static Date getClosestTriggerTime(Date startDate, List<Alarm> alarms, Event event, TimeZone timeZone) throws OXException {
-    //        if (null == alarms || 0 == alarms.size()) {
-    //            return null;
-    //        }
-    //        Date closestTriggerTime = null;
-    //        for (Alarm alarm : alarms) {
-    //            Date triggerTime = getNextTriggerTime(startDate, alarm.getTrigger(), event, timeZone);
-    //            if (null != triggerTime && false == triggerTime.before(startDate) &&
-    //                (null == alarm.getAcknowledged() || false == triggerTime.before(alarm.getAcknowledged())) &&
-    //                (null == closestTriggerTime || triggerTime.before(closestTriggerTime))) {
-    //                closestTriggerTime = triggerTime;
-    //            }
-    //        }
-    //        return closestTriggerTime;
-    //    }
 
     /**
      * Gets the actual date-time of an event a trigger relates to, i.e. either the event's start- or end-date.
@@ -365,7 +369,7 @@ public class AlarmUtils extends CalendarUtils {
 
     /**
      * Gets a value indicating whether a specific alarm represents a <i>snoozed</i> one, i.e. there exists another alarm with a matching
-     * <code>SNOOZE</code> relationship in the supplied alarm collection.
+     * <code>SNOOZE</code> relationship in the supplied alarm collection that was 'overridden' by this alarm.
      *
      * @param alarm The alarm to inspect
      * @param allAlarms A collection holding all alarms associated with the event
@@ -376,7 +380,7 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
-     * Gets the alarm that has been snoozed and replaced by this snooze alarm, i.e. looks up another alarm with a matching
+     * Gets the alarm that has been snoozed and 'overridden' by this snooze alarm, i.e. looks up another alarm with a matching
      * <code>SNOOZE</code> relationship in the supplied alarm collection.
      *
      * @param alarm The possible 'snooze' alarm to inspect
