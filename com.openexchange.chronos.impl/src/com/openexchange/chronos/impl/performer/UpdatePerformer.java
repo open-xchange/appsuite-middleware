@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -67,6 +68,7 @@ import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
@@ -262,8 +264,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * update any stored alarm triggers of all users if required
          */
         if (null != eventUpdate && needsAlarmTriggerUpdate(eventUpdate)) {
-            Event changedEvent = storage.getEventStorage().loadEvent(originalEvent.getId(), null);
-            storage.getAlarmStorage().updateAlarms(changedEvent);
+            Map<Integer, List<Alarm>> alarmsByUserID = storage.getAlarmStorage().loadAlarms(originalEvent);
+            if (null != alarmsByUserID && 0 < alarmsByUserID.size()) {
+                Event changedEvent = storage.getEventStorage().loadEvent(originalEvent.getId(), null);
+                for (Attendee attendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+                    List<Alarm> alarms = alarmsByUserID.get(I(attendee.getEntity()));
+                    if (null != alarms && 0 < alarms.size()) {
+                        changedEvent.setFolderId(AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID == attendee.getFolderID() ? changedEvent.getPublicFolderId() : attendee.getFolderID());
+                        storage.getAlarmStorage().updateAlarms(changedEvent, attendee.getEntity(), alarms);
+                    }
+                }
+            }
         }
         if (wasUpdated) {
             result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
