@@ -61,6 +61,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.framework.config.util.PropertyHelper;
 import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
 import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.TestConfig;
 import com.openexchange.exception.OXException;
@@ -107,6 +108,7 @@ public class ProvisioningSetup {
 
         synchronized (ProvisioningSetup.class) {
             if (!initialized.get()) {
+                AJAXConfig.init();
                 Properties contextsAndUsers = getProperties();
 
                 createProvisionedContext(contextsAndUsers);

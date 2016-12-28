@@ -11,6 +11,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.FolderTestManager;
 
 public class Bug11250Test extends AppointmentTest {
 
@@ -21,8 +22,9 @@ public class Bug11250Test extends AppointmentTest {
 
     @Test
     public void testBug11250() throws Exception {
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testBug11250" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-        final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
+        FolderObject folderObj = FolderTestManager.createNewFolderObject("testBug11250" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        
+        final int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         Appointment appointmentObj = createAppointmentObject("testBug11250_1");
         appointmentObj.setIgnoreConflicts(true);
@@ -76,7 +78,5 @@ public class Bug11250Test extends AppointmentTest {
         assertEquals("appointment id at position 2 not equals", objectId2, appointmentArray[1].getObjectID());
         assertEquals("appointment id at position 3 not equals", objectId3, appointmentArray[2].getObjectID());
         assertEquals("appointment id at position 4 not equals", objectId2, appointmentArray[3].getObjectID());
-
-        com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, getHostName(), getLogin(), getPassword(), "");
     }
 }

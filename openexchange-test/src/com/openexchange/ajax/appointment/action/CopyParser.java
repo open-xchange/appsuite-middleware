@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,49 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.ajax.appointment.action;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
- * {@link DetachParser}
+ * 
+ * {@link CopyParser}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class DetachParser extends AbstractAJAXParser<DetachResponse> {
+public class CopyParser extends AbstractAJAXParser<CopyResponse> {
 
-    protected DetachParser(boolean failOnError) {
+    /**
+     * Default constructor.
+     */
+    CopyParser(final boolean failOnError) {
         super(failOnError);
     }
 
     @Override
-    protected DetachResponse createResponse(Response response) throws JSONException {
-        JSONObject json = ResponseWriter.getJSON(response);
-        JSONArray arr = null;
-        try{
-            arr = json.getJSONArray("data");
-            if(!json.has("error")) {
-                assertNotNull(json.opt(ResponseFields.TIMESTAMP)); // FIXME!
-            }
-        } catch (final JSONException x) {
-            final Response res = Response.parse(json.toString());
-            if(res.hasError()) {
-                throw new JSONException(res.getErrorMessage());
-            }
-        }
-        final int[] notDeleted = new int[arr.length()];
-
-        for(int i = 0; i < arr.length(); i++) {
-            notDeleted[i] = arr.getInt(i);
-        }
-        
-        return new DetachResponse(response, notDeleted);
+    protected CopyResponse createResponse(final Response response) {
+        return new CopyResponse(response);
     }
 }

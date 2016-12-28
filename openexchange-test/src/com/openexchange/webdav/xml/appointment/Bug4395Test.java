@@ -36,7 +36,7 @@ public class Bug4395Test extends AppointmentTest {
                 FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
             }
         }
-        
+
     }
 
     @Test
@@ -80,9 +80,5 @@ public class Bug4395Test extends AppointmentTest {
 
         final Appointment loadAppointment = loadAppointment(getWebConversation(), appointmentObjectId, parentFolderId, getHostName(), getLogin(), getPassword(), context);
         compareObject(appointmentObj, loadAppointment);
-
-        FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
-        folderObj = null;
-        parentFolderId = 0;
     }
 }

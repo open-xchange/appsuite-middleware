@@ -2,13 +2,13 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.FolderTestManager;
 
 public class MoveTest extends AppointmentTest {
 
@@ -16,7 +16,6 @@ public class MoveTest extends AppointmentTest {
     private String login;
     private String password;
     private String context;
-    private int targetFolder;
     private int objectId;
 
     public MoveTest() {
@@ -29,18 +28,6 @@ public class MoveTest extends AppointmentTest {
         login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
         context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultcontext");
         password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
-        targetFolder = 0;
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-        if (0 != targetFolder) {
-            com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password, context);
-        }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -56,8 +43,8 @@ public class MoveTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.RESERVED);
         objectId = catm.insert(appointmentObj).getObjectID();
 
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-        targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testMove2PrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         appointmentObj.setParentFolderID(targetFolder);
         catm.update(appointmentFolderId, appointmentObj);
@@ -79,8 +66,8 @@ public class MoveTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.RESERVED);
         objectId = catm.insert(appointmentObj).getObjectID();
 
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, true);
-        targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testMove2PublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PUBLIC, userId, 2);
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         appointmentObj.setParentFolderID(targetFolder);
         catm.update(appointmentFolderId, appointmentObj);

@@ -66,6 +66,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import com.google.common.collect.Iterables;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -93,7 +94,7 @@ public class LockTest extends InfostoreAJAXTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        
+
         testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         sessionId = getSessionId();
         // Copied-without-thinking from FolderTest
@@ -108,7 +109,6 @@ public class LockTest extends InfostoreAJAXTest {
         itm.newAction(data, testFile);
 
         String c = data.getId();
-        clean.add(c);
 
         com.openexchange.file.storage.File org = itm.getAction(c);
         itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
@@ -135,7 +135,7 @@ public class LockTest extends InfostoreAJAXTest {
 
     @Test
     public void testLock() throws Exception {
-        String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         itm.getAction(id);
 
         itm.lock(id);
@@ -175,11 +175,10 @@ public class LockTest extends InfostoreAJAXTest {
         assertTrue(itm.getLastResponse().hasError());
 
         // Versions may not be removed
-        ftm.detach(id, new Date(Long.MAX_VALUE), new int[] { 4 });
-//      TODO
-//        int[] notDetached = detach(getSecondWebConversation(), getHostName(), sessionId2, Long.MAX_VALUE, id, new int[] { 4 });
-//        assertEquals(1, notDetached.length);
-//        assertEquals(4, notDetached[0]);
+        ftm.setClient(getClient2());
+        int[] notDetached = ftm.detach(id, new Date(Long.MAX_VALUE), new int[] { 4 });
+        assertEquals(1, notDetached.length);
+        assertEquals(4, notDetached[0]);
 
         itm.lock(id);
         // Object may not be locked
@@ -200,19 +199,14 @@ public class LockTest extends InfostoreAJAXTest {
         assertEquals("Hallo", reload.getTitle());
 
         //Lock owner may detach
-        ftm.detach(id, new Date(Long.MAX_VALUE), new int[] { 4 });
-//        TODO
-//        notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, id, new int[] { 4 });
-//        assertEquals(0, notDetached.length);
-
-        //Lock owner may remove
-        itm.deleteAction(Collections.singletonList(id), Collections.singletonList(folderId), new Date(Long.MAX_VALUE));
-        clean.remove(0);
+        ftm.setClient(getClient());
+        notDetached = ftm.detach(id, new Date(Long.MAX_VALUE), new int[] { 4 });
+        assertEquals(0, notDetached.length);
     }
 
     @Test
     public void testUnlock() throws Exception {
-        String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         itm.lock(id);
         assertFalse(itm.getLastResponse().hasError());
 

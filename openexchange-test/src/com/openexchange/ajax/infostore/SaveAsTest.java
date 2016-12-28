@@ -30,8 +30,6 @@ public class SaveAsTest extends InfostoreAJAXTest {
         
         final String id = itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
 
-        clean.add(id);
-
         com.openexchange.file.storage.File obj = itm.getAction(id);
 
         final File upload = attachmentTest.getTestFile();
@@ -70,8 +68,6 @@ public class SaveAsTest extends InfostoreAJAXTest {
         final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
         try {
             final String id = itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
-
-            clean.add(id);
             fail("Expected IOException when trying to save attachment in virtual infostore folder");
         } catch (final JSONException x) {
             assertTrue(x.getMessage(), x.getMessage().contains("IFO-1700"));

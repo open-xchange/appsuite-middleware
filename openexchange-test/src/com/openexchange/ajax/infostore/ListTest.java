@@ -14,6 +14,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
+import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -28,8 +29,10 @@ public class ListTest extends InfostoreAJAXTest {
     @Test
     public void testBasic() throws Exception {
         final String[][] bothEntries = new String[2][2];
-        bothEntries[0][1] = clean.get(0);
-        bothEntries[1][1] = clean.get(1);
+        final String origId1 = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        bothEntries[0][1] = origId1;
+        final String origId2 = Iterables.get(itm.getCreatedEntities(), 1).getId();
+        bothEntries[1][1] = origId2;
 
         bothEntries[0][0] = String.valueOf(folderId);
         bothEntries[1][0] = String.valueOf(folderId);
@@ -43,10 +46,10 @@ public class ListTest extends InfostoreAJAXTest {
         final String fantasyID = getFantasyID();
 
         final String[][] entries = new String[4][2];
-        entries[0][1] = clean.get(0);
+        entries[0][1] = Iterables.get(itm.getCreatedEntities(), 0).getId();
         entries[1][1] = String.valueOf(fantasyID);
-        entries[2][1] = clean.get(1);
-        entries[3][1] = clean.get(1);
+        entries[2][1] = Iterables.get(itm.getCreatedEntities(), 1).getId();
+        entries[3][1] = Iterables.get(itm.getCreatedEntities(), 1).getId();
 
         entries[0][0] = String.valueOf(folderId);
         entries[1][0] = String.valueOf(folderId);
@@ -61,8 +64,10 @@ public class ListTest extends InfostoreAJAXTest {
     @Test
     public void testLastModifiedUTC() throws JSONException, IOException, OXException {
         final String[][] bothEntries = new String[2][2];
-        bothEntries[0][1] = clean.get(0);
-        bothEntries[1][1] = clean.get(1);
+        final String origId1 = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        bothEntries[0][1] = origId1;
+        final String origId2 = Iterables.get(itm.getCreatedEntities(), 1).getId();
+        bothEntries[1][1] = origId2;
 
         bothEntries[0][0] = String.valueOf(folderId);
         bothEntries[1][0] = String.valueOf(folderId);
@@ -86,11 +91,12 @@ public class ListTest extends InfostoreAJAXTest {
     public void testNumberOfVersions() throws JSONException, IOException, OXException {
         final String[][] entries = new String[1][2];
         entries[0][0] = String.valueOf(folderId);
-        entries[0][1] = clean.get(0);
+        String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        entries[0][1] = origId;
 
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         
-        com.openexchange.file.storage.File org = itm.getAction(clean.get(0));
+        com.openexchange.file.storage.File org = itm.getAction(origId);
         org.setDescription("New description");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
@@ -104,7 +110,7 @@ public class ListTest extends InfostoreAJAXTest {
             String id = row.getString(0);
             int numberOfVersions = row.getInt(1);
 
-            if (id.equals(clean.get(0))) {
+            if (id.equals(origId)) {
                 assertEquals(1, numberOfVersions);
                 found = true;
             }
@@ -123,8 +129,8 @@ public class ListTest extends InfostoreAJAXTest {
     public void checkEntries(final String[][] infostore_ids) throws Exception {
         itm.list(infostore_ids, new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL });
         assertFalse(itm.getLastResponse().hasError());
-
-        final Set<String> ids = new HashSet<String>(clean);
+        
+        final Set<String> ids = itm.getCreatedEntitiesIds();
         final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
         final Set<String> urls = new HashSet<String>(Arrays.asList("http://www.open-xchange.com"));
         final Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge", "test url"));

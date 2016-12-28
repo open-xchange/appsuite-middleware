@@ -194,7 +194,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         return response.getArray();
     }
 
-    private Object[][] getViaSearch(Appointment appointment) throws OXException, IOException, SAXException, JSONException {
+    private Object[][] getViaSearch(Appointment appointment) throws OXException, IOException, JSONException {
         SearchRequest searchRequest = new SearchRequest("*", expectedFolderId, new Date(0), new Date(Integer.MAX_VALUE), Appointment.ALL_COLUMNS, -1, null, false, true); // TODO: Tierlieb - fix params
         SearchResponse searchResponse = client.execute(searchRequest);
         return searchResponse.getArray();

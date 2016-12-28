@@ -17,17 +17,12 @@ public class DocumentTest extends InfostoreAJAXTest {
     protected File upload;
     protected String id;
 
-    public DocumentTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         com.openexchange.file.storage.File data = createFile(folderId, "test upload");
         itm.newAction(data, upload);
-        clean.add(data.getId());
     }
 
     @Test

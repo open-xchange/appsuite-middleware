@@ -207,7 +207,7 @@ public class ListTest extends AppointmentTest {
         folderObj.setModule(FolderObject.CALENDAR);
         folderObj.setType(FolderObject.PUBLIC);
 
-        final OCLPermission[] permission = new OCLPermission[] { com.openexchange.webdav.xml.FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), };
+        final OCLPermission[] permission = new OCLPermission[] { FolderTestManager.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), };
 
         folderObj.setPermissionsAsArray(permission);
 

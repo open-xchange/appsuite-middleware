@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Date;
 import org.junit.Test;
+import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.test.TestInit;
 
@@ -40,7 +41,6 @@ public class NewTest extends InfostoreAJAXTest {
         itm.newAction(data, upload);
 
         String id = data.getId();
-        clean.add(id);
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals("test upload", obj.getTitle());
@@ -70,7 +70,6 @@ public class NewTest extends InfostoreAJAXTest {
         itm.newAction(dataNoUpload);
 
         id = dataNoUpload.getId();
-        clean.add(id);
 
         obj = itm.getAction(id);
 
@@ -89,7 +88,6 @@ public class NewTest extends InfostoreAJAXTest {
         itm.newAction(data, emptyFile);
         
         String id = data.getId();
-        clean.add(id);
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals("test upload", obj.getTitle());
@@ -122,7 +120,6 @@ public class NewTest extends InfostoreAJAXTest {
             com.openexchange.file.storage.File data = createFile(folderId, "test large upload");
             data.setFileMIMEType("text/plain");
             itm.newAction(data, largeFile);
-            clean.add(data.getId());
             fail("Uploaded Large File and got no error");
         } catch (final Exception x) {
             // Exception is expected
@@ -141,7 +138,6 @@ public class NewTest extends InfostoreAJAXTest {
         itm.newAction(data, upload);
         
         String id = data.getId();
-        clean.add(id);
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals(1, obj.getNumberOfVersions());
@@ -153,7 +149,7 @@ public class NewTest extends InfostoreAJAXTest {
     public void testUniqueFilenamesOnUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
@@ -163,8 +159,6 @@ public class NewTest extends InfostoreAJAXTest {
         data.setFileMIMEType("text/plain");
         data.setDescription("other_desc");
         itm.newAction(data, upload);
-
-        clean.add(data.getId());
 
         com.openexchange.file.storage.File obj = itm.getAction(data.getId());
         assertFalse(upload.getName().equals(obj.getFileName()));
@@ -177,7 +171,6 @@ public class NewTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File data = createFile(folderId, null);
         data.setFileMIMEType("text/plain");
         itm.newAction(data, upload);
-        clean.add(data.getId());
 
         com.openexchange.file.storage.File obj = itm.getAction(data.getId());
         assertEquals(upload.getName(), obj.getTitle());
@@ -191,14 +184,11 @@ public class NewTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File data = createFile(folderId, "test upload");
         data.setFileMIMEType("text/plain");
         itm.newAction(data, upload);
-        clean.add(data.getId());
 
         com.openexchange.file.storage.File data2 = createFile(folderId, "test upload");
         data.setFileMIMEType("text/plain");
         itm.newAction(data2, upload);
 
-        clean.add(data2.getId());
-        
         com.openexchange.file.storage.File action = itm.getAction(data2.getId());
 
         assertEquals(action.getFileName(), action.getTitle());

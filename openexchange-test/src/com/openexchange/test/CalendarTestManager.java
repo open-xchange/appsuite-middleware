@@ -69,6 +69,8 @@ import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
+import com.openexchange.ajax.appointment.action.CopyRequest;
+import com.openexchange.ajax.appointment.action.CopyResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.FreeBusyRequest;
 import com.openexchange.ajax.appointment.action.FreeBusyResponse;
@@ -261,6 +263,17 @@ public class CalendarTestManager implements TestManager {
     public Appointment get(int parentFolderID, int objectID) throws OXException {
         GetRequest get = new GetRequest(parentFolderID, objectID, getFailOnError());
         GetResponse response = execute(get);
+        extractInfo(response);
+        return response.getAppointment(timezone);
+    }
+    
+    public Appointment copy(int parentFolderID, int objectID, Object body) throws OXException {
+        return this.copy(parentFolderID, objectID, body, false);
+    }
+
+    public Appointment copy(int parentFolderID, int objectID, Object body, boolean ignoreConflicts) throws OXException {
+        CopyRequest request = new CopyRequest(parentFolderID, objectID, body, ignoreConflicts);
+        CopyResponse response = execute(request);
         extractInfo(response);
         return response.getAppointment(timezone);
     }

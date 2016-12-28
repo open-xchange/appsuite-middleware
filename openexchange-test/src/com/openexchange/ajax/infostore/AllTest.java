@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.TestInit;
@@ -71,8 +72,9 @@ public class AllTest extends InfostoreAJAXTest {
     @Test
     public void testNumberOfVersions() throws JSONException, IOException, SAXException, OXException {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
-        com.openexchange.file.storage.File org = itm.getAction(clean.get(0));
+        com.openexchange.file.storage.File org = itm.getAction(id);
         org.setDescription("New description");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.DESCRIPTION}, new Date(Long.MAX_VALUE)); // V1
         assertFalse(itm.getLastResponse().hasError());
@@ -82,10 +84,10 @@ public class AllTest extends InfostoreAJAXTest {
         boolean found = false;
         for (int i = 0, size = all.size(); i < size; i++) {
             com.openexchange.file.storage.File row = all.get(i);
-            String id = row.getId();
+            String rowId = row.getId();
             int numberOfVersions = row.getNumberOfVersions();
 
-            if (id.equals(clean.get(0))) {
+            if (rowId.equals(id)) {
                 assertEquals(1, numberOfVersions);
                 found = true;
             }

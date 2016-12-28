@@ -16,8 +16,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
+import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
@@ -28,10 +29,6 @@ public class SearchTest extends InfostoreAJAXTest {
     protected String[] all = null;
     private static final int[] COLS = new int[] { Metadata.TITLE, Metadata.DESCRIPTION };
 
-    public SearchTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -39,11 +36,11 @@ public class SearchTest extends InfostoreAJAXTest {
         all = new String[26];
 
         final char[] alphabet = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
-
         for (int i = 0; i < 26; i++) {
-            com.openexchange.file.storage.File createdFile = createFileOnServer(folderId, "Test " + i, "text/javascript");
+            com.openexchange.file.storage.File tempFile = InfostoreTestManager.createFile(folderId, "Test " + i, "text/javascript");
+            tempFile.setDescription("this is document "+alphabet[i]);
+            itm.newAction(tempFile);
             all[i] = "Test " + i;
-            clean.add(createdFile.getId());
         }
     }
 
@@ -65,7 +62,6 @@ public class SearchTest extends InfostoreAJAXTest {
         files = itm.search("Test ?5", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
         assertFalse(itm.getLastResponse().hasError());
         assertTitles(files, "Test 15", "Test 25");
-
     }
 
     @Test
@@ -161,8 +157,7 @@ public class SearchTest extends InfostoreAJAXTest {
     public void testVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final String id = clean.get(0);
-
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(id);
         org.setTitle("File");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
@@ -184,7 +179,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     // Tests functionality that no one requested yet
     public void notestEscape() throws Exception {
-        final String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File file = itm.getAction(id);
         file.setTitle("The mysterious ?");
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
@@ -221,7 +216,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     @Test
     public void testCategories() throws Exception {
-        final String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File file = itm.getAction(id);
         file.setCategories("[\"curiosity\", \"cat\", \"danger\"]");
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.CATEGORIES }, new Date(Long.MAX_VALUE));
@@ -236,7 +231,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     // Node 2652
     @Test
-    public void testLastModifiedUTC() throws JSONException, IOException, SAXException, OXException {
+    public void testLastModifiedUTC() throws JSONException, IOException, OXException {
         itm.search("*", new int[] { Metadata.LAST_MODIFIED_UTC }, folderId, Metadata.LAST_MODIFIED_UTC, Order.NO_ORDER);
         assertFalse(itm.getLastResponse().hasError());
         final JSONArray results = (JSONArray) itm.getLastResponse().getData();
@@ -256,7 +251,6 @@ public class SearchTest extends InfostoreAJAXTest {
     public void testBackslashFound() throws Exception {
         String title = "Test\\WithBackslash";
         com.openexchange.file.storage.File createdFile = createFileOnServer(folderId, title, "text/javascript");
-        clean.add(createdFile.getId());
 
         List<com.openexchange.file.storage.File> files = itm.search(title, new int[] { Metadata.TITLE, Metadata.ID }, folderId, Metadata.ID, Order.NO_ORDER);
 

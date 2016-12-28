@@ -4,21 +4,23 @@ package com.openexchange.ajax.infostore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
+import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.test.TestInit;
 
 public class DetachTest extends InfostoreAJAXTest {
-
-    public DetachTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -26,7 +28,8 @@ public class DetachTest extends InfostoreAJAXTest {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         final long FAR_FUTURE = Long.MAX_VALUE;
 
-        com.openexchange.file.storage.File org = itm.getAction(clean.get(0));
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        com.openexchange.file.storage.File org = itm.getAction(origId);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
@@ -48,106 +51,105 @@ public class DetachTest extends InfostoreAJAXTest {
 
     @Test
     public void testBasic() throws Exception {
-        ftm.detach(clean.get(0), new Date(System.currentTimeMillis()), new int[] { 1, 2, 3, 4, 5 });
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        ftm.detach(origId, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3, 4, 5 });
 
-        checkNoVersions();
+        checkNoVersions(origId);
     }
 
     @Test
     public void testRevert() throws Exception {
-        itm.revert(clean.get(0));
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        itm.revert(origId);
         assertFalse(itm.getLastResponse().hasError());
         assertNotNull(itm.getLastResponse().getTimestamp());
-        checkNoVersions();
+        checkNoVersions(origId);
     }
 
-    public void checkNoVersions() throws Exception {
+    public void checkNoVersions(String id) throws Exception {
         //		 Version magically reverts to 0
-        com.openexchange.file.storage.File obj = itm.getAction(clean.get(0));
+        com.openexchange.file.storage.File obj = itm.getAction(id);
 
         assertEquals(0, obj.getVersion());
 
-        ftm.detach(clean.get(0), new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
+        ftm.detach(id, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
 
         final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[] { 1, 2, 3 }));
 
-        //TODO 
-        //        final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[] { 1, 2, 3 });
-        //        assertEquals(versions.size(), notDetached.length);
-        //        for (final int id : notDetached) {
-        //            assertTrue(versions.remove(id));
-        //        }
-        //        assertTrue(versions.isEmpty());
+        final int[] notDetached = ftm.detach(id, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
+        assertEquals(versions.size(), notDetached.length);
+        for (final int lId : notDetached) {
+            assertTrue(versions.remove(lId));
+        }
+        assertTrue(versions.isEmpty());
 
-        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
+        com.openexchange.file.storage.File file = itm.getAction(id);
 
         assertEquals(null, file.getFileName());
         assertEquals("", file.getFileMIMEType());
         assertEquals(0, file.getFileSize());
     }
 
-//    TODO MS re-add
-//    @Test
-//        public void testSpotted() throws Exception {
-//            ftm.detach(clean.get(0), new Date(Long.MAX_VALUE), new int[] { 1, 3, 5 });
-//
-//        final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[] { 1, 3, 5 });
-//            assertEquals(0, notDetached.length);
-//    
-//            Response res = versions(getWebConversation(), getHostName(), sessionId, clean.get(0), new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION });
-//            assertNoError(res);
-//            // Current Version reverts to 4 (being the newest available version
-//            VersionsTest.assureVersions(new Integer[] { 2, 4 }, res, 4);
-//            asser
-//    
-//            com.openexchange.file.storage.File obj = itm.getAction(clean.get(0));
-//    
-//            assertEquals(4, obj.getVersion());
-//        }
+    @Test
+    public void testSpotted() throws Exception {
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
-//  TODO MS re-add
-//    @Test
-//    public void testDetachVersion0() throws Exception {
-//        final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[] { 0 });
-//        assertEquals(1, notDetached.length);
-//        assertEquals(0, notDetached[0]);
-//    }
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 1, 3, 5 });
+        assertEquals(0, notDetached.length);
+
+        List<com.openexchange.file.storage.File> versions = itm.versions(origId, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);
+        AbstractAJAXResponse lastResponse = itm.getLastResponse();
+        assertFalse(lastResponse.hasError());
+        // Current Version reverts to 4 (being the newest available version
+        VersionsTest.assureVersions(new Integer[] { 2, 4 }, lastResponse, 4);
+
+        com.openexchange.file.storage.File obj = itm.getAction(origId);
+
+        assertEquals(4, obj.getVersion());
+    }
+
+    @Test
+    public void testDetachVersion0() throws Exception {
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 0 });
+        assertEquals(1, notDetached.length);
+        assertEquals(0, notDetached[0]);
+    }
 
     // Bug 3818
-//  TODO MS re-add
-//    @Test
-//    public void testCopyComments() throws Exception {
-//        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
-//        file.setDescription("current_description");
-//        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.DESCRIPTION }, new Date(Long.MAX_VALUE));
-//        assertFalse(itm.getLastResponse().hasError());
-//
-//        final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[] { 5, 4, 3 });
-//        assertEquals(0, notDetached.length);
-//
-//        com.openexchange.file.storage.File document = itm.getAction(clean.get(0));
-//        assertEquals("current_description", document.getDescription());
-//    }
+    @Test
+    public void testCopyComments() throws Exception {
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        com.openexchange.file.storage.File file = itm.getAction(origId);
+        file.setDescription("current_description");
+        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.DESCRIPTION }, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
+
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 5, 4, 3 });
+        assertEquals(0, notDetached.length);
+
+        com.openexchange.file.storage.File document = itm.getAction(origId);
+        assertEquals("current_description", document.getDescription());
+    }
 
     //	Bug 4120
-//  TODO MS re-add
-//    @Test
-//    public void testUniqueFilenames() throws Exception {
-//        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-//
-//        com.openexchange.file.storage.File file = itm.getAction(clean.get(0));
-//        file.setFileName("blubb.properties");
-//        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.FILENAME }, new Date(Long.MAX_VALUE));
-//        assertFalse(itm.getLastResponse().hasError());
-//
-//        com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
-//        data.setFileMIMEType("text/plain");
-//        data.setDescription("other_desc");
-//        itm.newAction(data, upload);
-//
-//        clean.add(data.getId());
-//
-//        detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[] { 5 });
-//
-//    }
+    @Test
+    public void testUniqueFilenames() throws Exception {
+        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+
+        com.openexchange.file.storage.File file = itm.getAction(origId);
+        file.setFileName("blubb.properties");
+        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.FILENAME }, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
+
+        com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
+        data.setFileMIMEType("text/plain");
+        data.setDescription("other_desc");
+        itm.newAction(data, upload);
+
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 5 });
+
+    }
 }

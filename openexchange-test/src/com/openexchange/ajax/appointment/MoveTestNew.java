@@ -93,16 +93,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     private Set<TestManager> tm = new HashSet<TestManager>();
 
-    private int idA, idB, idC;
-
-    /**
-     * Initializes a new {@link MoveTestNew}.
-     * 
-     * @param name The test name
-     */
-    public MoveTestNew() {
-        super();
-    }
+    private int idB, idC;
 
     @Before
     public void setUp() throws Exception {
@@ -140,14 +131,14 @@ public class MoveTestNew extends AbstractAppointmentTest {
         ftm.insertFolderOnServer(folderA1);
 
         folderB = ftmB.getFolderFromServer(valuesB.getPrivateAppointmentFolder());
-        addAuthorPermissions(folderB, idA, ftmB);
+        addAuthorPermissions(folderB, getClient().getValues().getUserId(), ftmB);
         folderB1 = createPrivateFolder("SubfolderB1" + System.currentTimeMillis(), ftmB, clientB, getClient());
         ftmB.insertFolderOnServer(folderB1);
         folderB2 = createPrivateFolder("SubfolderB2" + System.currentTimeMillis(), ftmB, clientB, getClient());
         ftmB.insertFolderOnServer(folderB2);
 
         folderC = ftmC.getFolderFromServer(valuesC.getPrivateAppointmentFolder());
-        addAuthorPermissions(folderC, idA, ftmC);
+        addAuthorPermissions(folderC, getClient().getValues().getUserId(), ftmC);
         folderC1 = createPrivateFolder("SubfolderC1" + System.currentTimeMillis(), ftmC, clientC, getClient());
         ftmC.insertFolderOnServer(folderC1);
     }
@@ -187,18 +178,18 @@ public class MoveTestNew extends AbstractAppointmentTest {
         Appointment loaded = get(app, folderA, catm);
         assertEquals("Wrong folder id.", folderA.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 1, loaded.getParticipants().length);
-        assertEquals("Wrong participant.", idA, loaded.getParticipants()[0].getIdentifier());
+        assertEquals("Wrong participant.", getClient().getValues().getUserId(), loaded.getParticipants()[0].getIdentifier());
 
         move(app, folderA, folderA1, catm);
         loaded = get(app, folderA1, catm);
         assertEquals("Wrong folder id.", folderA1.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 1, loaded.getParticipants().length);
-        assertEquals("Wrong participant.", idA, loaded.getParticipants()[0].getIdentifier());
+        assertEquals("Wrong participant.", getClient().getValues().getUserId(), loaded.getParticipants()[0].getIdentifier());
     }
 
     @Test
     public void testOwnPrivateToSubfolderWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOwnPrivateToSubfolderWithParticipants", folderA, idA, idB, idC);
+        Appointment app = generateAppointment("testOwnPrivateToSubfolderWithParticipants", folderA, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderA, catm);
         assertEquals("Wrong folder id.", folderA.getObjectID(), loaded.getParentFolderID());
@@ -233,7 +224,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
         Appointment loaded = get(app, folderA, catm);
         assertEquals("Wrong folder id.", folderA.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 1, loaded.getParticipants().length);
-        assertEquals("Wrong participant.", idA, loaded.getParticipants()[0].getIdentifier());
+        assertEquals("Wrong participant.", getClient().getValues().getUserId(), loaded.getParticipants()[0].getIdentifier());
 
         move(app, folderA, folderB, catm);
         loaded = get(app, folderB, ctmB);
@@ -244,7 +235,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @Test
     public void testOwnPrivateToOtherPrivateWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOwnPrivateToOtherPrivateWithParticipants", folderA, idA, idB, idC);
+        Appointment app = generateAppointment("testOwnPrivateToOtherPrivateWithParticipants", folderA, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderA, catm);
         assertEquals("Wrong folder id.", folderA.getObjectID(), loaded.getParentFolderID());
@@ -280,7 +271,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
         Appointment loaded = get(app, folderA, catm);
         assertEquals("Wrong folder id.", folderA.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 1, loaded.getParticipants().length);
-        assertEquals("Wrong participant.", idA, loaded.getParticipants()[0].getIdentifier());
+        assertEquals("Wrong participant.", getClient().getValues().getUserId(), loaded.getParticipants()[0].getIdentifier());
 
         move(app, folderA, folderB1, catm);
 
@@ -292,7 +283,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @Test
     public void testOwnPrivateToOtherSubfolderWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOwnPrivateToOtherSubfolderWithParticipants", folderA, idA, idB, idC);
+        Appointment app = generateAppointment("testOwnPrivateToOtherSubfolderWithParticipants", folderA, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderA, catm);
         assertEquals("Wrong folder id.", folderA.getObjectID(), loaded.getParentFolderID());
@@ -342,7 +333,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @Test
     public void testOtherPrivateToOwnPrivateWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherPrivateToOwnPrivateWithParticipants", folderB, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherPrivateToOwnPrivateWithParticipants", folderB, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB, catm);
         assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
@@ -388,7 +379,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @Test
     public void testOtherPrivateToOtherSubfolderWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherPrivateToOtherSubfolderWithParticipants", folderB, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherPrivateToOtherSubfolderWithParticipants", folderB, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB, catm);
         assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
@@ -427,7 +418,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @Test
     public void testOtherPrivateToThirdPartyPrivateWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherPrivateToOtherSubfolder", folderB, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherPrivateToOtherSubfolder", folderB, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB, catm);
         assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
@@ -503,7 +494,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @Test
     public void testOtherSubfolderToOwnPrivateWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherPrivateToOwnPrivateWithParticipants", folderB1, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherPrivateToOwnPrivateWithParticipants", folderB1, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB1, catm);
         assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
@@ -533,7 +524,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @Test
     public void testOtherSubfolderToOwnSubfolderWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherPrivateToOwnPrivateWithParticipants", folderB1, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherPrivateToOwnPrivateWithParticipants", folderB1, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB1, catm);
         assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
@@ -589,7 +580,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     @Test
     public void testOtherSubfolderToOtherSubfolderWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherSubfolderToOtherSubfolderWithParticipants", folderB1, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherSubfolderToOtherSubfolderWithParticipants", folderB1, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB1, catm);
         assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
@@ -684,7 +675,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
     // TODO: Fix!
     @Test
     public void testOtherPrivateToThirdPartySubfolderWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherPrivateToThirdPartySubfolderWithParticipants", folderB, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherPrivateToThirdPartySubfolderWithParticipants", folderB, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB, catm);
         assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
@@ -779,7 +770,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
     // TODO: Fix!
     @Test
     public void testOtherSubfolderToThirdPartySubfolderWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherPrivateToOtherSubfolder", folderB1, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherPrivateToOtherSubfolder", folderB1, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB1, catm);
         assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
@@ -831,7 +822,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
     // TODO: Fix!
     @Test
     public void testOtherSubfolderToThirdPartyPrivateWithParticipants() throws Exception {
-        Appointment app = generateAppointment("testOtherSubfolderToThirdPartyPrivateWithParticipants", folderB1, idA, idB, idC);
+        Appointment app = generateAppointment("testOtherSubfolderToThirdPartyPrivateWithParticipants", folderB1, getClient().getValues().getUserId(), idB, idC);
         catm.insert(app);
         Appointment loaded = get(app, folderB1, catm);
         assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());

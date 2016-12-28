@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,49 +47,69 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.ajax.appointment.action;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
- * {@link DetachParser}
+ * 
+ * {@link CopyRequest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class DetachParser extends AbstractAJAXParser<DetachResponse> {
+public class CopyRequest extends AbstractAppointmentRequest<CopyResponse> {
 
-    protected DetachParser(boolean failOnError) {
-        super(failOnError);
+    private final int folderId;
+    private final int objectId;
+    private final boolean ignoreConlicts;
+    private Object body;
+
+    public CopyRequest(final int folderId, final int objectId, Object body, boolean ignoreConlicts) {
+        this.folderId = folderId;
+        this.objectId = objectId;
+        this.ignoreConlicts = ignoreConlicts;
+        this.body = body;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected DetachResponse createResponse(Response response) throws JSONException {
-        JSONObject json = ResponseWriter.getJSON(response);
-        JSONArray arr = null;
-        try{
-            arr = json.getJSONArray("data");
-            if(!json.has("error")) {
-                assertNotNull(json.opt(ResponseFields.TIMESTAMP)); // FIXME!
-            }
-        } catch (final JSONException x) {
-            final Response res = Response.parse(json.toString());
-            if(res.hasError()) {
-                throw new JSONException(res.getErrorMessage());
-            }
-        }
-        final int[] notDeleted = new int[arr.length()];
+    public Object getBody() throws JSONException {
+        return body;
+    }
 
-        for(int i = 0; i < arr.length(); i++) {
-            notDeleted[i] = arr.getInt(i);
-        }
-        
-        return new DetachResponse(response, notDeleted);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Parameter[] getParameters() {
+         Parameter[] params = new Parameter[] { 
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY), 
+            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderId)),
+            new Parameter(AJAXServlet.PARAMETER_ID, objectId),
+            new Parameter(AppointmentFields.IGNORE_CONFLICTS, ignoreConlicts)
+        };
+        return params;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AbstractAJAXParser<CopyResponse> getParser() {
+        return new CopyParser(true);
     }
 }

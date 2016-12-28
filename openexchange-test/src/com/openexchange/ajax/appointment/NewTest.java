@@ -54,7 +54,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
@@ -67,32 +66,19 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.FolderTestManager;
 
 public class NewTest extends AppointmentTest {
 
-    private int targetFolder;
     private int objectId;
     private int objectId2;
     private int folderId;
-    private int folderId2;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        targetFolder = 0;
         objectId = 0;
         objectId2 = 0;
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (0 != targetFolder) {
-                com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -422,8 +408,8 @@ public class NewTest extends AppointmentTest {
 
     @Test
     public void testPrivateFolder() throws Exception {
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testPrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-        targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testPrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testPrivateFolder");
@@ -443,8 +429,8 @@ public class NewTest extends AppointmentTest {
 
     @Test
     public void testPublicFolder() throws Exception {
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testPublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, true);
-        targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testPublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PUBLIC, userId, 2);
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testPrivateFolder");
@@ -466,13 +452,13 @@ public class NewTest extends AppointmentTest {
     public void testSharedFolder() throws Exception {
         final int secondUserId = getClient2().getValues().getPrivateAppointmentFolder();
 
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testSharedFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-        final OCLPermission[] permission = new OCLPermission[] { com.openexchange.webdav.xml.FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), com.openexchange.webdav.xml.FolderTest.createPermission(secondUserId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false)
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testSharedFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        final OCLPermission[] permission = new OCLPermission[] { FolderTestManager.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), com.openexchange.webdav.xml.FolderTest.createPermission(secondUserId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false)
         };
 
         folderObj.setPermissionsAsArray(permission);
 
-        targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSharedFolder");
@@ -689,15 +675,12 @@ public class NewTest extends AppointmentTest {
 
         appointmentObj.setIgnoreConflicts(false);
         objectId2 = catm.insert(appointmentObj).getObjectID();
-        folderId2 = appointmentFolderId;
         appointmentObj.setObjectID(objectId2);
         catm.delete(appointmentObj, true, true);
         objectId2 = 0;
-        folderId2 = 0;
 
         appointmentObj.setIgnoreConflicts(true);
         objectId2 = catm.insert(appointmentObj).getObjectID();
-        folderId2 = appointmentFolderId;
     }
 
     @Test
@@ -723,19 +706,15 @@ public class NewTest extends AppointmentTest {
 
         appointmentObj.setIgnoreConflicts(false);
         objectId2 = catm.insert(appointmentObj).getObjectID();
-        folderId2 = appointmentFolderId;
         appointmentObj.setObjectID(objectId2);
         catm.delete(appointmentObj);
         objectId2 = 0;
-        folderId2 = 0;
         assertEquals("conflict expected here object id should be 0", 0, objectId2);
 
         appointmentObj.setIgnoreConflicts(true);
         objectId2 = catm.insert(appointmentObj).getObjectID();
-        folderId2 = appointmentFolderId;
         appointmentObj.setObjectID(objectId2);
         objectId2 = 0;
-        folderId2 = 0;
         assertEquals("conflict expected here object id should be 0", 0, objectId2);
     }
 }

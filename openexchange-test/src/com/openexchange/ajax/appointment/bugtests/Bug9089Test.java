@@ -7,7 +7,7 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.webdav.xml.FolderTest;
+import com.openexchange.test.FolderTestManager;
 
 public class Bug9089Test extends AppointmentTest {
 
@@ -25,12 +25,12 @@ public class Bug9089Test extends AppointmentTest {
         folderObj.setModule(FolderObject.CALENDAR);
         folderObj.setType(FolderObject.PUBLIC);
 
-        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+        final OCLPermission[] permission = new OCLPermission[] { FolderTestManager.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
         };
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
+        final int newFolderId = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = createAppointmentObject("testBug9089");
         appointmentObj.setParentFolderID(newFolderId);
@@ -46,7 +46,5 @@ public class Bug9089Test extends AppointmentTest {
 
         loadAppointment = catm.get(newFolderId, objectId);
         modified = loadAppointment.getLastModified();
-
-        FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, modified, getHostName(), getLogin(), getPassword(), "");
     }
 }

@@ -78,6 +78,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.test.TestInit;
 import com.openexchange.test.TestManager;
 
 /**
@@ -104,6 +105,14 @@ public class InfostoreTestManager implements TestManager {
 
     public Set<File> getCreatedEntities() {
         return this.createdEntities;
+    }
+
+    public Set<String> getCreatedEntitiesIds() {
+        Set<String> createdIds = new HashSet<>(createdEntities.size());
+        for (File file : createdEntities) {
+            createdIds.add(file.getId());
+        }
+        return createdIds;
     }
 
     public void setClient(AJAXClient client) {
@@ -342,12 +351,12 @@ public class InfostoreTestManager implements TestManager {
         return doc;
     }
 
-    public List<File> search(final String query, final int[] columns, final int folderId, final int sort, final Order order) throws MalformedURLException, JSONException, IOException, SAXException, OXException {
+    public List<File> search(final String query, final int[] columns, final int folderId, final int sort, final Order order) throws MalformedURLException, JSONException, IOException, OXException {
         SearchInfostoreRequest request = new SearchInfostoreRequest(folderId, query, columns, sort, order);
         SearchInfostoreResponse response = getClient().execute(request);
         lastResponse = response;
-        JSONArray foundFiles = (JSONArray) response.getData();
 
+        JSONArray foundFiles = (JSONArray) response.getData();
         List<File> found = new ArrayList<>();
         for (Object object : foundFiles) {
             File file = new DefaultFile();
@@ -378,4 +387,20 @@ public class InfostoreTestManager implements TestManager {
         return null;
     }
 
+    public File createFileOnServer(int folderId, String fileName, String mimeType) throws Exception {
+        File createFile = InfostoreTestManager.createFile(folderId, fileName, mimeType);
+        newAction(createFile, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
+        return createFile;
+    }
+
+    public static File createFile(int folderId, String fileName, String mimeType) throws Exception {
+        long now = System.currentTimeMillis();
+        File file = new DefaultFile();
+        file.setFolderId(String.valueOf(folderId));
+        file.setTitle(fileName + now);
+        file.setFileName(file.getTitle());
+        file.setDescription(file.getTitle());
+        file.setFileMIMEType(mimeType);
+        return file;
+    }
 }

@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
-import org.junit.Before;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.exception.OXException;
@@ -67,6 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ContactTestData;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.webdav.xml.FolderTest;
 
 /**
@@ -141,20 +141,6 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         put("X-SHOESIZE", "6.0");
     }};
 
-    /* @formatter:on */
-
-    public AbstractImportExportServletTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        //  final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
-        //  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
-        //  sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
-    }
-
     public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, OXException {
         final StringBuilder bob = new StringBuilder("http://");
         bob.append(getHostName());
@@ -192,15 +178,10 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         folderObj.setModule(folderObjectModuleID);
         folderObj.setType(FolderObject.PRIVATE);
 
-        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(getClient().getValues().getPrivateAppointmentFolder(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-        };
-
+        final OCLPermission[] permission = new OCLPermission[] { FolderTestManager.createPermission(getClient().getValues().getPrivateAppointmentFolder(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),};
         folderObj.setPermissionsAsArray(permission);
-        try {
-            return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
-        } catch (final OXException e) {
-            return -1;
-        }
+        
+        return ftm.insertFolderOnServer(folderObj).getObjectID();
     }
 
     protected void removeFolder(final int folderId) throws OXException, Exception {

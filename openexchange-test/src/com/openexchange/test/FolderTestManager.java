@@ -98,13 +98,17 @@ public class FolderTestManager implements TestManager {
 
     private List<FolderObject> createdItems;
 
-    private final AJAXClient client;
+    private AJAXClient client;
 
     private boolean failOnError = true;
 
     private boolean ignoreMailFolders = true;
 
     private Throwable lastException;
+
+    public void setClient(AJAXClient client) {
+        this.client = client;
+    }
 
     @Override
     public void setFailOnError(final boolean failOnError) {
@@ -410,10 +414,11 @@ public class FolderTestManager implements TestManager {
         return folderArray;
     }
 
-    public void detach(String id, Date timestamp, int[] versions) throws OXException, IOException, JSONException {
+    public int[] detach(String id, Date timestamp, int[] versions) throws OXException, IOException, JSONException {
         DetachRequest request = new DetachRequest(id, timestamp, versions);
         DetachResponse response = client.execute(request);
         lastResponse = response;
+        return response.getNotDeleted();
     }
 
     /**
@@ -603,7 +608,7 @@ public class FolderTestManager implements TestManager {
     public boolean hasLastException() {
         return this.lastException != null;
     }
-    
+
     public static FolderObject createNewFolderObject(String name, int module, int type, int createdBy, int parentFolder) {
         FolderObject folder = new FolderObject();
         folder.setFolderName(name);
@@ -612,6 +617,22 @@ public class FolderTestManager implements TestManager {
         folder.setCreatedBy(createdBy);
         folder.setParentFolderID(parentFolder);
         return folder;
+    }
+
+    public static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp) {
+        return createPermission(entity, isGroup, fp, orp, owp, odp, true);
+    }
+
+    public static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp, boolean isAdmin) {
+        final OCLPermission oclp = new OCLPermission();
+        oclp.setEntity(entity);
+        oclp.setGroupPermission(isGroup);
+        oclp.setFolderAdmin(isAdmin);
+        oclp.setFolderPermission(fp);
+        oclp.setReadObjectPermission(orp);
+        oclp.setWriteObjectPermission(owp);
+        oclp.setDeleteObjectPermission(odp);
+        return oclp;
     }
 
 }

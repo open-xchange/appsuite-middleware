@@ -50,8 +50,6 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONException;
 import org.junit.Before;
 import com.openexchange.exception.OXException;
@@ -59,6 +57,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
 
 public class InfostoreAJAXTest extends AbstractAJAXTest {
@@ -68,8 +67,6 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
     public static final String INFOSTORE_FOLDER = "infostore.folder";
 
     protected int folderId;
-
-    protected List<String> clean = new ArrayList<String>();
 
     protected String hostName = null;
 
@@ -83,15 +80,13 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         this.folderId = createFolderForTest(userId);
 
         com.openexchange.file.storage.File createdFile = createFileOnServer(folderId, "test knowledge", "text/javascript");
-        clean.add(createdFile.getId());
 
         com.openexchange.file.storage.File createdFile2 = createFileOnServer(folderId, "test url", "text/javascript");
-        clean.add(createdFile2.getId());
     }
 
     private int createFolderForTest(final int userId) throws JSONException, OXException, IOException {
         final int parent = getClient().getValues().getPrivateInfostoreFolder();
-        FolderObject folder = new FolderObject("NewInfostoreFolder" + System.currentTimeMillis(), parent, Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId);
+        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + System.currentTimeMillis(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
         return ftm.insertFolderOnServer(folder).getObjectID();
     }
 

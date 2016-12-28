@@ -61,7 +61,15 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class DetachResponse extends AbstractAJAXResponse {
 
-    public DetachResponse(final Response response) {
+    private final int[] notDeleted;
+
+    public DetachResponse(final Response response, int[] lNotDeleted) {
         super(response);
+        
+        this.notDeleted = lNotDeleted;
+    }
+
+    public int[] getNotDeleted() {
+        return this.notDeleted;
     }
 }

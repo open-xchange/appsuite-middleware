@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
@@ -32,7 +33,7 @@ public class VersionsTest extends InfostoreAJAXTest {
     public void testVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(id);
         org.setVersionComment("Comment 1");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.VERSION_COMMENT}, new Date(Long.MAX_VALUE));
@@ -55,7 +56,7 @@ public class VersionsTest extends InfostoreAJAXTest {
     public void testVersionSorting() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(id);
         org.setVersionComment("Comment 1");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.VERSION_COMMENT}, new Date(Long.MAX_VALUE));
@@ -80,7 +81,7 @@ public class VersionsTest extends InfostoreAJAXTest {
     public void testUniqueVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(id);
         org.setVersionComment("Comment 1");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.VERSION_COMMENT}, new Date(Long.MAX_VALUE));
@@ -99,9 +100,11 @@ public class VersionsTest extends InfostoreAJAXTest {
 
         assureVersions(new Integer[] { 1, 2, 3 }, itm.getLastResponse(), 3);
 
-//      TODO MS re-add
-//        final int[] nd = detach(getWebConversation(), getHostName(), sessionId, itm.getLastResponse().getTimestamp().getTime(), clean.get(0), new int[] { 3 });
-//        assertEquals(0, nd.length);
+        int[] notDetached = ftm.detach(id, itm.getLastResponse().getTimestamp(), new int[] { 3 });
+        assertEquals(0, notDetached.length);
+        AbstractAJAXResponse response = ftm.getLastResponse();
+        assertFalse(response.hasError());
+        assertFalse(response.hasConflicts());
 
         org.setVersionComment("Comment 3");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.VERSION_COMMENT}, new Date(Long.MAX_VALUE));
@@ -118,17 +121,18 @@ public class VersionsTest extends InfostoreAJAXTest {
     public void testLastModifiedUTC() throws JSONException, IOException, SAXException, OXException {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         
-        com.openexchange.file.storage.File toUpdate = itm.getAction(clean.get(0));
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        com.openexchange.file.storage.File toUpdate = itm.getAction(id);
         toUpdate.setVersionComment("Comment 1");
-        itm.updateAction(toUpdate, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION_COMMENT }, new Date(Long.MAX_VALUE));
+        itm.updateAction(toUpdate, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION_COMMENT }, new Date(Long.MAX_VALUE));
 
         toUpdate.setVersionComment("Comment 2");
-        itm.updateAction(toUpdate, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION_COMMENT }, new Date(Long.MAX_VALUE));
+        itm.updateAction(toUpdate, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION_COMMENT }, new Date(Long.MAX_VALUE));
 
         toUpdate.setVersionComment("Comment 3");
-        itm.updateAction(toUpdate, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION_COMMENT }, new Date(Long.MAX_VALUE));
+        itm.updateAction(toUpdate, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION_COMMENT }, new Date(Long.MAX_VALUE));
 
-        com.openexchange.file.storage.File fileWithVersions = itm.getAction(clean.get(0));
+        com.openexchange.file.storage.File fileWithVersions = itm.getAction(id);
         final int size = fileWithVersions.getNumberOfVersions();
         assertTrue(size > 0);
     }

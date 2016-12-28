@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,49 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.ajax.appointment.action;
 
-import org.json.JSONArray;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.parser.AppointmentParser;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link DetachParser}
+ * 
+ * {@link CopyResponse}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class DetachParser extends AbstractAJAXParser<DetachResponse> {
+public class CopyResponse extends AbstractAJAXResponse {
 
-    protected DetachParser(boolean failOnError) {
-        super(failOnError);
+    private Appointment appointmentObj;
+
+    /**
+     * @param response
+     */
+    CopyResponse(final Response response) {
+        super(response);
     }
 
-    @Override
-    protected DetachResponse createResponse(Response response) throws JSONException {
-        JSONObject json = ResponseWriter.getJSON(response);
-        JSONArray arr = null;
-        try{
-            arr = json.getJSONArray("data");
-            if(!json.has("error")) {
-                assertNotNull(json.opt(ResponseFields.TIMESTAMP)); // FIXME!
-            }
-        } catch (final JSONException x) {
-            final Response res = Response.parse(json.toString());
-            if(res.hasError()) {
-                throw new JSONException(res.getErrorMessage());
-            }
+    /**
+     * @return the appointment
+     * @throws OXException parsing the appointment out of the response fails.
+     * @throws JSONException if parsing of some extra values fails.
+     */
+    public Appointment getAppointment(final TimeZone timeZone) throws OXException {
+        if (null == appointmentObj) {
+            this.appointmentObj = new Appointment();
+            final JSONObject json = (JSONObject) getResponse().getData();
+            new AppointmentParser(true, timeZone).parse(appointmentObj, json);
         }
-        final int[] notDeleted = new int[arr.length()];
+        return appointmentObj;
+    }
 
-        for(int i = 0; i < arr.length(); i++) {
-            notDeleted[i] = arr.getInt(i);
-        }
-        
-        return new DetachResponse(response, notDeleted);
+    /**
+     * @param appointmentObj the appointment to set
+     */
+    public void setAppointment(final Appointment appointmentObj) {
+        this.appointmentObj = appointmentObj;
     }
 }
