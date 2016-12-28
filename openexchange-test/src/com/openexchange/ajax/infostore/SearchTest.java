@@ -38,7 +38,7 @@ public class SearchTest extends InfostoreAJAXTest {
         final char[] alphabet = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
         for (int i = 0; i < 26; i++) {
             com.openexchange.file.storage.File tempFile = InfostoreTestManager.createFile(folderId, "Test " + i, "text/javascript");
-            tempFile.setDescription("this is document "+alphabet[i]);
+            tempFile.setDescription("this is document " + alphabet[i]);
             itm.newAction(tempFile);
             all[i] = "Test " + i;
         }
@@ -46,7 +46,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     @Test
     public void testBasic() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("5", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
+        List<com.openexchange.file.storage.File> files = itm.search("5", folderId);
         assertFalse(itm.getLastResponse().hasError());
 
         assertTitles(files, "Test 5", "Test 15", "Test 25");
@@ -55,41 +55,40 @@ public class SearchTest extends InfostoreAJAXTest {
 
     @Test
     public void testPattern() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("*", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
+        List<com.openexchange.file.storage.File> files = itm.search("*", folderId);
         assertFalse(itm.getLastResponse().hasError());
         assertTitles(files, all);
 
-        files = itm.search("Test ?5", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
+        files = itm.search("Test ?5", folderId);
         assertFalse(itm.getLastResponse().hasError());
         assertTitles(files, "Test 15", "Test 25");
     }
 
     @Test
     public void testAll() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
+        List<com.openexchange.file.storage.File> files = itm.search("", folderId);
         assertFalse(itm.getLastResponse().hasError());
         assertTitles(files, all);
     }
 
     @Test
     public void testCaseInsensitive() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("test", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
+        List<com.openexchange.file.storage.File> files = itm.search("test", folderId);
         assertFalse(itm.getLastResponse().hasError());
         assertTitles(files, all);
     }
 
     @Test
     public void testStartAndStop() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("5", COLS, folderId, Metadata.DESCRIPTION, Order.ASCENDING);
+        List<com.openexchange.file.storage.File> files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, -1, 0, 1);
         assertFalse(itm.getLastResponse().hasError());
-        assertTitles(files, all);
 
         JSONArray arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
         assertEquals(2, arrayOfarrays.length());
         assertTitle(0, arrayOfarrays, "Test 5");
         assertTitle(1, arrayOfarrays, "Test 15");
 
-        files = itm.search("5", COLS, folderId, Metadata.DESCRIPTION, Order.DESCENDING);
+        files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1, 0, 1);
         assertFalse(itm.getLastResponse().hasError());
 
         arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
@@ -98,7 +97,7 @@ public class SearchTest extends InfostoreAJAXTest {
         assertTitle(0, arrayOfarrays, "Test 25");
         assertTitle(1, arrayOfarrays, "Test 15");
 
-        files = itm.search("5", COLS, folderId, Metadata.DESCRIPTION, Order.DESCENDING);
+        files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1, 1, 2);
         assertFalse(itm.getLastResponse().hasError());
 
         arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
@@ -107,7 +106,7 @@ public class SearchTest extends InfostoreAJAXTest {
         assertTitle(0, arrayOfarrays, "Test 15");
         assertTitle(1, arrayOfarrays, "Test 5");
 
-        files = itm.search("5", COLS, folderId, Metadata.DESCRIPTION, Order.DESCENDING);
+        files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1, 1, 5);
         assertFalse(itm.getLastResponse().hasError());
 
         arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
@@ -120,21 +119,18 @@ public class SearchTest extends InfostoreAJAXTest {
 
     @Test
     public void testLimit() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("5", COLS, folderId, Metadata.DESCRIPTION, Order.ASCENDING);
+        List<com.openexchange.file.storage.File> files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, 1);
         assertFalse(itm.getLastResponse().hasError());
-        assertTitles(files, all);
 
         final JSONArray arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
         assertEquals(1, arrayOfarrays.length());
         assertTitle(0, arrayOfarrays, "Test 5");
-
     }
 
     @Test
     public void testSort() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("5", COLS, folderId, Metadata.DESCRIPTION, Order.ASCENDING);
+        List<com.openexchange.file.storage.File> files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, -1);
         assertFalse(itm.getLastResponse().hasError());
-        assertTitles(files, all);
 
         JSONArray arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
 
@@ -142,7 +138,7 @@ public class SearchTest extends InfostoreAJAXTest {
         assertTitle(1, arrayOfarrays, "Test 15");
         assertTitle(2, arrayOfarrays, "Test 25");
 
-        files = itm.search("5", COLS, folderId, Metadata.DESCRIPTION, Order.DESCENDING);
+        files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1);
         assertFalse(itm.getLastResponse().hasError());
 
         arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
@@ -160,10 +156,10 @@ public class SearchTest extends InfostoreAJAXTest {
         final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(id);
         org.setTitle("File");
-        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
-        List<com.openexchange.file.storage.File> found = itm.search("File", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
+        List<com.openexchange.file.storage.File> found = itm.search("File", folderId);
         assertFalse(itm.getLastResponse().hasError());
 
         assertTitles(found, "File");
@@ -171,7 +167,7 @@ public class SearchTest extends InfostoreAJAXTest {
         itm.revert(id);
         assertFalse(itm.getLastResponse().hasError());
 
-        List<com.openexchange.file.storage.File> files = itm.search("1", COLS, folderId, Metadata.ID, Order.NO_ORDER);
+        List<com.openexchange.file.storage.File> files = itm.search("1", folderId);
         assertFalse(itm.getLastResponse().hasError());
 
         assertTitles(files, "Test 1", "Test 10", "Test 11", "Test 12", "Test 13", "Test 14", "Test 15", "Test 16", "Test 17", "Test 18", "Test 19", "Test 21");
@@ -185,7 +181,7 @@ public class SearchTest extends InfostoreAJAXTest {
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
-        List<com.openexchange.file.storage.File> files = itm.search("\\?", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
+        List<com.openexchange.file.storage.File> files = itm.search("\\?", folderId);
         assertFalse(itm.getLastResponse().hasError());
 
         assertTitles(files, "The mysterious ?");
@@ -195,7 +191,7 @@ public class SearchTest extends InfostoreAJAXTest {
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
-        files = itm.search("\\*", COLS, folderId, Metadata.TITLE, Order.NO_ORDER);
+        files = itm.search("\\*", folderId);
         assertFalse(itm.getLastResponse().hasError());
 
         assertTitles(files, "The * of all trades");
@@ -204,14 +200,10 @@ public class SearchTest extends InfostoreAJAXTest {
 
     @Test
     public void testPermissions() throws Exception {
-        final String sessionId2 = this.getSecondSessionId();
-
         itm.setClient(getClient2());
-        itm.search("*", COLS, folderId, Metadata.LAST_MODIFIED_UTC, Order.NO_ORDER);
-
+        List<com.openexchange.file.storage.File> found = itm.search("*", folderId);
+        assertEquals(0, found.size());
         assertEquals("IFO-0400", itm.getLastResponse().getException().getErrorCode());
-
-        itm.setClient(getClient());
     }
 
     @Test
@@ -222,17 +214,17 @@ public class SearchTest extends InfostoreAJAXTest {
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.CATEGORIES }, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
-        List<com.openexchange.file.storage.File> files = itm.search("curiosity", COLS, folderId, Metadata.TITLE, Order.DESCENDING);
+        List<com.openexchange.file.storage.File> files = itm.search("curiosity", folderId);
         assertFalse(itm.getLastResponse().hasError());
 
-        assertTitles(files, "Test 0");
+        assertTitles(files, file.getTitle());
 
     }
 
     // Node 2652
     @Test
     public void testLastModifiedUTC() throws JSONException, IOException, OXException {
-        itm.search("*", new int[] { Metadata.LAST_MODIFIED_UTC }, folderId, Metadata.LAST_MODIFIED_UTC, Order.NO_ORDER);
+        itm.search("*", folderId);
         assertFalse(itm.getLastResponse().hasError());
         final JSONArray results = (JSONArray) itm.getLastResponse().getData();
         final int size = results.length();
@@ -250,11 +242,8 @@ public class SearchTest extends InfostoreAJAXTest {
     @Test
     public void testBackslashFound() throws Exception {
         String title = "Test\\WithBackslash";
-        com.openexchange.file.storage.File createdFile = createFileOnServer(folderId, title, "text/javascript");
-
-        List<com.openexchange.file.storage.File> files = itm.search(title, new int[] { Metadata.TITLE, Metadata.ID }, folderId, Metadata.ID, Order.NO_ORDER);
-
-        assertTitles(files, title);
+        com.openexchange.file.storage.File tempFile = itm.createFileOnServer(folderId, title, "text/javascript");
+        assertTrue(itm.getLastResponse().hasError());
     }
 
     public static void assertTitle(final int index, final JSONArray results, final String title) throws JSONException {
@@ -269,7 +258,7 @@ public class SearchTest extends InfostoreAJAXTest {
         assertEquals(error, titles.length, files.size());
         for (int i = 0; i < files.size(); i++) {
             final com.openexchange.file.storage.File entry = files.get(i);
-            assertTrue(error, titlesSet.remove(entry.getFileName()));
+            assertTrue(error, titlesSet.remove(entry.getTitle()));
         }
     }
 

@@ -146,7 +146,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
-        final String id2 = createFileOnServer(folderId, "otherFile", "text/javascript").getId();
+        final String id2 = itm.createFileOnServer(folderId, "otherFile", "text/javascript").getId();
 
         com.openexchange.file.storage.File org2 = itm.getAction(id2);
         itm.updateAction(org2, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));

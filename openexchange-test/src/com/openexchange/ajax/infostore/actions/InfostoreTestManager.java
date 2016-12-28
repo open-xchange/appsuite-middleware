@@ -63,7 +63,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.VersionsRequest;
 import com.openexchange.ajax.folder.actions.VersionsResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -163,7 +162,7 @@ public class InfostoreTestManager implements TestManager {
         }
     }
 
-    public void newAction(File data) throws OXException, IOException, SAXException, JSONException {
+    public void newAction(File data) throws OXException, IOException, JSONException {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(data);
         newRequest.setFailOnError(getFailOnError());
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
@@ -176,13 +175,15 @@ public class InfostoreTestManager implements TestManager {
      * The following is not beautiful, but the request/response framework
      * doesn't seem to offer a solution to do POST requests containing files.
      */
-    public void newAction(File data, java.io.File upload) throws OXException, IOException, SAXException, JSONException {
+    public void newAction(File data, java.io.File upload) throws OXException, IOException, JSONException {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(data, upload);
         newRequest.setFailOnError(getFailOnError());
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
         lastResponse = newResponse;
-        data.setId(newResponse.getID());
-        createdEntities.add(data);
+        if (!lastResponse.hasError()) {
+            data.setId(newResponse.getID());
+            createdEntities.add(data);
+        }
     }
 
     public String copyAction(String id, String folderId, File data) throws OXException, IOException, JSONException {
@@ -228,11 +229,11 @@ public class InfostoreTestManager implements TestManager {
         removeFromCreatedEntities(ids);
     }
 
-    public void deleteAction(String id, String folder, Date timestamp) throws OXException, IOException, SAXException, JSONException {
+    public void deleteAction(String id, String folder, Date timestamp) throws OXException, IOException, JSONException {
         deleteAction(Arrays.asList(id), Arrays.asList(folder), timestamp);
     }
 
-    public void deleteAction(File data) throws OXException, IOException, SAXException, JSONException {
+    public void deleteAction(File data) throws OXException, IOException, JSONException {
         deleteAction(data.getId(), data.getFolderId(), data.getLastModified());
     }
 
@@ -351,18 +352,34 @@ public class InfostoreTestManager implements TestManager {
         return doc;
     }
 
-    public List<File> search(final String query, final int[] columns, final int folderId, final int sort, final Order order) throws MalformedURLException, JSONException, IOException, OXException {
-        SearchInfostoreRequest request = new SearchInfostoreRequest(folderId, query, columns, sort, order);
+    public List<File> search(final String query, final int folderId) throws MalformedURLException, JSONException, IOException, OXException {
+        return search(query, folderId, -1, null, -1);
+    }
+    
+    public List<File> search(final String query, final int folderId, final int sort, final Order order, final int limit) throws MalformedURLException, JSONException, IOException, OXException {
+        return search(query, folderId, sort, order, limit, -1, -1);
+    }
+
+    public List<File> search(final String query, final int folderId, final int sort, final Order order, final int limit, final int start, final int end) throws MalformedURLException, JSONException, IOException, OXException {
+        int[] columns = new int[] { Metadata.TITLE, Metadata.ID, Metadata.DESCRIPTION, Metadata.LAST_MODIFIED_UTC, Metadata.CATEGORIES };
+
+        SearchInfostoreRequest request = new SearchInfostoreRequest(folderId, query, columns, sort, order, limit, start, end, false);
         SearchInfostoreResponse response = getClient().execute(request);
         lastResponse = response;
 
-        JSONArray foundFiles = (JSONArray) response.getData();
         List<File> found = new ArrayList<>();
-        for (Object object : foundFiles) {
-            File file = new DefaultFile();
-
-            //            TODO
-            //            file.
+        JSONArray foundFiles = (JSONArray) response.getData();
+        if (foundFiles == null) {
+            return found;
+        }
+        //FIXME MS more intelligent parsing based on columns
+        for (int i = 0; i < foundFiles.length(); i++) {
+            JSONArray jsonFile = foundFiles.getJSONArray(i);
+            DefaultFile file = new DefaultFile();
+            file.setTitle(jsonFile.get(0).toString());
+            file.setId(jsonFile.get(1).toString());
+            file.setDescription(jsonFile.get(2).toString());
+            file.setLastModified(new Date((Long) jsonFile.get(3)));
 
             found.add(file);
         }
@@ -394,10 +411,10 @@ public class InfostoreTestManager implements TestManager {
     }
 
     public static File createFile(int folderId, String fileName, String mimeType) throws Exception {
-        long now = System.currentTimeMillis();
+        //        long now = System.currentTimeMillis();
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(folderId));
-        file.setTitle(fileName + now);
+        file.setTitle(fileName);
         file.setFileName(file.getTitle());
         file.setDescription(file.getTitle());
         file.setFileMIMEType(mimeType);

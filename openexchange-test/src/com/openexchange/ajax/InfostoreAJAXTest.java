@@ -58,7 +58,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestInit;
 
 public class InfostoreAJAXTest extends AbstractAJAXTest {
 
@@ -79,9 +78,9 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         final int userId = getClient().getValues().getUserId();
         this.folderId = createFolderForTest(userId);
 
-        com.openexchange.file.storage.File createdFile = createFileOnServer(folderId, "test knowledge", "text/javascript");
-
-        com.openexchange.file.storage.File createdFile2 = createFileOnServer(folderId, "test url", "text/javascript");
+//        com.openexchange.file.storage.File createdFile = createFileOnServer(folderId, "test knowledge", "text/javascript");
+//
+//        com.openexchange.file.storage.File createdFile2 = createFileOnServer(folderId, "test url", "text/javascript");
     }
 
     private int createFolderForTest(final int userId) throws JSONException, OXException, IOException {
@@ -117,18 +116,6 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     public void setHostName(final String hostName) {
         this.hostName = hostName;
-    }
-
-    public File createFileOnServer(int folderId, String fileName, String mimeType) throws Exception {
-        long now = System.currentTimeMillis();
-        File file = new DefaultFile();
-        file.setFolderId(String.valueOf(folderId));
-        file.setTitle(fileName + now);
-        file.setFileName(file.getTitle());
-        file.setDescription(file.getTitle());
-        file.setFileMIMEType(mimeType);
-        itm.newAction(file, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
-        return file;
     }
 
     public File createFile(int folderId, String fileName) throws Exception {
