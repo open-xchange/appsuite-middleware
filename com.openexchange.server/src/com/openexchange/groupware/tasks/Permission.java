@@ -125,6 +125,9 @@ public final class Permission {
         }
         checkForTaskFolder(folder);
         final OCLPermission permission = getPermission(ctx, user, userPerms, folder);
+        if (!permission.isFolderVisible()) {
+            throw TaskExceptionCode.NOT_VISIBLE.create(I(folder.getObjectID()));
+        }
         if (!permission.canCreateObjects()) {
             throw TaskExceptionCode.NO_CREATE_PERMISSION.create(folder.getFolderName(), I(folder.getObjectID()));
         }
