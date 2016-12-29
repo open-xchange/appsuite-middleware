@@ -1,3 +1,9 @@
+open-xchange-file-storage-onedrive (7.8.2-20) stable; urgency=medium
+
+  * Build for patch 2017-01-09 (3848)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 29 Dec 2016 15:44:59 +0100
+
 open-xchange-file-storage-onedrive (7.8.2-19) stable; urgency=medium
 
   * Build for patch 2016-12-19 (3813)
