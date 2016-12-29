@@ -23,3 +23,15 @@ Default is 60 seconds
       Reloadable: false
       Configcascade_Aware: false
       File: grizzly.properties
+  - data:
+      Key: com.openexchange.http.grizzly.maxNumberOfConcurrentRequests
+      Description: >
+Specifies the number of concurrent HTTP requests that are allowed being processed.
+Those requests exceeding that limit will encounter a 503 "The server is temporary overloaded..." status code and accompanying error page
+A value of less than or equal to 0 (zero) effectively disables that limitation.
+Default is 0 (infinite)
+      Default: 0
+      Version: 7.8.4
+      Reloadable: false
+      Configcascade_Aware: false
+      File: grizzly.properties

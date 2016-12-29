@@ -82,11 +82,12 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
  * {@link OXHttpServerFilter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.8.4
  */
 public class OXHttpServerFilter extends HttpServerFilter {
 
     private final static Logger LOGGER = Grizzly.logger(HttpHandler.class);
+
     /**
      * The {@link CompletionHandler} to be used to make sure the response data
      * have been flushed
@@ -123,7 +124,15 @@ public class OXHttpServerFilter extends HttpServerFilter {
      */
     private final AtomicInteger activeRequestsCounter = new AtomicInteger();
 
+    /**
+     * The backing Grizzly configuration
+     */
     private final GrizzlyConfig grizzlyConfig;
+
+    /**
+     * The HTTP request guard
+     */
+    private final HttpRequestGuard guard;
 
 
     // ------------------------------------------------------------ Constructors
@@ -131,9 +140,9 @@ public class OXHttpServerFilter extends HttpServerFilter {
     public OXHttpServerFilter(GrizzlyConfig grizzlyConfig, final ServerFilterConfiguration config, final DelayedExecutor delayedExecutor) {
         super(config, delayedExecutor);
         this.grizzlyConfig = grizzlyConfig;
+        this.guard = HttpRequestGuard.guardFor(grizzlyConfig.getMaxNumberOfConcurrentRequests());
         suspendedResponseQueue = Response.createDelayQueue(delayedExecutor);
-        httpRequestInProgress = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.
-                        createAttribute("HttpServerFilter.Request");
+        httpRequestInProgress = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute("HttpServerFilter.Request");
     }
 
     @Override
@@ -214,10 +223,19 @@ public class OXHttpServerFilter extends HttpServerFilter {
                                 400, HttpStatus.BAD_REQUEST_400.getReasonPhrase(),
                                 "The request payload size exceeds the max post size limitation", null);
                     } else {
-                        final HttpHandler httpHandlerLocal = httpHandler;
-                        if (httpHandlerLocal != null) {
-                            wasSuspended = !httpHandlerLocal.doHandle(
+                        if (guard.mayHandle(handlerRequest)) {
+                            final HttpHandler httpHandlerLocal = httpHandler;
+                            if (httpHandlerLocal != null) {
+                                wasSuspended = !httpHandlerLocal.doHandle(
                                     handlerRequest, handlerResponse);
+                            }
+                        } else {
+                            handlerResponse.getResponse().getProcessingState().setError(true);
+                            HtmlHelper.setErrorAndSendErrorPage(
+                                    handlerRequest, handlerResponse,
+                                    config.getDefaultErrorPageGenerator(),
+                                    503, "Service Temporary Unavailable",
+                                    "The server is temporary overloaded...", null);
                         }
                     }
                 } catch (Exception t) {
@@ -396,11 +414,13 @@ public class OXHttpServerFilter extends HttpServerFilter {
      * The {@link CompletionHandler} to be used to make sure the response data
      * have been flushed.
      */
-    private final class FlushResponseHandler
-            extends EmptyCompletionHandler<Object>
-            implements AfterServiceListener{
+    private final class FlushResponseHandler extends EmptyCompletionHandler<Object> implements AfterServiceListener{
 
         private final FilterChainEvent event = TransportFilter.createFlushEvent(this);
+
+        FlushResponseHandler() {
+            super();
+        }
 
         @Override
         public void cancelled() {

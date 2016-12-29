@@ -113,6 +113,7 @@ public class GrizzlyConfig {
         private long wsTimeoutMillis;
         private int sessionExpiryCheckInterval = 60;
         private boolean checkTrackingIdInRequestParameters = false;
+        private int maxNumberOfConcurrentRequests = 0;
 
         /**
          * Initializes a new {@link GrizzlyConfig.Builder}.
@@ -138,6 +139,7 @@ public class GrizzlyConfig {
             this.keystorePath = configService.getProperty("com.openexchange.http.grizzly.keystorePath", "");
             this.keystorePassword = configService.getProperty("com.openexchange.http.grizzly.keystorePassword", "");
             this.sessionExpiryCheckInterval = configService.getIntProperty("com.openexchange.http.grizzly.sessionExpiryCheckInterval", 60);
+            this.maxNumberOfConcurrentRequests = configService.getIntProperty("com.openexchange.http.grizzly.maxNumberOfConcurrentRequests", 0);
 
             // server properties
             this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
@@ -379,8 +381,13 @@ public class GrizzlyConfig {
             return this;
         }
 
+        public Builder setMaxNumberOfConcurrentRequests(int maxNumberOfConcurrentRequests) {
+            this.maxNumberOfConcurrentRequests = maxNumberOfConcurrentRequests;
+            return this;
+        }
+
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
         }
     }
 
@@ -498,10 +505,13 @@ public class GrizzlyConfig {
     /** The interval in seconds when to check for expired/invalid HTTP sessions */
     private final int sessionExpiryCheckInterval;
 
+    /** The max. number of concurrent HTTP requests that are allowed being processed */
+    private final int maxNumberOfConcurrentRequests;
+
     /** Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created */
     private final boolean checkTrackingIdInRequestParameters;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
@@ -519,6 +529,7 @@ public class GrizzlyConfig {
         this.keystorePath = keystorePath;
         this.keystorePassword = keystorePassword;
         this.sessionExpiryCheckInterval = sessionExpiryCheckInterval;
+        this.maxNumberOfConcurrentRequests = maxNumberOfConcurrentRequests;
         this.checkTrackingIdInRequestParameters = checkTrackingIdInRequestParameters;
         this.cookieMaxAge = cookieMaxAge;
         this.cookieMaxInactivityInterval = cookieMaxInactivityInterval;
@@ -548,6 +559,15 @@ public class GrizzlyConfig {
      */
     public int getSessionExpiryCheckInterval() {
         return sessionExpiryCheckInterval;
+    }
+
+    /**
+     * Gets the max. number of concurrent HTTP requests that are allowed being processed
+     *
+     * @return The max. number of concurrent HTTP requests that are allowed being processed
+     */
+    public int getMaxNumberOfConcurrentRequests() {
+        return maxNumberOfConcurrentRequests;
     }
 
     /**
