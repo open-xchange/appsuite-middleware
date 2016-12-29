@@ -69,7 +69,7 @@ import org.slf4j.Logger;
 import com.openexchange.java.Strings;
 
 /**
- * {@link MemoryMonitoring} - Heavily driven By <a href="http://www.torsten-horn.de/techdocs/jmx-gc.htm">Torsten Horn's article about GC monitoring and more</a>.
+ * {@link MemoryMonitoring} - Heavily driven by <a href="http://www.torsten-horn.de/techdocs/jmx-gc.htm">Torsten Horn's article about GC monitoring and more</a>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
