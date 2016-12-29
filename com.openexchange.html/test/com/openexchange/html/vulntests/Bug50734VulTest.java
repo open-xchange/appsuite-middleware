@@ -78,4 +78,14 @@ public class Bug50734VulTest extends AbstractSanitizing {
         AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "isindex");
     }
 
+    @Test
+    public void testStartTagSanitizing2() {
+        String content = "Hello there 3 \n" +
+            "\n" +
+            "<!-- --!>\n" +
+            "<input type=hidden style=`x:expression(alert(/ /))`>\n" +
+            "<! XSS=\"><img src=xx:x onerror=alert(1)//\"> ";
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "alert", "onerror");
+    }
+
 }
