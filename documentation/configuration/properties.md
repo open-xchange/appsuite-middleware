@@ -499,6 +499,18 @@ If you would like to add a reference to another property use the following appro
 | __File__ | grizzly.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.http.grizzly.maxNumberOfConcurrentRequests</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the number of concurrent HTTP requests that are allowed being processed.<br>Those requests exceeding that limit will encounter a 503 "The server is temporary overloaded..." status code and accompanying error page<br>A value of less than or equal to 0 (zero) effectively disables that limitation.<br>The chosen value for this property should be aligned to the configured "ulimit" of the backing operating system. E.g. having "ulimit" set<br>to 8,192 (given that JVM is the only main process running for OS user) implies that ~6,000 should be considered for this property leaving<br>some room for threads not associated with an HTTP request.<br> |
+| __Default__ | is 0 (infinite)  |
+ |
+| __Default__ | 0  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | grizzly.properties  |
+
+---
 
 
 ## Mail 
