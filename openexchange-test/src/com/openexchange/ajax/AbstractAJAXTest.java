@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
@@ -183,7 +184,7 @@ public abstract class AbstractAJAXTest {
             mtm = new MailTestManager(client);
             testManager.add(mtm);
             atm = new AttachmentTestManager(client);
-            testManager.add(atm);
+            //            testManager.add(atm); not added as attachments have to be deleted first
         } catch (final OXException | IOException | JSONException ex) {
             fail(ex.getMessage());
         }
@@ -192,9 +193,14 @@ public abstract class AbstractAJAXTest {
     @After
     public void tearDown() throws Exception {
         try {
+            atm.cleanUp();
             for (TestManager manager : testManager) {
                 if (manager != null) {
-                    manager.cleanUp();
+                    try {
+                        manager.cleanUp();
+                    } catch (Exception e) {
+                        LoggerFactory.getLogger(AbstractAJAXTest.class).error("", e);
+                    }
                 }
             }
         } finally {

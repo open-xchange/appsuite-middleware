@@ -77,8 +77,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         this.sessionId = getClient().getSession().getId();
         final int userId = getClient().getValues().getUserId();
         this.folderId = createFolderForTest(userId);
-
-        itm.createFileOnServer(folderId, "Title", "text/javascript");
+//        itm.createFileOnServer(folderId, "Title", "text/javascript");
         //        com.openexchange.file.storage.File createdFile2 = createFileOnServer(folderId, "test url", "text/javascript");
     }
 

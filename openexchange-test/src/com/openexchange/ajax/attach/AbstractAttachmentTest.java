@@ -218,7 +218,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
         final int[] ids = new int[] { atm.getCreatedEntities().get(0).getId(), atm.getCreatedEntities().get(2).getId(), atm.getCreatedEntities().get(4).getId()
         };
-        atm.list(folderId, attachedId, moduleId, ids, new int[] { AttachmentField.ID, AttachmentField.FILENAME });
+        atm.list(folderId, attachedId, moduleId, ids, new int[] { AttachmentField.ID, AttachmentField.FILENAME, AttachmentField.FOLDER_ID, AttachmentField.ATTACHED_ID, AttachmentField.MODULE_ID });
         final AbstractAJAXResponse res = atm.getLastResponse();
         assertFalse(res.hasError());
         final JSONArray arrayOfArrays = (JSONArray) res.getData();

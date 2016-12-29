@@ -113,10 +113,6 @@ public class TaskTestManager implements TestManager {
         createdEntities = new LinkedList<Task>();
         try {
             taskFolderId = client.getValues().getPrivateTaskFolder();
-        } catch (Exception e) {
-            doHandleExeption(e, "getting private task folder from user values");
-        }
-        try {
             timezone = client.getValues().getTimeZone();
         } catch (OXException e) {
             //no matter, fix it in finally block
@@ -363,7 +359,6 @@ public class TaskTestManager implements TestManager {
         for (Task task : objects) {
             deleteTaskOnServer(task);
         }
-        createdEntities.clear();
     }
 
     /**

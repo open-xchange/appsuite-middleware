@@ -181,7 +181,6 @@ public class AttachmentTestManager implements TestManager {
                 LOG.error("Unable to remove attachment!", e);
             }
         }
-        createdEntities.clear();
     }
 
     public int attach(AttachmentMetadata attachment, String fileName, InputStream data, String mimeType) throws OXException, IOException, JSONException {
