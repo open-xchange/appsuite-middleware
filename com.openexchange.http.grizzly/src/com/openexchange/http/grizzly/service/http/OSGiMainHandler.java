@@ -114,6 +114,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import org.glassfish.grizzly.http.server.ErrorPageGenerator;
 import org.glassfish.grizzly.http.server.HttpHandler;
+import org.glassfish.grizzly.http.server.OXErrorPageGenerator;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.util.MappingData;
@@ -174,7 +175,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
         this.shutDownStatus = HttpStatus.newHttpStatus(HttpStatus.SERVICE_UNAVAILABLE_503.getStatusCode(), "Server shutting down...");
-        errorPageGenerator = new ErrorPageGeneratorImpl();
+        errorPageGenerator = OXErrorPageGenerator.getInstance();
     }
 
     /**
@@ -699,22 +700,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     }
 
     // -----------------------------------------------------------------------------------------
-
-    private static final class ErrorPageGeneratorImpl implements ErrorPageGenerator {
-
-
-        /**
-         * Initializes a new {@link OSGiMainHandler.ErrorPageGeneratorImpl}.
-         */
-        ErrorPageGeneratorImpl() {
-            super();
-        }
-
-        @Override
-        public String generate(Request request, int status, String reasonPhrase, String description, Throwable exception) {
-            return com.openexchange.tools.servlet.http.Tools.getErrorPage(status, reasonPhrase, description);
-        }
-    }
 
     private static final OXThreadMarker DUMMY = new OXThreadMarker() {
 

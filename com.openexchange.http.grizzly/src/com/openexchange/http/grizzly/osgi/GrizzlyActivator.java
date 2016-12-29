@@ -54,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http.server.OXErrorPageGenerator;
 import org.glassfish.grizzly.http.server.OXHttpServer;
 import org.glassfish.grizzly.http.server.OXSessionManager;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
@@ -164,6 +165,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
             serverConfiguration.setAllowPayloadForUndefinedHttpMethods(true);
+            serverConfiguration.setDefaultErrorPageGenerator(OXErrorPageGenerator.getInstance());
 
             final NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
 
