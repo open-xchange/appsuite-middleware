@@ -129,4 +129,13 @@ public class CombinedCharSequence implements CharSequence {
         return new CombinedCharSequence(seqs);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(sequences.size() << 4);
+        for (CharSequence sequence : sequences) {
+            sb.append(sequence);
+        }
+        return sb.toString();
+    }
+
 }
