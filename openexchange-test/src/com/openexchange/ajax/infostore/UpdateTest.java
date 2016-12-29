@@ -48,7 +48,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         assertEquals("test knowledge updated", object.getTitle());
         assertEquals("test knowledge description", object.getDescription());
         assertEquals(1, object.getColorLabel());
-        assertEquals(0, object.getVersion());
+        assertEquals("1", object.getVersion());
 
     }
 
@@ -81,9 +81,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         file.setTitle("test knowledge updated");
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(file.getLastModified().getTime() - 2000));
         AbstractAJAXResponse response = itm.getLastResponse();
-        assertTrue(response.hasConflicts());
         assertTrue(response.hasError());
-
     }
 
     @Test
@@ -98,7 +96,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
 
-        assertEquals(1, obj.getVersion());
+        assertEquals("1", obj.getVersion());
         assertEquals("text/plain", obj.getFileMIMEType());
         assertEquals(upload.getName(), obj.getFileName());
 
@@ -129,9 +127,9 @@ public class UpdateTest extends InfostoreAJAXTest {
         assertFalse(itm.getLastResponse().hasError());
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
-        assertEquals(1, obj.getVersion());
+        assertEquals("2", obj.getVersion());
         assertEquals("text/plain", obj.getFileMIMEType());
-        assertEquals(emptyFile.getName(), obj.getFileMD5Sum());
+        assertEquals(emptyFile.getName(), obj.getFileName());
         assertTrue(emptyFile.delete());
     }
 
@@ -152,7 +150,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         itm.updateAction(org2, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
-        com.openexchange.file.storage.File obj = itm.getAction(id);
+        com.openexchange.file.storage.File obj = itm.getAction(id2);
         assertFalse(upload.getName().equals(obj.getFileName()));
     }
 
@@ -171,16 +169,16 @@ public class UpdateTest extends InfostoreAJAXTest {
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
-        com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
-        data.setFileMIMEType("text/plain");
-        data.setDescription("other_desc");
-        data.setFileName("theFile.txt");
-        itm.newAction(data, upload);
+        com.openexchange.file.storage.File id2 = createFile(folderId, "otherFile");
+        id2.setFileMIMEType("text/plain");
+        id2.setDescription("other_desc");
+        id2.setFileName("theFile.txt");
+        itm.newAction(id2, upload);
 
         com.openexchange.file.storage.File file = itm.getAction(id);
-        file.setTitle("otherTitle");
-        file.setVersion("1");
-        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION, com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
+        org.setTitle("otherTitle");
+        org.setVersion("1");
+        itm.updateAction(org, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION, com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasConflicts());
 
         com.openexchange.file.storage.File reloaded = itm.getAction(id);

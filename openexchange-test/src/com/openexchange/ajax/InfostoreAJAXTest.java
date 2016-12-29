@@ -77,7 +77,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         this.sessionId = getClient().getSession().getId();
         final int userId = getClient().getValues().getUserId();
         this.folderId = createFolderForTest(userId);
-//        itm.createFileOnServer(folderId, "Title", "text/javascript");
+        itm.createFileOnServer(folderId, "test knowledge", "text/javascript");
         //        com.openexchange.file.storage.File createdFile2 = createFileOnServer(folderId, "test url", "text/javascript");
     }
 
@@ -117,10 +117,9 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
     }
 
     public File createFile(int folderId, String fileName) throws Exception {
-        long now = System.currentTimeMillis();
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(folderId));
-        file.setTitle(fileName + now);
+        file.setTitle(fileName);
         file.setFileName(file.getTitle());
         file.setDescription(file.getTitle());
         return file;

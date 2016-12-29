@@ -45,7 +45,7 @@ public class NewTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals("test upload", obj.getTitle());
         assertEquals("test upload description", obj.getDescription());
-        assertEquals(1, obj.getVersion());
+        assertEquals("1", obj.getVersion());
         assertEquals("text/plain", obj.getFileMIMEType());
         assertEquals(upload.getName(), obj.getFileName());
 
@@ -92,7 +92,7 @@ public class NewTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals("test upload", obj.getTitle());
         assertEquals("test upload description", obj.getDescription());
-        assertEquals(1, obj.getVersion());
+        assertEquals("1", obj.getVersion());
         assertEquals("text/plain", obj.getFileMIMEType());
         assertEquals(emptyFile.getName(), obj.getFileName());
         assertTrue(emptyFile.delete());

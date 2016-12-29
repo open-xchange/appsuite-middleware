@@ -160,9 +160,9 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setUid("1234567890abcdef" + System.currentTimeMillis());
         appointmentObj.setSequence(0);
 
-        final int userParticipantId = cotm.searchAction(userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getClient(), groupParticipant)[0].getIdentifier();
-        final int resourceParticipantId = resTm.search(resourceParticipant).get(0).getIdentifier();
+        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
+        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);

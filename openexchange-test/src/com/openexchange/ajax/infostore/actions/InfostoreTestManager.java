@@ -238,7 +238,8 @@ public class InfostoreTestManager implements TestManager {
     }
 
     public File getAction(String id) throws OXException, JSONException, IOException {
-        GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
+        int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.VERSION, Metadata.COLOR_LABEL };
+        GetInfostoreRequest getRequest = new GetInfostoreRequest(id, columns);
         getRequest.setFailOnError(getFailOnError());
         GetInfostoreResponse getResponse = getClient().execute(getRequest);
         lastResponse = getResponse;
@@ -416,7 +417,7 @@ public class InfostoreTestManager implements TestManager {
         file.setFolderId(String.valueOf(folderId));
         file.setTitle(fileName);
         file.setFileName(file.getTitle());
-        file.setDescription(file.getTitle());
+        file.setDescription(fileName + " description");
         file.setFileMIMEType(mimeType);
         return file;
     }

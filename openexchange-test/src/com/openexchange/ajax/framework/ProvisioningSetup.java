@@ -171,7 +171,14 @@ public class ProvisioningSetup {
                 context.addUser(testUser4);
                 startSMTPMockServer(testUser4);
                 
+                context.addUserParticipants(filter.get(prefix + PARTICIPANT1_IDENTIFIER).toString());
+                context.addUserParticipants(filter.get(prefix + PARTICIPANT2_IDENTIFIER).toString());
+                context.addUserParticipants(filter.get(prefix + PARTICIPANT3_IDENTIFIER).toString());
                 context.addGroupParticipant(filter.get(prefix + GROUP_PARTICIPANT_IDENTIFIER).toString());
+                context.addResourceParticipants(filter.get(prefix + RESOURCE_PARTICIPANT).toString());
+                context.addResourceParticipants(filter.get(prefix + RESOURCE_PARTICIPANT1).toString());
+                context.addResourceParticipants(filter.get(prefix + RESOURCE_PARTICIPANT2).toString());
+                context.addResourceParticipants(filter.get(prefix + RESOURCE_PARTICIPANT3).toString());
 
                 TestContextPool.addContext(context);
             } catch (Exception e) {

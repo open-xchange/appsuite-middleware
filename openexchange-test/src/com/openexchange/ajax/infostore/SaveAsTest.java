@@ -36,7 +36,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
 
         assertEquals("My Attachment", obj.getTitle());
         assertEquals("An attachment cum InfoItem", obj.getDescription());
-        assertEquals(1, obj.getVersion());
+        assertEquals("1", obj.getVersion());
         assertEquals(upload.getName(), obj.getFileName());
 
         InputStream is = null;

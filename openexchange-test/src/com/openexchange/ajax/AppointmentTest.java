@@ -65,7 +65,6 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -93,14 +92,6 @@ public class AppointmentTest extends AbstractAJAXTest {
     protected long endTime = 0;
 
     protected final long dayInMillis = 86400000;
-
-    protected String userParticipant2 = null;
-
-    protected String userParticipant3 = null;
-
-    protected String groupParticipant = null;
-
-    protected String resourceParticipant = null;
 
     protected int userId = 0;
 
@@ -131,13 +122,6 @@ public class AppointmentTest extends AbstractAJAXTest {
             startTime = c.getTimeInMillis();
             startTime += timeZone.getOffset(startTime);
             endTime = startTime + 3600000;
-
-            userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
-            userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
-
-            groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
-
-            resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
         } catch (final Exception ex) {
             fail(ex.getMessage());
         }

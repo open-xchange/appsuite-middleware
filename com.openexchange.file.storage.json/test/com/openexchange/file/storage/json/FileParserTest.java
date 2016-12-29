@@ -58,6 +58,9 @@ import static com.openexchange.file.storage.File.Field.MODIFIED_BY;
 import static com.openexchange.file.storage.File.Field.NUMBER_OF_VERSIONS;
 import static com.openexchange.file.storage.File.Field.VERSION;
 import static com.openexchange.file.storage.File.Field.VERSION_COMMENT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -67,10 +70,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**
@@ -122,7 +121,7 @@ public class FileParserTest {
         assertEquals(3000, file.getNumberOfVersions());
         assertEquals("nice title", file.getTitle());
         assertEquals("http://some.url", file.getURL());
-        assertEquals(33, file.getVersion());
+        assertEquals("33", file.getVersion());
         assertEquals("This is the best version", file.getVersionComment());
     }
 

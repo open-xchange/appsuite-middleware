@@ -105,7 +105,7 @@ public class DetachTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File obj = itm.getAction(origId);
 
-        assertEquals(4, obj.getVersion());
+        assertEquals("4", obj.getVersion());
     }
 
     @Test

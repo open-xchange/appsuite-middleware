@@ -77,7 +77,7 @@ import com.openexchange.file.storage.File;
 public class TryAddVersionTest extends AbstractInfostoreTest {
 
     private List<String> ids;
-    private final String[] COLUMNS = new String[] { "700", "702", "710", "711" };
+    private final int[] COLUMNS = new int[] { 700, 702, 710, 711 };
     private final String filename = "bug.eml";
 
     public TryAddVersionTest() {
