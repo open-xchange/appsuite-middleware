@@ -124,11 +124,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
                     Attachment attachment = new Attachment();
-                    attachment.setManagedId(String.valueOf(resultSet.getInt("id")));
+                    attachment.setManagedId(resultSet.getInt("id"));
                     attachment.setFormatType(resultSet.getString("file_mimetype"));
                     attachment.setSize(resultSet.getLong("file_size"));
-                    attachment.setManagedId(resultSet.getString("filename"));
-                    attachment.setContentId(resultSet.getString("file_id"));
+                    attachment.setFilename(resultSet.getString("filename"));
+                    //                    attachment.setContentId(resultSet.getString("file_id"));
                     attachment.setLastModified(new Date(resultSet.getLong("creation_date")));
                     put(attachmentsById, I(resultSet.getInt("attached")), attachment);
                 }

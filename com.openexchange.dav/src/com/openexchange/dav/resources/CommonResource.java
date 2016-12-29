@@ -87,7 +87,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class CommonResource<T extends CommonObject> extends DAVResource {
+public abstract class CommonResource<T extends CommonObject> extends DAVObjectResource {
 
     protected static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CommonResource.class);
 
@@ -163,22 +163,13 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
         }
     }
 
-    /**
-     * Adds an attachment to the underlying groupware object.
-     *
-     * @param inputStream The binary attachment data
-     * @param contentType The attachment's content type
-     * @param fileName The target filename
-     * @param size The attachment size
-     * @param recurrenceIDs The targeted recurrence ids, or <code>null</code> if not applicable or to apply to the master instance only
-     * @return Metadata of the managed attachments
-     */
-    public AttachmentMetadata[] addAttachment(InputStream inputStream, String contentType, String fileName, long size, String[] recurrenceIDs) throws OXException {
+    @Override
+    public int[] addAttachment(InputStream inputStream, String contentType, String fileName, long size, String[] recurrenceIDs) throws OXException {
         List<T> targetObjects = getTargetedObjects(recurrenceIDs);
         if (null == targetObjects || 0 == targetObjects.size()) {
             throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
-        AttachmentMetadata[] attachmentMetadata = new AttachmentMetadata[targetObjects.size()];
+        int[] attachmentIds = new int[targetObjects.size()];
         AttachmentBase attachments = Attachments.getInstance();
         try {
             attachments.startTransaction();
@@ -186,13 +177,13 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
              * create first attachment
              */
             AttachmentMetadata metadata = addAttachment(attachments, inputStream, targetObjects.get(0), contentType, fileName, size);
-            attachmentMetadata[0] = metadata;
+            attachmentIds[0] = metadata.getId();
             /*
              * copy attachment to further targets
              */
             for (int i = 1; i < targetObjects.size(); i++) {
                 AttachmentMetadata furtherMetadata = copyAttachment(attachments, metadata, targetObjects.get(i));
-                attachmentMetadata[i] = furtherMetadata;
+                attachmentIds[i] = furtherMetadata.getId();
             }
             attachments.commit();
         } catch (OXException e) {
@@ -201,20 +192,11 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
         } finally {
             attachments.finish();
         }
-        return attachmentMetadata;
+        return attachmentIds;
     }
 
-    /**
-     * Replaces an existing attachment with an updated one.
-     *
-     * @param attachmentId The identifier of the attachment to update
-     * @param inputStream The binary attachment data
-     * @param contentType The attachment's content type
-     * @param fileName The target filename
-     * @param size The attachment size
-     * @return Metadata of the (new) updated attachment
-     */
-    public AttachmentMetadata updateAttachment(int attachmentId, InputStream inputStream, String contentType, String fileName, long size) throws OXException {
+    @Override
+    public int updateAttachment(int attachmentId, InputStream inputStream, String contentType, String fileName, long size) throws OXException {
         AttachmentBase attachments = Attachments.getInstance();
         try {
             attachments.startTransaction();
@@ -225,7 +207,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
             attachments.detachFromObject(object.getParentFolderID(), object.getObjectID(), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
                 new int[] { attachmentId }, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
             attachments.commit();
-            return metadata;
+            return metadata.getId();
         } catch (OXException e) {
             attachments.rollback();
             throw e;
@@ -234,12 +216,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
         }
     }
 
-    /**
-     * Removes an attachment from the underlying groupware object.
-     *
-     * @param attachmentId The identifier of the attachment to remove
-     * @param recurrenceIDs The targeted recurrence ids, or <code>null</code> if not applicable or to apply to the master instance only
-     */
+    @Override
     public void removeAttachment(int attachmentId, String[] recurrenceIDs) throws OXException {
         List<T> targetObjects = getTargetedObjects(recurrenceIDs);
         if (null == targetObjects || 0 == targetObjects.size()) {

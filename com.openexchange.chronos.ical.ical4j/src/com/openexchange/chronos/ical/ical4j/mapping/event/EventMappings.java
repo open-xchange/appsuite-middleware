@@ -68,7 +68,7 @@ public class EventMappings {
 	 * Holds a collection of all known event mappings.
 	 */
 	public static List<ICalMapping<VEvent, Event>> ALL = Collections.<ICalMapping<VEvent, Event>>unmodifiableList(Arrays.asList(
-        //		new AttachmentMapping(),
+        new AttachmentMapping(),
 		new AttendeeMapping(),
         new CategoriesMapping(),
         new ClassMapping(),

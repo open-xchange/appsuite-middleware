@@ -58,9 +58,9 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.attachments.AttachmentUtils;
 import com.openexchange.dav.internal.ShareHelper;
 import com.openexchange.dav.resources.CommonResource;
+import com.openexchange.dav.resources.DAVObjectResource;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.action.ReplayWebdavRequest;
@@ -199,7 +199,7 @@ public class POSTAction extends DAVAction {
         /*
          * get targeted resource & attachment related parameters
          */
-        CommonResource<?> resource = requireResource(request, CommonResource.class);
+        DAVObjectResource resource = requireResource(request, DAVObjectResource.class);
         String contentType = getContentType(request);
         String fileName = AttachmentUtils.parseFileName(request);
         String[] recurrenceIDs = Strings.splitByComma(request.getHeader("rid"));
@@ -207,11 +207,11 @@ public class POSTAction extends DAVAction {
         /*
          * save attachment
          */
-        AttachmentMetadata metadata = null;
+        int attachmenId;
         InputStream inputStream = null;
         try {
             inputStream = request.getBody();
-            metadata = resource.addAttachment(inputStream, contentType, fileName, size, recurrenceIDs)[0];
+            attachmenId = resource.addAttachment(inputStream, contentType, fileName, size, recurrenceIDs)[0];
         } catch (IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } catch (OXException e) {
@@ -226,14 +226,14 @@ public class POSTAction extends DAVAction {
         response.setContentType(resource.getContentType());
         response.setHeader("Content-Location", resource.getUrl().toString());
         response.setHeader("ETag", resource.getETag());
-        response.setHeader("Cal-Managed-ID", String.valueOf(metadata.getId()));
+        response.setHeader("Cal-Managed-ID", String.valueOf(attachmenId));
     }
 
     private void removeAttachment(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
         /*
          * get targeted resource & attachment related parameters
          */
-        CommonResource<?> resource = requireResource(request, CommonResource.class);
+        DAVObjectResource resource = requireResource(request, DAVObjectResource.class);
         String managedId = request.getHeader("managed-id");
         if (Strings.isEmpty(managedId)) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
@@ -260,7 +260,7 @@ public class POSTAction extends DAVAction {
         /*
          * get targeted resource & attachment related parameters
          */
-        CommonResource<?> resource = requireResource(request, CommonResource.class);
+        DAVObjectResource resource = requireResource(request, DAVObjectResource.class);
         String contentType = getContentType(request);
         String fileName = AttachmentUtils.parseFileName(request);
         long size = getContentLength(request);
@@ -277,11 +277,10 @@ public class POSTAction extends DAVAction {
         /*
          * update attachment
          */
-        AttachmentMetadata metadata = null;
         InputStream inputStream = null;
         try {
             inputStream = request.getBody();
-            metadata = resource.updateAttachment(attachmentId, inputStream, contentType, fileName, size);
+            attachmentId = resource.updateAttachment(attachmentId, inputStream, contentType, fileName, size);
         } catch (IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } catch (OXException e) {
@@ -296,7 +295,7 @@ public class POSTAction extends DAVAction {
         response.setContentType(resource.getContentType());
         response.setHeader("Content-Location", resource.getUrl().toString());
         response.setHeader("ETag", resource.getETag());
-        response.setHeader("Cal-Managed-ID", String.valueOf(metadata.getId()));
+        response.setHeader("Cal-Managed-ID", String.valueOf(attachmentId));
     }
 
 }
