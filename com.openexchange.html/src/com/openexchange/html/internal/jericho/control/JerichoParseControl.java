@@ -47,83 +47,86 @@
  *
  */
 
-package com.openexchange.java;
+package com.openexchange.html.internal.jericho.control;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.DelayQueue;
 
 /**
- * {@link InterruptibleCharSequence} - A <code>CharSequence</code> that can notice thread interrupts.
- * <p>
- * Originally developed by <a href="http://gojomo.blogspot.de/">Gordon Mohr (@gojomo)</a> in Heritrix project (<a
- * href="crawler.archive.org">crawler.archive.org</a>).
+ * {@link JerichoParseControl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public final class InterruptibleCharSequence implements CharSequence {
+public class JerichoParseControl {
 
-    /** The special runtime exception signaling that reading from char sequence has been interrupted */
-    public static final class InterruptedRuntimeException extends RuntimeException {
-
-        private static final long serialVersionUID = 6627208506308108226L;
-
-        /**
-         * Initializes a new {@link InterruptedRuntimeException}.
-         */
-        InterruptedRuntimeException() {
-            super("Interrupted while reading char sequence", new InterruptedException());
-        }
-    }
+    private static final JerichoParseControl INSTANCE = new JerichoParseControl();
 
     /**
-     * Gets an {@link InterruptibleCharSequence} instance for given {@link CharSequence} instance.
+     * Gets the instance
      *
-     * @param charSequence The char sequence
-     * @return An {@link InterruptibleCharSequence} instance for given {@link CharSequence} instance
+     * @return The instance
      */
-    public static InterruptibleCharSequence valueOf(final CharSequence charSequence) {
-        if (null == charSequence) {
-            return null;
-        }
-        if (charSequence instanceof InterruptibleCharSequence) {
-            return (InterruptibleCharSequence) charSequence;
-        }
-        return new InterruptibleCharSequence(charSequence);
+    public static JerichoParseControl getInstance() {
+        return INSTANCE;
     }
 
-    // ------------------------------------------------------------------------------------------------------------- //
+    // ------------------------------------------------------------------------------------------------------------------------
 
-    private final CharSequence inner;
+    private final DelayQueue<JerichoParseTask> queue;
 
     /**
-     * Initializes a new {@link InterruptibleCharSequence}.
-     *
-     * @param cs The char sequence to delegate to
+     * Initializes a new {@link JerichoParseControl}.
      */
-    private InterruptibleCharSequence(final CharSequence cs) {
+    private JerichoParseControl() {
         super();
-        this.inner = cs;
+        queue = new DelayQueue<JerichoParseTask>();
     }
 
-    @Override
-    public char charAt(final int index) {
-        if (Thread.interrupted()) { // clears flag if set
-            throw new InterruptedRuntimeException();
-        }
-        // counter++;
-        return inner.charAt(index);
+    /**
+     * Adds the specified task.
+     *
+     * @param task The task
+     * @return <tt>true</tt>
+     */
+    public boolean add(JerichoParseTask task) {
+        return queue.offer(task);
     }
 
-    @Override
-    public int length() {
-        return inner.length();
+    /**
+     * Removes the specified task.
+     *
+     * @param task The task to remove
+     * @return <code>true</code> if such a task was removed; otherwise <code>false</code>
+     */
+    public boolean remove(JerichoParseTask task) {
+        return queue.remove(task);
     }
 
-    @Override
-    public CharSequence subSequence(final int start, final int end) {
-        return new InterruptibleCharSequence(inner.subSequence(start, end));
+    /**
+     * Await expired push listeners from this control.
+     *
+     * @return The expired push listeners
+     * @throws InterruptedException If interrupted while waiting
+     */
+    List<JerichoParseTask> awaitExpired() throws InterruptedException {
+        JerichoParseTask expired = queue.take();
+        List<JerichoParseTask> expirees = new LinkedList<JerichoParseTask>();
+        expirees.add(expired);
+        queue.drainTo(expirees);
+        return expirees;
     }
 
-    @Override
-    public String toString() {
-        return inner.toString();
+    /**
+     * Removes expired push listeners from this control.
+     *
+     * @return The expired push listeners
+     */
+    List<JerichoParseTask> removeExpired() {
+        List<JerichoParseTask> expirees = new LinkedList<JerichoParseTask>();
+        queue.drainTo(expirees);
+        return expirees;
     }
 
 }
