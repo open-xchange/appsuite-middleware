@@ -7055,6 +7055,10 @@ msgstr ""
 msgid "Priority is %d but must be between 1 and 3."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:134
+msgid "This folder (%2$d) is not visible."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
 "The current version number %1$s is already lower than or equal to the "
