@@ -1830,7 +1830,17 @@ public final class HtmlServiceImpl implements HtmlService {
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
         do {
             sb.append(htmlContent.substring(lastMatch, m.start()));
-            final String condition = m.group(2);
+            String condition = m.group(2);
+            if (condition.indexOf(']') < 0) {
+                // Need to insert the missing closing bracket ']' character
+                if (condition.endsWith("--!>")) {
+                    condition = condition.substring(0, condition.length() - 4) + "]--!>";
+                } else if (condition.endsWith("-->")) {
+                    condition = condition.substring(0, condition.length() - 3) + "]-->";
+                } else {
+                    condition = condition.substring(0, condition.length() - 1) + "]>";
+                }
+            }
             if (isValidCondition(condition)) {
                 boolean isDownlevelRevealed = false;
                 if (m.group(1).startsWith("<![if")) {
@@ -1857,7 +1867,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
-    private static final Pattern PAT_VALID_COND = Pattern.compile("[a-zA-Z_0-9 -!]+");
+    private static final Pattern PAT_VALID_COND = Pattern.compile("[a-zA-Z_0-9 -!|()]+");
 
     private static boolean isValidCondition(final String condition) {
         if (isEmpty(condition)) {
