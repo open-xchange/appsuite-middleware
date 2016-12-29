@@ -58,18 +58,13 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
     }
 
     @Override
-    public int createExclusiveWritableAttachable(final String sessionId, final int folderId) throws Exception {
+    public int createExclusiveWritableAttachable(final int folderId) throws Exception {
         return 22;
     }
 
     @Override
-    public int getExclusiveWritableFolder(final String sessionId) throws Exception {
+    public int getExclusiveWritableFolder() throws Exception {
         return 22;
-    }
-
-    @Override
-    public void removeAttachable(final int folder, final int id, final String sessionId) throws Exception {
-
     }
 
     @Override

@@ -83,20 +83,14 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         this(folder, objectId, module, attachment, null);
     }
 
-    public GetDocumentRequest(int folder, int objectId, int module, int attachment, String contentType) {
-        folderID = folder;
-        attached = objectId;
-        moduleID = module;
-        attachmentID = attachment;
-        off = -1;
-        len = -1;
-        contentType = contentType;
+    public GetDocumentRequest(int folder, int objectId, int module, int attachment, String lContentType) {
+        this(folder, objectId, module, attachment, lContentType, -1, -1, false);
     }
-
+    
     /**
      * Initializes a new {@link GetDocumentRequest}.
      */
-    public GetDocumentRequest(int objectId, int module, String lContentType, int folder, int attachment, int off, int len, boolean lFailOnError) {
+    public GetDocumentRequest(int folder, int objectId, int module, int attachment, String lContentType, int off, int len, boolean lFailOnError) {
         super();
         this.attached = objectId;
         this.moduleID = module;
@@ -108,11 +102,6 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         this.len = len;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.GET;
@@ -144,21 +133,11 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         return parameters.toArray(new Parameter[parameters.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends GetDocumentResponse> getParser() {
         return new GetDocumentParser(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;

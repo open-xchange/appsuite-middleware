@@ -68,7 +68,7 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
      * {@inheritDoc}
      */
     @Override
-    public int createExclusiveWritableAttachable(final String sessionId, final int folderId) throws Exception {
+    public int createExclusiveWritableAttachable(final int folderId) throws Exception {
         final Task task = new Task();
         task.setTitle("AttachmentTest");
         task.setParentFolderID(folderId);
@@ -76,11 +76,8 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
         return taskId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public int getExclusiveWritableFolder(final String sessionId) throws Exception {
+    public int getExclusiveWritableFolder() throws Exception {
         return getClient().getValues().getPrivateTaskFolder();
     }
 
@@ -90,15 +87,6 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
     @Override
     public int getModule() throws Exception {
         return Types.TASK;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void removeAttachable(final int folder, final int taskId, final String sessionId) throws Exception {
-        Task task = ttm.getTaskFromServer(folderId, taskId);
-        ttm.deleteTaskOnServer(task);
     }
 
     /**

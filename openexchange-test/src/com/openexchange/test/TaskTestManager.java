@@ -52,6 +52,7 @@ package com.openexchange.test;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -134,7 +135,6 @@ public class TaskTestManager implements TestManager {
      * Creates a task via HTTP-API and updates it with new id, timestamp and all other information that is updated after such requests.
      */
     public Task insertTaskOnServer(Task taskToCreate) {
-        createdEntities.add(taskToCreate);
         InsertRequest request = new InsertRequest(taskToCreate, timezone);
         InsertResponse response = null;
         try {
@@ -144,6 +144,7 @@ public class TaskTestManager implements TestManager {
         } catch (Exception e) {
             doHandleExeption(e, "NewRequest on folder " + taskToCreate.getParentFolderID());
         }
+        createdEntities.add(taskToCreate);
 
         return taskToCreate;
     }
@@ -355,9 +356,14 @@ public class TaskTestManager implements TestManager {
      */
     @Override
     public void cleanUp() {
-        for (Task task : new LinkedList<Task>(createdEntities)) {
+        List<Task> objects = new ArrayList<Task>(createdEntities.size());
+        for (Task task : createdEntities) {
+            objects.add(task);
+        }
+        for (Task task : objects) {
             deleteTaskOnServer(task);
         }
+        createdEntities.clear();
     }
 
     /**

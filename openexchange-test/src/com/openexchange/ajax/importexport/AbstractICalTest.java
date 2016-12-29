@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,12 +58,6 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Before;
-import org.xml.sax.SAXException;
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
@@ -84,8 +77,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.tools.URLParameter;
 
 /**
  * @deprecated Use IcalImportRequest/Response or IcalExportRequest/Response
@@ -158,7 +149,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
         };
     }
 
-    public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String host, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, OXException, JSONException {
+    public Appointment[] exportAppointment(final int folderId, final Context ctx) throws IOException, ConversionWarning, OXException, JSONException {
         final ICalExportRequest request = new ICalExportRequest(folderId);
         final ICalExportResponse response = Executor.execute(getClient(), request);
 
@@ -175,26 +166,15 @@ public class AbstractICalTest extends AbstractAJAXTest {
         return exportData.toArray(new Appointment[exportData.size()]);
     }
 
-    public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, OXException {
-        host = appendPrefix(host);
-
-        final URLParameter parameter = new URLParameter(true);
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter("action", Format.ICAL.getConstantName());
-        parameter.setParameter("folder", taskFolderId);
-        parameter.setParameter("type", Types.TASK);
-
-        final WebRequest req = new GetMethodWebRequest(host + EXPORT_URL + parameter.getURLParameters());
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
+    public Task[] exportTask(final TimeZone timeZone, final Context ctx) throws Exception, OXException {
+        final ICalExportRequest request = new ICalExportRequest(taskFolderId, Types.TASK);
+        final ICalExportResponse response = Executor.execute(getClient(), request);
+    
         List<Task> exportData = new ArrayList<Task>();
-
         final ICalParser parser = new ICal4JParser();
         final List<ConversionError> errors = new LinkedList<ConversionError>();
         final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
-        exportData = parser.parseTasks(resp.getInputStream(), timeZone, ctx, errors, warnings);
+        exportData = parser.parseTasks(response.getICal(), timeZone, ctx, errors, warnings);
 
         return exportData.toArray(new Task[exportData.size()]);
     }

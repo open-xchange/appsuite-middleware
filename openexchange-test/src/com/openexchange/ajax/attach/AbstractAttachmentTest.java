@@ -64,17 +64,17 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.AttachmentTest;
 import com.openexchange.ajax.attach.actions.GetDocumentResponse;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.quota.FilestoreQuotaRequest;
+import com.openexchange.ajax.quota.FilestoreQuotaResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.groupware.tasks.TestTask;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.test.OXTestToolkit;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
@@ -84,52 +84,34 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
     protected int moduleId = -1;
 
-    protected String sessionId;
-    private Response res;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        sessionId = getSessionId();
-
-        folderId = getExclusiveWritableFolder(sessionId);
-        attachedId = createExclusiveWritableAttachable(sessionId, folderId);
-
+        folderId = getExclusiveWritableFolder();
+        attachedId = createExclusiveWritableAttachable(folderId);
         moduleId = getModule();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        try {
-            removeAttachments();
-            removeAttachable(folderId, attachedId, sessionId);
-        } finally {
-            super.tearDown();
-        }
-    }
+    public abstract int createExclusiveWritableAttachable(int folderId) throws Exception;
 
-    public abstract int createExclusiveWritableAttachable(String sessionId, int folderId) throws Exception;
-
-    public abstract int getExclusiveWritableFolder(String sessionId) throws Exception;
-
-    public abstract void removeAttachable(int folder, int id, String sessionId) throws Exception;
+    public abstract int getExclusiveWritableFolder() throws Exception;
 
     public abstract int getModule() throws Exception;
 
     protected void doDetach() throws Exception {
         doGet();
-        final int id = clean.get(0).getId();
-        removeAttachments();
-
+        final int id = atm.getCreatedEntities().get(0).getId();
+        atm.cleanUp();
+        
         AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, id);
         assertTrue(atm.getLastResponse().hasError());
     }
 
     protected void doUpdates() throws Exception {
-        upload();
+        int objectId = upload();
         Thread.sleep(2000); // Hang around a bit
-        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, clean.get(0).getId());
+        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, objectId);
         assertFalse(atm.getLastResponse().hasError());
         final long timestamp = atm.getLastResponse().getTimestamp().getTime();
         upload();
@@ -137,12 +119,12 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         upload();
         upload();
 
-        final List<AttachmentMetadata> createdLater = new ArrayList<AttachmentMetadata>(clean.subList(1, clean.size()));
+        final List<AttachmentMetadata> createdLater = new ArrayList<AttachmentMetadata>(atm.getCreatedEntities().subList(1, atm.getCreatedEntities().size()));
 
-        res = updates(getWebConversation(), sessionId, folderId, attachedId, moduleId, timestamp, new int[] { AttachmentField.ID, AttachmentField.FILENAME }, AttachmentField.CREATION_DATE, "ASC");
+        atm.updates(folderId, attachedId, moduleId, timestamp);
+        assertFalse(atm.getLastResponse().hasError());
 
-        assertNoError(res);
-        final JSONArray arrayOfArrays = (JSONArray) res.getData();
+        final JSONArray arrayOfArrays = (JSONArray) atm.getLastResponse().getData();
         // Ugly extract of updates in response.
         int updates = 0;
         for (int i = 0; i < arrayOfArrays.length(); i++) {
@@ -163,12 +145,12 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
             }
         }
 
-        final List<AttachmentMetadata> copy = new ArrayList<AttachmentMetadata>(clean);
-        removeAttachments();
+        final List<AttachmentMetadata> copy = new ArrayList<AttachmentMetadata>(atm.getCreatedEntities());
+        atm.cleanUp();
 
-        res = updates(getWebConversation(), sessionId, folderId, attachedId, moduleId, timestamp, new int[] { AttachmentField.ID, AttachmentField.FILENAME }, AttachmentField.CREATION_DATE, "ASC");
+        atm.updates(folderId, attachedId, moduleId, timestamp);
 
-        final JSONArray arrayOfIds = (JSONArray) res.getData();
+        final JSONArray arrayOfIds = (JSONArray) atm.getLastResponse().getData();
         // Ugly extract of deletes in response.
         updates = 0;
         for (int i = 0; i < arrayOfIds.length(); i++) {
@@ -196,9 +178,10 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         upload();
         upload();
 
-        final Response res = all(getWebConversation(), sessionId, folderId, attachedId, moduleId, new int[] { AttachmentField.ID, AttachmentField.FILENAME }, AttachmentField.CREATION_DATE, "ASC");
-        assertNoError(res);
-        final JSONArray arrayOfArrays = (JSONArray) res.getData();
+        List<AttachmentMetadata> all = atm.all(folderId, attachedId, moduleId, new int[] { AttachmentField.ID, AttachmentField.FILENAME }, AttachmentField.CREATION_DATE, Order.ASCENDING);
+        assertFalse(atm.getLastResponse().hasError());
+
+        final JSONArray arrayOfArrays = (JSONArray) atm.getLastResponse().getData();
         // Ugly extract of updates in response.
         int updates = 0;
         for (int i = 0; i < arrayOfArrays.length(); i++) {
@@ -206,9 +189,9 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
                 updates++;
             }
         }
-        assertTrue(arrayOfArrays.toString(), clean.size() <= updates);
-        for (int i = 0; i < clean.size(); i++) {
-            final AttachmentMetadata attachment = clean.get(i);
+        assertTrue(arrayOfArrays.toString(), atm.getCreatedEntities().size() <= updates);
+        for (int i = 0; i < atm.getCreatedEntities().size(); i++) {
+            final AttachmentMetadata attachment = atm.getCreatedEntities().get(i);
 
             JSONArray found = null;
             for (int j = 0; null == found && j < arrayOfArrays.length(); j++) {
@@ -233,7 +216,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         upload();
         upload();
 
-        final int[] ids = new int[] { clean.get(0).getId(), clean.get(2).getId(), clean.get(4).getId()
+        final int[] ids = new int[] { atm.getCreatedEntities().get(0).getId(), atm.getCreatedEntities().get(2).getId(), atm.getCreatedEntities().get(4).getId()
         };
         atm.list(folderId, attachedId, moduleId, ids, new int[] { AttachmentField.ID, AttachmentField.FILENAME });
         final AbstractAJAXResponse res = atm.getLastResponse();
@@ -251,9 +234,9 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
     }
 
     protected void doGet() throws Exception {
-        upload();
+        int objectId = upload();
         
-        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, clean.get(0).getId());
+        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, objectId);
         assertFalse(atm.getLastResponse().hasError());
 
         assertEquals(folderId, get.getFolderId());
@@ -262,16 +245,16 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         assertEquals(testFile.getName(), get.getFilename());
         assertEquals("text/plain", get.getFileMIMEType());
         assertEquals(testFile.length(), get.getFilesize());
-        assertEquals(clean.get(0).getId(), get.getId());
+        assertEquals(objectId, get.getId());
     }
 
     protected void doMultiple() throws Exception {
-        TestTask attachment = new TestTask();
+        AttachmentImpl attachment = new AttachmentImpl();
         int id = atm.attach(attachment, testFile.getName(), new FileInputStream(testFile), null);
         AbstractAJAXResponse resp = atm.getLastResponse();
         assertFalse(resp.hasError());
 
-        AttachmentMetadata reloaded = atm.get(folderId, attachedId, AttachmentTools.determineModule(attachment), id);
+        AttachmentMetadata reloaded = atm.get(folderId, attachedId, attachment.getModuleId(), id);
         assertEquals(reloaded.getFilename(), testFile.getName());
     }
 
@@ -284,13 +267,13 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
     }
 
     protected void doDocument() throws Exception {
-        upload();
+        int objectId = upload();
 
         InputStream data = null;
         InputStream local = null;
 
         try {
-            data = atm.document(folderId, attachedId, moduleId, clean.get(0).getId());
+            data = atm.document(folderId, attachedId, moduleId, objectId);
             OXTestToolkit.assertSameContent(local = new FileInputStream(testFile), data);
         } finally {
             if (data != null) {
@@ -301,11 +284,11 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
             }
         }
 
-        com.openexchange.ajax.attach.actions.GetDocumentRequest request = new com.openexchange.ajax.attach.actions.GetDocumentRequest(folderId, clean.get(0).getId(), moduleId, attachedId);
+        com.openexchange.ajax.attach.actions.GetDocumentRequest request = new com.openexchange.ajax.attach.actions.GetDocumentRequest(folderId, objectId, moduleId, attachedId);
         GetDocumentResponse response = getClient().execute(request);
         assertEquals("application/octet-stream", response.getContentType());
 
-        request = new com.openexchange.ajax.attach.actions.GetDocumentRequest(folderId, clean.get(0).getId(), moduleId, attachedId, "application/octet-stream");
+        request = new com.openexchange.ajax.attach.actions.GetDocumentRequest(folderId, objectId, moduleId, attachedId, "application/octet-stream");
         response = getClient().execute(request);
         assertEquals("application/octet-stream", response.getContentType());
     }
@@ -319,14 +302,14 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
 
-        Response res = attach(getWebConversation(), sessionId, imaginaryFolderFriend, attachedId, moduleId, testFile);
-        assertTrue(res.hasError());
+        int objectId = atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
+        assertTrue(atm.getLastResponse().hasError());
 
         attachment.setFolderId(folderId);
         attachment.setAttachedId(imaginaryObjectFriend);
 
-        res = attach(getWebConversation(), sessionId, imaginaryFolderFriend, attachedId, moduleId, testFile);
-        assertTrue(res.hasError());
+        atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
+        assertTrue(atm.getLastResponse().hasError());
     }
 
     protected void doForbidden() throws Exception {
@@ -335,46 +318,50 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
 
-        final Response res = attach(getSecondWebConversation(), getSecondSessionId(), folderId, attachedId, moduleId, testFile);
-        assertTrue(res.hasError());
+        atm.setClient(getClient2());
+        int objectId = atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
+        assertTrue(atm.getLastResponse().hasError());
 
+        atm.setClient(getClient());
     }
 
     protected void doQuota() throws Exception {
-        Response res = quota(getWebConversation(), sessionId);
-        assertNoError(res);
-        JSONObject quota = (JSONObject) res.getData();
+        FilestoreQuotaRequest request = new FilestoreQuotaRequest();
+        FilestoreQuotaResponse response = getClient().execute(request);
+        assertFalse(response.hasError());
+
+        JSONObject quota = (JSONObject) response.getData();
         final int use = quota.getInt("use");
 
         upload();
 
-        res = quota(getWebConversation(), sessionId);
-        assertNoError(res);
-        quota = (JSONObject) res.getData();
+        response = getClient().execute(request);
+        assertFalse(response.hasError());
+
+        quota = (JSONObject) response.getData();
         final int useAfter = quota.getInt("use");
 
-        AttachmentMetadata get = atm.get(clean.get(0).getFolderId(), clean.get(0).getAttachedId(), clean.get(0).getAttachedId(), clean.get(0).getId());
+        AttachmentMetadata get = atm.get(atm.getCreatedEntities().get(0).getFolderId(), atm.getCreatedEntities().get(0).getAttachedId(), atm.getCreatedEntities().get(0).getAttachedId(), atm.getCreatedEntities().get(0).getId());
         assertFalse(atm.getLastResponse().hasError());
 
-        assertEquals(useAfter - use, ((JSONObject) res.getData()).get("file_size"));
+        assertEquals(useAfter - use, ((JSONObject) atm.getLastResponse().getData()).get("file_size"));
     }
 
-    public void upload() throws Exception {
+    public int upload() throws Exception {
         final AttachmentMetadata attachment = new AttachmentImpl();
         attachment.setFolderId(folderId);
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
         
-        atm.attach(folderId, attachedId, moduleId, testFile.getAbsolutePath(), FileUtils.openInputStream(testFile), null);
+        int objectId = atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), "text/plain");
 
         assertFalse(atm.getLastResponse().hasError());
-
-        attachment.setId(((JSONArray) atm.getLastResponse().getData()).getInt(0));
-        clean.add(attachment);
+        
+        return objectId;
     }
 
     public AttachmentMetadata getAttachment(final int index) {
-        return clean.get(index);
+        return atm.getCreatedEntities().get(index);
     }
 
     public File getTestFile() {

@@ -54,33 +54,22 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.google.common.collect.Iterables;
-import com.meterware.httpunit.PutMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
-import com.openexchange.tools.URLParameter;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class LockTest extends InfostoreAJAXTest {
@@ -101,8 +90,11 @@ public class LockTest extends InfostoreAJAXTest {
         final int userId = getClient().getValues().getUserId();
         final int secondUserId = getClient2().getValues().getUserId();
         // TODO create folder in one step with correct permissions.
-        folderId = new FolderObject("NewInfostoreFolder" + System.currentTimeMillis(), getClient().getValues().getPrivateInfostoreFolder(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId).getObjectID();
-        updateFolder(getWebConversation(), getHostName(), sessionId, userId, secondUserId, folderId, Long.MAX_VALUE);
+        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + System.currentTimeMillis(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, getClient().getValues().getPrivateInfostoreFolder());
+        folderId = ftm.insertFolderOnServer(folder).getObjectID();
+        
+        folder.addPermission(new OCLPermission(secondUserId, folderId));
+        ftm.updateFolderOnServer(folder);
 
         com.openexchange.file.storage.File data = createFile(folderId, "test upload");
         data.setFileMIMEType("text/plain");
@@ -122,15 +114,6 @@ public class LockTest extends InfostoreAJAXTest {
 
         itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ftm.deleteFolderOnServer(folderId, new Date(Long.MAX_VALUE));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -250,72 +233,6 @@ public class LockTest extends InfostoreAJAXTest {
     public static void assertUnlocked(final com.openexchange.file.storage.File file) throws JSONException {
         assertNull(file.getLockedUntil());
     }
-
-    // Copied from FolderTest
-
-    public static boolean updateFolder(final WebConversation conversation, final String hostname, final String sessionId, final int entity, final int secondEntity, final int folderId, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
-        final JSONObject jsonFolder = new JSONObject();
-        jsonFolder.put("id", folderId);
-        final JSONArray perms = new JSONArray();
-        JSONObject jsonPermission = new JSONObject();
-        jsonPermission.put("entity", entity);
-        jsonPermission.put("group", false);
-        jsonPermission.put("bits", createPermissionBits(8, 8, 8, 8, true));
-        perms.put(jsonPermission);
-        jsonPermission = new JSONObject();
-        jsonPermission.put("entity", secondEntity);
-        jsonPermission.put("group", false);
-        jsonPermission.put("bits", createPermissionBits(8, 8, 8, 8, true));
-        perms.put(jsonPermission);
-        jsonFolder.put("permissions", perms);
-        final URLParameter urlParam = new URLParameter();
-        urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
-        urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
-        urlParam.setParameter("timestamp", String.valueOf(timestamp));
-        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
-        final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname + FOLDER_URL + urlParam.getURLParameters(), bais, "text/javascript; charset=UTF-8");
-        final WebResponse resp = conversation.getResponse(req);
-        final JSONObject respObj = new JSONObject(resp.getText());
-        if (respObj.has("error")) {
-            return false;
-        }
-        return true;
-    }
-
-    private static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) {
-        final int[] perms = new int[5];
-        perms[0] = fp;
-        perms[1] = orp;
-        perms[2] = owp;
-        perms[3] = odp;
-        perms[4] = adminFlag ? 1 : 0;
-        return createPermissionBits(perms);
-    }
-
-    private static int createPermissionBits(final int[] permission) {
-        int retval = 0;
-        boolean first = true;
-        for (int i = permission.length - 1; i >= 0; i--) {
-            final int exponent = (i * 7); // Number of bits to be shifted
-            if (first) {
-                retval += permission[i] << exponent;
-                first = false;
-            } else {
-                if (permission[i] == OCLPermission.ADMIN_PERMISSION) {
-                    retval += Folder.MAX_PERMISSION << exponent;
-                } else {
-                    retval += mapping[permission[i]] << exponent;
-                }
-            }
-        }
-        return retval;
-    }
-
-    private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
-
-    private static final String FOLDER_URL = "/ajax/folders";
 
     public static void assertLocked(final JSONObject o) throws JSONException {
         final long locked = o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName());

@@ -84,9 +84,9 @@ public class AttachRequest extends AbstractAttachmentRequest<AttachResponse> {
         this.attachedId = objectId;
         this.fileName = fileName;
         this.data = data;
-        this.mimeType = mimeType;    }
+        this.mimeType = mimeType;
+    }
 
-        
     public AttachRequest(CommonObject obj, String fileName, InputStream data, String mimeType) {
         super();
         moduleId = AttachmentTools.determineModule(obj);
@@ -123,6 +123,6 @@ public class AttachRequest extends AbstractAttachmentRequest<AttachResponse> {
 
     @Override
     public AttachParser getParser() {
-        return new AttachParser(true);
+        return new AttachParser(false);
     }
 }

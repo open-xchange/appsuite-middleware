@@ -56,7 +56,6 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -327,8 +326,6 @@ public class TaskTest extends AbstractWebdavXMLTest {
     }
 
     public static int[] deleteTask(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password, String context) throws Exception {
-        new ArrayList();
-
         for (int a = 0; a < objectIdAndFolderId.length; a++) {
             deleteTask(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password, context);
         }
