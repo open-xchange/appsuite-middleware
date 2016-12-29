@@ -50,6 +50,9 @@
 package org.glassfish.grizzly.http.server;
 
 import java.util.concurrent.Semaphore;
+import org.glassfish.grizzly.EmptyCompletionHandler;
+import org.glassfish.grizzly.filterchain.FilterChainEvent;
+import org.glassfish.grizzly.filterchain.TransportFilter;
 
 /**
  * {@link HttpRequestGuard} - A guard that controls the number of threads that are allowed to concurrently process a HTTP request.
@@ -80,26 +83,28 @@ public abstract class HttpRequestGuard {
      * @return The guard
      */
     public static HttpRequestGuard guardFor(int permits) {
-        return permits > 0 ? new SemaphoreHttpRequestGuard(permits) : NO_GUARD;
+        if (permits <= 0) {
+            return NO_GUARD;
+        }
+
+        Semaphore semaphore = new Semaphore(permits);
+        SemaphoreHandler semaphoreHandler = new SemaphoreHandler(semaphore);
+        return new SemaphoreHttpRequestGuard(semaphore, semaphoreHandler);
     }
 
     // -----------------------------------------------------------------------------------------------------------
 
-
     /**
      * Initializes a new {@link HttpRequestGuard}.
-     *
-     * @param permits The initial number of permits available. Must not be equal to or less than zero.
-     * @throws IllegalArgumentException If permits is negative or equal to zero
      */
     protected HttpRequestGuard() {
         super();
     }
 
     /**
-     * Checks if this guard allows that the specified <i>new</i> HTTP request should be handled.
+     * Checks if this guard allows that the given <i>new</i> HTTP request should be handled.
      *
-     * @return <code>true</code> if given HTTP request is allowed being handled and <code>false</code> otherwise
+     * @return <code>true</code> if the HTTP request is allowed being handled and <code>false</code> otherwise
      */
     public abstract boolean mayHandle(Request newRequest);
 
@@ -108,36 +113,25 @@ public abstract class HttpRequestGuard {
     private static final class SemaphoreHttpRequestGuard extends HttpRequestGuard {
 
         private final Semaphore semaphore;
-        private final AfterServiceListener afterServiceListener;
+        private final SemaphoreHandler semaphoreHandler;
 
         /**
          * Initializes a new {@link SemaphoreHttpRequestGuard}.
          *
-         * @param permits The initial number of permits available. Must not be equal to or less than zero.
-         * @throws IllegalArgumentException If permits is negative or equal to zero
+         * @param semaphore The semaphore managing the permits
+         * @param semaphoreHandler The handler caring about releasing a previously acquired permit
          */
-        SemaphoreHttpRequestGuard(int permits) {
+        SemaphoreHttpRequestGuard(Semaphore semaphore, SemaphoreHandler semaphoreHandler) {
             super();
-            if (permits <= 0) {
-                throw new IllegalArgumentException();
-            }
-
-            final Semaphore semaphore = new Semaphore(permits);
             this.semaphore = semaphore;
-            afterServiceListener = new AfterServiceListener() {
-
-                @Override
-                public void onAfterService(Request request) {
-                    semaphore.release();
-                }
-            };
+            this.semaphoreHandler = semaphoreHandler;
         }
 
         @Override
         public boolean mayHandle(Request newRequest) {
             boolean allowed = semaphore.tryAcquire();
             if (allowed) {
-                newRequest.addAfterServiceListener(afterServiceListener);
+                newRequest.addAfterServiceListener(semaphoreHandler);
             }
             return allowed;
         }
@@ -145,6 +139,46 @@ public abstract class HttpRequestGuard {
         @Override
         public String toString() {
             return semaphore.toString();
+        }
+    }
+
+    private static final class SemaphoreHandler extends EmptyCompletionHandler<Object> implements AfterServiceListener {
+
+        private final FilterChainEvent event;
+        private final Semaphore semaphore;
+
+        SemaphoreHandler(Semaphore semaphore) {
+            super();
+            this.semaphore = semaphore;
+            event = TransportFilter.createFlushEvent(this);
+        }
+
+        @Override
+        public void cancelled() {
+            onRequestCompleteAndResponseFlushed();
+        }
+
+        @Override
+        public void failed(final Throwable throwable) {
+            onRequestCompleteAndResponseFlushed();
+        }
+
+        @Override
+        public void completed(final Object result) {
+            onRequestCompleteAndResponseFlushed();
+        }
+
+        @Override
+        public void onAfterService(final Request request) {
+            // Same as request.getContext().flush(this), but less garbage
+            request.getContext().notifyDownstream(event);
+        }
+
+        /**
+         * Will be called, once HTTP request processing is complete and response is flushed.
+         */
+        private void onRequestCompleteAndResponseFlushed() {
+            semaphore.release();
         }
     }
 
