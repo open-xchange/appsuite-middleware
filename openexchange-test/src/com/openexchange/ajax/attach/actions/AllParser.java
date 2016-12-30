@@ -73,21 +73,23 @@ public class AllParser extends AbstractAJAXParser<AllResponse> {
     @Override
     protected AllResponse createResponse(final Response response) throws JSONException {
         AllResponse res = new AllResponse(response);
-        List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
-        JSONArray array = (JSONArray) response.getData();
-        for (int i = 0; i < array.length(); i++) {
-            JSONArray json = array.getJSONArray(i);
-            AttachmentImpl metadata = new AttachmentImpl();
-            metadata.setFolderId(json.getInt(0));
-            metadata.setAttachedId(json.getInt(1));
-            metadata.setModuleId(json.getInt(2));
-            metadata.setFilename(json.getString(3));
-            metadata.setFilesize(json.getLong(4));
-            metadata.setFileMIMEType(json.getString(5));
-            metadata.setRtfFlag(Boolean.parseBoolean(json.getString(6)));
-            attachments.add(metadata);
+        if (null != response.getData()) {
+            List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
+            JSONArray array = (JSONArray) response.getData();
+            for (int i = 0; i < array.length(); i++) {
+                JSONArray json = array.getJSONArray(i);
+                AttachmentImpl metadata = new AttachmentImpl();
+                metadata.setFolderId(json.getInt(0));
+                metadata.setAttachedId(json.getInt(1));
+                metadata.setModuleId(json.getInt(2));
+                metadata.setFilename(json.getString(3));
+                metadata.setFilesize(json.getLong(4));
+                metadata.setFileMIMEType(json.getString(5));
+                metadata.setRtfFlag(Boolean.parseBoolean(json.getString(6)));
+                attachments.add(metadata);
+            }
+            res.setAttachments(attachments);
         }
-        res.setAttachments(attachments);
         return res;
     }
 
