@@ -52,6 +52,7 @@ package com.openexchange.chronos.ical;
 import java.io.Closeable;
 import java.util.List;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.exception.OXException;
 
 /**
@@ -82,6 +83,13 @@ public interface CalendarImport extends Closeable {
      * @return The imported events, or <code>null</code> if there are none
      */
     List<Event> getEvents();
+
+    /**
+     * Gets the free/busy data imported from the contained VFREEBUSY components.
+     *
+     * @return The imported free/busy data, or <code>null</code> if there are none
+     */
+    List<FreeBusyData> getFreeBusy();
 
 	/**
      * Gets a list of parser- and conversion warnings.

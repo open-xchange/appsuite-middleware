@@ -57,6 +57,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ComponentData;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
@@ -70,6 +71,7 @@ import net.fortuna.ical4j.model.PropertyFactoryImpl;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.property.Method;
 
 /**
@@ -130,6 +132,12 @@ public class CalendarExportImpl implements CalendarExport {
     @Override
     public CalendarExport add(Event event) throws OXException {
         calendar.getComponents().add(exportEvent(event));
+        return this;
+    }
+
+    @Override
+    public CalendarExport add(FreeBusyData freeBusyData) throws OXException {
+        calendar.getComponents().add(exportFreeBusy(freeBusyData));
         return this;
     }
 
@@ -221,12 +229,36 @@ public class CalendarExportImpl implements CalendarExport {
         return vAlarm;
     }
 
-    private void trackTimezones(Event event) {
-        if (null != event.getStartTimeZone()) {
-            timezoneIDs.add(event.getStartTimeZone());
+    private VFreeBusy exportFreeBusy(FreeBusyData freeBusyData) throws OXException {
+        /*
+         * export free/busy data & track timezones
+         */
+        VFreeBusy vFreeBusy = mapper.exportFreeBusy(freeBusyData, parameters, warnings);
+        trackTimezones(freeBusyData);
+        /*
+         * export any arbitrary properties
+         */
+        if (ComponentData.class.isInstance(freeBusyData)) {
+            for (Property property : ICalUtils.exportProperties(((ComponentData) freeBusyData).getProperties())) {
+                vFreeBusy.getProperties().add(property);
+            }
         }
-        if (null != event.getEndTimeZone()) {
-            timezoneIDs.add(event.getEndTimeZone());
+        return vFreeBusy;
+    }
+
+    private void trackTimezones(Event event) {
+        trackTimezone(event.getStartTimeZone());
+        trackTimezone(event.getEndTimeZone());
+    }
+
+    private void trackTimezones(FreeBusyData freeBusyData) {
+        trackTimezone(freeBusyData.getStartTimeZone());
+        trackTimezone(freeBusyData.getEndTimeZone());
+    }
+
+    private void trackTimezone(String timeZoneID) {
+        if (null != timeZoneID && false == "UTC".equals(timeZoneID)) {
+            timezoneIDs.add(timeZoneID);
         }
     }
 

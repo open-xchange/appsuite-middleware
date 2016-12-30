@@ -47,29 +47,44 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
+package com.openexchange.chronos.ical.ical4j.mapping.freebusy;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping;
-import net.fortuna.ical4j.model.component.VEvent;
+import java.util.Date;
+import com.openexchange.chronos.FreeBusyData;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VFreeBusy;
+import net.fortuna.ical4j.model.property.DtStamp;
+import net.fortuna.ical4j.model.property.UtcProperty;
 
 /**
- * {@link OrganizerMapping}
+ * {@link DtStampMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class OrganizerMapping extends ICalOrganizerMapping<VEvent, Event> {
+public class DtStampMapping extends ICalUtcMapping<VFreeBusy, FreeBusyData> {
 
-    @Override
-    protected Organizer getValue(Event object) {
-        return object.getOrganizer();
-    }
+    /**
+     * Initializes a new {@link DtStampMapping}.
+     */
+	public DtStampMapping() {
+		super(Property.DTSTAMP);
+	}
 
-    @Override
-    protected void setValue(Event object, Organizer value) {
-        object.setOrganizer(value);
-    }
+	@Override
+    protected Date getValue(FreeBusyData object) {
+        return object.getTimestamp();
+	}
+
+	@Override
+    protected void setValue(FreeBusyData object, Date value) {
+        object.setTimestamp(value);
+	}
+
+	@Override
+	protected UtcProperty createProperty() {
+		return new DtStamp();
+	}
 
 }

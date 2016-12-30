@@ -47,29 +47,55 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
+package com.openexchange.chronos.ical.ical4j.mapping.freebusy;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping;
-import net.fortuna.ical4j.model.component.VEvent;
+import java.util.Date;
+import com.openexchange.chronos.FreeBusyData;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateMapping;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VFreeBusy;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.DtEnd;
 
 /**
- * {@link OrganizerMapping}
+ * {@link DtEndMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class OrganizerMapping extends ICalOrganizerMapping<VEvent, Event> {
+public class DtEndMapping extends ICalDateMapping<VFreeBusy, FreeBusyData> {
 
-    @Override
-    protected Organizer getValue(Event object) {
-        return object.getOrganizer();
-    }
+    /**
+     * Initializes a new {@link DtEndMapping}.
+     */
+	public DtEndMapping() {
+		super(Property.DTEND);
+	}
 
-    @Override
-    protected void setValue(Event object, Organizer value) {
-        object.setOrganizer(value);
-    }
+	@Override
+    protected Date getValue(FreeBusyData object) {
+		return object.getEndDate();
+	}
+
+	@Override
+    protected String getTimezone(FreeBusyData object) {
+		return object.getEndTimeZone();
+	}
+
+	@Override
+    protected boolean hasTime(FreeBusyData object) {
+        return true;
+	}
+
+	@Override
+    protected void setValue(FreeBusyData object, Date value, String timezone, boolean hasTime) {
+		object.setEndDate(value);
+		object.setEndTimeZone(timezone);
+	}
+
+	@Override
+	protected DateProperty createProperty() {
+		return new DtEnd();
+	}
 
 }

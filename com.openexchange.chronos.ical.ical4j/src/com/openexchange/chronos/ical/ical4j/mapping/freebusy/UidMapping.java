@@ -47,29 +47,42 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
+package com.openexchange.chronos.ical.ical4j.mapping.freebusy;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping;
-import net.fortuna.ical4j.model.component.VEvent;
+import com.openexchange.chronos.FreeBusyData;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VFreeBusy;
+import net.fortuna.ical4j.model.property.Uid;
 
 /**
- * {@link OrganizerMapping}
+ * {@link UidMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class OrganizerMapping extends ICalOrganizerMapping<VEvent, Event> {
+public class UidMapping extends ICalTextMapping<VFreeBusy, FreeBusyData> {
 
-    @Override
-    protected Organizer getValue(Event object) {
-        return object.getOrganizer();
-    }
+    /**
+     * Initializes a new {@link UidMapping}.
+     */
+	public UidMapping() {
+		super(Property.UID);
+	}
 
-    @Override
-    protected void setValue(Event object, Organizer value) {
-        object.setOrganizer(value);
-    }
+	@Override
+    protected String getValue(FreeBusyData object) {
+		return object.getUid();
+	}
+
+	@Override
+    protected void setValue(FreeBusyData object, String value) {
+		object.setUid(value);
+	}
+
+	@Override
+	protected Property createProperty() {
+		return new Uid();
+	}
 
 }

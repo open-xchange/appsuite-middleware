@@ -52,13 +52,13 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
  * {@link ICalDateMapping}
@@ -72,7 +72,7 @@ public abstract class ICalDateMapping<T extends CalendarComponent, U> extends Ab
 
     /**
      * Initializes a new {@link ICalDateMapping}.
-     * 
+     *
      * @param propertyName The name of the mapping's property
      */
     protected ICalDateMapping(String propertyName) {
@@ -103,7 +103,7 @@ public abstract class ICalDateMapping<T extends CalendarComponent, U> extends Ab
             }
             if (hasTime(object)) {
                 String timezoneID = getTimezone(object);
-                if (Strings.isNotEmpty(timezoneID)) {
+                if (Strings.isNotEmpty(timezoneID) && false == "UTC".equals(timezoneID)) {
                     TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParameters.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
                     net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
                     if (null != timeZone) {
@@ -142,22 +142,6 @@ public abstract class ICalDateMapping<T extends CalendarComponent, U> extends Ab
             } else {
                 setValue(object, ParserTools.parseDate(component, property, defaultTimeZone), null, false);
             }
-            //			net.fortuna.ical4j.model.Date date = property.getDate();
-            //			Date value;
-            //			String timezone;
-            //			boolean hasTime;
-            //			if (DateTime.class.isInstance(date)) {
-            //				hasTime = true;
-            //				TimeZone timeZone = ((DateTime) date).getTimeZone();
-            //				timezone = null != timeZone ? timeZone.getID() : null;
-            //				value = new Date(date.getTime());				
-            //			} else {
-            //				hasTime = false;
-            //				timezone = null;
-            //				value = new Date(date.getTime());
-            //			}
-            //			setValue(object, value, timezone, hasTime);
-
         }
     }
 

@@ -47,29 +47,30 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
+package com.openexchange.chronos.ical.ical4j.mapping.freebusy;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping;
-import net.fortuna.ical4j.model.component.VEvent;
+import java.util.List;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.FreeBusyData;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalAttendeeMapping;
+import net.fortuna.ical4j.model.component.VFreeBusy;
 
 /**
- * {@link OrganizerMapping}
+ * {@link AttendeeMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class OrganizerMapping extends ICalOrganizerMapping<VEvent, Event> {
+public class AttendeeMapping extends ICalAttendeeMapping<VFreeBusy, FreeBusyData> {
 
     @Override
-    protected Organizer getValue(Event object) {
-        return object.getOrganizer();
+    protected List<Attendee> getValue(FreeBusyData object) {
+        return object.getAttendees();
     }
 
     @Override
-    protected void setValue(Event object, Organizer value) {
-        object.setOrganizer(value);
+    protected void setValue(FreeBusyData object, List<Attendee> value) {
+        object.setAttendees(value);
     }
 
 }

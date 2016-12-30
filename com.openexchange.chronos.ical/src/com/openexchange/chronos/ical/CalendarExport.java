@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.exception.OXException;
 
 /**
@@ -70,6 +71,14 @@ public interface CalendarExport {
      * @return A self reference
      */
     CalendarExport add(Event event) throws OXException;
+
+    /**
+     * Adds a new free/busy data component to this VCALENDAR component.
+     *
+     * @param freeBusyData The free/busy component to add
+     * @return A self reference
+     */
+    CalendarExport add(FreeBusyData freeBusyData) throws OXException;
 
     /**
      * Sets the method to be declared in the VCALENDAR component.

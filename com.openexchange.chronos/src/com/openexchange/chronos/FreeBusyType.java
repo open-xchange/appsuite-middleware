@@ -47,29 +47,68 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
+package com.openexchange.chronos;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping;
-import net.fortuna.ical4j.model.component.VEvent;
+import com.openexchange.java.Enums;
 
 /**
- * {@link OrganizerMapping}
+ * {@link FreeBusyType}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
+ * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.2.9">RFC 5545, section 3.2.9</a>
  */
-public class OrganizerMapping extends ICalOrganizerMapping<VEvent, Event> {
+public enum FreeBusyType implements FbType {
 
-    @Override
-    protected Organizer getValue(Event object) {
-        return object.getOrganizer();
+    /**
+     * The time interval is free for scheduling.
+     */
+    FREE(FbType.FREE, 0),
+
+    /**
+     * The time interval is busy because one or more events have been scheduled for that interval.
+     */
+    BUSY(FbType.BUSY, 3),
+
+    /**
+     * The time interval is busy and that the interval can not be scheduled.
+     */
+    BUSY_UNAVAILABLE(FbType.BUSY_UNAVAILABLE, 4),
+
+    /**
+     * The time interval is busy because one or more events have been tentatively scheduled for that interval.
+     */
+    BUSY_TENTATIVE(FbType.BUSY_TENTATIVE, 2),
+
+    ;
+
+    private final String value;
+    private final int order;
+
+    private FreeBusyType(String value, int order) {
+        this.value = value;
+        this.order = order;
     }
 
     @Override
-    protected void setValue(Event object, Organizer value) {
-        object.setOrganizer(value);
+    public String getValue() {
+        return value;
+    }
+
+    public boolean equals(FbType other) {
+        return 0 == compareTo(other);
+    }
+
+    @Override
+    public int compareTo(FbType other) {
+        if (null == other) {
+            return 1;
+        }
+        if (FreeBusyType.class.isInstance(other)) {
+            return Integer.compare(order, ((FreeBusyType) other).order);
+        }
+        FreeBusyType parsedFbType = Enums.parse(FreeBusyType.class, other.getValue(), null);
+        return Integer.compare(order, null == parsedFbType ? 1 : parsedFbType.order);
     }
 
 }

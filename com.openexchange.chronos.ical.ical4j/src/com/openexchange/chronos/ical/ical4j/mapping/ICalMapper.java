@@ -53,15 +53,18 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.AlarmComponent;
 import com.openexchange.chronos.ical.EventComponent;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.alarm.AlarmMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.event.EventMappings;
+import com.openexchange.chronos.ical.ical4j.mapping.freebusy.FreeBusyMappings;
 import com.openexchange.chronos.ical.impl.ICalUtils;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VFreeBusy;
 
 /**
  * {@link ICalMapper}
@@ -115,8 +118,20 @@ public class ICalMapper {
         return vAlarm;
     }
 
+    public VFreeBusy exportFreeBusy(FreeBusyData freeBusyData, ICalParameters parameters, List<OXException> warnings) {
+        VFreeBusy vFreeBusy = new VFreeBusy();
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+        if (null == warnings) {
+            warnings = new ArrayList<OXException>();
+        }
+        for (ICalMapping<VFreeBusy, FreeBusyData> mapping : FreeBusyMappings.ALL) {
+            mapping.export(freeBusyData, vFreeBusy, iCalParameters, warnings);
+        }
+        return vFreeBusy;
+    }
+
     /**
-     * Imports a vEvent, optionally merging with an existing contact.
+     * Imports a vEvent, optionally merging with an existing event.
      *
      * @param vEvent The vEvent to import
      * @param event The contact to merge the vEvent into, or <code>null</code> to import as a new contact
@@ -150,6 +165,18 @@ public class ICalMapper {
             mapping.importICal(vAlarm, alarm, iCalParameters, warnings);
         }
         return alarm;
+    }
+
+    public FreeBusyData importVFreeBusy(VFreeBusy vFreeBusy, ICalParameters parameters, List<OXException> warnings) {
+        FreeBusyData freeBusy = new FreeBusyData();
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+        if (null == warnings) {
+            warnings = new ArrayList<OXException>();
+        }
+        for (ICalMapping<VFreeBusy, FreeBusyData> mapping : FreeBusyMappings.ALL) {
+            mapping.importICal(vFreeBusy, freeBusy, iCalParameters, warnings);
+        }
+        return freeBusy;
     }
 
 }

@@ -47,29 +47,98 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
+package com.openexchange.chronos;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping;
-import net.fortuna.ical4j.model.component.VEvent;
+import java.util.Date;
 
 /**
- * {@link OrganizerMapping}
+ * {@link FreeBusyTime}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
+ * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.2.6">RFC 5545, section 3.8.2.6</a>
  */
-public class OrganizerMapping extends ICalOrganizerMapping<VEvent, Event> {
+public class FreeBusyTime implements Comparable<FreeBusyTime> {
 
-    @Override
-    protected Organizer getValue(Event object) {
-        return object.getOrganizer();
+    private FbType fbType;
+    private Date startTime;
+    private Date endTime;
+
+    public FreeBusyTime() {
+        super();
+    }
+
+    public FreeBusyTime(FbType fbType, Date startTime, Date endTime) {
+        super();
+        this.fbType = fbType;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    /**
+     * Gets the fbType
+     *
+     * @return The fbType
+     */
+    public FbType getFbType() {
+        return fbType;
+    }
+
+    /**
+     * Sets the fbType
+     *
+     * @param fbType The fbType to set
+     */
+    public void setFbType(FbType fbType) {
+        this.fbType = fbType;
+    }
+
+    /**
+     * Gets the startTime
+     *
+     * @return The startTime
+     */
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    /**
+     * Sets the startTime
+     *
+     * @param startTime The startTime to set
+     */
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    /**
+     * Gets the endTime
+     *
+     * @return The endTime
+     */
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    /**
+     * Sets the endTime
+     *
+     * @param endTime The endTime to set
+     */
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
     }
 
     @Override
-    protected void setValue(Event object, Organizer value) {
-        object.setOrganizer(value);
+    public int compareTo(FreeBusyTime o) {
+        int value = null == o ? 1 : startTime.compareTo(o.getStartTime());
+        if (0 == value) {
+            value = endTime.compareTo(o.getEndTime());
+            if (0 == value) {
+                value = fbType.compareTo(o.getFbType());
+            }
+        }
+        return value;
     }
 
 }

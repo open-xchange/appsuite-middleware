@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.AlarmComponent;
 import com.openexchange.chronos.ical.CalendarImport;
 import com.openexchange.chronos.ical.EventComponent;
@@ -69,6 +70,7 @@ import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VFreeBusy;
 
 /**
  * {@link CalendarImportImpl}
@@ -83,6 +85,7 @@ public class CalendarImportImpl implements CalendarImport {
     private final ICalMapper mapper;
 
     private List<Event> events;
+    private List<FreeBusyData> freeBusys;
     private String method;
     private String name;
 
@@ -94,6 +97,7 @@ public class CalendarImportImpl implements CalendarImport {
         this.method = ICalUtils.optPropertyValue(calendar.getMethod());
         this.name = ICalUtils.optPropertyValue(calendar.getProperty(WrCalName.PROPERTY_NAME));
         this.events = importEvents(calendar.getComponents(Component.VEVENT));
+        this.freeBusys = importFreeBusys(calendar.getComponents(Component.VFREEBUSY));
     }
 
     @Override
@@ -120,6 +124,11 @@ public class CalendarImportImpl implements CalendarImport {
     @Override
     public List<Event> getEvents() {
         return events;
+    }
+
+    @Override
+    public List<FreeBusyData> getFreeBusy() {
+        return freeBusys;
     }
 
     @Override
@@ -162,6 +171,18 @@ public class CalendarImportImpl implements CalendarImport {
             alarms.add(alarm);
         }
         return alarms;
+    }
+
+    private List<FreeBusyData> importFreeBusys(ComponentList freeBusyComponents) throws OXException {
+        if (null == freeBusyComponents) {
+            return null;
+        }
+        List<FreeBusyData> freeBusys = new ArrayList<FreeBusyData>(freeBusyComponents.size());
+        for (Iterator<?> iterator = freeBusyComponents.iterator(); iterator.hasNext();) {
+            VFreeBusy vFreeBusy = (VFreeBusy) iterator.next();
+            freeBusys.add(mapper.importVFreeBusy(vFreeBusy, parameters, warnings));
+        }
+        return freeBusys;
     }
 
 }

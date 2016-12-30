@@ -47,29 +47,47 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
-
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping;
-import net.fortuna.ical4j.model.component.VEvent;
+package com.openexchange.chronos;
 
 /**
- * {@link OrganizerMapping}
+ * {@link FbType}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
+ * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.2.9">RFC 5545, section 3.2.9</a>
  */
-public class OrganizerMapping extends ICalOrganizerMapping<VEvent, Event> {
+public interface FbType {
 
-    @Override
-    protected Organizer getValue(Event object) {
-        return object.getOrganizer();
-    }
+    /** Constant to indicate that the time interval is free for scheduling. */
+    static final String FREE = "FREE";
 
-    @Override
-    protected void setValue(Event object, Organizer value) {
-        object.setOrganizer(value);
-    }
+    /** Constant to indicate that the time interval is busy because one or more events have been scheduled for that interval. */
+    static final String BUSY = "BUSY";
+
+    /** Constant to indicate that the time interval is busy and that the interval can not be scheduled. */
+    static final String BUSY_UNAVAILABLE = "BUSY-UNAVAILABLE";
+
+    /** Constant to indicate that the time interval is busy because one or more events have been tentatively scheduled for that interval. */
+    static final String BUSY_TENTATIVE = "BUSY-TENTATIVE";
+
+    /**
+     * Gets the value.
+     *
+     * @return The free or busy time type value
+     */
+    String getValue();
+
+    /**
+     * Compares this free/busy type with another one for ordering.
+     * <p/>
+     * The following order is used: {@link FbType#BUSY_UNAVAILABLE} > {@link FbType#BUSY} > {@link FbType#BUSY_TENTATIVE} >
+     * [any unknown value] > {@link FbType#FREE}.
+     *
+     * @param other The free/busy type to compare against
+     * @return <code>0</code> if the supplied free/busy type is equal to this type, a value <code>&lt; 0</code> if this type is <i>less
+     *         conflicting</i> than the passed free/busy type, or a value <code>&gt; 0</code> if this type is <i>more conflicting</i> than
+     *         the passed instance.
+     */
+    int compareTo(FbType other);
 
 }
