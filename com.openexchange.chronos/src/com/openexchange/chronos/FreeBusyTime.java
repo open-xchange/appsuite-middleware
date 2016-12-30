@@ -64,10 +64,20 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
     private Date startTime;
     private Date endTime;
 
+    /**
+     * Initializes a new {@link FreeBusyTime}.
+     */
     public FreeBusyTime() {
         super();
     }
 
+    /**
+     * Initializes a new {@link FreeBusyTime}.
+     *
+     * @param fbType The free/busy type
+     * @param startTime The start of the period
+     * @param endTime The end of the period
+     */
     public FreeBusyTime(FbType fbType, Date startTime, Date endTime) {
         super();
         this.fbType = fbType;
@@ -76,18 +86,18 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
     }
 
     /**
-     * Gets the fbType
+     * Gets the free/busy type.
      *
-     * @return The fbType
+     * @return The free/busy type
      */
     public FbType getFbType() {
         return fbType;
     }
 
     /**
-     * Sets the fbType
+     * Sets the free/busy type.
      *
-     * @param fbType The fbType to set
+     * @param fbType The free/busy type to set
      */
     public void setFbType(FbType fbType) {
         this.fbType = fbType;
@@ -139,6 +149,11 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
             }
         }
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return "FreeBusyTime [fbType=" + fbType + ", startTime=" + startTime + ", endTime=" + endTime + "]";
     }
 
 }

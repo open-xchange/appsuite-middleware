@@ -570,6 +570,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     // ignore implicitly
                     eventUpdate.removeCreatedBy();
                     break;
+                case LAST_MODIFIED:
+                    // ignore implicitly
+                    eventUpdate.removeLastModified();
+                    break;
+                case MODIFIED_BY:
+                    // ignore implicitly
+                    eventUpdate.removeModifiedBy();
+                    break;
                 case SEQUENCE:
                     // ignore implicitly
                     eventUpdate.removeSequence();

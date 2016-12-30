@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.FreeBusyPerformer;
 import com.openexchange.chronos.impl.performer.HasPerformer;
@@ -107,6 +108,17 @@ public class FreeBusyServiceImpl implements FreeBusyService {
             @Override
             protected List<EventConflict> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new ConflictCheckPerformer(session, storage).perform(event, attendees);
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
+        return new StorageOperation<Map<Attendee, List<FreeBusyTime>>>(session) {
+
+            @Override
+            protected Map<Attendee, List<FreeBusyTime>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new FreeBusyPerformer(session, storage).performMerged(attendees, from, until);
             }
         }.executeQuery();
     }

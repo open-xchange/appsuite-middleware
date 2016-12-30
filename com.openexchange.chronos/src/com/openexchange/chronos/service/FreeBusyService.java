@@ -55,6 +55,7 @@ import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.exception.OXException;
 
 /**
@@ -86,6 +87,19 @@ public interface FreeBusyService {
      * @return The free/busy data for the attendees, which are stripped down event objects based on the current session user's access permissions for the events
      */
     Map<Attendee, List<Event>> getFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
+
+    /**
+     * Gets free/busy information in a certain interval for one ore more attendees. The data is pre-processed and sorted by time, so
+     * that any overlapping intervals each of the attendee's free/busy time are merged implicitly to the most conflicting busy times.
+     * Only <i>internal</i> attendees of types {@link CalendarUserType#INDIVIDUAL} and {@link CalendarUserType#RESOURCE} are considered.
+     *
+     * @param session The calendar session
+     * @param attendees The attendees to get the free/busy data for
+     * @param from The start of the requested time range
+     * @param until The end of the requested time range
+     * @return The free/busy times for each of the attendees
+     */
+    Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
      * Checks for potential conflicting events of the attendees with another event, typically prior event creation or update.

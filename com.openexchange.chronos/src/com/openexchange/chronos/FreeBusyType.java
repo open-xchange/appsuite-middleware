@@ -85,6 +85,12 @@ public enum FreeBusyType implements FbType {
     private final String value;
     private final int order;
 
+    /**
+     * Initializes a new {@link FreeBusyType}.
+     *
+     * @param value The free or busy time type value
+     * @param order The order of the type for sorting
+     */
     private FreeBusyType(String value, int order) {
         this.value = value;
         this.order = order;
