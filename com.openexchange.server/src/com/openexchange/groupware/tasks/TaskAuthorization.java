@@ -49,9 +49,11 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -114,6 +116,11 @@ public class TaskAuthorization implements AttachmentAuthorization {
             Permission.canReadInFolder(session.getContext(), session.getUser(), session.getUserPermissionBits(), folder, task);
         } catch (final OXException e) {
             throw e;
+        }
+        Set<Folder> folderMappings = FolderStorage.getInstance().selectFolder(session.getContext(), taskId, StorageType.ACTIVE);
+        Folder matchingFolder = FolderStorage.getFolder(folderMappings, folderId);
+        if (null == matchingFolder || (Tools.isFolderShared(folder, session.getUser()) && task.getPrivateFlag())) {
+            throw TaskExceptionCode.NO_PERMISSION.create(Autoboxing.I(taskId), folder.getFolderName(), Autoboxing.I(folderId));
         }
     }
 }
