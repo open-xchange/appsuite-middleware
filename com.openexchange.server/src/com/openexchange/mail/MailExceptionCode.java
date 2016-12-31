@@ -101,6 +101,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      */
     UNREADBALE_PART_CONTENT("A part's content could not be read from message %1$s in mail folder %2$s", MailExceptionStrings.UNREADBALE_PART_CONTENT_MSG, CATEGORY_USER_INPUT, 7),
     /**
+     * A part's content could not be read from message
+     */
+    UNREADBALE_PART_CONTENT_SIMPLE("A part's content could not be read from message", MailExceptionStrings.UNREADBALE_PART_CONTENT_MSG, CATEGORY_USER_INPUT, 7), // Yes, same error code
+    /**
      * An I/O error occurred: %1$s
      */
     IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 8),
