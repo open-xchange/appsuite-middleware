@@ -157,12 +157,14 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         while (keepgoing.get()) {
             try {
                 objects.clear();
+
                 // Blocking wait for at least 1 DelayedPushMsObject to expire.
                 DelayedStoreOp object = delayedStoreOps.take();
                 if (POISON == object) {
                     return;
                 }
                 objects.add(object);
+
                 // Drain more if available
                 delayedStoreOps.drainTo(objects);
                 Cache cache = optCache();
@@ -468,16 +470,6 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
             cache.removeFromGroup(id.getId(), groupName(id));
         }
         return delegate.remove(id);
-    }
-
-    @Override
-    public boolean lock(JSlobId jslobId) throws OXException {
-        return delegate.lock(jslobId);
-    }
-
-    @Override
-    public void unlock(JSlobId jslobId) throws OXException {
-        delegate.unlock(jslobId);
     }
 
 }
