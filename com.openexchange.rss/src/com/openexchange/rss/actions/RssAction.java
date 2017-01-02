@@ -76,7 +76,6 @@ import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.osgi.Services;
@@ -275,7 +274,7 @@ public class RssAction implements AJAXActionService {
             } catch (IOException e) {
                 OXException oxe;
                 if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
-                    oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, url.getHost());
+                    oxe = RssExceptionCodes.SSL_HANDSHAKE_ERROR.create(e, url.toString());
                 } else {
                     oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
                 }
