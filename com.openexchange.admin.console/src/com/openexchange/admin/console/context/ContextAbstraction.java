@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.java.Strings;
 
 public abstract class ContextAbstraction extends UserAbstraction {
 
@@ -504,7 +505,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
             @Override
             public void callMethod(String value) throws ParseException, InvalidDataException {
-                context.addLoginMappings(null != value ? Arrays.asList(value.split(",")) : null);
+                context.addLoginMappings(null != value ? Arrays.asList(Strings.splitByComma(value)) : null);
             }
         });
         setValue(nextLine, idarray, ContextConstants.quota, new MethodStringClosure() {
