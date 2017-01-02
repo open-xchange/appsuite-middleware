@@ -765,7 +765,6 @@ public class AlarmTestLightning extends CalDAVTest {
         Date exceptionEnd = calendar.getTime();
         calendar.setTime(exceptionStart);
         calendar.add(Calendar.MINUTE, -16);
-        calendar.add(Calendar.DATE, 1);
         Date seriesAcknowledged = calendar.getTime();
         String iCal =
             "BEGIN:VCALENDAR\r\n" +
@@ -871,6 +870,9 @@ public class AlarmTestLightning extends CalDAVTest {
         calendar.add(Calendar.MINUTE, -14);
         calendar.add(Calendar.SECOND, 52);
         Date exceptionAcknowledged = calendar.getTime();
+        calendar.setTime(seriesAcknowledged);
+        calendar.add(Calendar.DATE, 1);
+        seriesAcknowledged = calendar.getTime();
         iCal =
             "BEGIN:VCALENDAR\r\n" +
             "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
@@ -985,7 +987,6 @@ public class AlarmTestLightning extends CalDAVTest {
         Date exceptionEnd = calendar.getTime();
         calendar.setTime(exceptionStart);
         calendar.add(Calendar.MINUTE, -16);
-        calendar.add(Calendar.DATE, 1);
         Date seriesAcknowledged = calendar.getTime();
         String iCal =
             "BEGIN:VCALENDAR\r\n" +
