@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
@@ -106,9 +107,21 @@ public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> implements 
      * @param mapper A suitable mapper
      * @param originalItems The collection of items, or <code>null</code> if there is none
      * @param newItems The new collection of items, or <code>null</code> if there is none
-     * @throws OXException
      */
     public AbstractCollectionUpdate(DefaultMapper<O, E> mapper, List<O> originalItems, List<O> newItems) throws OXException {
+        this(mapper, originalItems, newItems, true, (E[]) null);
+    }
+
+    /**
+     * Initializes a new {@link AbstractCollectionUpdate}.
+     *
+     * @param mapper A suitable mapper
+     * @param originalItems The collection of items, or <code>null</code> if there is none
+     * @param newItems The new collection of items, or <code>null</code> if there is none
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences between updated items
+     */
+    public AbstractCollectionUpdate(DefaultMapper<O, E> mapper, List<O> originalItems, List<O> newItems, boolean considerUnset, E... ignoredFields) throws OXException {
         super();
         if (null == originalItems || 0 == originalItems.size()) {
             removedItems = Collections.emptyList();
@@ -131,12 +144,9 @@ public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> implements 
                 if (null == originalItem) {
                     addedItems.add(newItem);
                 } else {
-                    O deltaItem = mapper.getDifferences(originalItem, newItem);
-                    E[] updatedFields = mapper.getAssignedFields(deltaItem);
-                    if (0 < updatedFields.length) {
-                        updatedItems.add(new DefaultItemUpdate<O, E>(mapper, originalItem, newItem));
-                    } else {
-                        // not changed
+                    Set<E> differentFields = mapper.getDifferentFields(originalItem, newItem, considerUnset, ignoredFields);
+                    if (0 < differentFields.size()) {
+                        updatedItems.add(new DefaultItemUpdate<O, E>(originalItem, newItem, differentFields));
                     }
                 }
             }

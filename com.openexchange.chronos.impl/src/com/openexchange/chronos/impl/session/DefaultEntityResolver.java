@@ -119,7 +119,21 @@ public class DefaultEntityResolver implements EntityResolver {
 
     @Override
     public Attendee prepare(Attendee attendee) throws OXException {
-        return prepare(attendee, null != attendee.getCuType() ? attendee.getCuType() : CalendarUserType.INDIVIDUAL);
+        if (null == attendee) {
+            return null;
+        }
+        attendee = resolveExternals(attendee);
+        if (isInternal(attendee)) {
+            /*
+             * internal entity, ensure it exists & enhance with static properties
+             */
+            attendee.setCuType(checkExistence(attendee.getEntity(), attendee.getCuType()));
+            return applyEntityData(attendee);
+        }
+        /*
+         * external entity otherwise, take over as-is
+         */
+        return attendee;
     }
 
     @Override
@@ -143,8 +157,7 @@ public class DefaultEntityResolver implements EntityResolver {
              * internal entity, ensure it exists & enhance with static properties
              */
             checkExistence(calendarUser.getEntity(), cuType);
-            applyEntityData(calendarUser, cuType);
-            return calendarUser;
+            return applyEntityData(calendarUser, cuType);
         }
         /*
          * external entity otherwise, take over as-is
@@ -306,6 +319,23 @@ public class DefaultEntityResolver implements EntityResolver {
         return group;
     }
 
+    private Group optGroup(int entity) throws OXException {
+        int id = I(entity);
+        Group group = knownGroups.get(id);
+        if (null == group) {
+            try {
+                group = loadGroup(entity);
+            } catch (OXException e) {
+                if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+                    return null;
+                }
+                throw e;
+            }
+            knownGroups.put(id, group);
+        }
+        return group;
+    }
+
     private User getUser(int entity) throws OXException {
         int id = I(entity);
         User user = knownUsers.get(id);
@@ -316,11 +346,45 @@ public class DefaultEntityResolver implements EntityResolver {
         return user;
     }
 
+    private User optUser(int entity) throws OXException {
+        int id = I(entity);
+        User user = knownUsers.get(id);
+        if (null == user) {
+            try {
+                user = loadUser(entity);
+            } catch (OXException e) {
+                if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+                    return null;
+                }
+                throw e;
+            }
+            knownUsers.put(id, user);
+        }
+        return user;
+    }
+
     private Resource getResource(int entity) throws OXException {
         int id = I(entity);
         Resource resource = knownResources.get(id);
         if (null == resource) {
             resource = loadResource(entity);
+            knownResources.put(id, resource);
+        }
+        return resource;
+    }
+
+    private Resource optResource(int entity) throws OXException {
+        int id = I(entity);
+        Resource resource = knownResources.get(id);
+        if (null == resource) {
+            try {
+                resource = loadResource(entity);
+            } catch (OXException e) {
+                if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+                    return null;
+                }
+                throw e;
+            }
             knownResources.put(id, resource);
         }
         return resource;
@@ -401,7 +465,45 @@ public class DefaultEntityResolver implements EntityResolver {
         return calendarUser;
     }
 
-    private void checkExistence(int entity, CalendarUserType type) throws OXException {
+    private Attendee resolveExternals(Attendee attendee) throws OXException {
+        if (null != attendee) {
+            if (isInternal(attendee)) {
+                // already resolved
+            } else {
+                ResourceId resourceId = resolve(attendee.getUri());
+                if (null != resourceId) {
+                    if (null != attendee.getCuType() && false == resourceId.getCalendarUserType().equals(attendee.getCuType())) {
+                        throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), I(attendee.getEntity()), attendee.getCuType());
+                    }
+                    attendee.setCuType(attendee.getCuType());
+                    attendee.setEntity(resourceId.getEntity());
+                }
+            }
+            resolveExternals(attendee.getSentBy(), CalendarUserType.INDIVIDUAL);
+        }
+        return attendee;
+    }
+
+    /**
+     * Checks the existence of an internal entity.
+     *
+     * @param entity The identifier of the entity to check
+     * @param type The expected calendar user type, or <code>null</code> if unknown
+     * @return The corresponding calendar user type for the entity if a matching calendar user exists
+     * @throws OXException If the entity does not exist
+     */
+    private CalendarUserType checkExistence(int entity, CalendarUserType type) throws OXException {
+        if (null == type) {
+            if (null != optUser(entity)) {
+                type = CalendarUserType.INDIVIDUAL;
+            } else if (null != optGroup(entity)) {
+                type = CalendarUserType.GROUP;
+            } else if (null != optResource(entity)) {
+                type = CalendarUserType.RESOURCE;
+            } else {
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.UNKNOWN);
+            }
+        }
         switch (type) {
             case GROUP:
                 getGroup(entity);
@@ -414,6 +516,7 @@ public class DefaultEntityResolver implements EntityResolver {
                 getUser(entity);
                 break;
         }
+        return type;
     }
 
     private ResourceId resolve(String uri) throws OXException {
@@ -462,7 +565,7 @@ public class DefaultEntityResolver implements EntityResolver {
             return services.getService(ResourceService.class).getResource(entity, context);
         } catch (OXException e) {
             if ("RES-0012".equals(e.getErrorCode())) {
-                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.RESOURCE);
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.RESOURCE, e);
             }
             throw e;
         }
@@ -473,7 +576,7 @@ public class DefaultEntityResolver implements EntityResolver {
             return services.getService(GroupService.class).getGroup(context, entity);
         } catch (OXException e) {
             if ("GRP-0017".equals(e.getErrorCode())) {
-                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.GROUP);
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.GROUP, e);
             }
             throw e;
         }
@@ -484,7 +587,7 @@ public class DefaultEntityResolver implements EntityResolver {
             return services.getService(UserService.class).getUser(entity, context);
         } catch (OXException e) {
             if ("USR-0010".equals(e.getErrorCode())) {
-                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.GROUP);
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.INDIVIDUAL, e);
             }
             throw e;
         }
@@ -497,9 +600,9 @@ public class DefaultEntityResolver implements EntityResolver {
             if ("USR-0010".equals(e.getErrorCode())) {
                 if (null != e.getLogArgs() && 0 < e.getLogArgs().length) {
                     Object arg = e.getLogArgs()[0];
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(arg, arg, CalendarUserType.INDIVIDUAL);
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(arg, arg, CalendarUserType.INDIVIDUAL, e);
                 } else {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(java.util.Arrays.toString(entities), I(0), CalendarUserType.INDIVIDUAL);
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(java.util.Arrays.toString(entities), I(0), CalendarUserType.INDIVIDUAL, e);
                 }
             }
             throw e;

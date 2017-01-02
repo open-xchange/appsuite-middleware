@@ -75,7 +75,7 @@ public interface EntityResolver {
      * </ul>
      *
      * @param calendarUser The calendar user to prepare
-     * @param cuType The expected calendar user type
+     * @param cuType The expected calendar user type, or <code>null</code> if not specified
      * @return The passed calendar user reference, possibly enriched by the resolved static entity data if a matching internal calendar user was found
      */
     <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType) throws OXException;

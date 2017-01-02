@@ -141,17 +141,20 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
         /*
          * search (potentially) overlapping events for the attendees
          */
+        Map<Attendee, List<Event>> eventsPerAttendee = new HashMap<Attendee, List<Event>>(attendees.size());
+        for (Attendee attendee : attendees) {
+            eventsPerAttendee.put(attendee, new ArrayList<Event>());
+        }
         EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
         List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(from, until, attendees, true, new SortOptions(session), fields);
         if (0 == eventsInPeriod.size()) {
-            return Collections.emptyMap();
+            return eventsPerAttendee;
         }
         readAdditionalEventData(eventsInPeriod, -1, new EventField[] { EventField.ATTENDEES });
         List<UserizedFolder> visibleFolders = getVisibleFolders(session);
         /*
          * step through events & build free/busy per requested attendee
          */
-        Map<Attendee, List<Event>> eventsPerAttendee = new HashMap<Attendee, List<Event>>(attendees.size());
         for (Event eventInPeriod : eventsInPeriod) {
             for (Attendee attendee : attendees) {
                 Attendee eventAttendee = find(eventInPeriod.getAttendees(), attendee);

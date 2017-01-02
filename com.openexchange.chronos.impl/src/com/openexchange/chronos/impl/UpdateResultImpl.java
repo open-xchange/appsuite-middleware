@@ -89,20 +89,6 @@ public class UpdateResultImpl implements UpdateResult {
             null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
     }
 
-    //    public UpdateResultImpl setAlarmUpdates(List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
-    //        return setAlarmUpdates(AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, updatedAlarms));
-    //    }
-    //
-    //    public UpdateResultImpl setAlarmUpdates(CollectionUpdate<Alarm, AlarmField> alarmUpdates) {
-    //        this.alarmUpdates = alarmUpdates;
-    //        return this;
-    //    }
-    //
-    //    public UpdateResultImpl setAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
-    //        this.attendeeUpdates = AttendeeMapper.getInstance().getAttendeeUpdate(originalAttendees, updatedAttendees);
-    //        return this;
-    //    }
-    //
     @Override
     public CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates() {
         return null != attendeeUpdates ? attendeeUpdates : AbstractCollectionUpdate.<Attendee, AttendeeField> emptyUpdate();

@@ -70,14 +70,27 @@ public class DefaultItemUpdate<O, E extends Enum<E>> implements ItemUpdate<O, E>
     protected final Set<E> updatedFields;
 
     /**
-     * Initializes a new {@link DefaultItemUpdate}.
+     * Initializes a new {@link EventUpdateImpl}.
      *
      * @param mapper A suitable mapper
      * @param originalItem The original item
      * @param updatedItem The updated item
      */
     public DefaultItemUpdate(DefaultMapper<O, E> mapper, O originalItem, O updatedItem) throws OXException {
-        this(originalItem, updatedItem, getUpdatedFields(mapper, originalItem, updatedItem));
+        this(originalItem, updatedItem, getDifferentFields(mapper, originalItem, updatedItem, true, (E[]) null));
+    }
+
+    /**
+     * Initializes a new {@link EventUpdateImpl}.
+     *
+     * @param mapper A suitable mapper
+     * @param originalItem The original item
+     * @param updatedItem The updated item
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences
+     */
+    public DefaultItemUpdate(DefaultMapper<O, E> mapper, O originalItem, O updatedItem, boolean considerUnset, E... ignoredFields) throws OXException {
+        this(originalItem, updatedItem, getDifferentFields(mapper, originalItem, updatedItem, considerUnset, ignoredFields));
     }
 
     /**
@@ -126,19 +139,17 @@ public class DefaultItemUpdate<O, E extends Enum<E>> implements ItemUpdate<O, E>
         return "ItemUpdate [originalItem=" + originalItem + ", updatedItem=" + updatedItem + ", updatedFields=" + updatedFields + "]";
     }
 
-    private static <O, E extends Enum<E>> Set<E> getUpdatedFields(DefaultMapper<O, E> mapper, O originalItem, O updatedItem) throws OXException {
-        if (null != originalItem) {
-            if (null != updatedItem) {
-                O deltaItem = mapper.getDifferences(originalItem, updatedItem);
-                return Collections.unmodifiableSet(new HashSet<E>(Arrays.asList(mapper.getAssignedFields(deltaItem))));
-            } else {
-                return Collections.unmodifiableSet(new HashSet<E>(Arrays.asList(mapper.getAssignedFields(originalItem))));
+    protected static <O, E extends Enum<E>> Set<E> getDifferentFields(DefaultMapper<O, E> mapper, O original, O update, boolean considerUnset, E... ignoredFields) throws OXException {
+        if (null == original) {
+            if (null == update) {
+                return Collections.emptySet();
             }
-        } else if (null != updatedItem) {
-            return Collections.unmodifiableSet(new HashSet<E>(Arrays.asList(mapper.getAssignedFields(updatedItem))));
-        } else {
-            return Collections.emptySet();
+            return new HashSet<E>(Arrays.asList(mapper.getAssignedFields(update)));
         }
+        if (null == update) {
+            return new HashSet<E>(Arrays.asList(mapper.getAssignedFields(original)));
+        }
+        return mapper.getDifferentFields(original, update, considerUnset, ignoredFields);
     }
 
 }
