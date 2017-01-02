@@ -549,6 +549,61 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * The message content is too big from message %1$s in mail folder %2$s
      */
     CONTENT_TOO_BIG("The message content is too big from message %1$s in mail folder %2$s", MailExceptionStrings.CONTENT_TOO_BIG_MSG, CATEGORY_ERROR, 102),
+    /**
+     * Invalid parameter value: %1$s
+     */
+    INVALID_PARAMETER_VALUE("Invalid parameter value: %1$s", MailExceptionStrings.INVALID_PARAMETER_VALUE_MSG, CATEGORY_USER_INPUT, 103),
+    /**
+     * The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+     */
+    INVALID_FLAG_WITH_LEADING_BACKSLASH("The flag name %1$s is not valid. Flags may not begin with a leading '\\'.", MailExceptionStrings.INVALID_FLAG_WITH_LEADING_BACKSLASH_MSG, CATEGORY_USER_INPUT, 104),
+    /**
+     * The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the
+     * attachments are shared and the links added to your email. Whoever receives the email can then access the attachments.
+     */
+    USED_SHARING_FEATURE("The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the" +
+        " attachments are shared and the links added to your email. Whoever receives the email can then access the attachments.",  MailExceptionStrings.USED_SHARING_FEATURE_MSG, CATEGORY_WARNING, 105),
+    /**
+     * User %1$s in context %2$s is not allowed to compose a share message
+     */
+    SHARING_NOT_POSSIBLE("User %1$s in context %2$s is not allowed to compose a share message", MailExceptionStrings.SHARING_NOT_POSSIBLE_MSG, CATEGORY_PERMISSION_DENIED, 106),
+    /**
+     * User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so
+     */
+    EXPIRATION_DATE_MISSING("User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so", MailExceptionStrings.EXPIRATION_DATE_MISSING_MSG, CATEGORY_USER_INPUT, 107),
+    /**
+     * Authentication type "%1$s" is not supported by server %2$s
+     */
+    AUTH_TYPE_NOT_SUPPORTED("Authentication type \"%1$s\" is not supported by server %2$s", MailExceptionStrings.AUTH_TYPE_NOT_SUPPORTED_MSG, CATEGORY_CONFIGURATION, 108),
+    /**
+     * An account status response providing no information for a user
+     */
+    ACCOUNT_STATUS("Account status is \"%1$s\".", CATEGORY_SERVICE_DOWN, 109),
+    /**
+     * An account status response providing information for a user. Account status is "%1$s". User info: %2$s
+     */
+    ACCOUNT_STATUS_WITH_INFO("Account status is \"%1$s\". User info: %2$s", MailExceptionStrings.ACCOUNT_STATUS_WITH_INFO_MSG, ACCOUNT_STATUS.getCategory(), ACCOUNT_STATUS.getNumber()), // Yapp, same error code
+    /**
+     * Invalid name specified. Information from mail server: %1$s
+     */
+    INVALID_FOLDER_NAME_SIMPLE("Invalid name specified. Information from mail server: %1$s", MailExceptionStrings.INVALID_FOLDER_NAME_SIMPLE_MSG, INVALID_FOLDER_NAME.getCategory(), INVALID_FOLDER_NAME.getNumber()),
+    /**
+     * Insufficient permissions to perform the operation.
+     */
+    INSUFFICIENT_PERMISSIONS("Insufficient permissions to perform the operation.", MailExceptionStrings.INSUFFICIENT_PERMISSIONS_MSG, CATEGORY_PERMISSION_DENIED, 110),
+    /**
+     * A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
+     */
+    NONSECURE_CONNECTION_DENIED("A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).", MailExceptionStrings.NONSECURE_CONNECTION_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 111),
+    /**
+     * A temporary failure because a subsystem is down.
+     */
+    SUBSYSTEM_DOWN("A temporary failure because a subsystem is down.", MailExceptionStrings.SUBSYSTEM_DOWN_MSG, CATEGORY_SERVICE_DOWN, 112),
+    /**
+     * Default folders cannot be created on server %1$s for user %2$s (%3$s) in context on %4$s as mail system denies to create more folders: %5$s
+     */
+    DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA("Default folders cannot be created on server %1$s for user %2$s (%3$s) in context on %4$s as mail system denies to create more folders: %5$s",
+        MailExceptionStrings.DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG, CATEGORY_PERMISSION_DENIED, 113),
     ;
 
     private static String PREFIX = "MSG";

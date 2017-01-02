@@ -111,6 +111,8 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String DEFAULT_FOLDER_CHECK_FAILED_MSG = "Checking default folders failed for user %2$s.";
 
+    public final static String DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG = "Default folders cannot be created as mail system denies to create more folders. Consequently, the mail module is not usable at the moment. Please delete other folders first in order to re-use the mail module again";
+
     public final static String UNSUPPORTED_DATASOURCE_MSG = "The types of specified data source are not supported.";
 
     public final static String UNPARSEABLE_MESSAGE_MSG = "Mail cannot be parsed. Invalid or incomplete mail data.";
@@ -206,5 +208,40 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     // The content/body of the message is too big
     public static final String CONTENT_TOO_BIG_MSG = "The content of the mail is too big.";
+
+    // Invalid parameter value: %1$s
+    public static final String INVALID_PARAMETER_VALUE_MSG = "Invalid parameter value: %1$s";
+
+    // The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+    public static final String INVALID_FLAG_WITH_LEADING_BACKSLASH_MSG = "The flag name %1$s is not valid. Flags may not begin with a leading '\\'.";
+
+    public static final String USED_SHARING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachments with the E-Mail, the attachments are shared and the links are added to your E-Mail. Whoever receives the E-Mail can then access the attachments.";
+
+    // User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
+    public static final String SHARING_NOT_POSSIBLE_MSG = "You are not allowed to compose a message containing share links";
+
+    // User wants to compose a share message but does not specify an expiration date which is required
+    public static final String EXPIRATION_DATE_MISSING_MSG = "Please specify an expiration date in order to compose a message containing share links";
+
+    // The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
+    public static final String AUTH_TYPE_NOT_SUPPORTED_MSG = "The selected authentication type is not supported by server %2$s";
+
+    // Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
+    public static final String ACCOUNT_STATUS_WITH_INFO_MSG = "Please check your mail account: %2$s";
+
+    // Invalid name specified. Information from mail server: %1$s
+    public static final String INVALID_FOLDER_NAME_SIMPLE_MSG = "Invalid name specified. Information from mail server: %1$s";
+
+    // Insufficient permissions to perform the operation.
+    public static final String INSUFFICIENT_PERMISSIONS_MSG = "Insufficient permissions to perform the operation.";
+
+    // Such a folder already exists.
+    public static final String DUPLICATE_FOLDER_SIMPLE_MSG = "Such a folder already exists.";
+
+    // A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
+    public static final String NONSECURE_CONNECTION_DENIED_MSG = "Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS)";
+
+    // A temporary failure because a subsystem is down. Please try again later.
+    public static final String SUBSYSTEM_DOWN_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
 
 }

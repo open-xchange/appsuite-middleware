@@ -461,7 +461,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param session The server session
      * @return The locale
      */
-    protected static Locale localeFrom(ServerSession session) {
+    public static Locale localeFrom(ServerSession session) {
         if (null == session) {
             return Locale.US;
         }
