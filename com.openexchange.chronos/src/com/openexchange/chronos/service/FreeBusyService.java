@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.exception.OXException;
@@ -77,8 +76,7 @@ public interface FreeBusyService {
     boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException;
 
     /**
-     * Gets free/busy information in a certain interval for one ore more attendees. Only <i>internal</i> attendees of types
-     * {@link CalendarUserType#INDIVIDUAL} and {@link CalendarUserType#RESOURCE} are considered.
+     * Gets free/busy information in a certain interval for one ore more attendees. Only <i>internal</i> attendees are considered.
      *
      * @param session The calendar session
      * @param attendees The attendees to get the free/busy data for
@@ -91,7 +89,7 @@ public interface FreeBusyService {
     /**
      * Gets free/busy information in a certain interval for one ore more attendees. The data is pre-processed and sorted by time, so
      * that any overlapping intervals each of the attendee's free/busy time are merged implicitly to the most conflicting busy times.
-     * Only <i>internal</i> attendees of types {@link CalendarUserType#INDIVIDUAL} and {@link CalendarUserType#RESOURCE} are considered.
+     * Only <i>internal</i> attendees are considered.
      *
      * @param session The calendar session
      * @param attendees The attendees to get the free/busy data for

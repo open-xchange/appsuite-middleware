@@ -134,7 +134,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
          * prepare & filter internal attendees for lookup
          */
         attendees = session.getEntityResolver().prepare(attendees);
-        attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL, CalendarUserType.RESOURCE);
+        attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL, CalendarUserType.RESOURCE, CalendarUserType.GROUP);
         if (0 == attendees.size()) {
             return Collections.emptyMap();
         }

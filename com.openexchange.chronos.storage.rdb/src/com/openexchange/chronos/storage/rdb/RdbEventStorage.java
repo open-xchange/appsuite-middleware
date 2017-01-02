@@ -70,6 +70,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
@@ -142,18 +143,21 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     @Override
     public List<Event> searchOverlappingEvents(Date from, Date until, List<Attendee> attendees, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws OXException {
         Set<Integer> userIDs = new HashSet<Integer>();
-        Set<Integer> resourceIDs = new HashSet<Integer>();
+        Set<Integer> otherEntityIDs = new HashSet<Integer>();
         for (Attendee attendee : attendees) {
-            if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
+            if (null == attendee.getCuType() || false == CalendarUtils.isInternal(attendee)) {
+                continue;
+            }
+            if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
                 userIDs.add(I(attendee.getEntity()));
-            } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
-                resourceIDs.add(I(attendee.getEntity()));
+            } else {
+                otherEntityIDs.add(I(attendee.getEntity()));
             }
         }
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectOverlappingEvents(connection, context.getContextId(), from, until, I2i(userIDs), I2i(resourceIDs), includeTransparent, sortOptions, fields);
+            return selectOverlappingEvents(connection, context.getContextId(), from, until, I2i(userIDs), I2i(otherEntityIDs), includeTransparent, sortOptions, fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -393,14 +397,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         return events;
     }
 
-    private static List<Event> selectOverlappingEvents(Connection connection, int contextID, Date from, Date until, int[] userIDs, int[] resourceIDs, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
+    private static List<Event> selectOverlappingEvents(Connection connection, int contextID, Date from, Date until, int[] userIDs, int[] otherEntityIDs, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d");
         if (null != userIDs && 0 < userIDs.length) {
             stringBuilder.append(" LEFT JOIN prg_dates_members AS m ON d.cid=m.cid AND d.intfield01=m.object_id");
         }
-        if (null != resourceIDs && 0 < resourceIDs.length) {
+        if (null != otherEntityIDs && 0 < otherEntityIDs.length) {
             stringBuilder.append(" LEFT JOIN prg_date_rights AS r ON d.cid=r.cid AND d.intfield01=r.object_id");
         }
         stringBuilder.append(" WHERE d.cid=?");
@@ -413,7 +417,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         if (null != until) {
             stringBuilder.append(" AND d.timestampfield01<=?");
         }
-        if (null != userIDs && 0 < userIDs.length || null != resourceIDs && 0 < resourceIDs.length) {
+        if (null != userIDs && 0 < userIDs.length || null != otherEntityIDs && 0 < otherEntityIDs.length) {
             stringBuilder.append(" AND (");
             if (null != userIDs && 0 < userIDs.length) {
                 if (1 == userIDs.length) {
@@ -421,15 +425,15 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 } else {
                     stringBuilder.append("m.member_uid IN (").append(EventMapper.getParameters(userIDs.length)).append(')');
                 }
-                if (null != resourceIDs && 0 < resourceIDs.length) {
+                if (null != otherEntityIDs && 0 < otherEntityIDs.length) {
                     stringBuilder.append(" OR ");
                 }
             }
-            if (null != resourceIDs && 0 < resourceIDs.length) {
-                if (1 == resourceIDs.length) {
+            if (null != otherEntityIDs && 0 < otherEntityIDs.length) {
+                if (1 == otherEntityIDs.length) {
                     stringBuilder.append("r.id=?");
                 } else {
-                    stringBuilder.append("r.id IN (").append(EventMapper.getParameters(resourceIDs.length)).append(')');
+                    stringBuilder.append("r.id IN (").append(EventMapper.getParameters(otherEntityIDs.length)).append(')');
                 }
             }
             stringBuilder.append(')');
@@ -450,8 +454,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                     stmt.setInt(parameterIndex++, id);
                 }
             }
-            if (null != resourceIDs && 0 < resourceIDs.length) {
-                for (int id : resourceIDs) {
+            if (null != otherEntityIDs && 0 < otherEntityIDs.length) {
+                for (int id : otherEntityIDs) {
                     stmt.setInt(parameterIndex++, id);
                 }
             }

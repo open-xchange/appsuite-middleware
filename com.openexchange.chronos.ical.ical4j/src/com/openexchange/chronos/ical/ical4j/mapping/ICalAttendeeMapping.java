@@ -229,12 +229,30 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
             sentByUser.setUri(property.getValue());
             attendee.setSentBy(sentByUser);
         }
-        attendee.setCn(optParameterValue(property, Parameter.CN));
-        attendee.setPartStat(Enums.parse(ParticipationStatus.class, optParameterValue(property, Parameter.PARTSTAT), ParticipationStatus.NEEDS_ACTION));
-        attendee.setRole(Enums.parse(ParticipantRole.class, optParameterValue(property, Parameter.ROLE), null));
-        attendee.setCuType(Enums.parse(CalendarUserType.class, optParameterValue(property, Parameter.CUTYPE), CalendarUserType.INDIVIDUAL));
-        attendee.setRsvp(Boolean.valueOf(optParameterValue(property, Parameter.RSVP)));
-        attendee.setMember(optParameterValue(property, Parameter.MEMBER));
+        String cn = optParameterValue(property, Parameter.CN);
+        if (null != cn) {
+            attendee.setCn(cn);
+        }
+        ParticipationStatus partStat = Enums.parse(ParticipationStatus.class, optParameterValue(property, Parameter.PARTSTAT), null);
+        if (null != partStat) {
+            attendee.setPartStat(partStat);
+        }
+        ParticipantRole role = Enums.parse(ParticipantRole.class, optParameterValue(property, Parameter.ROLE), null);
+        if (null != role) {
+            attendee.setRole(role);
+        }
+        CalendarUserType cuType = Enums.parse(CalendarUserType.class, optParameterValue(property, Parameter.CUTYPE), null);
+        if (null != cuType) {
+            attendee.setCuType(cuType);
+        }
+        String rsvp = optParameterValue(property, Parameter.RSVP);
+        if (null != rsvp) {
+            attendee.setRsvp(Boolean.valueOf(rsvp));
+        }
+        String member = optParameterValue(property, Parameter.MEMBER);
+        if (null != member) {
+            attendee.setMember(member);
+        }
         return attendee;
     }
 

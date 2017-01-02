@@ -473,9 +473,10 @@ public class DefaultEntityResolver implements EntityResolver {
                 ResourceId resourceId = resolve(attendee.getUri());
                 if (null != resourceId) {
                     if (null != attendee.getCuType() && false == resourceId.getCalendarUserType().equals(attendee.getCuType())) {
-                        throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), I(attendee.getEntity()), attendee.getCuType());
+                        LOG.warn("Wrong calendar user type {} for internal entity {} ({}), auto-correcting to {}.",
+                            attendee.getCuType(), I(attendee.getEntity()), attendee.getUri(), resourceId.getCalendarUserType());
                     }
-                    attendee.setCuType(attendee.getCuType());
+                    attendee.setCuType(resourceId.getCalendarUserType());
                     attendee.setEntity(resourceId.getEntity());
                 }
             }
