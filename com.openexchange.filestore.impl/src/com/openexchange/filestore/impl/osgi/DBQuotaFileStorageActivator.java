@@ -56,19 +56,24 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.QuotaBackendService;
 import com.openexchange.filestore.impl.DatabaseAccessServiceImpl;
 import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
 import com.openexchange.filestore.impl.groupware.AddFilestoreOwnerColumnToUserTable;
 import com.openexchange.filestore.impl.groupware.AddInitialUserFilestoreUsage;
 import com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTable;
 import com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTable;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.user.UserService;
 
 /**
@@ -102,24 +107,32 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         {
             QuotaFileStorageListenerTracker listenerTracker = new QuotaFileStorageListenerTracker(context);
             rememberTracker(listenerTracker);
-            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(listenerTracker, context));
+
+            RankingAwareNearRegistryServiceTracker<QuotaBackendService> backendServices = new RankingAwareNearRegistryServiceTracker<>(context, QuotaBackendService.class, 0);
+            rememberTracker(backendServices);
+
+            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(backendServices, listenerTracker, context));
             rememberTracker(tracker);
+
             trackService(ContextService.class);
             trackService(UserService.class);
+            trackService(ConfigViewFactory.class);
 
             {
                 ServiceTrackerCustomizer<CacheService, CacheService> customizer = new ServiceTrackerCustomizer<CacheService, CacheService>() {
 
-                    private final String regionName = "QuotaFileStorages";
+                    private final String[] regionNames = { "QuotaFileStorages" };
 
                     @Override
                     public CacheService addingService(ServiceReference<CacheService> reference) {
-                        try {
-                            CacheService cacheService = context.getService(reference);
+                        CacheService cacheService = context.getService(reference);
 
-                            int idleSeconds = 7200; // 2 hours
-                            int shrinkInterval = 600; // Every 10 minutes
-                            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                        int idleSeconds = 7200; // 2 hours
+                        int shrinkInterval = 600; // Every 10 minutes
+
+                        for (String regionName : regionNames) {
+                            try {
+                                byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
                                 "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
                                 "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
                                 "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
@@ -133,17 +146,15 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
                                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-
-                            cacheService.loadConfiguration(new ByteArrayInputStream(ccf), true);
-                            addService(CacheService.class, cacheService);
-                            return cacheService;
-                        } catch (Exception e) {
-                            // Failed to initialize cache region
-                            logger.warn("Failed to initialize cache region {}", regionName, e);
+                                cacheService.loadConfiguration(new ByteArrayInputStream(ccf), true);
+                            } catch (Exception e) {
+                                // Failed to initialize cache region
+                                logger.warn("Failed to initialize cache region {}", regionName, e);
+                            }
                         }
 
-                        context.ungetService(reference);
-                        return null;
+                        addService(CacheService.class, cacheService);
+                        return cacheService;
                     }
 
                     @Override
@@ -153,10 +164,12 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
                     @Override
                     public void removedService(ServiceReference<CacheService> reference, CacheService service) {
-                        try {
-                            service.freeCache(regionName);
-                        } catch (Exception e) {
-                            // Ignore
+                        for (String regionName : regionNames) {
+                            try {
+                                service.freeCache(regionName);
+                            } catch (Exception e) {
+                                // Ignore
+                            }
                         }
                         removeService(CacheService.class);
                         context.ungetService(reference);

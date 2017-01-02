@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.java.Strings;
@@ -75,6 +76,13 @@ public class DefaultVCardStorageService implements VCardStorageService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultVCardStorageService.class);
 
     /**
+     * Initializes a new {@link DefaultVCardStorageService}.
+     */
+    public DefaultVCardStorageService() {
+        super();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -87,7 +95,7 @@ public class DefaultVCardStorageService implements VCardStorageService {
         return fileStorageID;
     }
 
-    protected SaveFileAction createFileAction(InputStream file, int contextId) throws OXException {
+    protected SaveFileAction createFileAction(InputStream file,int contextId) throws OXException {
         return new SaveFileAction(getFileStorage(contextId), file, -1, false);
     }
 
@@ -149,7 +157,7 @@ public class DefaultVCardStorageService implements VCardStorageService {
             if (null == storageService) {
                 throw VCardStorageExceptionCodes.FILESTORE_DOWN.create();
             }
-            return storageService.getQuotaFileStorage(contextId);
+            return storageService.getQuotaFileStorage(contextId, Info.general());
         } catch (final OXException e) {
             throw VCardStorageExceptionCodes.FILESTORE_DOWN.create(e);
         }

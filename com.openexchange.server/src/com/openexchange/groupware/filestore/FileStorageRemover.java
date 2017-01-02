@@ -55,6 +55,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -89,6 +90,6 @@ public final class FileStorageRemover extends ContextDelete {
     }
 
     private FileStorage getFileStorage(final Context ctx, final DBProvider dbProvider) throws OXException {
-        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(ctx.getContextId());
+        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(ctx.getContextId(), Info.administrative());
     }
 }

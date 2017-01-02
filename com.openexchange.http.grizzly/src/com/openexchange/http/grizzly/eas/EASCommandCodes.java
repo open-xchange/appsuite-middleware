@@ -50,7 +50,7 @@
 package com.openexchange.http.grizzly.eas;
 
 import static com.openexchange.java.Strings.toUpperCase;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 
@@ -60,138 +60,97 @@ import java.util.Set;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class EASCommandCodes {
+public enum EASCommandCodes {
 
-    public enum EASCommands {
-        FOLDER_CREATE(EASCommandCodes.FOLDER_CREATE, "FolderCreate"),
-        FOLDER_DELETE(EASCommandCodes.FOLDER_DELETE, "FolderDelete"),
-        FOLDER_SYNC(EASCommandCodes.FOLDER_SYNC, "FolderSync"),
-        FOLDER_UPDATE(EASCommandCodes.FOLDER_UPDATE, "FolderUpdate"),
-        GET_ATTACHMENT(EASCommandCodes.GET_ATTACHMENT, "GetAttachment"),
-        GET_ITEM_ESTIMATE(EASCommandCodes.GET_ITEM_ESTIMATE, "GetItemEstimate"),
-        ITEM_OPERATIONS(EASCommandCodes.ITEM_OPERATIONS, "ItemOperations"),
-        MEETING_RESPONSE(EASCommandCodes.MEETING_RESPONSE, "MeetingResponse"),
-        MOVE_ITEMS(EASCommandCodes.MOVE_ITEMS, "MoveItems"),
-        PING(EASCommandCodes.PING, "Ping"),
-        PROVISION(EASCommandCodes.PROVISION, "Provision"),
-        RESOLVE_RECIPIENTS(EASCommandCodes.RESOLVE_RECIPIENTS, "ResolveRecipients"),
-        SEARCH(EASCommandCodes.SEARCH, "Search"),
-        SEND_MAIL(EASCommandCodes.SEND_MAIL, "SendMail"),
-        SETTINGS(EASCommandCodes.SETTINGS, "Settings"),
-        SMART_FORWARD(EASCommandCodes.SMART_FORWARD, "SmartForward"),
-        SMART_REPLY(EASCommandCodes.SMART_REPLY, "SmartReply"),
-        SYNC(EASCommandCodes.SYNC, "Sync"),
-        VALIDATE_CERT(EASCommandCodes.VALIDATE_CERT, "ValidateCert"),
+    FOLDER_CREATE(10, "FolderCreate"),
+    FOLDER_DELETE(11, "FolderDelete"),
+    FOLDER_SYNC(9, "FolderSync"),
+    FOLDER_UPDATE(12, "FolderUpdate"),
+    GET_ATTACHMENT(4, "GetAttachment"),
+    GET_ITEM_ESTIMATE(14, "GetItemEstimate"),
+    ITEM_OPERATIONS(19, "ItemOperations"),
+    MEETING_RESPONSE(15, "MeetingResponse"),
+    MOVE_ITEMS(13, "MoveItems"),
+    PING(18, "Ping"),
+    PROVISION(20, "Provision"),
+    RESOLVE_RECIPIENTS(21, "ResolveRecipients"),
+    SEARCH(16, "Search"),
+    SEND_MAIL(1, "SendMail"),
+    SETTINGS(17, "Settings"),
+    SMART_FORWARD(2, "SmartForward"),
+    SMART_REPLY(3, "SmartReply"),
+    SYNC(0, "Sync"),
+    VALIDATE_CERT(22, "ValidateCert"),
 
-        ;
+    ;
 
-        /** The associated byte constant */
-        final int theByte;
+    /** The associated byte constant */
+    private final int theByte;
 
-        /** The associated command name */
-        final String commandName;
+    /** The associated command name */
+    private final String commandName;
 
-        private EASCommands(final int theByte, final String commandName) {
-            this.theByte = theByte;
-            this.commandName = commandName;
-        }
+    private EASCommandCodes(final int theByte, final String commandName) {
+        this.theByte = theByte;
+        this.commandName = commandName;
+    }
 
-        /**
-         * Gets the associated bit constant.
-         *
-         * @return The byte
-         */
-        public int getByte() {
-            return theByte;
-        }
+    /**
+     * Gets the associated bit constant.
+     *
+     * @return The byte
+     */
+    public int getByte() {
+        return theByte;
+    }
 
-        /**
-         * Gets the command name.
-         *
-         * @return The command name
-         */
-        public String getCommandName() {
-            return commandName;
-        }
+    /**
+     * Gets the command name.
+     *
+     * @return The command name
+     */
+    public String getCommandName() {
+        return commandName;
+    }
 
-        /**
-         * Gets the permission by specified identifier.
-         *
-         * @param name The identifier
-         * @return The permission or <code>null</code>
-         */
-        public static EASCommands get(String name) {
-            if (null == name) {
-                return null;
-            }
-            final String upperCase = toUpperCase(name);
-            for (EASCommands p : values()) {
-                if (p.name().equals(upperCase)) {
-                    return p;
-                }
-            }
+    /**
+     * Gets the permission by specified identifier.
+     *
+     * @param name The identifier
+     * @return The permission or <code>null</code>
+     */
+    public static EASCommandCodes get(String name) {
+        if (null == name) {
             return null;
         }
-
-        /**
-         * Gets the permission by specified identifier.
-         *
-         * @param name The identifier
-         * @return The permission or <code>null</code>
-         */
-        public static Set<EASCommands> get(Set<String> names) {
-            Set<EASCommands> commands = new HashSet<EASCommands>();
-
-            if (null == names) {
-                return commands;
+        final String upperCase = toUpperCase(name);
+        for (EASCommandCodes p : values()) {
+            if (p.name().equals(upperCase)) {
+                return p;
             }
+        }
+        return null;
+    }
 
-            for (String name : names) {
-                EASCommands easCommands = EASCommands.get(name);
-                if (easCommands != null) {
-                    commands.add(easCommands);
-                }
-            }
+    /**
+     * Gets the permission by specified identifier.
+     *
+     * @param name The identifier
+     * @return The permission or <code>null</code>
+     */
+    public static Set<EASCommandCodes> get(Set<String> names) {
+        Set<EASCommandCodes> commands = EnumSet.noneOf(EASCommandCodes.class);
+
+        if (null == names) {
             return commands;
         }
-    };
 
-
-    public static final int SYNC = 0;
-
-    public static final int SEND_MAIL = 1;
-
-    public static final int SMART_FORWARD = 2;
-
-    public static final int SMART_REPLY = 3;
-
-    public static final int GET_ATTACHMENT = 4;
-
-    public static final int FOLDER_SYNC = 9;
-
-    public static final int FOLDER_CREATE = 10;
-
-    public static final int FOLDER_DELETE = 11;
-
-    public static final int FOLDER_UPDATE = 12;
-
-    public static final int MOVE_ITEMS = 13;
-
-    public static final int GET_ITEM_ESTIMATE = 14;
-
-    public static final int MEETING_RESPONSE = 15;
-
-    public static final int SEARCH = 16;
-
-    public static final int SETTINGS = 17;
-
-    public static final int PING = 18;
-
-    public static final int ITEM_OPERATIONS = 19;
-
-    public static final int PROVISION = 20;
-
-    public static final int RESOLVE_RECIPIENTS = 21;
-
-    public static final int VALIDATE_CERT = 22;
+        for (String name : names) {
+            EASCommandCodes easCommands = EASCommandCodes.get(name);
+            if (easCommands != null) {
+                commands.add(easCommands);
+            }
+        }
+        return commands;
+    }
 }

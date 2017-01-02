@@ -52,6 +52,8 @@ package javax.servlet.http.sim;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,14 +98,14 @@ public final class SimHttpServletResponse implements HttpServletResponse {
         return headers.get("content-type");
     }
 
-    public int getContentLength() {
+    public long getContentLength() {
         final String string = headers.get("content-length");
         if (null == string) {
             return -1;
         }
 
         try {
-            final int ret = (int) Long.parseLong(string);
+            final long ret = Long.parseLong(string);
             return ret < 0 ? -1 : ret;
         } catch (NumberFormatException e) {
             return -1;
@@ -136,7 +138,7 @@ public final class SimHttpServletResponse implements HttpServletResponse {
 
     @Override
     public void setContentLength(int len) {
-        headers.put("content-length", Integer.toString(len));
+        headers.put("content-length", Long.toString(len));
     }
 
     @Override
@@ -208,6 +210,7 @@ public final class SimHttpServletResponse implements HttpServletResponse {
         return headers;
     }
 
+    @Override
     public String getHeader(String name) {
         return headers.get(name.toLowerCase());
     }
@@ -298,6 +301,7 @@ public final class SimHttpServletResponse implements HttpServletResponse {
      *
      * @return The status
      */
+    @Override
     public int getStatus() {
         return status;
     }
@@ -329,6 +333,22 @@ public final class SimHttpServletResponse implements HttpServletResponse {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    @Override
+    public void setContentLengthLong(long len) {
+        headers.put("content-length", Long.toString(len));
+    }
+
+    @Override
+    public Collection<String> getHeaders(String name) {
+        String header = headers.get(name);
+        return null == header ? Collections.<String> emptyList() : Collections.<String> singletonList(header);
+    }
+
+    @Override
+    public Collection<String> getHeaderNames() {
+        return headers.keySet();
     }
 
 }

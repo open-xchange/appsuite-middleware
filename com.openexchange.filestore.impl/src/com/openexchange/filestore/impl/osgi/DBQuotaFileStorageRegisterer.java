@@ -49,6 +49,8 @@
 
 package com.openexchange.filestore.impl.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleContext;
@@ -57,7 +59,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.filestore.QuotaBackendService;
 import com.openexchange.filestore.impl.DBQuotaFileStorageService;
+import com.openexchange.filestore.impl.groupware.QuotaModePreferenceItem;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
  * {@link DBQuotaFileStorageRegisterer} - Registers the {@link QuotaFileStorageService} service if all required services are available.
@@ -71,8 +78,9 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
     private final Lock lock = new ReentrantLock();
 
     private final QuotaFileStorageListenerTracker listenerTracker;
+    private final RankingAwareNearRegistryServiceTracker<QuotaBackendService> backendServices;
 
-    private ServiceRegistration<QuotaFileStorageService> registration;
+    private List<ServiceRegistration<?>> registrations;
     boolean isRegistered = false;
 
     /**
@@ -80,8 +88,9 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
      *
      * @param context The bundle context
      */
-    public DBQuotaFileStorageRegisterer(QuotaFileStorageListenerTracker listenerTracker, BundleContext context) {
+    public DBQuotaFileStorageRegisterer(RankingAwareNearRegistryServiceTracker<QuotaBackendService> backendServices, QuotaFileStorageListenerTracker listenerTracker, BundleContext context) {
         super();
+        this.backendServices = backendServices;
         this.listenerTracker = listenerTracker;
         this.context = context;
     }
@@ -98,8 +107,16 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
                 isRegistered = true;
             }
             if (needsRegistration) {
-                QuotaFileStorageService qfss = new DBQuotaFileStorageService(listenerTracker, service);
-                registration = context.registerService(QuotaFileStorageService.class, qfss, null);
+                List<ServiceRegistration<?>> registrations = new ArrayList<>(4);
+                this.registrations = registrations;
+
+                QuotaFileStorageService qfss = new DBQuotaFileStorageService(backendServices, listenerTracker, service);
+                registrations.add(context.registerService(QuotaFileStorageService.class, qfss, null));
+
+                QuotaModePreferenceItem item = new QuotaModePreferenceItem(qfss);
+                registrations.add(context.registerService(PreferencesItemService.class, item, null));
+                registrations.add(context.registerService(ConfigTreeEquivalent.class, item, null));
+
                 return service;
             }
         } finally {
@@ -120,14 +137,18 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
         lock.lock();
         try {
             boolean needsUnregistration = false;
-            ServiceRegistration<QuotaFileStorageService> reg = registration;
+            List<ServiceRegistration<?>> regs = registrations;
             if (isRegistered) {
-                registration = null;
+                registrations = null;
                 needsUnregistration = true;
                 isRegistered = false;
             }
             if (needsUnregistration) {
-                reg.unregister();
+                if (null != regs) {
+                    for (ServiceRegistration<?> reg : regs) {
+                        reg.unregister();
+                    }
+                }
             }
             context.ungetService(reference);
         } finally {

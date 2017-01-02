@@ -13,3 +13,4 @@ requests:
   - NewAppointmentsRequest.yaml
   - ResolveUIDRequest.yaml
   - GetChangeExceptionsRequest.yaml
+  - CopyRequest.yaml

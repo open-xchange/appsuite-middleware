@@ -51,6 +51,7 @@ package com.openexchange.http.grizzly.http.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Locale;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -70,7 +71,7 @@ import com.openexchange.servlet.StatusKnowing;
  */
 public class HttpServletResponseWrapper implements StatusKnowing {
 
-    private final HttpServletResponse httpServletResponse;
+    private final HttpServletResponse delegate;
     private final String echoHeaderName;
     private final String echoHeaderValue;
     private int statusCode;
@@ -84,9 +85,30 @@ public class HttpServletResponseWrapper implements StatusKnowing {
      * @param echoHeaderValue The value of the echo header when using KippData's mod_id.
      */
     public HttpServletResponseWrapper(HttpServletResponse httpServletResponse, String echoHeaderName, String echoHeaderValue) {
-        this.httpServletResponse = httpServletResponse;
+        super();
+        this.delegate = httpServletResponse;
         this.echoHeaderName = echoHeaderName;
         this.echoHeaderValue = echoHeaderValue;
+    }
+
+    @Override
+    public void setContentLengthLong(long len) {
+        delegate.setContentLengthLong(len);
+    }
+
+    @Override
+    public String getHeader(String name) {
+        return delegate.getHeader(name);
+    }
+
+    @Override
+    public Collection<String> getHeaders(String name) {
+        return delegate.getHeaders(name);
+    }
+
+    @Override
+    public Collection<String> getHeaderNames() {
+        return delegate.getHeaderNames();
     }
 
     @Override
@@ -96,92 +118,92 @@ public class HttpServletResponseWrapper implements StatusKnowing {
 
     @Override
     public void addCookie(Cookie arg0) {
-        httpServletResponse.addCookie(arg0);
+        delegate.addCookie(arg0);
     }
 
     @Override
     public void addDateHeader(String arg0, long arg1) {
-        httpServletResponse.addDateHeader(arg0, arg1);
+        delegate.addDateHeader(arg0, arg1);
     }
 
     @Override
     public void addHeader(String arg0, String arg1) {
-        httpServletResponse.addHeader(arg0, arg1);
+        delegate.addHeader(arg0, arg1);
     }
 
     @Override
     public void addIntHeader(String arg0, int arg1) {
-        httpServletResponse.addIntHeader(arg0, arg1);
+        delegate.addIntHeader(arg0, arg1);
     }
 
     @Override
     public boolean containsHeader(String arg0) {
-        return httpServletResponse.containsHeader(arg0);
+        return delegate.containsHeader(arg0);
     }
 
     @Override
     public String encodeRedirectURL(String arg0) {
-        return httpServletResponse.encodeRedirectURL(arg0);
+        return delegate.encodeRedirectURL(arg0);
     }
 
     @Override
     public String encodeRedirectUrl(String arg0) {
-        return httpServletResponse.encodeRedirectUrl(arg0);
+        return delegate.encodeRedirectUrl(arg0);
     }
 
     @Override
     public String encodeURL(String arg0) {
-        return httpServletResponse.encodeURL(arg0);
+        return delegate.encodeURL(arg0);
     }
 
     @Override
     public String encodeUrl(String arg0) {
-        return httpServletResponse.encodeUrl(arg0);
+        return delegate.encodeUrl(arg0);
     }
 
     @Override
     public void flushBuffer() throws IOException {
-        httpServletResponse.flushBuffer();
+        delegate.flushBuffer();
     }
 
     @Override
     public int getBufferSize() {
-        return httpServletResponse.getBufferSize();
+        return delegate.getBufferSize();
     }
 
     @Override
     public String getCharacterEncoding() {
-        return httpServletResponse.getCharacterEncoding();
+        return delegate.getCharacterEncoding();
     }
 
     @Override
     public String getContentType() {
-        return httpServletResponse.getContentType();
+        return delegate.getContentType();
     }
 
     @Override
     public Locale getLocale() {
-        return httpServletResponse.getLocale();
+        return delegate.getLocale();
     }
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        return httpServletResponse.getOutputStream();
+        return delegate.getOutputStream();
     }
 
     @Override
     public PrintWriter getWriter() throws IOException {
-        return httpServletResponse.getWriter();
+        return delegate.getWriter();
     }
 
     @Override
     public boolean isCommitted() {
-        return httpServletResponse.isCommitted();
+        return delegate.isCommitted();
     }
 
     @Override
     public void reset() {
-        httpServletResponse.reset();
+        delegate.reset();
         //Don't reset the com.openexchange.servlet.echoHeaderName if present
         if(Strings.isNotEmpty(echoHeaderValue)) {
             setHeader(echoHeaderName, echoHeaderValue);
@@ -190,47 +212,47 @@ public class HttpServletResponseWrapper implements StatusKnowing {
 
     @Override
     public void resetBuffer() {
-        httpServletResponse.resetBuffer();
+        delegate.resetBuffer();
     }
 
     @Override
     public void sendError(int arg0, String arg1) throws IOException {
-        httpServletResponse.sendError(arg0, arg1);
+        delegate.sendError(arg0, arg1);
     }
 
     @Override
     public void sendError(int arg0) throws IOException {
-        httpServletResponse.sendError(arg0);
+        delegate.sendError(arg0);
     }
 
     @Override
     public void sendRedirect(String arg0) throws IOException {
-        httpServletResponse.sendRedirect(arg0);
+        delegate.sendRedirect(arg0);
     }
 
     @Override
     public void setBufferSize(int arg0) {
-        httpServletResponse.setBufferSize(arg0);
+        delegate.setBufferSize(arg0);
     }
 
     @Override
     public void setCharacterEncoding(String arg0) {
-        httpServletResponse.setCharacterEncoding(arg0);
+        delegate.setCharacterEncoding(arg0);
     }
 
     @Override
     public void setContentLength(int arg0) {
-        httpServletResponse.setContentLength(arg0);
+        delegate.setContentLength(arg0);
     }
 
     @Override
     public void setContentType(String arg0) {
-        httpServletResponse.setContentType(arg0);
+        delegate.setContentType(arg0);
     }
 
     @Override
     public void setDateHeader(String arg0, long arg1) {
-        httpServletResponse.setDateHeader(arg0, arg1);
+        delegate.setDateHeader(arg0, arg1);
     }
 
     /**
@@ -242,41 +264,41 @@ public class HttpServletResponseWrapper implements StatusKnowing {
      */
     @Override
     public void setHeader(String headerName, String headerValue) {
-        if (httpServletResponse.isCommitted()) {
+        if (delegate.isCommitted()) {
             throw new IllegalStateException("Response is already committed");
         }
 
         if (headerValue == null) {
-            Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
+            Response internalResponse = ServletUtils.getInternalResponse(delegate);
             HttpResponsePacket httpResponsePacket = internalResponse.getResponse();
             MimeHeaders responseMimeHeaders = httpResponsePacket.getHeaders();
             responseMimeHeaders.removeHeader(headerName);
         } else {
             // Delegate to the original response implementation
-            httpServletResponse.setHeader(headerName, headerValue);
+            delegate.setHeader(headerName, headerValue);
         }
     }
 
     @Override
     public void setIntHeader(String arg0, int arg1) {
-        httpServletResponse.setIntHeader(arg0, arg1);
+        delegate.setIntHeader(arg0, arg1);
     }
 
     @Override
     public void setLocale(Locale arg0) {
-        httpServletResponse.setLocale(arg0);
+        delegate.setLocale(arg0);
     }
 
     @Override
     public void setStatus(int arg0, String arg1) {
         this.statusCode = arg0;
-        httpServletResponse.setStatus(arg0, arg1);
+        delegate.setStatus(arg0, arg1);
     }
 
     @Override
     public void setStatus(int arg0) {
         this.statusCode = arg0;
-        httpServletResponse.setStatus(arg0);
+        delegate.setStatus(arg0);
     }
 
 }

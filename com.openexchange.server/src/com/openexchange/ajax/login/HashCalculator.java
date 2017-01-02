@@ -169,7 +169,7 @@ public class HashCalculator {
             String[] fields = this.fields;
             if (null != fields) {
                 for (final String field : fields) {
-                    final String header = req.getHeader(field);
+                    final String header = null == field || 0 == field.length() ? null : req.getHeader(field);
                     if (!isEmpty(header)) {
                         md.update(header.getBytes(Charsets.UTF_8));
                     }

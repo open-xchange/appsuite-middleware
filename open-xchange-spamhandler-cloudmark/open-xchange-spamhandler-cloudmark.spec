@@ -26,7 +26,6 @@ Summary:        The Open-Xchange Cloudmark Spamhandler
 Autoreqprov:   no
 Requires:       open-xchange-core
 Provides:	open-xchange-spamhandler
-Conflicts:      open-xchange-spamhandler-default open-xchange-spamhandler-spamassassin
 
 %description
 The Open-Xchange Cloudmark Spamhandler can be used in a generic way since it can just

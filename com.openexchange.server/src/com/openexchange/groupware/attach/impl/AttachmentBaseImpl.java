@@ -77,6 +77,7 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -545,7 +546,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     }
 
-    private void removeFiles(final Context context) throws OXException, OXException {
+    private void removeFiles(Context context) throws OXException, OXException {
         final FileStorage fs = getFileStorage(context);
         for (final String fileId : this.getAttachmentFileStoreLocationsperContext(context)) {
             fs.deleteFile(fileId);
@@ -628,7 +629,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
-    private String saveFile(final InputStream data, final AttachmentMetadata attachment, final Context ctx) throws OXException, OXException {
+    private String saveFile(final InputStream data, final AttachmentMetadata attachment, Context ctx) throws OXException, OXException {
         SaveFileAction action = new SaveFileAction(getFileStorage(ctx), data, attachment.getFilesize(), false);
         action.perform();
         addUndoable(action);
@@ -686,7 +687,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return files;
     }
 
-    private InputStream retrieveFile(final String fileId, final Context ctx) throws OXException {
+    private InputStream retrieveFile(String fileId, Context ctx) throws OXException {
         try {
             final FileStorage fs = getFileStorage(ctx);
             return fs.getFile(fileId);
@@ -696,7 +697,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
-    InputStream getFile(final int id, final Context ctx) throws OXException {
+    InputStream getFile(int id, Context ctx) throws OXException {
         final String fileId = findFileId(id, ctx);
         return retrieveFile(fileId, ctx);
     }
@@ -1074,7 +1075,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 throw AttachmentExceptionCodes.FILESTORE_DOWN.create();
             }
 
-            return storageService.getQuotaFileStorage(ctx.getContextId());
+            return storageService.getQuotaFileStorage(ctx.getContextId(), Info.general());
         } catch (final OXException e) {
             throw AttachmentExceptionCodes.FILESTORE_DOWN.create(e);
         }

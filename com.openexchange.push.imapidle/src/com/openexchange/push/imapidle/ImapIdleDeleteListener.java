@@ -51,10 +51,8 @@ package com.openexchange.push.imapidle;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ImapIdleDeleteListener} - Delete listener for IMAP IDLE bundle.
@@ -62,31 +60,18 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public final class ImapIdleDeleteListener implements DeleteListener {
 
+	public ImapIdleDeleteListener() {
+		super();
+	}
 
-    private volatile UserPermissionService userPermissionService;
-
-    public ImapIdleDeleteListener() {
-        super();
-    }
-
-    @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        int userId = event.getId();
-        Context context = event.getContext();
-
-        UserPermissionService userPermissionService = this.userPermissionService;
-        boolean hasWebMail = userPermissionService == null ? false : userPermissionService.getUserPermissionBits(readCon, userId, context).hasWebMail();
-
-        if (hasWebMail && (DeleteEvent.TYPE_USER == event.getType())) {
-            ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
-            if (null != instance) {
-                instance.stopListener(false, true, userId, context.getContextId());
-            }
-        }
-    }
-
-    public void setUserPermissionService(UserPermissionService userPermissionService) {
-        this.userPermissionService = userPermissionService;
-    }
+	@Override
+	public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+		if (DeleteEvent.TYPE_USER == event.getType()) {
+			ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
+			if (null != instance) {
+				instance.stopListener(false, true, event.getId(), event.getContext().getContextId());
+			}
+		}
+	}
 
 }

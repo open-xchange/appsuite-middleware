@@ -51,11 +51,8 @@ package com.openexchange.push.malpoll;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link MALPollDeleteListener} - Delete listener for MAL Poll bundle.
@@ -70,14 +67,9 @@ public final class MALPollDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        int userId = event.getId();
-        Context context = event.getContext();
-
-        UserPermissionService userPermissionService = MALPollServiceRegistry.getServiceRegistry().getService(UserPermissionService.class, false);
-        boolean hasWebMail = userPermissionService == null ? false : userPermissionService.getUserPermissionBits(readCon, userId, context).hasWebMail();
-        
-        if (hasWebMail && (DeleteEvent.TYPE_USER == event.getType())) {
-            int contextId = context.getContextId();
+        if (DeleteEvent.TYPE_USER == event.getType()) {
+            final int contextId = event.getContext().getContextId();
+            final int userId = event.getId();
             MALPollPushListenerRegistry.getInstance().purgeUserPushListener(contextId, userId);
 
             MALPollDBUtility.deleteUserData(contextId, userId);

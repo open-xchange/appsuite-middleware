@@ -49,10 +49,11 @@
 
 package com.openexchange.dav.push.gcm;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -70,14 +71,16 @@ public class PushTransportOptions {
      * @return The properties of interest
      */
     public static String[] getPropertiesOfInterest() {
-        return new String[] {
-            "com.openexchange.davpush.gcm.enabled",
-            "com.openexchange.davpush.gcm.transportId",
-            "com.openexchange.davpush.gcm.transportUri",
-            "com.openexchange.davpush.gcm.applicationId",
-            "com.openexchange.davpush.gcm.gatewayUrl",
-            "com.openexchange.davpush.gcm.refreshInterval",
-        };
+        List<String> properties = new ArrayList<String>();
+        for (String client : new String[] { DAVPushUtility.CLIENT_CALDAV, DAVPushUtility.CLIENT_CARDDAV }) {
+            properties.add("com.openexchange." + client + ".push.davpush.gcm.enabled");
+            properties.add("com.openexchange." + client + ".push.davpush.gcm.transportId");
+            properties.add("com.openexchange." + client + ".push.davpush.gcm.transportUri");
+            properties.add("com.openexchange." + client + ".push.davpush.gcm.applicationId");
+            properties.add("com.openexchange." + client + ".push.davpush.gcm.gatewayUrl");
+            properties.add("com.openexchange." + client + ".push.davpush.gcm.refreshInterval");
+        }
+        return properties.toArray(new String[properties.size()]);
     }
 
     /**
@@ -87,18 +90,16 @@ public class PushTransportOptions {
      * @return The parsed transport options
      */
     public static List<PushTransportOptions> load(ConfigurationService configService) throws OXException {
-        if (false == configService.getBoolProperty("com.openexchange.davpush.gcm.enabled", false)) {
-            return null;
+        List<PushTransportOptions> options = new ArrayList<PushTransportOptions>(2);
+        PushTransportOptions caldavOptions = parse(configService, DAVPushUtility.CLIENT_CALDAV);
+        if (null != caldavOptions) {
+            options.add(caldavOptions);
         }
-        String transportURI = configService.getProperty("com.openexchange.davpush.gcm.transportUri", "https://push.davpush.com/push?GCM");
-        String gatewayUrl = configService.getProperty("com.openexchange.davpush.gcm.gatewayUrl", "https://push.davpush.com/push/");
-        String applicationID = configService.getProperty("com.openexchange.davpush.gcm.applicationId");
-        if (Strings.isEmpty(applicationID)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.davpush.gcm.applicationId");
+        PushTransportOptions carddavOptions = parse(configService, DAVPushUtility.CLIENT_CARDDAV);
+        if (null != carddavOptions) {
+            options.add(carddavOptions);
         }
-        String transportID = configService.getProperty("com.openexchange.davpush.gcm.transportId", "davpush-gcm");
-        int refreshInterval = configService.getIntProperty("com.openexchange.davpush.gcm.refreshInterval", 172800);
-        return Collections.singletonList(new PushTransportOptions(transportID, transportURI, gatewayUrl, applicationID, refreshInterval));
+        return options;
     }
 
     private final int refreshInterval;
@@ -106,18 +107,21 @@ public class PushTransportOptions {
     private final String transportURI;
     private final String gatewayUrl;
     private final String transportID;
+    private final String clientID;
 
     /**
      * Initializes a new {@link PushTransportOptions}.
      *
+     * @param clientID The internal client identifier
      * @param transportID The internal transport identifier
      * @param transportURI The URL to the push gateway
      * @param gatewayUrl The URL to the push gateway
      * @param applicationID The registered application identifier
      * @param refreshInterval The subscription refresh interval
      */
-    public PushTransportOptions(String transportID, String transportURI, String gatewayUrl, String applicationID, int refreshInterval) {
+    public PushTransportOptions(String clientID, String transportID, String transportURI, String gatewayUrl, String applicationID, int refreshInterval) {
         super();
+        this.clientID = clientID;
         this.refreshInterval = refreshInterval;
         this.transportURI = transportURI;
         this.applicationID = applicationID;
@@ -141,6 +145,15 @@ public class PushTransportOptions {
      */
     public String getApplicationID() {
         return applicationID;
+    }
+
+    /**
+     * Gets the clientID
+     *
+     * @return The clientID
+     */
+    public String getClientID() {
+        return clientID;
     }
 
     /**
@@ -168,6 +181,21 @@ public class PushTransportOptions {
      */
     public String getGatewayUrl() {
         return gatewayUrl;
+    }
+
+    private static PushTransportOptions parse(ConfigurationService configService, String client) throws OXException {
+        if (false == configService.getBoolProperty("com.openexchange." + client + ".push.davpush.gcm.enabled", false)) {
+            return null;
+        }
+        String transportID = configService.getProperty("com.openexchange." + client + ".push.davpush.gcm.transportId", "davpush-gcm");
+        String transportURI = configService.getProperty("com.openexchange." + client + ".push.davpush.gcm.transportUri", "https://push.davpush.com/push?GCM");
+        String applicationID = configService.getProperty("com.openexchange." + client + ".push.davpush.gcm.applicationId");
+        if (Strings.isEmpty(applicationID)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange." + client + ".push.davpush.gcm.applicationId");
+        }
+        String gatewayUrl = configService.getProperty("com.openexchange." + client + ".push.davpush.gcm.gatewayUrl", "https://push.davpush.com/push/");
+        int refreshInterval = configService.getIntProperty("com.openexchange." + client + ".push.davpush.gcm.refreshInterval", 172800);
+        return new PushTransportOptions(client, transportID, transportURI, gatewayUrl, applicationID, refreshInterval);
     }
 
 }

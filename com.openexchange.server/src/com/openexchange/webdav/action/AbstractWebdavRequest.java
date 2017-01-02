@@ -154,7 +154,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 
     @Override
     public boolean isBrief() {
-        return "t".equals(getHeader("Brief"));
+        return "t".equals(getHeader("Brief")) || "return=minimal".equals(getHeader("Prefer"));
     }
 
 }

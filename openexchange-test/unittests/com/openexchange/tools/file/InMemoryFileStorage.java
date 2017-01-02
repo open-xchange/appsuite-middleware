@@ -121,7 +121,12 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
         }
         return new ByteArrayInputStream(bytes);
     }
-    
+
+    @Override
+    public String getMode() throws OXException {
+        return DEFAULT_MODE;
+    }
+
     @Override
     public InputStream getFile(String name) throws OXException {
         return load(name);
@@ -231,7 +236,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
     @Override
     public void recalculateUsage() throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -240,7 +245,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
     @Override
     public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)

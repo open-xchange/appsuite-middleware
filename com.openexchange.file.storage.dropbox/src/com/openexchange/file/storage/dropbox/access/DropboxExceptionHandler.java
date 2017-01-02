@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.dropbox.access;
 
+import com.dropbox.core.BadRequestException;
 import com.dropbox.core.InvalidAccessTokenException;
 import com.dropbox.core.ProtocolException;
 import com.dropbox.core.RateLimitException;
@@ -85,7 +86,7 @@ final class DropboxExceptionHandler {
 
     /**
      * Handles the specified Exception and returns an appropriate {@link OXException}
-     * 
+     *
      * @param e The {@link Exception} to handle
      * @param session The groupware {@link Session}
      * @param oauthAccount The {@link OAuthAccount}
@@ -109,6 +110,16 @@ final class DropboxExceptionHandler {
             return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oauthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
         }
 
+        // Bad request
+        if (BadRequestException.class.isInstance(e)) {
+            String message = e.getMessage();
+            if (null != message && message.indexOf("access token is malformed") >= 0) {
+                String cburl = OAuthUtil.buildCallbackURL(oauthAccount);
+                API api = oauthAccount.getAPI();
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oauthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+            }
+        }
+
         // Protocol error
         if (ProtocolException.class.isInstance(e)) {
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());
@@ -120,7 +131,7 @@ final class DropboxExceptionHandler {
 
     /**
      * Handles the {@link GetMetadataErrorException}
-     * 
+     *
      * @param e The {@link GetMetadataErrorException}
      * @param folderId The folder identifier used to trigger the {@link GetMetadataErrorException}
      * @param fileId The file identifier used to trigger the {@link GetMetadataErrorException}
@@ -132,7 +143,7 @@ final class DropboxExceptionHandler {
 
     /**
      * Handles the {@link ListFolderErrorException}
-     * 
+     *
      * @param e The {@link ListFolderErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @return The {@link OXException}
@@ -143,14 +154,14 @@ final class DropboxExceptionHandler {
                 return mapLookupError(e.errorValue.getPathValue(), folderId, "", e);
             case OTHER:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link ListFolderContinueErrorException}
-     * 
+     *
      * @param e The {@link ListFolderContinueErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @return The {@link OXException}
@@ -162,14 +173,14 @@ final class DropboxExceptionHandler {
             case RESET:
             case OTHER:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link RelocationErrorException}
-     * 
+     *
      * @param e The {@link RelocationErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
@@ -189,14 +200,14 @@ final class DropboxExceptionHandler {
                 return mapWriteError(e.errorValue.getToValue(), fileId, e);
             case TOO_MANY_FILES:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link RestoreErrorException}
-     * 
+     *
      * @param e The {@link RestoreErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
@@ -211,14 +222,14 @@ final class DropboxExceptionHandler {
             case INVALID_REVISION:
             case OTHER:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link UploadErrorException}
-     * 
+     *
      * @param e The {@link UploadErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @return The {@link OXException}
@@ -229,14 +240,14 @@ final class DropboxExceptionHandler {
                 return mapWriteError(e.errorValue.getPathValue().getReason(), folderId, e);
             case OTHER:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link DownloadErrorException}
-     * 
+     *
      * @param e The {@link DownloadErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
@@ -248,14 +259,14 @@ final class DropboxExceptionHandler {
                 return mapLookupError(e.errorValue.getPathValue(), folderId, fileId, e);
             case OTHER:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link ListRevisionsErrorException}
-     * 
+     *
      * @param e The {@link ListRevisionsErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
@@ -267,14 +278,14 @@ final class DropboxExceptionHandler {
                 return mapLookupError(e.errorValue.getPathValue(), folderId, fileId, e);
             case OTHER:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link SearchErrorException}
-     * 
+     *
      * @param e The {@link SearchErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @return The {@link OXException}
@@ -285,14 +296,14 @@ final class DropboxExceptionHandler {
                 return mapLookupError(e.errorValue.getPathValue(), folderId, pattern, e);
             case OTHER:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link DeleteErrorException}
-     * 
+     *
      * @param e The {@link DeleteErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
@@ -306,14 +317,14 @@ final class DropboxExceptionHandler {
                 return mapWriteError(e.errorValue.getPathWriteValue(), folderId, e);
             case OTHER:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link ThumbnailErrorException}
-     * 
+     *
      * @param e The {@link ThumbnailErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
@@ -327,14 +338,14 @@ final class DropboxExceptionHandler {
             case UNSUPPORTED_IMAGE:
             case CONVERSION_ERROR:
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Handles the {@link CreateFolderErrorException}
-     * 
+     *
      * @param e The {@link CreateFolderErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @return The {@link OXException}
@@ -344,7 +355,7 @@ final class DropboxExceptionHandler {
             case PATH:
                 return mapWriteError(e.errorValue.getPathValue(), folderId, e);
             default:
-                // Everything else falls through to 'unexpected error' 
+                // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -353,7 +364,7 @@ final class DropboxExceptionHandler {
 
     /**
      * Maps the specified {@link LookupError} to a valid {@link FileStorageExceptionCodes}
-     * 
+     *
      * @param error The {@link LookupError}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
@@ -375,7 +386,7 @@ final class DropboxExceptionHandler {
 
     /**
      * Maps the specified {@link WriteError} to a valid {@link FileStorageExceptionCodes}
-     * 
+     *
      * @param error The {@link WriteError}
      * @param id The object's identifier used to trigger the error
      * @param e The next {@link Exception}
@@ -398,7 +409,7 @@ final class DropboxExceptionHandler {
 
     /**
      * Concatenates the specified folder identifier and the optional file identifier into a path
-     * 
+     *
      * @param folderId The folder identifier
      * @param fileId The optional file identifier
      * @return The concatenated path

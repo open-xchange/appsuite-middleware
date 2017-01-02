@@ -50,10 +50,8 @@
 package com.openexchange.websockets.grizzly;
 
 import java.lang.reflect.UndeclaredThrowableException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import org.glassfish.grizzly.http.Cookies;
-import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.WebSocketException;
 import org.slf4j.Logger;
@@ -74,7 +72,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.user.UserService;
 import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
-import com.openexchange.websockets.grizzly.http.GrizzlyWebSocketHttpServletRequest;
 
 /**
  * {@link DefaultGrizzlyWebSocketAuthenticator}
@@ -99,7 +96,7 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
     }
 
     @Override
-    public Session checkSession(String sessionId, HttpRequestPacket requestPacket, Parameters parameters) throws HandshakeException {
+    public Session checkSession(String sessionId, HttpServletRequest request) throws HandshakeException {
         // Acquire needed service
         SessiondService sessiond = SessiondService.SERVICE_REFERENCE.get();
         if (null == sessiond) {
@@ -135,23 +132,21 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
 
         // Check cookies/secret
         try {
-            Cookies cookies = new Cookies();
-            cookies.setHeaders(requestPacket.getHeaders());
-            if (cookies.get() == null) {
+            Cookie[] cookies = request.getCookies();
+            if (cookies == null) {
                 // No cookies available. Hence, no need to check secret.
                 throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
 
             // Check secret...
-            HttpServletRequest servletRequest = new GrizzlyWebSocketHttpServletRequest(requestPacket, cookies, parameters);
-            SessionUtility.checkSecret(hashSource, servletRequest, session);
+            SessionUtility.checkSecret(hashSource, request, session);
         } catch (OXException e) {
             throw new HandshakeException(e.getPlainLogMessage());
         }
 
         // Check IP address
         try {
-            SessionUtility.checkIP(session, requestPacket.getRemoteAddress());
+            SessionUtility.checkIP(session, request.getRemoteAddr());
         } catch (OXException e) {
             throw new HandshakeException(e.getPlainLogMessage());
         }

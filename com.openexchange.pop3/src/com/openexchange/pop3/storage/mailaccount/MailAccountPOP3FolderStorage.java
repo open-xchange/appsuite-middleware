@@ -327,13 +327,13 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
                         }
 
                         if (StorageUtility.INDEX_CONFIRMED_HAM == i) {
-                            if (spamHandler.isCreateConfirmedHam()) {
+                            if (spamHandler.isCreateConfirmedHam(session)) {
                                 setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator()));
                             } else {
                                 LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", defaultFolderNames[i]);
                             }
                         } else if (StorageUtility.INDEX_CONFIRMED_SPAM == i) {
-                            if (spamHandler.isCreateConfirmedSpam()) {
+                            if (spamHandler.isCreateConfirmedSpam(session)) {
                                 setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator()));
                             } else {
                                 LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", defaultFolderNames[i]);

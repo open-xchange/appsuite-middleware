@@ -167,7 +167,7 @@ public class IncrementArguments extends AbstractArguments {
     private final int userId;
     private final int folderId;
 
-    IncrementArguments(Connection con, Collection<String> mailAddresses, int objectId, int folderId, int userId, boolean throwException) {
+    protected IncrementArguments(Connection con, Collection<String> mailAddresses, int objectId, int folderId, int userId, boolean throwException) {
         super(con, throwException);
         this.mailAddresses = mailAddresses;
         this.userId = userId;

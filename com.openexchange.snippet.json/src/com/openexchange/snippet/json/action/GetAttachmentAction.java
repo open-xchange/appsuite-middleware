@@ -50,7 +50,6 @@
 package com.openexchange.snippet.json.action;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -135,54 +134,54 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
                 saveToDisk = "true".equalsIgnoreCase(saveParam) || "yes".equalsIgnoreCase(saveParam) || "on".equalsIgnoreCase(saveParam);
             }
         }
-        // Get service
-        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
-        final Snippet snippet = snippetService.getManagement(snippetRequest.getSession()).getSnippet(id);
-        final List<Attachment> attachments = snippet.getAttachments();
+
+        // Get service & load snippet
+        SnippetService snippetService = getSnippetService(snippetRequest.getSession());
+        Snippet snippet = snippetService.getManagement(snippetRequest.getSession()).getSnippet(id);
+
+        // Get list of attachments
+        List<Attachment> attachments = snippet.getAttachments();
         if (null == attachments) {
             throw SnippetExceptionCodes.ATTACHMENT_NOT_FOUND.create(attachmentId, id);
         }
-        final int length = attachments.size();
+
+        // Look-up the referenced one
         Attachment attachment = null;
-        for (int i = 0; null == attachment && i < length; i++) {
-            final Attachment cur = attachments.get(i);
-            if (attachmentId.equals(cur.getId())) {
-                attachment = cur;
+        {
+            int length = attachments.size();
+            for (int i = 0; null == attachment && i < length; i++) {
+                Attachment cur = attachments.get(i);
+                if (attachmentId.equals(cur.getId())) {
+                    attachment = cur;
+                }
+            }
+            if (null == attachment) {
+                throw SnippetExceptionCodes.ATTACHMENT_NOT_FOUND.create(attachmentId, id);
             }
         }
-        if (null == attachment) {
-            throw SnippetExceptionCodes.ATTACHMENT_NOT_FOUND.create(attachmentId, id);
-        }
-        InputStream attachmentInputStream = null;
+
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        boolean error = true;
         try {
-            attachmentInputStream = attachment.getInputStream();
-            /*
-             * Read from stream
-             */
-            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            /*
-             * Write from content's input stream to byte array output stream
-             */
-            fileHolder.write(attachmentInputStream);
-            /*
-             * Parameterize file holder
-             */
+            // Write to file holder
+            fileHolder.write(attachment.getInputStream());
+
+            // Parameterize file holder
             snippetRequest.getRequestData().setFormat("file");
             fileHolder.setName(extractFilename(attachment));
             fileHolder.setContentType(saveToDisk ? "application/octet-stream" : attachment.getContentType());
-            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            /*
-             * Set ETag
-             */
+
+            // Compose & return result
+            AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
-            /*
-             * Return result
-             */
+            error = false;
             return result;
         } catch (final IOException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(attachmentInputStream);
+            if (error) {
+                Streams.close(fileHolder);
+            }
         }
     }
 

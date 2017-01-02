@@ -61,7 +61,7 @@ import org.powermock.api.mockito.PowerMockito;
 
 /**
  * Unit tests for {@link TestServlet}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -85,7 +85,7 @@ public class TestServletTest {
     /**
      * Header and attribute name parameters
      */
-    private Enumeration<?> parameters;
+    private Enumeration<String> parameters;
 
     /**
      * @throws java.lang.Exception

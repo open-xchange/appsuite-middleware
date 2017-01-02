@@ -45,6 +45,21 @@ postFix() {
     ox_add_property com.openexchange.http.grizzly.enabledCipherSuites '' $PFILE
     ox_add_property com.openexchange.http.grizzly.keystorePath '' $PFILE
     ox_add_property com.openexchange.http.grizzly.keystorePassword '' $PFILE
+
+    # SoftwareChange_Request-3827
+    ox_remove_property com.openexchange.http.grizzly.ping $PFILE
+    ox_remove_property com.openexchange.http.grizzly.pingDelay $PFILE
+    ox_remove_property com.openexchange.http.grizzly.maxPingCount $PFILE
+
+    # SoftwareChange_Request-3828
+    if ! grep "documented properties" $PFILE > /dev/null; then
+        cat<<EOF >> $PFILE
+### HTTP session
+################################################################################
+
+# Please see documented properties at https://documentation.open-xchange.com/latest/middleware/configuration/properties.html#grizzly
+EOF
+    fi
 }
 
 case "$1" in

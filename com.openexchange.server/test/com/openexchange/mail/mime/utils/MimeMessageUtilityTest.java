@@ -251,6 +251,14 @@ public class MimeMessageUtilityTest extends TestCase {
         assertFalse(ATTACHMENT_WRONG_FOUND, result);
     }
     
+    public void testHasAttachment_BodystructureMessageRFC() {
+        boolean result = true;
+        bodystructure.type = "message";
+        bodystructure.subtype = "rfc822";
+        result = MimeMessageUtility.hasAttachments(bodystructure);
+        assertTrue(ATTACHMENT_WRONG_FOUND, result);
+    }
+    
     private static void setContentTypePlainText(BODYSTRUCTURE bs) {
         bs.type = "plain";
         bs.subtype = "text";

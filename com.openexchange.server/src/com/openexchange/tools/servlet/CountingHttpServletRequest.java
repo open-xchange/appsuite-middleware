@@ -54,14 +54,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
+import javax.servlet.http.Part;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
@@ -71,7 +81,6 @@ import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
-import com.openexchange.tools.stream.CountingInputStream;
 
 /**
  * {@link CountingHttpServletRequest} - The HTTP Servlet request wrapper aware of <code>"com.openexchange.servlet.maxBodySize"</code>
@@ -179,7 +188,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<?> getAttributeNames() {
+    public Enumeration<String> getAttributeNames() {
         return servletRequest.getAttributeNames();
     }
 
@@ -216,7 +225,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<?> getHeaders(final String name) {
+    public Enumeration<String> getHeaders(final String name) {
         return servletRequest.getHeaders(name);
     }
 
@@ -231,7 +240,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
             synchronized (servletRequest) {
                 tmp = servletInputStream;
                 if (null == tmp) {
-                    servletInputStream = tmp = new DelegateServletInputStream(new CountingInputStream(servletRequest.getInputStream(), max));
+                    servletInputStream = tmp = new CountingServletInputStream(servletRequest.getInputStream(), max);
                 }
             }
         }
@@ -244,7 +253,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<?> getHeaderNames() {
+    public Enumeration<String> getHeaderNames() {
         return servletRequest.getHeaderNames();
     }
 
@@ -254,7 +263,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<?> getParameterNames() {
+    public Enumeration<String> getParameterNames() {
         return servletRequest.getParameterNames();
     }
 
@@ -274,7 +283,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Map<?, ?> getParameterMap() {
+    public Map<String, String[]> getParameterMap() {
         return servletRequest.getParameterMap();
     }
 
@@ -374,7 +383,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<?> getLocales() {
+    public Enumeration<Locale> getLocales() {
         return servletRequest.getLocales();
     }
 
@@ -447,4 +456,80 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     public boolean isRequestedSessionIdFromUrl() {
         return servletRequest.isRequestedSessionIdFromUrl();
     }
+
+    @Override
+    public long getContentLengthLong() {
+        return servletRequest.getContentLengthLong();
+    }
+
+    @Override
+    public ServletContext getServletContext() {
+        return servletRequest.getServletContext();
+    }
+
+    @Override
+    public AsyncContext startAsync() throws IllegalStateException {
+        return servletRequest.startAsync();
+    }
+
+    @Override
+    public String changeSessionId() {
+        return servletRequest.changeSessionId();
+    }
+
+    @Override
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        return servletRequest.authenticate(response);
+    }
+
+    @Override
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        return servletRequest.startAsync(servletRequest, servletResponse);
+    }
+
+    @Override
+    public void login(String username, String password) throws ServletException {
+        servletRequest.login(username, password);
+    }
+
+    @Override
+    public void logout() throws ServletException {
+        servletRequest.logout();
+    }
+
+    @Override
+    public Collection<Part> getParts() throws IOException, ServletException {
+        return servletRequest.getParts();
+    }
+
+    @Override
+    public boolean isAsyncStarted() {
+        return servletRequest.isAsyncStarted();
+    }
+
+    @Override
+    public boolean isAsyncSupported() {
+        return servletRequest.isAsyncSupported();
+    }
+
+    @Override
+    public Part getPart(String name) throws IOException, ServletException {
+        return servletRequest.getPart(name);
+    }
+
+    @Override
+    public AsyncContext getAsyncContext() {
+        return servletRequest.getAsyncContext();
+    }
+
+    @Override
+    public DispatcherType getDispatcherType() {
+        return servletRequest.getDispatcherType();
+    }
+
+    @Override
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+        return servletRequest.upgrade(handlerClass);
+    }
+
 }

@@ -476,7 +476,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             Appointment appointment = searchIterator.next();
             String uid = appointment.getUid();
             if (Strings.isEmpty(uid)) {
-                LOG.warn("Skipping appointment without UID: {}", appointment);
+                LOG.debug("Skipping appointment without UID: {}", appointment);
                 continue;
             }
             List<Appointment> appointments = appointmentsByUid.get(uid);

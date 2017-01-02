@@ -51,6 +51,7 @@ package com.openexchange.tools.servlet.http;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Locale;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -74,6 +75,26 @@ public class StatusKnowingHttpServletResponse implements StatusKnowing {
     public StatusKnowingHttpServletResponse(HttpServletResponse delegate) {
         super();
         this.delegate = delegate;
+    }
+
+    @Override
+    public void setContentLengthLong(long len) {
+        delegate.setContentLengthLong(len);
+    }
+
+    @Override
+    public String getHeader(String name) {
+        return delegate.getHeader(name);
+    }
+
+    @Override
+    public Collection<String> getHeaders(String name) {
+        return delegate.getHeaders(name);
+    }
+
+    @Override
+    public Collection<String> getHeaderNames() {
+        return delegate.getHeaderNames();
     }
 
     @Override

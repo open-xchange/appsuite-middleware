@@ -232,6 +232,9 @@ public final class MimeTypes {
         "application/vnd.ms-word",
         "application/odt",
         "application/x-pdf");
+    
+    public static final Set<String> ATTACHMENTS = ImmutableSet.of(
+        "message/rfc822");
 
     // --------------------------------------------------------------------------------------------------------
 
@@ -336,6 +339,16 @@ public final class MimeTypes {
      */
     public static String checkedMimeType(final String givenMimeType, final String fileName) {
         return checkedMimeType(givenMimeType, fileName, null);
+    }
+    
+    /**
+     * Determines if the given mimetype is considered to be an attachment.
+     * 
+     * @param mimeType, like <type>/<subtype>
+     * @return true: if it is an attachment type, false: otherwise
+     */
+    public static boolean isConsideredAttachment(String mimeType) {
+        return ATTACHMENTS.contains(mimeType.toLowerCase());
     }
 
     /**

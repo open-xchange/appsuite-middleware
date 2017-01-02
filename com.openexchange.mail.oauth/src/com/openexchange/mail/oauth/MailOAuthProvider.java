@@ -87,6 +87,6 @@ public interface MailOAuthProvider {
      * @return The applicable token
      * @throws OXException If applicable token cannot be returned
      */
-    String getTokenFor(OAuthAccount oauthAccount, Session session) throws OXException;
+    TokenInfo getTokenFor(OAuthAccount oauthAccount, Session session) throws OXException;
 
 }

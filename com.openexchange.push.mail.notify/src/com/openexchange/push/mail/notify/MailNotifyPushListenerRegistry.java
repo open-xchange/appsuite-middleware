@@ -508,7 +508,7 @@ public final class MailNotifyPushListenerRegistry {
         } else {
             for (String alias : aliases) {
                 int idx = alias.indexOf('@');
-                mboxIds.add(Strings.toLowerCase((idx > 0) ? alias.substring(0, idx) : alias));
+                mboxIds.add(Strings.toLowerCase( (idx > 0) ? alias.substring(0, idx) : alias) );
             }
         }
 
@@ -520,7 +520,6 @@ public final class MailNotifyPushListenerRegistry {
                 LOG.debug("Added login info from user with id {} in context {}.", userId, contextId);
             }
         }
-
         return mboxIds;
     }
 

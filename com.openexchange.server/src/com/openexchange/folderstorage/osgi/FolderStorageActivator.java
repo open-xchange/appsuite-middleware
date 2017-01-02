@@ -64,6 +64,9 @@ import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.ajax.customizer.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
@@ -72,6 +75,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;
 import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
 import com.openexchange.folderstorage.filestorage.osgi.FileStorageFolderStorageActivator;
+import com.openexchange.folderstorage.internal.ConfiguredDefaultPermissions;
 import com.openexchange.folderstorage.internal.ContentTypeRegistry;
 import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
@@ -227,6 +231,22 @@ public final class FolderStorageActivator implements BundleActivator {
                 ContentTypeRegistry.getInstance(),
                 null));
             serviceRegistrations.add(context.registerService(AdditionalFolderField.class.getName(), new DisplayNameFolderField(), null));
+            {
+                ForcedReloadable reloadable = new ForcedReloadable() {
+
+                    @Override
+                    public void reloadConfiguration(ConfigurationService configService) {
+                        ConfiguredDefaultPermissions.getInstance().invalidateCache();
+                    }
+
+                    @Override
+                    public Interests getInterests() {
+                        return null;
+                    }
+                };
+                ConfiguredDefaultPermissions.getInstance();
+                serviceRegistrations.add(context.registerService(ForcedReloadable.class, reloadable, null));
+            }
             // Register service trackers
             serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(2);
             serviceTrackers.add(new ServiceTracker<FolderStorage, FolderStorage>(

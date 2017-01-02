@@ -54,6 +54,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
@@ -65,6 +66,7 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.client.onboarding.mail.custom.CustomLoginSource;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.exception.OXException;
@@ -102,6 +104,8 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     private final String identifier;
     private final Set<Device> supportedDevices;
     private final Set<OnboardingType> supportedTypes;
+
+    private static final Logger LOG = Logger.getLogger(MailOnboardingProvider.class.getName());
 
     /**
      * Initializes a new {@link MailOnboardingProvider}.
@@ -210,7 +214,21 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             if (null == imapSecure) {
                 imapSecure = Boolean.valueOf(imapConfig.isSecure());
             }
-            String imapLogin = imapConfig.getLogin();
+
+            Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.imap.login.customsource", false, session);
+            String imapLogin;
+
+            if (customSource) {
+                CustomLoginSource customLoginSource = services.getService(CustomLoginSource.class);
+                if(customLoginSource==null){
+                    LOG.warning("Unable to find any CustomLoginSource services! Falling back to imap config.");
+                    imapLogin = imapConfig.getLogin();
+                } else {
+                    imapLogin = customLoginSource.getImapLogin(session);
+                }
+            } else {
+                imapLogin = imapConfig.getLogin();
+            }
             String imapPassword = imapConfig.getPassword();
             imapConfiguration = new Configuration(imapServer, imapPort.intValue(), imapSecure.booleanValue(), imapLogin, imapPassword);
         }
@@ -232,8 +250,23 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             if (null == smtpSecure) {
                 smtpSecure = Boolean.valueOf(smtpConfig.isSecure());
             }
-            String smtpLogin = smtpConfig.getLogin();
             String smtpPassword = smtpConfig.getPassword();
+
+            Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.smtp.login.customsource", false, session);
+            String smtpLogin;
+
+            if (customSource) {
+                CustomLoginSource customLoginSource = services.getService(CustomLoginSource.class);
+                if(customLoginSource==null){
+                    LOG.warning("Unable to find any CustomLoginSource services! Falling back to smtp config.");
+                    smtpLogin = smtpConfig.getLogin();
+                }else {
+                    smtpLogin = customLoginSource.getSmtpLogin(session);
+                }
+            } else {
+                smtpLogin = smtpConfig.getLogin();
+            }
+
             if ((smtpConfig instanceof TransportAuthSupportAware) && (false == ((TransportAuthSupportAware) smtpConfig).isAuthSupported())) {
                 smtpLogin = null;
                 smtpPassword = null;

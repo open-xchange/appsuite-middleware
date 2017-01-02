@@ -91,6 +91,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.image.ImageLocation;
@@ -129,6 +130,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class MimeSnippetManagement implements SnippetManagement {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
+
     /**
      * The file storage reference type identifier: <b><code>1</code></b>.
      */
@@ -161,7 +164,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     private static QuotaFileStorage getFileStorage(int contextId) throws OXException {
-        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId);
+        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
@@ -235,6 +238,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
+
+                    LOGGER.warn("Missing file for snippet {} for user {} in context {}. Maybe file storage is (temporary) not available.", id, userId, contextId, e);
                 }
             }
             return list;

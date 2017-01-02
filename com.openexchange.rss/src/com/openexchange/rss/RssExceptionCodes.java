@@ -67,7 +67,7 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNEXPECTED_ERROR("An error occurred: %1$s", null, CATEGORY_ERROR, 1),
     /**
-     * An I/O error occurred: %1$s
+     * I/O error '%1$s' occurred while loading RSS feed from URL: %2$s
      */
     IO_ERROR("I/O error '%1$s' occurred while loading RSS feed from URL: %2$s", RssExceptionMessages.GENERIC_ERROR_WITH_ARG2_MSG, CATEGORY_ERROR, 2),
     /**
@@ -90,6 +90,10 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
      * Cannot connect to RSS with URL: %1$s.
      */
     RSS_CONNECTION_ERROR("Cannot connect to RSS with URL: %1$s.", RssExceptionMessages.RSS_CONNECTION_ERROR_MSG, CATEGORY_USER_INPUT, 7),
+    /**
+     * Failed to negotiate the desired level of security with RSS feed from URL: %1$s
+     */
+    SSL_HANDSHAKE_ERROR("Failed to negotiate the desired level of security with RSS feed from URL: %1$s", RssExceptionMessages.GENERIC_ERROR_WITH_ARG2_MSG, CATEGORY_ERROR, 8),
 
     ;
 

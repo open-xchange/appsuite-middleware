@@ -48,9 +48,12 @@
  */
 package com.openexchange.mailfilter;
 
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+
 public class MailFilterProperties {
 
-    public enum LoginTypes {
+    public static enum LoginTypes {
         GLOBAL("global"),
         USER("user");
 
@@ -61,7 +64,7 @@ public class MailFilterProperties {
         }
     }
 
-    public enum Values {
+    public static enum Values {
         SIEVE_CREDSRC("SIEVE_CREDSRC", CredSrc.SESSION.name),
         SIEVE_LOGIN_TYPE("SIEVE_LOGIN_TYPE", LoginTypes.GLOBAL.name),
         SIEVE_SERVER("SIEVE_SERVER", "localhost"),
@@ -89,7 +92,7 @@ public class MailFilterProperties {
 
     }
 
-    public enum CredSrc {
+    public static enum CredSrc {
         SESSION_FULL_LOGIN("session-full-login"),
         SESSION("session"),
         IMAP_LOGIN("imapLogin"),
@@ -100,9 +103,22 @@ public class MailFilterProperties {
         private CredSrc(final String name) {
             this.name = name;
         }
+
+        private static final Map<String, CredSrc> MAP;
+        static {
+            ImmutableMap.Builder<String, CredSrc> b = ImmutableMap.builder();
+            for (CredSrc credSrc : CredSrc.values()) {
+                b.put(credSrc.name, credSrc);
+            }
+            MAP = b.build();
+        }
+
+        public static CredSrc credSrcFor(String name) {
+            return null == name ? null : MAP.get(name);
+        }
     }
 
-    public enum PasswordSource {
+    public static enum PasswordSource {
         SESSION("session"),
         GLOBAL("global");
 
@@ -110,6 +126,19 @@ public class MailFilterProperties {
 
         private PasswordSource(final String name) {
             this.name = name;
+        }
+
+        private static final Map<String, PasswordSource> MAP;
+        static {
+            ImmutableMap.Builder<String, PasswordSource> b = ImmutableMap.builder();
+            for (PasswordSource pwSrc : PasswordSource.values()) {
+                b.put(pwSrc.name, pwSrc);
+            }
+            MAP = b.build();
+        }
+
+        public static PasswordSource passwordSourceFor(String name) {
+            return null == name ? null : MAP.get(name);
         }
     }
 

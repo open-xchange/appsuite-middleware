@@ -12,7 +12,7 @@ JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"
 # Maximum number of open Files for the groupware. This value will only be
 # applied when using sysv init. For systemd have a look at the drop-in configs
 # at /etc/systemd/system/open-xchange.service.d
-NRFILES="8192"
+NRFILES="65536"
 
 # Specify the umask of file permissions to be created by ox, e.g. in the
 # filestore.

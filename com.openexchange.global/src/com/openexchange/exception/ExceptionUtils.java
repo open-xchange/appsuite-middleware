@@ -111,8 +111,7 @@ public class ExceptionUtils {
     public static void handleOOM(final OutOfMemoryError oom) {
         String message = oom.getMessage();
         if ("unable to create new native thread".equalsIgnoreCase(message)) {
-            if (!Boolean.TRUE.equals(System.getProperties().get("__thread_dump_created"))) {
-                System.getProperties().put("__thread_dump_created", Boolean.TRUE);
+            if (null == System.getProperties().put("__thread_dump_created", Boolean.TRUE)) {
                 boolean error = true;
                 try {
                     StringBuilder sb = new StringBuilder(2048);
@@ -148,8 +147,7 @@ public class ExceptionUtils {
                 Pair<Boolean, String> heapDumpArgs = checkHeapDumpArguments();
 
                 // Is HeapDumpOnOutOfMemoryError enabled?
-                if (!heapDumpArgs.getFirst().booleanValue() && !Boolean.TRUE.equals(System.getProperties().get("__heap_dump_created"))) {
-                    System.getProperties().put("__heap_dump_created", Boolean.TRUE);
+                if (!heapDumpArgs.getFirst().booleanValue() && null == System.getProperties().put("__heap_dump_created", Boolean.TRUE)) {
                     boolean error = true;
                     try {
                         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);

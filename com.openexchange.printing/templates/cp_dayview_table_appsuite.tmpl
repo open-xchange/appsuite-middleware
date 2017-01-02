@@ -57,7 +57,7 @@ ol ol                                             { list-style-type: none; margi
 ol ol li                                          { margin: 1px 5px; margin-left: 18px; }
 ol ol ol li                                       { background: none; padding: 0 }
 
-.appointmentDayStartEnd                           { background: #6CB8E1; height: 15px; overflow: hidden; padding: 0 0 2px 5px; border: 1px solid #808080;}
+.appointmentDayStartEnd                           {height: 15px; overflow: hidden; padding: 0 0 2px 5px; border: 1px solid #808080;}
 h1                                                {font-size: 12px; text-align: left;}
 
 /* Name
@@ -68,7 +68,7 @@ h1                                                {font-size: 12px; text-align: 
 
 #calendarDay td                                   { border-right: 1px solid black; }
 
-#calendarDay span                                 { padding: 2px 2px 0 2px; background: #6CB8E1; font-weight: bold; }
+#calendarDay span                                 { padding: 2px 2px 0 2px; font-weight: bold; }
 #calendarDay li li span                           { padding: 0; background: none; }
 
 #calendarDay li li                                { margin-top: 10px }
@@ -84,7 +84,7 @@ h1                                                {font-size: 12px; text-align: 
 #calendarDay .appointments li                     { border-left: 5px solid #ffcb71; padding-left: 5px; }
 #calendarDay #events                              { width: 50%; }
 
-#calendarDay .appointment                         { overflow: hidden; background-color: #6CB8E1; border: 1px solid #000; }
+#calendarDay .appointment                         { overflow: hidden; border: 1px solid #000; }
 #calendarDay .appointment div                     { padding: 2px; }
     </style>
     <title>${documentTitle} ${i18n.tr("Calendar")}: ${dateFormatter.formatDate(day.time)}</title>
@@ -112,7 +112,7 @@ h1                                                {font-size: 12px; text-align: 
               <td class="appointments" style="height: auto; ">
                 <div class="wrapper">
                   <#list days[0].wholeDayAppointments as appointment>
-                  <div class="appointmentDayStartEnd">${appointment.title}</div>
+                  <div class="appointmentDayStartEnd colorLabel-${appointment.colorLabel}">${appointment.title}</div>
                   </#list>
                 </div>
               </td>
@@ -124,7 +124,7 @@ h1                                                {font-size: 12px; text-align: 
                     <ol>
                       <#list days[0].wholeDayAppointments as appointment>
                       <li>
-                        <span>${appointment.format("d.M.", appointment.startDate)} ${appointment.title}</span>
+                        <span class="colorLabel-${appointment.colorLabel}">${appointment.format("d.M.", appointment.startDate)} ${appointment.title}</span>
                         <ol>
                           <#if appointment.location?has_content>
                           <li>
@@ -156,7 +156,7 @@ h1                                                {font-size: 12px; text-align: 
                     <ol>
                       <#list days[0].appointments as appointment>
                       <li>
-                        <span>${appointment.format("HH:mm", appointment.startDate)} - ${appointment.format("HH:mm", appointment.endDate)} ${appointment.title}</span>
+                        <span class="colorLabel-${appointment.colorLabel}">${appointment.format("HH:mm", appointment.startDate)} - ${appointment.format("HH:mm", appointment.endDate)} ${appointment.title}</span>
                         <ol>
                           <#if appointment.location?has_content>
                           <li>
@@ -196,7 +196,7 @@ h1                                                {font-size: 12px; text-align: 
                   <#list appointmentsBetween as appointment>
                   <div style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; margin-left: ${days[0].getColumn(appointment) * width}%; height: ${appointment.durationInMinutes}px; width: ${width}%; ">
                   	<div style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
-	                  <div class="appointment" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
+	                  <div class="appointment colorLabel-${appointment.colorLabel}" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
 	                    <div>${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</div>
 	                    <#if appointment.location?has_content>
 	                    <span>${appointment.location}</span>

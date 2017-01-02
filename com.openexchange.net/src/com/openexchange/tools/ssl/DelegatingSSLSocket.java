@@ -395,6 +395,11 @@ public class DelegatingSSLSocket extends SSLSocket {
                     + " or \"com.openexchange.net.ssl.custom.truststore.path\" property (if \"com.openexchange.net.ssl.custom.truststore.enabled\" is true)", e);
             }
 
+            if (matchesException(e, java.io.EOFException.class, "ssl peer shut down incorrectly")) {
+                throw new javax.net.ssl.SSLException("The remote host closed connection during handshake unexpectedly. Most likey because the end-point expects a protocol (TLSv1, TLSv1.1, TLSv1.2, whatever),"
+                    + " that is not enabled/available for the JVM.", e);
+            }
+
             throw e;
         }
     }

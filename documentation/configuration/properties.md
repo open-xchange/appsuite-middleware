@@ -84,7 +84,7 @@ If you would like to add a reference to another property use the following appro
 
 ## Advertisement 
 
-| Key | <span style="font-weight:normal">com.openexchange.advertisement.<reseller>.packageScheme</span> |
+| Key | <span style="font-weight:normal">com.openexchange.advertisement.[reseller].packageScheme</span> |
 |:----------------|:--------|
 | __Description__ |         Defines which package scheme is used for the reseller. <reseller> can be replaced with either the reseller name or the reseller id.<br>        Use 'OX_ALL' for the default reseller. Available package schemes are:<br>        Global - always uses the default reseller and default package.<br>        AccessCombinations - Using access combination names to retrive the package.<br>        TaxonomyTypes - Using taxonomy types to retrieve the package.<br> |
 | __Default__ | Global  |
@@ -94,7 +94,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | advertisement.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexchange.advertisement.<reseller>.taxonomy.types</span> |
+| Key | <span style="font-weight:normal">com.openexchange.advertisement.[reseller].taxonomy.types</span> |
 |:----------------|:--------|
 | __Description__ |         Defines a comma separated list of taxonomy types which are used as package identifiers. <br>        This list is used by the 'TaxonomyTypes' package scheme to identify the package.<br> |
 | __Default__ |  |
@@ -240,6 +240,190 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
+## Cassandra 
+
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.clusterName</span> |
+|:----------------|:--------|
+| __Description__ | Defines the name of the Cassandra cluster. Technically this name does not correlate with the name configured in the real Cassandra cluster, but it's rather used to distinguish exposed JMX metrics when multiple Cluster instances live in the same JVM <br> |
+| __Default__ | ox  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.clusterContactPoints</span> |
+|:----------------|:--------|
+| __Description__ | Defines the Cassandra seed node(s) as a comma separated list<br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.port</span> |
+|:----------------|:--------|
+| __Description__ | Defines the port on which the Cassandra server is running<br> |
+| __Default__ | 9042  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.loadBalancingPolicy</span> |
+|:----------------|:--------|
+| __Description__ | Defines load balancing policy to use for the cluster. There are three load balancing policies to choose from: <code>RoundRobin</code>, <code>DCAwareRoundRobin</code> and <code>DCTokenAwareRoundRobin</code>.<br><b><u>RoundRobin</u></b><br>A Round-robin load balancing policy. <br>This policy queries nodes in a round-robin fashion. For a given query, if an host fail, the next one (following the round-robin order) is tried, until all hosts have been tried. <br>This policy is not datacenter aware and will include every known Cassandra host in its round robin algorithm. If you use multiple datacenter this will be inefficient and you will want to use the <code>DCAwareRoundRobin</code> load balancing policy instead. <br><b><u>DCAwareRoundRobin</u></b><br>A data-center aware Round-robin load balancing policy. <br>This policy provides round-robin queries over the node of the local data center. It also includes in the query plans returned a configurable number of hosts in the remote data centers, but those are always tried after the local nodes. In other words, this policy guarantees that no host in a remote data center will be queried unless no host in the local data center can be reached. <br>If used with a single data center, this policy is equivalent to the <code>RoundRobin</code>, but its DC awareness incurs a slight overhead so the latter should be preferred to this policy in that case. <br><b><u>DCTokenAwareRoundRobin</u></b><br>Same as the <code>DCAwareRoundRobin</code> load balancing policy but with added token awareness. <br> |
+| __Default__ | RoundRobin  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.retryPolicy</span> |
+|:----------------|:--------|
+| __Description__ | A policy that defines a default behaviour to adopt when a request fails. There are three retry policies to choose from: <code>defaultRetryPolicy</code>, <code>downgradingConsistencyRetryPolicy</code> and <code>fallthroughRetryPolicy</code> <br><b><u>defaultRetryPolicy</u></b><br>This policy retries queries in only two cases: <ul><li>On a read timeout, if enough replicas replied but data was not retrieved.</li><li>On a write timeout, if we timeout while writing the distributed log used by batch statements.</li></ul><br>This retry policy is conservative in that it will never retry with a different consistency level than the one of the initial operation. <br>In some cases, it may be convenient to use a more aggressive retry policy like <code>downgradingConsistencyRetryPolicy</code>. <br><u>downgradingConsistencyRetryPolicy</u><br>A retry policy that sometimes retries with a lower consistency level than the one initially requested. <br><b>BEWARE</b>: this policy may retry queries using a lower consistency level than the one initially requested. By doing so, it may break consistency guarantees. In other words, if you use this retry policy, there are cases where a read at QUORUM may NOT see a preceding write at QUORUM. Do not use this policy unless you have understood the cases where this can happen and are ok with that. It is also highly recommended to always enable the <code>logRetryPolicy</code> to log the occurrences of such consistency breaks. <br><b><u>fallthroughRetryPolicy</u></b><br>A retry policy that never retries (nor ignores). <br> |
+| __Default__ | defaultRetryPolicy  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.logRetryPolicy</span> |
+|:----------------|:--------|
+| __Description__ | Logs the retry decision of the policy<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.enableQueryLogger</span> |
+|:----------------|:--------|
+| __Description__ | Enables the query logger which logs all executed statements<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.queryLatencyThreshold</span> |
+|:----------------|:--------|
+| __Description__ | Defines the latency threshold in milliseconds beyond which queries are considered 'slow' and logged as such by the Cassandra service. Used in conjunction with the <code>enableQueryLogger</code> property <br> |
+| __Default__ | 5000  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.poolingHeartbeat</span> |
+|:----------------|:--------|
+| __Description__ | Defines the amount of time (in seconds) for connection keepalive in the form of a heartbeat. When a connection has been idle for the given amount of time, the Cassandra service will simulate activity by writing a dummy request to it (by sending an <code>OPTIONS</code> message). <br>To disable heartbeat, set the interval to 0. <br> |
+| __Default__ | 30  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode</span> |
+|:----------------|:--------|
+| __Description__ | The Cassandra service's connection pools have a variable size, which gets adjusted automatically depending on the current load. There will always be at least a minimum number of connections, and at most a maximum number. These values can be configured independently by host distance (the distance is determined by your <code>loadBalancingPolicy</code>, and will generally indicate whether a host is in the same datacenter or not).<br>This property defines the minimum connections to the local datacenter<br> |
+| __Default__ | 4  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.maximumLocalConnectionsPerNode</span> |
+|:----------------|:--------|
+| __Description__ | Defines the amount of maximum connections to the local Datacenter  |
+ |
+| __Default__ | 10  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.minimumRemoteConnectionsPerNode</span> |
+|:----------------|:--------|
+| __Description__ | Defines the amount of minimum connections to the remote Datacenter  |
+ |
+| __Default__ | 2  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode</span> |
+|:----------------|:--------|
+| __Description__ | Defines the amount of maximum connections to the remote Datacenter  |
+ |
+| __Default__ | 4  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode</span> |
+|:----------------|:--------|
+| __Description__ | When activity goes down, the driver will "trash" connections if the maximum number of requests in a 10 second time period can be satisfied by less than the number of connections opened. Trashed connections are kept open but do not accept new requests. After the given timeout, trashed connections are closed and removed. If during that idle period activity increases again, those connections will be resurrected back into the active pool and reused. <br> |
+| __Default__ | 120  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.nosql.cassandra.idleConnectionTrashTimeout  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode</span> |
+|:----------------|:--------|
+| __Description__ | Defines the throttling of concurrent requests per connection on local (on the same datacenter) nodes. <br>For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle. It should be set to 128 (the max) <br>For Cassandra clusters that use a protocol v3 and up, it is set by default to 1024. These low defaults were chosen so that the default configuration for protocol v2 and v3 allow the same total number of simultaneous requests (to avoid bad surprises when clients migrate from v2 to v3). This threshold can be raised, or even set it to the max which is 32768 for LOCAL nodes.<br>Note that that high values will give clients more bandwidth and therefore put more pressure on the cluster. This might require some tuning, especially with many clients. <br> |
+| __Default__ | 1024  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.nosql.cassandra.maximumRequestsPerLocalConnection  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode</span> |
+|:----------------|:--------|
+| __Description__ | Defines the throttling of concurrent requests per connection on remote (on a different datacenter) nodes.<br>For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle. It should be set to 128 (the max) <br>For Cassandra clusters that use a protocol v3 and up, it is set by default to 256. These low defaults were chosen so that the default configuration for protocol v2 and v3 allow the same total number of simultaneous requests (to avoid bad surprises when clients migrate from v2 to v3). This threshold can be raised, or even set it to the max which is 2000 for REMOTE nodes.<br>Note that that high values will give clients more bandwidth and therefore put more pressure on the cluster. This might require some tuning, especially with many clients. <br> |
+| __Default__ | 256  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.nosql.cassandra.maximumRequestsPerRemoteConnection  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode</span> |
+|:----------------|:--------|
+| __Description__ | When the CassandraService tries to send a request to a host, it will first try to acquire a connection from this host's pool. If the pool is busy (i.e. all connections are already handling their maximum number of in flight requests), the acquisition attempt gets enqueued until a connection becomes available again. <br>If the queue has already reached its limit, further attempts to acquire a connection will be rejected immediately: the CassandraService will move on and try to acquire a connection from the next host's pool. The limit can be set to 0 to disable queueing entirely. <br>If all hosts are busy with a full queue, the request will fail with a <code>NoHostAvailableException</code>.<br> |
+| __Default__ | 256  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.nosql.cassandra.acquistionQueueMaxSize  |
+| __File__ | cassandra.properties  |
+
+---
+
+
 ## Doveadm 
 
 | Key | <span style="font-weight:normal">com.openexchange.dovecot.doveadm.enabled</span> |
@@ -274,6 +458,20 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
+## Folder 
+
+| Key | <span style="font-weight:normal">com.openexchange.folderstorage.defaultPermissions</span> |
+|:----------------|:--------|
+| __Description__ | Specifies default permission to use in case folder is supposed to be created below a certain parent folder.<br>The value is a pipe ('|') separated listing of expressions; each expression defines the default permissions<br>for a denoted parent folder. Currently the reserved folder identifiers "2" and "15" are considered as "2"<br>denoted the public PIM folder whereas "15" denotes the public Drive folder.<br><br>An expression starts with the parent folder identifier followed by '=' character; e.g. "2=".<br>Then there is a comma-separated list of permissions to assume per entity (user or group).<br><br>Each permission either starts with "user_", "admin_user_", "group_" or "admin_group_" (the prefix "admin_" controls<br>whether the entity is supposed to be set as folder administrator) followed by the numeric entity identifier.<br><br>Then an '@' character is supposed to occur and finally followed by rights expression. The rights may be dot-separated<br>listing (<folder-permission> + "." + <read-permission> + "." + <write-permission> + "." + <delete-permission>) or one<br>of the tokens  "viewer", "writer" or "author".<br><br>More formally<br>expressions = expression ("|" expression)*<br>expression = folder "=" permission ("," permission)*<br>permission = ("admin_")? ("group_" | "user_") entity(int) "@" rights<br>rights = (folder-permission(int) "." read-permission(int) "." write-permission(int) "." delete-permission(int)) | ("viewer" | "writer" | "author")<br><br>Example<br>2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8<br>2=group_2@viewer,admin_user_5@author|15=admin_group_2@writer<br> |
+| __Default__ | No defaut value  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | foldercache.properties  |
+
+---
+
+
 ## Grizzly 
 
 | Key | <span style="font-weight:normal">com.openexchange.http.grizzly.wsTimeoutMillis</span> |
@@ -286,6 +484,30 @@ If you would like to add a reference to another property use the following appro
 | __Reloadable__ | false  |
 | __Configcascade Aware__ | false  |
 | __Related__ | com.openexchange.websockets.enabled  |
+| __File__ | grizzly.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.http.grizzly.sessionExpiryCheckInterval</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the interval in seconds when to check for expired/invalid HTTP sessions<br>This value should be aligned to property "com.openexchange.servlet.maxInactiveInterval"<br>that defines how long (in seconds) a HTTP session may stay idle/inactive until considered<br>as invalid<br> |
+| __Default__ | is 60 seconds  |
+ |
+| __Default__ | 60  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | grizzly.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.http.grizzly.maxNumberOfConcurrentRequests</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the number of concurrent HTTP requests that are allowed being processed.<br>Those requests exceeding that limit will encounter a 503 "The server is temporary overloaded..." status code and accompanying error page<br>A value of less than or equal to 0 (zero) effectively disables that limitation.<br>The chosen value for this property should be aligned to the configured "ulimit" of the backing operating system. E.g. having "ulimit" set<br>to 8,192 (given that JVM is the only main process running for OS user) implies that ~6,000 should be considered for this property leaving<br>some room for threads not associated with an HTTP request.<br> |
+| __Default__ | is 0 (infinite)  |
+ |
+| __Default__ | 0  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
 | __File__ | grizzly.properties  |
 
 ---
@@ -330,6 +552,26 @@ If you would like to add a reference to another property use the following appro
 | __Version__ | 7.6.2  |
 | __Reloadable__ | false  |
 | __Configcascade Aware__ | false  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexhange.mail.authType</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the authentication type which should be used for primary account's mail access. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
+| __Default__ | login  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexhange.mail.transport.authType</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the authentication type which should be used for primary account's mail transport. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
+| __Default__ | login  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
 | __File__ | mail.properties  |
 
 ---
@@ -516,6 +758,30 @@ If you would like to add a reference to another property use the following appro
 | __File__ | rssmessaging.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.rss</span> |
+|:----------------|:--------|
+| __Description__ |         If set to false disables the rss capability.<br> |
+| __Default__ | true  |
+| __Version__ | 7.2.1  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | rssmessaging.properties  |
+
+---
+
+
+## Saml 
+
+| Key | <span style="font-weight:normal">com.openexchange.saml.enableSessionIndexAutoLogin</span> |
+|:----------------|:--------|
+| __Description__ | Specifies whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | saml.properties  |
+
+---
 
 
 ## Share 
@@ -528,6 +794,20 @@ If you would like to add a reference to another property use the following appro
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
 | __File__ | share.properties  |
+
+---
+
+
+## SpamHandler 
+
+| Key | <span style="font-weight:normal">com.openexchange.spamhandler.name</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the name of the spam handler to use for the primary mail account. The special name "NoSpamHandler" explicitly sets no spam handler<br>If such a setting is not specified, the spam handler as configured through the mail bundle is used;<br>e.g. "com.openexchange.imap.spamHandler" in file 'imap.properties'<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | spamhandler.properties  |
 
 ---
 

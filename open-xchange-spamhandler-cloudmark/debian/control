@@ -2,7 +2,7 @@ Source: open-xchange-spamhandler-cloudmark
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk | java7-sdk, open-xchange-core (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
@@ -10,6 +10,5 @@ Package: open-xchange-spamhandler-cloudmark
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Conflicts: open-xchange-spamhandler-default
 Provides: open-xchange-spamhandler
 Description: The Open-Xchange Cloudmark Spamhandler can be used in a generic way since it can be configured to report Spam and/or Ham messages to any configured EMail address.

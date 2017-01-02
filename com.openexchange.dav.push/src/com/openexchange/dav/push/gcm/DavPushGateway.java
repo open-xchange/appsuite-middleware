@@ -111,7 +111,7 @@ public class DavPushGateway implements PushNotificationTransport {
 
     @Override
     public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
-        return DAVPushUtility.CLIENT_CALDAV.equals(client) || DAVPushUtility.CLIENT_CARDDAV.equals(client);
+        return servesClient(client);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class DavPushGateway implements PushNotificationTransport {
 
     @Override
     public boolean servesClient(String client) throws OXException {
-        return DAVPushUtility.CLIENT_CALDAV.equals(client) || DAVPushUtility.CLIENT_CARDDAV.equals(client);
+        return transportOptions.getClientID().equals(client);
     }
 
     @Override
@@ -170,6 +170,7 @@ public class DavPushGateway implements PushNotificationTransport {
      * Unsubscribes a client at the gateway.
      *
      * @param clientData The client data to pass
+     * @return The subscription token
      */
     public String unsubscribe(Object clientData) throws OXException {
         //TODO necessary?
@@ -220,7 +221,7 @@ public class DavPushGateway implements PushNotificationTransport {
             JSONObject transportObject = new JSONObject();
             transportObject.put("transport-uri", transportOptions.getTransportURI());
             transportObject.put("client-data", clientData);
-            pushSubscribeObject.put("transport", transportObject);
+            pushSubscribeObject.put("selected-transport", transportObject);
             pushSubscribeObject.put("expires", DAVPushUtility.UTC_DATE_FORMAT.get().format(expires));
             subscribeData.put("push-subscribe", pushSubscribeObject);
             return subscribeData;

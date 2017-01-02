@@ -785,7 +785,7 @@ public final class MimeMessageUtility {
                 return true;
             }
         }
-        return false;
+        return MimeTypes.isConsideredAttachment(part.getContentType().getBaseType() + "/" + part.getContentType().getSubType());
     }
 
     /**
@@ -844,7 +844,7 @@ public final class MimeMessageUtility {
                 return true;
             }
         }
-        return false;
+        return MimeTypes.isConsideredAttachment(part.getContentType());
     }
 
     /**
@@ -869,7 +869,7 @@ public final class MimeMessageUtility {
                 return true;
             }
         }
-        return false;
+        return MimeTypes.isConsideredAttachment(bodystructure.type + "/" + bodystructure.subtype);
     }
 
     private static boolean hasAttachments0(final BODYSTRUCTURE bodystructure) {

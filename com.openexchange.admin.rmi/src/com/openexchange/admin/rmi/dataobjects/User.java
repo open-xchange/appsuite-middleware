@@ -572,6 +572,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private Integer folderTree;
 
     private boolean folderTreeSet = false;
+    
+    private String driveFolderMode;
+    
+    private boolean driveFolderModeSet = false;
 
     private Map<String, String> guiPreferences;
 
@@ -586,6 +590,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private String primaryAccountName;
 
     private boolean primaryAccountNameSet = false;
+    
+    private boolean removeDriveFolderFlags = false;
 
     /**
      * Instantiates a new empty user object
@@ -4254,6 +4260,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         }
         return ht;
     }
+    
+    public void setRemoveDriveFolderFlags(boolean removeDriveFolderFlags) {
+        this.removeDriveFolderFlags = removeDriveFolderFlags;
+    }
+    
+    public boolean isRemoveDriveFolderFlags() {
+        return removeDriveFolderFlags;
+    }
 
     @Override
     public String toString() {
@@ -4424,6 +4438,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.userfield20 = null;
         this.defaultSenderAddress = null;
         folderTree = null;
+        this.driveFolderMode = null;
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
         this.primaryAccountName = null;
@@ -4705,7 +4720,21 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public boolean isFolderTreeSet() {
         return folderTreeSet;
     }
-
+    
+    
+    public String getDriveFolderMode() {
+        return driveFolderMode;
+    }
+    
+    public void setDriveFolderMode(String driveFolderMode) {
+        this.driveFolderModeSet = true;
+        this.driveFolderMode = driveFolderMode;
+    }
+    
+    public boolean isDriveFolderModeSet() {
+        return driveFolderModeSet;
+    }
+    
     /**
      * Sets a generic user attribute
      */
@@ -4881,6 +4910,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (defaultSenderAddressset ? 1231 : 1237);
         result = prime * result + ((folderTree == null) ? 0 : folderTree.hashCode());
         result = prime * result + (folderTreeSet ? 1231 : 1237);
+        result = prime * result + ((driveFolderMode == null) ? 0 : driveFolderMode.hashCode());
+        result = prime * result + (driveFolderModeSet ? 1231 :1237);
         result = prime * result + ((default_group == null) ? 0 : default_group.hashCode());
         result = prime * result + (default_groupset ? 1231 : 1237);
         result = prime * result + ((department == null) ? 0 : department.hashCode());
@@ -5076,6 +5107,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (userfield20set ? 1231 : 1237);
         result = prime * result + ((primaryAccountName == null) ? 0 : primaryAccountName.hashCode());
         result = prime * result + (primaryAccountNameSet ? 1231 : 1237);
+        result = prime * result + (removeDriveFolderFlags ? 1231: 1237);
         return result;
     }
 
@@ -5285,6 +5317,16 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         }
         if (folderTreeSet != other.folderTreeSet) {
+            return false;
+        }
+        if (driveFolderMode == null) {
+            if (other.driveFolderMode != null) {
+                return false;
+            }
+        } else if (!driveFolderMode.equals(other.driveFolderMode)) {
+            return false;
+        }
+        if (driveFolderModeSet != other.driveFolderModeSet) {
             return false;
         }
         if (default_group == null) {
@@ -6261,6 +6303,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         }
         if(primaryAccountNameSet!=other.primaryAccountNameSet){
+            return false;
+        }
+        if (removeDriveFolderFlags != other.removeDriveFolderFlags) {
             return false;
         }
         return true;

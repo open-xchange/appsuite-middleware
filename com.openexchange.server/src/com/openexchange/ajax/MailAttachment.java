@@ -67,6 +67,7 @@ import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -155,6 +156,11 @@ public class MailAttachment extends AJAXServlet {
             try {
                 SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 Session session = sessiondService.getSession(token.getSessionId());
+                if (null == session) {
+                    // No such session
+                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, SessionExceptionCodes.SESSION_EXPIRED.create(token.getSessionId()).getDisplayMessage(Locale.US));
+                    return;
+                }
                 ServerSession serverSession = ServerSessionAdapter.valueOf(session);
                 DispatcherPrefixService dispatcherPrefixService = ServerServiceRegistry.getServize(DispatcherPrefixService.class, true);
 

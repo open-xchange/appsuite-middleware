@@ -178,6 +178,7 @@ public class ImageGetAction implements AJAXActionService {
         .add(MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND)
         .add(MailExceptionCode.ATTACHMENT_NOT_FOUND)
         .add(MailExceptionCode.MAIL_NOT_FOUND)
+        .add(MailExceptionCode.REFERENCED_MAIL_NOT_FOUND)
         .add(MailExceptionCode.FOLDER_NOT_FOUND)
         .build();
 

@@ -4309,13 +4309,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         String[] userFlags = message.getFlags().getUserFlags();
         if (userFlags.length > 0) {
             /*
-             * Create a new flags container necessary for later removal
-             */
-            Flags remove = new Flags();
-            for (final String userFlag : userFlags) {
-                remove.add(userFlag);
-            }
-            /*
              * Remove gathered user flags from message's flags; flags which do not occur in flags object are unaffected.
              */
             return removeUserFlagsFromCopyOf(message);

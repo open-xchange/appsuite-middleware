@@ -51,6 +51,7 @@ package com.openexchange.pns.transport.websocket.internal;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 import com.openexchange.push.PushClientChecker;
@@ -83,10 +84,11 @@ public class WebSocketClientPushClientChecker implements PushClientChecker {
             return false;
         }
 
+        String newMailTopic = KnownTopic.MAIL_NEW.getName();
         for (WebSocketToClientResolver resolver : resolvers) {
             WebSocketClient webSocketClient = resolver.getSupportedClients().get(clientId);
             if (null != webSocketClient) {
-                return webSocketClient.isInterestedInNewMail();
+                return webSocketClient.isInterestedIn(newMailTopic);
             }
         }
 

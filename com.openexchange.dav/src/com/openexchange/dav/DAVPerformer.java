@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -65,6 +66,7 @@ import com.openexchange.webdav.action.WebdavDefaultHeaderAction;
 import com.openexchange.webdav.action.WebdavExistsAction;
 import com.openexchange.webdav.action.WebdavIfMatchAction;
 import com.openexchange.webdav.action.WebdavLogAction;
+import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavRequestCycleAction;
 import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.protocol.WebdavMethod;
@@ -202,9 +204,7 @@ public abstract class DAVPerformer implements SessionHolder {
     public void doIt(HttpServletRequest request, HttpServletResponse response, WebdavMethod method, ServerSession session) {
         ServletWebdavRequest webdavRequest = new ServletWebdavRequest(getFactory(), request);
         webdavRequest.setUrlPrefix(getURLPrefix());
-        session.setParameter("user-agent", request.getHeader("user-agent"));
-        session.setParameter("com.openexchange.dav.push.clientToken", request.getHeader("X-Apple-DAV-Pushtoken"));
-        sessionHolder.set(session);
+        sessionHolder.set(decorateSession(session, webdavRequest));
         try {
             ServletWebdavResponse webdavResponse = new ServletWebdavResponse(response);
             getAction(method).perform(webdavRequest, webdavResponse);
@@ -258,6 +258,28 @@ public abstract class DAVPerformer implements SessionHolder {
                 }
             }
         }
+    }
+
+    /**
+     * Optionally decorates the session based on the actual WebDAV request.
+     *
+     * @param session The server session
+     * @param request The request
+     * @return The decorated server session
+     */
+    protected ServerSession decorateSession(ServerSession session, WebdavRequest request) {
+        String userAgent = request.getHeader("user-agent");
+        if (Strings.isNotEmpty(userAgent)) {
+            session.setParameter("user-agent", userAgent);
+        }
+        String pushClientToken = request.getHeader("X-Apple-DAV-Pushtoken");
+        if (Strings.isEmpty(pushClientToken)) {
+            pushClientToken = request.getHeader("Push-Client-Id");
+        }
+        if (Strings.isNotEmpty(pushClientToken)) {
+            session.setParameter("com.openexchange.dav.push.clientToken", pushClientToken);
+        }
+        return session;
     }
 
 }
