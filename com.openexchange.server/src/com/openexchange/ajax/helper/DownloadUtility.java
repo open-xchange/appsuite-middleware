@@ -226,6 +226,9 @@ public final class DownloadUtility {
                     sz = tmp.length;
                     in = new ByteArrayRandomAccess(tmp);
                 }
+            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "javascript") || fileNameImpliesJavascript(fileName)) {
+                // Treat all JavaScript content as harmful
+                sContentDisposition = "attachment";
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
                 // Treat all SVG content as harmful
                 sContentDisposition = "attachment";
@@ -238,7 +241,7 @@ public final class DownloadUtility {
                 } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
                     if (contentType.startsWith("application/")) {
                         sContentDisposition = "attachment";
-                    } else {                        
+                    } else {
                         /*
                          * Escaping of XML content needed
                          */
@@ -529,6 +532,10 @@ public final class DownloadUtility {
 
     private static boolean fileNameImpliesSvg(final String fileName) {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("svg") >= 0;
+    }
+
+    private static boolean fileNameImpliesJavascript(final String fileName) {
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("javascript") >= 0;
     }
 
     private static boolean fileNameImpliesXml(final String fileName) {
