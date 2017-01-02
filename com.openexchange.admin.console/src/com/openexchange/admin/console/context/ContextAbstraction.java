@@ -51,6 +51,7 @@ package com.openexchange.admin.console.context;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -503,7 +504,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
             @Override
             public void callMethod(String value) throws ParseException, InvalidDataException {
-                context.addLoginMapping(value);
+                context.addLoginMappings(null != value ? Arrays.asList(value.split(",")) : null);
             }
         });
         setValue(nextLine, idarray, ContextConstants.quota, new MethodStringClosure() {
