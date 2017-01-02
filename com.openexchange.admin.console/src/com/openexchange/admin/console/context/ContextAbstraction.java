@@ -515,7 +515,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 try {
                     context.setMaxQuota(Long.valueOf(value));
                 } catch (final NumberFormatException e) {
-                    throw new InvalidDataException("Value in field " + ContextConstants.quota.getString() + " is no integer");
+                    throw new InvalidDataException("Value in field " + ContextConstants.quota.getString() + " is no integer", e);
                 }
             }
         });
@@ -526,7 +526,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 try {
                     context.setWriteDatabase(new Database(Integer.parseInt(value)));
                 } catch (final NumberFormatException e) {
-                    throw new InvalidDataException("Value in field " + ContextConstants.destination_database_id.getString() + " is no integer");
+                    throw new InvalidDataException("Value in field " + ContextConstants.destination_database_id.getString() + " is no integer", e);
                 }
             }
         });
@@ -537,7 +537,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 try {
                     context.setFilestoreId(Integer.valueOf(value));
                 } catch (final NumberFormatException e) {
-                    throw new InvalidDataException("Value in field " + ContextConstants.destination_store_id.getString() + " is no integer");
+                    throw new InvalidDataException("Value in field " + ContextConstants.destination_store_id.getString() + " is no integer", e);
                 }
             }
         });
