@@ -606,7 +606,12 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * A temporary failure because a subsystem is down.
      */
-    SUBSYSTEM_DOWN("A temporary failure because a subsystem is down.", MailExceptionStrings.SUBSYSTEM_DOWN_MSG, CATEGORY_SERVICE_DOWN, 112)
+    SUBSYSTEM_DOWN("A temporary failure because a subsystem is down.", MailExceptionStrings.SUBSYSTEM_DOWN_MSG, CATEGORY_SERVICE_DOWN, 112),
+    /**
+     * Default folders cannot be created on server %1$s for user %2$s (%3$s) in context on %4$s as mail system denies to create more folders: %5$s
+     */
+    DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA("Default folders cannot be created on server %1$s for user %2$s (%3$s) in context on %4$s as mail system denies to create more folders: %5$s",
+        MailExceptionStrings.DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG, CATEGORY_PERMISSION_DENIED, 113),
     ;
 
     private static final String PREFIX = "MSG";
