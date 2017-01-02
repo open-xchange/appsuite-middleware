@@ -125,9 +125,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     FORBIDDEN_ATTENDEE_CHANGE("Forbidden attendee change [id %1$d, attendee %2$s, field %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4033),
     /**
      * <li>The calendar user \"%1$s\" is invalid.</li>
-     * <li>Invalid calendar user [uri %1$s, id %1$d, type %1$s]</li>
+     * <li>Invalid calendar user [uri %1$s, id %2$d, type %3$s]</li>
      */
-    INVALID_CALENDAR_USER("Invalid calendar user [uri %1$s, id %1$d, type %1$s]", INVALID_CALENDAR_USER_MSG, Category.CATEGORY_USER_INPUT, 4034),
+    INVALID_CALENDAR_USER("Invalid calendar user [uri %1$s, id %2$d, type %3$s]", INVALID_CALENDAR_USER_MSG, Category.CATEGORY_USER_INPUT, 4034),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Forbidden change [id %1$d, field %2$s]</li>
