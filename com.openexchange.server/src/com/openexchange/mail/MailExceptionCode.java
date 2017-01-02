@@ -571,6 +571,11 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so
      */
     EXPIRATION_DATE_MISSING("User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so", MailExceptionStrings.EXPIRATION_DATE_MISSING_MSG, CATEGORY_USER_INPUT, 107),
+    /**
+     * Default folders cannot be created on server %1$s for user %2$s (%3$s) in context on %4$s as mail system denies to create more folders: %5$s
+     */
+    DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA("Default folders cannot be created on server %1$s for user %2$s (%3$s) in context on %4$s as mail system denies to create more folders: %5$s",
+        MailExceptionStrings.DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG, CATEGORY_PERMISSION_DENIED, 113),
     ;
 
     private static final String PREFIX = "MSG";
