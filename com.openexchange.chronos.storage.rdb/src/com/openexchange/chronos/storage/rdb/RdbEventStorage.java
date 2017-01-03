@@ -105,7 +105,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @param context The context
      * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
-     * @param The transaction policy
+     * @param txPolicy The transaction policy
      */
     public RdbEventStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, entityResolver, dbProvider, txPolicy);

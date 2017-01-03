@@ -49,12 +49,20 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.filter;
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.arrays.Collections.put;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +70,9 @@ import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
@@ -86,7 +96,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
      * @param context The context
      * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
-     * @param The transaction policy
+     * @param txPolicy The transaction policy
      */
     public RdbAttendeeStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, entityResolver, dbProvider, txPolicy);
@@ -130,6 +140,11 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
+    public void insertTombstoneAttendee(int objectID, Attendee attendee) throws OXException {
+        insertTombstoneAttendees(objectID, Collections.singletonList(attendee));
+    }
+
+    @Override
     public void insertTombstoneAttendees(int objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -146,27 +161,33 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void insertTombstoneAttendee(int objectID, Attendee attendee) throws OXException {
-        insertTombstoneAttendees(objectID, Collections.singletonList(attendee));
-    }
-
-    @Override
     public List<Attendee> loadAttendees(int objectID) throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            return new AttendeeLoader(connection, entityResolver).loadAttendees(objectID, AttendeeField.values());
-        } finally {
-            dbProvider.releaseReadConnection(context, connection);
-        }
+        return loadAttendees(new int[] { objectID }).get(I(objectID));
     }
 
     @Override
     public Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs) throws OXException {
+        Map<Integer, List<Attendee>> attendeesById = new HashMap<Integer, List<Attendee>>(objectIDs.length);
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return new AttendeeLoader(connection, entityResolver).loadAttendees(objectIDs, AttendeeField.values());
+            /*
+             * select raw attendee data & pre-fetch referenced internal entities
+             */
+            Map<Integer, List<Attendee>> userAttendeeData = selectUserAttendeeData(connection, context.getContextId(), objectIDs);
+            Map<Integer, List<Attendee>> internalAttendeeData = selectInternalAttendeeData(connection, context.getContextId(), objectIDs);
+            Map<Integer, List<Attendee>> externalAttendeeData = selectExternalAttendeeData(connection, context.getContextId(), objectIDs);
+            prefetchEntities(internalAttendeeData.values(), userAttendeeData.values());
+            /*
+             * generate resulting attendee lists per object ID
+             */
+            for (int objectID : objectIDs) {
+                Integer key = I(objectID);
+                attendeesById.put(key, getAttendees(internalAttendeeData.get(key), userAttendeeData.get(key), externalAttendeeData.get(key)));
+            }
+            return attendeesById;
+        } catch (SQLException e) {
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -204,10 +225,75 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
+    /**
+     * Constructs the final attendee list for an event my pre-processing and merging the supplied lists of loaded attendees.
+     *
+     * @param internalAttendees The internal attendees as loaded from the storag
+     * @param userAttendees The user attendees as loaded from the storag
+     * @param externalAttendees The external attendees as loaded from the storag
+     * @return The merged list of attendees
+     */
+    private List<Attendee> getAttendees(List<Attendee> internalAttendees, List<Attendee> userAttendees, List<Attendee> externalAttendees) throws OXException {
+        List<Attendee> attendees = new ArrayList<Attendee>();
+        /*
+         * add user attendees individually if listed in internal attendees, or as member of a group if not
+         */
+        if (null != userAttendees) {
+            for (Attendee userAttendee : userAttendees) {
+                if (null != find(internalAttendees, userAttendee.getEntity())) {
+                    attendees.add(entityResolver.applyEntityData(userAttendee));
+                } else {
+                    int groupID = findGroupID(internalAttendees, userAttendee.getEntity());
+                    if (-1 != groupID) {
+                        userAttendee.setMember(ResourceId.forGroup(context.getContextId(), groupID));
+                        attendees.add(entityResolver.applyEntityData(userAttendee));
+                    }
+                }
+            }
+        }
+        /*
+         * add other internal, non-user attendees as well as external attendees as-is
+         */
+        if (null != internalAttendees) {
+            for (Attendee internalAttendee : internalAttendees) {
+                if (false == CalendarUserType.INDIVIDUAL.equals(internalAttendee.getCuType())) {
+                    attendees.add(entityResolver.applyEntityData(internalAttendee));
+                }
+            }
+        }
+        if (null != externalAttendees) {
+            attendees.addAll(externalAttendees);
+        }
+        return attendees;
+    }
+
+    private int findGroupID(List<Attendee> internalAttendees, int member) throws OXException {
+        for (Attendee internalAttendee : filter(internalAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
+            int[] members = entityResolver.getGroupMembers(internalAttendee.getEntity());
+            if (com.openexchange.tools.arrays.Arrays.contains(members, member)) {
+                return internalAttendee.getEntity();
+            }
+        }
+        return -1;
+    }
+
+    private void prefetchEntities(Collection<List<Attendee>> internalAttendees, Collection<List<Attendee>> userAttendees) throws OXException {
+        if (null != internalAttendees && null != userAttendees) {
+            List<Attendee> attendees = new ArrayList<Attendee>();
+            for (List<Attendee> attendeeList : internalAttendees) {
+                attendees.addAll(attendeeList);
+            }
+            for (List<Attendee> attendeeList : userAttendees) {
+                attendees.addAll(attendeeList);
+            }
+            entityResolver.prefetch(attendees);
+        }
+    }
+
     private static int deleteAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException {
         int updated = 0;
         for (Attendee attendee : attendees) {
-            if (0 >= attendee.getEntity()) {
+            if (false == CalendarUtils.isInternal(attendee)) {
                 /*
                  * delete records in dateExternal and prg_date_rights for external users
                  */
@@ -412,6 +498,86 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
         }
         return updated;
+    }
+
+    private static Map<Integer, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
+        Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
+        String sql = new StringBuilder()
+            .append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
+            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(") AND type IN (1,2,3);")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    Attendee attendee = new Attendee();
+                    attendee.setEntity(resultSet.getInt("id"));
+                    attendee.setCuType(Appointment2Event.getCalendarUserType(resultSet.getInt("type")));
+                    attendee.setUri(Appointment2Event.getURI(resultSet.getString("ma")));
+                    attendee.setCn(resultSet.getString("dn"));
+                    put(attendeesByObjectId, I(resultSet.getInt("object_id")), attendee);
+                }
+            }
+        }
+        return attendeesByObjectId;
+    }
+
+    private static Map<Integer, List<Attendee>> selectUserAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
+        Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
+        String sql = new StringBuilder()
+            .append("SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members ")
+            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    Attendee attendee = new Attendee();
+                    attendee.setEntity(resultSet.getInt("member_uid"));
+                    attendee.setCuType(CalendarUserType.INDIVIDUAL);
+                    attendee.setPartStat(Appointment2Event.getParticipationStatus(resultSet.getInt("confirm")));
+                    attendee.setComment(resultSet.getString("reason"));
+                    attendee.setFolderID(resultSet.getInt("pfid"));
+                    put(attendeesByObjectId, I(resultSet.getInt("object_id")), attendee);
+                }
+            }
+        }
+        return attendeesByObjectId;
+    }
+
+    private static Map<Integer, List<Attendee>> selectExternalAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
+        Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
+        String sql = new StringBuilder()
+            .append("SELECT objectId,mailAddress,displayName,confirm,reason FROM dateExternal ")
+            .append("WHERE cid=? AND objectId IN (").append(getParameters(objectIDs.length)).append(");")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    Attendee attendee = new Attendee();
+                    attendee.setCuType(CalendarUserType.INDIVIDUAL);
+                    attendee.setUri(Appointment2Event.getURI(resultSet.getString("mailAddress")));
+                    attendee.setCn(resultSet.getString("displayName"));
+                    attendee.setPartStat(Appointment2Event.getParticipationStatus(resultSet.getInt("confirm")));
+                    attendee.setComment(resultSet.getString("reason"));
+                    put(attendeesByObjectId, I(resultSet.getInt("objectId")), attendee);
+                }
+            }
+        }
+        return attendeesByObjectId;
     }
 
     /**

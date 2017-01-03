@@ -112,7 +112,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param context The context
      * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
-     * @param The transaction policy
+     * @param txPolicy The transaction policy
      */
     public RdbAlarmStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, entityResolver, dbProvider, txPolicy);

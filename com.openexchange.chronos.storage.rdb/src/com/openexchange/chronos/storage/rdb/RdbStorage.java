@@ -95,7 +95,7 @@ public abstract class RdbStorage {
      * @param context The context
      * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
-     * @param The transaction policy
+     * @param txPolicy The transaction policy
      */
     protected RdbStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super();
