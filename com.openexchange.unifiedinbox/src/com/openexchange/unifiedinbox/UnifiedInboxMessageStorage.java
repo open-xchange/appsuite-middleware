@@ -112,7 +112,6 @@ import com.openexchange.unifiedinbox.copy.UnifiedInboxMessageCopier;
 import com.openexchange.unifiedinbox.dataobjects.UnifiedMailMessage;
 import com.openexchange.unifiedinbox.services.Services;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
-import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 import com.openexchange.user.UserService;
@@ -286,8 +285,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Parse mail IDs
             TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
             // Create completion service for simultaneous access
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<GetMessagesResult> completionService = new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<GetMessagesResult> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             // Iterate parsed map and submit a task for each iteration
             int numTasks = 0;
             TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
@@ -689,8 +687,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             int length = accounts.size();
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             final IndexRange applicableRange = null == indexRange ? null : new IndexRange(0, indexRange.end);
             for (final MailAccount mailAccount : accounts) {
                 Session session = this.session;
@@ -1077,8 +1074,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
             Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<List<MailMessage>> completionService =
-                new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 Session session  = this.session;
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
@@ -1226,9 +1222,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(folder)) {
             List<MailAccount> accounts = getAccounts(true, unifiedMailAccountId, session.getUserId(), session.getContextId());
             int length = accounts.size();
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
-
-            TrackingCompletionService<Integer> completionService = new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<Integer> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<Integer>(session) {
 
@@ -1489,7 +1483,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
 
             // The old way
-            TrackingCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
@@ -1727,9 +1721,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             List<MailAccount> accounts = getAccounts();
             int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<List<MailMessage>> completionService =
-                new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 Session session  = this.session;
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
