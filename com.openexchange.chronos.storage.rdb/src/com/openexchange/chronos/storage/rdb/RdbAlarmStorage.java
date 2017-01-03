@@ -85,7 +85,6 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -138,7 +137,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             }
             return alarmsByUserID;
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -160,7 +159,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             }
             return alarmsByEventID;
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -180,7 +179,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
@@ -204,7 +203,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
@@ -229,7 +228,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             updated += deleteReminderTriggers(connection, context.getContextId(), eventID, userIDs);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
@@ -246,7 +245,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             updated += deleteReminderTriggers(connection, context.getContextId(), eventID);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, updated);
         }
