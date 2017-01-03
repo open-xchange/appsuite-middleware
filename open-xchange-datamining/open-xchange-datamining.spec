@@ -6,7 +6,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 20
+%define         ox_release 21
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -50,6 +50,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Tue Jan 03 2017 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2017-01-06 (3833)
 * Fri Nov 11 2016 Karsten Will <karsten.will@open-xchange.com>
 Build for patch 2016-11-21 (3728)
 * Fri Nov 04 2016 Karsten Will <karsten.will@open-xchange.com>
