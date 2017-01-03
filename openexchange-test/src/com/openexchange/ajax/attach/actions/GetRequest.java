@@ -96,6 +96,6 @@ public class GetRequest extends AbstractAttachmentRequest<GetResponse> {
 
     @Override
     public GetParser getParser() {
-        return new GetParser(true);
+        return new GetParser(false);
     }
 }

@@ -82,6 +82,7 @@ import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.ConcurrentLinkedList;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -139,7 +140,7 @@ public class FolderTestManager implements TestManager {
 
     public FolderTestManager(final AJAXClient client) {
         this.client = client;
-        createdItems = new LinkedList<FolderObject>();
+        createdItems = new ConcurrentLinkedList<FolderObject>();
     }
 
     /**
@@ -468,10 +469,10 @@ public class FolderTestManager implements TestManager {
         for (final FolderObject tempFolder : createdItems) {
             if (tempFolder.getObjectID() == folder.getObjectID()) {
                 createdItems.set(createdItems.indexOf(tempFolder), folder);
-            } else {
-                createdItems.add(folder);
+                return;
             }
         }
+        createdItems.add(folder);
     }
 
     /**

@@ -50,15 +50,18 @@
 package com.openexchange.ajax.appointment;
 
 import static org.junit.Assert.assertEquals;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.ajax.resource.ResourceTools;
+import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -294,13 +297,21 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
-        participants[1] = new UserParticipant(userParticipantId);
-
+        UserParticipant userParticipant = new UserParticipant(userParticipantId);
+        userParticipant.setEmailAddress("testo@test.org");
+        participants[1] = userParticipant;
         appointmentObj.setParticipants(participants);
+        
+        final StringWriter stringWriter = new StringWriter();
+        final JSONObject jsonObj = new JSONObject();
+        final AppointmentWriter appointmentwriter = new AppointmentWriter(getClient().getValues().getTimeZone());
+        appointmentwriter.writeAppointment(appointmentObj, jsonObj);
+        stringWriter.write(jsonObj.toString());
+        stringWriter.flush();
 
         objectId = catm.insert(appointmentObj).getObjectID();
         folderId = appointmentFolderId;
@@ -319,7 +330,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
@@ -370,7 +381,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID });
+        cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID });
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
         final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 

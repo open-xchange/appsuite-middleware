@@ -85,6 +85,7 @@ import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
+import com.openexchange.java.ConcurrentLinkedList;
 
 /**
  * {@link TaskTestManager}
@@ -110,7 +111,7 @@ public class TaskTestManager implements TestManager {
     public TaskTestManager(AJAXClient client) {
         setFailOnError(true);
         this.setClient(client);
-        createdEntities = new LinkedList<Task>();
+        createdEntities = new ConcurrentLinkedList<Task>();
         try {
             taskFolderId = client.getValues().getPrivateTaskFolder();
             timezone = client.getValues().getTimeZone();
@@ -357,7 +358,7 @@ public class TaskTestManager implements TestManager {
             objects.add(task);
         }
         for (Task task : objects) {
-            deleteTaskOnServer(task);
+            deleteTaskOnServer(task, false);
         }
     }
 

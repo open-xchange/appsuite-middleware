@@ -222,12 +222,12 @@ public class AttachmentTestManager implements TestManager {
         }
     }
 
-    public InputStream document(int folderId, int attachedId, int moduleId, int objectId) throws IllegalStateException, IOException, OXException, JSONException {
+    public String document(int folderId, int attachedId, int moduleId, int objectId) throws IllegalStateException, IOException, OXException, JSONException {
         com.openexchange.ajax.attach.actions.GetDocumentRequest request = new com.openexchange.ajax.attach.actions.GetDocumentRequest(folderId, objectId, moduleId, attachedId);
         GetDocumentResponse response = client.execute(request);
 
         extractInfo(response);
-        return response.getContent();
+        return response.getContentAsString();
     }
 
     public List<AttachmentMetadata> all(int folderId, int objectId, int moduleId, int[] columns, int sort, Order order) throws OXException, IOException, JSONException {
@@ -237,8 +237,8 @@ public class AttachmentTestManager implements TestManager {
         return allResponse.getAttachments();
     }
 
-    public void updates(int folderId, int objectId, int moduleId, long timestamp) throws OXException, IOException, JSONException {
-        UpdatesRequest request = new UpdatesRequest(folderId, objectId, moduleId, timestamp);
+    public void updates(int folderId, int objectId, int moduleId, int[] columns, long timestamp) throws OXException, IOException, JSONException {
+        UpdatesRequest request = new UpdatesRequest(folderId, objectId, moduleId, columns, timestamp);
         UpdatesResponse response = client.execute(request);
         extractInfo(response);
     }

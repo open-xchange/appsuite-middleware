@@ -66,14 +66,15 @@ public class UpdatesRequest extends AbstractAttachmentRequest<UpdatesResponse> {
     private int objectId;
     private int moduleId;
     private long timestamp;
+    private int[] columns;
 
-    public UpdatesRequest(int folderId, int objectId, int moduleId, long timestamp) {
+    public UpdatesRequest(int folderId, int objectId, int moduleId, int[] columns, long timestamp) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
         this.moduleId = moduleId;
+        this.columns = columns;
         this.timestamp = timestamp;
-        
     }
 
     @Override
@@ -94,7 +95,7 @@ public class UpdatesRequest extends AbstractAttachmentRequest<UpdatesResponse> {
             new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderId),
             new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, objectId),
             new URLParameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(timestamp)),
-            
+            new URLParameter(AJAXServlet.PARAMETER_COLUMNS, columns),
         };
     }
 

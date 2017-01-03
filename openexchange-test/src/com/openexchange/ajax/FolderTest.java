@@ -193,31 +193,27 @@ public class FolderTest extends AbstractAJAXTest {
         int parent01 = -1;
         int parent02 = -1;
         int moveFuid = -1;
-        int[] failedIds = null;
         final int userId = getClient().getValues().getUserId();
 
         FolderObject parent1 = FolderTestManager.createNewFolderObject("Parent01" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-        parent01 = ftm.insertFolderOnServer(parent1).getParentFolderID();
+        parent01 = ftm.insertFolderOnServer(parent1).getObjectID();
         assertFalse(parent01 == -1);
 
         FolderObject parent2 = FolderTestManager.createNewFolderObject("Parent02" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-        parent02 = ftm.insertFolderOnServer(parent2).getParentFolderID();
+        parent02 = ftm.insertFolderOnServer(parent2).getObjectID();
         assertFalse(parent02 == -1);
 
         FolderObject moveMe = FolderTestManager.createNewFolderObject("MoveMe" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, parent01);
-        moveFuid = ftm.insertFolderOnServer(moveMe).getParentFolderID();
-
+        moveFuid = ftm.insertFolderOnServer(moveMe).getObjectID();
         assertFalse(moveFuid == -1);
-        final Calendar cal = GregorianCalendar.getInstance();
-        FolderObject movedFolder = ftm.getFolderFromServer(moveFuid);
-        movedFolder.setParentFolderID(parent02);
-        movedFolder.setLastModified(new Date(cal.getTimeInMillis()));
-        ftm.updateFolderOnServer(movedFolder); //move
+
+        FolderObject folderToMove = ftm.getFolderFromServer(moveFuid);
+        folderToMove.setParentFolderID(parent02);
+        folderToMove.setLastModified(moveMe.getLastModified());
+        
+        ftm.updateFolderOnServer(folderToMove); //move
         FolderObject movedFolderObj = ftm.getFolderFromServer(moveFuid);
         assertTrue(movedFolderObj.containsParentFolderID() ? movedFolderObj.getParentFolderID() == parent02 : true);
-        ftm.deleteFolderOnServer(parent01, new Date(cal.getTimeInMillis()));
-        ftm.deleteFolderOnServer(parent02, new Date(cal.getTimeInMillis()));
-        assertFalse((failedIds != null && failedIds.length > 0));
     }
 
     @Test

@@ -63,7 +63,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentResponse> {
 
-    private final int attached;
+    private final int objectId;
 
     private final int moduleID;
 
@@ -92,7 +92,7 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
      */
     public GetDocumentRequest(int folder, int objectId, int module, int attachment, String lContentType, int off, int len, boolean lFailOnError) {
         super();
-        this.attached = objectId;
+        this.objectId = objectId;
         this.moduleID = module;
         this.folderID = folder;
         this.failOnError = lFailOnError;
@@ -118,8 +118,8 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DOCUMENT));
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_MODULE, moduleID));
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderID));
-        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ID, attachmentID));
-        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, attached));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ID, objectId));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, attachmentID));
         if (contentType != null) {
             parameters.add(new URLParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, contentType));
         }

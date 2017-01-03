@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.attach.actions;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
@@ -70,12 +69,12 @@ public class UpdatesParser extends AbstractUploadParser<UpdatesResponse> {
     @Override
     protected UpdatesResponse createResponse(Response response) throws JSONException {
         final UpdatesResponse retval = new UpdatesResponse(response);
-        final JSONArray data = (JSONArray) response.getData();
-        final int objectId = data.getInt(0);
-        if (isFailOnError()) {
-            assertTrue("Problem while inserting object.", objectId > 0);
-        }
-        retval.setId(objectId);
+//        final JSONArray data = (JSONArray) response.getData();
+//        final int objectId = data.getInt(0);
+//        if (isFailOnError()) {
+//            assertTrue("Problem while inserting object.", objectId > 0);
+//        }
+//        retval.setId(objectId);
         return retval;
     }
 }

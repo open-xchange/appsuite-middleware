@@ -54,6 +54,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -67,9 +68,10 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
 
     private int contentLength;
-    
+
     private HttpResponse httpResponse;
 
+    private String respString;
 
     /**
      * Initializes a new {@link GetDocumentParser}.
@@ -88,11 +90,10 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
         final boolean isJSON = body.startsWith("{");
         if (isJSON) {
             return super.parse(body);
-        } else {
-            JSONObject json = new JSONObject();
-            json.put("document", body);
-            return super.parse(json.toString());
         }
+        JSONObject json = new JSONObject();
+        json.put("document", body);
+        return super.parse(json.toString());
     }
 
     /*
@@ -110,17 +111,13 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
                 break;
             }
         }
-        return super.checkResponse(response, request);
+        respString = EntityUtils.toString(response.getEntity());
+        return respString;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected GetDocumentResponse createResponse(Response response) throws JSONException {
-        GetDocumentResponse r = new GetDocumentResponse(httpResponse, contentLength);
+        GetDocumentResponse r = new GetDocumentResponse(httpResponse, response, contentLength, respString);
         return r;
     }
 
