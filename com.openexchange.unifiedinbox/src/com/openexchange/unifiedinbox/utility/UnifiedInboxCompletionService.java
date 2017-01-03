@@ -71,7 +71,7 @@ public final class UnifiedInboxCompletionService<V> {
     public static class Result<V> {
 
         private final V result;
-        private final ExecutionException error;
+        private final Throwable error;
 
         Result(V result) {
             super();
@@ -79,12 +79,11 @@ public final class UnifiedInboxCompletionService<V> {
             this.error = null;
         }
 
-        Result(ExecutionException error) {
+        Result(Throwable error) {
             super();
             this.result = null;
             this.error = error;
         }
-
 
         /**
          * Gets the result
@@ -94,7 +93,7 @@ public final class UnifiedInboxCompletionService<V> {
          */
         public V get() throws ExecutionException {
             if (null != error) {
-                throw error;
+                throw new ExecutionException(error);
             }
             return result;
         }
@@ -140,8 +139,11 @@ public final class UnifiedInboxCompletionService<V> {
                 queue.add(new Result<V>(result));
                 return result;
             } catch (Exception e) {
-                queue.add(new Result<V>(new ExecutionException(e)));
+                queue.add(new Result<V>(e));
                 throw e;
+            } catch (Throwable t) {
+                queue.add(new Result<V>(t));
+                throw t;
             }
         }
     }
