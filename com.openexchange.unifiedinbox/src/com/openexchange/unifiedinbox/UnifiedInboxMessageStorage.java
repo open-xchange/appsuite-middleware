@@ -632,6 +632,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 mail.setMailId(mailId);
                 mail.setFolder(fullName);
                 mail.setAccountId(accountId);
+                mail.setOriginalId(uid.getId());
+                mail.setOriginalFolder(uid.getFullName());
                 if (null != future) {
                     try {
                         mail.setUnreadMessages(future.get().intValue());
@@ -723,6 +725,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                             umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
                                             umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                             umm.setAccountId(accountId);
+                                            umm.setOriginalId(accountMail.getMailId());
+                                            umm.setOriginalFolder(fn);
                                             messages.add(umm);
                                         }
                                         ret.add(messages);
@@ -809,6 +813,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
                                     umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                     umm.setAccountId(accountId);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
                                     messages.add(umm);
                                 }
                                 ret.add(messages);
@@ -1101,6 +1107,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
                                     messages.add(umm);
                                 }
                             }
@@ -1449,6 +1457,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                         umm.setFolder(fullName);
                                         umm.setAccountId(accountId);
                                         umm.setAccountName(name);
+                                        umm.setOriginalId(accountMail.getMailId());
+                                        umm.setOriginalFolder(fn);
                                         messages.add(umm);
                                     }
                                 }
@@ -1561,6 +1571,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
                                     umm.setAccountName(name);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
                                     messages.add(umm);
                                 }
                             }
@@ -1745,6 +1757,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
                                     messages.add(umm);
                                 }
                             }
@@ -2125,6 +2139,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     umm.setMailId(mailIds[pos]);
                     umm.setFolder(uiFullname);
                     umm.setAccountId(accountId);
+                    umm.setOriginalId(mail.getMailId());
+                    umm.setOriginalFolder(folder);
                 }
             }
         }
