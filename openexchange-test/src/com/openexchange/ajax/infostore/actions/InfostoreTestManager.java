@@ -255,8 +255,8 @@ public class InfostoreTestManager implements TestManager {
         List<File> found = new ArrayList<>();
         for (Object[] doc : response.getArray()) {
             File file = new DefaultFile();
-            int docId = Integer.parseInt((String) doc[response.getColumnPos(Metadata.ID)]);
-            file.setId(Integer.toString(docId));
+            String docId = (String) doc[response.getColumnPos(Metadata.ID)];
+            file.setId(docId);
             String title = (String) doc[response.getColumnPos(Metadata.TITLE)];
             file.setTitle(title);
             String description = (String) doc[response.getColumnPos(Metadata.DESCRIPTION)];

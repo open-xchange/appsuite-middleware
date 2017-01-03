@@ -52,12 +52,14 @@ package com.openexchange.ajax;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Before;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TestInit;
 
 public class InfostoreAJAXTest extends AbstractAJAXTest {
 
@@ -78,7 +80,9 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         final int userId = getClient().getValues().getUserId();
         this.folderId = createFolderForTest(userId);
         itm.createFileOnServer(folderId, "test knowledge", "text/javascript");
-        //        com.openexchange.file.storage.File createdFile2 = createFileOnServer(folderId, "test url", "text/javascript");
+        File file = InfostoreTestManager.createFile(folderId, "test url", "text/javascript");
+        file.setURL("http://www.open-xchange.com");
+        itm.newAction(file, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
     private int createFolderForTest(final int userId) throws JSONException, OXException, IOException {

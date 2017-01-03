@@ -15,7 +15,6 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.exception.OXException;
@@ -23,19 +22,23 @@ import com.openexchange.test.TestInit;
 
 public class AllTest extends InfostoreAJAXTest {
 
-    public AllTest() {
-        super();
-    }
-
     @Test
     public void testBasic() throws Exception {
         List<com.openexchange.file.storage.File> all = itm.getAll(folderId);
 
-        final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
-        final Set<String> urls = new HashSet<String>(Arrays.asList("http://www.open-xchange.com"));
-        final Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge", "test url"));
+        final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description"));
+        final Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge"));
 
-        assertFalse(all.size() == 0);
+        assertFalse(itm.getLastResponse().hasError());
+
+        final JSONArray entries = (JSONArray) itm.getLastResponse().getData();
+
+        for(int i = 0; i < entries.length(); i++) {
+            final JSONArray entry = entries.getJSONArray(i);
+
+            assertTrue(titles.remove(entry.getString(1)));
+            assertTrue(descriptions.remove(entry.getString(2)));
+        }
     }
 
     //Bug 4269
@@ -46,9 +49,9 @@ public class AllTest extends InfostoreAJAXTest {
         }
     }
 
-    public void virtualFolderTest(int folderid) throws JSONException, IOException, SAXException, OXException {
-        com.openexchange.file.storage.File file = itm.getAction(Integer.toString(folderid));
-        assertNotNull(file);
+    public void virtualFolderTest(int folderid) throws JSONException, IOException, OXException {
+        List<com.openexchange.file.storage.File> all = itm.getAll(folderid);
+        assertNotNull(all);
         assertFalse(itm.getLastResponse().hasError());
         assertEquals(0, ((JSONArray) itm.getLastResponse().getData()).length());
     }
@@ -70,7 +73,7 @@ public class AllTest extends InfostoreAJAXTest {
 
     // Bug 12427
     @Test
-    public void testNumberOfVersions() throws JSONException, IOException, SAXException, OXException {
+    public void testNumberOfVersions() throws JSONException, IOException, OXException {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
