@@ -130,7 +130,7 @@ public class Bug44131Test extends CalDAVTest {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
         Date clientLastModified = manager2.getLastModification();

@@ -81,7 +81,7 @@ public class DetachParser extends AbstractAJAXParser<DetachResponse> {
         } catch (final JSONException x) {
             final Response res = Response.parse(json.toString());
             if(res.hasError()) {
-                throw new JSONException(res.getErrorMessage());
+                return new DetachResponse(response, null);
             }
         }
         final int[] notDeleted = new int[arr.length()];

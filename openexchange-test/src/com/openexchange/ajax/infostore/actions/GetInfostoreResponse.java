@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -65,8 +64,7 @@ public class GetInfostoreResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public File getDocumentMetadata() throws OXException, JSONException {
+    public File getDocumentMetadata() throws OXException {
         return com.openexchange.file.storage.json.FileMetadataParser.getInstance().parse((JSONObject) getData());
     }
-
 }

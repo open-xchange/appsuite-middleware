@@ -74,7 +74,7 @@ public class LockRequest extends AbstractFileRequest<LockResponse> {
     }
 
     public LockRequest(final String id, final Long timeDiff) {
-        super(true);
+        super(false);
         this.id = id;
         this.timeDiff = timeDiff;
     }
@@ -91,7 +91,7 @@ public class LockRequest extends AbstractFileRequest<LockResponse> {
 
     @Override
     public LockParser getParser() {
-        return new LockParser(true);
+        return new LockParser(failOnError);
     }
 
     @Override

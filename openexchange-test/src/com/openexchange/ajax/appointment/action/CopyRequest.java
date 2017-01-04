@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.action;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -66,9 +67,9 @@ public class CopyRequest extends AbstractAppointmentRequest<CopyResponse> {
     private final int folderId;
     private final int objectId;
     private final boolean ignoreConlicts;
-    private Object body;
+    private JSONObject body;
 
-    public CopyRequest(final int folderId, final int objectId, Object body, boolean ignoreConlicts) {
+    public CopyRequest(final int folderId, final int objectId, JSONObject body, boolean ignoreConlicts) {
         this.folderId = folderId;
         this.objectId = objectId;
         this.ignoreConlicts = ignoreConlicts;
@@ -79,7 +80,7 @@ public class CopyRequest extends AbstractAppointmentRequest<CopyResponse> {
      * {@inheritDoc}
      */
     @Override
-    public Object getBody() throws JSONException {
+    public JSONObject getBody() throws JSONException {
         return body;
     }
 
@@ -97,10 +98,10 @@ public class CopyRequest extends AbstractAppointmentRequest<CopyResponse> {
     @Override
     public Parameter[] getParameters() {
          Parameter[] params = new Parameter[] { 
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY), 
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderId)),
-            new Parameter(AJAXServlet.PARAMETER_ID, objectId),
-            new Parameter(AppointmentFields.IGNORE_CONFLICTS, ignoreConlicts)
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY), 
+            new URLParameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderId)),
+            new URLParameter(AJAXServlet.PARAMETER_ID, objectId),
+            new URLParameter(AppointmentFields.IGNORE_CONFLICTS, ignoreConlicts)
         };
         return params;
     }
@@ -110,6 +111,6 @@ public class CopyRequest extends AbstractAppointmentRequest<CopyResponse> {
      */
     @Override
     public AbstractAJAXParser<CopyResponse> getParser() {
-        return new CopyParser(true);
+        return new CopyParser(false);
     }
 }

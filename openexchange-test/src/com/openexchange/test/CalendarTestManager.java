@@ -267,11 +267,11 @@ public class CalendarTestManager implements TestManager {
         return response.getAppointment(timezone);
     }
     
-    public Appointment copy(int parentFolderID, int objectID, Object body) throws OXException {
+    public Appointment copy(int parentFolderID, int objectID, JSONObject body) throws OXException {
         return this.copy(parentFolderID, objectID, body, false);
     }
 
-    public Appointment copy(int parentFolderID, int objectID, Object body, boolean ignoreConflicts) throws OXException {
+    public Appointment copy(int parentFolderID, int objectID, JSONObject body, boolean ignoreConflicts) throws OXException {
         CopyRequest request = new CopyRequest(parentFolderID, objectID, body, ignoreConflicts);
         CopyResponse response = execute(request);
         extractInfo(response);

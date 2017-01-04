@@ -76,7 +76,7 @@ public class DetachRequest extends AbstractFileRequest<DetachResponse> {
     }
 
     public DetachRequest(String id, Date timestamp, final int[] versions) {
-        super(true);
+        super(false);
         this.id = id;
         this.timestamp = timestamp;
         this.versions = versions;
@@ -108,7 +108,7 @@ public class DetachRequest extends AbstractFileRequest<DetachResponse> {
 
     @Override
     public DetachParser getParser() {
-        return new DetachParser(true);
+        return new DetachParser(false);
     }
 
     @Override

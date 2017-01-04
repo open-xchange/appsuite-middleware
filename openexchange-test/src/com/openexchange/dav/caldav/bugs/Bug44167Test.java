@@ -95,11 +95,13 @@ public class Bug44167Test extends CalDAVTest {
     private CalendarTestManager manager2;
     private FolderObject subfolder;
     private String sharedFolderID;
+    private AJAXClient client3;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(new AJAXClient(testUser));
+        client3 = new AJAXClient(testContext.acquireUser());
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
         FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
         String subFolderName = "testfolder_" + randomUID();
@@ -162,7 +164,7 @@ public class Bug44167Test extends CalDAVTest {
         appointment.setParentFolderID(Integer.parseInt(sharedFolderID));
         appointment.setAlarm(15);
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(new AJAXClient(testUser).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         manager2.insert(appointment);
         /*
          * synchronize user B's shared calendar as user A

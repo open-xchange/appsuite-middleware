@@ -69,7 +69,7 @@ public class UnlockRequest extends AbstractFileRequest<UnlockResponse> {
     private final String id;
 
     public UnlockRequest(final String id) {
-        super(true);
+        super(false);
         this.id = id;
     }
 
@@ -85,7 +85,7 @@ public class UnlockRequest extends AbstractFileRequest<UnlockResponse> {
 
     @Override
     public UnlockParser getParser() {
-        return new UnlockParser(true);
+        return new UnlockParser(failOnError);
     }
 
     @Override

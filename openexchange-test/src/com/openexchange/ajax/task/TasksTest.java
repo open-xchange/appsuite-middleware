@@ -80,19 +80,6 @@ public class TasksTest extends AbstractAJAXTest {
      * Logger.
      */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TasksTest.class);
-    /**
-     * Proxy attribute for the private task folder of the user.
-     */
-    private int privateTaskFolder;
-
-    /**
-     * Default constructor.
-     * 
-     * @param name Name of this test.
-     */
-    public TasksTest() {
-        super();
-    }
 
     /**
      * Tests inserting a delegated task.
@@ -283,7 +270,7 @@ public class TasksTest extends AbstractAJAXTest {
 
         ttm.setClient(getClient2());
         Task taskForUser = ttm.getTaskFromServer(folderId2, taskId);
-        taskForUser.setStatus(Task.ACCEPT);
+        taskForUser.setConfirm(Task.ACCEPT);
         ttm.updateTaskOnServer(taskForUser);
 
         ttm.setClient(getClient());
