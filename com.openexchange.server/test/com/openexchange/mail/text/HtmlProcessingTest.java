@@ -384,5 +384,4 @@ public class HtmlProcessingTest {
         Assert.assertFalse(replacedBody.contains("<body>"));
 
     }
-
 }
