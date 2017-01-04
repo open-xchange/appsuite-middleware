@@ -104,7 +104,7 @@ public class UserTest extends AbstractTest {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
     
-    private static List<User> toDeleteUsers = new ArrayList<>();
+    private static List<User> toDeleteUsers = new ArrayList<User>();
 
     @AfterClass
     public static void tearDown() throws Exception {
