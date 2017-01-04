@@ -752,7 +752,8 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
             int spaceInBuffer = 0;
             int copyLength = 0;
             if (filePosition >= bufferStart) {
-                spaceInBuffer = (int) ((bufferStart + buffer.length) - filePosition);
+                long space = (bufferStart + buffer.length) - filePosition;
+                spaceInBuffer = 0 < space && space < Integer.MAX_VALUE ? (int) space : 0;
             }
             if (spaceInBuffer > 0) {
 
