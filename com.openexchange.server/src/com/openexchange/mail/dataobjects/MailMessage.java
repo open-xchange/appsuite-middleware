@@ -502,6 +502,11 @@ public abstract class MailMessage extends MailPart {
     private boolean b_originalId;
 
     /**
+     * Email is encrypted
+     */
+    public boolean encrypted = false;
+
+    /**
      * Default constructor
      */
     protected MailMessage() {
@@ -2007,4 +2012,12 @@ public abstract class MailMessage extends MailPart {
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);
+
+    public void setEncrypted (boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    public boolean isEncrypted () {
+        return this.encrypted;
+    }
 }

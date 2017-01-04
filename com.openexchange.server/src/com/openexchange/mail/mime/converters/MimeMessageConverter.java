@@ -2021,6 +2021,7 @@ public final class MimeMessageConverter {
              */
             mail.setSubject(getSubject(mail));
             mail.setThreadLevel(0);
+            mail.setEncrypted(isEncrypted(mail));
             return mail;
         } catch (final MessageRemovedException e) {
             final String[] sa = getFolderAndIdSafe(msg);
@@ -2038,6 +2039,30 @@ public final class MimeMessageConverter {
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Checks if the email is an encrypted PGP email
+     * @return
+     * @throws OXException
+     */
+    private static boolean isEncrypted (MimeMailMessage mail) throws OXException {
+        // First check if PGP Mime email by checking content-type
+        if (mail.getContentType().toString().contains("application/pgp-encrypted")) return true;
+        InputStream in = mail.getInputStream();
+        // Now check if PGP Inline message.  Will only check first 2k of message
+        try {
+            byte[] data = new byte[2000];
+            in.read(data, 0, 2000);
+            String message = new String(data, "UTF-8");
+            if (message.contains("----BEGIN PGP MESSAGE")) return true;
+
+        } catch (IOException e) {
+            return false;
+        } finally {
+            Streams.close(in);
+        }
+        return false;
     }
 
     private static void examineAttachmentPresence(MimeMailMessage mail, ContentType ct) throws IOException, OXException {

@@ -146,6 +146,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String HEADERS = MailJSONField.HEADERS.getKey();
     private static final String ORIGINAL_ID = MailJSONField.ORIGINAL_ID.getKey();
     private static final String ORIGINAL_FOLDER_ID = MailJSONField.ORIGINAL_FOLDER_ID.getKey();
+    private static final String ENCRYPTED = MailJSONField.ENCRYPTED.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
 
@@ -362,6 +363,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
                 jsonObject.put(MALICIOUS, usm.isSuppressLinks());
+                jsonObject.put(ENCRYPTED, mail.isEncrypted());
                 this.initialiserSequenceId = mail.getSequenceId();
 
 
