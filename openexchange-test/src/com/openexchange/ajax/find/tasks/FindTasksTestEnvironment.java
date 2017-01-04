@@ -63,9 +63,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
@@ -141,8 +141,6 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
     private Map<String, List<Integer>> rootTasks = new HashMap<String, List<Integer>>();
 
     private Map<Integer, Task> tasks = new HashMap<Integer, Task>();
-    
-    private AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
      * Get the instance of the test environment
@@ -153,10 +151,10 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
         return INSTANCE;
     }
 
-    private void init() {
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
         try {
-            super.setUp();
-
             initUsers();
             createFolderStructure();
             createAndInsertTasks();
@@ -172,6 +170,16 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
     private final void initUsers() throws Exception {
         userA = getClient().getValues();
         userB = getClient2().getValues();
+    }
+
+    /**
+     * Logout
+     * 
+     * @throws Exception
+     */
+    private final void logout() throws Exception {
+        getClient().logout();
+        getClient2().logout();
     }
 
     /**
