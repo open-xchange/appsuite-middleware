@@ -60,7 +60,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -88,7 +87,7 @@ public class Bug23181Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(new AJAXClient(testUser));
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
         testUser2 = testContext.acquireUser();
 

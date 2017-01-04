@@ -471,7 +471,7 @@ public class MailNotificationTest extends ShareTest {
     }
 
     private void testUserGotNoNotification(FolderObject testFolder, File file) throws Exception {
-        AJAXClient secondClient = new AJAXClient(testContext.acquireUser());
+        AJAXClient secondClient = getClient2();
         int internalUserId = secondClient.getValues().getUserId();
         secondClient.logout();
         OCLPermission permission = new OCLPermission();

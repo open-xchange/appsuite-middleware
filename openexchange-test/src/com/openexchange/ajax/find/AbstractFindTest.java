@@ -110,7 +110,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         random = new Random();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
         folderManager = new FolderTestManager(getClient());
         folderManager2 = new FolderTestManager(client2);
     }
