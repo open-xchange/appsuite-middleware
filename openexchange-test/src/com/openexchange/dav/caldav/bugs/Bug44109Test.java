@@ -60,7 +60,6 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -85,7 +84,7 @@ public class Bug44109Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(new AJAXClient(testUser));
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
     }
 

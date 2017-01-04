@@ -58,7 +58,6 @@ import java.util.Calendar;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -71,8 +70,6 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug31779Test extends AbstractAJAXSession {
-
-    private AJAXClient client2;
 
     private int nextYear;
 
@@ -99,7 +96,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
 
@@ -114,13 +111,13 @@ public class Bug31779Test extends AbstractAJAXSession {
     @Test
     public void testBug31779() throws Exception {
         Appointment exception = ctm2.createIdentifyingCopy(appointment);
-        exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
         exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         catm.delete(catm.createIdentifyingCopy(exception));
-        exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         Appointment loadedException = ctm2.get(exception);
         assertNull("No object expected.", loadedException);
         assertTrue("Error expected.", ctm2.getLastResponse().hasError());
@@ -135,7 +132,7 @@ public class Bug31779Test extends AbstractAJAXSession {
     @Test
     public void testDeleteByparticipant() throws Exception {
         Appointment exception = ctm2.createIdentifyingCopy(appointment);
-        exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
@@ -144,7 +141,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         Appointment loadedException = catm.get(exception);
         assertNotNull("Object expected.", loadedException);
         assertEquals("Wrong creator.", getClient().getValues().getUserId(), loadedException.getCreatedBy());
-        assertEquals("Wrong changer.", client2.getValues().getUserId(), loadedException.getModifiedBy());
+        assertEquals("Wrong changer.", getClient2().getValues().getUserId(), loadedException.getModifiedBy());
     }
 
     @After

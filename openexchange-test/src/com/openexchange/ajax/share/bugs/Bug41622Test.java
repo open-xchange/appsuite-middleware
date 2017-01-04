@@ -98,7 +98,7 @@ public class Bug41622Test extends ShareTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
         clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
         clientsAndFolders.put(getClient(), new ArrayList<Integer>());
         clientsAndFolders.put(client2, new ArrayList<Integer>());
