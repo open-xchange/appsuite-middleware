@@ -94,12 +94,12 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
      * @param combination as char array
      * @return all relevant filters for that combination
      */
-    private static final List<ActiveFacet> getRelevantActiveFacets(char[] combination) {
+    private final List<ActiveFacet> getRelevantActiveFacets(char[] combination) {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
         ArrayUtils.reverse(combination);
         for (int i = 0; i < combination.length; i++) {
             if (combination[i] == '1')
-                facets.addAll(FindTasksTestEnvironment.getInstance().getLoActiveFacets().get(i));
+                facets.addAll(getLoActiveFacets().get(i));
         }
         return facets;
     }
@@ -153,7 +153,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
         facets.clear();
         facets.add(f.get(2)); //ext participant
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
+        facets.add(createGlobalFacet());
         assertResults(2, facets);
 
         assertResults(1, f); //all participants (a+b+ext)

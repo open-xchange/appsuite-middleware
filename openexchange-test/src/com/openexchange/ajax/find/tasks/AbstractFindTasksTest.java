@@ -58,7 +58,6 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.exception.OXException;
@@ -70,7 +69,7 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractFindTasksTest extends AbstractFindTest {
+public abstract class AbstractFindTasksTest extends FindTasksTestEnvironment {
 
     /**
      * Fetch the results from the QueryResponse
@@ -111,7 +110,7 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
      */
     protected final void assertResults(int expectedResultCount, List<ActiveFacet> f, int start, int size) throws OXException, IOException, JSONException {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
+        facets.add(createGlobalFacet());
         facets.addAll(f);
         final QueryResponse queryResponse = getClient().execute(new QueryRequest(start, size, facets, "tasks"));
         assertNotNull(queryResponse);
@@ -121,7 +120,7 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
 
         for (Object o : results.asList()) {
             Map<String, Object> m = (Map<String, Object>) o;
-            Task t = FindTasksTestEnvironment.getInstance().getTask((Integer) m.get("id"));
+            Task t = getTask((Integer) m.get("id"));
             assertNotNull("Expected object not found", t);
             assertEquals("Not the same", t.getTitle(), m.get("title"));
         }

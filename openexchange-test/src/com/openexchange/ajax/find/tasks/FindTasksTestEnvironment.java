@@ -67,6 +67,7 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.attach.actions.AttachRequest;
+import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -76,7 +77,6 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
@@ -99,9 +99,7 @@ import com.openexchange.server.impl.OCLPermission;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FindTasksTestEnvironment extends AbstractAJAXSession {
-
-    private static final FindTasksTestEnvironment INSTANCE = new FindTasksTestEnvironment();
+public class FindTasksTestEnvironment extends AbstractFindTest {
 
     /** UserA's private test folder */
     private FolderObject userAprivateTestFolder;
@@ -142,15 +140,6 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
 
     private Map<Integer, Task> tasks = new HashMap<Integer, Task>();
 
-    /**
-     * Get the instance of the test environment
-     * 
-     * @return the instance of the test environment
-     */
-    public static FindTasksTestEnvironment getInstance() {
-        return INSTANCE;
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -164,22 +153,29 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
         }
     }
 
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (cleanup) {
+                if (getClient() == null || getClient2() == null)
+                    initUsers();
+                getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
+                getClient2().execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
+
+                cleanRootTasks(getClient(), rootTasks.get(userA.getDefaultAddress()));
+                cleanRootTasks(getClient2(), rootTasks.get(userB.getDefaultAddress()));
+            }
+        } finally {
+            super.tearDown();
+        }
+    }
+
     /**
      * Initialize the users
      */
     private final void initUsers() throws Exception {
         userA = getClient().getValues();
         userB = getClient2().getValues();
-    }
-
-    /**
-     * Logout
-     * 
-     * @throws Exception
-     */
-    private final void logout() throws Exception {
-        getClient().logout();
-        getClient2().logout();
     }
 
     /**
@@ -545,17 +541,17 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
         facets.add(l);
     }
 
-    private final ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
-        return new ActiveFacet(type, Integer.toString(valueId), filter);
-    }
-
-    private final ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
-        return new ActiveFacet(type, valueId, filter);
-    }
-
-    private final ActiveFacet createFolderTypeFacet(FolderType type) {
-        return createActiveFacet(CommonFacetType.FOLDER_TYPE, type.getIdentifier(), new Filter(Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId()), type.getIdentifier()));
-    }
+    //    public static final ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
+    //        return new ActiveFacet(type, Integer.toString(valueId), filter);
+    //    }
+    //
+    //    public static final ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
+    //        return new ActiveFacet(type, valueId, filter);
+    //    }
+    //
+    //    public static final ActiveFacet createFolderTypeFacet(FolderType type) {
+    //        return createActiveFacet(CommonFacetType.FOLDER_TYPE, type.getIdentifier(), new Filter(Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId()), type.getIdentifier()));
+    //    }
 
     /**
      * Create a single filter
@@ -569,25 +565,6 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
     }
 
     /**
-     * Cleanup
-     * 
-     * @throws Exception
-     */
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-        if (cleanup) {
-            if (getClient() == null || getClient2() == null)
-                initUsers();
-            getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
-            getClient2().execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
-
-            cleanRootTasks(getClient(), rootTasks.get(userA.getDefaultAddress()));
-            cleanRootTasks(getClient2(), rootTasks.get(userB.getDefaultAddress()));
-        }
-    }
-
-    /**
      * Clean up the root tasks
      * 
      * @param client
@@ -596,7 +573,7 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
      * @throws IOException
      * @throws JSONException
      */
-    private static final void cleanRootTasks(AJAXClient client, List<Integer> list) throws OXException, IOException, JSONException {
+    private final void cleanRootTasks(AJAXClient client, List<Integer> list) throws OXException, IOException, JSONException {
         for (Integer i : list) {
             client.execute(new com.openexchange.ajax.task.actions.DeleteRequest(client.getValues().getPrivateTaskFolder(), i, new Date((System.currentTimeMillis() + 7300)))); //cheat and set a future last modified
         }
@@ -632,14 +609,14 @@ public class FindTasksTestEnvironment extends AbstractAJAXSession {
     /**
      * Get the global active facet with tracking id as query.
      */
-    public static final ActiveFacet createGlobalFacet() {
+    public final ActiveFacet createGlobalFacet() {
         return createGlobalFacet(trackingID.toString());
     }
 
     /**
      * Get the global active facet for an arbitrary query.
      */
-    public static final ActiveFacet createGlobalFacet(String query) {
+    public final ActiveFacet createGlobalFacet(String query) {
         return new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(Collections.singletonList("global"), query));
     }
 
