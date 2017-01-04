@@ -2053,6 +2053,10 @@ public final class MimeMessageConverter {
         // Now check if PGP Inline message.  Will only check first 2k of message
         try {
             byte[] data = new byte[2000];
+            // TODO
+            // This is only going to check messages sent in plaintext, though should be most PGP Inline messages
+            // Consider adding more in depth check
+            if (in == null) return false;
             in.read(data, 0, 2000);
             String message = new String(data, "UTF-8");
             if (message.contains("----BEGIN PGP MESSAGE")) return true;
