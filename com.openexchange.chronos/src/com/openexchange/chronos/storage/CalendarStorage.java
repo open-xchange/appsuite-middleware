@@ -78,12 +78,32 @@ public interface CalendarStorage {
      */
     Context getContext();
 
+    /**
+     * Gets the event storage.
+     *
+     * @return The event storage
+     */
     EventStorage getEventStorage();
 
+    /**
+     * Gets the alarm storage.
+     *
+     * @return The alarm storage
+     */
     AlarmStorage getAlarmStorage();
 
+    /**
+     * Gets the attachment storage.
+     *
+     * @return The attachment storage
+     */
     AttachmentStorage getAttachmentStorage();
 
+    /**
+     * Gets the attendee storage.
+     *
+     * @return The attendee storage
+     */
     AttendeeStorage getAttendeeStorage();
 
 }

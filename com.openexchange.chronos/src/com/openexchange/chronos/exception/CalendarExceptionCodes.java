@@ -95,9 +95,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     EVENT_RECURRENCE_NOT_FOUND("Event recurrence not found [series id %1$d, recurrence id %2$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4042),
     /**
      * <li>The requested attendee was not found.</li>
-     * <li>Attendee not found [attendee %1$s, event %1$d]</li>
+     * <li>Attendee not found [attendee %1$s, event %2$d]</li>
      */
-    ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$s, event %1$d]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
+    ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$s, event %2$d]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
     /**
      * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
      * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>

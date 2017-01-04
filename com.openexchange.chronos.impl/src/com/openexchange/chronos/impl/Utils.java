@@ -456,6 +456,34 @@ public class Utils {
     }
 
     /**
+     * Gets the identifier of the folder representing a specific calendar user's view on an event. For events in <i>public</i> folders,
+     * this is always the static public folder identifier of the event. Otherwise, the corresponding attendee's parent folder identifier
+     * is returned.
+     *
+     * @param storage A reference to the calendar storage to query the event's attendees not set
+     * @param event The event to get the folder view for
+     * @param calendarUser The identifier of the user to get the folder view for
+     * @return The folder identifier
+     * @throws OXException - {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND} in case there's no static parent folder and the supplied user is no attendee
+     */
+    public static int getFolderView(CalendarStorage storage, Event event, int calendarUser) throws OXException {
+        if (0 < event.getPublicFolderId()) {
+            return event.getPublicFolderId();
+        } else {
+            if (false == event.containsAttendees()) {
+                System.out.println("dsds");
+            }
+
+            Attendee userAttendee = CalendarUtils.find(
+                event.containsAttendees() ? event.getAttendees() : storage.getAttendeeStorage().loadAttendees(event.getId()), calendarUser);
+            if (null == userAttendee || 0 >= userAttendee.getFolderID()) {
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), I(event.getId()));
+            }
+            return userAttendee.getFolderID();
+        }
+    }
+
+    /**
      * Finds a specific event identified by its object-identifier in a collection.
      *
      * @param events The events to search in
