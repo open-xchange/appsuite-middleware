@@ -1,3 +1,9 @@
+open-xchange-mail-categories (7.8.3-10) stable; urgency=medium
+
+  * Build for patch 2017-01-09 (3849)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Wed, 04 Jan 2017 10:40:43 +0100
+
 open-xchange-mail-categories (7.8.3-9) stable; urgency=medium
 
   * Build for patch 2016-12-23 (3857)
