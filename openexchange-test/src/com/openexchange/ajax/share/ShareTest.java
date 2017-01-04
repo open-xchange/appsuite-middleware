@@ -783,7 +783,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The message, or <code>null</code> if not found
      */
     protected Message discoverInvitationMessage(AJAXClient client, String emailAddress) throws Exception {
-        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
         for (Message message : messages) {
             Map<String, String> headers = message.getHeaders();
             String toHeader = headers.get("To");
