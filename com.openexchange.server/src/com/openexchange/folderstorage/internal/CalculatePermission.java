@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
@@ -270,7 +271,14 @@ public final class CalculatePermission {
      * @return The effective permission for given session's user in given folder
      */
     public static Permission calculate(final Folder folder, final ServerSession session, final java.util.List<ContentType> allowedContentTypes) {
-        final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
+        if (session.isAnonymous()) {
+            // Deny for anonymous user
+            DefaultPermission p = new DefaultPermission();
+            p.setNoPermissions();
+            return p;
+        }
+
+        UserPermissionBits userPermissionBits = session.getUserPermissionBits();
         return new EffectivePermission(
             getMaxPermission(folder.getPermissions(), userPermissionBits),
             folder.getID(),
