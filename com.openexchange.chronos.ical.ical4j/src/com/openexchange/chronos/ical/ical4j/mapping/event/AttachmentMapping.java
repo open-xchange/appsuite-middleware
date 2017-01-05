@@ -64,10 +64,13 @@ import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.parameter.FmtType;
 import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.Attach;
 
@@ -127,15 +130,17 @@ public class AttachmentMapping extends AbstractICalMapping<VEvent, Event> {
             } finally {
                 Streams.close(inputStream);
             }
+        } else if (null != attachment.getUri()) {
+            property.setUri(new URI(attachment.getUri()));
         }
         if (null != attachment.getContentId()) {
             property.getParameters().add(new XParameter("CID", attachment.getContentId()));
         }
-        if (null != attachment.getUri()) {
-            property.setUri(new URI(attachment.getUri()));
-        }
         if (null != attachment.getFilename()) {
             property.getParameters().add(new XParameter("FILENAME", attachment.getFilename()));
+        }
+        if (null != attachment.getFormatType()) {
+            property.getParameters().add(new FmtType(attachment.getFormatType()));
         }
         if (0 < attachment.getSize()) {
             property.getParameters().add(new XParameter("SIZE", String.valueOf(attachment.getSize())));
@@ -161,14 +166,9 @@ public class AttachmentMapping extends AbstractICalMapping<VEvent, Event> {
         if (null != cidParameter) {
             attachment.setContentId(cidParameter.getValue());
         }
+        attachment.setFilename(extractFilename(property));
         Parameter fmtTypeParameter = property.getParameter(Parameter.FMTTYPE);
-        if (null != fmtTypeParameter) {
-            attachment.setFormatType(fmtTypeParameter.getValue());
-        }
-        Parameter filenameParameter = property.getParameter("FILENAME");
-        if (null != filenameParameter) {
-            attachment.setFilename(filenameParameter.getValue());
-        }
+        attachment.setFormatType(null != fmtTypeParameter ? fmtTypeParameter.getValue() : MimeType2ExtMap.getContentType(attachment.getFilename(), "application/octet-stream"));
         Parameter managedIdParameter = property.getParameter("MANAGED-ID");
         if (null != managedIdParameter) {
             try {
@@ -182,10 +182,29 @@ public class AttachmentMapping extends AbstractICalMapping<VEvent, Event> {
             try {
                 attachment.setSize(Long.parseLong(sizeParameter.getValue()));
             } catch (NumberFormatException e) {
-                addConversionWarning(warnings, e, Property.ATTACH, "Error parsing managed id");
+                addConversionWarning(warnings, e, Property.ATTACH, "Error parsing attachment size");
             }
         }
         return attachment;
+    }
+
+    private static String extractFilename(net.fortuna.ical4j.model.property.Attach attach) {
+        for (String parameterName : new String[] { "FILENAME", "X-FILENAME", "X-ORACLE-FILENAME", "X-APPLE-FILENAME" }) {
+            Parameter filenameParameter = attach.getParameter(parameterName);
+            if (null != filenameParameter && Strings.isNotEmpty(filenameParameter.getValue())) {
+                return filenameParameter.getValue();
+            }
+        }
+        if (null != attach.getUri()) {
+            String path = attach.getUri().getPath();
+            if (Strings.isNotEmpty(path)) {
+                int idx = path.lastIndexOf('/');
+                if (-1 != idx) {
+                    return path.substring(idx);
+                }
+            }
+        }
+        return "attachment";
     }
 
 }
