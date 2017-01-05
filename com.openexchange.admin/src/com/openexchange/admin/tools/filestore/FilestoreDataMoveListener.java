@@ -184,8 +184,9 @@ public interface FilestoreDataMoveListener {
      * @param masterId The master identifier
      * @param srcMasterStorage The source file storage associated with given master
      * @param dstUserStorage The destination file storage associated with given user
+     * @throws OXException If listener signals that the move should not occur
      */
-    void onBeforeMasterToUserDataMove(int contextId, int userId, int masterId, QuotaFileStorage srcMasterStorage, QuotaFileStorage dstUserStorage);
+    void onBeforeMasterToUserDataMove(int contextId, int userId, int masterId, QuotaFileStorage srcMasterStorage, QuotaFileStorage dstUserStorage) throws OXException;
 
     /**
      * Invoked in case data was moved from master-associated file storage to a user-associated one.

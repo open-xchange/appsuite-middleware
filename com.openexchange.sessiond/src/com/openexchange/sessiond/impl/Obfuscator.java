@@ -79,8 +79,6 @@ public class Obfuscator implements ObfuscatorService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
 
-    private static final String[] WRAPPED_PARMETERS = { Session.PARAM_ALTERNATIVE_ID };
-
     private static boolean useDirectByteBuffer() {
         return false;
     }

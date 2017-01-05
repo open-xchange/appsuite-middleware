@@ -276,7 +276,7 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
 
     @Override
     public void onMessage(WebSocket socket, String text) {
-        // Don't care
+        // Incoming messages already handled in 'WsTransportConnection.onInboundMessage(WebSocket, String)'
     }
 
 }

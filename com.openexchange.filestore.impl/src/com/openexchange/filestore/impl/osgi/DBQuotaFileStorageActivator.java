@@ -56,20 +56,22 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorageService;
-import com.openexchange.filestore.QuotaLimitService;
-import com.openexchange.filestore.QuotaUsageService;
+import com.openexchange.filestore.QuotaBackendService;
 import com.openexchange.filestore.impl.DatabaseAccessServiceImpl;
 import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
 import com.openexchange.filestore.impl.groupware.AddFilestoreOwnerColumnToUserTable;
 import com.openexchange.filestore.impl.groupware.AddInitialUserFilestoreUsage;
 import com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTable;
 import com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTable;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.user.UserService;
@@ -106,22 +108,20 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
             QuotaFileStorageListenerTracker listenerTracker = new QuotaFileStorageListenerTracker(context);
             rememberTracker(listenerTracker);
 
-            RankingAwareNearRegistryServiceTracker<QuotaUsageService> usageServices = new RankingAwareNearRegistryServiceTracker<>(context, QuotaUsageService.class, 0);
-            rememberTracker(usageServices);
+            RankingAwareNearRegistryServiceTracker<QuotaBackendService> backendServices = new RankingAwareNearRegistryServiceTracker<>(context, QuotaBackendService.class, 0);
+            rememberTracker(backendServices);
 
-            RankingAwareNearRegistryServiceTracker<QuotaLimitService> limitServices = new RankingAwareNearRegistryServiceTracker<>(context, QuotaLimitService.class, 0);
-            rememberTracker(limitServices);
-
-            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(usageServices, limitServices, listenerTracker, context));
+            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(backendServices, listenerTracker, context));
             rememberTracker(tracker);
 
             trackService(ContextService.class);
             trackService(UserService.class);
+            trackService(ConfigViewFactory.class);
 
             {
                 ServiceTrackerCustomizer<CacheService, CacheService> customizer = new ServiceTrackerCustomizer<CacheService, CacheService>() {
 
-                    private final String[] regionNames = { "QuotaFileStorages", "SingleUserContext" };
+                    private final String[] regionNames = { "QuotaFileStorages" };
 
                     @Override
                     public CacheService addingService(ServiceReference<CacheService> reference) {

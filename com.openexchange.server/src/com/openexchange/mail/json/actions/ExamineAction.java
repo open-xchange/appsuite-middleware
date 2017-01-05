@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageStatusSupport;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -89,11 +90,10 @@ public class ExamineAction extends AbstractMailAction {
         ServerSession session = req.getSession();
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder);
 
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = MailAccess.getInstance(session, fullnameArgument.getAccountId());
-            mailAccess.connect();
-
+        MailServletInterface mailInterface = getMailInterface(req);
+        mailInterface.openFor(folder);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
+        {
             MailConfig mailConfig = mailAccess.getMailConfig();
             MailCapabilities capabilities = mailConfig.getCapabilities();
 
@@ -119,10 +119,6 @@ public class ExamineAction extends AbstractMailAction {
                 .put("next", status.getNextId());
 
             return new AJAXRequestResult(jStatus, "json");
-        } finally {
-            if (mailAccess != null) {
-                mailAccess.close();
-            }
         }
     }
 

@@ -1535,7 +1535,17 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         if (tmp != null) {
             user.setDefaultSenderAddress(tmp);
         }
-
+        
+        tmp = soapUser.getDriveFolderMode();
+        if (tmp != null) {
+            user.setDriveFolderMode(tmp);
+        }
+        
+        Boolean bool_tmp = soapUser.isRemoveDriveFolderFlags();
+        if (bool_tmp != null) {
+            user.setRemoveDriveFolderFlags(bool_tmp);
+        }
+        
         tmp = soapUser.getDepartment();
         if (tmp != null) {
             user.setDepartment(tmp);
@@ -2179,6 +2189,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setCountryHome(user.getCountry_home());
         soapUser.setCountryOther(user.getCountry_other());
         soapUser.setDefaultSenderAddress(user.getDefaultSenderAddress());
+        soapUser.setDriveFolderMode(user.getDriveFolderMode());
         soapUser.setDefaultGroup(group2Soap(user.getDefault_group()));
         soapUser.setDepartment(user.getDepartment());
         soapUser.setDisplayName(user.getDisplay_name());

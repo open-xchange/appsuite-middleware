@@ -189,8 +189,8 @@ public final class VersionControlUtil {
 
         int contextId = context.getContextId();
         QuotaFileStorageService qfs = FileStorages.getQuotaFileStorageService();
-        QuotaFileStorage prevFs = qfs.getQuotaFileStorage(previousOwner, contextId, Info.drive(previousOwner));
-        QuotaFileStorage newFs = qfs.getQuotaFileStorage(newOwner, contextId, Info.drive(newOwner));
+        QuotaFileStorage prevFs = qfs.getQuotaFileStorage(previousOwner, contextId, Info.drive());
+        QuotaFileStorage newFs = qfs.getQuotaFileStorage(newOwner, contextId, Info.drive());
         if (prevFs.getUri().equals(newFs.getUri())) {
             return Collections.emptyMap();
         }
@@ -266,7 +266,7 @@ public final class VersionControlUtil {
         int contextId = context.getContextId();
         QuotaFileStorageService qfs = FileStorages.getQuotaFileStorageService();
         int folderOwner = folderAccess.getFolderOwner((int) destinationFolder);
-        QuotaFileStorage destFs = qfs.getQuotaFileStorage(folderOwner, contextId, Info.drive(folderOwner));
+        QuotaFileStorage destFs = qfs.getQuotaFileStorage(folderOwner, contextId, Info.drive());
         Map<Integer, DocumentMetadata> oldDocs = asMap(oldDocuments);
 
         Map<Integer, List<VersionControlResult>> resultMap = new LinkedHashMap<Integer, List<VersionControlResult>>(documents.size());
@@ -276,7 +276,7 @@ public final class VersionControlUtil {
             DocumentMetadata oldDoc = oldDocs.get(id);
             if (null != oldDoc) {
                 folderOwner = folderAccess.getFolderOwner((int) oldDoc.getFolderId());
-                QuotaFileStorage srcFs = qfs.getQuotaFileStorage(folderOwner, contextId, Info.drive(folderOwner));
+                QuotaFileStorage srcFs = qfs.getQuotaFileStorage(folderOwner, contextId, Info.drive());
                 if (srcFs.getUri().equals(destFs.getUri())) {
                     // Same, so nothing to do
                 } else {

@@ -57,6 +57,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -78,6 +79,7 @@ import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
+import org.apache.commons.lang.math.IntRange;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -454,9 +456,19 @@ public final class HtmlProcessing {
             //return outputDocument.toString().trim();
         }
 
-        for (Element htmlElement : htmlElements) {
-            lookUpHeadAndReplaceBody(source, outputDocument, htmlElement, cssPrefix);
+        Iterator<Element> htmlElementsIterator = htmlElements.iterator();
+        Element htmlElement = htmlElementsIterator.next(); // Get first
+        IntRange alreadyProcessed = new IntRange(htmlElement.getBegin(), htmlElement.getEnd() - 1);
+        lookUpHeadAndReplaceBody(source, outputDocument, htmlElement, cssPrefix);
+        while (htmlElementsIterator.hasNext()) {
+            htmlElement = htmlElementsIterator.next();
+            IntRange range = new IntRange(htmlElement.getBegin(), htmlElement.getEnd() - 1);
+            if (false == alreadyProcessed.containsRange(range)) {
+                lookUpHeadAndReplaceBody(source, outputDocument, htmlElement, cssPrefix);
+                alreadyProcessed = new IntRange(Math.min(alreadyProcessed.getMinimumInteger(), range.getMinimumInteger()), Math.max(alreadyProcessed.getMaximumInteger(), range.getMaximumInteger()));
+            }
         }
+
         return outputDocument.toString().trim();
     }
 
@@ -528,9 +540,11 @@ public final class HtmlProcessing {
 
         if (1 == numOfBodies) {
             Element bodyElement = bodyElements.get(0);
-            Segment content = bodyElement.getContent();
-            StringBuilder sb = new StringBuilder(content.length());
+            StringBuilder sb = new StringBuilder(32);
             getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix, sb);
+            outputDocument.replace(bodyElement.getStartTag(), sb.toString());
+
+            sb.setLength(0);
             if (null != styleElements) {
                 for (Element styleElement : styleElements) {
                     sb.append(styleElement);
@@ -541,16 +555,26 @@ public final class HtmlProcessing {
                     sb.append(element);
                 }
             }
-            sb.append(content);
-            sb.append("</div>");
-            outputDocument.replace(bodyElement, sb);
+            if (sb.length() > 0) {
+                outputDocument.insert(bodyElement.getStartTag().getEnd(), sb.toString());
+            }
+
+            EndTag bodyEndTag = bodyElement.getEndTag();
+            if (null == bodyEndTag) {
+                outputDocument.insert(bodyElement.getEnd(), "</div>");
+            } else {
+                outputDocument.replace(bodyEndTag, "</div>");
+            }
             return;
         }
 
+        StringBuilder sb = new StringBuilder(32);
         for (Element bodyElement : bodyElements) {
-            Segment content = bodyElement.getContent();
-            StringBuilder sb = new StringBuilder(content.length());
+            sb.setLength(0);
             getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix, sb);
+            outputDocument.replace(bodyElement.getStartTag(), sb.toString());
+
+            sb.setLength(0);
             if (null != styleElements) {
                 for (Element styleElement : styleElements) {
                     sb.append(styleElement);
@@ -561,9 +585,16 @@ public final class HtmlProcessing {
                     sb.append(element);
                 }
             }
-            sb.append(content);
-            sb.append("</div>");
-            outputDocument.replace(bodyElement, sb);
+            if (sb.length() > 0) {
+                outputDocument.insert(bodyElement.getStartTag().getEnd(), sb.toString());
+            }
+
+            EndTag bodyEndTag = bodyElement.getEndTag();
+            if (null == bodyEndTag) {
+                outputDocument.insert(bodyElement.getEnd(), "</div>");
+            } else {
+                outputDocument.replace(bodyEndTag, "</div>");
+            }
         }
     }
 

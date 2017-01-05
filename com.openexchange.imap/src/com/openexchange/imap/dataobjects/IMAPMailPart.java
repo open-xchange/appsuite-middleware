@@ -152,8 +152,10 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
                 final ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
                 tisp.write(inp.getInputStream());
                 this.inProvider = tisp;
-            } catch (final IOException e) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (com.sun.mail.util.MessageRemovedIOException e) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw MailExceptionCode.UNREADBALE_PART_CONTENT_SIMPLE.create(e, e.getMessage());
             }
         }
     }

@@ -77,6 +77,7 @@ import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.mail.api.permittance.Permittance;
 import com.openexchange.mail.api.permittance.Permitter;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
@@ -85,6 +86,7 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeCleanUp;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.oauth.API;
@@ -788,8 +790,20 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             return e;
         }
 
+        if (mailConfig.getAccountId() == MailAccount.DEFAULT_ID) {
+            AuthenticationFailedHandlerService handlerService = ServerServiceRegistry.getInstance().getService(AuthenticationFailedHandlerService.class);
+            if (null != handlerService) {
+                try {
+                    handlerService.handleAuthenticationFailed(e, Service.MAIL, mailConfig, session);
+                    return e;
+                } catch (OXException x) {
+                    return x;
+                }
+            }
+        }
+
         // Authentication failed... Check for OAuth-based authentication
-        if (AuthType.OAUTH.equals(mailConfig.getAuthType())) {
+        if (AuthType.isOAuthType(mailConfig.getAuthType())) {
             // Determine identifier of the associated OAuth account
             int oauthAccountId = mailConfig.getOAuthAccountId();
             if (oauthAccountId >= 0) {
@@ -824,7 +838,28 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         if (Thread.currentThread() == acquiredLatch.owner) {
             // Perform the standard folder check
             try {
-                getFolderStorage().checkDefaultFolders();
+                F folderStorage = getFolderStorage();
+                try {
+                    folderStorage.checkDefaultFolders();
+                } catch (OXException e) {
+                    // Check if default folder check failed due to a quota limitation
+                    Throwable cause = e.getCause();
+                    String message = cause == null ? e.getPlainLogMessage() : cause.getMessage();
+                    if (!MimeMailException.isOverQuotaException(message)) {
+                        throw e;
+                    }
+
+                    // Handle quota-related errors
+                    MailConfig mailConfig = getMailConfig();
+                    String server = mailConfig.getServer();
+                    String login = mailConfig.getLogin();
+                    Integer contextId = Integer.valueOf(session.getContextId());
+                    Integer userId = Integer.valueOf(session.getUserId());
+
+                    OXException mailExc = MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA.create(cause, server, userId, login, contextId, message);
+                    acquiredLatch.result.set(mailExc);
+                    throw mailExc;
+                }
                 acquiredLatch.result.set(Boolean.TRUE);
                 return;
             } catch (OXException e) {

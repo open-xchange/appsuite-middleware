@@ -490,19 +490,19 @@ public final class MessageWriter {
             @Override
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
-                    int accId = accountId;
-                    if (mail instanceof Delegatized) {
-                        int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
-                        if (undelegatedAccountId >= 0) {
-                            accId = undelegatedAccountId;
-                        }
-                    }
-
                     Object originalFolder;
                     if (mail.containsOriginalFolder() && null != mail.getOriginalFolder()) {
-                        originalFolder = prepareFullname(accId, mail.getOriginalFolder());
+                        originalFolder = prepareFullname(accountId, mail.getOriginalFolder());
                     } else {
                         // Fall back to regular folder
+                        int accId = accountId;
+                        if (mail instanceof Delegatized) {
+                            int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                            if (undelegatedAccountId >= 0) {
+                                accId = undelegatedAccountId;
+                            }
+                        }
+
                         String folder = mail.getFolder();
                         originalFolder = null == folder ? JSONObject.NULL : prepareFullname(accId, folder);
                     }

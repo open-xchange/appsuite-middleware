@@ -1,0 +1,35 @@
+array:
+  - data:
+      Key: com.openexchange.folderstorage.defaultPermissions
+      Description: >
+Specifies default permission to use in case folder is supposed to be created below a certain parent folder.
+The value is a pipe ('|') separated listing of expressions; each expression defines the default permissions
+for a denoted parent folder. Currently the reserved folder identifiers "2" and "15" are considered as "2"
+denoted the public PIM folder whereas "15" denotes the public Drive folder.
+
+An expression starts with the parent folder identifier followed by '=' character; e.g. "2=".
+Then there is a comma-separated list of permissions to assume per entity (user or group).
+
+Each permission either starts with "user_", "admin_user_", "group_" or "admin_group_" (the prefix "admin_" controls
+whether the entity is supposed to be set as folder administrator) followed by the numeric entity identifier.
+
+Then an '@' character is supposed to occur and finally followed by rights expression. The rights may be dot-separated
+listing (<folder-permission> + "." + <read-permission> + "." + <write-permission> + "." + <delete-permission>) or one
+of the tokens  "viewer", "writer" or "author".
+
+More formally
+expressions = expression ("|" expression)*
+expression = folder "=" permission ("," permission)*
+permission = ("admin_")? ("group_" | "user_") entity(int) "@" rights
+rights = (folder-permission(int) "." read-permission(int) "." write-permission(int) "." delete-permission(int)) | ("viewer" | "writer" | "author")
+
+Example
+2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8
+2=group_2@viewer,admin_user_5@author|15=admin_group_2@writer
+      Default: No defaut value
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: 
+      File: foldercache.properties
+  		

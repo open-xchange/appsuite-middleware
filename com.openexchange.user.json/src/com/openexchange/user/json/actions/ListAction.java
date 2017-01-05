@@ -178,10 +178,14 @@ public final class ListAction extends AbstractUserAction {
 
     private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
         Object data = request.getData();
-        if (null == data || !(data instanceof JSONArray)) {
+        if (null == data) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+        if (!(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create("JSONArray", data.getClass().getSimpleName());
         }
-        final JSONArray jsonArray = (JSONArray) request.getData();
+
+        JSONArray jsonArray = (JSONArray) request.getData();
         if (null == jsonArray) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("data");
         }

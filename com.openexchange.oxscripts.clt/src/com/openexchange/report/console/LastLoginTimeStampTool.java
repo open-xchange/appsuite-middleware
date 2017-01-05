@@ -70,6 +70,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.openexchange.ajax.Client;
 import com.openexchange.report.Constants;
 
 
@@ -85,9 +86,10 @@ public final class LastLoginTimeStampTool {
     static {
         final Options opts = new Options();
         opts.addOption("h", "help", false, "Prints a help text");
-        opts.addOption("c", "context", true, "A valid context identifier");
-        opts.addOption("u", "user", true, "A valid user identifier");
-        opts.addOption("t", "client", true, "A client identifier; e.g \"com.openexchange.ox.gui.dhtml\"");
+        opts.addOption("c", "context", true, "A valid (numeric) context identifier");
+        opts.addOption("u", "user", true, "A valid (numeric) user identifier");
+        opts.addOption("i", true, "A valid (numeric) user identifier. As alternative for the \"-u, --user\" option.");
+        opts.addOption("t", "client", true, "A client identifier; e.g \"open-xchange-appsuite\" for App Suite UI. See below for more client identifiers.");
 
         opts.addOption("d", "datepattern", true, "The optional date pattern used for formatting retrieved time stamp; e.g \"EEE, d MMM yyyy HH:mm:ss Z\" would yield \"Wed, 4 Jul 2001 12:08:56 -0700\"");
 
@@ -100,8 +102,19 @@ public final class LastLoginTimeStampTool {
     }
 
     private static void printHelp() {
-        final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("lastlogintimestamp", toolkitOptions);
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp("lastlogintimestamp", "Prints the time stamp of the last login for a user using a certain client.", toolkitOptions, null);
+
+        StringBuilder footer = new StringBuilder(512);
+        footer.append("\nExamples:");
+        footer.append("\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite");
+        footer.append("\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite -d \"\\\"yyyy.MM.dd G 'at' HH:mm:ss z\\\"\"");
+        footer.append("\n");
+        footer.append("\nClients:");
+        for (Client client : Client.values()) {
+            footer.append("\n- ").append(client.getClientId()).append("\n   ").append(client.getDescription());
+        }
+        System.out.println(footer);
     }
 
     /**
@@ -188,12 +201,15 @@ public final class LastLoginTimeStampTool {
                 System.exit(1);
             }
 
-            if (!cmd.hasOption('u')) {
+            if (cmd.hasOption('u')) {
+                optionValue = cmd.getOptionValue('u');
+            } else if (cmd.hasOption('i')) {
+                optionValue = cmd.getOptionValue('i');
+            } else {
                 System.err.println("Missing user identifier.");
                 printHelp();
                 System.exit(1);
             }
-            optionValue = cmd.getOptionValue('u');
             try {
                 userId = Integer.parseInt(optionValue.trim());
             } catch (final NumberFormatException e) {

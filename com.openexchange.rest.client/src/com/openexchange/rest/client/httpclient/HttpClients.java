@@ -94,6 +94,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.TextUtils;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
+import com.openexchange.rest.client.httpclient.ssl.EasySSLSocketFactory;
 import com.openexchange.rest.client.osgi.RestClientServices;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -152,11 +154,31 @@ public final class HttpClients {
      */
     public static DefaultHttpClient getHttpClient(final ClientConfig config) {
         SSLSocketFactoryProvider factoryProvider = RestClientServices.getOptionalService(SSLSocketFactoryProvider.class);
-        if (null == factoryProvider) {
-            throw new IllegalStateException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        if (null != factoryProvider) {
+            return getHttpClient(config, factoryProvider);
         }
 
+        return WrappedClientsRegistry.getInstance().createWrapped(config);
+    }
+
+    /**
+     * Creates a {@link DefaultHttpClient} instance.
+     *
+     * @param config The configuration settings for the client
+     * @param factoryProvider The provider for the appropriate <code>SSLSocketFactory</code> instance to use
+     * @return A newly created {@link DefaultHttpClient} instance
+     */
+    public static DefaultHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider) {
+        // Initialize ClientConnectionManager
+        ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider);
+
+        // Initialize DefaultHttpClient using the ClientConnectionManager and client configuration
+        return initializeHttpClientUsing(config, ccm);
+    }
+
+    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider) {
         javax.net.ssl.SSLSocketFactory f = factoryProvider.getDefault();
+
         SSLConfigurationService sslConfig = RestClientServices.getService(SSLConfigurationService.class);
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
@@ -164,7 +186,37 @@ public final class HttpClients {
 
         ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, config.maxConnectionsPerRoute, config.maxTotalConnections, config.keepAliveMonitorInterval);
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
+        return ccm;
+    }
 
+    /**
+     * Creates a fall-back {@link DefaultHttpClient} instance.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">Exclusively invoked internally! Do not use!</div>
+     * <p>
+     *
+     * @param config The configuration settings for the client
+     * @return A newly created {@link DefaultHttpClient} instance
+     */
+    public static DefaultHttpClient getFallbackHttpClient(ClientConfig config) {
+        // Initialize ClientConnectionManager
+        ClientConnectionManager ccm = initializeFallbackClientConnectionManagerUsing(config);
+
+        // Initialize DefaultHttpClient using the ClientConnectionManager and client configuration
+        return initializeHttpClientUsing(config, ccm);
+    }
+
+    private static ClientConnectionManager initializeFallbackClientConnectionManagerUsing(ClientConfig config) {
+        SchemeRegistry schemeRegistry = new SchemeRegistry();
+        schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+        schemeRegistry.register(new Scheme("https", 443, EasySSLSocketFactory.getInstance()));
+
+        ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, config.maxConnectionsPerRoute, config.maxTotalConnections, config.keepAliveMonitorInterval);
+        ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
+        return ccm;
+    }
+
+    private static DefaultHttpClient initializeHttpClientUsing(final ClientConfig config, ClientConnectionManager ccm) {
         HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, config.connectionTimeout);
         HttpConnectionParams.setSoTimeout(httpParams, config.socketReadTimeout);
@@ -349,6 +401,23 @@ public final class HttpClients {
             return this;
         }
 
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(256);
+            builder.append("[");
+            builder.append("socketReadTimeout=").append(socketReadTimeout);
+            builder.append(", connectionTimeout=").append(connectionTimeout);
+            builder.append(", maxTotalConnections=").append(maxTotalConnections);
+            builder.append(", maxConnectionsPerRoute=").append(maxConnectionsPerRoute);
+            builder.append(", keepAliveDuration=").append(keepAliveDuration);
+            builder.append(", keepAliveMonitorInterval=").append(keepAliveMonitorInterval);
+            builder.append(", socketBufferSize=").append(socketBufferSize);
+            if (userAgent != null) {
+                builder.append(", userAgent=").append(userAgent);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
     }
 
     /**

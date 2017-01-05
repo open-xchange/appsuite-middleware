@@ -46,127 +46,88 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.nosql.cassandra.osgi;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Properties;
-
-import org.xerial.snappy.SnappyServiceLookUp;
-
+import javax.management.ObjectName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.nosql.cassandra.CassandraServiceLookUp;
-import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
+import com.openexchange.management.ManagementService;
+import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
+import com.openexchange.nosql.cassandra.mbean.CassandraClusterMBean;
+import com.openexchange.nosql.cassandra.mbean.impl.CassandraClusterMBeanImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * Activates an embedded Cassandra instance along with its dependencies (i.e. snappy-java)
+ * {@link CassandraActivator}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class CassandraActivator extends HousekeepingActivator {
-	
-	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CassandraActivator.class);
-	
-	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
-	
-	private EmbeddedCassandraService cassandra;
+public class CassandraActivator extends HousekeepingActivator {
 
-	/**
-	 * Default Constructor 
-	 */
-	public CassandraActivator() {
-		super();
-	}
+    /**
+     * Initialises a new {@link CassandraActivator}.
+     */
+    public CassandraActivator() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-	 */
-	@Override
-	protected Class<?>[] getNeededServices() {
-		
-		return new Class[]{ConfigurationService.class};
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, ManagementService.class };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
-	 */
-	@Override
-	protected void startBundle() throws Exception {
-		log.info("starting bundle: com.openexchange.nosql.cassandra");
-		
-		//-------------- INIT SNAPPYJAVA ----------------//
-		
-		SnappyServiceLookUp.set(this);
-		
-		ConfigurationService configSnappy = SnappyServiceLookUp.getService(ConfigurationService.class);
-		final File snappyFile = configSnappy.getFileByName("snappy.properties");
-		if (null != snappyFile) {
-            System.setProperty("snappy.config", snappyFile.getAbsolutePath().toString());
-        }
-		
-		Properties prop = new Properties();
-		String configUrl = System.getProperty("snappy.config");
-		prop.load(new FileInputStream(configUrl));
-		
-		String snappyNativePath = prop.getProperty(snappyPathProp);
-		
-    	String osName = System.getProperty("os.name");
-    	String osArch = System.getProperty("os.arch");
-    	//String fileSeparator = System.getProperty("file.separator");
-    	log.info("{} {}", osName, osArch);
-    	
-    	String postfix = null;
-    	if (osName.equals("Linux")) {
-    		postfix = ".so";
-    	} else if (osName.equals("Windows")) {
-    		postfix = ".dll";
-    	} else if (osName.subSequence(0, 3).equals("Mac")) {
-    		postfix = ".jnilib";
-    		osName = osName.subSequence(0, 3).toString();
-    	} else {
-    		log.error("Unsupported system");
-    	}
-
-		String path = snappyNativePath + "/native/" + osName + "/" + osArch + "/libsnappyjava" + postfix;
-    	System.load(path);
-		
-		//----------------- INIT CASSANDRA -------------//
-		
-		CassandraServiceLookUp.set(this);
-		
-		ConfigurationService config = CassandraServiceLookUp.getService(ConfigurationService.class);
-
-		final File file = config.getFileByName("cassandra.yaml");
-		if (null != file) {
-            System.setProperty("cassandra.config", file.toURI().toString());
-        }
-		
-		//start embedded cassandra node
-		cassandra = new EmbeddedCassandraService();
-		cassandra.init();
-		cassandra.start();
-		
-		registerService(EmbeddedCassandraService.class, cassandra);
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        CassandraService cassandraService = new CassandraServiceImpl(this);
+        registerService(CassandraService.class, cassandraService);
+        trackService(CassandraService.class);
         openTrackers();
-        
-        log.info("Cassandra Service started successfully.");
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-	 */
-	@Override
-	protected void stopBundle() throws Exception {
-		log.info("stopping bundle: com.openexchange.nosql.cassandra");
-		cassandra.stop();
-		cassandra = null;
-		
-		CassandraServiceLookUp.set(null);
-		cleanUp();
-		
-		log.info("stopped bundle: com.openexchange.nosql.cassandra");
-	}
+
+        // Register the cluster mbean
+        ObjectName objectName = new ObjectName(CassandraClusterMBean.DOMAIN, "name", CassandraClusterMBean.NAME);
+        CassandraClusterMBean mbean = new CassandraClusterMBeanImpl(this);
+        ManagementService managementService = getService(ManagementService.class);
+        managementService.registerMBean(objectName, mbean);
+
+        final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
+        logger.info("Cassandra service was successfully registered");
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     */
+    @Override
+    protected void stopBundle() throws Exception {
+        // Unregister cluster mbean
+        ManagementService managementService = getService(ManagementService.class);
+        ObjectName objectName = new ObjectName(CassandraClusterMBean.DOMAIN, "name", CassandraClusterMBean.NAME);
+        managementService.unregisterMBean(objectName);
+
+        // Unregister cassandra service
+        CassandraService cassandraService = getService(CassandraService.class);
+        if (cassandraService == null) {
+            return;
+        }
+        unregisterService(CassandraService.class);
+        // Shutdown the service
+        ((CassandraServiceImpl) cassandraService).shutdown();
+
+        final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
+        logger.info("Cassandra service was successfully shutdown and unregistered");
+    }
 }

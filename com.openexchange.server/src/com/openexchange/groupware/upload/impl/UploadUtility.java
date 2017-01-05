@@ -309,7 +309,8 @@ public final class UploadUtility {
                 upload.setHeaderEncoding(defaultEnc);
             }
             // Parse multipart request
-            iter = upload.getItemIterator(req);
+            ServletRequestContext requestContext = new ServletRequestContext(req);
+            iter = upload.getItemIterator(requestContext);
         } catch (FileSizeLimitExceededException e) {
             throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
         } catch (SizeLimitExceededException e) {

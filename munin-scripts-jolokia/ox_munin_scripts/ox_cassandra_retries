@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+
+use LWP;
+use JSON;
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	print "yes\n";
+	exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+    print "graph_title Cassandra Retries\n";
+    print "graph_args --base 1000 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    print "retries.label Retries\n";
+    print "retries.draw LINE1\n";
+    print "retriesOnClientTimeout.label Retries On Client Timeout\n";
+    print "retriesOnClientTimeout.draw LINE1\n";
+    print "retriesOnConnectionError.label Retries On Connection Error\n";
+    print "retriesOnConnectionError.draw LINE1\n";
+    print "retriesOnOtherErrors.label Retries On Other Errors\n";
+    print "retriesOnOtherErrors.draw LINE1\n";
+    print "retriesOnReadTimeout.label Retries On Read Timeout\n";
+    print "retriesOnReadTimeout.draw LINE1\n";
+    print "retriesOnWriteTimeout.label Retries On Write Timeout\n";
+    print "retriesOnWriteTimeout.draw LINE1\n";
+    print "retriesOnUnavailable.label Retries On Unavailable\n";
+    print "retriesOnUnavailable.draw LINE1\n";
+    exit 0
+}
+
+my $url = $ENV{oxJolokiaUrl};
+my $username = $ENV{oxJolokiaUser};
+my $password = $ENV{oxJolokiaPassword};
+
+callUrl("retries","/read/com.openexchange.nosql.cassandra:name=Cassandra%20Cluster%20Monitoring%20Bean/Retries");
+callUrl("retriesOnClientTimeout","/read/com.openexchange.nosql.cassandra:name=Cassandra%20Cluster%20Monitoring%20Bean/RetriesOnClientTimeout");
+callUrl("retriesOnConnectionError","/read/com.openexchange.nosql.cassandra:name=Cassandra%20Cluster%20Monitoring%20Bean/RetriesOnConnectionError");
+callUrl("retriesOnOtherErrors","/read/com.openexchange.nosql.cassandra:name=Cassandra%20Cluster%20Monitoring%20Bean/RetriesOnOtherErrors");
+callUrl("retriesOnReadTimeout","/read/com.openexchange.nosql.cassandra:name=Cassandra%20Cluster%20Monitoring%20Bean/RetriesOnReadTimeout");
+callUrl("retriesOnUnavailable","/read/com.openexchange.nosql.cassandra:name=Cassandra%20Cluster%20Monitoring%20Bean/RetriesOnUnavailable");
+callUrl("retriesOnWriteTimeout","/read/com.openexchange.nosql.cassandra:name=Cassandra%20Cluster%20Monitoring%20Bean/RetriesOnWriteTimeout");
+
+sub callUrl {
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			print "$_[0].value ";
+			print $json->{value},"\n";
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+}

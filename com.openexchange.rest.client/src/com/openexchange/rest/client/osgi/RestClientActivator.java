@@ -54,6 +54,7 @@ import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
+import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
 import com.openexchange.timer.TimerService;
 
 
@@ -80,6 +81,7 @@ public class RestClientActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         RestClientServices.setServices(this);
+        WrappedClientsRegistry.getInstance().setFactoryProvider(getService(SSLSocketFactoryProvider.class));
         registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
 
         // Avoid annoying WARN logging
@@ -90,8 +92,9 @@ public class RestClientActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         try {
             // Clean-up
-            cleanUp();
+            super.stopBundle();
             // Clear service registry
+            WrappedClientsRegistry.getInstance().setFactoryProvider(null);
             RestClientServices.setServices(null);
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);

@@ -724,15 +724,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         }
     }
 
-    private void addToHzMultiMap(WebSocket socket) {
-        if (null == socket) {
-            return;
-        }
-
-        int userId = socket.getUserId();
-        int contextId = socket.getContextId();
-        String path = socket.getPath();
-
+    private void addToHzMultiMap(String path, String connectionId, int userId, int contextId) {
         HazelcastInstance hzInstance = this.hzInstance;
         if (null == hzInstance) {
             LOGGER.warn("Missing Hazelcast instance. Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
@@ -755,7 +747,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
             Address address = hzInstance.getCluster().getLocalMember().getAddress();
             String key = generateKey(userId, contextId, address.getHost(), address.getPort());
-            String value = generateValue(socket.getConnectionId().getId(), path);
+            String value = generateValue(connectionId, path);
             map.put(key, value);
             synchronized (myValues) {
                 myValues.put(key, value);
@@ -765,15 +757,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         }
     }
 
-    private void removeFromHzMultiMap(WebSocket socket) {
-        if (null == socket) {
-            return;
-        }
-
-        int userId = socket.getUserId();
-        int contextId = socket.getContextId();
-        String path = socket.getPath();
-
+    private void removeFromHzMultiMap(String path, String connectionId, int userId, int contextId) {
         HazelcastInstance hzInstance = this.hzInstance;
         if (null == hzInstance) {
             LOGGER.warn("Missing Hazelcast instance. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
@@ -789,7 +773,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         try {
             Address address = hzInstance.getCluster().getLocalMember().getAddress();
             String key = generateKey(userId, contextId, address.getHost(), address.getPort());
-            String value = generateValue(socket.getConnectionId().getId(), path);
+            String value = generateValue(connectionId, path);
             synchronized (myValues) {
                 myValues.remove(key, value);
             }
@@ -810,8 +794,18 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
     @Override
     public void addWebSocket(WebSocket socket) {
-        addToHzMultiMap(socket);
-        startCleanerTaskFor(socket.getUserId(), socket.getContextId());
+        if (null != socket) {
+            addToHzMultiMap(socket.getPath(), socket.getConnectionId().getId(), socket.getUserId(), socket.getContextId());
+            startCleanerTaskFor(socket.getUserId(), socket.getContextId());
+        }
+    }
+
+    @Override
+    public void addWebSocket(WebSocketInfo socketInfo) {
+        if (null != socketInfo) {
+            addToHzMultiMap(socketInfo.getPath(), socketInfo.getConnectionId().getId(), socketInfo.getUserId(), socketInfo.getContextId());
+            startCleanerTaskFor(socketInfo.getUserId(), socketInfo.getContextId());
+        }
     }
 
     @Override
@@ -821,7 +815,16 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
     @Override
     public void removeWebSocket(WebSocket socket) {
-        removeFromHzMultiMap(socket);
+        if (null != socket) {
+            removeFromHzMultiMap(socket.getPath(), socket.getConnectionId().getId(), socket.getUserId(), socket.getContextId());
+        }
+    }
+
+    @Override
+    public void removeWebSocket(WebSocketInfo socketInfo) {
+        if (null != socketInfo) {
+            removeFromHzMultiMap(socketInfo.getPath(), socketInfo.getConnectionId().getId(), socketInfo.getUserId(), socketInfo.getContextId());
+        }
     }
 
     @Override

@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 /**
  * {@link QuotaFileStorage} - A {@link FileStorage file storage} that is quota aware.
  */
-public interface QuotaFileStorage extends FileStorage {
+public interface QuotaFileStorage extends FileStorage, QuotaMode {
 
     /**
      * Gets the URI that fully qualifies this file storage.

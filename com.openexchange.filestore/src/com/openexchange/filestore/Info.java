@@ -51,15 +51,17 @@ package com.openexchange.filestore;
 
 
 /**
- * {@link Info} - The info passed along with obtaining a certain file storage.
+ * {@link Info} - The info passed along with obtaining a certain file storage;<br>
+ * e.g. revealing the intended purpose for the requested file storage representation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
 public class Info {
 
-    private static final Info INFO_ADMINISTRATIVE = new Info(0, Purpose.ADMINISTRATIVE);
-    private static final Info INFO_GENERAL = new Info(0, Purpose.GENERAL);
+    private static final Info INFO_ADMINISTRATIVE = new Info(Purpose.ADMINISTRATIVE);
+    private static final Info INFO_GENERAL = new Info(Purpose.GENERAL);
+    private static final Info INFO_DRIVE = new Info(Purpose.GENERAL);
 
     /**
      * Gets the administrative info
@@ -80,34 +82,20 @@ public class Info {
     }
 
     /**
-     * Gets the Drive info for specified user
+     * Gets the Drive info
      *
-     * @param userId The user identifier
      * @return The Drive info
      */
-    public static Info drive(int userId) {
-        return new Info(userId, Purpose.DRIVE);
-    }
-
-    /**
-     * Gets the info for specified arguments
-     *
-     * @param userId The user identifier
-     * @param purpose The purpose
-     * @return The info
-     */
-    public static Info infoFor(int userId, Purpose purpose) {
-        return new Info(userId, purpose);
+    public static Info drive() {
+        return INFO_DRIVE;
     }
 
     // -------------------------------------------------------------
 
-    private final int userId;
     private final Purpose purpose;
 
-    private Info(int userId, Purpose purpose) {
+    private Info(Purpose purpose) {
         super();
-        this.userId = userId;
         this.purpose = purpose;
     }
 
@@ -120,12 +108,4 @@ public class Info {
         return purpose;
     }
 
-    /**
-     * Gets the user identifier (if any)
-     *
-     * @return The user identifier or <code>0</code>
-     */
-    public int getUserId() {
-        return userId;
-    }
 }

@@ -335,15 +335,17 @@ public final class Tools {
             if (forAutocomplete) {
                 stringBuilder.append("value DESC, fid ASC, ");
             }
-            final SortOrder[] order = sortOptions.getOrder();
-            if (null != order && 0 < order.length) {
-                final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
-                stringBuilder.append(getOrderClause(order[0], collator));
-                for (int i = 1; i < order.length; i++) {
-                    stringBuilder.append(", ").append(getOrderClause(order[i], collator));
+            if (null != sortOptions) {
+                final SortOrder[] order = sortOptions.getOrder();
+                if (null != order && 0 < order.length) {
+                    final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
+                    stringBuilder.append(getOrderClause(order[0], collator));
+                    for (int i = 1; i < order.length; i++) {
+                        stringBuilder.append(", ").append(getOrderClause(order[i], collator));
+                    }
+                } else {
+                    stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
                 }
-            } else {
-                stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
             }
         }
         return stringBuilder.toString();
@@ -393,7 +395,12 @@ public final class Tools {
     private static String getOrderClause(final SortOrder order, final SuperCollator collator) throws OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
-            stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
+            ContactField by = order.getBy();
+            if (ContactField.USE_COUNT == by) {
+                stringBuilder.append(Table.OBJECT_USE_COUNT).append(".value");
+            } else {
+                stringBuilder.append(Mappers.CONTACT.get(by).getColumnLabel());
+            }
         } else {
             stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(" USING '")
                 .append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');

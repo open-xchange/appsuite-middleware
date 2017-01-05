@@ -385,7 +385,7 @@ public class DatabaseImpl extends DBService {
             releaseReadConnection(ctx, con);
             con = null;
 
-            FileStorage fs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, ctx.getContextId(), Info.drive(folderOwner));
+            FileStorage fs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, ctx.getContextId(), Info.drive());
             return fs.getFile(fileStorageLoaction);
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
@@ -1653,7 +1653,7 @@ public class DatabaseImpl extends DBService {
     }
 
     protected FileStorage getFileStorage(int folderOwner, int contextId) throws OXException {
-        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, contextId, Info.drive(folderOwner));
+        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, contextId, Info.drive());
     }
 
     @Override

@@ -73,7 +73,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link UpdateFilesProviderImpl} is an UpdateFilesProvider which uses a FileSystemRessourceLoader per branding to retrieve the files.
- * 
+ *
  * For this purpose it searches for subfolder's under a given path, which have a proper '.branding' or '.properties' file.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -102,7 +102,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     /**
      * Initialize this UpdatesFilesProvider again with the old path
-     * 
+     *
      * @return this
      * @throws OXException
      */
@@ -112,7 +112,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     /**
      * Tests which branding's are available and creates all necessary FileSystemResourceLoader
-     * 
+     *
      * @param path The path to look for branding's
      * @return this
      * @throws OXException if branding folder is missing
@@ -122,7 +122,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
             this.path = path;
             loaders.clear();
-            File parent = new File(path);
+            File parent = null == path ? null : new File(path);
             if (null == parent || !parent.exists()) {
                 throw new BrandingException(BrandingException.MISSING_FOLDER);
             }

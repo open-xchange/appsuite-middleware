@@ -52,6 +52,7 @@ package com.openexchange.admin.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
@@ -68,7 +69,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import junit.framework.JUnit4TestAdapter;
+import org.junit.AfterClass;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -83,6 +84,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.java.util.TimeZones;
+import junit.framework.JUnit4TestAdapter;
 
 /**
  *
@@ -102,9 +104,29 @@ public class UserTest extends AbstractTest {
     protected static OXUserInterface getUserClient() throws Exception {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
+    
+    private static List<User> toDeleteUsers = new ArrayList<>();
 
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(UserTest.class);
+    }
+    
+    @AfterClass
+    public static void tearDown() throws Exception {
+        final OXUserInterface oxu = getUserClient();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        User[] userArray = new User[toDeleteUsers.size()];
+        userArray = toDeleteUsers.toArray(userArray);
+        if (userArray.length > 0) {
+            oxu.delete(ctx, userArray, null, cred);
+        }
+    }
+    
+    private void rememberToDeleteUser(User createduser) {
+        if (toDeleteUsers != null) {
+            toDeleteUsers.add(createduser);
+        }
     }
 
     @Test
@@ -142,7 +164,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -152,6 +174,8 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data for added user");
         }
     }
+
+    
 
     private User id(User createduser) {
         User user = new User();
@@ -170,7 +194,7 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, cred);
-
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -192,7 +216,7 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, NAMED_ACCESS_COMBINATION_BASIC, cred);
-
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -215,7 +239,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User urs = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -226,7 +250,7 @@ public class UserTest extends AbstractTest {
         }
 
     }
-
+    
     private void compareUserMandatory(User a, User b) {
 
         System.out.println("USERA" + a.toString());
@@ -238,6 +262,25 @@ public class UserTest extends AbstractTest {
         assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
         assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
 
+    }
+    
+    @Test
+    public void testCreateUserWithWrongDriveFoldersMode() throws Exception {
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        final User user = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        user.setDriveFolderMode("wrong");
+        User createdUser = null;
+        try {
+            createdUser = oxu.create(ctx, user, access, cred);
+            rememberToDeleteUser(createdUser);
+        } catch (InvalidDataException e) {
+            // Do nothing, we expect that
+        }
+        assertNull("User was created although an unsupported folder mode was set", createdUser);
     }
 
     @Test(expected = NoSuchUserException.class)
@@ -300,7 +343,7 @@ public class UserTest extends AbstractTest {
 
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         // delete user
         oxu.delete(ctx, new User[0], null, cred);
 
@@ -322,6 +365,7 @@ public class UserTest extends AbstractTest {
 
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, createduser, cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -344,7 +388,7 @@ public class UserTest extends AbstractTest {
 
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         final User usernameuser = new User();
         usernameuser.setName(createduser.getName());
 
@@ -380,8 +424,9 @@ public class UserTest extends AbstractTest {
             // Everything is fine. Setting publicFolderEditable should be denied. See bugs 18866, 20369, 20635.
             access.setPublicFolderEditable(false);
             createduser = oxu.create(ctx, usr, access, cred);
+            
         }
-
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         UserModuleAccess moduleAccess = oxu.getModuleAccess(ctx, createduser, cred);
         assertFalse("Editing public folder was allowed for a normal user.", moduleAccess.isPublicFolderEditable());
@@ -434,7 +479,7 @@ public class UserTest extends AbstractTest {
 
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         final User usernameuser = new User();
         usernameuser.setName(createduser.getName());
 
@@ -461,7 +506,7 @@ public class UserTest extends AbstractTest {
 
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         final User iduser = new User();
         iduser.setId(createduser.getId());
 
@@ -487,7 +532,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess client_access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, client_access, cred);
-
+        rememberToDeleteUser(createduser);
         // get module access
         final UserModuleAccess srv_response = oxu.getModuleAccess(ctx, createduser, cred);
 
@@ -508,7 +553,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess client_access = new UserModuleAccess();
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, usr, client_access, cred);
-
+        rememberToDeleteUser(createduser);
         // get module access
         final UserModuleAccess srv_response = oxu.getModuleAccess(ctx, createduser, cred);
 
@@ -553,7 +598,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess client_access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, client_access, cred);
-
+        rememberToDeleteUser(createduser);
         final User[] srv_response = oxu.list(ctx, "*", cred);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
@@ -584,7 +629,6 @@ public class UserTest extends AbstractTest {
         OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
         try {
             final User createduser = oxu.create(ctx, urs, client_access, cred);
-
             //test if filestore already exists
             Filestore[] filestores = oxutil.listFilestore("file:///", master, true);
             if (filestores != null && filestores.length != 0) {
@@ -644,7 +688,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess client_access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, client_access, cred);
-
+        rememberToDeleteUser(createduser);
         final User[] srv_response = oxu.listAll(ctx, cred);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
@@ -671,6 +715,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -712,6 +757,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -789,6 +835,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -841,6 +888,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -929,6 +977,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
@@ -1139,7 +1188,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         // STEP 2
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
@@ -1180,7 +1229,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         // STEP 2
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
@@ -1222,7 +1271,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         // STEP 2
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
@@ -1265,7 +1314,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
-
+        rememberToDeleteUser(createduser);
         // STEP 2
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
@@ -1309,6 +1358,7 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
         User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {

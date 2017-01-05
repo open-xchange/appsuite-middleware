@@ -204,7 +204,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         HashMap<String, Integer> filestoreMap = new HashMap<>();
         for (Entry<Integer, List<Integer>> contexts : usersInContext.entrySet()) {
             for (Integer userId : contexts.getValue()) {
-                QuotaFileStorage userStorage = storageService.getQuotaFileStorage(userId, contexts.getKey(), Info.drive(userId));
+                QuotaFileStorage userStorage = storageService.getQuotaFileStorage(userId, contexts.getKey(), Info.drive());
                 long quota = userStorage.getQuota();
                 Long percent = quota < 0 ? 0 : (quota == 0 ? 100 : userStorage.getUsage() * 100 / quota);
                 filestoreMap.put(userStorage.getUri().toString(), percent.intValue());

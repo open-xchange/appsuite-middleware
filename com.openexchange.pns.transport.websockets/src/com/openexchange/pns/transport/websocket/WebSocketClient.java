@@ -49,6 +49,9 @@
 
 package com.openexchange.pns.transport.websocket;
 
+import java.util.Collection;
+import com.openexchange.pns.Interest;
+
 /**
  * {@link WebSocketClient} - Provides the client identifier and the associated path filter expression to associate a Web Socket with that client.
  * <p>
@@ -61,7 +64,7 @@ public final class WebSocketClient {
 
     private final String client;
     private final String pathFilter;
-    private final boolean interestedInNewMail;
+    private final Collection<Interest> interests;
     private Integer hash;
 
     /**
@@ -69,22 +72,28 @@ public final class WebSocketClient {
      *
      * @param client The identifier of the client; e.g. <code>"open-xchange-appsuite"</code>
      * @param pathFilter The path filter expression that applies to the client; e.g. <code>"/socket.io/*"</code>
-     * @param interestedInNewMail <code>true</code> if associated client is interested in special <code>"ox:mail:new"</code> notifications; otherwise <code>false</code>
+     * @param interests The interests for this client
      */
-    public WebSocketClient(String client, String pathFilter, boolean interestedInNewMail) {
+    public WebSocketClient(String client, String pathFilter, Collection<Interest> interests) {
         super();
         this.client = client;
         this.pathFilter = pathFilter;
-        this.interestedInNewMail = interestedInNewMail;
+        this.interests = interests;
     }
 
     /**
-     * Checks if associated client is interested in special <code>"ox:mail:new"</code> notifications.
+     * Checks if associated client is interested in given topic.
      *
+     * @param topic The topic identifier; e.g <code>"ox:mail:new"</code>
      * @return <code>true</code> if interested; otherwise <code>false</code>
      */
-    public boolean isInterestedInNewMail() {
-        return interestedInNewMail;
+    public boolean isInterestedIn(String topic) {
+        for (Interest interest : interests) {
+            if (interest.isInterestedIn(topic)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

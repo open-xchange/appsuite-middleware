@@ -38,6 +38,7 @@ import com.openexchange.socketio.server.Session;
 import com.openexchange.socketio.server.SocketIOClosedException;
 import com.openexchange.socketio.server.SocketIOProtocolException;
 import com.openexchange.socketio.server.transport.AbstractTransportConnection;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.websockets.MessageTranscoder;
 import com.openexchange.websockets.WebSocket;
 import javax.servlet.http.HttpServletRequest;
@@ -149,31 +150,28 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         Session session = getSession();
         LOGGER.debug("Session[{}]: text received: {}", session.getSessionId(), message);
 
-        session.resetTimeout();
-
         String retval = null;
         try {
+            // Decode message
             EngineIOPacket packet = EngineIOProtocol.decode(message);
+
+            // Only in case of MESSAGE type
             if (EngineIOPacket.Type.MESSAGE == packet.getType()) {
                 SocketIOPacket socketIOPacket = SocketIOProtocol.decode(packet.getTextData());
                 if (SocketIOPacket.Type.EVENT == socketIOPacket.getType()) {
-                    EventPacket eventPacket = (EventPacket) socketIOPacket;
-                    String name = eventPacket.getName();
-                    Object[] args = eventPacket.getArgs();
-                    String namespace = eventPacket.getNamespace();
-                    if (Strings.isEmpty(namespace)) {
-                        namespace = SocketIOProtocol.DEFAULT_NAMESPACE;
-                    }
                     try {
-                        retval = new JSONObject(3).put("name", name).put("args", new JSONArray(Arrays.asList(args))).put("namespace", namespace).toString();
+                        EventPacket eventPacket = (EventPacket) socketIOPacket;
+                        JSONObject jMsg = new JSONObject(3).put("name", eventPacket.getName()).put("args", new JSONArray(Arrays.asList(eventPacket.getArgs())));
+                        jMsg.put("namespace", Strings.isEmpty(eventPacket.getNamespace()) ? SocketIOProtocol.DEFAULT_NAMESPACE : eventPacket.getNamespace());
+                        retval = jMsg.toString();
                     } catch (JSONException e) {
-                        LOGGER.warn("Invalid event packet received", e);
+                        LOGGER.warn("Failed to transcode text message: {}", message, e);
                     }
                 }
             }
 
-            // Trigger common handling
-            session.onPacket(packet, this);
+            // Trigger packet handling asynchronously
+            ThreadPools.submitElseExecute(new PacketHandlerTask(packet, this, session));
         } catch (SocketIOProtocolException e) {
             LOGGER.warn("Invalid packet received", e);
         }

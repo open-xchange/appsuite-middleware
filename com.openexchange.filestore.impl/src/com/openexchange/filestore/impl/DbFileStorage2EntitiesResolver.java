@@ -420,7 +420,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
             FsInfo fsInfo = retrieveFileStoragesFromUser(contextId, userId, schemaCon);
 
             if (quotaAware) {
-                return qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.drive(userId));
+                return qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.drive());
             } else {
                 FileStorageService fsService = FileStorages.getFileStorageService();
                 return fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.administrative()).getUri());

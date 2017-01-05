@@ -59,6 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -66,6 +67,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -78,8 +81,10 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.mail.oauth.TokenInfo;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
+import com.openexchange.mail.utils.ImmutableReference;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.StorageUtility;
@@ -104,6 +109,57 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailConfig {
+
+    private static final class AuthTypeKey {
+
+        final boolean forMailAccess;
+        final int userId;
+        final int contextId;
+        private final int hash;
+
+        AuthTypeKey(boolean forMailAccess, int userId, int contextId) {
+            super();
+            this.forMailAccess = forMailAccess;
+            this.userId = userId;
+            this.contextId = contextId;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + (forMailAccess ? 1231 : 1237);
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            AuthTypeKey other = (AuthTypeKey) obj;
+            if (forMailAccess != other.forMailAccess) {
+                return false;
+            }
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
+    }
 
     public static enum BoolCapVal {
 
@@ -270,11 +326,12 @@ public abstract class MailConfig {
         }
     }
 
-    private static volatile Boolean usePartModifier;
-
     protected static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
 
     protected static final Object[] INIT_ARGS = new Object[0];
+
+    private static final String PROPERTY_AUTH_TYPE_MAIL = "com.openexhange.mail.authType";
+    private static final String PROPERTY_AUTH_TYPE_TRANSPORT = "com.openexhange.mail.transport.authType";
 
     /**
      * Gets the user-specific mail configuration.
@@ -621,6 +678,8 @@ public abstract class MailConfig {
         return null;
     }
 
+    static volatile Boolean usePartModifier;
+
     /**
      * Checks if a part modifier shall be used, that is {@link PartModifier#getInstance()} is not <code>null</code> and not
      * assignment-compatible to {@link DummyPartModifier} (which does nothing at all).
@@ -647,11 +706,12 @@ public abstract class MailConfig {
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 usePartModifier = null;
+                doSaneLogin = null;
             }
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.partModifierImpl");
+                return Reloadables.interestsForProperties("com.openexchange.mail.partModifierImpl", "com.openexchange.mail.saneLogin");
             }
         });
     }
@@ -674,6 +734,26 @@ public abstract class MailConfig {
         return true;
     }
 
+    static volatile Boolean doSaneLogin;
+    private static boolean doSaneLogin() {
+        Boolean tmp = doSaneLogin;
+        if (null == tmp) {
+            synchronized (MailConfig.class) {
+                tmp = doSaneLogin;
+                if (null == tmp) {
+                    boolean defaultValue = true;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.saneLogin", defaultValue));
+                    doSaneLogin = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     /**
      * Gets the sane (puny-code) representation of passed login in case it appears to be an Internet address.
      *
@@ -681,8 +761,7 @@ public abstract class MailConfig {
      * @return The sane login
      */
     public static final String saneLogin(final String login) {
-        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (!(null == service ? true : service.getBoolProperty("com.openexchange.mail.saneLogin", true))) {
+        if (false == doSaneLogin()) {
             return login;
         }
         try {
@@ -690,6 +769,41 @@ public abstract class MailConfig {
         } catch (final Exception e) {
             return login;
         }
+    }
+
+    private static final Cache<AuthTypeKey, ImmutableReference<AuthType>> CACHE_AUTH_TYPE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>auth type cache</i>.
+     */
+    public static void invalidateAuthTypeCache() {
+        CACHE_AUTH_TYPE.invalidateAll();
+    }
+
+    private static AuthType getConfiguredAuthType(boolean forMailAccess, Session session) throws OXException {
+        AuthTypeKey key = new AuthTypeKey(forMailAccess, session.getUserId(), session.getContextId());
+        ImmutableReference<AuthType> authType = CACHE_AUTH_TYPE.getIfPresent(key);
+        if (null == authType) {
+            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            if (null == factory) {
+                return AuthType.LOGIN;
+            }
+
+            authType = doGetConfiguredAuthType(forMailAccess, session, factory);
+            CACHE_AUTH_TYPE.put(key, authType);
+        }
+        return authType.getValue();
+    }
+
+    private static ImmutableReference<AuthType> doGetConfiguredAuthType(boolean forMailAccess, Session session, ConfigViewFactory factory) throws OXException {
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+        String property = forMailAccess ? PROPERTY_AUTH_TYPE_MAIL : PROPERTY_AUTH_TYPE_TRANSPORT;
+        String authTypeStr = view.opt(property, String.class, AuthType.LOGIN.getName());
+        AuthType authType = AuthType.parse(authTypeStr);
+        if (null == authType) {
+            throw MailConfigException.create("Invalid or unsupported value configured for property \"" + property + "\": " + authTypeStr);
+        }
+        return new ImmutableReference<AuthType>(authType);
     }
 
     /**
@@ -714,19 +828,32 @@ public abstract class MailConfig {
 
         // Assign password
         if (account.isDefaultAccount()) {
-            PasswordSource cur = MailProperties.getInstance().getPasswordSource();
-            if (PasswordSource.GLOBAL.equals(cur)) {
-                final String masterPw = MailProperties.getInstance().getMasterPassword();
-                if (masterPw == null) {
-                    throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
+            // First, check the configured authentication type for current user
+            AuthType configuredAuthType = getConfiguredAuthType(account.isMailAccount(), session);
+            if (AuthType.isOAuthType(configuredAuthType)) {
+                // Apparently, OAuth is supposed to be used
+                Object obj = session.getParameter(Session.PARAM_OAUTH_TOKEN);
+                if (obj == null) {
+                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
                 }
-                mailConfig.password = masterPw;
+                mailConfig.password = obj.toString();
+                mailConfig.authType = configuredAuthType;
             } else {
-                String sessionPassword = session.getPassword();
-                if (null == sessionPassword) {
-                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                // Common handling based on configuration
+                PasswordSource cur = MailProperties.getInstance().getPasswordSource();
+                if (PasswordSource.GLOBAL.equals(cur)) {
+                    final String masterPw = MailProperties.getInstance().getMasterPassword();
+                    if (masterPw == null) {
+                        throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
+                    }
+                    mailConfig.password = masterPw;
+                } else {
+                    String sessionPassword = session.getPassword();
+                    if (null == sessionPassword) {
+                        throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                    }
+                    mailConfig.password = sessionPassword;
                 }
-                mailConfig.password = sessionPassword;
             }
         } else {
             CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(account.isMailAccount(), account.getId(), session);
@@ -793,12 +920,13 @@ public abstract class MailConfig {
      * @throws OXException If authentication information cannot be resolved
      */
     public static AuthInfo determinePasswordAndAuthType(String login, Session session, Account account, boolean forMailAccess) throws OXException {
-        int oAuthAccontId = assumeXOauth2For(account, forMailAccess);
+        // This method is only called for external accounts
+        int oAuthAccontId = assumeOauthFor(account, forMailAccess);
         if (oAuthAccontId >= 0) {
-            // Do the XOAUTH2 dance...
+            // Do the OAuth dance...
             MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
-            String token = mailOAuthService.getTokenFor(oAuthAccontId, session);
-            return new AuthInfo(login, token, AuthType.OAUTH, oAuthAccontId);
+            TokenInfo tokenInfo = mailOAuthService.getTokenFor(oAuthAccontId, session);
+            return new AuthInfo(login, tokenInfo.getToken(), AuthType.parse(tokenInfo.getAuthMechanism()), oAuthAccontId);
         }
 
         String mailAccountPassword = account.getPassword();
@@ -820,7 +948,7 @@ public abstract class MailConfig {
      * @param forMailAccess <code>true</code> to resolve for mail access; otherwise <code>false</code> for mail transport
      * @return The verified identifier of the associated OAuth account or <code>-1</code>
      */
-    protected static int assumeXOauth2For(Account account, boolean forMailAccess) {
+    protected static int assumeOauthFor(Account account, boolean forMailAccess) {
         if (forMailAccess) {
             MailAccount mailAccount = (MailAccount) account;
             if (false == mailAccount.isMailOAuthAble()) {

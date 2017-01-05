@@ -155,4 +155,11 @@ public interface SAMLConfig {
      * @return <code>true</code> if unsolicited responses are on.
      */
     boolean isAllowUnsolicitedResponses();
+
+    /**
+     * Gets whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.
+     *
+     * @return <code>true</code> if auto-login is on for SessionIndex.
+     */
+    boolean isSessionIndexAutoLoginEnabled();
 }

@@ -50,7 +50,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -86,19 +86,22 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.EventListener;
-import org.glassfish.grizzly.http.server.util.MimeType;
+import org.glassfish.grizzly.http.util.MimeType;
+import org.glassfish.grizzly.servlet.FilterChainFactory;
+import org.glassfish.grizzly.servlet.FilterRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
+import javax.servlet.Filter;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.EventListener;
 
 /**
  * OSGi {@link WebappContext} integration.
@@ -107,11 +110,17 @@ import org.osgi.service.http.HttpContext;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OSGiServletContext extends WebappContext {
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiServletContext.class);
+
     /**
      * {@link HttpContext} providing OSGi integration.
      */
     private final HttpContext httpContext;
+
+
+    // ------------------------------------------------------------ Constructors
+
 
     /**
      * Default constructor.
@@ -120,9 +129,13 @@ public class OSGiServletContext extends WebappContext {
      * @param logger      Logger util.
      */
     public OSGiServletContext(HttpContext httpContext) {
-        super("HttpService");
         this.httpContext = httpContext;
+        installAuthFilter(httpContext);
     }
+
+
+    // ---------------------------------------------------------- Public Methods
+
 
     /**
      * OSGi integration. Uses {@link HttpContext#getResource(String)}.
@@ -154,13 +167,13 @@ public class OSGiServletContext extends WebappContext {
         }
 
         URL resource = httpContext.getResource(path);
-        if(resource == null) {
+        if (resource == null) {
             LOG.warn("Error getting resource ''{}''. Message: {}", path, "Can't locate resource.");
             return null;
         }
 
         try {
-            return httpContext.getResource(path).openStream();
+            return resource.openStream();
         } catch (IOException e) {
             LOG.warn("Error getting resource ''{}''. Message: {}", path, e.getMessage());
         }
@@ -181,8 +194,43 @@ public class OSGiServletContext extends WebappContext {
         return mime;
     }
 
+
+    // ------------------------------------------------------- Protected Methods
+
+
     @Override
     protected EventListener[] getEventListeners() {
         return super.getEventListeners();
+    }
+
+    @Override
+    protected FilterChainFactory getFilterChainFactory() {
+        return super.getFilterChainFactory();
+    }
+
+    @Override
+    protected void unregisterFilter(final Filter f) {
+        super.unregisterFilter(f);
+    }
+
+    @Override
+    protected void unregisterAllFilters() {
+        super.unregisterAllFilters();
+    }
+
+
+    // --------------------------------------------------------- Private Methods
+
+
+    private void installAuthFilter(HttpContext httpContext) {
+        final Filter f = new OSGiAuthFilter(httpContext);
+        try {
+            f.init(new OSGiFilterConfig(this));
+        } catch (Exception ignored) {
+            // won't happen
+        }
+        FilterRegistration registration =
+                addFilter(Integer.toString(f.hashCode()), f);
+        registration.addMappingForUrlPatterns(null, "/*");
     }
 }

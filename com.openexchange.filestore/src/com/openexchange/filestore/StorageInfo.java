@@ -61,20 +61,20 @@ public class StorageInfo {
     private final int id;
     private final long quota;
     private final String name;
-    private final int owner;
+    private final OwnerInfo ownerInfo;
 
     /**
      * Initializes a new {@link StorageInfo}.
      *
      * @param id The file storage identifier
-     * @param owner The owner of the file storage
+     * @param ownerInfo The owner information for the file storage
      * @param name The entity-specific location inside the file storage
      * @param quota The file storage quota
      */
-    public StorageInfo(int id, int owner, String name, long quota) {
+    public StorageInfo(int id, OwnerInfo ownerInfo, String name, long quota) {
         super();
         this.id = id;
-        this.owner = owner;
+        this.ownerInfo = ownerInfo;
         this.name = name;
         this.quota = quota;
     }
@@ -107,14 +107,14 @@ public class StorageInfo {
     }
 
     /**
-     * Gets the owner of the file storage.
+     * Gets the owner information for the file storage.
      * <p>
      * The owner determines to what 'filestore_usage' entry the quota gets accounted.
      *
-     * @return The owner
+     * @return The owner information
      */
-    public int getOwner() {
-        return owner;
+    public OwnerInfo getOwnerInfo() {
+        return ownerInfo;
     }
 
     @Override
@@ -124,7 +124,7 @@ public class StorageInfo {
         if (name != null) {
             builder.append("name=").append(name).append(", ");
         }
-        builder.append("owner=").append(owner).append("]");
+        builder.append("ownerInfo=").append(ownerInfo).append("]");
         return builder.toString();
     }
 

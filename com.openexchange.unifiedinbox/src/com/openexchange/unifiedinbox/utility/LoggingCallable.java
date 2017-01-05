@@ -54,13 +54,14 @@ import org.slf4j.Logger;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.threadpool.Trackable;
 
 /**
  * {@link LoggingCallable} - Extends {@link Callable} interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class LoggingCallable<V> implements Task<V> {
+public abstract class LoggingCallable<V> implements Task<V>, Trackable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoggingCallable.class);
 
