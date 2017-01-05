@@ -57,6 +57,8 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 
@@ -66,6 +68,7 @@ import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
 
     /**
