@@ -125,33 +125,4 @@ public class TaskRecurrenceTest extends AbstractTaskTestForAJAXClient {
         TestTask myPostponedAAMeeting = myAAMeeting.clone().startsThisMonth(5).onDay(5).checkConsistencyOf(TestTask.DATES, TestTask.RECURRENCES);
         runInsertAndUpdateTest(myAAMeeting, myPostponedAAMeeting, Task.DAYS, Task.DAY_IN_MONTH, Task.START_DATE);
     }
-
-    //yearly
-    @Test
-    public void failtestInsertYearlyRecurrence() {
-        Task organizeSilvesterParty = getNewTask("Have to organize Silvester party").everyYear().onDay(30).inMonth(12).checkConsistencyOf(TestTask.DATES, TestTask.RECURRENCES);
-        runSimpleInsertTest(organizeSilvesterParty);
-    }
-
-    @Test
-    public void failtestInsertAndUpdateYearlyRecurrence() {
-        TestTask organizeSilvesterParty = getNewTask("Have to organize Silvester party").everyYear().onDay(30).inMonth(12).checkConsistencyOf(TestTask.DATES, TestTask.RECURRENCES);
-        TestTask organizeSilvesterPartyEarlier = organizeSilvesterParty.clone().onDay(29).checkConsistencyOf(TestTask.DATES, TestTask.RECURRENCES);
-        runInsertAndUpdateTest(organizeSilvesterParty, organizeSilvesterPartyEarlier, Task.DAYS);
-    }
-
-    @Test
-    public void failtestInsertYearlyRecurrence2() {
-        Task breakNewYearsVows = getNewTask("Forget New Year's vows now").everyYear().inMonth(1).onWeekDays(Task.MONDAY).checkConsistencyOf(TestTask.DATES, TestTask.RECURRENCES);
-        runSimpleInsertTest(breakNewYearsVows);
-    }
-
-    @Test
-    public void failtestInsertAndUpdateYearlyRecurrence2() {
-        TestTask breakNewYearsVows = getNewTask("Forget New Year's vows now").everyYear().inMonth(1).onWeekDays(Task.MONDAY).checkConsistencyOf(TestTask.DATES, TestTask.RECURRENCES);
-        TestTask breakNewYearsVowsLater = breakNewYearsVows.clone().onWeekDays(Task.TUESDAY).checkConsistencyOf(TestTask.DATES, TestTask.RECURRENCES);
-        runInsertAndUpdateTest(breakNewYearsVows, breakNewYearsVowsLater, Task.START_DATE);
-    }
-
-    /* limited recurrences */
 }
