@@ -110,7 +110,7 @@ public final class LastLoginTimeStampTool {
         StringBuilder footer = new StringBuilder(512);
         footer.append("\nExamples:");
         footer.append("\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite");
-        footer.append("\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite -d \"\\\"yyyy.MM.dd G 'at' HH:mm:ss z\\\"\"");
+        footer.append("\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite -d \"yyyy.MM.dd G 'at' HH:mm:ss z\"");
         System.out.println(footer);
     }
 
