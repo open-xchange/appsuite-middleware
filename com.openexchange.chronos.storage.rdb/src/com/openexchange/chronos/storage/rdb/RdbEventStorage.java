@@ -80,7 +80,6 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
-import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -92,7 +91,7 @@ import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.search.SearchTerm;
 
 /**
- * {@link CalendarStorage}
+ * {@link RdbEventStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
@@ -606,8 +605,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 /*
                  * drop recurrence information for change exceptions
                  */
-                //                event.removeRecurrenceRule(); // better keep?
-                event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
+                event.removeRecurrenceRule();
                 /*
                  * transform change exception's legacy "recurrence date position" to recurrence id & apply actual recurrence id
                  */
