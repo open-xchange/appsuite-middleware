@@ -88,7 +88,7 @@ public final class LastLoginTimeStampTool {
         opts.addOption("c", "context", true, "A valid (numeric) context identifier");
         opts.addOption("u", "user", true, "A valid (numeric) user identifier");
         opts.addOption("i", true, "A valid (numeric) user identifier. As alternative for the \"-u, --user\" option.");
-        opts.addOption("t", "client", true, "A client identifier; e.g \"com.openexchange.ox.gui.dhtml\"");
+        opts.addOption("t", "client", true, "A client identifier; e.g \"open-xchange-appsuite\" for App Suite UI");
 
         opts.addOption("d", "datepattern", true, "The optional date pattern used for formatting retrieved time stamp; e.g \"EEE, d MMM yyyy HH:mm:ss Z\" would yield \"Wed, 4 Jul 2001 12:08:56 -0700\"");
 
