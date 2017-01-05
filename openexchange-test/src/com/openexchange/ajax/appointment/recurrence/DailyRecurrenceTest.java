@@ -10,11 +10,11 @@ import com.openexchange.groupware.container.Appointment;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DailyRecurrenceTest.class);
-
-    public DailyRecurrenceTest() {
-        super();
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
         simpleDateFormatUTC.setTimeZone(timeZoneUTC);
+        catm.setTimezone(timeZone);
     }
 
     @Test
@@ -39,7 +39,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
-        appointmentObj.setObjectID(objectId);
+
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startDate.getTime(), endDate.getTime());
 
@@ -47,7 +47,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
         final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 
-        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields);
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields, false);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));
@@ -104,7 +104,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
         final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 
-        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields);
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields, false);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));
@@ -160,7 +160,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
         final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 
-        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields);
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields, false);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));
@@ -217,7 +217,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
         final List<Occurrence> occurrenceList = new ArrayList<Occurrence>();
 
-        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields);
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, _fields, false);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 occurrenceList.add(new Occurrence(appointmentArray[a].getStartDate(), appointmentArray[a].getEndDate(), appointmentArray[a].getRecurrencePosition()));

@@ -124,7 +124,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(appointmentObj.getParentFolderID()))
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID()), new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(appointmentObj.getParentFolderID()))
         };
     }
 

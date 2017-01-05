@@ -81,7 +81,7 @@ public class FreeBusyRequest extends AbstractAppointmentRequest<FreeBusyResponse
         this.type = type;
         this.start = start;
         this.end = end;
-        freeBusyParser = new FreeBusyParser(false, Appointment.ALL_COLUMNS);
+        this.freeBusyParser = new FreeBusyParser(false, Appointment.ALL_COLUMNS);
         
     }
 
@@ -96,8 +96,8 @@ public class FreeBusyRequest extends AbstractAppointmentRequest<FreeBusyResponse
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_FREEBUSY),
             new URLParameter(AJAXServlet.PARAMETER_ID, userId),
             new URLParameter(AJAXServlet.PARAMETER_TYPE, type),
-            new URLParameter(AJAXServlet.PARAMETER_START, start.toString()),
-            new URLParameter(AJAXServlet.PARAMETER_END, end.toString()),
+            new URLParameter(AJAXServlet.PARAMETER_START, String.valueOf(start.getTime())),
+            new URLParameter(AJAXServlet.PARAMETER_END, String.valueOf(end.getTime())),
         };
     }
 

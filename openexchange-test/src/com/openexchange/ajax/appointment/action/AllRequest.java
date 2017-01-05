@@ -103,6 +103,7 @@ public class AllRequest extends CommonAllRequest {
         this.end = addTimeZone2Date(end, tz);
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
+        this.timeZoneId = tz.getID();
     }
 
     public AllRequest(final int folderId, final String alias, final Date start, final Date end, final TimeZone tz) {
@@ -120,6 +121,7 @@ public class AllRequest extends CommonAllRequest {
         this.end = addTimeZone2Date(end, tz);
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
+        this.timeZoneId = tz.getID();
     }
 
     /**

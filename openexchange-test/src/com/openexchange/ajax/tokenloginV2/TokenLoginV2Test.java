@@ -57,6 +57,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginRequest.TokenLoginParameters;
@@ -95,12 +96,14 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         String token = response.getToken();
 
         LoginRequest login = new LoginRequest(new TokenLoginParameters(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"));
-        LoginResponse loginResponse = getClient().execute(login);
+        AJAXClient client = new AJAXClient(new AJAXSession(), true);
+        LoginResponse loginResponse = client.execute(login);
         assertEquals("Wrong password.", testUser.getPassword(), loginResponse.getPassword());
 
         Thread.sleep(500);
         login = new LoginRequest(new TokenLoginParameters(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
-        loginResponse = getClient().execute(login);
+        client = new AJAXClient(new AJAXSession(), true);
+        loginResponse = client.execute(login);
 
         assertTrue("Error expected, but got: " + loginResponse.getResponse().toString(), loginResponse.hasError());
 
@@ -116,11 +119,13 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         String token = response.getToken();
 
         LoginRequest login = new LoginRequest(new TokenLoginParameters(token, SECRET_2, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"));
-        LoginResponse loginResponse = getClient().execute(login);
+        AJAXClient client = new AJAXClient(new AJAXSession(), true);
+        LoginResponse loginResponse = client.execute(login);
         assertNull("No password expected.", loginResponse.getPassword());
 
         login = new LoginRequest(new TokenLoginParameters(token, SECRET_2, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
-        loginResponse = getClient().execute(login);
+        client = new AJAXClient(new AJAXSession(), true);
+        loginResponse = client.execute(login);
         assertTrue("Error expected", loginResponse.hasError());
         assertEquals("Wrong error.", TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber(), loginResponse.getException().getCode());
     }
@@ -132,7 +137,8 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         String token = response.getToken();
 
         LoginRequest login = new LoginRequest(new TokenLoginParameters(token, "blubb", generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
-        LoginResponse loginResponse = getClient().execute(login);
+        AJAXClient client = new AJAXClient(new AJAXSession(), true);
+        LoginResponse loginResponse = client.execute(login);
 
         assertTrue("Error expected.", loginResponse.hasError());
         assertEquals("Wrong error.", TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.getNumber(), loginResponse.getException().getCode());
@@ -147,7 +153,8 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         getClient().logout();
 
         LoginRequest login = new LoginRequest(new TokenLoginParameters(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
-        LoginResponse loginResponse = getClient().execute(login);
+        AJAXClient client = new AJAXClient(new AJAXSession(), true);
+        LoginResponse loginResponse = client.execute(login);
 
         assertTrue("Error expected.", loginResponse.hasError());
         assertTrue("Wrong error.", loginResponse.getException().getCode() == TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber() || loginResponse.getException().getCode() == TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN.getNumber());
@@ -156,7 +163,8 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
     @Test
     public void testBadToken() throws Exception {
         LoginRequest login = new LoginRequest(new TokenLoginParameters("phantasyToken", SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
-        LoginResponse loginResponse = getClient().execute(login);
+        AJAXClient client = new AJAXClient(new AJAXSession(), true);
+        LoginResponse loginResponse = client.execute(login);
 
         assertTrue("Error expected.", loginResponse.hasError());
     }
@@ -169,8 +177,9 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         String token = response.getToken();
         assertNotNull("Missing token.", token);
         assertFalse("Invalid token.", token.equals(""));
+        AJAXClient client = new AJAXClient(new AJAXSession(), true);
         TokenLoginV2Request login = new TokenLoginV2Request(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.8.0", REDIRECT);
-        TokenLoginV2Response loginResponse = new AJAXClient(testContext.acquireUser()).execute(login);
+        TokenLoginV2Response loginResponse = client.execute(login);
         assertTrue("Tokenlogin failed.", loginResponse.isLoginSuccessful());
         assertTrue("Redirect urls does not match.", loginResponse.getRedirectUrl().startsWith(REDIRECT));
     }

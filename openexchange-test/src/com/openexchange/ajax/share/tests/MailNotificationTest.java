@@ -65,6 +65,8 @@ import org.json.JSONException;
 import org.jsoup.nodes.Document;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -99,6 +101,7 @@ import com.openexchange.test.TestInit;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class MailNotificationTest extends ShareTest {
 
     private InfostoreTestManager infostoreTestManager;

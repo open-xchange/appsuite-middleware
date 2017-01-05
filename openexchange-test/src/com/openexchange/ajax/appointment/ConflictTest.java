@@ -2,6 +2,7 @@
 package com.openexchange.ajax.appointment;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,14 +12,9 @@ import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 public class ConflictTest extends AppointmentTest {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConflictTest.class);
-
-    public ConflictTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -52,69 +48,71 @@ public class ConflictTest extends AppointmentTest {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-
         final Date rangeStart = calendar.getTime();
-
         calendar.add(Calendar.DAY_OF_MONTH, 1);
-
         final Date rangeEnd = calendar.getTime();
 
-        final Appointment appointmentObj = new Appointment();
-        appointmentObj.setTitle("testConflict1 - insert");
-        appointmentObj.setStartDate(new Date(startTime));
-        appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setParentFolderID(appointmentFolderId);
+        Appointment appointmentObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict1 - insert", new Date(startTime), new Date(endTime));
         appointmentObj.setIgnoreConflicts(true);
         int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        catm.insert(appointmentObj);
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict1 - insert", new Date(startTime), new Date(endTime));
+        conflictObj.setIgnoreConflicts(false);
+
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 
         boolean found = false;
-
         for (ConflictObject conflict : conflicts) {
             if (conflict.getId() == objectId) {
                 found = true;
             }
         }
-
         assertTrue("appointment id " + objectId + " not found in conflicts", found);
 
-        appointmentObj.setIgnoreConflicts(true);
-        catm.setClient(getClient2());
-        final int secondObjectId = catm.insert(appointmentObj).getObjectID();
-        Appointment loadAppointment = catm.get(appointmentFolderId, secondObjectId);
+        Appointment newAppointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict1 - insert", new Date(startTime), new Date(endTime));
+        newAppointment.setIgnoreConflicts(true);
+        final int secondObjectId = catm.insert(newAppointment).getObjectID();
+        
+        Appointment loadAppointment = get(secondObjectId, rangeStart, rangeEnd);
         Date modified = new Date(Long.MAX_VALUE);
 
-        appointmentObj.setObjectID(secondObjectId);
-        appointmentObj.setIgnoreConflicts(true);
-        appointmentObj.setShownAs(Appointment.FREE);
-        catm.update(appointmentFolderId, appointmentObj);
+        loadAppointment.setObjectID(secondObjectId);
+        loadAppointment.setIgnoreConflicts(true);
+        loadAppointment.setShownAs(Appointment.FREE);
+        loadAppointment.setLastModified(modified);
+        catm.update(appointmentFolderId, loadAppointment);
 
         loadAppointment = catm.get(appointmentFolderId, secondObjectId);
         modified = loadAppointment.getLastModified();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setTitle("testConflict1 - update");
-        appointmentObj.setObjectID(secondObjectId);
+        loadAppointment.setIgnoreConflicts(false);
+        loadAppointment.setShownAs(Appointment.ABSENT);
+        loadAppointment.setTitle("testConflict1 - update");
+        loadAppointment.setObjectID(secondObjectId);
         
-        catm.update(appointmentFolderId, appointmentObj);
+        catm.update(appointmentFolderId, loadAppointment);
         assertTrue(catm.getLastResponse().hasConflicts());
 
         List<ConflictObject> updateConflicts = catm.getLastResponse().getConflicts();
         found = false;
-
         for (ConflictObject conflict : updateConflicts) {
             if (conflict.getId() == objectId) {
                 found = true;
             }
         }
-
         assertTrue("appointment id " + objectId + " not found in conflicts", found);
+    }
+
+    private Appointment get(int objectId, Date rangeStart, Date rangeEnd) {
+        Appointment[] all = catm.all(appointmentFolderId, rangeStart, rangeEnd);
+        for (Appointment element : all) {
+            if (element.getObjectID() == objectId) {
+                return element;
+            }
+        }
+        return null;
     }
 
     /**
@@ -135,11 +133,11 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
+        
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict2", new Date(startTime), new Date(endTime - 3600000));
+        conflictObj.setIgnoreConflicts(false);
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setEndDate(new Date(endTime - 3600000));
-
-        catm.insert(appointmentObj);
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 
@@ -173,10 +171,10 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setEndDate(new Date(endTime + 3600000));
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict3", new Date(startTime), new Date(endTime + 3600000));
+        conflictObj.setIgnoreConflicts(false);
         
-        catm.insert(appointmentObj);
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 
@@ -210,10 +208,10 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setStartDate(new Date(startTime - 3600000));
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict4", new Date(startTime - 3600000), new Date(endTime));
+        conflictObj.setIgnoreConflicts(false);
 
-        catm.insert(appointmentObj);
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 
@@ -247,10 +245,10 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setStartDate(new Date(startTime + 3600000));
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict5", new Date(startTime + 3600000), new Date(endTime));
+        conflictObj.setIgnoreConflicts(false);
 
-        catm.insert(appointmentObj);
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 
@@ -283,11 +281,10 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setStartDate(new Date(startTime + 3600000));
-        appointmentObj.setEndDate(new Date(endTime - 1800000));
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict6", new Date(startTime + 3600000), new Date(endTime - 1800000));
+        conflictObj.setIgnoreConflicts(false);
 
-        catm.insert(appointmentObj);
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 
@@ -321,11 +318,10 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setStartDate(new Date(startTime - 3600000));
-        appointmentObj.setEndDate(new Date(endTime + 3600000));
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict7", new Date(startTime - 3600000), new Date(endTime + 3600000));
+        conflictObj.setIgnoreConflicts(false);
 
-        catm.insert(appointmentObj);
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 
@@ -359,22 +355,13 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setStartDate(new Date(startTime - 3600000));
-        appointmentObj.setEndDate(new Date(endTime - 7200000));
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict7", new Date(startTime - 3600000), new Date(endTime - 7200000));
+        conflictObj.setIgnoreConflicts(false);
 
-        catm.insert(appointmentObj);
-        assertTrue(catm.getLastResponse().hasConflicts());
+        catm.insert(conflictObj);
+        assertFalse(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
-
-        boolean found = false;
-
-        for (ConflictObject conflict : conflicts) {
-            if (conflict.getId() == objectId) {
-                found = true;
-            }
-        }
-        assertFalse("appointment id " + objectId + " found in conflicts", found);
+        assertNull(conflicts);
     }
 
     /**
@@ -396,22 +383,13 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setStartDate(new Date(startTime + 7200000));
-        appointmentObj.setEndDate(new Date(endTime + 3600000));
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testNonConflict2", new Date(startTime + 7200000), new Date(endTime + 3600000));
+        conflictObj.setIgnoreConflicts(false);
 
-        catm.insert(appointmentObj);
-        assertTrue(catm.getLastResponse().hasConflicts());
+        catm.insert(conflictObj);
+        assertFalse(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
-
-        boolean found = false;
-
-        for (ConflictObject conflict : conflicts) {
-            if (conflict.getId() == objectId) {
-                found = true;
-            }
-        }
-        assertFalse("appointment id " + objectId + " found in conflicts", found);
+        assertNull(conflicts);
     }
 
     /**
@@ -434,11 +412,11 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
-        appointmentObj.setStartDate(new Date(startTime));
-        appointmentObj.setEndDate(new Date(endTime));
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testFullTimeConflict1", new Date(startTime), new Date(endTime));
+        conflictObj.setFullTime(true);
+        conflictObj.setIgnoreConflicts(false);
 
-        catm.insert(appointmentObj);
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 
@@ -472,9 +450,11 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setIgnoreConflicts(false);
+        Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testFullTimeConflict2", new Date(startTime), new Date(endTime));
+        conflictObj.setIgnoreConflicts(false);
+        conflictObj.setFullTime(true);
 
-        catm.insert(appointmentObj);
+        catm.insert(conflictObj);
         assertTrue(catm.getLastResponse().hasConflicts());
         List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
 

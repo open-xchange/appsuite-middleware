@@ -141,11 +141,7 @@ public class CalendarTestManager implements TestManager {
 
         try {
             timezone = client.getValues().getTimeZone();
-        } catch (OXException e) {
-            // wait for finally block
-        } catch (IOException e) {
-            // wait for finally block
-        } catch (JSONException e) {
+        } catch (OXException | IOException | JSONException e) {
             // wait for finally block
         } finally {
             if (timezone == null) {
@@ -722,5 +718,14 @@ public class CalendarTestManager implements TestManager {
 
         final JSONArray arr = (JSONArray) response.getResponse().getData();
         return CTMUtils.jsonArray2AppointmentArray(arr, client.getValues().getTimeZone());
+    }
+
+    public static Appointment createAppointmentObject(int parentFolderId, String title, Date start, Date end) {
+        Appointment obj = new Appointment();
+        obj.setTitle(title);
+        obj.setStartDate(start);
+        obj.setEndDate(end);
+        obj.setParentFolderID(parentFolderId);
+        return obj;
     }
 }

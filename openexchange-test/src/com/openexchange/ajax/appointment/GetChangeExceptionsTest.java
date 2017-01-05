@@ -158,7 +158,7 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.TITLE };
         GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(appointment.getParentFolderID(), appointment.getObjectID(), columns, false);
 
-        GetChangeExceptionsResponse response = new AJAXClient(testUser).execute(request);
+        GetChangeExceptionsResponse response = new AJAXClient(testContext.acquireUser()).execute(request);
         assertTrue("Missing error.", response.hasError());
         OXException oxException = response.getException();
         assertEquals("Wrong error.", OXCachingExceptionCode.CATEGORY_PERMISSION_DENIED, oxException.getCategory());

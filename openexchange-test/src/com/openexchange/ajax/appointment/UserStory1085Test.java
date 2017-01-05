@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.CalendarTestManager;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -85,16 +86,12 @@ public class UserStory1085Test extends AppointmentTest {
 
     private Date start, end;
 
-    public UserStory1085Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
         clientC = new AJAXClient(testContext.acquireUser());
         userIdA = clientA.getValues().getUserId();
         userIdB = clientB.getValues().getUserId();
@@ -105,31 +102,19 @@ public class UserStory1085Test extends AppointmentTest {
         final CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
 
-        appointmenShare = new Appointment();
-        appointmenShare.setTitle("Full");
-        appointmenShare.setStartDate(D("01.02.2009 12:00"));
-        appointmenShare.setEndDate(D("01.02.2009 14:00"));
-        appointmenShare.setParentFolderID(folder.getObjectID());
+        appointmenShare = CalendarTestManager.createAppointmentObject(folder.getObjectID(), "Full", D("01.02.2009 12:00"), D("01.02.2009 14:00"));
         appointmenShare.setIgnoreConflicts(true);
         CommonInsertResponse insertResponse = clientB.execute(new InsertRequest(appointmenShare, clientB.getValues().getTimeZone()));
         insertResponse.fillObject(appointmenShare);
 
-        appointmentPrivate = new Appointment();
-        appointmentPrivate.setTitle("Title of private flagged appointment");
-        appointmentPrivate.setStartDate(D("01.02.2009 12:00"));
-        appointmentPrivate.setEndDate(D("01.02.2009 14:00"));
+        appointmentPrivate = CalendarTestManager.createAppointmentObject(clientC.getValues().getPrivateAppointmentFolder(), "Title of private flagged appointment", D("01.02.2009 12:00"), D("01.02.2009 14:00"));
         appointmentPrivate.setPrivateFlag(true);
         appointmentPrivate.setIgnoreConflicts(true);
-        appointmentPrivate.setParentFolderID(clientC.getValues().getPrivateAppointmentFolder());
         insertResponse = clientC.execute(new InsertRequest(appointmentPrivate, clientC.getValues().getTimeZone()));
         insertResponse.fillObject(appointmentPrivate);
 
-        appointmentNormal = new Appointment();
-        appointmentNormal.setTitle("Title of appointment in not shared folder");
-        appointmentNormal.setStartDate(D("01.02.2009 12:00"));
-        appointmentNormal.setEndDate(D("01.02.2009 14:00"));
+        appointmentNormal = CalendarTestManager.createAppointmentObject(clientC.getValues().getPrivateAppointmentFolder(), "Title of appointment in not shared folder", D("01.02.2009 12:00"), D("01.02.2009 14:00"));
         appointmentNormal.setIgnoreConflicts(true);
-        appointmentNormal.setParentFolderID(clientC.getValues().getPrivateAppointmentFolder());
         insertResponse = clientC.execute(new InsertRequest(appointmentNormal, clientC.getValues().getTimeZone()));
         insertResponse.fillObject(appointmentNormal);
 
