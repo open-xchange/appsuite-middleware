@@ -178,6 +178,8 @@ public interface CalendarSqlImp {
 
     long attachmentAction(int folderId, int oid, int uid, Session session, Context c, int numberOfAttachments) throws OXException;
 
+    long attachmentAction(int folderId, int oid, int uid, Session session, Context c, int numberOfAttachments, Connection writeCon) throws OXException;
+
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, int limit, final Context ctx, final Connection readcon) throws SQLException, OXException;
 
     PreparedStatement getActiveAppointments(Context c, int uid, Date d1, Date d2, String select, Connection readcon) throws SQLException;

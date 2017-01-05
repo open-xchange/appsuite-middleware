@@ -460,6 +460,14 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     }
 
     @Override
+    public long attachmentAction(final int folderId, final int objectId, final int userId,
+        final Session session, final Context c, final int numberOfAttachments, Connection writeCon)
+            throws OXException {
+        return delegate.attachmentAction(folderId, objectId, userId, session, c,
+            numberOfAttachments, writeCon);
+    }
+
+    @Override
     public SearchIterator<Appointment> getFreeBusyInformation(final int id, final int type,
         final Date start, final Date end) throws OXException {
         return delegate.getFreeBusyInformation(id, type, start, end);

@@ -149,9 +149,20 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     @Override
     public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments) throws OXException {
+        return attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, null);
+    }
+
+    @Override
+    public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments, Connection writeCon) throws OXException {
         attachmentMemory.rememberAttachmentChange(objectId, c.getContextId());
 
-        final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments);
+        final long retval;
+        if (null == writeCon) {
+            retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments);
+        } else {
+            retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, writeCon);
+        }
+
         // Trigger Update Mail unless attachment is in create new limbo
         if (!createNewLimbo.containsKey(new AppointmentAddress(objectId, c.getContextId()))) {
             try {
@@ -173,7 +184,6 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
             }
         }
         return retval;
-
     }
 
     @Override

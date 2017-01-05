@@ -83,7 +83,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.api.TransactionallyCachingCalendar;
 import com.openexchange.calendar.cache.Attribute;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
@@ -93,7 +92,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
-import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
@@ -2194,13 +2192,13 @@ public class CalendarMySQL implements CalendarSqlImp {
                              * Bug 47094 - Missing reminder for appointment from series
                              *
                              * In case of an exception on a series appointment the resulting reminders were bound to the creators folder ID.
-                             * This caused all other participants in not having the permission for the exception.                             * 
+                             * This caused all other participants in not having the permission for the exception.                             *
                              */
                             if (null != reminder) {
                                 changeReminder(
                                     cdao.getObjectID(),
                                     user.getIdentifier(),
-                                    FolderObject.PUBLIC == cdao.getFolderType() ? cdao.getEffectiveFolderId() : user.getPersonalFolderId(), 
+                                    FolderObject.PUBLIC == cdao.getFolderType() ? cdao.getEffectiveFolderId() : user.getPersonalFolderId(),
                                     cdao.getContext(),
                                     cdao.isSequence(true),
                                     cdao.getEndDate(),
@@ -4297,22 +4295,43 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
+        long last_modified = 0L;
+        final Connection con = DBPool.pickupWriteable(c);
+        try {
+            con.setAutoCommit(false);
+            last_modified = attachmentAction(folderId, oid, uid, session, c, numberOfAttachments, con);
+            con.commit();
+        } catch (OXException e) {
+            rollback(con);
+            throw e;
+        } catch (SQLException sqle) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
+        } finally {
+            autocommit(con);
+            DBPool.closeWriterSilent(c, con);
+        }
+        return last_modified;
+    }
+
+    @Override
+    public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments, final Connection writeCon) throws OXException {
+        if (null == writeCon) {
+            return attachmentAction(folderId, oid, uid, session, c, numberOfAttachments);
+        }
         int changes;
         PreparedStatement pst = null;
         int amount = 0;
         ResultSet rs = null;
         PreparedStatement prep = null;
         long last_modified = 0L;
-        final Connection con = DBPool.pickupWriteable(c);
         try {
-            con.setAutoCommit(false);
             final StringBuilder sb = new StringBuilder(96);
             sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01=");
             sb.append(oid);
             sb.append(" AND cid=");
             sb.append(c.getContextId());
             sb.append(" FOR UPDATE");
-            prep = getPreparedStatement(con, sb.toString());
+            prep = getPreparedStatement(writeCon, sb.toString());
             rs = prep.executeQuery();
             if (rs.next()) {
                 amount = rs.getInt(1);
@@ -4330,7 +4349,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         new Throwable());
                 throw new OXException();
             }
-            pst = con.prepareStatement("UPDATE prg_dates SET changing_date=?,changed_from=?,intfield08=? WHERE intfield01=? AND cid=?");
+            pst = writeCon.prepareStatement("UPDATE prg_dates SET changing_date=?,changed_from=?,intfield08=? WHERE intfield01=? AND cid=?");
             last_modified = System.currentTimeMillis();
             pst.setLong(1, last_modified);
             pst.setInt(2, uid);
@@ -4350,15 +4369,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                 "Result of attachmentAction was ", Autoboxing.I(changes), ". Check prg_dates oid:cid:uid ", Autoboxing.I(oid),
                 Character.valueOf(CalendarOperation.COLON), Autoboxing.I(c.getContextId()), Character.valueOf(CalendarOperation.COLON),
                 Autoboxing.I(uid) }));
-            con.commit();
         } catch (final SQLException sqle) {
-            rollback(con);
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             closeSQLStuff(prep);
             closeSQLStuff(pst);
-            autocommit(con);
-            DBPool.closeWriterSilent(c, con);
         }
         final CalendarDataObject edao = new CalendarDataObject();
         edao.setParentFolderID(folderId);

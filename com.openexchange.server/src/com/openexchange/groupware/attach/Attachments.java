@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.attach;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Types;
@@ -63,6 +61,8 @@ import com.openexchange.groupware.tasks.TaskAttachmentListener;
 import com.openexchange.groupware.tasks.TaskAuthorization;
 import com.openexchange.tools.service.ServicePriorityConflictException;
 import com.openexchange.tools.service.SpecificServiceChooser;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public abstract class Attachments {
 
@@ -130,4 +130,15 @@ public abstract class Attachments {
     public static AttachmentBase getInstance(final DBProvider provider) {
         return new AttachmentBaseImpl(provider);
     }
+
+    public static AttachmentBase getInstance(DBProvider provider, boolean applyDefaults) {
+        if (applyDefaults) {
+            AttachmentBaseImpl attachmentBase = new AttachmentBaseImpl(impl);
+            attachmentBase.setProvider(provider);
+            return attachmentBase;
+        } else {
+            return new AttachmentBaseImpl(provider);
+        }
+    }
+
 }

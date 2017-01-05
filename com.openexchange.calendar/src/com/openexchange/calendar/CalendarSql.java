@@ -676,7 +676,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             if (conflicts.length == 0) {
                 /*
                  * Bug 49322 - NPE at c.o.calendar.CalendarSql.updateAppointmentObject
-                 * Added a check if users actually exist before accessing the data 
+                 * Added a check if users actually exist before accessing the data
                  */
                 // Check user participants completeness
                 if (cdao.containsUserParticipants() && null != cdao.getUsers() && 0 < cdao.getUsers().length) {
@@ -1434,6 +1434,11 @@ public class CalendarSql implements AppointmentSQLInterface {
     @Override
     public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
         return cimp.attachmentAction(folderId, oid, uid, session, c, numberOfAttachments);
+    }
+
+    @Override
+    public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments, Connection writeCon) throws OXException {
+        return cimp.attachmentAction(folderId, oid, uid, session, c, numberOfAttachments, writeCon);
     }
 
     @Override

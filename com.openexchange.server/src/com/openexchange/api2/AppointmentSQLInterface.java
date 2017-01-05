@@ -412,6 +412,25 @@ public interface AppointmentSQLInterface {
      */
     long attachmentAction(int folderId, int objectId, int userId, Session session, Context c, int numberOfAttachments) throws OXException;
 
+    /**
+     * Method to attach or detach attachments
+     * @param folderId
+     * The folder Id
+     * @param objectId
+     * The object ID
+     * @param userId
+     * The user ID
+     * @param session
+     * The session
+     * @param Context
+     * The context
+     * @param numberOfAttachments
+     * Amount of attached attachments.
+     * @param writeCon
+     * A writable connection to the database to use
+     * @throws OXException
+     */
+    long attachmentAction(int folderId, int objectId, int userId, Session session, Context c, int numberOfAttachments, Connection writeCon) throws OXException;
 
     /**
      * Lists of FreeBusy Information
