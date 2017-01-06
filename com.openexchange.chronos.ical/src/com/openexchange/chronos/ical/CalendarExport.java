@@ -81,6 +81,14 @@ public interface CalendarExport {
     CalendarExport add(FreeBusyData freeBusyData) throws OXException;
 
     /**
+     * Explicitly adds a timezone identifier to this VCALENDAR component.
+     *
+     * @param timeZoneID The time zone identifier to add
+     * @return A self reference
+     */
+    CalendarExport add(String timeZoneID) throws OXException;
+
+    /**
      * Sets the method to be declared in the VCALENDAR component.
      *
      * @param method The method, or <code>null</code> to remove

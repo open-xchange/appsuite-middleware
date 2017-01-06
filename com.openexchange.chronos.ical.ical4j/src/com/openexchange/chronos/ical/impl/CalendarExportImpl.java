@@ -73,6 +73,8 @@ import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.property.Method;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Version;
 
 /**
  * {@link CalendarExportImpl}
@@ -97,11 +99,29 @@ public class CalendarExportImpl implements CalendarExport {
      */
     public CalendarExportImpl(ICalMapper mapper, ICalParameters parameters, List<OXException> warnings) {
         super();
+        this.mapper = mapper;
         this.parameters = parameters;
         this.warnings = warnings;
-        this.calendar = new Calendar();
-        this.mapper = mapper;
         this.timezoneIDs = new HashSet<String>();
+        this.calendar = initCalendar();
+    }
+
+    public void setProductId(String prodId) {
+        ProdId property = calendar.getProductId();
+        if (null == property) {
+            property = new ProdId();
+            calendar.getProperties().add(property);
+        }
+        property.setValue(prodId);
+    }
+
+    public void setVersion(String version) {
+        Version property = calendar.getVersion();
+        if (null == property) {
+            property = new Version();
+            calendar.getProperties().add(property);
+        }
+        property.setValue(version);
     }
 
     @Override
@@ -138,6 +158,12 @@ public class CalendarExportImpl implements CalendarExport {
     @Override
     public CalendarExport add(FreeBusyData freeBusyData) throws OXException {
         calendar.getComponents().add(exportFreeBusy(freeBusyData));
+        return this;
+    }
+
+    @Override
+    public CalendarExport add(String timeZoneID) throws OXException {
+        trackTimezone(timeZoneID);
         return this;
     }
 
@@ -256,10 +282,22 @@ public class CalendarExportImpl implements CalendarExport {
         trackTimezone(freeBusyData.getEndTimeZone());
     }
 
-    private void trackTimezone(String timeZoneID) {
+    private boolean trackTimezone(String timeZoneID) {
         if (null != timeZoneID && false == "UTC".equals(timeZoneID)) {
-            timezoneIDs.add(timeZoneID);
+            return timezoneIDs.add(timeZoneID);
         }
+        return false;
+    }
+
+    private static Calendar initCalendar() {
+        Calendar calendar = new Calendar();
+        calendar.getProperties().add(Version.VERSION_2_0);
+        String versionString = com.openexchange.version.Version.getInstance().optVersionString();
+        if (null == versionString) {
+            versionString = "<unknown version>";
+        }
+        calendar.getProperties().add(new ProdId("-//" + com.openexchange.version.Version.NAME + "//" + versionString + "//EN"));
+        return calendar;
     }
 
 }
