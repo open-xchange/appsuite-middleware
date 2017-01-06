@@ -176,8 +176,9 @@ public class Bug40142Test extends AbstractInfostoreTest {
             actual = infoMgr.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getFileName(), actual.getFileName());
         }
-
-        final String id = infoMgr.copyAction(actual.getId(), folder.getObjectID() + "", actual);
+        infoMgr.copyAction(actual.getId(), folder.getObjectID() + "", actual);
+        final String id = actual.getId();
+        
 
         actual = infoMgr.getAction(id);
         assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());

@@ -59,16 +59,7 @@ public class SpamButtonTest extends AbstractAJAXTest {
     /**
      * Path to the configuration parameter.
      */
-    private static final String PATH = "mail/spambutton";
-
-    /**
-     * Default constructor.
-     * 
-     * @param name Name of the test.
-     */
-    public SpamButtonTest() {
-        super();
-    }
+    private static final String PATH = "/mail/spambutton";
 
     /**
      * Tests if the spam button option is sent to the GUI.

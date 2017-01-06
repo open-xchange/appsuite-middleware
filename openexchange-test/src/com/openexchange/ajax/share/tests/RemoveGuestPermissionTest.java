@@ -79,15 +79,6 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class RemoveGuestPermissionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link RemoveGuestPermissionTest}.
-     *
-     * @param name The test name
-     */
-    public RemoveGuestPermissionTest() {
-        super();
-    }
-
     @Test
     public void testUpdateSharedFolderRandomly() throws Exception {
         int module = randomModule();

@@ -186,12 +186,15 @@ public class InfostoreTestManager implements TestManager {
         }
     }
 
-    public String copyAction(String id, String folderId, File data) throws OXException, IOException, JSONException {
+    public void copyAction(String id, String folderId, File data) throws OXException, IOException, JSONException {
         CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(id, folderId, data);
         copyRequest.setFailOnError(getFailOnError());
         CopyInfostoreResponse copyResponse = getClient().execute(copyRequest);
         lastResponse = copyResponse;
-        return copyResponse.getID();
+        if (!lastResponse.hasError()) {
+            data.setId(copyResponse.getID());
+            createdEntities.add(data);
+        }
     }
 
     public Object getConfigAction(String name) throws OXException, IOException, JSONException {

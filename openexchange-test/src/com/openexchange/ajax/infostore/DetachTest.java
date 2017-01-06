@@ -44,9 +44,6 @@ public class DetachTest extends InfostoreAJAXTest {
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
-
-        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
     }
 
     @Test
@@ -63,38 +60,37 @@ public class DetachTest extends InfostoreAJAXTest {
         itm.revert(origId);
         assertFalse(itm.getLastResponse().hasError());
         assertNotNull(itm.getLastResponse().getTimestamp());
-        checkNoVersions(origId);
+        checkVersions(origId, "0", 0);;
     }
 
     public void checkNoVersions(String id) throws Exception {
-        //		 Version magically reverts to 0
-        com.openexchange.file.storage.File obj = itm.getAction(id);
+        checkVersions(id, "6", 1);
+    }
 
-        assertEquals(0, obj.getVersion());
+    public void checkVersions(String objectId, String version, int numberoOfVersions) throws Exception {
+        //       Version magically reverts to 0
+        com.openexchange.file.storage.File obj = itm.getAction(objectId);
 
-        ftm.detach(id, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
+        assertEquals(version, obj.getVersion());
+        assertEquals(numberoOfVersions, obj.getNumberOfVersions());
+
+        ftm.detach(objectId, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
 
         final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[] { 1, 2, 3 }));
 
-        final int[] notDetached = ftm.detach(id, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
+        final int[] notDetached = ftm.detach(objectId, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
         assertEquals(versions.size(), notDetached.length);
         for (final int lId : notDetached) {
             assertTrue(versions.remove(lId));
         }
         assertTrue(versions.isEmpty());
-
-        com.openexchange.file.storage.File file = itm.getAction(id);
-
-        assertEquals(null, file.getFileName());
-        assertEquals("", file.getFileMIMEType());
-        assertEquals(0, file.getFileSize());
     }
 
     @Test
     public void testSpotted() throws Exception {
         final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
-        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 1, 3, 5 });
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 1, 3, 5, 6 });
         assertEquals(0, notDetached.length);
 
         List<com.openexchange.file.storage.File> versions = itm.versions(origId, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);

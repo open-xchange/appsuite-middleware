@@ -70,15 +70,6 @@ import com.openexchange.share.recipient.GuestRecipient;
  */
 public class Bug40722Test extends ShareTest {
 
-    /**
-     * Initializes a new {@link Bug40722Test}.
-     *
-     * @param name The test name
-     */
-    public Bug40722Test() {
-        super();
-    }
-
     @Test
     public void testRemoveGuestPassword() throws Exception {
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");

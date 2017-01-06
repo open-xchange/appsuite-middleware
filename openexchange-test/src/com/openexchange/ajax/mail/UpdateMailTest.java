@@ -58,6 +58,8 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -83,13 +85,10 @@ import com.openexchange.server.impl.OCLPermission;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class UpdateMailTest extends AbstractMailTest {
 
     private UserValues values;
-
-    public UpdateMailTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {

@@ -62,8 +62,6 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -86,7 +84,7 @@ public class GetTest extends AppointmentTest {
     public void testGetWithParticipants() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGetWithParticipants");
         
-        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(2), FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int userParticipantId = getClient2().getValues().getUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
         final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 
@@ -120,7 +118,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
-        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(2), FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int userParticipantId = getClient2().getValues().getUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
         final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 
@@ -169,7 +167,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
-        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(2), FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int userParticipantId = getClient2().getValues().getUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
         final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 

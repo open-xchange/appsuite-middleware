@@ -63,7 +63,6 @@ import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -297,12 +296,11 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int userParticipantId = getClient2().getValues().getUserId();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
         UserParticipant userParticipant = new UserParticipant(userParticipantId);
-        userParticipant.setEmailAddress("testo@test.org");
         participants[1] = userParticipant;
         appointmentObj.setParticipants(participants);
         
@@ -330,7 +328,6 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
@@ -381,7 +378,6 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID });
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
         final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 

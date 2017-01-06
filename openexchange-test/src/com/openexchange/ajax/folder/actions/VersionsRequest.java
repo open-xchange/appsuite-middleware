@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.infostore.thirdparty.actions.AbstractFileRequest;
 import com.openexchange.groupware.search.Order;
 
@@ -113,7 +114,7 @@ public class VersionsRequest extends AbstractFileRequest<VersionsResponse> {
             params.add(new Parameter("sort", this.sort));
         }
         if (this.order != null) {
-            params.add(new Parameter("order", this.order.toString()));
+            params.add(new Parameter("order", OrderFields.write(this.order)));
         }
         return params.toArray(new Parameter[params.size()]);
     }

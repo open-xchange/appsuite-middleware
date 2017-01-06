@@ -55,6 +55,7 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.attach.AttachmentTools;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.search.Order;
@@ -119,7 +120,7 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
 
         if (sort > 0) {
             parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, order.toString()));
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
         }
 
         return parameters.toArray(new Parameter[parameters.size()]);

@@ -92,7 +92,7 @@ public class OAuthServiceTest {
 
     private TestUser oxadmin;
 
-    private AJAXClient client2;
+    private TestUser user2;
 
     @BeforeClass
     public static void before() throws Exception {
@@ -103,7 +103,8 @@ public class OAuthServiceTest {
     public void setUp() throws Exception {
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         oxadmin = testContext.getAdmin();
-        client2 = new AJAXClient(testContext.acquireUser());
+        user2 = testContext.acquireUser();
+        AJAXClient client2 = new AJAXClient(user2);
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
         user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", "false");
         Credentials credentials = new Credentials(oxadmin.getUser(), oxadmin.getPassword());
@@ -121,6 +122,7 @@ public class OAuthServiceTest {
             if (client != null) {
                 client.logout();
             }
+            AJAXClient client2 = new AJAXClient(user2);
 
             com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
             user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", null);
@@ -162,7 +164,8 @@ public class OAuthServiceTest {
     public void testGetAllServicesWithoutPermission() throws Exception {
         AJAXClient client2 = null;
         try {
-            client2 = new AJAXClient(testContext.acquireUser());
+            client2 = new AJAXClient(user2);
+
             OAuthServicesResponse response = client2.execute(new AllOAuthServicesRequest());
             List<OAuthService> services = response.getServices();
             boolean found = false;
@@ -185,7 +188,7 @@ public class OAuthServiceTest {
     public void testGetTestServiceWithoutPermission() throws Exception {
         AJAXClient client2 = null;
         try {
-            client2 = new AJAXClient(testContext.acquireUser());
+            client2 = new AJAXClient(user2);
             OAuthServicesResponse response = client2.execute(new GetOAuthServiceRequest(TESTSERVICE, false));
             Assert.assertTrue("Response should contain error", response.hasError());
             // We expect com.openexchange.oauth.OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA

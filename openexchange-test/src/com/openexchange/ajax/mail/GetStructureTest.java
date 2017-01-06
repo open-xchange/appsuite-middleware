@@ -57,9 +57,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
@@ -180,24 +178,34 @@ public class GetStructureTest extends AbstractMailTest {
      * "O4BZCIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIP/2Q==\n";
      */
 
-    private static String eml = "Date: Tue, 27 Nov 2012 21:43:24 +0100 (CET)\n" + "From: #ADDR#\n" + "To: #ADDR#\n" + "Message-ID: <1602561799.1706.1354049004437@open-xchange.com>\n" + "Subject: Simple attachment\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/mixed; boundary=\"----=_Part_1705_1673668315.1354049004384\"\n" + "\n" + "------=_Part_1705_1673668315.1354049004384\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Some text\n" + "------=_Part_1705_1673668315.1354049004384\n" + "Content-Type: image/jpeg; name=7.jpeg\n" + "Content-Transfer-Encoding: base64\n" + "Content-Disposition: attachment; filename=7.jpeg\n" + "\n" + attachment + "\n" + "------=_Part_1705_1673668315.1354049004384--";
-
-    private UserValues values;
-
-    public GetStructureTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        values = getClient().getValues();
-    }
+    private static String eml =
+        "Date: Tue, 27 Nov 2012 21:43:24 +0100 (CET)\n" +
+            "From: #ADDR#\n" +
+            "To: #ADDR#\n" +
+            "Message-ID: <1602561799.1706.1354049004437@open-xchange.com>\n" +
+            "Subject: Simple attachment\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: multipart/mixed; boundary=\"----=_Part_1705_1673668315.1354049004384\"\n" +
+            "\n" +
+            "------=_Part_1705_1673668315.1354049004384\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=UTF-8\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
+            "Some text\n" +
+            "------=_Part_1705_1673668315.1354049004384\n" +
+            "Content-Type: image/jpeg; name=7.jpeg\n" +
+            "Content-Transfer-Encoding: base64\n" +
+            "Content-Disposition: attachment; filename=7.jpeg\n" +
+            "\n" +
+            attachment +
+            "\n" +
+            "------=_Part_1705_1673668315.1354049004384--";
 
     @Test
     public void testGetStructure() throws OXException, IOException, JSONException {
 
-        final NewMailRequest newMailRequest = new NewMailRequest(null, eml.replaceAll("#ADDR#", values.getSendAddress()), -1, true);
+        final NewMailRequest newMailRequest = new NewMailRequest(null, eml.replaceAll("#ADDR#", getClient().getValues().getSendAddress()), -1, true);
         final NewMailResponse newMailResponse = getClient().execute(newMailRequest);
 
         assertNotNull("Missing folder in response.", newMailResponse.getFolder());

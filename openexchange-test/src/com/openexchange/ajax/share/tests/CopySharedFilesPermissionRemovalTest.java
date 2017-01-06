@@ -75,15 +75,6 @@ import com.openexchange.share.recipient.GuestRecipient;
  */
 public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTest {
 
-    /**
-     * Initializes a new {@link CopySharedFilesPermissionRemovalTest}.
-     * 
-     * @param name
-     */
-    public CopySharedFilesPermissionRemovalTest() {
-        super();
-    }
-
     @Test
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
@@ -101,7 +92,8 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
             assertEquals("Wrong number of shares users/guests", 2, documentMetadata.getObjectPermissions().size());
 
             file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
-            String newObjectId = infoMgr.copyAction(file.getId(), Integer.toString(userDestFolder.getObjectID()), file);
+            infoMgr.copyAction(file.getId(), Integer.toString(userDestFolder.getObjectID()), file);
+            String newObjectId = file.getId();
 
             File copiedFile = getClient().execute(new GetInfostoreRequest(newObjectId)).getDocumentMetadata();
 

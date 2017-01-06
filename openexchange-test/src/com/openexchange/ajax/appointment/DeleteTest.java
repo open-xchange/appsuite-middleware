@@ -2,8 +2,8 @@
 package com.openexchange.ajax.appointment;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -20,14 +20,11 @@ public class DeleteTest extends AppointmentTest {
         final Appointment appointmentObj = createAppointmentObject("testDelete");
         appointmentObj.setIgnoreConflicts(true);
         final int id = catm.insert(appointmentObj).getObjectID();
-        appointmentObj.setObjectID(id);
+
         catm.delete(appointmentObj, false, false);
-        try {
-            catm.delete(appointmentObj, true, true);
-            fail("OXObjectNotFoundException expected!");
-        } catch (final Exception ex) {
-            assertTrue(true);
-        }
+
+        catm.delete(appointmentObj, false, true);
+        assertTrue(catm.getLastResponse().hasError());
     }
 
     @Test
@@ -55,11 +52,11 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
-        appointmentObj.setObjectID(objectId);
+
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
 
-        appointmentObj = new Appointment();
+        appointmentObj = catm.createIdentifyingCopy(appointmentObj);
         appointmentObj.setTitle("testDeleteRecurrenceWithPosition - exception");
         appointmentObj.setStartDate(new Date(startTime + 60 * 60 * 1000));
         appointmentObj.setEndDate(new Date(endTime + 60 * 60 * 1000));
@@ -69,19 +66,19 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
-        appointmentObj.setLastModified(new Date(System.currentTimeMillis() + APPEND_MODIFIED));
+//        appointmentObj.setLastModified(new Date(System.currentTimeMillis() + APPEND_MODIFIED));
 
         catm.update(appointmentFolderId, appointmentObj);
-        int newObjectId = appointmentObj.getObjectID();
+        int exceptionId = appointmentObj.getObjectID();
 
-        assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
+        assertFalse("object id of the update is equals with the old object id", exceptionId == objectId);
 
-        loadAppointment = catm.get(appointmentFolderId, newObjectId);
+        loadAppointment = catm.get(appointmentFolderId, exceptionId);
 
         // Loaded exception MUST NOT contain any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        loadAppointment = catm.get(appointmentFolderId, newObjectId);
+        loadAppointment = catm.get(appointmentFolderId, exceptionId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
     }
 
@@ -112,8 +109,15 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
-        appointmentObj.setObjectID(objectId);
+        
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
+        
+        catm.delete(appointmentObj, exceptionDate);
+        assertFalse(catm.getLastResponse().hasError());
+        
+        loadAppointment = catm.get(appointmentFolderId, objectId);
+        
+        assertNotNull(loadAppointment);
     }
 }

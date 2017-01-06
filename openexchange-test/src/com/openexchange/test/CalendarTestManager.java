@@ -56,6 +56,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -262,7 +263,7 @@ public class CalendarTestManager implements TestManager {
         extractInfo(response);
         return response.getAppointment(timezone);
     }
-    
+
     public Appointment copy(int parentFolderID, int objectID, JSONObject body) throws OXException {
         return this.copy(parentFolderID, objectID, body, false);
     }
@@ -417,26 +418,14 @@ public class CalendarTestManager implements TestManager {
         ListRequest req = new ListRequest(foldersAndIds, addNecessaryColumns(columns), getFailOnError());
         CommonListResponse resp = execute(req);
         extractInfo(resp);
-        return extractAppointments(resp);
-    }
 
-    public List<Appointment> extractAppointments(CommonListResponse resp) {
-        List<Appointment> list = new LinkedList<Appointment>();
-        int[] cols = resp.getColumns();
-        Object[][] arr = resp.getArray();
-        for (Object[] values : arr) {
-            Appointment temp = new Appointment();
-            list.add(temp);
-            for (int i = 0; i < cols.length; i++) {
-                if (values[i] != null) {
-                    temp.set(cols[i], conv(cols[i], values[i]));
-                } else {
-                    temp.remove(cols[i]);
-                }
-            }
-            fixDates(temp);
+        try {
+            Appointment[] appointmentArray = CTMUtils.jsonArray2AppointmentArray((JSONArray) resp.getData(), columns, timezone);
+            return Arrays.asList(appointmentArray);
+        } catch (Exception e) {
+            // TODO: handle exception
         }
-        return list;
+        return Collections.emptyList();
     }
 
     public List<Appointment> newappointments(Date start, Date end, int limit, int[] columns) {
@@ -449,36 +438,6 @@ public class CalendarTestManager implements TestManager {
             lastException = e;
             return null;
         }
-    }
-
-    private void fixDates(Appointment temp) {
-        if (temp.getFullTime()) {
-            return;
-        }
-        if (temp.containsStartDate()) {
-            temp.setStartDate(moveOffset(temp.getStartDate()));
-        }
-        if (temp.containsEndDate()) {
-            temp.setEndDate(moveOffset(temp.getEndDate()));
-        }
-    }
-
-    private Date moveOffset(Date value) {
-        int offset = timezone.getOffset(value.getTime());
-        return new Date(value.getTime() - offset);
-    }
-
-    private Object conv(int i, Object object) {
-        Object value = object;
-        switch (i) {
-            case Appointment.START_DATE:
-            case Appointment.END_DATE:
-            case Appointment.UNTIL:
-                if (!(object instanceof Date)) {
-                    value = new Date((Long) object);
-                }
-        }
-        return value;
     }
 
     private int[] addNecessaryColumns(int[] columns) {
@@ -611,6 +570,16 @@ public class CalendarTestManager implements TestManager {
         }
 
         return appointments.toArray(new Appointment[appointments.size()]);
+    }
+
+    public void delete(Appointment appointment, Date recurrenceDatePosition) {
+        final DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), recurrenceDatePosition, new Date(Long.MAX_VALUE));
+        deleteRequest.setFailOnError(false);
+        CommonDeleteResponse response = execute(deleteRequest);
+
+        if (response != null) {
+            extractInfo(response);
+        }
     }
 
     public void delete(Appointment appointment, boolean failOnErrorOverride, boolean deleteFromCreatedEntities) {

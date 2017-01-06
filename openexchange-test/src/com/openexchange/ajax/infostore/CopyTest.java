@@ -51,7 +51,6 @@ package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -63,16 +62,13 @@ import org.json.JSONException;
 import org.junit.Test;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.realtime.json.fields.ResourceIDField;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;
 
 public class CopyTest extends InfostoreAJAXTest {
-
-    public CopyTest() {
-        super();
-    }
 
     private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(Metadata.ID_LITERAL.getName(), Metadata.CREATION_DATE_LITERAL.getName(), Metadata.LAST_MODIFIED_LITERAL.getName(), Metadata.LAST_MODIFIED_UTC_LITERAL.getName(), Metadata.VERSION_LITERAL.getName(), Metadata.CURRENT_VERSION_LITERAL.getName(), Metadata.SEQUENCE_NUMBER_LITERAL.getName(), Metadata.CONTENT_LITERAL.getName(), new ResourceIDField().getColumnName()));
 
@@ -81,7 +77,8 @@ public class CopyTest extends InfostoreAJAXTest {
         final String objectId = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
         com.openexchange.file.storage.File file = itm.getAction(objectId);
-        final String id = itm.copyAction(objectId, Integer.toString(folderId), file);
+        itm.copyAction(objectId, Integer.toString(folderId), file);
+        final String id = file.getId();
 
         com.openexchange.file.storage.File orig = itm.getAction(objectId);
         com.openexchange.file.storage.File copy = itm.getAction(id);
@@ -110,7 +107,8 @@ public class CopyTest extends InfostoreAJAXTest {
         reload.setFileName("other.properties");
         
         final String objectId = Iterables.get(itm.getCreatedEntities(), 0).getId();
-        final String copyId = itm.copyAction(objectId, Integer.toString(folderId), reload);
+        itm.copyAction(objectId, Integer.toString(folderId), reload);
+        final String copyId = reload.getId();
 
         com.openexchange.file.storage.File file = itm.getAction(id);
 
@@ -144,7 +142,8 @@ public class CopyTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File file = itm.getAction(id);
         file.setTitle("copy");
 
-        final String copyId = itm.copyAction(id, Integer.toString(folderId), file);
+        itm.copyAction(id, Integer.toString(folderId), file);
+        final String copyId = file.getId();
 
         com.openexchange.file.storage.File orig = itm.getAction(id);
         com.openexchange.file.storage.File copy = itm.getAction(copyId);
@@ -167,32 +166,34 @@ public class CopyTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File org = itm.getAction(origId);
         org.setTitle("copy");
-        final String id = itm.copyAction(origId, String.valueOf(folderId), org);
+        itm.copyAction(origId, String.valueOf(folderId), org); //FIXME add 'upload' to copy method
+        final String id = org.getId();
 
         com.openexchange.file.storage.File copy = itm.getAction(id);
 
-        assertEquals(upload.getName(), copy.getFileName());
+        assertEquals(org.getFileName(), copy.getFileName());
         assertEquals("text/plain", copy.getFileMIMEType());
     }
 
     //Bug 4269
     @Test
     public void testVirtualFolder() throws Exception {
-
+        itm.setFailOnError(false);
         for (int folderId : virtualFolders) {
-            virtualFolderTest();
+            virtualFolderTest(folderId);
         }
     }
 
     //Bug 4269
-    public void virtualFolderTest() throws Exception {
+    public void virtualFolderTest(int folderId) throws Exception {
         try {
             final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
             com.openexchange.file.storage.File file = itm.getAction(origId);
             file.setFolderId("" + folderId);
-
-            final String copyId = itm.copyAction(origId, Integer.toString(folderId), file);
-            fail("Expected IOException");
+            
+            itm.copyAction(origId, Integer.toString(folderId), file);
+            AbstractAJAXResponse resp = itm.getLastResponse();
+            assertTrue(resp.hasError());
         } catch (final JSONException x) {
             assertTrue(x.getMessage(), x.getMessage().contains("IFO-1700"));
         }

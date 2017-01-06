@@ -69,7 +69,6 @@ import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -79,18 +78,12 @@ import com.openexchange.test.FolderTestManager;
 
 public class ListTest extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListTest.class);
-
-    private FolderTestManager ftm;
-
     private FolderObject folder;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         catm.setFailOnError(true);
-        ftm = new FolderTestManager(getClient());
-
     }
 
     @Test
@@ -112,7 +105,7 @@ public class ListTest extends AppointmentTest {
         listIDs.add(new ListIDInt(appointmentFolderId, id1.getObjectID()));
         listIDs.add(new ListIDInt(appointmentFolderId, id2.getObjectID()));
         listIDs.add(new ListIDInt(appointmentFolderId, id3.getObjectID()));
-        ;
+
         final List<Appointment> appointmentArray = catm.list(listIDs, cols);
 
         assertEquals("check response array", 3, appointmentArray.size());
@@ -160,7 +153,7 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setUid("1234567890abcdef" + System.currentTimeMillis());
         appointmentObj.setSequence(0);
 
-        final int userParticipantId = cotm.searchAction(testContext.getUserParticipants().get(1), FolderObject.SYSTEM_LDAP_FOLDER_ID,new int[] { Contact.INTERNAL_USERID })[0].getInternalUserId();
+        final int userParticipantId = getClient2().getValues().getUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
         final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 
