@@ -52,6 +52,7 @@ package com.openexchange.ajax.folder;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,7 +95,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         userId1 = client.getValues().getUserId();
-        folder = Create.createPrivateFolder("test for bug 16724_" + System.currentTimeMillis(), FolderObject.TASK, client.getValues().getUserId());
+        folder = Create.createPrivateFolder("test for bug 16724_" + UUID.randomUUID().toString(), FolderObject.TASK, client.getValues().getUserId());
         folder.setParentFolderID(client.getValues().getPrivateTaskFolder());
         client2 = new AJAXClient(testContext.acquireUser());
         folder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));

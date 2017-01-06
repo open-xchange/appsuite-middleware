@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -127,19 +128,19 @@ public class MoveTestNew extends AbstractAppointmentTest {
         }
 
         folderA = ftm.getFolderFromServer(getClient().getValues().getPrivateAppointmentFolder());
-        folderA1 = createPrivateFolder("SubfolderA1" + System.currentTimeMillis(), ftm, getClient());
+        folderA1 = createPrivateFolder("SubfolderA1" + UUID.randomUUID().toString(), ftm, getClient());
         ftm.insertFolderOnServer(folderA1);
 
         folderB = ftmB.getFolderFromServer(valuesB.getPrivateAppointmentFolder());
         addAuthorPermissions(folderB, getClient().getValues().getUserId(), ftmB);
-        folderB1 = createPrivateFolder("SubfolderB1" + System.currentTimeMillis(), ftmB, clientB, getClient());
+        folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, clientB, getClient());
         ftmB.insertFolderOnServer(folderB1);
-        folderB2 = createPrivateFolder("SubfolderB2" + System.currentTimeMillis(), ftmB, clientB, getClient());
+        folderB2 = createPrivateFolder("SubfolderB2" + UUID.randomUUID().toString(), ftmB, clientB, getClient());
         ftmB.insertFolderOnServer(folderB2);
 
         folderC = ftmC.getFolderFromServer(valuesC.getPrivateAppointmentFolder());
         addAuthorPermissions(folderC, getClient().getValues().getUserId(), ftmC);
-        folderC1 = createPrivateFolder("SubfolderC1" + System.currentTimeMillis(), ftmC, clientC, getClient());
+        folderC1 = createPrivateFolder("SubfolderC1" + UUID.randomUUID().toString(), ftmC, clientC, getClient());
         ftmC.insertFolderOnServer(folderC1);
     }
 

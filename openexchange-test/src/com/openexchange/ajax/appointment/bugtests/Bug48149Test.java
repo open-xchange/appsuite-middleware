@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -122,7 +123,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         ftm2.updateFolderOnServer(privateFolder2);
 
         // Add new shared folder.
-        sharedFolder1 = ftm1.generateSharedFolder("Shared Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), client3.getValues().getUserId());
+        sharedFolder1 = ftm1.generateSharedFolder("Shared Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), client3.getValues().getUserId());
         ftm1.insertFolderOnServer(sharedFolder1);
 
         // Appointments not visible for user 3.

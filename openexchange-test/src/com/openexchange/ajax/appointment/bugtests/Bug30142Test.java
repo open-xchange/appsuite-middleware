@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -76,7 +77,7 @@ public class Bug30142Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        folder = ftm.generatePrivateFolder("Bug 30142 " + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
+        folder = ftm.generatePrivateFolder("Bug 30142 " + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(folder);
 
         appointment = new Appointment();

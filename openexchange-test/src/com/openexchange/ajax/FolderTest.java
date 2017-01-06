@@ -60,6 +60,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -99,19 +100,19 @@ public class FolderTest extends AbstractAJAXTest {
     public void testDeleteFolder() throws OXException, JSONException, IOException, SAXException, OXException, OXException {
         final int userId = getClient().getValues().getUserId();
         
-        FolderObject parentObj = FolderTestManager.createNewFolderObject("DeleteMeImmediately" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        FolderObject parentObj = FolderTestManager.createNewFolderObject("DeleteMeImmediately" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         
         final int parent = ftm.insertFolderOnServer(parentObj).getParentFolderID();
         assertFalse(parent == -1);
         final Calendar cal = GregorianCalendar.getInstance();
         ftm.getFolderFromServer(parent);
 
-        FolderObject subFolder = FolderTestManager.createNewFolderObject("DeleteMeImmediatelyChild01" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
+        FolderObject subFolder = FolderTestManager.createNewFolderObject("DeleteMeImmediatelyChild01" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
         final int child01 = ftm.insertFolderOnServer(subFolder).getObjectID();
         assertFalse(child01 == -1);
         ftm.getFolderFromServer(child01);
 
-        FolderObject subFolder2 = FolderTestManager.createNewFolderObject("DeleteMeImmediatelyChild02" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
+        FolderObject subFolder2 = FolderTestManager.createNewFolderObject("DeleteMeImmediatelyChild02" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
         final int child02 = ftm.insertFolderOnServer(subFolder2).getObjectID();
         assertFalse(child02 == -1);
         ftm.getFolderFromServer(child02);
@@ -140,7 +141,7 @@ public class FolderTest extends AbstractAJAXTest {
         try {
             final int userId = getClient().getValues().getUserId();
 
-            FolderObject newFolder = FolderTestManager.createNewFolderObject("NewPrivateFolder" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+            FolderObject newFolder = FolderTestManager.createNewFolderObject("NewPrivateFolder" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
             fuid = ftm.insertFolderOnServer(newFolder).getObjectID();
             assertFalse(fuid == -1);
             final Calendar cal = GregorianCalendar.getInstance();
@@ -152,7 +153,7 @@ public class FolderTest extends AbstractAJAXTest {
             ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
             assertFalse((failedIds != null && failedIds.length > 0));
 
-            FolderObject newPublicFolder = FolderTestManager.createNewFolderObject("NewPublicFolder" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+            FolderObject newPublicFolder = FolderTestManager.createNewFolderObject("NewPublicFolder" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             fuid = ftm.insertFolderOnServer(newPublicFolder).getObjectID();
             assertFalse(fuid == -1);
             ftm.getFolderFromServer(fuid);
@@ -160,7 +161,7 @@ public class FolderTest extends AbstractAJAXTest {
             assertFalse((failedIds != null && failedIds.length > 0));
             fuid = -1;
 
-            FolderObject newInfostoreFolder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + System.currentTimeMillis(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, getClient().getValues().getPrivateInfostoreFolder());
+            FolderObject newInfostoreFolder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + UUID.randomUUID().toString(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, getClient().getValues().getPrivateInfostoreFolder());
             fuid = ftm.insertFolderOnServer(newInfostoreFolder).getObjectID();
             assertFalse(fuid == -1);
             FolderObject retrievedNewInfoStoreFolder = ftm.getFolderFromServer(fuid);
@@ -195,15 +196,15 @@ public class FolderTest extends AbstractAJAXTest {
         int moveFuid = -1;
         final int userId = getClient().getValues().getUserId();
 
-        FolderObject parent1 = FolderTestManager.createNewFolderObject("Parent01" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        FolderObject parent1 = FolderTestManager.createNewFolderObject("Parent01" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
         parent01 = ftm.insertFolderOnServer(parent1).getObjectID();
         assertFalse(parent01 == -1);
 
-        FolderObject parent2 = FolderTestManager.createNewFolderObject("Parent02" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        FolderObject parent2 = FolderTestManager.createNewFolderObject("Parent02" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
         parent02 = ftm.insertFolderOnServer(parent2).getObjectID();
         assertFalse(parent02 == -1);
 
-        FolderObject moveMe = FolderTestManager.createNewFolderObject("MoveMe" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, parent01);
+        FolderObject moveMe = FolderTestManager.createNewFolderObject("MoveMe" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, parent01);
         moveFuid = ftm.insertFolderOnServer(moveMe).getObjectID();
         assertFalse(moveFuid == -1);
 

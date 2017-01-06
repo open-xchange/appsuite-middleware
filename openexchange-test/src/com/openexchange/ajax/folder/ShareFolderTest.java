@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder;
 
 import static org.junit.Assert.assertTrue;
 import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,7 +98,7 @@ public class ShareFolderTest extends AbstractAJAXSession {
         final OCLPermission perm1 = Create.ocl(getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         final OCLPermission perm2 = Create.ocl(secondUserValues.getUserId(), false, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         parentId = getClient().getValues().getPrivateAppointmentFolder();
-        testFolder = Create.folder(parentId, "TestShared" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, perm1, perm2);
+        testFolder = Create.folder(parentId, "TestShared" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, perm1, perm2);
         InsertRequest insFolder = new InsertRequest(EnumAPI.OX_OLD, testFolder);
         InsertResponse folderInsertResponse = getClient().execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());

@@ -2,6 +2,7 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
@@ -43,7 +44,7 @@ public class MoveTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.RESERVED);
         objectId = catm.insert(appointmentObj).getObjectID();
 
-        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testMove2PrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testMove2PrivateFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
         int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         appointmentObj.setParentFolderID(targetFolder);
@@ -66,7 +67,7 @@ public class MoveTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.RESERVED);
         objectId = catm.insert(appointmentObj).getObjectID();
 
-        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testMove2PublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PUBLIC, userId, 2);
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testMove2PublicFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PUBLIC, userId, 2);
         int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         appointmentObj.setParentFolderID(targetFolder);

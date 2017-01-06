@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
@@ -247,7 +248,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     protected FolderObject createDefaultContactFolder() throws OXException, IOException, SAXException, JSONException {
-        FolderObject folder = getFolderManager().generatePublicFolder("pubsub default contact folder " + System.currentTimeMillis(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject folder = getFolderManager().generatePublicFolder("pubsub default contact folder " + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);
         return folder;
     }

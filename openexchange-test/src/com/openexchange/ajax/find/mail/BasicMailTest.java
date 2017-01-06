@@ -65,6 +65,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.junit.Before;
@@ -424,7 +425,7 @@ public class BasicMailTest extends AbstractMailFindTest {
 
     @Test
     public void testPrefixItemIsLastInContactsFacet() throws Exception {
-        FolderObject contactFolder = folderManager.generatePrivateFolder("findApiMailTestFolder_" + System.currentTimeMillis(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject contactFolder = folderManager.generatePrivateFolder("findApiMailTestFolder_" + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
 
         contactFolder = folderManager.insertFolderOnServer(contactFolder);
         List<Contact> contacts = new LinkedList<Contact>();

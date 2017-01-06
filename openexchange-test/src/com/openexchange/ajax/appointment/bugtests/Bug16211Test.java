@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -116,7 +117,7 @@ public class Bug16211Test extends AbstractAJAXSession {
         tz = getClient().getValues().getTimeZone();
         calendar = TimeTools.createCalendar(tz);
 
-        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR);
+        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR);
         FolderTools.shareFolder(client2, EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), getClient().getValues().getUserId(), OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
         appointment = createAppointment();

@@ -54,6 +54,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -75,7 +76,7 @@ public class Bug35687Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        folder = ftm.generateSharedFolder("Bug35687Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), getClient2().getValues().getUserId());
+        folder = ftm.generateSharedFolder("Bug35687Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), getClient2().getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
 
         catm.setClient(getClient2());

@@ -61,6 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Assert;
@@ -209,8 +210,8 @@ public class ReadFoldersTest extends AbstractOAuthTest {
             }
         }
 
-        privateSubfolder = ftm.generatePrivateFolder("oauth provider folder tree test - private " + contentType.toString() + " " + System.currentTimeMillis(), moduleId(), privateFolderId(), userId);
-        publicSubfolder = ftm.generatePublicFolder("oauth provider folder tree test - public " + contentType.toString() + " " + System.currentTimeMillis(), moduleId(), FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
+        privateSubfolder = ftm.generatePrivateFolder("oauth provider folder tree test - private " + contentType.toString() + " " + UUID.randomUUID().toString(), moduleId(), privateFolderId(), userId);
+        publicSubfolder = ftm.generatePublicFolder("oauth provider folder tree test - public " + contentType.toString() + " " + UUID.randomUUID().toString(), moduleId(), FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
         ftm.insertFoldersOnServer(new FolderObject[] { privateSubfolder, publicSubfolder });
 
         // prepare shared folders
@@ -226,7 +227,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         client2PrivateFolder.setPermissionsAsArray(new OCLPermission[] { adminPermission });
         client2PrivateFolder.setLastModified(new Date());
         ftm2.updateFolderOnServer(client2PrivateFolder);
-        sharedSubfolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared " + contentType.toString() + " " + System.currentTimeMillis(), moduleId(), privateFolderId(ajaxClient2), ajaxClient2.getValues().getUserId(), userId);
+        sharedSubfolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared " + contentType.toString() + " " + UUID.randomUUID().toString(), moduleId(), privateFolderId(ajaxClient2), ajaxClient2.getValues().getUserId(), userId);
         ftm2.insertFoldersOnServer(new FolderObject[] { sharedSubfolder });
 
         oAuthClient.logout();

@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
@@ -173,7 +174,7 @@ public class BasicDriveTest extends AbstractFindTest {
         final int num_of_subfolders = 3;
         files = new LinkedList<File>();
         for (int x = 0; x < num_of_subfolders; x++) {
-            FolderObject subfolder = folderManager.generatePrivateFolder("findApiDriveTestFolder_" + System.currentTimeMillis(), FolderObject.INFOSTORE, parentId, getClient().getValues().getUserId());
+            FolderObject subfolder = folderManager.generatePrivateFolder("findApiDriveTestFolder_" + UUID.randomUUID().toString(), FolderObject.INFOSTORE, parentId, getClient().getValues().getUserId());
             subfolder = folderManager.insertFolderOnServer(subfolder);
             parentId = subfolder.getObjectID();
 

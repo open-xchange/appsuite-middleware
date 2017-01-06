@@ -51,6 +51,7 @@ package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.UUID;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -78,7 +79,7 @@ public class ICalImportExportServletTest extends AbstractImportExportServletTest
         final InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
         final WebConversation webconv = getWebConversation();
         final Format format = Format.ICAL;
-        final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(), FolderObject.CONTACT);
+        final int folderId = createFolder("ical-empty-file-" + UUID.randomUUID().toString(), FolderObject.CONTACT);
         try {
             final WebRequest req = new PostMethodWebRequest(getCSVColumnUrl(IMPORT_SERVLET, folderId, format), true);
             req.selectFile("file", "empty.ics", is, format.getMimeType());

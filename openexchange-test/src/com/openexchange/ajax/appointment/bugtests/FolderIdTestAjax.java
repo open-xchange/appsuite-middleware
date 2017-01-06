@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -73,10 +74,10 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folderA = ftm.generateSharedFolder("folder A" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
+        folderA = ftm.generateSharedFolder("folder A" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
         ftm.insertFolderOnServer(folderA);
 
-        folderB = ftm.generateSharedFolder("folder B" + System.currentTimeMillis(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
+        folderB = ftm.generateSharedFolder("folder B" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
         ftm.insertFolderOnServer(folderB);
 
         appointment = new Appointment();

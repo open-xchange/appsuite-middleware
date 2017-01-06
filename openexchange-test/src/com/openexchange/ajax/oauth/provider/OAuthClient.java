@@ -70,7 +70,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CustomizedParser;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
@@ -78,6 +77,7 @@ import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
 import com.openexchange.oauth.provider.exceptions.OAuthRequestException;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link OAuthClient}

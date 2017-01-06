@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -151,7 +152,7 @@ public class UpdatesTest extends AbstractFolderTest {
     public void testModifiedAndDeleted() throws Throwable {
         // insert some
         final int numberOfFolders = 8;
-        List<FolderObject> newFolders = createAndPersistSeveral("testFolder-" + System.currentTimeMillis(), numberOfFolders);
+        List<FolderObject> newFolders = createAndPersistSeveral("testFolder-" + UUID.randomUUID().toString(), numberOfFolders);
 
         // update 2
         List<FolderObject> updatedFolders = new ArrayList<FolderObject>(2);

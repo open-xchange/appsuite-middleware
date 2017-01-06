@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -84,7 +85,7 @@ public class Bug26350Test extends AbstractAJAXSession {
         super.setUp();
         ids = new ArrayList<List<Integer>>();
 
-        folder = ftm.generatePrivateFolder("Bug26350 Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
+        folder = ftm.generatePrivateFolder("Bug26350 Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(folder);
     }
 

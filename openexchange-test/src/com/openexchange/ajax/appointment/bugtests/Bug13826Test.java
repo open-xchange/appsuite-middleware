@@ -53,6 +53,7 @@ import static com.openexchange.ajax.folder.Create.ocl;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Date;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,7 +99,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         userId = getClient().getValues().getUserId();
         sourceFolderId = getClient().getValues().getPrivateAppointmentFolder();
         OCLPermission ocl = ocl(userId, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        folder = Create.folder(sourceFolderId, "Folder to test bug 13826" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl);
+        folder = Create.folder(sourceFolderId, "Folder to test bug 13826-" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl);
         CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
         targetFolderId = folder.getObjectID();

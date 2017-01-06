@@ -55,6 +55,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -415,7 +416,7 @@ public class NewTest extends AppointmentTest {
 
     @Test
     public void testPrivateFolder() throws Exception {
-        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testPrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testPrivateFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
         int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = new Appointment();
@@ -436,7 +437,7 @@ public class NewTest extends AppointmentTest {
 
     @Test
     public void testPublicFolder() throws Exception {
-        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testPublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PUBLIC, userId, 2);
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testPublicFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PUBLIC, userId, 2);
         int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = new Appointment();
@@ -459,7 +460,7 @@ public class NewTest extends AppointmentTest {
     public void testSharedFolder() throws Exception {
         final int secondUserId = getClient2().getValues().getPrivateAppointmentFolder();
 
-        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testSharedFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testSharedFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
         final OCLPermission[] permission = new OCLPermission[] { FolderTestManager.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), com.openexchange.webdav.xml.FolderTest.createPermission(secondUserId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false)
         };
 

@@ -65,7 +65,6 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
@@ -82,6 +81,7 @@ import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TaskTestManager;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link FindTasksQueryTests}

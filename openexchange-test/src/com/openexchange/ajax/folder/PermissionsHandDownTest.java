@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -128,7 +129,7 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
             }
 
             final int objectId = folder.getObjectID();
-            folder = Create.createPrivateFolder("sub-permissions-hand-down_" + System.currentTimeMillis(), FolderObject.TASK, getClient().getValues().getUserId());
+            folder = Create.createPrivateFolder("sub-permissions-hand-down_" + UUID.randomUUID().toString(), FolderObject.TASK, getClient().getValues().getUserId());
             {
                 folder.setParentFolderID(objectId);
                 final InsertResponse response = getClient().execute(new InsertRequest(EnumAPI.OUTLOOK, folder));

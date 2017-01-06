@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
@@ -22,7 +23,7 @@ public class Bug11250Test extends AppointmentTest {
 
     @Test
     public void testBug11250() throws Exception {
-        FolderObject folderObj = FolderTestManager.createNewFolderObject("testBug11250" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        FolderObject folderObj = FolderTestManager.createNewFolderObject("testBug11250_" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
         
         final int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 

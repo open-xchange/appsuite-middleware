@@ -53,6 +53,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,7 +103,7 @@ public class DeleteFolderTest extends AbstractAJAXSession {
         final OCLPermission perm1 = Create.ocl(getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         final OCLPermission perm2 = Create.ocl(secondUserValues.getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         parentId = FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
-        testFolder = Create.folder(parentId, "TestDeletion" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PUBLIC, perm1, perm2);
+        testFolder = Create.folder(parentId, "TestDeletion" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PUBLIC, perm1, perm2);
         InsertRequest insFolder = new InsertRequest(EnumAPI.OX_OLD, testFolder);
         InsertResponse folderInsertResponse = secondClient.execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());

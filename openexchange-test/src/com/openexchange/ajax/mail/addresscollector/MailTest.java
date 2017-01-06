@@ -5,6 +5,7 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import java.io.IOException;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -112,7 +113,7 @@ public class MailTest extends AbstractMailTest {
     }
 
     private FolderObject createContactFolder() throws OXException, IOException, SAXException, JSONException {
-        final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, getClient().getValues().getUserId());
+        final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getUserId());
         folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         final CommonInsertResponse response = Executor.execute(client, new InsertRequest(EnumAPI.OX_OLD, folder));
         folder.setObjectID(response.getId());

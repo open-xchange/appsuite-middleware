@@ -4,6 +4,7 @@ package com.openexchange.ajax.appointment;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.util.Date;
+import java.util.UUID;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
@@ -27,7 +28,7 @@ public class CopyTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId1 = catm.insert(appointmentObj).getObjectID();
 
-        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testCopy" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testCopy" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
         int targetFolderId = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final JSONObject jsonObj = new JSONObject();

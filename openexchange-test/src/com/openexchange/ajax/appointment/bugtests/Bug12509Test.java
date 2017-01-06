@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,7 +93,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         clientB = new AJAXClient(testContext.acquireUser());
 
         folder = new FolderObject();
-        folder.setFolderName("Bug 12509 Test Folder" + System.currentTimeMillis());
+        folder.setFolderName("Bug 12509 Test Folder" + UUID.randomUUID().toString());
         folder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         folder.setType(FolderObject.PRIVATE);
         folder.setModule(FolderObject.CALENDAR);

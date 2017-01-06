@@ -57,6 +57,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -160,7 +161,7 @@ public class MailNotificationTest extends ShareTest {
     //        /*
     //         * First invitation
     //         */
-    //        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null);
+    //        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null);
     //        InviteRequest inviteRequest = new InviteRequest();
     //        inviteRequest.addTarget(new ShareTarget(testFolder1.getModule(), Integer.toString(testFolder1.getObjectID())));
     //        inviteRequest.addRecipient(guestPermission.getRecipient());
@@ -322,7 +323,7 @@ public class MailNotificationTest extends ShareTest {
     //---PERMISSION APIs--------------------------------------------------------------------------------------------------------------------
     @Test
     public void testGuestGetsMessageIfAddedViaFolderPermission() throws Exception {
-        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null);
+        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null);
         FolderObject toUpdate = new FolderObject();
         toUpdate.setObjectID(testFolder1.getObjectID());
         toUpdate.setLastModified(testFolder1.getLastModified());
@@ -354,7 +355,7 @@ public class MailNotificationTest extends ShareTest {
 
     @Test
     public void testGuestGetsMessageIfAddedViaFilePermission() throws Exception {
-        FileStorageObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null));
+        FileStorageObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null));
         File testFile = insertFile(testFolder1.getObjectID());
 
         DefaultFile toUpdate = new DefaultFile();
@@ -394,7 +395,7 @@ public class MailNotificationTest extends ShareTest {
 
     //---HELPERS----------------------------------------------------------------------------------------------------------------------------
     private void testUserGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, String shareMessage, boolean notify) throws Exception {
-        share(testFolder, file, createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null), shareMessage, notify);
+        share(testFolder, file, createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null), shareMessage, notify);
         assertGotA(initialSubject, hasSharedString, viewItemString, shareMessage, null, null);
     }
 

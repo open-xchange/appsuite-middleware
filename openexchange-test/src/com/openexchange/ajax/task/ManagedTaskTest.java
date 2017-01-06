@@ -2,6 +2,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.Calendar;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -27,7 +28,7 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
         super.setUp();
         manager = new TaskTestManager(getClient());
         fManager = new FolderTestManager(getClient());
-        folderID = fManager.insertFolderOnServer(fManager.generatePublicFolder("Managed task test folder #" + System.currentTimeMillis(), Module.TASK.getFolderConstant(), getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId())).getObjectID();
+        folderID = fManager.insertFolderOnServer(fManager.generatePublicFolder("Managed task test folder #" + UUID.randomUUID().toString(), Module.TASK.getFolderConstant(), getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId())).getObjectID();
         actual = null;
     }
 

@@ -53,6 +53,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map.Entry;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -83,7 +84,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(), FolderObject.CONTACT);
+        folderId = createFolder("vcard-contact-roundtrip-" + UUID.randomUUID().toString(), FolderObject.CONTACT);
     }
 
     @Test

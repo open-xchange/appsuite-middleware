@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
@@ -71,7 +72,7 @@ public class MoveTest extends AbstractContactTest {
         contactObj.setParentFolderID(contactFolderId);
         objectId = insertContact(contactObj);
 
-        folder = Create.createPrivateFolder("testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, userId);
+        folder = Create.createPrivateFolder("testCopy" + UUID.randomUUID().toString(), FolderObject.CONTACT, userId);
         folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         final InsertResponse folderCreateResponse = getClient().execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);
@@ -92,7 +93,7 @@ public class MoveTest extends AbstractContactTest {
         contactObj.setParentFolderID(contactFolderId);
         objectId = insertContact(contactObj);
 
-        folder = Create.createPrivateFolder("testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, userId);
+        folder = Create.createPrivateFolder("testCopy" + UUID.randomUUID().toString(), FolderObject.CONTACT, userId);
         folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         final InsertResponse folderCreateResponse = getClient().execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         folderCreateResponse.fillObject(folder);

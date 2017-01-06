@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.json.JSONException;
 import org.junit.Before;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
@@ -87,7 +88,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     private int createFolderForTest(final int userId) throws JSONException, OXException, IOException {
         final int parent = getClient().getValues().getPrivateInfostoreFolder();
-        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + System.currentTimeMillis(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
+        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + UUID.randomUUID().toString(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
         return ftm.insertFolderOnServer(folder).getObjectID();
     }
 

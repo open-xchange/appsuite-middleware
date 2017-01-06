@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.After;
@@ -129,7 +130,7 @@ public class FunctionTests extends AbstractAJAXSession {
         int userId1 = client.getValues().getUserId();
         int userId2 = client2.getValues().getUserId();
         try {
-            FolderObject folder = Create.createPrivateFolder("ChangeMyPermissions" + System.currentTimeMillis(), FolderObject.CALENDAR, userId1);
+            FolderObject folder = Create.createPrivateFolder("ChangeMyPermissions" + UUID.randomUUID().toString(), FolderObject.CALENDAR, userId1);
             folder.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
             InsertResponse insertR = client.execute(new InsertRequest(EnumAPI.OX_OLD, folder));
             GetResponse getR = client.execute(new GetRequest(EnumAPI.OX_OLD, insertR.getId()));

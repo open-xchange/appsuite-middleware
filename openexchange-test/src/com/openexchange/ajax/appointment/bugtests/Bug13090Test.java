@@ -54,6 +54,7 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Date;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,7 +97,7 @@ public class Bug13090Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Bug 13090 Folder " + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Bug 13090 Folder " + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
         CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);

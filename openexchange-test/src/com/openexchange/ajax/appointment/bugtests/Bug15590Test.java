@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,20 +44,16 @@ public class Bug15590Test extends AbstractAJAXSession {
 
     UserValues secondUserValues;
 
-    public Bug15590Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
         // Create 2. User
-        secondClient = new AJAXClient(testContext.acquireUser());
+        secondClient = getClient2();
         secondUserValues = secondClient.getValues();
 
         // Create Folder and share it to 2. User
-        testFolder = Create.createPrivateFolder("bug15590folder" + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getUserId());
+        testFolder = Create.createPrivateFolder("bug15590folder_" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getUserId());
         testFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
 
         com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, testFolder);

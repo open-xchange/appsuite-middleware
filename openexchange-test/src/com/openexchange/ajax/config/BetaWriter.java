@@ -52,9 +52,9 @@ package com.openexchange.ajax.config;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Random;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link Runnable} that constantly writes

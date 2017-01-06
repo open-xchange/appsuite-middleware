@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.java.Strings;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

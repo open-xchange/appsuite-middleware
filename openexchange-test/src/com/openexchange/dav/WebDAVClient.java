@@ -68,13 +68,13 @@ import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.junit.Assert;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionReportMethod;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link WebDAVClient}

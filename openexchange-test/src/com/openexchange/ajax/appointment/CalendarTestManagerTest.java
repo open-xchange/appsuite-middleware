@@ -59,6 +59,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,7 +82,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        testFolder = ftm.generatePublicFolder("Calendar Manager Tests " + System.currentTimeMillis(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
+        testFolder = ftm.generatePublicFolder("Calendar Manager Tests " + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(testFolder);
     }
 
