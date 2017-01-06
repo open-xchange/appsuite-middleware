@@ -326,7 +326,6 @@ public class HtmlProcessingTest {
             "</head>\n" +
             "\n" +
             "<body>\n" +
-            "<!--ИЛЬИЧЕВ Афанасий Федорович-->\n" +
             "\n" +
             "gab\n" +
             "\n" +
