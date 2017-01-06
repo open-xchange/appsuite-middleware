@@ -329,6 +329,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     protected static final String VIEW_TEXT = "text";
 
+    protected static final String VIEW_PLAIN_TEXT = "plain-text";
+
     protected static final String VIEW_HTML = "html";
 
     protected static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
@@ -351,6 +353,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             } else if (VIEW_TEXT.equals(view)) {
                 usm.setDisplayHtmlInlineContent(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else if (VIEW_PLAIN_TEXT.equals(view)) {
+                usm.setDisplayHtmlInlineContent(false);
+                displayMode = DisplayMode.PLAIN_TEXT;
             } else if (VIEW_HTML.equals(view)) {
                 usm.setDisplayHtmlInlineContent(true);
                 usm.setAllowHTMLImages(true);
