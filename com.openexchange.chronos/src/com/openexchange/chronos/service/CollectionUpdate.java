@@ -57,21 +57,7 @@ import java.util.List;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CollectionUpdate<O, E extends Enum<E>> {
-
-    /**
-     * Gets the list of newly added items.
-     *
-     * @return The added items, or an empty list if there are none
-     */
-    List<O> getAddedItems();
-
-    /**
-     * Gets the list of removed items.
-     *
-     * @return The removed items, or an empty list if there are none
-     */
-    List<O> getRemovedItems();
+public interface CollectionUpdate<O, E extends Enum<E>> extends SimpleCollectionUpdate<O> {
 
     /**
      * Gets the list of updated items.
@@ -79,13 +65,6 @@ public interface CollectionUpdate<O, E extends Enum<E>> {
      * @return The updated items, or an empty list if there are none
      */
     List<ItemUpdate<O, E>> getUpdatedItems();
-
-    /**
-     * Gets a value indicating whether the collection update is empty, i.e. if there were any kind of changes or not.
-     *
-     * @return <code>true</code> if there were no changes at all, <code>false</code>, otherwise
-     */
-    boolean isEmpty();
 
 }
 

@@ -84,6 +84,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -726,6 +727,26 @@ public class Utils {
             }
         }
         return visibleFolders;
+    }
+
+    /**
+     * Initializes a new attachment collection update based on the supplied original and updated attachment lists.
+     *
+     * @param originalAttachments The original attachments
+     * @param updatedAttachments The updated attachments
+     * @return The collection update
+     */
+    public static SimpleCollectionUpdate<Attachment> getAttachmentUpdates(List<Attachment> originalAttachments, List<Attachment> updatedAttachments) {
+        return new AbstractSimpleCollectionUpdate<Attachment>(originalAttachments, updatedAttachments) {
+
+            @Override
+            protected boolean matches(Attachment item1, Attachment item2) {
+                if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
+                    return item1.getManagedId() == item2.getManagedId();
+                }
+                return false;
+            }
+        };
     }
 
     private static FolderServiceDecorator initDecorator(CalendarSession session) {

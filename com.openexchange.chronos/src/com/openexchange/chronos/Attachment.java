@@ -62,23 +62,35 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 public class Attachment {
 
     private int managedId;
-	private String formatType;
+    private String uri;
+    private IFileHolder data;
+    private String contentId;
+    private Date created;
+    private String formatType;
     private long size;
 	private String filename;
-	private String name;
-    private IFileHolder data;
-	private String uri;
-	private String contentId;
-    private Date lastModified;
 
+    /**
+     * Initializes a new {@link Attachment}.
+     */
 	public Attachment() {
 		super();
 	}
 
+    /**
+     * Gets the attachment's format- / MIME-type.
+     * 
+     * @return The format type
+     */
 	public String getFormatType() {
 		return formatType;
 	}
 
+    /**
+     * Sets the attachment's format- / MIME-type.
+     * 
+     * @param formatType The format type
+     */
 	public void setFormatType(String formatType) {
 		this.formatType = formatType;
 	}
@@ -115,14 +127,6 @@ public class Attachment {
 		this.data = data;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getUri() {
 		return uri;
 	}
@@ -139,12 +143,17 @@ public class Attachment {
         this.contentId = contentId;
     }
 
-    public Date getLastModified() {
-        return lastModified;
+    public Date getCreated() {
+        return created;
     }
 
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    @Override
+    public String toString() {
+        return "Attachment [managedId=" + managedId + ", uri=" + uri + ", filename=" + filename + "]";
     }
 
 }

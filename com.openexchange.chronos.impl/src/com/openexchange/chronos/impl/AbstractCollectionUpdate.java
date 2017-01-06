@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.tools.mappings.DefaultMapper;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> implements CollectionUpdate<O, E> {
+public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> extends AbstractSimpleCollectionUpdate<O> implements CollectionUpdate<O, E> {
 
     /**
      * Creates an empty collection update.
@@ -97,8 +96,6 @@ public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> implements 
         };
     }
 
-    protected final List<O> removedItems;
-    protected final List<O> addedItems;
     protected final List<ItemUpdate<O, E>> updatedItems;
 
     /**
@@ -122,60 +119,21 @@ public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> implements 
      * @param ignoredFields Fields to ignore when determining the differences between updated items
      */
     public AbstractCollectionUpdate(DefaultMapper<O, E> mapper, List<O> originalItems, List<O> newItems, boolean considerUnset, E... ignoredFields) throws OXException {
-        super();
-        if (null == originalItems || 0 == originalItems.size()) {
-            removedItems = Collections.emptyList();
-            updatedItems = Collections.emptyList();
-            if (null == newItems || 0 == newItems.size()) {
-                addedItems = Collections.emptyList();
-            } else {
-                addedItems = new ArrayList<O>(newItems);
-            }
-        } else if (null == newItems || 0 == newItems.size()) {
-            removedItems = new ArrayList<O>(originalItems);
-            updatedItems = Collections.emptyList();
-            addedItems = Collections.emptyList();
-        } else {
-            addedItems = new ArrayList<O>();
+        super(originalItems, newItems);
+        if (null != originalItems && null != newItems) {
             updatedItems = new ArrayList<ItemUpdate<O, E>>();
-            removedItems = new ArrayList<O>();
             for (O newItem : newItems) {
                 O originalItem = find(originalItems, newItem);
-                if (null == originalItem) {
-                    addedItems.add(newItem);
-                } else {
+                if (null != originalItem) {
                     Set<E> differentFields = mapper.getDifferentFields(originalItem, newItem, considerUnset, ignoredFields);
                     if (0 < differentFields.size()) {
                         updatedItems.add(new DefaultItemUpdate<O, E>(originalItem, newItem, differentFields));
                     }
                 }
             }
-            for (O originalItem : originalItems) {
-                O newItem = find(newItems, originalItem);
-                if (null == newItem) {
-                    removedItems.add(originalItem);
-                }
-            }
+        } else {
+            updatedItems = Collections.emptyList();
         }
-    }
-
-    /**
-     * Gets a value indicating whether a specific item <i>matches</i> another one, i.e. they denote the same underlying resource.
-     *
-     * @param item1 The first item to check
-     * @param item2 The second item to check
-     * @return <code>true</code> if the items match, <code>false</code>, otherwise
-     */
-    protected abstract boolean matches(O item1, O item2);
-
-    @Override
-    public List<O> getAddedItems() {
-        return addedItems;
-    }
-
-    @Override
-    public List<O> getRemovedItems() {
-        return removedItems;
     }
 
     @Override
@@ -184,22 +142,8 @@ public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> implements 
     }
 
     @Override
-    public boolean isEmpty() {
-        return 0 == addedItems.size() && 0 == removedItems.size() && 0 == updatedItems.size();
-    }
-
-    @Override
     public String toString() {
         return "CollectionUpdate [" + removedItems.size() + " removed, " + addedItems.size() + " added, " + updatedItems.size() + " updated]";
-    }
-
-    private O find(Collection<O> items, O item) {
-        for (O o : items) {
-            if (matches(item, o)) {
-                return o;
-            }
-        }
-        return null;
     }
 
 }

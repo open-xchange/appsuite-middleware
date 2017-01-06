@@ -476,9 +476,9 @@ public class EventConverter {
                 appointment.setNumberOfAttachments(attachments.size());
                 Date lastModifiedOfNewestAttachment = null;
                 for (Attachment attachment : attachments) {
-                    if (null != attachment.getLastModified() &&
-                        (null == lastModifiedOfNewestAttachment || attachment.getLastModified().after(lastModifiedOfNewestAttachment))) {
-                        lastModifiedOfNewestAttachment = attachment.getLastModified();
+                    if (null != attachment.getCreated() &&
+                        (null == lastModifiedOfNewestAttachment || attachment.getCreated().after(lastModifiedOfNewestAttachment))) {
+                        lastModifiedOfNewestAttachment = attachment.getCreated();
                     }
                 }
                 appointment.setLastModifiedOfNewestAttachment(lastModifiedOfNewestAttachment);

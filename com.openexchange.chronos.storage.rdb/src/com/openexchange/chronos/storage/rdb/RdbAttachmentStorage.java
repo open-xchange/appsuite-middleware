@@ -276,7 +276,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                     attachment.setSize(resultSet.getLong("file_size"));
                     attachment.setFilename(resultSet.getString("filename"));
                     //                    attachment.setContentId(resultSet.getString("file_id"));
-                    attachment.setLastModified(new Date(resultSet.getLong("creation_date")));
+                    attachment.setCreated(new Date(resultSet.getLong("creation_date")));
                     put(attachmentsById, I(resultSet.getInt("attached")), attachment);
                 }
             }

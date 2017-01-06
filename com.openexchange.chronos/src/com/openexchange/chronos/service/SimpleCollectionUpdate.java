@@ -49,42 +49,36 @@
 
 package com.openexchange.chronos.service;
 
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
-import com.openexchange.chronos.Attachment;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
+import java.util.List;
 
 /**
- * {@link UpdateResult}
+ * {@link SimpleCollectionUpdate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends ItemUpdate<Event, EventField> {
+public interface SimpleCollectionUpdate<O> {
 
     /**
-     * Gets the attendee-related modifications performed through the update operation.
+     * Gets the list of newly added items.
      *
-     * @return The attendee updates, or an empty collection update if there were no attendee-related changes
+     * @return The added items, or an empty list if there are none
      */
-    CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates();
+    List<O> getAddedItems();
 
     /**
-     * Gets the alarm-related modifications performed through the update operation. Only alarms of the actual calendar user are considered.
+     * Gets the list of removed items.
      *
-     * @return The alarm updates, or an empty collection update if there were no alarm-related changes
-     * @see #getCalendarUser()
+     * @return The removed items, or an empty list if there are none
      */
-    CollectionUpdate<Alarm, AlarmField> getAlarmUpdates();
+    List<O> getRemovedItems();
 
     /**
-     * Gets the attachment-related modifications performed through the update operation.
+     * Gets a value indicating whether the collection update is empty, i.e. if there were any kind of changes or not.
      *
-     * @return The attachment updates, or an empty collection update if there were no attachment-related changes
+     * @return <code>true</code> if there were no changes at all, <code>false</code>, otherwise
      */
-    SimpleCollectionUpdate<Attachment> getAttachmentUpdates();
+    boolean isEmpty();
 
 }
+
