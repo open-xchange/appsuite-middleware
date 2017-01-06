@@ -52,12 +52,14 @@ package com.openexchange.chronos.impl;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
 
 /**
@@ -70,6 +72,7 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
 
     private final CollectionUpdate<Alarm, AlarmField> alarmUpdates;
     private final CollectionUpdate<Attendee, AttendeeField> attendeeUpdates;
+    private final SimpleCollectionUpdate<Attachment> attachmentUpdates;
 
     /**
      * Initializes a new {@link EventUpdateImpl}.
@@ -90,6 +93,7 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
             null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
         this.attendeeUpdates = AttendeeMapper.getInstance().getAttendeeUpdate(
             null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
+        this.attachmentUpdates = Utils.getAttachmentUpdates(originalEvent.getAttachments(), updatedEvent.getAttachments());
     }
 
     @Override
@@ -100,6 +104,11 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
     @Override
     public CollectionUpdate<Alarm, AlarmField> getAlarmUpdates() {
         return alarmUpdates;
+    }
+
+    @Override
+    public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
+        return attachmentUpdates;
     }
 
 }

@@ -142,6 +142,11 @@ public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> extends Abs
     }
 
     @Override
+    public boolean isEmpty() {
+        return super.isEmpty() && updatedItems.isEmpty();
+    }
+
+    @Override
     public String toString() {
         return "CollectionUpdate [" + removedItems.size() + " removed, " + addedItems.size() + " added, " + updatedItems.size() + " updated]";
     }

@@ -49,42 +49,12 @@
 
 package com.openexchange.chronos.service;
 
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
-import com.openexchange.chronos.Attachment;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-
 /**
  * {@link UpdateResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends ItemUpdate<Event, EventField> {
-
-    /**
-     * Gets the attendee-related modifications performed through the update operation.
-     *
-     * @return The attendee updates, or an empty collection update if there were no attendee-related changes
-     */
-    CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates();
-
-    /**
-     * Gets the alarm-related modifications performed through the update operation. Only alarms of the actual calendar user are considered.
-     *
-     * @return The alarm updates, or an empty collection update if there were no alarm-related changes
-     * @see #getCalendarUser()
-     */
-    CollectionUpdate<Alarm, AlarmField> getAlarmUpdates();
-
-    /**
-     * Gets the attachment-related modifications performed through the update operation.
-     *
-     * @return The attachment updates, or an empty collection update if there were no attachment-related changes
-     */
-    SimpleCollectionUpdate<Attachment> getAttachmentUpdates();
+public interface UpdateResult extends EventUpdate {
 
 }
