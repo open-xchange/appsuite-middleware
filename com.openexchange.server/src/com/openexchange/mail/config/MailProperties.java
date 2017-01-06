@@ -534,7 +534,7 @@ public final class MailProperties implements IMailProperties {
                     tmp = tmp.trim();
                     try {
                         ipAddressRenderer = IpAddressRenderer.createRendererFor(tmp);
-                        logBuilder.append("\tIP Address Pattern: Pattern syntax ``").append(tmp).append("´´ accepted.").append('\n');
+                        logBuilder.append("\tIP Address Pattern: Pattern syntax \u0060\u0060").append(tmp).append("\u00b4\u00b4 accepted.").append('\n');
                     } catch (Exception e) {
                         logBuilder.append("\tIP Address Pattern: Unsupported pattern syntax \"").append(tmp).append("\". Using simple renderer.").append('\n');
                     }
