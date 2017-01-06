@@ -415,12 +415,13 @@ public class CalendarTestManager implements TestManager {
     }
 
     public List<Appointment> list(ListIDs foldersAndIds, int[] columns) {
-        ListRequest req = new ListRequest(foldersAndIds, addNecessaryColumns(columns), getFailOnError());
+        int[] enhancedColumns = addNecessaryColumns(columns);
+        ListRequest req = new ListRequest(foldersAndIds, enhancedColumns, getFailOnError());
         CommonListResponse resp = execute(req);
         extractInfo(resp);
 
         try {
-            Appointment[] appointmentArray = CTMUtils.jsonArray2AppointmentArray((JSONArray) resp.getData(), columns, timezone);
+            Appointment[] appointmentArray = CTMUtils.jsonArray2AppointmentArray((JSONArray) resp.getData(), enhancedColumns, timezone);
             return Arrays.asList(appointmentArray);
         } catch (Exception e) {
             // TODO: handle exception
