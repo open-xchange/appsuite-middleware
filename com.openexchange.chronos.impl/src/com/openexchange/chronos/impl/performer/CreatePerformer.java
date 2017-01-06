@@ -127,13 +127,16 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             return result;
         }
         /*
-         * insert event, attendees & alarms of user
+         * insert event, attendees, attachments & alarms of user
          */
         storage.getEventStorage().insertEvent(newEvent);
         storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
             newEvent.setFolderId(i(folder));
             storage.getAlarmStorage().insertAlarms(newEvent, calendarUser.getId(), event.getAlarms());
+        }
+        if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), newEvent.getId(), event.getAttachments());
         }
         result.addCreation(new CreateResultImpl(loadEventData(newEvent.getId())));
         return result;

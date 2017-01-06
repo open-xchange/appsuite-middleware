@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.filter;
+import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -57,6 +58,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -72,6 +74,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
@@ -156,13 +159,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 Event newExceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(originalEvent, recurrenceID));
                 storage.getEventStorage().insertEvent(newExceptionEvent);
                 /*
-                 * take over all original attendees & alarms
+                 * take over all original attendees, attachments & alarms
                  */
-                List<Attendee> excpetionAttendees = new ArrayList<Attendee>(originalEvent.getAttendees());
-                storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), excpetionAttendees);
-                /*
-                 * take over all original alarms
-                 */
+                storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalEvent.getAttendees());
+                storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), newExceptionEvent.getId(), originalEvent.getAttachments());
                 for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent).entrySet()) {
                     storage.getAlarmStorage().insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue());
                 }
@@ -170,8 +170,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  * reload the newly created exception as 'original' & perform the update
                  * - recurrence rule is forcibly ignored during update to satisfy UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
                  * - sequence number is also ignored (since possibly incremented implicitly before)
+                 * - attachments are copied over from the master to detect possible differences correctly
                  */
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
+                newExceptionEvent.setAttachments(originalEvent.getAttachments());
                 updateEvent(newExceptionEvent, updatedEvent, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
                 addChangeExceptionDate(originalEvent, recurrenceID);
                 result.addCreation(new CreateResultImpl(loadEventData(newExceptionEvent.getId())));
@@ -225,10 +227,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     return;
                 }
             }
-            /*
-             * perform update
-             */
-            Consistency.setModified(timestamp, eventUpdate.getUpdate(), session.getUser().getId());
             if (needsSequenceNumberIncrement(eventUpdate)) {
                 eventUpdate.getUpdate().setSequence(originalEvent.getSequence() + 1);
             }
@@ -240,6 +238,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 eventUpdate.getUpdate().setChangeExceptionDates(null);
                 deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
             }
+            /*
+             * perform update
+             */
+            Consistency.setModified(timestamp, eventUpdate.getUpdate(), session.getUser().getId());
             storage.getEventStorage().updateEvent(eventUpdate.getUpdate());
             wasUpdated = true;
         }
@@ -251,6 +253,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             wasUpdated |= true;
         } else if (null != eventUpdate && needsParticipationStatusReset(eventUpdate)) {
             wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
+        }
+        /*
+         * process any attachment updates
+         */
+        if (updatedEvent.containsAttachments()) {
+            wasUpdated |= updateAttachments(originalEvent.getId(), originalEvent.getAttachments(), updatedEvent.getAttachments());
         }
         /*
          * process any alarm updates for the calendar user
@@ -280,7 +288,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
         }
     }
-
 
     /**
      * Determines if it's allowed to skip the check if the updated event already exists in the targeted folder or not.
@@ -412,6 +419,41 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             //TODO: any checks prior removal? user a must not add user b if not organizer?
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeHelper.getAttendeesToInsert());
         }
+    }
+
+    private boolean updateAttachments(int eventID, List<Attachment> originalAttachments, List<Attachment> newAttachments) throws OXException {
+        List<Attachment> attachmentsToInsert = new ArrayList<Attachment>();
+        List<Attachment> attachmentsToDelete = new ArrayList<Attachment>();
+        if (null == originalAttachments) {
+            if (null == newAttachments) {
+                return false;
+            }
+            attachmentsToInsert.addAll(newAttachments);
+        } else if (null == newAttachments) {
+            attachmentsToDelete.addAll(originalAttachments);
+        } else {
+            for (Attachment newAttachment : newAttachments) {
+                if (0 < newAttachment.getManagedId() && null != findAttachment(originalAttachments, newAttachment.getManagedId())) {
+                    continue;
+                }
+                attachmentsToInsert.add(newAttachment);
+            }
+            for (Attachment originalAttachment : originalAttachments) {
+                if (0 < originalAttachment.getManagedId() && null == findAttachment(newAttachments, originalAttachment.getManagedId())) {
+                    attachmentsToDelete.add(originalAttachment);
+                }
+            }
+        }
+        if (attachmentsToDelete.isEmpty() && attachmentsToInsert.isEmpty()) {
+            return false;
+        }
+        if (0 < attachmentsToDelete.size()) {
+            storage.getAttachmentStorage().deleteAttachments(session.getSession(), i(folder), eventID, attachmentsToDelete);
+        }
+        if (0 < attachmentsToInsert.size()) {
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), eventID, attachmentsToInsert);
+        }
+        return true;
     }
 
     /**

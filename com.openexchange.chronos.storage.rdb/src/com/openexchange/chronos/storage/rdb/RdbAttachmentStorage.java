@@ -51,11 +51,14 @@ package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.tools.arrays.Collections.put;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -63,20 +66,37 @@ import java.util.Map;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttachmentStorage;
-import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
+import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.AttachmentMetadataFactory;
+import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Streams;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CalendarStorage}
+ * {@link RdbAttachmentStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
 public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorage {
+
+    private static final int MODULE_ID = com.openexchange.groupware.Types.APPOINTMENT;
+    private static final AttachmentMetadataFactory METADATA_FACTORY = new AttachmentMetadataFactory();
 
     /**
      * Initializes a new {@link RdbAttachmentStorage}.
@@ -108,6 +128,133 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         }
     }
 
+    @Override
+    public void deleteAttachments(ServerSession session, int folderID, int eventID) throws OXException {
+        checkSession(session);
+        AttachmentBase attachmentBase = initAttachmentBase();
+        try {
+            attachmentBase.startTransaction();
+            List<Integer> attachmentIDs = new ArrayList<Integer>();
+            TimedResult<AttachmentMetadata> timedResult = attachmentBase.getAttachments(
+                session, folderID, eventID, MODULE_ID, new AttachmentField[] { AttachmentField.ID_LITERAL }, null, 0,
+                context, session.getUser(), session.getUserConfiguration());
+            SearchIterator<AttachmentMetadata> iterator = null;
+            try {
+                iterator = timedResult.results();
+                while (iterator.hasNext()) {
+                    attachmentIDs.add(I(iterator.next().getId()));
+                }
+            } finally {
+                SearchIterators.close(iterator);
+            }
+            if (0 < attachmentIDs.size()) {
+                attachmentBase.detachFromObject(folderID, eventID, MODULE_ID, I2i(attachmentIDs),
+                    session, context, session.getUser(), session.getUserConfiguration());
+            }
+            attachmentBase.commit();
+        } finally {
+            attachmentBase.finish();
+        }
+    }
+
+    @Override
+    public void deleteAttachments(ServerSession session, int folderID, int eventID, List<Attachment> attachments) throws OXException {
+        if (null == attachments || 0 == attachments.size()) {
+            return;
+        }
+        checkSession(session);
+        List<Integer> attachmentIDs = new ArrayList<Integer>(attachments.size());
+        for (Attachment attachment : attachments) {
+            attachmentIDs.add(I(attachment.getManagedId()));
+        }
+        AttachmentBase attachmentBase = initAttachmentBase();
+        try {
+            attachmentBase.startTransaction();
+            attachmentBase.detachFromObject(folderID, eventID, MODULE_ID, I2i(attachmentIDs),
+                session, context, session.getUser(), session.getUserConfiguration());
+            attachmentBase.commit();
+        } finally {
+            attachmentBase.finish();
+        }
+    }
+
+    @Override
+    public void insertAttachments(ServerSession session, int folderID, int eventID, List<Attachment> attachments) throws OXException {
+        if (null == attachments || 0 == attachments.size()) {
+            return;
+        }
+        checkSession(session);
+        AttachmentBase attachmentBase = initAttachmentBase();
+        try {
+            attachmentBase.startTransaction();
+            /*
+             * store new binary attachments
+             */
+            for (Attachment attachment : filterBinary(attachments)) {
+                AttachmentMetadata metadata = getMetadata(attachment, folderID, eventID);
+                InputStream inputStream = null;
+                try {
+                    inputStream = attachment.getData().getStream();
+                    attachmentBase.attachToObject(metadata, inputStream, session, context, session.getUser(), session.getUserConfiguration());
+                } finally {
+                    Streams.close(inputStream);
+                }
+            }
+            /*
+             * copy over referenced managed attachments
+             */
+            for (Attachment attachment : filterManaged(attachments)) {
+                AttachmentMetadata metadata = getMetadata(attachment, folderID, eventID);
+                metadata.setId(AttachmentBase.NEW);
+                InputStream inputStream = null;
+                try {
+                    inputStream = loadAttachmentData(attachment.getManagedId());
+                    attachmentBase.attachToObject(metadata, inputStream, session, context, session.getUser(), session.getUserConfiguration());
+                } finally {
+                    Streams.close(inputStream);
+                }
+            }
+            attachmentBase.commit();
+        } finally {
+            attachmentBase.finish();
+        }
+    }
+
+    public InputStream loadAttachmentData(int attachmentID) throws OXException {
+        String fileID;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            fileID = selectFileID(connection, context.getContextId(), attachmentID);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+        if (null == fileID) {
+            throw AttachmentExceptionCodes.ATTACHMENT_NOT_FOUND.create();
+        }
+        return getFileStorage().getFile(fileID);
+    }
+
+    private QuotaFileStorage getFileStorage() throws OXException, OXException {
+        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+        if (null == storageService) {
+            throw AttachmentExceptionCodes.FILESTORE_DOWN.create();
+        }
+        return storageService.getQuotaFileStorage(context.getContextId(), Info.general());
+    }
+
+    private void checkSession(ServerSession session) {
+        if (null == session || session.getContextId() != context.getContextId()) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private AttachmentBase initAttachmentBase() {
+        return Attachments.getInstance(dbProvider, true);
+    }
+
     private static Map<Integer, List<Attachment>> selectAttachments(Connection connection, int contextID, int[] objectIDs) throws SQLException {
         Map<Integer, List<Attachment>> attachmentsById = new HashMap<Integer, List<Attachment>>();
         String sql = new StringBuilder()
@@ -135,6 +282,60 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             }
         }
         return attachmentsById;
+    }
+
+    private static String selectFileID(Connection connection, int contextID, int attachmentID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT file_id FROM prg_attachment WHERE cid=? AND id=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, attachmentID);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? resultSet.getString(1) : null;
+            }
+        }
+    }
+
+    private static List<Attachment> filterBinary(List<Attachment> attachments) {
+        List<Attachment> binaryAttachments = new ArrayList<Attachment>();
+        for (Attachment attachment : attachments) {
+            if (null != attachment.getData()) {
+                binaryAttachments.add(attachment);
+            }
+        }
+        return binaryAttachments;
+    }
+
+    private static List<Attachment> filterManaged(List<Attachment> attachments) {
+        List<Attachment> managedAttachments = new ArrayList<Attachment>();
+        for (Attachment attachment : attachments) {
+            if (0 < attachment.getManagedId()) {
+                managedAttachments.add(attachment);
+            }
+        }
+        return managedAttachments;
+    }
+
+    private static AttachmentMetadata getMetadata(Attachment attachment, int folderID, int eventID) {
+        AttachmentMetadata metadata = METADATA_FACTORY.newAttachmentMetadata();
+        metadata.setModuleId(MODULE_ID);
+        metadata.setId(attachment.getManagedId());
+        metadata.setFolderId(folderID);
+        metadata.setAttachedId(eventID);
+        if (null != attachment.getFormatType()) {
+            metadata.setFileMIMEType(attachment.getFormatType());
+        } else if (null != attachment.getData()) {
+            metadata.setFileMIMEType(attachment.getData().getContentType());
+        }
+        if (null != attachment.getFilename()) {
+            metadata.setFilename(attachment.getFilename());
+        } else if (null != attachment.getData()) {
+            metadata.setFilename(attachment.getData().getName());
+        }
+        if (0 < attachment.getSize()) {
+            metadata.setFilesize(attachment.getSize());
+        } else if (null != attachment.getData()) {
+            metadata.setFilesize(attachment.getData().getLength());
+        }
+        return metadata;
     }
 
 }

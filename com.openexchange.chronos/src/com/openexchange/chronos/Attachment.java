@@ -61,13 +61,12 @@ import com.openexchange.ajax.fileholder.IFileHolder;
  */
 public class Attachment {
 
+    private int managedId;
 	private String formatType;
     private long size;
 	private String filename;
-	private String url;
-    private int managedId;
-	private IFileHolder data;
 	private String name;
+    private IFileHolder data;
 	private String uri;
 	private String contentId;
     private Date lastModified;
@@ -98,14 +97,6 @@ public class Attachment {
 
 	public void setFilename(String filename) {
 		this.filename = filename;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
 	}
 
     public int getManagedId() {

@@ -64,7 +64,6 @@ import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -201,13 +200,10 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Event exceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(originalEvent, recurrenceID));
                 storage.getEventStorage().insertEvent(exceptionEvent);
                 /*
-                 * take over all original attendees & alarms
+                 * take over all original attendees, attachments & alarms
                  */
-                List<Attendee> excpetionAttendees = new ArrayList<Attendee>(originalEvent.getAttendees());
-                storage.getAttendeeStorage().insertAttendees(exceptionEvent.getId(), excpetionAttendees);
-                /*
-                 * take over all original alarms
-                 */
+                storage.getAttendeeStorage().insertAttendees(exceptionEvent.getId(), originalEvent.getAttendees());
+                storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), exceptionEvent.getId(), originalEvent.getAttachments());
                 for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent).entrySet()) {
                     storage.getAlarmStorage().insertAlarms(exceptionEvent, entry.getKey().intValue(), entry.getValue());
                 }

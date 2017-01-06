@@ -62,6 +62,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -144,6 +145,24 @@ public class CalendarUtils {
             for (Attendee attendee : attendees) {
                 if (entity == attendee.getEntity()) {
                     return attendee;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Looks up a specific (managed) attachment in a collection of attachments based on its managed identifier.
+     *
+     * @param attachments The attachments to search
+     * @param managedId The managed identifier to lookup
+     * @return The matching attachment, or <code>null</code> if not found
+     */
+    public static Attachment findAttachment(List<Attachment> attachments, int managedId) {
+        if (null != attachments && 0 < attachments.size()) {
+            for (Attachment attachment : attachments) {
+                if (managedId == attachment.getManagedId()) {
+                    return attachment;
                 }
             }
         }

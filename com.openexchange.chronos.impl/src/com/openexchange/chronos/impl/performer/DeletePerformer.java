@@ -415,6 +415,10 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                 storage.getAlarmStorage().insertAlarms(exceptionEvent, userID, entry.getValue());
             }
         }
+        /*
+         * take over all original attachments
+         */
+        storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), exceptionEvent.getId(), originalMasterEvent.getAttachments());
         result.addCreation(new CreateResultImpl(loadEventData(exceptionEvent.getId())));
         /*
          * track new change exception date in master

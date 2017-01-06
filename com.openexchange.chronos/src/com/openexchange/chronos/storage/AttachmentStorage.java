@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AttachmentStorage}
@@ -62,8 +63,59 @@ import com.openexchange.exception.OXException;
  */
 public interface AttachmentStorage {
 
-    Map<Integer, List<Attachment>> loadAttachments(int[] objectIDs) throws OXException;
+    /**
+     * Inserts new attachments for a specific event.
+     * <p/>
+     * Binary attachments (where {@link Attachment#getData()} is not <code>null</code>) are uploaded and stored, while existing
+     * <i>managed</i> attachments (where {@link Attachment#getManagedId()} is not <code>0</code>) attached to other groupware objects are
+     * copied over.
+     * <p/>
+     * Permissions may be re-checked under the hood, therefore a valid session and parent folder needs to passed.
+     *
+     * @param session The session of the acting user
+     * @param folderID The identifier of the parent folder where the event appears for the acting user
+     * @param eventID The identifier of the event to add the attachments for
+     * @param attachments The attachments to add
+     */
+    void insertAttachments(ServerSession session, int folderID, int eventID, List<Attachment> attachments) throws OXException;
 
-    List<Attachment> loadAttachments(int objectID) throws OXException;
+    /**
+     * Loads metadata for all attachments of specific events.
+     *
+     * @param eventIDs The identifiers of the event to get the attachment metadata for
+     * @return The metadata for all attachments of each event, mapped to the corresponding event's identifier
+     */
+    Map<Integer, List<Attachment>> loadAttachments(int[] eventIDs) throws OXException;
+
+    /**
+     * Loads metadata for all attachments of a specific event.
+     *
+     * @param eventID The identifier of the event to get the attachment metadata for
+     * @return The metadata for all attachments of the event, or <code>null</code> if there are none
+     */
+    List<Attachment> loadAttachments(int eventID) throws OXException;
+
+    /**
+     * Deletes all attachments of a specific event.
+     * <p/>
+     * Permissions may be re-checked under the hood, therefore a valid session and parent folder needs to passed.
+     *
+     * @param session The session of the acting user
+     * @param folderID The identifier of the parent folder where the event appears for the acting user
+     * @param eventID The identifier of the event to delete the attachments for
+     */
+    void deleteAttachments(ServerSession session, int folderID, int eventID) throws OXException;
+
+    /**
+     * Deletes certain attachments of a specific event.
+     * <p/>
+     * Permissions may be re-checked under the hood, therefore a valid session and parent folder needs to passed.
+     *
+     * @param session The session of the acting user
+     * @param folderID The identifier of the parent folder where the event appears for the acting user
+     * @param attachments The attachments to delete
+     * @param eventID The identifier of the event to delete the attachments for
+     */
+    void deleteAttachments(ServerSession session, int folderID, int eventID, List<Attachment> attachments) throws OXException;
 
 }

@@ -179,6 +179,7 @@ public abstract class AbstractUpdatePerformer {
      * <li>insertion of a <i>tombstone</i> record for the original event</li>
      * <li>insertion of <i>tombstone</i> records for the original event's attendees</li>
      * <li>deletion of any alarms associated with the event</li>
+     * <li>deletion of any attachments associated with the event</li>
      * <li>deletion of the event</li>
      * <li>deletion of the event's attendees</li>
      * </ul>
@@ -199,6 +200,7 @@ public abstract class AbstractUpdatePerformer {
         storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
         storage.getAttendeeStorage().insertTombstoneAttendees(id, AttendeeMapper.getInstance().getTombstones(originalEvent.getAttendees()));
         storage.getAlarmStorage().deleteAlarms(id);
+        storage.getAttachmentStorage().deleteAttachments(session.getSession(), i(folder), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
         storage.getAttendeeStorage().deleteAttendees(id);
         result.addDeletion(new DeleteResultImpl(originalEvent));
