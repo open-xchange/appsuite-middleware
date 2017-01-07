@@ -49,19 +49,32 @@
 
 package com.openexchange.caldav;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
+import org.slf4j.LoggerFactory;
+import com.openexchange.caldav.resources.EventResource;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.AlarmComponent;
+import com.openexchange.chronos.ical.ComponentData;
+import com.openexchange.chronos.ical.EventComponent;
+import com.openexchange.chronos.ical.ICalProperty;
+import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 
@@ -85,7 +98,131 @@ public class Tools {
         return PhantomMaster.class.isInstance(event);
     }
 
+    /**
+     * Optionally gets an extended iCal property from a previously imported iCal component.
+     *
+     * @param component The component to get the extended property from
+     * @param propertyName The extended propery's name
+     * @return The extended iCal property, or <code>null</code> if not set
+     */
+    public static ICalProperty optICalProperty(Object component, String propertyName) {
+        if (null != component && ComponentData.class.isInstance(component)) {
+            return optICalProperty((ComponentData) component, propertyName);
+        }
+        return null;
+    }
+
+    /**
+     * Optionally gets an extended iCal property date value from a previously imported iCal component.
+     *
+     * @param component The component to get the extended date property value from
+     * @param propertyName The extended propery's name
+     * @return The extended iCal property's value parsed as UTC date, or <code>null</code> if not set
+     */
+    public static Date optICalDateProperty(Object component, String propertyName) {
+        ICalProperty iCalProperty = optICalProperty(component, propertyName);
+        if (null != iCalProperty && Strings.isNotEmpty(iCalProperty.getValue())) {
+            try {
+                return parseUTC(iCalProperty.getValue());
+            } catch (ParseException e) {
+                LoggerFactory.getLogger(Tools.class).warn("Error parsing UTC date from iCal property", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Optionally gets an extended iCal property from a previously imported event component.
+     *
+     * @param event The event to get the extended property from
+     * @param propertyName The extended propery's name
+     * @return The extended iCal property, or <code>null</code> if not set
+     */
+    private static ICalProperty optICalProperty(ComponentData component, String propertyName) {
+        List<ICalProperty> extraProperties = component.getProperties();
+        if (null != extraProperties && 0 < extraProperties.size()) {
+            if (-1 != propertyName.indexOf('*')) {
+                Pattern pattern = Pattern.compile(Strings.wildcardToRegex(propertyName));
+                for (ICalProperty extraProperty : extraProperties) {
+                    if (pattern.matcher(extraProperty.getName()).matches()) {
+                        return extraProperty;
+                    }
+                }
+            } else {
+                for (ICalProperty extraProperty : extraProperties) {
+                    if (propertyName.equals(extraProperty.getName())) {
+                        return extraProperty;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static EventComponent asComponent(Event event) {
+        if (EventComponent.class.isInstance(event)) {
+            return (EventComponent) event;
+        }
+        return new EventComponent(event, null);
+    }
+
+    public static AlarmComponent addProperty(Alarm alarm, ICalProperty property) {
+        AlarmComponent component = AlarmComponent.class.isInstance(alarm) ? (AlarmComponent) alarm : new AlarmComponent(alarm, null);
+        List<ICalProperty> properties = component.getProperties();
+        if (null == properties) {
+            properties = new ArrayList<ICalProperty>();
+            component.setProperties(properties);
+        }
+        properties.add(property);
+        return component;
+    }
+
+    public static EventComponent addProperty(Event event, ICalProperty property) {
+        EventComponent component = EventComponent.class.isInstance(event) ? (EventComponent) event : new EventComponent(event, null);
+        List<ICalProperty> properties = component.getProperties();
+        if (null == properties) {
+            properties = new ArrayList<ICalProperty>();
+            component.setProperties(properties);
+        }
+        properties.add(property);
+        return component;
+    }
+
+    public static AttachmentMetadata getAttachmentMetadata(Attachment attachment, EventResource eventResource, Event event) throws OXException {
+        AttachmentMetadata metadata = AttachmentUtils.newAttachmentMetadata();
+        metadata.setId(attachment.getManagedId());
+        if (null != eventResource) {
+            metadata.setModuleId(AttachmentUtils.getModuleId(eventResource.getParent().getFolder().getContentType()));
+            metadata.setFolderId(parse(eventResource.getParent().getFolder().getID()));
+        }
+        if (null != event) {
+            metadata.setAttachedId(event.getId());
+        }
+        if (null != attachment.getFormatType()) {
+            metadata.setFileMIMEType(attachment.getFormatType());
+        } else if (null != attachment.getData()) {
+            metadata.setFileMIMEType(attachment.getData().getContentType());
+        }
+        if (null != attachment.getFilename()) {
+            metadata.setFilename(attachment.getFilename());
+        } else if (null != attachment.getData()) {
+            metadata.setFilename(attachment.getData().getName());
+        }
+        if (0 < attachment.getSize()) {
+            metadata.setFilesize(attachment.getSize());
+        } else if (null != attachment.getData()) {
+            metadata.setFilesize(attachment.getData().getLength());
+        }
+        return metadata;
+    }
+
     public static Date getLatestModified(Date lastModified1, Date lastModified2) {
+        if (null == lastModified1) {
+            return lastModified2;
+        }
+        if (null == lastModified2) {
+            return lastModified1;
+        }
         return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;
     }
 
@@ -160,9 +297,15 @@ public class Tools {
     }
 
     public static String formatAsUTC(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
+    }
+
+    public static Date parseUTC(String value) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat.parse(value);
     }
 
     /**

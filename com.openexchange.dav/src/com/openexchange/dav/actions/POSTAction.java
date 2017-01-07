@@ -54,8 +54,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
+import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.attachments.AttachmentUtils;
 import com.openexchange.dav.internal.ShareHelper;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.dav.resources.DAVObjectResource;
@@ -110,7 +110,7 @@ public class POSTAction extends DAVAction {
         WebdavResource resource = request.getResource();
         if (null != resource) {
             String action = request.getParameter("action");
-            if (Strings.isNotEmpty(action) && CommonResource.class.isInstance(resource)) {
+            if (Strings.isNotEmpty(action) && DAVObjectResource.class.isInstance(resource)) {
                 /*
                  * handle special attachment action
                  */
@@ -199,7 +199,7 @@ public class POSTAction extends DAVAction {
         /*
          * get targeted resource & attachment related parameters
          */
-        DAVObjectResource resource = requireResource(request, DAVObjectResource.class);
+        DAVObjectResource<?> resource = requireResource(request, DAVObjectResource.class);
         String contentType = getContentType(request);
         String fileName = AttachmentUtils.parseFileName(request);
         String[] recurrenceIDs = Strings.splitByComma(request.getHeader("rid"));
@@ -233,7 +233,7 @@ public class POSTAction extends DAVAction {
         /*
          * get targeted resource & attachment related parameters
          */
-        DAVObjectResource resource = requireResource(request, DAVObjectResource.class);
+        DAVObjectResource<?> resource = requireResource(request, DAVObjectResource.class);
         String managedId = request.getHeader("managed-id");
         if (Strings.isEmpty(managedId)) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
@@ -260,7 +260,7 @@ public class POSTAction extends DAVAction {
         /*
          * get targeted resource & attachment related parameters
          */
-        DAVObjectResource resource = requireResource(request, DAVObjectResource.class);
+        DAVObjectResource<?> resource = requireResource(request, DAVObjectResource.class);
         String contentType = getContentType(request);
         String fileName = AttachmentUtils.parseFileName(request);
         long size = getContentLength(request);

@@ -47,36 +47,62 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.caldav;
 
-import com.openexchange.dav.DAVProtocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
-
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link CalendarOrder}
+ * {@link PhantomMaster}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class CalendarOrder extends SingleXMLPropertyMixin {
+public class PhantomMaster extends Event {
 
-    public static final int NO_ORDER = -1;
-
-    private final int order;
+    private final List<Event> detachedOccurrences;
 
     /**
-     * Initializes a new {@link CalendarOrder}.
+     * Initializes a new {@link PhantomMaster}.
      *
-     * @param order The numerical order
+     * @param detachedOccurrences The detached occurrences
      */
-    public CalendarOrder(int order) {
-        super(DAVProtocol.APPLE_NS.getURI(), "calendar-order");
-        this.order = order;
+    public PhantomMaster(List<Event> detachedOccurrences) {
+        super();
+        this.detachedOccurrences = detachedOccurrences;
+        setSummary("[Placeholder Item]");
+        if (null != detachedOccurrences && 0 < detachedOccurrences.size()) {
+            Event occurrence = detachedOccurrences.get(0);
+            setUid(occurrence.getUid());
+            setFilename(occurrence.getFilename());
+            setFolderId(occurrence.getFolderId());
+            setId(occurrence.getSeriesId());
+            setSeriesId(occurrence.getSeriesId());
+            setCreated(occurrence.getCreated());
+            setCreatedBy(occurrence.getCreatedBy());
+            setModifiedBy(occurrence.getModifiedBy());
+            List<Date> changeExceptionDates = new ArrayList<Date>(detachedOccurrences.size());
+            Date lastModified = occurrence.getLastModified();
+            for (Event event : detachedOccurrences) {
+                lastModified = Tools.getLatestModified(lastModified, event);
+                if (null != event.getRecurrenceId()) {
+                    changeExceptionDates.add(new Date(event.getRecurrenceId().getValue()));
+                }
+            }
+            setLastModified(lastModified);
+            setChangeExceptionDates(changeExceptionDates);
+        }
     }
 
-    @Override
-    protected String getValue() {
-        return NO_ORDER == order ? null : String.valueOf(order);
+    /**
+     * Gets the detachedOccurrences
+     *
+     * @return The detachedOccurrences
+     */
+    public List<Event> getDetachedOccurrences() {
+        return detachedOccurrences;
     }
 
 }

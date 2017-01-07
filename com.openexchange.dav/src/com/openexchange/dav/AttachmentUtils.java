@@ -47,25 +47,31 @@
  *
  */
 
-package com.openexchange.dav.attachments;
+package com.openexchange.dav;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
 import com.google.common.io.BaseEncoding;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.AttachmentMetadataFactory;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -211,6 +217,62 @@ public class AttachmentUtils {
             return WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_NOT_FOUND);
         }
         return WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Copies an existing attachment to another target object.
+     *
+     * @param attachments The attachment service instance to use for the operation
+     * @param collection The parent folder collection
+     * @param originalMetadata The metadata of the attachment to copy
+     * @param targetObject The target groupware object for adding the attachment
+     * @return The copied attachment metadata
+     */
+    public static AttachmentMetadata copyAttachment(AttachmentBase attachments, FolderCollection<?> collection, AttachmentMetadata originalMetadata, int targetObjectID) throws OXException {
+        DAVFactory factory = collection.getFactory();
+        AttachmentMetadata metadata = newAttachmentMetadata(originalMetadata);
+        metadata.setId(0);
+        metadata.setAttachedId(targetObjectID);
+        InputStream inputStream = null;
+        try {
+            inputStream = attachments.getAttachedFile(factory.getSession(), originalMetadata.getFolderId(), originalMetadata.getAttachedId(), originalMetadata.getModuleId(), originalMetadata.getId(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
+            attachments.attachToObject(metadata, inputStream, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
+            return metadata;
+        } finally {
+            Streams.close(inputStream);
+        }
+    }
+
+    /**
+     * Adds a new attachment to a groupware object.
+     *
+     * @param attachments The attachment service instance to use for the operation
+     * @param collection The parent folder collection
+     * @param inputStream The attachment data to store
+     * @param targetObject The target groupware object for adding the attachment
+     * @param contentType The content type of the attachment
+     * @param fileName The filename of the attachment
+     * @param size The indicated size in bytes of the attachment
+     * @return The added attachment's metadata
+     */
+    public static AttachmentMetadata addAttachment(AttachmentBase attachments, FolderCollection<?> collection, InputStream inputStream, int objectID, String contentType, String fileName, long size) throws OXException {
+        long maxSize = AttachmentConfig.getMaxUploadSize();
+        if (0 < maxSize) {
+            if (maxSize < size) {
+                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-attachment-size", collection.getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            }
+            inputStream = new CountingInputStream(inputStream, maxSize);
+        }
+        DAVFactory factory = collection.getFactory();
+        AttachmentMetadata metadata = newAttachmentMetadata();
+        metadata.setAttachedId(objectID);
+        metadata.setFileMIMEType(contentType);
+        metadata.setFilename(fileName);
+        metadata.setModuleId(getModuleId(collection.getFolder().getContentType()));
+        metadata.setFilesize(size);
+        metadata.setFolderId(Integer.parseInt(collection.getFolder().getID()));
+        attachments.attachToObject(metadata, inputStream, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
+        return metadata;
     }
 
 }

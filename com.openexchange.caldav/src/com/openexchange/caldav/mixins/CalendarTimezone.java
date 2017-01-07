@@ -49,21 +49,13 @@
 
 package com.openexchange.caldav.mixins;
 
-import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.SimpleMode;
-import com.openexchange.data.conversion.ical.ZoneInfo;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -98,13 +90,16 @@ public class CalendarTimezone extends SingleXMLPropertyMixin {
                 user = factory.getUser();
             }
             if (Strings.isNotEmpty(user.getTimeZone())) {
-                ICalEmitter icalEmitter = factory.getIcalEmitter();
-                ICalSession iCalSession = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
-                if (icalEmitter.writeTimeZone(iCalSession, user.getTimeZone(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>())) {
-                    ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(4096);
-                    icalEmitter.writeSession(iCalSession, outputStream);
-                    return new String(outputStream.toByteArray(), "UTF-8");
-                }
+                ICalService iCalService = factory.getService(ICalService.class);
+                byte[] iCal = iCalService.exportICal(iCalService.initParameters()).add(user.getTimeZone()).toByteArray();
+                return new String(iCal, "UTF-8");
+                //                ICalEmitter icalEmitter = factory.getIcalEmitter();
+                //                ICalSession iCalSession = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
+                //                if (icalEmitter.writeTimeZone(iCalSession, user.getTimeZone(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>())) {
+                //                    ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(4096);
+                //                    icalEmitter.writeSession(iCalSession, outputStream);
+                //                    return new String(outputStream.toByteArray(), "UTF-8");
+                //                }
             }
         } catch (OXException | UnsupportedEncodingException e) {
             org.slf4j.LoggerFactory.getLogger(CalendarTimezone.class).warn("Error serializing calendar-timezone", e);

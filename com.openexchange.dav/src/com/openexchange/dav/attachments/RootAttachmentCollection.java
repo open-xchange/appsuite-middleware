@@ -52,6 +52,7 @@ package com.openexchange.dav.attachments;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.AddressbookHomeSet;

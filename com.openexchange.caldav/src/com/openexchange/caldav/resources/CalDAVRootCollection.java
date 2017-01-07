@@ -63,6 +63,7 @@ import com.openexchange.dav.Privilege;
 import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -160,21 +161,16 @@ public class CalDAVRootCollection extends DAVRootCollection {
         }
     }
 
-    private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
-        if (TaskContentType.getInstance().equals(folder.getContentType())) {
-            return factory.mixin(new TaskCollection(factory, constructPathForChildResource(folder), folder));
-        } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder));
-        } else {
-            throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
-        }
+    private FolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
+        return createCollection(folder, CalDAVFolderCollection.NO_ORDER);
     }
 
-    private CalDAVFolderCollection<?> createCollection(UserizedFolder folder, int order) throws OXException {
+    private FolderCollection<?> createCollection(UserizedFolder folder, int order) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
             return factory.mixin(new TaskCollection(factory, constructPathForChildResource(folder), folder, order));
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order));
+            //             return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order));
+            return factory.mixin(new EventCollection(factory, constructPathForChildResource(folder), folder, order));
         } else {
             throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
         }
