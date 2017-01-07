@@ -294,7 +294,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 
 					final SessionObject session = getSession();
 					final JsonMessageHandler messageHandler = new JsonMessageHandler(MailAccount.DEFAULT_ID, mailPath, mail,
-							DisplayMode.DISPLAY, false, session, UserSettingMailStorage.getInstance().getUserSettingMail(
+							DisplayMode.DISPLAY, false, true, session, UserSettingMailStorage.getInstance().getUserSettingMail(
 									session.getUserId(), session.getContextId()), false, -1);
 					new MailMessageParser().parseMailMessage(mail, messageHandler);
 					final JSONObject jObject = messageHandler.getJSONObject();
@@ -351,7 +351,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			session.setPassword(getPassword());
 
 			final MailMessage rfc2231Mail = MimeMessageConverter.convertMessage(RFC2231.getBytes(com.openexchange.java.Charsets.US_ASCII));
-			final JsonMessageHandler messageHandler = new JsonMessageHandler(MailAccount.DEFAULT_ID, null, rfc2231Mail, DisplayMode.DISPLAY, false,
+			final JsonMessageHandler messageHandler = new JsonMessageHandler(MailAccount.DEFAULT_ID, null, rfc2231Mail, DisplayMode.DISPLAY, false, true,
 					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 							session.getContextId()), false, -1);
 			new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);

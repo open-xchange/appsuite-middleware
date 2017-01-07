@@ -123,12 +123,13 @@ public final class HtmlProcessing {
      * @param content The plain text content
      * @param usm The settings used for formatting content
      * @param mode The display mode
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode, final int maxContentSize) {
-        return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false, maxContentSize);
+    public static HtmlSanitizeResult formatTextForDisplay(String content, UserSettingMail usm, DisplayMode mode, boolean asMarkup, int maxContentSize) {
+        return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false, asMarkup, maxContentSize);
     }
 
     /**
@@ -140,8 +141,8 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) {
-        return formatTextForDisplay(content, usm, mode, -1).getContent();
+    public static String formatTextForDisplay(String content, UserSettingMail usm, DisplayMode mode) {
+        return formatTextForDisplay(content, usm, mode, true, -1).getContent();
     }
 
     /**
@@ -155,11 +156,12 @@ public final class HtmlProcessing {
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter
      * @param mode The display mode
      * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) {
-        return formatHTMLForDisplay(content, charset, session, mailPath, usm, modified, mode, embedded, -1).getContent();
+    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup) {
+        return formatHTMLForDisplay(content, charset, session, mailPath, usm, modified, mode, embedded, asMarkup, -1).getContent();
     }
 
     /**
@@ -173,11 +175,12 @@ public final class HtmlProcessing {
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter
      * @param mode The display mode
      * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded) {
-        return formatHTMLForDisplay(content, charset, session, mailPath, originalMailPath, usm, modified, mode, embedded, -1).getContent();
+    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup) {
+        return formatHTMLForDisplay(content, charset, session, mailPath, originalMailPath, usm, modified, mode, embedded, asMarkup, -1).getContent();
     }
 
     /**
@@ -190,14 +193,14 @@ public final class HtmlProcessing {
      * @param usm The settings used for formatting content
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter
      * @param mode The display mode
-     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise
-     *            <code>false</code>
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) {
-        return formatHTMLForDisplay(content, charset, session, mailPath, null, usm, modified, mode, embedded, maxContentSize);
+    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
+        return formatHTMLForDisplay(content, charset, session, mailPath, null, usm, modified, mode, embedded, asMarkup, maxContentSize);
     }
 
     /**
@@ -211,14 +214,14 @@ public final class HtmlProcessing {
      * @param usm The settings used for formatting content
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter
      * @param mode The display mode
-     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise
-     *            <code>false</code>
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) {
-        return formatContentForDisplay(content, charset, true, session, mailPath, originalMailPath, usm, modified, mode, embedded, maxContentSize);
+    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
+        return formatContentForDisplay(content, charset, true, session, mailPath, originalMailPath, usm, modified, mode, embedded, asMarkup, maxContentSize);
     }
 
     /**
@@ -242,16 +245,15 @@ public final class HtmlProcessing {
      * @param session The session
      * @param mailPath The message's unique path in mailbox
      * @param usm The settings used for formatting content
-     * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter (only
-     *            needed by HTML content; may be <code>null</code> on plain text)
+     * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter (only needed by HTML content; may be <code>null</code> on plain text)
      * @param mode The display mode
-     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise
-     *            <code>false</code>
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) {
-        return formatContentForDisplay(content, charset, isHtml, session, mailPath, null, usm, modified, mode, embedded, maxContentSize);
+    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
+        return formatContentForDisplay(content, charset, isHtml, session, mailPath, null, usm, modified, mode, embedded, asMarkup, maxContentSize);
     }
 
     private static final String COMMENT_ID = "anchor-5fd15ca8-a027-4b14-93ea-35de1747419e:";
@@ -278,15 +280,14 @@ public final class HtmlProcessing {
      * @param mailPath The message's unique path in mailbox
      * @param originalMailPath The original mail path or <code>null</code>
      * @param usm The settings used for formatting content
-     * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter (only
-     *            needed by HTML content; may be <code>null</code> on plain text)
+     * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter (only needed by HTML content; may be <code>null</code> on plain text)
      * @param mode The display mode
-     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise
-     *            <code>false</code>
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) {
+    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
         HtmlSanitizeResult retval = new HtmlSanitizeResult(content);
         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         if (isHtml) {
@@ -342,20 +343,22 @@ public final class HtmlProcessing {
                 }
             }
         } else {
-            if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
-                if (DisplayMode.PLAIN_TEXT.equals(mode)) {
-                    // Keep as-is
-                } else if (DisplayMode.DISPLAY.isIncluded(mode)) {
-                    retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
-                    retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
-                    if (usm.isUseColorQuote()) {
-                        retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent()));
+            if (asMarkup) {
+                if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
+                    if (DisplayMode.PLAIN_TEXT.equals(mode)) {
+                        // Keep as-is
+                    } else if (DisplayMode.DISPLAY.isIncluded(mode)) {
+                        retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
+                        retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
+                        if (usm.isUseColorQuote()) {
+                            retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent()));
+                        }
+                        if (DisplayMode.DOCUMENT.equals(mode)) {
+                            retval.setContent(htmlService.getConformHTML(retval.getContent(), "UTF-8"));
+                        }
+                    } else {
+                        retval = htmlService.htmlFormat(retval.getContent(), true, null, maxContentSize);
                     }
-                    if (DisplayMode.DOCUMENT.equals(mode)) {
-                        retval.setContent(htmlService.getConformHTML(retval.getContent(), "UTF-8"));
-                    }
-                } else {
-                    retval = htmlService.htmlFormat(retval.getContent(), true, null, maxContentSize);
                 }
             }
         }

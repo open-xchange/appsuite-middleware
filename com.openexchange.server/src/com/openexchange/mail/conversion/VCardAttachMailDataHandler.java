@@ -211,6 +211,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 MimeMessageConverter.convertMessage(mimeMessage),
                 DisplayMode.MODIFYABLE,
                 false,
+                true,
                 session,
                 null);
             addFileInformation(mailObject, managedFile.getID());
