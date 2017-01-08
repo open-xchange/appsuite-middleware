@@ -69,10 +69,6 @@ public enum DisplayMode {
      */
     DISPLAY,
     /**
-     * Generate a plain-text version as-is.
-     */
-    PLAIN_TEXT,
-    /**
      * Generates the document view for associated message's body
      */
     DOCUMENT,

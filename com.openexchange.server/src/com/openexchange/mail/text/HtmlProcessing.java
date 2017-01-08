@@ -345,9 +345,7 @@ public final class HtmlProcessing {
         } else {
             if (asMarkup) {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
-                    if (DisplayMode.PLAIN_TEXT.equals(mode)) {
-                        // Keep as-is
-                    } else if (DisplayMode.DISPLAY.isIncluded(mode)) {
+                    if (DisplayMode.DISPLAY.isIncluded(mode)) {
                         retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
                         retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
                         if (usm.isUseColorQuote()) {
