@@ -289,11 +289,11 @@ public final class HtmlProcessing {
      */
     public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
         HtmlSanitizeResult retval = new HtmlSanitizeResult(content);
-        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         if (isHtml) {
             if (DisplayMode.RAW.equals(mode)) {
                 retval.setContent(content);
             } else {
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                 retval.setContent(htmlService.dropScriptTagsInHeader(content));
 
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
@@ -345,6 +345,7 @@ public final class HtmlProcessing {
         } else {
             if (asMarkup) {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
+                    HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     if (DisplayMode.DISPLAY.isIncluded(mode)) {
                         retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
                         retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
