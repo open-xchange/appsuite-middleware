@@ -109,10 +109,8 @@ ul {
 }
 
 .appointmentDayStartEnd { 
-  background-color: #6CB8E1; 
   overflow: hidden; 
   margin: 0px 0px 1px 0px; 
-  border: 1px solid #6CB8E1; 
 }
 
 h1 {
@@ -161,14 +159,14 @@ h1 {
                   <div>
                       <ul>
                         <#list day.wholeDayAppointments as appointment>
-                        <li class="appointmentDayStartEnd">
+                        <li class="appointmentDayStartEnd colorLabel-${appointment.colorLabel}">
                           <span class="text">${appointment.title}</span>
                         </li>
                         </#list>
                         <#list day.appointments as appointment>
                         <li>
                           <span class="time">${appointment.format("HH:mm", appointment.startDate)}</span>
-                          <span class="text">${appointment.title}</span>
+                          <span class="text colorLabel-${appointment.colorLabel}">${appointment.title}</span>
                         </li>
                         </#list>
                       </ul>

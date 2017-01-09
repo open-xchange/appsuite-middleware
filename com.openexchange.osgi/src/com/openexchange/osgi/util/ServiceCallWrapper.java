@@ -49,10 +49,15 @@
 
 package com.openexchange.osgi.util;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -94,7 +99,88 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public class ServiceCallWrapper {
 
+    static final ConcurrentMap<ServiceKey<?>, ServiceValue> SERVICE_CACHE = new ConcurrentHashMap<>(16, 0.9F, 1);
+
     static final AtomicReference<BundleContextProvider> BC_PROVIDER_REF = new AtomicReference<BundleContextProvider>(new BundleContextProvider());
+
+    private static <S> String generateServiceFilter(Class<S> serviceClass) {
+        return new StringBuilder(48).append("(").append(Constants.OBJECTCLASS).append('=').append(serviceClass.getName()).append(")").toString();
+    }
+
+    private static <S> ServiceValue<S> getService(Class<?> caller, Class<S> serviceClass, boolean required) throws ServiceException {
+        final ServiceKey<S> serviceKey = new ServiceKey<>(caller, serviceClass);
+
+        // Check cache
+        {
+            ServiceValue<S> serviceValue = SERVICE_CACHE.get(serviceKey);
+            if (null != serviceValue) {
+                return serviceValue;
+            }
+        }
+
+        BundleContextProvider bundleContextProvider = BC_PROVIDER_REF.get();
+        if (null == bundleContextProvider) {
+            if (required) {
+                throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
+            }
+            return null;
+        }
+
+        BundleContext bundleContext = bundleContextProvider.getBundleContext(caller, serviceClass);
+        ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
+        if (serviceReference == null) {
+            if (required) {
+                throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
+            }
+            return null;
+        }
+
+        boolean ungetServiceHere = false;
+        try {
+            S service = bundleContext.getService(serviceReference);
+            ungetServiceHere = true;
+            if (service == null) {
+                if (required) {
+                    throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
+                }
+                return null;
+            }
+
+            // Try to put into cache
+            try {
+                ServiceListener serviceListener = new ServiceListener() {
+
+                    @Override
+                    public void serviceChanged(ServiceEvent event) {
+                        if (event.getType() == ServiceEvent.UNREGISTERING) {
+                            ServiceValue<?> value = SERVICE_CACHE.remove(serviceKey);
+                            if (null != value) {
+                                value.ungetService();
+                            }
+                        }
+                    }
+                };
+                bundleContext.addServiceListener(serviceListener, generateServiceFilter(serviceClass));
+
+                ServiceValue<S> serviceValue = new ServiceValue<S>(service, serviceReference, bundleContext, false);
+                SERVICE_CACHE.put(serviceKey, serviceValue);
+                ungetServiceHere = false;
+                return serviceValue;
+            } catch (Exception e) {
+                // Put into cache failed
+            }
+
+            ServiceValue<S> serviceValue = new ServiceValue<S>(service, serviceReference, bundleContext, true);
+            ungetServiceHere = false;
+            return serviceValue;
+        } catch (RuntimeException e) {
+            throw new ServiceException(e, serviceClass);
+        } finally {
+            if (ungetServiceHere) {
+                bundleContext.ungetService(serviceReference);
+            }
+        }
+    }
 
     /**
      * Performs a call to a specified service. The service is requested from the OSGi service registry and passed
@@ -109,27 +195,13 @@ public class ServiceCallWrapper {
      * @throws ServiceException if the service was not available or an error occurred during {@link ServiceUser#call(Object)}.
      */
     public static <S, T> T doServiceCall(Class<?> caller, Class<S> serviceClass, ServiceUser<S, T> serviceUser) throws ServiceException {
-        BundleContextProvider bundleContextProvider = BC_PROVIDER_REF.get();
-        if (null == bundleContextProvider) {
-            throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
-        }
-        BundleContext bundleContext = bundleContextProvider.getBundleContext(caller, serviceClass);
-        ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
-        if (serviceReference == null) {
-            throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
-        }
-
+        ServiceValue<S> serviceValue = getService(caller, serviceClass, true);
         try {
-            S service = bundleContext.getService(serviceReference);
-            if (service == null) {
-                throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
-            }
-
-            return serviceUser.call(service);
+            return serviceUser.call(serviceValue.service);
         } catch (Exception e) {
             throw new ServiceException(e, serviceClass);
         } finally {
-            bundleContext.ungetService(serviceReference);
+            serviceValue.close();
         }
     }
 
@@ -147,27 +219,17 @@ public class ServiceCallWrapper {
      * @throws ServiceException if an error occurred during {@link ServiceUser#call(Object)}.
      */
     public static <S, T> T tryServiceCall(Class<?> caller, Class<S> serviceClass, ServiceUser<S, T> serviceUser, T defaultValue) throws ServiceException {
-        BundleContextProvider bundleContextProvider = BC_PROVIDER_REF.get();
-        if (null == bundleContextProvider) {
-            return defaultValue;
-        }
-        BundleContext bundleContext = bundleContextProvider.getBundleContext(caller, serviceClass);
-        ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
-        if (serviceReference == null) {
+        ServiceValue<S> serviceValue = getService(caller, serviceClass, false);
+        if (null == serviceValue) {
             return defaultValue;
         }
 
         try {
-            S service = bundleContext.getService(serviceReference);
-            if (service == null) {
-                return defaultValue;
-            }
-
-            return serviceUser.call(service);
+            return serviceUser.call(serviceValue.service);
         } catch (Exception e) {
             throw new ServiceException(e, serviceClass);
         } finally {
-            bundleContext.ungetService(serviceReference);
+            serviceValue.close();
         }
     }
 
@@ -285,6 +347,86 @@ public class ServiceCallWrapper {
             }
 
             return bundleContext;
+        }
+    }
+
+    private static final class ServiceKey<S> {
+
+        final Class<?> caller;
+        final Class<S> serviceClass;
+        private final int hash;
+
+        ServiceKey(Class<?> caller, Class<S> serviceClass) {
+            super();
+            this.caller = caller;
+            this.serviceClass = serviceClass;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((caller == null) ? 0 : caller.hashCode());
+            result = prime * result + ((serviceClass == null) ? 0 : serviceClass.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            ServiceKey<?> other = (ServiceKey<?>) obj;
+            if (caller == null) {
+                if (other.caller != null) {
+                    return false;
+                }
+            } else if (!caller.equals(other.caller)) {
+                return false;
+            }
+            if (serviceClass == null) {
+                if (other.serviceClass != null) {
+                    return false;
+                }
+            } else if (!serviceClass.equals(other.serviceClass)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static final class ServiceValue<S> implements AutoCloseable {
+
+        private final BundleContext bundleContext;
+        private final ServiceReference<S> serviceReference;
+        private final boolean unget;
+        final S service;
+
+        ServiceValue(S service, ServiceReference<S> serviceReference, BundleContext bundleContext, boolean unget) {
+            super();
+            this.bundleContext = bundleContext;
+            this.service = service;
+            this.serviceReference = serviceReference;
+            this.unget = unget;
+        }
+
+        void ungetService() {
+            bundleContext.ungetService(serviceReference);
+        }
+
+        @Override
+        public void close() {
+            if (unget) {
+                ungetService();
+            }
         }
     }
 
