@@ -1420,6 +1420,13 @@ if [ "\"open-xchange-mailapp\"" = "$VALUE" ]; then
     ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\", \"open-xchange-mobile-api-facade\"" /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-3859
+VALUE=$(ox_read_property NRFILES /opt/open-xchange/etc/ox-scriptconf.sh)
+VALUE=${VALUE//\"/}
+if [ "8192" = "$VALUE" ]; then
+    ox_set_property NRFILES "\"65536\"" /opt/open-xchange/etc/ox-scriptconf.sh
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
