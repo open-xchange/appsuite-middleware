@@ -710,7 +710,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         boolean considerAsInline = isInline || (!part.getContentDisposition().isAttachment() && part.containsHeader("Content-Id"));
 
         // Handle it...
-        if (considerAsInline && (DisplayMode.MODIFYABLE.getMode() < displayMode.getMode())) {
+        if (asMarkup && considerAsInline && (DisplayMode.MODIFYABLE.getMode() < displayMode.getMode())) {
             final MultipartInfo mpInfo = multiparts.peek();
             if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                 try {
@@ -781,6 +781,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
             }
         }
+
         return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id, considerAsInline);
     }
 
