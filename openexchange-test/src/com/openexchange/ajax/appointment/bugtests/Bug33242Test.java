@@ -222,11 +222,11 @@ public class Bug33242Test extends AbstractAJAXSession {
         Appointment groupMemberAppointment = ctm2.get(series);
         series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
-        assertNotNull(groupMemberAppointment.getChangeException());
+        assertNotNull(groupMemberAppointment.getDeleteException());
         assertSame(creatorAppointment.getChangeException().length, 1);
-        assertSame(groupMemberAppointment.getChangeException().length, 1);
+        assertSame(groupMemberAppointment.getDeleteException().length, 1);
         assertNull(creatorAppointment.getDeleteException());
-        assertNull(groupMemberAppointment.getDeleteException());
+        assertNull(groupMemberAppointment.getChangeException());
 
         List<Appointment> checkAppointment =  ctm.getChangeExceptions(client1.getValues().getPrivateAppointmentFolder(), series.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull(checkAppointment);
@@ -276,11 +276,11 @@ public class Bug33242Test extends AbstractAJAXSession {
         Appointment groupMemberAppointment = ctm2.get(series);
         series.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
-        assertNotNull(groupMemberAppointment.getChangeException());
+        assertNotNull(groupMemberAppointment.getDeleteException());
         assertSame(creatorAppointment.getChangeException().length, 1);
-        assertSame(groupMemberAppointment.getChangeException().length, 1);
+        assertSame(groupMemberAppointment.getDeleteException().length, 1);
         assertNull(creatorAppointment.getDeleteException());
-        assertNull(groupMemberAppointment.getDeleteException());
+        assertNull(groupMemberAppointment.getChangeException());
 
         Appointment copy = ctm.createIdentifyingCopy(series);
         copy.setRecurrencePosition(2);
