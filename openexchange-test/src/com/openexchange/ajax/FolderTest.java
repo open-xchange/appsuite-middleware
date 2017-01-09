@@ -73,13 +73,14 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.FolderTestManager;
 
-public class FolderTest extends AbstractAJAXTest {
+public class FolderTest extends AbstractAJAXSession {
 
     public static final String FOLDER_URL = "/ajax/folders";
 
@@ -136,8 +137,6 @@ public class FolderTest extends AbstractAJAXTest {
     @Test
     public void testInsertRenameFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException, OXException {
         int fuid = -1;
-        int[] failedIds = null;
-        boolean updated = false;
         try {
             final int userId = getClient().getValues().getUserId();
 
@@ -151,14 +150,14 @@ public class FolderTest extends AbstractAJAXTest {
             ftm.updateFolderOnServer(folder);
             ftm.getFolderFromServer(fuid);
             ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
-            assertFalse((failedIds != null && failedIds.length > 0));
+            assertFalse(ftm.getLastResponse().hasError());
 
             FolderObject newPublicFolder = FolderTestManager.createNewFolderObject("NewPublicFolder" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             fuid = ftm.insertFolderOnServer(newPublicFolder).getObjectID();
             assertFalse(fuid == -1);
             ftm.getFolderFromServer(fuid);
             ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
-            assertFalse((failedIds != null && failedIds.length > 0));
+            assertFalse(ftm.getLastResponse().hasError());
             fuid = -1;
 
             FolderObject newInfostoreFolder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + UUID.randomUUID().toString(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, getClient().getValues().getPrivateInfostoreFolder());
@@ -169,9 +168,10 @@ public class FolderTest extends AbstractAJAXTest {
             retrievedNewInfoStoreFolder.setFolderName("ChangedInfostoreFolderName" + System.currentTimeMillis());
             ftm.updateFolderOnServer(retrievedNewInfoStoreFolder);
             
-            FolderObject updatedFOlder = ftm.getFolderFromServer(fuid);
+            ftm.getFolderFromServer(fuid);
+            assertFalse(ftm.getLastResponse().hasError());
             ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
-            assertFalse((failedIds != null && failedIds.length > 0));
+            assertFalse(ftm.getLastResponse().hasError());
             fuid = -1;
         } finally {
             try {

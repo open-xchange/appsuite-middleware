@@ -79,9 +79,7 @@ public class LockTest extends InfostoreAJAXTest {
         super.setUp();
 
         testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        sessionId = getSessionId();
-        // Copied-without-thinking from FolderTest
-        final int userId = getClient().getValues().getUserId();
+        
         final int secondUserId = getClient2().getValues().getUserId();
         // TODO create folder in one step with correct permissions.
         FolderObject folder = ftm.getFolderFromServer(folderId);

@@ -52,7 +52,6 @@ package com.openexchange.ajax;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,13 +63,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
-import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -269,7 +265,7 @@ public abstract class AbstractAJAXTest {
     }
 
     protected String getSecondSessionId() {
-        return client2.getSession().getId();
+        return getClient2().getSession().getId();
     }
 
     public String getLogin() {
@@ -282,21 +278,6 @@ public abstract class AbstractAJAXTest {
 
     public String getSeconduser() {
         return testUser2.getLogin();
-    }
-
-    // Query methods
-    protected String gS(final WebConversation webConv, final String url) throws MalformedURLException, IOException, SAXException {
-        final GetMethodWebRequest m = new GetMethodWebRequest(url);
-        final WebResponse resp = webConv.getResponse(m);
-        return resp.getText();
-    }
-
-    protected Response gT(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
-        final String res = gS(webConv, url);
-        if ("".equals(res.trim())) {
-            return null;
-        }
-        return Response.parse(res);
     }
 
     public static void assertNoError(final Response res) {

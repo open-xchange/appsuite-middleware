@@ -4,7 +4,6 @@ package com.openexchange.ajax.infostore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,19 +21,10 @@ public class NewTest extends InfostoreAJAXTest {
 
     private static final byte[] megabyte = new byte[1000000];
 
-    public NewTest() {
-        super();
-    }
-
-    @Test
-    public void testNothing() {
-        assertTrue(true);
-    }
-
     @Test
     public void testUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        
+
         com.openexchange.file.storage.File data = createFile(folderId, "test upload");
         data.setFileMIMEType("text/plain");
         data.setDescription("test upload description");
@@ -81,12 +71,12 @@ public class NewTest extends InfostoreAJAXTest {
     @Test
     public void testUploadEmptyFile() throws Exception {
         File emptyFile = File.createTempFile("infostore-new-test", ".txt");
-        
+
         com.openexchange.file.storage.File data = createFile(folderId, "test upload");
         data.setFileMIMEType("text/plain");
         data.setDescription("test upload description");
         itm.newAction(data, emptyFile);
-        
+
         String id = data.getId();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
@@ -116,27 +106,25 @@ public class NewTest extends InfostoreAJAXTest {
             }
         }
 
-        try {
-            com.openexchange.file.storage.File data = createFile(folderId, "test large upload");
-            data.setFileMIMEType("text/plain");
-            itm.newAction(data, largeFile);
-            fail("Uploaded Large File and got no error");
-        } catch (final Exception x) {
-            // Exception is expected
-        }
+        com.openexchange.file.storage.File data = createFile(folderId, "test large upload");
+        data.setFileMIMEType("text/plain");
+        itm.setFailOnError(false);
+        itm.newAction(data, largeFile);
+        
+        assertTrue(itm.getLastResponse().hasError());
     }
 
     // Bug 3928 
     @Test
     public void testVersionCommentForNewDocument() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        
+
         com.openexchange.file.storage.File data = createFile(folderId, "test upload");
         data.setFileMIMEType("text/plain");
         data.setDescription("test upload description");
         data.setVersionComment("Version Comment");
         itm.newAction(data, upload);
-        
+
         String id = data.getId();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
@@ -154,7 +142,7 @@ public class NewTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
-        
+
         com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
         data.setFileMIMEType("text/plain");
         data.setDescription("other_desc");
@@ -167,7 +155,7 @@ public class NewTest extends InfostoreAJAXTest {
     @Test
     public void testTitleFromFilename() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        
+
         com.openexchange.file.storage.File data = createFile(folderId, null);
         data.setFileMIMEType("text/plain");
         itm.newAction(data, upload);

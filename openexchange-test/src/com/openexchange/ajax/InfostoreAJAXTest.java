@@ -72,53 +72,27 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     protected String hostName = null;
 
-    protected String sessionId;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        this.sessionId = getClient().getSession().getId();
-        final int userId = getClient().getValues().getUserId();
-        this.folderId = createFolderForTest(userId);
-        itm.createFileOnServer(folderId, "test knowledge", "text/javascript");
-        File file = InfostoreTestManager.createFile(folderId, "test url", "text/javascript");
-        file.setURL("http://www.open-xchange.com");
-        itm.newAction(file, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
+        this.folderId = createFolderForTest();
+
+        java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
+
+        File file1 = InfostoreTestManager.createFile(folderId, "test knowledge", "text/javascript");
+        file1.setDescription("test knowledge description");
+        itm.newAction(file1, upload);
+        
+        File file2 = InfostoreTestManager.createFile(folderId, "test url", "text/javascript");
+        file2.setURL("http://www.open-xchange.com");
+        file2.setDescription("test url description");
+        itm.newAction(file2, upload);
     }
 
-    private int createFolderForTest(final int userId) throws JSONException, OXException, IOException {
+    private int createFolderForTest() throws JSONException, OXException, IOException {
         final int parent = getClient().getValues().getPrivateInfostoreFolder();
-        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + UUID.randomUUID().toString(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
+        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + UUID.randomUUID().toString(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, getClient().getValues().getUserId(), parent);
         return ftm.insertFolderOnServer(folder).getObjectID();
-    }
-
-    // Methods from the specification
-
-    protected StringBuffer getUrl(final String sessionId, final String action, final String hostname) {
-        return getUrl(sessionId, action, hostname, null);
-    }
-
-    protected StringBuffer getUrl(final String sessionId, final String action, final String hostname, final String protocol) {
-        final StringBuffer url = new StringBuffer((protocol != null) ? protocol : "http");
-        url.append("://");
-        url.append((hostname == null) ? getHostName() : hostname);
-        url.append("/ajax/infostore?session=");
-        url.append(sessionId);
-        url.append("&action=");
-        url.append(action);
-        return url;
-    }
-
-    @Override
-    public String getHostName() {
-        if (null == hostName) {
-            return super.getHostName();
-        }
-        return hostName;
-    }
-
-    public void setHostName(final String hostName) {
-        this.hostName = hostName;
     }
 
     public File createFile(int folderId, String fileName) throws Exception {

@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import java.io.IOException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
@@ -59,6 +63,17 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class NewInfostoreParser extends AbstractUploadParser<NewInfostoreResponse> {
+
+    @Override
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+        try {
+            return super.checkResponse(resp, request);
+        } catch (Exception e) {
+            System.out.println(e);
+            // TODO: handle exception
+        }
+        return null;
+    }
 
     private final boolean upload;
 

@@ -72,7 +72,7 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
     /**
      * Path to the configuration parameter.
      */
-    private static final String PATH = "mail/forwardmessage";
+    private static final String PATH = "/mail/forwardmessage";
 
     /**
      * Inline value.
@@ -97,7 +97,7 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
         GetResponse repsonse = getClient().execute(getRequest);
         for (final String testString : new String[] { INLINE, ATTACHMENT, repsonse.getData().toString() }) {
             getClient().execute(new SetRequest(Tree.ForwardMessage, testString));
-            assertEquals("Written setting isn't returned from server.", testString, getClient().execute(getRequest));
+            assertEquals("Written setting isn't returned from server.", testString, getClient().execute(getRequest).getData().toString());
         }
     }
 }
