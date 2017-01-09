@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -836,6 +837,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         return mailFolder;
                     } catch (final OXException e) {
+                        e.setCategory(Category.CATEGORY_WARNING);
                         access.addWarnings(Collections.singleton(e));
                         getLogger().debug("", e);
                         return null;
