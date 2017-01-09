@@ -106,6 +106,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     // private final UnifiedINBOXAccess access;
 
     private final int unifiedInboxId;
+    final UnifiedInboxAccess access;
     final Session session;
     private final Context ctx;
     private Locale locale;
@@ -121,6 +122,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         super();
         // this.access = access;
         unifiedInboxId = access.getAccountId();
+        this.access = access;
         this.session = session;
         ctx = ContextStorage.getStorageContext(session.getContextId());
     }
@@ -834,6 +836,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         return mailFolder;
                     } catch (final OXException e) {
+                        access.addWarnings(Collections.singleton(e));
                         getLogger().debug("", e);
                         return null;
                     } finally {
