@@ -75,6 +75,7 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -83,6 +84,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.html.HtmlService;
@@ -827,13 +829,21 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * Security settings
              */
             {
+                final CryptographicServiceAuthenticationFactory authenticationFactory =
+                    Services.getServiceLookup().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                String authentication = null;
+                if(authenticationFactory != null) {
+                    if(composeRequest.getRequest() != null) {
+                        authentication = authenticationFactory.createAuthenticationFrom(composeRequest.getRequest());
+                    }
+                }
                 JSONObject jSecuritySettings = jMail.optJSONObject("security");
                 if (null != jSecuritySettings) {
                     SecuritySettings settings = SecuritySettings.builder()
                         .encrypt(jSecuritySettings.optBoolean("encrypt", false))
                         .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
                         .sign(jSecuritySettings.optBoolean("sign", false))
-                        .authentication(jSecuritySettings.optString("authentication", null))
+                        .authentication(authentication)
                         .guestLanguage(jSecuritySettings.optString("guest_language", null))
                         .guestMessage(jSecuritySettings.optString("guest_message", null))
                         .pin(jSecuritySettings.optString("pin", null))
