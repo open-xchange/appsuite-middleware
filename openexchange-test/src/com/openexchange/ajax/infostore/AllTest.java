@@ -18,6 +18,7 @@ import org.junit.Test;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.test.TestInit;
 
 public class AllTest extends InfostoreAJAXTest {
@@ -26,8 +27,8 @@ public class AllTest extends InfostoreAJAXTest {
     public void testBasic() throws Exception {
         List<com.openexchange.file.storage.File> all = itm.getAll(folderId);
 
-        final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description"));
-        final Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge"));
+        final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
+        final Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge", "test url"));
 
         assertFalse(itm.getLastResponse().hasError());
 
@@ -82,16 +83,18 @@ public class AllTest extends InfostoreAJAXTest {
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.DESCRIPTION}, new Date(Long.MAX_VALUE)); // V1
         assertFalse(itm.getLastResponse().hasError());
 
-        List<com.openexchange.file.storage.File> all = itm.getAll(folderId);
-
+        int[] columns = new int[] { Metadata.ID, Metadata.NUMBER_OF_VERSIONS };
+        itm.getAll(folderId, columns);
+        
+        JSONArray rows = (JSONArray) itm.getLastResponse().getData();
         boolean found = false;
-        for (int i = 0, size = all.size(); i < size; i++) {
-            com.openexchange.file.storage.File row = all.get(i);
-            String rowId = row.getId();
-            int numberOfVersions = row.getNumberOfVersions();
+        for(int i = 0, size = rows.length(); i < size; i++) {
+            JSONArray row = rows.getJSONArray(i);
+            String objectId = row.getString(0);
+            int numberOfVersions = row.getInt(1);
 
-            if (rowId.equals(id)) {
-                assertEquals(1, numberOfVersions);
+            if(objectId.equals(id)) {
+                assertEquals(2, numberOfVersions);
                 found = true;
             }
         }

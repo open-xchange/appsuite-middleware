@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import com.openexchange.ajax.framework.AbstractAllRequest;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 
@@ -59,22 +63,30 @@ import com.openexchange.groupware.search.Order;
  *
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class AllInfostoreRequest extends AbstractAllRequest<AbstractColumnsResponse> {
+public class AllInfostoreRequest extends AbstractInfostoreRequest<AllInfostoreResponse> {
 
     public static final int GUI_SORT = Metadata.TITLE;
 
     public static final Order GUI_ORDER = Order.ASCENDING;
 
+    private int folderId;
+
+    private int[] columns;
+
+    private int sort;
+
+    private Order order;
+
     public AllInfostoreRequest(final int folderId, final int[] columns, final int sort, final Order order) {
-        super(AbstractInfostoreRequest.INFOSTORE_URL, folderId, columns, sort, order, true);
+        this(folderId, columns, sort, order, true);
     }
 
     public AllInfostoreRequest(final int folderId, final int[] columns, final int sort, final Order order, boolean failOnError) {
-        super(AbstractInfostoreRequest.INFOSTORE_URL, folderId, columns, sort, order, failOnError);
-    }
-
-    public AllInfostoreRequest(final String folderId, final int[] columns, final int sort, final Order order) {
-        super(AbstractInfostoreRequest.INFOSTORE_URL, folderId, columns, sort, order, true);
+        setFailOnError(failOnError);
+        this.folderId = folderId;
+        this.columns = columns;
+        this.sort = sort;
+        this.order = order;
     }
 
     /**
@@ -82,7 +94,32 @@ public class AllInfostoreRequest extends AbstractAllRequest<AbstractColumnsRespo
      */
     @Override
     public AllInfostoreParser getParser() {
-        return new AllInfostoreParser(isFailOnError(), getColumns());
+        return new AllInfostoreParser(getFailOnError());
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        if (columns != null) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        }
+        if (null != order) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
+            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
+        }
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

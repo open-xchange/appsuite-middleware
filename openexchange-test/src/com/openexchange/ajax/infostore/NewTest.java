@@ -13,6 +13,7 @@ import java.util.Date;
 import org.junit.Test;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.test.TestInit;
 
 public class NewTest extends InfostoreAJAXTest {
@@ -72,12 +73,15 @@ public class NewTest extends InfostoreAJAXTest {
     public void testUploadEmptyFile() throws Exception {
         File emptyFile = File.createTempFile("infostore-new-test", ".txt");
 
-        com.openexchange.file.storage.File data = createFile(folderId, "test upload");
-        data.setFileMIMEType("text/plain");
-        data.setDescription("test upload description");
-        itm.newAction(data, emptyFile);
+        com.openexchange.file.storage.File file = new DefaultFile();
+        file.setFolderId(String.valueOf(folderId));
+        file.setTitle("test upload");
+        file.setDescription("test upload description");
+        file.setFileMIMEType("text/plain");
+        
+        itm.newAction(file, emptyFile);
 
-        String id = data.getId();
+        String id = file.getId();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals("test upload", obj.getTitle());

@@ -166,7 +166,7 @@ public class CopyTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File org = itm.getAction(origId);
         org.setTitle("copy");
-        itm.copyAction(origId, String.valueOf(folderId), org); //FIXME add 'upload' to copy method
+        itm.copyAction(origId, String.valueOf(folderId), org, upload);
         final String id = org.getId();
 
         com.openexchange.file.storage.File copy = itm.getAction(id);

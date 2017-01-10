@@ -59,8 +59,6 @@ import java.util.Random;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.CommonObject;
@@ -153,11 +151,10 @@ public final class Bug27722Test extends AbstractInfostoreTest {
          * verify deletion
          */
         int[] columns = { CommonObject.OBJECT_ID };
-        AllInfostoreRequest allRequest = new AllInfostoreRequest(testFolder.getObjectID(), columns, -1, null);
-        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
-        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, allResponse.getArray().length);
-        for (Object[] object : allResponse) {
-            String objectID = object[0].toString();
+        List<File> all = infoMgr.getAll(testFolder.getObjectID(), columns);
+        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, all.size());
+        for (File file : all) {
+            String objectID = file.getId();
             assertFalse("Object not deleted", objectIDs.contains(objectID));
         }
     }
@@ -188,11 +185,11 @@ public final class Bug27722Test extends AbstractInfostoreTest {
          * verify deletion
          */
         int[] columns = { CommonObject.OBJECT_ID };
-        AllInfostoreRequest allRequest = new AllInfostoreRequest(testFolder.getObjectID(), columns, -1, null);
-        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
-        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, allResponse.getArray().length);
-        for (Object[] object : allResponse) {
-            String objectID = object[0].toString();
+        List<File> all = infoMgr.getAll(testFolder.getObjectID(), columns);
+
+        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, all.size());
+        for (File file : all) {
+            String objectID = file.getId();
             assertFalse("Object not deleted", objectIDs.contains(objectID));
         }
     }

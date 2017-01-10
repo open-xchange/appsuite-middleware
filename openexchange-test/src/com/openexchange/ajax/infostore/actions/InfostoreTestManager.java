@@ -63,17 +63,21 @@ import java.util.Set;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.folder.actions.VersionsRequest;
 import com.openexchange.ajax.folder.actions.VersionsResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.json.FileMetadataFieldParser;
+import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
@@ -196,6 +200,16 @@ public class InfostoreTestManager implements TestManager {
             createdEntities.add(data);
         }
     }
+    public void copyAction(String id, String folderId, File data, java.io.File file) throws OXException, IOException, JSONException {
+        CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(id, folderId, data);
+        copyRequest.setFailOnError(getFailOnError());
+        CopyInfostoreResponse copyResponse = getClient().execute(copyRequest);
+        lastResponse = copyResponse;
+        if (!lastResponse.hasError()) {
+            data.setId(copyResponse.getID());
+            createdEntities.add(data);
+        }
+    }
 
     public Object getConfigAction(String name) throws OXException, IOException, JSONException {
         GetInfostoreConfigRequest req = new GetInfostoreConfigRequest(name);
@@ -241,8 +255,12 @@ public class InfostoreTestManager implements TestManager {
     }
 
     public File getAction(String id) throws OXException, JSONException, IOException {
+        return getAction(id, -1);
+    }
+    
+    public File getAction(String id, int version) throws OXException, JSONException, IOException {
         int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.VERSION, Metadata.COLOR_LABEL };
-        GetInfostoreRequest getRequest = new GetInfostoreRequest(id, columns);
+        GetInfostoreRequest getRequest = new GetInfostoreRequest(id, version, columns);
         getRequest.setFailOnError(getFailOnError());
         GetInfostoreResponse getResponse = getClient().execute(getRequest);
         lastResponse = getResponse;
@@ -251,26 +269,51 @@ public class InfostoreTestManager implements TestManager {
 
     public List<File> getAll(int folderId) throws OXException, JSONException, IOException {
         int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL };
-        AllInfostoreRequest allRequest = new AllInfostoreRequest(folderId, columns, Metadata.ID, Order.DESCENDING);
-        AbstractColumnsResponse response = getClient().execute(allRequest);
+        return getAll(folderId, columns);
+    }
+
+    public List<File> getAll(int folderId, int[] columns) throws OXException, JSONException, IOException {
+        return getAll(folderId, columns, Metadata.ID, Order.DESCENDING);
+    }
+    
+    public List<File> getAll(int folderId, int[] columns, int sort, Order order) throws OXException, JSONException, IOException {
+        AllInfostoreRequest allRequest = new AllInfostoreRequest(folderId, columns, sort, order);
+        AllInfostoreResponse response = getClient().execute(allRequest);
         lastResponse = response;
 
-        List<File> found = new ArrayList<>();
-        for (Object[] doc : response.getArray()) {
-            File file = new DefaultFile();
-            String docId = (String) doc[response.getColumnPos(Metadata.ID)];
-            file.setId(docId);
-            String title = (String) doc[response.getColumnPos(Metadata.TITLE)];
-            file.setTitle(title);
-            String description = (String) doc[response.getColumnPos(Metadata.DESCRIPTION)];
-            file.setDescription(description);
-            String url = (String) doc[response.getColumnPos(Metadata.URL)];
-            file.setURL(url);
+        return createResponse(response.getResponse(), columns);
+    }
 
-            file.setTitle(Integer.toString(folderId));
-            found.add(file);
+    protected List<File> createResponse(Response response, int[] columns) throws JSONException {
+        List<File> files = new ArrayList<>();
+
+        FileFieldSet fileFieldSet = new FileFieldSet();
+
+        JSONObject json = ResponseWriter.getJSON(response);
+        JSONArray filesJSON = (JSONArray) json.get("data");
+        for (int i = 0; i < filesJSON.length(); i++) {
+            DefaultFile metadata = new DefaultFile();
+
+            int columncount = 0;
+            for (int column : columns) {
+                Field field = Field.get(column);
+                if (null != field) {
+                    Object orig = ((JSONArray) filesJSON.get(i)).get(columncount);
+                    Object converted;
+                    try {
+                        converted = FileMetadataFieldParser.convert(field, orig);
+                        field.doSwitch(fileFieldSet, metadata, converted);
+                    } catch (OXException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    columncount++;
+                }
+            }
+
+            files.add(metadata);
         }
-        return found;
+        return files;
     }
 
     public List<File> versions(final String objectId, final int[] cols) throws MalformedURLException, JSONException, IOException, OXException {
@@ -311,18 +354,21 @@ public class InfostoreTestManager implements TestManager {
         return response.getContent();
     }
 
-    public Object[][] list(final List<ListItem> items, final int[] cols) throws MalformedURLException, IOException, JSONException, OXException {
+    public List<File> list(final List<ListItem> items, final int[] cols) throws MalformedURLException, IOException, JSONException, OXException {
         ListInfostoreRequest request = new ListInfostoreRequest(items, cols, failOnError);
         ListInfostoreResponse response = getClient().execute(request);
         lastResponse = response;
-        return response.getArray();
+        return createResponse(response.getResponse(), cols);
     }
 
-    public Object[][] list(String[][] infostore_ids, int[] cols) throws MalformedURLException, IOException, JSONException, OXException {
+    public List<File> list(String[][] infostore_ids, int[] cols) throws MalformedURLException, IOException, JSONException, OXException {
         List<ListItem> items = new ArrayList<>();
         for (String[] infostoreId : infostore_ids) {
-            for (int i = 0; i < infostoreId.length; i++)
-                items.add(new ListItem(infostoreId[i], infostoreId[i++]));
+            for (int i = 0; i < infostoreId.length; i++) {
+                String folderId = infostoreId[i];
+                String id = infostoreId[++i];
+                items.add(new ListItem(folderId, id));
+            }
         }
         return list(items, cols);
     }
@@ -359,7 +405,7 @@ public class InfostoreTestManager implements TestManager {
     public List<File> search(final String query, final int folderId) throws MalformedURLException, JSONException, IOException, OXException {
         return search(query, folderId, -1, null, -1);
     }
-    
+
     public List<File> search(final String query, final int folderId, final int sort, final Order order, final int limit) throws MalformedURLException, JSONException, IOException, OXException {
         return search(query, folderId, sort, order, limit, -1, -1);
     }

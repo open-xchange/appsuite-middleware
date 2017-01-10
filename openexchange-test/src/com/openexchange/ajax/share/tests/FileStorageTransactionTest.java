@@ -56,12 +56,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
@@ -70,6 +67,7 @@ import com.openexchange.ajax.share.actions.FileShare;
 import com.openexchange.ajax.share.actions.FileSharesRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
@@ -92,19 +90,9 @@ public class FileStorageTransactionTest extends ShareTest {
     private InfostoreTestManager itm;
     private List<DefaultFile> files;
 
-    /**
-     * Initializes a new {@link FileStorageTransactionTest}.
-     * 
-     * @param name
-     */
-    public FileStorageTransactionTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        itm = new InfostoreTestManager(getClient());
         testFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder());
         files = new ArrayList<DefaultFile>(TEST_FILES);
         long now = System.currentTimeMillis();
@@ -115,17 +103,6 @@ public class FileStorageTransactionTest extends ShareTest {
             file.setDescription(file.getTitle());
             itm.newAction(file);
             files.add(file);
-        }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (itm != null) {
-                itm.cleanUp();
-            }
-        } finally {
-            super.tearDown();
         }
     }
 
@@ -171,13 +148,10 @@ public class FileStorageTransactionTest extends ShareTest {
             /*
              * check file listing in folder 10 contains share target
              */
-            AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING));
+            List<File> all = itm.getAll(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING);
 
-            Object[][] docs = allResp.getArray();
-            assertEquals(1, docs.length);
-            assertEquals(guestClient.getItem(), docs[0][allResp.getColumnPos(Metadata.ID)]);
+            assertEquals(1, all.size());
+            assertEquals(guestClient.getItem(), all.get(0).getId());
         }
-
     }
-
 }

@@ -78,6 +78,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.AllInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.GetDocumentRequest;
@@ -839,7 +840,7 @@ public class GuestClient extends AJAXClient {
                 return allContactResponse;
             case FolderObject.INFOSTORE:
                 int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID };
-                AbstractColumnsResponse allInfostoreResponse = execute(new AllInfostoreRequest(folderID, columns, Metadata.ID, Order.ASCENDING));
+                AllInfostoreResponse allInfostoreResponse = execute(new AllInfostoreRequest(folderID, columns, Metadata.ID, Order.ASCENDING));
                 checkResponse(allInfostoreResponse, expectToFail);
                 return allInfostoreResponse;
             case FolderObject.TASK:

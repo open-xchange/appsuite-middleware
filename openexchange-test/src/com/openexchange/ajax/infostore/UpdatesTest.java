@@ -59,9 +59,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.AllInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.DetachInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DetachInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
@@ -130,7 +130,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     @Test
     public void testBasic() throws Exception {
         AllInfostoreRequest allReq = new AllInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.FOLDER_ID }, Metadata.ID, Order.ASCENDING);
-        AbstractColumnsResponse allResp = getClient().execute(allReq);
+        AllInfostoreResponse allResp = getClient().execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
 
         File updateDoc = new DefaultFile();
@@ -166,7 +166,7 @@ public class UpdatesTest extends AbstractAJAXSession {
     @Test
     public void testRemovedVersionForcesUpdate() throws Exception {
         AllInfostoreRequest allReq = new AllInfostoreRequest(testFolder.getObjectID(), new int[] { Metadata.ID, Metadata.FOLDER_ID }, Metadata.ID, Order.ASCENDING);
-        AbstractColumnsResponse allResp = getClient().execute(allReq);
+        AllInfostoreResponse allResp = getClient().execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
 
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));

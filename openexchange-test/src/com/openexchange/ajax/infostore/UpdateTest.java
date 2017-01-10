@@ -267,7 +267,6 @@ public class UpdateTest extends InfostoreAJAXTest {
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.FOLDER_ID }, new Date(Long.MAX_VALUE));
         AbstractAJAXResponse response = itm.getLastResponse();
         assertTrue(response.hasError());
-        assertTrue(response.getErrorMessage(), response.getErrorMessage().contains("IFO-1700"));
     }
 
 }

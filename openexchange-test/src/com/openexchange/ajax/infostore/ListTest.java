@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,10 +22,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.test.TestInit;
 
 public class ListTest extends InfostoreAJAXTest {
-
-    public ListTest() {
-        super();
-    }
 
     @Test
     public void testBasic() throws Exception {
@@ -127,7 +124,7 @@ public class ListTest extends InfostoreAJAXTest {
     }
 
     public void checkEntries(final String[][] infostore_ids) throws Exception {
-        itm.list(infostore_ids, new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL });
+        List<com.openexchange.file.storage.File> list = itm.list(infostore_ids, new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL });
         assertFalse(itm.getLastResponse().hasError());
         
         final Set<String> ids = itm.getCreatedEntitiesIds();

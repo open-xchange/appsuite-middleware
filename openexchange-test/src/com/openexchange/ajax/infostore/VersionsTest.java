@@ -25,10 +25,6 @@ import com.openexchange.test.TestInit;
 
 public class VersionsTest extends InfostoreAJAXTest {
 
-    public VersionsTest() {
-        super();
-    }
-
     @Test
     public void testVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -48,7 +44,7 @@ public class VersionsTest extends InfostoreAJAXTest {
         assertFalse(itm.getLastResponse().hasError());
 
         com.openexchange.file.storage.File file = itm.getAction(id);
-        assertEquals(3,  file.getNumberOfVersions());
+        assertEquals(4,  file.getNumberOfVersions());
     }
 
     // Bug 13627
@@ -70,11 +66,10 @@ public class VersionsTest extends InfostoreAJAXTest {
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.VERSION_COMMENT}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
 
-        com.openexchange.file.storage.File reloaded = itm.getAction(id);
         List<com.openexchange.file.storage.File> versions = itm.versions(id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);
         assertFalse(itm.getLastResponse().hasError());
 
-        assureVersions(new Integer[] { 3, 2, 1 }, itm.getLastResponse(), 3);
+        assureVersions(new Integer[] { 4, 3, 2, 1 }, itm.getLastResponse(), 4);
     }
 
     @Test
@@ -98,7 +93,7 @@ public class VersionsTest extends InfostoreAJAXTest {
         List<com.openexchange.file.storage.File> versions = itm.versions(id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);
         assertFalse(itm.getLastResponse().hasError());
 
-        assureVersions(new Integer[] { 1, 2, 3 }, itm.getLastResponse(), 3);
+        assureVersions(new Integer[] { 1, 2, 3, 4 }, itm.getLastResponse(), 4);
 
         int[] notDetached = ftm.detach(id, itm.getLastResponse().getTimestamp(), new int[] { 3 });
         assertEquals(0, notDetached.length);
@@ -113,7 +108,7 @@ public class VersionsTest extends InfostoreAJAXTest {
         versions = itm.versions(id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);
         assertFalse(itm.getLastResponse().hasError());
 
-        assureVersions(new Integer[] { 1, 2, 4 }, itm.getLastResponse(), 4);
+        assureVersions(new Integer[] { 1, 2, 4, 5 }, itm.getLastResponse(), 5);
 
     }
 
@@ -133,8 +128,8 @@ public class VersionsTest extends InfostoreAJAXTest {
         itm.updateAction(toUpdate, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION_COMMENT }, new Date(Long.MAX_VALUE));
 
         com.openexchange.file.storage.File fileWithVersions = itm.getAction(id);
-        final int size = fileWithVersions.getNumberOfVersions();
-        assertTrue(size > 0);
+        final int versions = fileWithVersions.getNumberOfVersions();
+        assertTrue(versions > 0);
     }
 
 

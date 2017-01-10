@@ -68,8 +68,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
@@ -164,8 +162,9 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         /*
          * Must fail because of missing folder permissions
          */
-        AbstractColumnsResponse allResp = client2.execute(new AllInfostoreRequest(testFolder.getObjectID(), Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING, false));
-        OXException exception = allResp.getException();
+        itm.setClient(getClient2());
+        List<File> all = itm.getAll(testFolder.getObjectID(), Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING);
+        OXException exception = itm.getLastResponse().getException();
         assertTrue("Expected exception: InfostoreExceptionCodes.NO_READ_PERMISSION", InfostoreExceptionCodes.NO_READ_PERMISSION.equals(exception));
 
         List<String> sharedFiles = new ArrayList<String>(10);
@@ -213,13 +212,12 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             assertEquals(listItems.get(i).getId(), doc[listResp.getColumnPos(Metadata.ID)].toString());
         }
 
-        allResp = client2.execute(new AllInfostoreRequest(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING));
+        all = itm.getAll(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING);
         Set<String> foundIds = new HashSet<String>(sharedFiles);
-        for (Object[] doc : allResp.getArray()) {
-            int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
+        for (File file : all) {
+            int docId = Integer.parseInt(file.getId());
             foundIds.remove(docId);
         }
-
         assertTrue("Not all shared documents have been found", foundIds.isEmpty());
 
         /*
@@ -245,9 +243,9 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         /*
          * The file creator must not see the files within folder 10
          */
-        allResp = getClient().execute(new AllInfostoreRequest(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING));
-        for (Object[] doc : allResp.getArray()) {
-            int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
+        all = itm.getAll(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING);
+        for (File file : all) {
+            int docId = Integer.parseInt(file.getId());
             assertFalse(allFiles.containsKey(docId));
         }
 
@@ -255,12 +253,8 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         for (String id : allFiles.keySet()) {
             listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), id.toString()));
         }
-
-        listResp = getClient().execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
-        for (Object[] doc : listResp.getArray()) {
-            int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
-            assertFalse(allFiles.containsKey(docId));
-        }
+        List<File> list = itm.list(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY));
+        assertFalse(itm.getLastResponse().hasError());
     }
 
     private File newDocument(int folderId, List<FileStorageObjectPermission> objectPermissions) {

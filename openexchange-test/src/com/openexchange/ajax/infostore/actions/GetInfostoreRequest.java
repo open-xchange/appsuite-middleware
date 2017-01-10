@@ -64,6 +64,7 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
 
     private String id;
     private int[] columns;
+    private int version;
 
     public void setId(String id) {
         this.id = id;
@@ -78,14 +79,17 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
     }
 
     public GetInfostoreRequest(String id) {
-        this();
         setId(id);
     }
 
     public GetInfostoreRequest(String id, int... columns) {
-        this();
+        this(id, -1, columns);
+    }
+
+    public GetInfostoreRequest(String id, int version, int... columns) {
         setId(id);
         this.columns = columns;
+        this.version = version;
     }
 
     @Override
@@ -107,6 +111,9 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(getId())));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if(version != -1) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_VERSION, version));
+        }
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
