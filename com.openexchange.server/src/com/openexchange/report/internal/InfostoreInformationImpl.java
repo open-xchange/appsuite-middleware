@@ -200,8 +200,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         for (Entry<Integer, ArrayList<Integer>> contexts : usersInContext.entrySet()) {
             for (Integer userId : contexts.getValue()) {
                 QuotaFileStorage userStorage = storageService.getQuotaFileStorage(userId, contexts.getKey());
-                Long quota = userStorage.getQuota();
-                Long percent = quota == 0 ? 100L : (quota == -1 ? 0L :userStorage.getUsage() * 100 / quota);
+                Long percent = userStorage.getUsage() * 100 / userStorage.getQuota();
                 filestoreMap.put(userStorage.getUri().toString(), percent.intValue());
             }
         }
