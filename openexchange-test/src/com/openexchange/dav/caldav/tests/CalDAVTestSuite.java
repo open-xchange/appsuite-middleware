@@ -68,7 +68,8 @@ import org.junit.runners.Suite.SuiteClasses;
     AlarmTestEMClient.class,
     AlarmTestMacCalendar.class,
     AlarmTestLightning.class,
-    AlarmTestIOSCalendar.class
+    AlarmTestIOSCalendar.class,
+    ExDateTest.class
 })
 public final class CalDAVTestSuite {
 
