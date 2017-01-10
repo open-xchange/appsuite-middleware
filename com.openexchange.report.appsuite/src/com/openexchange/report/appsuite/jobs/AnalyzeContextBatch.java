@@ -155,7 +155,6 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                     }
                     LOG.error("Exception thrown while loading context. Skip report for context {}. Move to next context", ctxId, oxException);
                     reportService.abortContextReport(uuid, reportType);
-                    this.report.addError(oxException);
                     continue;
                 } catch (Exception e) {
                     LOG.error("Unexpected error while context report generation!", e);
