@@ -47,35 +47,45 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.exception.interception;
 
-import com.openexchange.exception.interception.Bug50893Test;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
-import com.openexchange.sessiond.SessionFilterTest;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import junit.framework.TestCase;
 
 /**
- * {@link UnitTests}
+ * {@link Bug50893Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Reflected content for /api/account
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.8.4
  */
-public class UnitTests {
+public class Bug50893Test extends TestCase {
 
-    public UnitTests() {
-        super();
+    /**
+     * @throws java.lang.Exception
+     */
+    @Override
+    public void setUp() throws Exception {
+        OXExceptionInterceptorRegistration.initInstance();
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        tests.addTest(new JUnit4TestAdapter(SessionFilterTest.class));
-        tests.addTestSuite(Bug50893Test.class);
-        return tests;
+    @Test
+    public void testSanitizeMaliciousSessionParamter() {
+        OXException e = SessionExceptionCodes.SESSION_EXPIRED.create(
+            "=========%0a%0d========================%0a%0d======================However.it.has.been.moved.to.our.new.website.at.WWW.TTACKER.COM=====================%0a%0d");
+        assertNotNull(e.getMessage());
+        assertFalse(e.getMessage(), e.getMessage().contains("TTACKER"));
     }
+
+    @Test
+    public void testDontSanitizeRegularSessionParamter() {
+        OXException e = SessionExceptionCodes.SESSION_EXPIRED.create("5d52add5f0924a2280a30bc491538fdb");
+        assertNotNull(e.getMessage());
+        assertTrue(e.getMessage(), e.getMessage().contains("5d52add5f0924a2280a30bc491538fdb"));
+    }
+
 }
