@@ -63,6 +63,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NotTestCommandParser}
@@ -84,7 +85,7 @@ public class NotTestCommandParser implements CommandParser<TestCommand> {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         // FIXME Not parser seems to be broken by design
 
 
@@ -96,7 +97,7 @@ public class NotTestCommandParser implements CommandParser<TestCommand> {
             CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
             CommandParser<TestCommand> parser = parserRegistry.get(innerJsonObject.optString(GeneralField.id.name()));
             if (null != parser) {
-                testcommands.add(parser.parse(innerJsonObject));
+                testcommands.add(parser.parse(innerJsonObject, session));
             }
         }
         return new TestCommand(TestCommand.Commands.NOT, argList, testcommands);

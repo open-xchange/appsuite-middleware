@@ -68,6 +68,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CurrentDateTestCommandParser}
@@ -96,13 +97,20 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.CURRENTDATE.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
+        // add the zone tag
+        if (session != null && session.getUser().getTimeZone() != null) {
+            argList.add(ArgumentUtil.createTagArgument("zone"));
+            String zone = java.time.ZoneOffset.ofTotalSeconds(TimeZone.getTimeZone(session.getUser().getTimeZone()).getRawOffset() / 1000).toString();
+            zone = zone.replace(":", "");
+            argList.add(CommandParserJSONUtil.stringToList(zone));
+        }
 
         // Parse the comparison tag
         final String comparisonTag = CommandParserJSONUtil.getString(jsonObject, CurrentDateTestField.comparison.name(), commandName);
@@ -149,7 +157,7 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
@@ -157,7 +165,8 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         final String comparison = command.getMatchType().substring(1);
         if ("value".equals(comparison)) {
-            jsonObject.put(CurrentDateTestField.comparison.name(), ((List) command.getArguments().get(command.getTagArguments().size())).get(0));
+            int compPos = command.getTagArguments().size() == 1 ? 1 : 3;
+            jsonObject.put(CurrentDateTestField.comparison.name(), ((List) command.getArguments().get(compPos)).get(0));
         } else {
             jsonObject.put(CurrentDateTestField.comparison.name(), comparison);
         }

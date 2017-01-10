@@ -53,6 +53,7 @@ import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CommandParser}
@@ -63,18 +64,18 @@ public interface CommandParser<T> {
 
     /**
      * Parses the specified {@link JSONObject} and creates a {@link T} object
-     * 
+     *
      * @param jsonObject The {@link JSONObject} to parse
      * @return The newly created {@link T} object
      * @throws JSONException if a JSON parsing error occurs
      * @throws SieveException if a Sieve parsing error occurs
      * @throws OXException if a semantic error occurs
      */
-    T parse(JSONObject jsonObject) throws JSONException, SieveException, OXException;
+    T parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException;
 
     /**
      * Parses the specified {@link T} object to the specified {@link JSONObject}
-     * 
+     *
      * @param jsonObject The {@link JSONObject} to parse the {@link T} object into
      * @param command The {@link T} to parse
      * @throws JSONException if a JSON parsing error occurs

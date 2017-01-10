@@ -69,6 +69,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.RuleFieldMapper;
 import com.openexchange.mailfilter.json.ajax.json.mapper.RuleNameRuleFieldMapper;
 import com.openexchange.mailfilter.json.ajax.json.mapper.TestCommandRuleFieldMapper;
 import com.openexchange.mailfilter.json.ajax.json.mapper.TextRuleFieldMapper;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RuleParser}
@@ -102,21 +103,21 @@ public class RuleParser {
 
     /**
      * Parses the specified JSONObject into a new Rule object
-     * 
+     *
      * @param json The JSONObject to parse
      * @return the Rule object
      * @throws OXException
      * @throws SieveException
      * @throws JSONException
      */
-    public Rule parse(JSONObject json) throws JSONException, SieveException, OXException {
+    public Rule parse(JSONObject json, ServerSession session) throws JSONException, SieveException, OXException {
         Rule rule = new Rule();
-        return parse(rule, json);
+        return parse(rule, json, session);
     }
 
     /**
      * Parses the specified JSONObject into the specified Rule object
-     * 
+     *
      * @param rule The rule object
      * @param json The JSONObject
      * @return The parsed Rule object
@@ -124,12 +125,12 @@ public class RuleParser {
      * @throws SieveException
      * @throws OXException
      */
-    public Rule parse(Rule rule, JSONObject json) throws JSONException, SieveException, OXException {
+    public Rule parse(Rule rule, JSONObject json, ServerSession session) throws JSONException, SieveException, OXException {
         for (RuleFieldMapper mapper : mappers) {
             String attributeName = mapper.getAttributeName().name();
             if (json.has(attributeName)) {
                 try {
-                    mapper.setAttribute(rule, json.get(attributeName));
+                    mapper.setAttribute(rule, json.get(attributeName), session);
                 } catch (final ClassCastException e) {
                     throw new JSONException(e);
                 }
@@ -140,7 +141,7 @@ public class RuleParser {
 
     /**
      * Parses the specified {@link Rule} object into a {@link JSONObject}
-     * 
+     *
      * @param rule The {@link Rule} object to parse
      * @return The parsed {@link JSONObject}
      * @throws JSONException if a JSON parsing error occurs
@@ -158,7 +159,7 @@ public class RuleParser {
     /**
      * Writes all {@link RuleField} fields of the specified rules into separate {@link JSONObject}s which in
      * turn are put into a surrounding {@link JSONArray}
-     * 
+     *
      * @param rules The rules
      * @return the JSONArray
      * @throws JSONException
