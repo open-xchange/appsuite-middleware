@@ -70,6 +70,8 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
     private final boolean recurrenceMaster;
     private final boolean showPrivates;
     private final Ignore ignore;
+    private Date end;
+    private Date start;
 
     /**
      * Initializes a new {@link UpdatesRequest} that doesn't show private appointments and ignores updates for deleted.
@@ -120,12 +122,18 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * @param ignore What kind of updates should be ignored
      */
     public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates, Ignore ignore) {
+        this(folderId, columns, timestamp, recurrenceMaster, showPrivates, ignore, null, null);
+    }
+
+    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates, Ignore ignore, Date start, Date end) {
         this.folderId = folderId;
         this.columns = columns;
         this.timestamp = timestamp;
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
         this.ignore = ignore;
+        this.start = start;
+        this.end = end;
     }
 
     @Override
@@ -150,6 +158,12 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, ignore.getValue()));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER, recurrenceMaster));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
+        if (start != null) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_START, start));
+        }
+        if (end != null) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_END, end));
+        }
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 

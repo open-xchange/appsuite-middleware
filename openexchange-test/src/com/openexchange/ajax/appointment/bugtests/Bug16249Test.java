@@ -70,8 +70,6 @@ public class Bug16249Test extends AttachmentTest {
 
     private int folderId;
 
-    private int appointmentId;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -88,8 +86,9 @@ public class Bug16249Test extends AttachmentTest {
         a.setParentFolderID(folderId);
         a.setIgnoreConflicts(true);
         
-        catm.insert(a);
-        Date beforeAttach = catm.get(a).getLastModified();
+        Appointment added = catm.insert(a);
+        int appointmentId = added.getObjectID();
+        Date beforeAttach = catm.get(added).getLastModified();
         
         final AttachmentMetadata attachment = new AttachmentImpl();
         attachment.setFolderId(folderId);

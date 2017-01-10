@@ -75,7 +75,6 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.SendLinkRequest;
@@ -105,7 +104,6 @@ import com.openexchange.test.TestInit;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class MailNotificationTest extends ShareTest {
 
-    private InfostoreTestManager infostoreTestManager;
     private FolderObject testFolder1;
     private FolderObject publicDriveFolder;
     private File image1, file1;
@@ -119,20 +117,10 @@ public class MailNotificationTest extends ShareTest {
     DateFormat dateFormat = null;
     UserValues userValues;
 
-    /**
-     * Initializes a new {@link MailNotificationTest}.
-     *
-     * @param name
-     */
-    public MailNotificationTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         userValues = getClient().getValues();
-        infostoreTestManager = new InfostoreTestManager(getClient());
         testFolder1 = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userValues.getPrivateInfostoreFolder());
         publicDriveFolder = insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
         image1 = getFile(createFile(testFolder1, IMAGENAME1, IMAGETYPE1).getId());
@@ -148,134 +136,6 @@ public class MailNotificationTest extends ShareTest {
         clientFullName = String.format("%1$s %2$s", clientContact.getGivenName(), clientContact.getSurName());
         clientEmail = clientContact.getEmail1();
     }
-
-    //    TODO: Adapt tests and NotifyAction once they are used, e.g. add own com.openexchange.share.notification.ShareNotification.NotificationType
-    //          and the matching builder
-    //
-    //    /**
-    //     * Invite a user and expect that he gets his personal link as email, together with the necessary credentials.
-    //     * Afterwards share a second folder with the same guest and expect another email without password.
-    //     */
-    //         @Test
-    //     public void testCreatedNotificationForGuestWithPassword() throws Exception {
-    //        /*
-    //         * First invitation
-    //         */
-    //        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null);
-    //        InviteRequest inviteRequest = new InviteRequest();
-    //        inviteRequest.addTarget(new ShareTarget(testFolder1.getModule(), Integer.toString(testFolder1.getObjectID())));
-    //        inviteRequest.addRecipient(guestPermission.getRecipient());
-    //        getClient().execute(inviteRequest);
-    //
-    //        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
-    //        assertEquals(1, messages.size());
-    //        Message message = messages.get(0);
-    //
-    //        /*
-    //         * assert magic headers and content
-    //         */
-    //        Map<String, String> headers = message.getHeaders();
-    //        assertEquals("share-created", headers.get("X-Open-Xchange-Share-Type"));
-    //        String url = headers.get("X-Open-Xchange-Share-URL");
-    //        assertNotNull(url);
-    //        String access = headers.get("X-Open-Xchange-Share-Access");
-    //        assertNotNull(access);
-    //        String[] credentials = new String(Base64.decode(access), Charset.forName("UTF-8")).split(":");
-    //        assertEquals(2, credentials.length);
-    //        String username = credentials[0];
-    //        String password = credentials[1];
-    //
-    //        String plainText = message.getPlainText();
-    //        assertNotNull(plainText);
-    //        assertTrue(plainText.contains(username));
-    //        assertTrue(plainText.contains(password));
-    //
-    //        /*
-    //         * check received link and credentials
-    //         */
-    //        GuestClient guestClient = new GuestClient(url, username, password);
-    //        guestClient.checkFolderAccessible(Integer.toString(testFolder1.getObjectID()), guestPermission);
-    //        guestClient.logout();
-    //
-    //        /*
-    //         * second invitation
-    //         */
-    //        inviteRequest = new InviteRequest();
-    //        inviteRequest.addTarget(new ShareTarget(testFolder2.getModule(), Integer.toString(testFolder2.getObjectID())));
-    //        inviteRequest.addRecipient(guestPermission.getRecipient());
-    //        getClient().execute(inviteRequest);
-    //
-    //        messages = getClient().execute(new GetMailsRequest()).getMessages();
-    //        assertEquals(1, messages.size());
-    //        message = messages.get(0);
-    //
-    //        /*
-    //         * assert magic headers and content
-    //         */
-    //        headers = message.getHeaders();
-    //        assertEquals("share-created", headers.get("X-Open-Xchange-Share-Type"));
-    //        url = headers.get("X-Open-Xchange-Share-URL");
-    //        assertNotNull(url);
-    //        assertNull(headers.get("X-Open-Xchange-Share-Access"));
-    //
-    //        /*
-    //         * re-login with existing credentials
-    //         */
-    //        guestClient = new GuestClient(url, username, password);
-    //        guestClient.checkFolderAccessible(Integer.toString(testFolder2.getObjectID()), guestPermission);
-    //        guestClient.logout();
-    //    }
-    //
-    //    /**
-    //     * Get a password-secured link and distribute it via notify action
-    //     */
-    //         @Test
-    //     public void testNotifyAnonymousWithPassword() throws Exception {
-    //        /*
-    //         * get link
-    //         */
-    //        String password = PasswordUtility.generate();
-    //        OCLGuestPermission permission = createAnonymousAuthorPermission(password);
-    //        GetLinkRequest getLinkRequest = new GetLinkRequest(Collections.singletonList(new ShareTarget(testFolder1.getModule(), Integer.toString(testFolder1.getObjectID()))));
-    //        getLinkRequest.setBits(permission.getPermissionBits());
-    //        getLinkRequest.setPassword(password);
-    //        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
-    //
-    //        /*
-    //         * notify
-    //         */
-    //        String textMessage = randomUID();
-    //        NotifyRequest notifyRequest = new NotifyRequest(getLinkResponse.getToken(), textMessage + "@example.com");
-    //        notifyRequest.setMessage(textMessage);
-    //        getClient().execute(notifyRequest);
-    //        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
-    //        assertEquals(1, messages.size());
-    //        Message message = messages.get(0);
-    //
-    //        /*
-    //         * assert magic headers and content
-    //         */
-    //        Map<String, String> headers = message.getHeaders();
-    //        assertEquals("share-created", headers.get("X-Open-Xchange-Share-Type"));
-    //        String url = headers.get("X-Open-Xchange-Share-URL");
-    //        assertNotNull(url);
-    //        String access = headers.get("X-Open-Xchange-Share-Access");
-    //        assertNotNull(access);
-    //        String receivedPassword = new String(Base64.decode(access), Charset.forName("UTF-8"));
-    //        assertEquals(password, receivedPassword);
-    //
-    //        String plainText = message.getPlainText();
-    //        assertNotNull(plainText);
-    //        assertTrue(plainText.contains(receivedPassword));
-    //        assertTrue(plainText.contains(textMessage));
-    //
-    //        /*
-    //         * check received link and credentials
-    //         */
-    //        GuestClient guestClient = new GuestClient(url, null, receivedPassword);
-    //        guestClient.checkFolderAccessible(Integer.toString(testFolder1.getObjectID()), permission);
-    //        guestClient.logout();
-    //    }
 
     //---IMAGES-----------------------------------------------------------------------------------------------------------------------------
     @Test
@@ -494,7 +354,7 @@ public class MailNotificationTest extends ShareTest {
         file.setFileName(file.getTitle());
         file.setDescription(file.getTitle());
         file.setFileMIMEType(mimeType);
-        infostoreTestManager.newAction(file, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
+        itm.newAction(file, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
         return file;
     }
 

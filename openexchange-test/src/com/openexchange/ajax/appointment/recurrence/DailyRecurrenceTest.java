@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
@@ -27,12 +28,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         final Date startDate = simpleDateFormat.parse("2007-03-01 08:00:00");
         final Date endDate = simpleDateFormat.parse("2007-03-01 10:00:00");
 
-        final Appointment appointmentObj = new Appointment();
-        appointmentObj.setTitle("testDailyRecurrenceFromWinter2SummerTime");
-        appointmentObj.setStartDate(startDate);
-        appointmentObj.setEndDate(endDate);
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setParentFolderID(appointmentFolderId);
+        final Appointment appointmentObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testDailyRecurrenceFromWinter2SummerTime", startDate, endDate);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
         appointmentObj.setOrganizer(testUser.getUser());

@@ -69,7 +69,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestManager;
-import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link MoveTestNew} This test describes the current status of the calendar implementation. It does not cover any user stories or expected
@@ -79,8 +78,6 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MoveTestNew extends AbstractAppointmentTest {
-
-    private TestUser userB, userC;
 
     private AJAXClient clientB, clientC;
 
@@ -99,11 +96,8 @@ public class MoveTestNew extends AbstractAppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        userB = testContext.acquireUser();
-        userC = testContext.acquireUser();
-
-        clientB = new AJAXClient(userB);
-        clientC = new AJAXClient(userC);
+        clientB = getClient2();
+        clientC = new AJAXClient(testContext.acquireUser());
 
         valuesB = clientB.getValues();
         valuesC = clientC.getValues();
@@ -130,7 +124,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
         folderA = ftm.getFolderFromServer(getClient().getValues().getPrivateAppointmentFolder());
         folderA1 = createPrivateFolder("SubfolderA1" + UUID.randomUUID().toString(), ftm, getClient());
         ftm.insertFolderOnServer(folderA1);
-
+        
         folderB = ftmB.getFolderFromServer(valuesB.getPrivateAppointmentFolder());
         addAuthorPermissions(folderB, getClient().getValues().getUserId(), ftmB);
         folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, clientB, getClient());

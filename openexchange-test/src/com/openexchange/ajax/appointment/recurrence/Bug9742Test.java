@@ -6,13 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -21,13 +16,10 @@ import com.openexchange.groupware.container.FolderChildObject;
 
 public class Bug9742Test extends AbstractAJAXSession {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9742Test.class);
-
     public static final int[] APPOINTMENT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, CalendarObject.START_DATE, CalendarObject.END_DATE, Appointment.LOCATION, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL };
 
     @Test
     public void testBug9742() throws Exception {
-        final AJAXSession ajaxSession = getSession();
         final AJAXClient ajaxClient = getClient();
         TimeZone timeZone = ajaxClient.getValues().getTimeZone();
         if (!timeZone.getID().equals("Europe/Berlin")) {
@@ -69,22 +61,14 @@ public class Bug9742Test extends AbstractAJAXSession {
         calendarRange.set(Calendar.MINUTE, 0);
         calendarRange.set(Calendar.SECOND, 0);
         calendarRange.set(Calendar.MILLISECOND, 0);
-
         final Date start = calendarRange.getTime();
-
         calendarRange.add(Calendar.DAY_OF_MONTH, 5);
-
         final Date end = calendarRange.getTime();
 
-        final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, true);
+        catm.insert(appointmentObj);
+        final int objectId = appointmentObj.getObjectID();
 
-        final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);
-        final int objectId = insertResponse.getId();
-
-        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
-        final Date modified = loadAppointment.getLastModified();
-
-        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, APPOINTMENT_FIELDS);
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, start, end, APPOINTMENT_FIELDS, false);
 
         int appointmentCounter = 0;
         for (int a = 0; a < appointmentArray.length; a++) {
@@ -94,8 +78,5 @@ public class Bug9742Test extends AbstractAJAXSession {
         }
 
         assertEquals("unexpected appointments size", 4, appointmentCounter);
-
-        final DeleteRequest deleteRequest = new DeleteRequest(objectId, appointmentFolderId, modified);
-        Executor.execute(ajaxSession, deleteRequest);
     }
 }

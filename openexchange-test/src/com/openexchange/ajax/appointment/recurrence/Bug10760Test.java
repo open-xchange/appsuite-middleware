@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
@@ -19,14 +18,6 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug10760Test extends AbstractRecurrenceTest {
 
-    private int objectId;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        objectId = -1;
-    }
-
     @Test
     public void testBug10760() throws Exception {
         final String title = "testBug10760";
@@ -39,8 +30,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = catm.insert(appointmentObj).getObjectID();
-        appointmentObj.setObjectID(objectId);
+        int objectId = catm.insert(appointmentObj).getObjectID();
 
         appointmentObj.setRecurrencePosition(2);
         catm.update(appointmentFolderId, appointmentObj);
@@ -59,7 +49,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
             fields[i] = tmp.get(i).intValue();
         }
         
-        final Appointment[] appointmentArray = catm.all(appointmentFolderId, new Date(), new Date());
+        final Appointment[] appointmentArray = catm.all(appointmentFolderId, new Date(), new Date(), APPOINTMENT_FIELDS, false);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 assertEquals("recurrence id is not equals expected", objectId, appointmentArray[a].getRecurrenceID());

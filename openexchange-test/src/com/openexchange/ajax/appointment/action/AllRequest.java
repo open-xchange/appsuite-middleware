@@ -99,8 +99,10 @@ public class AllRequest extends CommonAllRequest {
     public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster, final boolean showPrivates) {
         super(AbstractAppointmentRequest.URL, folderId, addGUIColumns(columns), 0, null, true);
         // Add time zone's offset to simulate local time as passed by requests from GUI
-        this.start = addTimeZone2Date(start, tz);
-        this.end = addTimeZone2Date(end, tz);
+//        this.start = addTimeZone2Date(start, tz);
+//        this.end = addTimeZone2Date(end, tz);
+        this.start = start;
+        this.end = end;
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
         this.timeZoneId = tz.getID();
@@ -117,8 +119,10 @@ public class AllRequest extends CommonAllRequest {
     public AllRequest(final int folderId, final String alias, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster, final boolean showPrivates) {
         super(AbstractAppointmentRequest.URL, folderId, alias, 0, null, true);
         // Add time zone's offset to simulate local time as passed by requests from GUI
-        this.start = addTimeZone2Date(start, tz);
-        this.end = addTimeZone2Date(end, tz);
+//        this.start = addTimeZone2Date(start, tz);
+//        this.end = addTimeZone2Date(end, tz);
+        this.start = start;
+        this.end = end;
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
         this.timeZoneId = tz.getID();

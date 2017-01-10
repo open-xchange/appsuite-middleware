@@ -368,8 +368,8 @@ public class CalendarTestManager implements TestManager {
         }
     }
 
-    public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, boolean showPrivates, Ignore ignore) {
-        UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster, showPrivates, ignore);
+    public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, boolean showPrivates, Ignore ignore, Date start, Date end) {
+        UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster, showPrivates, ignore, start, end);
         AppointmentUpdatesResponse resp = execute(req);
         extractInfo(resp);
         try {
@@ -696,6 +696,7 @@ public class CalendarTestManager implements TestManager {
         obj.setStartDate(start);
         obj.setEndDate(end);
         obj.setParentFolderID(parentFolderId);
+        obj.setShownAs(Appointment.ABSENT);
         return obj;
     }
 }

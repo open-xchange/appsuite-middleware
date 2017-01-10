@@ -55,6 +55,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
@@ -77,6 +78,7 @@ public abstract class AbstractAJAXSession {
     protected CalendarTestManager catm;
     protected ContactTestManager cotm;
     protected FolderTestManager ftm;
+    protected InfostoreTestManager itm;
 
     /**
      * Default constructor.
@@ -121,6 +123,7 @@ public abstract class AbstractAJAXSession {
         catm = new CalendarTestManager(client);
         cotm = new ContactTestManager(client);
         ftm = new FolderTestManager(client);
+        itm = new InfostoreTestManager(client);
     }
 
     @After
@@ -134,6 +137,9 @@ public abstract class AbstractAJAXSession {
             }
             if (ftm != null) {
                 ftm.cleanUp();
+            }
+            if (itm != null) {
+                itm.cleanUp();
             }
             if (client != null) {
                 // Client can be null if setUp() fails

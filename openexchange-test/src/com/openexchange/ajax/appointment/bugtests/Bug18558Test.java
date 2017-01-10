@@ -94,16 +94,12 @@ public class Bug18558Test extends AbstractAJAXSession {
     private AJAXClient clientD;
     private Appointment appointment;
 
-    public Bug18558Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
         clientC = new AJAXClient(testContext.acquireUser());
         clientD = new AJAXClient(testContext.acquireUser());
 

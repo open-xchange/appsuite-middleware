@@ -74,13 +74,9 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class Bug40527Test extends ShareTest {
 
-    public Bug40527Test() {
-        super();
-    }
-
     @Test
     public void testInternalFileShareLinkOnSharedCreation() throws Exception {
-        AJAXClient shareClient = new AJAXClient(testUser);
+        AJAXClient shareClient = getClient2();
         try {
             FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
             DefaultFileStorageObjectPermission sharePermission = new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ);
@@ -103,7 +99,7 @@ public class Bug40527Test extends ShareTest {
 
     @Test
     public void testInternalFileShareLinkOnSubsequentShare() throws Exception {
-        AJAXClient shareClient = new AJAXClient(testUser);
+        AJAXClient shareClient = getClient2();
         try {
             FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
             File file = insertFile(folder.getObjectID());

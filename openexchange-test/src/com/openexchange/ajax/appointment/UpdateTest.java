@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -69,6 +70,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.CalendarTestManager;
 
 public class UpdateTest extends AppointmentTest {
 
@@ -128,44 +130,35 @@ public class UpdateTest extends AppointmentTest {
 
         final Date until = new Date(c.getTimeInMillis() + (15 * dayInMillis));
 
-        final int changeExceptionPosition = 3;
-
-        Appointment appointmentObj = new Appointment();
-        appointmentObj.setTitle("testUpdateRecurrence");
-        appointmentObj.setStartDate(new Date(startTime));
-        appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setParentFolderID(appointmentFolderId);
+        Appointment appointmentObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testUpdateRecurrence", new Date(startTime), new Date(endTime));
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
         appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
+        
         final int objectId = catm.insert(appointmentObj).getObjectID();
-        appointmentObj.setObjectID(objectId);
+
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
 
         final long newStartTime = startTime + 60 * 60 * 1000;
         final long newEndTime = endTime + 60 * 60 * 1000;
+        final int changeExceptionPosition = 3;
 
-        appointmentObj = new Appointment();
-        appointmentObj.setTitle("testUpdateRecurrence - exception");
-        appointmentObj.setStartDate(new Date(newStartTime));
-        appointmentObj.setEndDate(new Date(newEndTime));
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testUpdateRecurrence - exception", new Date(newStartTime), new Date(newEndTime));
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setLastModified(new Date(Long.MAX_VALUE));
+        appointmentObj.setObjectID(objectId);
 
         catm.update(appointmentFolderId, appointmentObj);
         Appointment newApp = catm.get(appointmentObj);
         final int newObjectId = newApp.getObjectID();
         assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
-        appointmentObj.setObjectID(newObjectId);
 
-        loadAppointment = catm.get(appointmentFolderId, objectId);
+        loadAppointment = catm.get(appointmentFolderId, newObjectId);
 
         // Loaded change exception MUST NOT contain any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
@@ -177,24 +170,19 @@ public class UpdateTest extends AppointmentTest {
         final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
         final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
 
-        final Appointment appointmentObj = createAppointmentObject("testShiftRecurrenceAppointment");
+        Appointment appointmentObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testShiftRecurrenceAppointment", new Date(startTime), new Date(endTime));
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
         appointmentObj.setOccurrence(5);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
-        appointmentObj.setObjectID(objectId);
-
         final Date startDate = appointmentObj.getStartDate();
         final Date endDate = appointmentObj.getEndDate();
-
         final Calendar calendarStart = Calendar.getInstance(timeZone);
         final Calendar calendarEnd = Calendar.getInstance(timeZone);
-
         calendarStart.setTime(startDate);
         calendarStart.add(Calendar.DAY_OF_MONTH, 2);
-
         calendarEnd.setTime(endDate);
         calendarEnd.add(Calendar.DAY_OF_MONTH, 2);
 
@@ -213,6 +201,7 @@ public class UpdateTest extends AppointmentTest {
 
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         final Date modified = loadAppointment.getLastModified();
+        appointmentObj.setLastModified(modified);
 
         catm.update(appointmentFolderId, appointmentObj);
 
@@ -221,7 +210,7 @@ public class UpdateTest extends AppointmentTest {
         loadAppointment.removeUntil();   // TODO add expected until
         compareObject(appointmentObj, loadAppointment);
 
-        final List<Appointment> appointmentArray = catm.updates(0, _appointmentFields, new Date(0), false);
+        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, new Date(0), false, false, Ignore.DELETED, start, end);
 
         boolean found = false;
 
@@ -236,7 +225,7 @@ public class UpdateTest extends AppointmentTest {
         assertTrue("object with object_id: " + objectId + " not found in response", found);
     }
 
-    // Bug 12700    FIXME    @Test
+    // Bug 12700
     @Test
     public void testMakeFullTime() throws Exception {
         final TimeZone utc = TimeZone.getTimeZone("urc");
@@ -244,21 +233,17 @@ public class UpdateTest extends AppointmentTest {
         final Appointment appointmentObj = createAppointmentObject("testShiftRecurrenceAppointment");
         appointmentObj.setStartDate(D("04/01/2008 12:00"));
         appointmentObj.setEndDate(D("04/01/2008 14:00"));
-
         appointmentObj.setIgnoreConflicts(true);
+        
         final int objectId = catm.insert(appointmentObj).getObjectID();
-        appointmentObj.setObjectID(objectId);
-
-        final Appointment update = new Appointment();
-        update.setObjectID(objectId);
-        update.setParentFolderID(appointmentFolderId);
-        update.setFullTime(true);
 
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        
         final Date modified = new Date(Long.MAX_VALUE);
         loadAppointment.setLastModified(modified);
-
-        catm.update(appointmentFolderId, appointmentObj);
+        loadAppointment.setFullTime(true);
+        
+        catm.update(appointmentFolderId, loadAppointment);
 
         loadAppointment = catm.get(appointmentFolderId, objectId);
 
