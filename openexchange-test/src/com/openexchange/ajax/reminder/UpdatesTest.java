@@ -57,12 +57,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.GetRequest;
-import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.test.CalendarTestManager;
 
 public class UpdatesTest extends ReminderTest {
 
@@ -77,15 +75,10 @@ public class UpdatesTest extends ReminderTest {
         final long startTime = c.getTimeInMillis();
         final long endTime = startTime + 3600000;
 
-        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
+        final int parentFolderId = getClient().getValues().getPrivateAppointmentFolder();
 
-        final Appointment appointmentObj = new Appointment();
-        appointmentObj.setTitle("testRange");
-        appointmentObj.setStartDate(new Date(startTime));
-        appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setShownAs(Appointment.ABSENT);
+        final Appointment appointmentObj = CalendarTestManager.createAppointmentObject(parentFolderId, "testRange", new Date(startTime), new Date(endTime));
         appointmentObj.setAlarm(45);
-        appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(true);
 
         final int targetId = catm.insert(appointmentObj).getObjectID();
@@ -104,13 +97,10 @@ public class UpdatesTest extends ReminderTest {
         assertTrue("object id not found", selected.getObjectId() > 0);
         assertNotNull("last modified is null", selected.getLastModified());
         assertEquals("target id is not equals", targetId, selected.getTargetId());
-        assertEquals("folder id is not equals", folderId, selected.getFolder());
+        assertEquals("folder id is not equals", parentFolderId, selected.getFolder());
         assertEquals("user id is not equals", userId, selected.getUser());
 
         final long expectedAlarm = startTime - (45 * 60 * 1000);
         assertEquals("alarm is not equals", new Date(expectedAlarm), selected.getDate());
-
-        final GetResponse aGetR = getClient().execute(new GetRequest(folderId, targetId));
-        getClient().execute(new DeleteRequest(targetId, folderId, aGetR.getTimestamp()));
     }
 }

@@ -209,7 +209,7 @@ public class ReminderTestManager implements TestManager {
         return null;
     }
 
-    public List<ReminderObject> updates(Date timestamp) throws JSONException, OXException {
+    public List<ReminderObject> updates(Date timestamp) throws JSONException, OXException, IOException {
         UpdatesRequest request = new UpdatesRequest(timestamp);
         UpdatesResponse updatesResponse = execute(request);
         setLastResponse(updatesResponse);
@@ -223,7 +223,7 @@ public class ReminderTestManager implements TestManager {
             object.setObjectId(DataParser.parseInt(jsonReminder, ReminderFields.ID));
             object.setTargetId(DataParser.parseInt(jsonReminder, ReminderFields.TARGET_ID));
             object.setFolder(DataParser.parseInt(jsonReminder, ReminderFields.FOLDER));
-//            object.setDate(DataParser.parseTime(jsonReminder, ReminderFields.ALARM, timeZone));
+            object.setDate(DataParser.parseTime(jsonReminder, ReminderFields.ALARM, getClient().getValues().getTimeZone()));
             object.setLastModified(DataParser.parseDate(jsonReminder, ReminderFields.LAST_MODIFIED));
             object.setUser(DataParser.parseInt(jsonReminder, ReminderFields.USER_ID));
             object.setRecurrenceAppointment(DataParser.parseBoolean(jsonReminder, ReminderFields.RECURRENCE_APPOINTMENT));
