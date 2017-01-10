@@ -63,4 +63,29 @@ Specifies the authentication type which should be used for primary account's mai
       Configcascade_Aware: true
       Related: 
       File: mail.properties
+  - data:
+      Key: com.openexchange.mail.flagging.mode
+      Description: >
+Specifies the flagging mode. Possible values:
+-<code>default</code> The default value. No flagging or coloring.
+-<code>apply_flagged</code> When a mail will be flagged with a color, the mail will also be flagged with the \\Flagged flag.
+-<code>apply_color</code> When a mail is flagged (contains the \\Flagged flag) and contains no color, the mail is returned with a configured color (see com.openexchange.mail.flagging.color)
+-<code>apply_both</code> A combination of apply_flagged and apply_color
+      Default: default
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: com.openexchange.mail.flagging.color
+      File: mail.properties
+  - data:
+      Key: com.openexchange.mail.flagging.color
+      Description: >
+Specifies the color which should be added to colorless flagged mails in case the flagging mode is "apply_color" or "apply_both". Only values from 1 to 10 are allowed.
+      Default: 1
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: com.openexchange.mail.flagging.mode
+      File: mail.properties      
+      
  
