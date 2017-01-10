@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Alarm;
@@ -270,7 +271,7 @@ public class EventPatches {
                     Event masterEvent = calendarSession.getCalendarService().getEvent(calendarSession, resource.getEvent().getFolderId(), resource.getEvent().getId());
                     Event originalOccurrence = null;
                     Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().calculateInstances(
-                        masterEvent, initCalendar(resource.getParent().getTimeZone(), recurrenceId.getValue()), null, null);
+                        masterEvent, initCalendar(TimeZones.UTC, recurrenceId.getValue()), null, null);
                     if (iterator.hasNext()) {
                         originalOccurrence = iterator.next();
                     }
@@ -575,11 +576,15 @@ public class EventPatches {
 
         private static Event adjustAlarms(EventResource resource, Event exportedEvent) {
             List<Alarm> exportedAlarms = exportedEvent.getAlarms();
-            if (resource.getFactory().getUser().getId() != resource.getParent().getCalendarUser()) {
-                /*
-                 * remove alarms if event in shared folders is loaded is loaded by another user
-                 */
-                exportedAlarms = null;
+            try {
+                if (resource.getFactory().getUser().getId() != resource.getParent().getCalendarUser().getId()) {
+                    /*
+                     * remove alarms if event in shared folders is loaded is loaded by another user
+                     */
+                    exportedAlarms = null;
+                }
+            } catch (OXException e) {
+                LOG.warn("Error deriving calendar user from collection", e);
             }
             if (null == exportedAlarms || 0 == exportedAlarms.size()) {
                 /*
@@ -626,7 +631,14 @@ public class EventPatches {
                          * events, and a custom "X-MOZ-SNOOZE-TIME" property for non-recurring ones
                          */
                         if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(resource.getUserAgent())) {
-                            Date snoozeTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), exportedEvent, resource.getParent().getTimeZone());
+                            Date snoozeTime = null;
+                            try {
+                                TimeZone timeZone = TimeZone.getTimeZone(resource.getParent().getCalendarUser().getTimeZone());
+                                snoozeTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), exportedEvent, timeZone);
+                            } catch (OXException e) {
+                                LOG.warn("Error determining snooze time", e);
+                                continue;
+                            }
                             if (isSeriesMaster(exportedEvent) && null != snoozedAlarm.getAcknowledged()) {
                                 try {
                                     RecurrenceService recurrenceService = resource.getFactory().requireService(RecurrenceService.class);
@@ -664,10 +676,14 @@ public class EventPatches {
          */
         private static Event removeImplicitAttendee(EventResource resource, Event exportedEvent) {
             List<Attendee> attendees = exportedEvent.getAttendees();
-            if (null != attendees && 1 == attendees.size() && resource.getParent().getCalendarUser() == attendees.get(0).getEntity() &&
-                false == PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
-                exportedEvent.removeAttendees();
-                exportedEvent.removeOrganizer();
+            try {
+                if (null != attendees && 1 == attendees.size() && resource.getParent().getCalendarUser().getId() == attendees.get(0).getEntity() &&
+                    false == PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
+                    exportedEvent.removeAttendees();
+                    exportedEvent.removeOrganizer();
+                }
+            } catch (OXException e) {
+                LOG.warn("Error removing implicit event attendee", e);
             }
             return exportedEvent;
         }

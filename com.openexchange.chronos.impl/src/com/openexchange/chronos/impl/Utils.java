@@ -699,6 +699,57 @@ public class Utils {
     }
 
     /**
+     * Applies <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance.
+     *
+     * @param storage A reference to the calendar storage to use
+     * @param seriesMaster The series master event
+     * @param forUser The identifier of the user to apply the exception dates for
+     * @return The passed event reference, with possibly adjusted exception dates
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
+     */
+    public static Event applyExceptionDates(CalendarStorage storage, Event seriesMaster, int forUser) throws OXException {
+        if (false == isSeriesMaster(seriesMaster)) {
+            return seriesMaster;
+        }
+        /*
+         * lookup all known change exceptions
+         */
+        List<Date> changeExceptionDates = seriesMaster.getChangeExceptionDates();
+        if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
+            return seriesMaster;
+        }
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, I(seriesMaster.getSeriesId())))
+            .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+        ;
+        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, getFields((EventField[]) null));
+        changeExceptions = loadAdditionalEventData(storage, forUser, changeExceptions, new EventField[] { EventField.ATTENDEES });
+        /*
+         * check which change exception the user attends
+         */
+        List<Date> userizedChangeExceptions = new ArrayList<Date>(changeExceptionDates.size());
+        List<Date> userizedDeleteExceptions = new ArrayList<Date>();
+        if (null != seriesMaster.getDeleteExceptionDates()) {
+            userizedDeleteExceptions.addAll(seriesMaster.getDeleteExceptionDates());
+        }
+        for (Event changeException : changeExceptions) {
+            Date exceptionDate = new Date(changeException.getRecurrenceId().getValue());
+            if (CalendarUtils.contains(changeException.getAttendees(), forUser)) {
+                userizedChangeExceptions.add(exceptionDate);
+            } else {
+                userizedDeleteExceptions.add(exceptionDate);
+            }
+        }
+        /*
+         * apply 'userized' versions of exception dates
+         */
+        seriesMaster.setChangeExceptionDates(userizedChangeExceptions);
+        seriesMaster.setDeleteExceptionDates(userizedDeleteExceptions);
+        return seriesMaster;
+    }
+
+    /**
      * Gets a list containing all elements provided by the supplied iterator.
      *
      * @param itrerator The iterator to get the list for
@@ -743,6 +794,26 @@ public class Utils {
             protected boolean matches(Attachment item1, Attachment item2) {
                 if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
                     return item1.getManagedId() == item2.getManagedId();
+                }
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Initializes a new exception date collection update based on the supplied original and updated exception date lists.
+     *
+     * @param originalDates The original dates
+     * @param updatedDates The updated dates
+     * @return The collection update
+     */
+    public static SimpleCollectionUpdate<Date> getExceptionDateUpdates(List<Date> originalDates, List<Date> updatedDates) {
+        return new AbstractSimpleCollectionUpdate<Date>(originalDates, updatedDates) {
+
+            @Override
+            protected boolean matches(Date item1, Date item2) {
+                if (null != item1 && null != item2) {
+                    return item1.getTime() == item2.getTime();
                 }
                 return false;
             }

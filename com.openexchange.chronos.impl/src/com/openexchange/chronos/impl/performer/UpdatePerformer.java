@@ -50,9 +50,12 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.filter;
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -85,6 +88,8 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DataAwareRecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AlarmMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -96,10 +101,12 @@ import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.DefaultItemUpdate;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.ItemUpdate;
+import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -203,10 +210,19 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         }
+        boolean wasUpdated = false;
+        /*
+         * handle new delete exceptions
+         */
+        if (isSeriesMaster(originalEvent) && updatedEvent.containsDeleteExceptionDates()) {
+            if (updateDeleteExceptions(originalEvent, updatedEvent)) {
+                wasUpdated = true;
+                originalEvent = loadEventData(originalEvent.getId());
+            }
+        }
         /*
          * update event data
          */
-        boolean wasUpdated = false;
         ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent, ignoredFields);
         if (null != eventUpdate) {
             /*
@@ -391,6 +407,48 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         });
     }
 
+    private boolean updateDeleteExceptions(Event originalEvent, Event updatedEvent) throws OXException {
+        if (isSeriesMaster(originalEvent) && null != updatedEvent.getDeleteExceptionDates() && 0 < updatedEvent.getDeleteExceptionDates().size()) {
+            if (isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
+                /*
+                 * "real" delete exceptions for all attendees, take over as-is during normal update routine
+                 */
+                return false;
+            }
+            /*
+             * check for newly indicated delete exceptions, from the calendar user's point of view
+             */
+            Attendee userAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
+            Event originalUserEvent = new Event();
+            EventMapper.getInstance().copy(originalEvent, originalUserEvent, EventField.values());
+            originalUserEvent = Utils.applyExceptionDates(storage, originalUserEvent, calendarUser.getId());
+            SimpleCollectionUpdate<Date> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalUserEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
+            if (0 < exceptionDateUpdates.getRemovedItems().size() || null == userAttendee) {
+                throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), EventField.DELETE_EXCEPTION_DATES);
+            }
+            if (0 < exceptionDateUpdates.getAddedItems().size()) {
+                DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(originalEvent);
+                for (Date newDeleteException : exceptionDateUpdates.getAddedItems()) {
+                    RecurrenceId recurrenceId = Check.recurrenceIdExists(originalEvent, new DataAwareRecurrenceId(recurrenceData, newDeleteException.getTime()));
+                    if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(newDeleteException)) {
+                        /*
+                         * remove attendee from existing change exception
+                         */
+                        delete(loadExceptionData(originalEvent.getId(), recurrenceId), userAttendee);
+                    } else {
+                        /*
+                         * creation of new delete exception for this attendee
+                         */
+                        deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
+                    }
+                }
+                updatedEvent.removeDeleteExceptionDates();
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void updateAttendees(Event originalEvent, Event updatedEvent) throws OXException {
         AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees());
         /*
@@ -564,7 +622,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     /*
                      * ensure all necessary recurrence related data is present in passed event update & check rule validity & re-validate start- and end date
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID,
+                        EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
                     Check.startAndEndDate(eventUpdate);
                     break;
                 case RECURRENCE_ID:
@@ -583,6 +642,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     }
                     if (null != eventUpdate.getDeleteExceptionDates()) {
                         Check.recurrenceIdsExist(originalEvent, eventUpdate.getDeleteExceptionDates());
+                        SimpleCollectionUpdate<Date> exceptionDateUpdates = Utils.getExceptionDateUpdates(
+                            originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
+                        if (0 < exceptionDateUpdates.getRemovedItems().size()) {
+                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field );
+                        }
                     }
                     break;
                 case CHANGE_EXCEPTION_DATES:

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
@@ -57,6 +58,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
@@ -66,6 +70,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.DeleteResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.UpdateResultImpl;
@@ -207,6 +212,46 @@ public abstract class AbstractUpdatePerformer {
     }
 
     /**
+     * Deletes a specific internal user attendee from a single event from the storage. This can be used for any kind of event, i.e. a
+     * single, non-recurring event, an existing exception of an event series, or an event series. For the latter one, the attendee is deleted from
+     * any existing event exceptions as well.
+     * <p/>
+     * The deletion includes:
+     * <ul>
+     * <li>insertion of a <i>tombstone</i> record for the original event</li>
+     * <li>insertion of <i>tombstone</i> records for the original attendee</li>
+     * <li>deletion of any alarms of the attendee associated with the event</li>
+     * <li>deletion of the attendee from the event</li>
+     * <li>update of the last-modification timestamp of the original event</li>
+     * </ul>
+     *
+     * @param originalEvent The original event to delete
+     * @param originalAttendee The original attendee to delete
+     */
+    protected void delete(Event originalEvent, Attendee originalAttendee) throws OXException {
+        /*
+         * recursively delete any existing event exceptions for this attendee
+         */
+        int userID = originalAttendee.getEntity();
+        if (isSeriesMaster(originalEvent)) {
+            deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates(), userID);
+        }
+        /*
+         * delete event data from storage for this attendee
+         */
+        int objectID = originalEvent.getId();
+        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+        storage.getAttendeeStorage().insertTombstoneAttendee(objectID, originalAttendee);
+        storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(originalAttendee));
+        storage.getAlarmStorage().deleteAlarms(objectID, userID);
+        /*
+         * 'touch' event & add track update result
+         */
+        touch(objectID);
+        result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(objectID)));
+    }
+
+    /**
      * Deletes change exception events from the storage.
      * <p/>
      * For each change exception, the data is removed by invoking {@link #delete(Event)} for the exception.
@@ -225,6 +270,72 @@ public abstract class AbstractUpdatePerformer {
                 delete(originalExceptionEvent);
             }
         }
+    }
+
+    /**
+     * Deletes a specific internal user attendee from change exception events from the storage.
+     * <p/>
+     * For each change exception, the data is removed by invoking {@link #delete(Event, Attendee)} for the exception, in case the
+     * user is found the exception's attendee list.
+     *
+     * @param seriesID The series identifier
+     * @param exceptionDates The recurrence identifiers of the change exceptions to delete
+     * @param userID The identifier of the user attendee to delete
+     */
+    protected void deleteExceptions(int seriesID, List<Date> exceptionDates, int userID) throws OXException {
+        if (null != exceptionDates && 0 < exceptionDates.size()) {
+            List<RecurrenceId> recurrenceIDs = new ArrayList<RecurrenceId>();
+            for (Date exceptionDate : exceptionDates) {
+                recurrenceIDs.add(new DefaultRecurrenceId(exceptionDate));
+            }
+            for (Event originalExceptionEvent : loadExceptionData(seriesID, recurrenceIDs)) {
+                Attendee originalUserAttendee = find(originalExceptionEvent.getAttendees(), userID);
+                if (null != originalUserAttendee) {
+                    delete(originalExceptionEvent, originalUserAttendee);
+                }
+            }
+        }
+    }
+
+    /**
+     * Deletes a specific internal user attendee from a specific occurrence of a series event that does not yet exist as change exception.
+     * This includes the creation of the corresponding change exception, and the removal of the user attendee from this exception's
+     * attendee list.
+     *
+     * @param originalMasterEvent The original series master event
+     * @param recurrenceID The recurrence identifier of the occurrence to remove the attendee for
+     * @param originalAttendee The original attendee to delete from the recurrence
+     */
+    protected void deleteFromRecurrence(Event originalMasterEvent, RecurrenceId recurrenceID, Attendee originalAttendee) throws OXException {
+        /*
+         * create new exception event
+         */
+        Event exceptionEvent = prepareException(originalMasterEvent, recurrenceID);
+        storage.getEventStorage().insertEvent(exceptionEvent);
+        /*
+         * take over all other original attendees
+         */
+        List<Attendee> excpetionAttendees = new ArrayList<Attendee>(originalMasterEvent.getAttendees());
+        excpetionAttendees.remove(originalAttendee);
+        storage.getAttendeeStorage().insertAttendees(exceptionEvent.getId(), excpetionAttendees);
+        /*
+         * take over all other original alarms
+         */
+        for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalMasterEvent).entrySet()) {
+            int userID = entry.getKey().intValue();
+            if (userID != originalAttendee.getEntity()) {
+                storage.getAlarmStorage().insertAlarms(exceptionEvent, userID, entry.getValue());
+            }
+        }
+        /*
+         * take over all original attachments
+         */
+        storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), exceptionEvent.getId(), originalMasterEvent.getAttachments());
+        result.addCreation(new CreateResultImpl(loadEventData(exceptionEvent.getId())));
+        /*
+         * track new change exception date in master
+         */
+        addChangeExceptionDate(originalMasterEvent, recurrenceID);
     }
 
     /**

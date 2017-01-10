@@ -224,6 +224,18 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific user is the only / the last internal user attendee in an attendee list.
+     *
+     * @param attendees The attendees to check
+     * @param userID The identifier of the user to lookup in the attendee list
+     * @return <code>true</code> if there are no other internal user attendees despite the specified one, <code>false</code>, otherwise
+     */
+    public static boolean isLastUserAttendee(List<Attendee> attendees, int userID) {
+        List<Attendee> userAttendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
+        return 1 == userAttendees.size() && userID == userAttendees.get(0).getEntity();
+    }
+
+    /**
      * Truncates the time part of the supplied date, i.e. sets the fields {@link Calendar#HOUR_OF_DAY}, {@link Calendar#MINUTE},
      * {@link Calendar#SECOND} and {@link Calendar#MILLISECOND} to <code>0</code>.
      *

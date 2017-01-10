@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
+import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.i;
@@ -107,6 +109,9 @@ public class GetPerformer extends AbstractQueryPerformer {
         readAdditionalEventData(Collections.singletonList(event), getCalendarUser(folder).getId(), getFields(session, EventField.ATTENDEES));
         Check.eventIsInFolder(event, folder);
         event.setFolderId(i(folder));
+        if (isSeriesMaster(event)) {
+            event = applyExceptionDates(storage, event, getCalendarUser(folder).getId());
+        }
         return anonymizeIfNeeded(event, session.getUser().getId());
     }
 

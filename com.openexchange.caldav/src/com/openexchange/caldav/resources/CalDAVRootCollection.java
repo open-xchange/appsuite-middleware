@@ -169,8 +169,13 @@ public class CalDAVRootCollection extends DAVRootCollection {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
             return factory.mixin(new TaskCollection(factory, constructPathForChildResource(folder), folder, order));
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            //             return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order));
-            return factory.mixin(new EventCollection(factory, constructPathForChildResource(folder), folder, order));
+            boolean legacy = false;
+            if (legacy) {
+                return factory.mixin(new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order));
+            } else {
+                return factory.mixin(new EventCollection(factory, constructPathForChildResource(folder), folder, order));
+
+            }
         } else {
             throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
         }

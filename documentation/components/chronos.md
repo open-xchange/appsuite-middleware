@@ -44,7 +44,7 @@ The properties are stored as-is in the database, and are accessible in the same 
 
 ### Chronos: Organizer and sent-by
 
-In the Chronos stack, there's no dedicated "principal". Instead, it is ensured that the organizer is always the actual calendar owner for newly created events. An exception to this rule are imported scheduling object resources from external organizers. In case the event is created on behalf of the folder owner by another calendar user (e.g. the secretary), this is expressed via the ``SENT-BY`` attribute within the organizer.       
+In the Chronos stack, there's no dedicated "principal". Instead, it is ensured that the organizer is always the actual calendar owner for newly created events (An exception to this rule are imported scheduling object resources from external organizers, as described at RFC 6638, section 3.2.2.2). In case the event is created on behalf of the folder owner by another calendar user (e.g. the secretary), this is expressed via the ``SENT-BY`` attribute within the organizer.       
 
 ### Conversion 
 
@@ -66,7 +66,6 @@ In order to convert between the legacy properties for organizer/principal and th
   ``organizer``/``organizerId`` is taken from Organizer  
   ``principal``/``principalId`` empty  
   
-
 ### References / further reading
 - https://tools.ietf.org/html/rfc4791
 - https://tools.ietf.org/html/rfc6638
@@ -78,3 +77,23 @@ In order to convert between the legacy properties for organizer/principal and th
 - com.openexchange.calendar.itip.ITipCalendarWrapper.onBehalfOf(int)
 - com.openexchange.calendar.itip.ITipConsistencyCalendar.setPrincipal(CalendarDataObject)
 - com.openexchange.calendar.json.actions.chronos.EventConverter.getOrganizer(int, String, int, String)
+
+
+## Per-Attendee delete exceptions
+
+As invited attendees may delete a meeting from their personal calendar if they do not want to attend ("decline, and remove me from attendee list"), they may also do so for specific occurrences of a recurring event series. From the organizer's and the other attendee's point of view, this leads to a new change exception event with an updated list of attendees (with this deleting attendee being no longer listed there). However, for the attendee who has deleted a specific occurrence of the series, this rather means the creation of a new delete exception in the event series. 
+
+According to the RFC 6638, in such a scenario the attendee effectively gets a different set of delete exception dates (EXDATE property in iCal), while the organizer and the other attendees see this exception date as overridden instance (change exception): 
+
+> "As another example, an "Attendee" could be excluded from one instance of a recurring event.  In that case, the organizer scheduling object resource will include an overridden instance with an "ATTENDEE" list that does not include the "Attendee" being excluded.  Any scheduling messages delivered to the "Attendee" will not specify the overridden instance but rather will include an "EXDATE" property in the "master" component that defines the recurrence set."  
+
+While appropriate handling has originally been in place as incoming/outgoing "patches" within the CalDAV implementation, this is now considered directly within the Chronos service itself, so that the change- and delete-exception arrays in series events may be different based on the actual calendar user.
+
+### References / further reading
+- https://tools.ietf.org/html/rfc6638#section-3.2.6
+- com.openexchange.chronos.impl.Utils.applyExceptionDates(CalendarStorage, Event, int)
+- com.openexchange.chronos.impl.performer.UpdatePerformer.updateDeleteExceptions(Event, Event)
+ 
+
+
+

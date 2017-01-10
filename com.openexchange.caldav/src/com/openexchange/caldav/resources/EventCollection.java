@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.PhantomMaster;
@@ -95,7 +94,9 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -154,15 +155,14 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         includeProperties(new SupportedReportSet(), minDateTime, maxDateTime, new Invite(factory, this),
             new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this),
             new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new CalendarColor(this),
-            new ManagedAttachmentsServerURL(), new CalendarTimezone(factory, this));
-        if (CalendarOrder.NO_ORDER != order) {
-            includeProperties(new CalendarOrder(order));
-        }
-        includeProperties(
+            new ManagedAttachmentsServerURL(), new CalendarTimezone(factory, this),
             new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VEVENT),
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT),
             new DefaultAlarmVeventDate(), new DefaultAlarmVeventDatetime()
         );
+        if (CalendarOrder.NO_ORDER != order) {
+            includeProperties(new CalendarOrder(order));
+        }
     }
 
     public CalendarSession getCalendarSession() throws WebdavProtocolException {
@@ -178,15 +178,17 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         return calendarSession;
     }
 
-    public TimeZone getTimeZone() {
-        return TimeZone.getTimeZone(factory.getUser().getTimeZone());
-    }
-
-    public int getCalendarUser() {
-        if (PublicType.getInstance().equals(folder.getType())) {
-            return factory.getUser().getId();
+    /**
+     * Gets the actual target calendar user of the collection. This is either the current session's user for "private" or "public"
+     * folders, or the folder owner for "shared" calendar folders.
+     *
+     * @return The calendar user
+     */
+    public User getCalendarUser() throws OXException {
+        if (SharedType.getInstance().equals(folder.getType())) {
+            return super.getFactory().getService(UserService.class).getUser(folder.getCreatedBy(), folder.getContext());
         }
-        return folder.getCreatedBy();
+        return folder.getUser();
     }
 
     @Override

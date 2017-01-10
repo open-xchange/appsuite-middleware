@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.appendCommonTerms;
+import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
@@ -182,8 +183,9 @@ public abstract class AbstractQueryPerformer {
      * Post-processes a list of events prior returning it to the client. This includes
      * <ul>
      * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
-     * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
      * <li>applying the folder identifier from the passed folder</li>
+     * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
+     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the calendar user's actual attendance</li>
      * <li>sorting the resulting event list based on the requested sort options</li>
      * </ul>
      *
@@ -200,9 +202,12 @@ public abstract class AbstractQueryPerformer {
             }
             event.setFolderId(i(inFolder));
             event = anonymizeIfNeeded(event, session.getUser().getId());
-
-            if (isSeriesMaster(event) && isResolveOccurrences(session)) {
-                processedEvents.addAll(resolveOccurrences(event));
+            if (isSeriesMaster(event)) {
+                if (isResolveOccurrences(session)) {
+                    processedEvents.addAll(resolveOccurrences(event));
+                } else {
+                    processedEvents.add(applyExceptionDates(storage, event, getCalendarUser(inFolder).getId()));
+                }
             } else {
                 processedEvents.add(event);
             }
@@ -214,8 +219,9 @@ public abstract class AbstractQueryPerformer {
      * Post-processes a list of events prior returning it to the client. This includes
      * <ul>
      * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
-     * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
+     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual attendance</li>
      * <li>sorting the resulting event list based on the requested sort options</li>
      * </ul>
      *
@@ -232,8 +238,12 @@ public abstract class AbstractQueryPerformer {
             }
             event.setFolderId(Utils.getFolderView(storage, event, forUser));
             event = anonymizeIfNeeded(event, forUser);
-            if (isSeriesMaster(event) && isResolveOccurrences(session)) {
-                processedEvents.addAll(resolveOccurrences(event));
+            if (isSeriesMaster(event)) {
+                if (isResolveOccurrences(session)) {
+                    processedEvents.addAll(resolveOccurrences(event));
+                } else {
+                    processedEvents.add(applyExceptionDates(storage, event, forUser));
+                }
             } else {
                 processedEvents.add(event);
             }
