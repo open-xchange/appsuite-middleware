@@ -78,7 +78,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
     @Test
     public void testCreatingTwoEquallyNamedFiles() throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
-        fMgr.insertFolderOnServer(folder);
+        ftm.insertFolderOnServer(folder);
 
         {
             final File expected = new DefaultFile();
@@ -88,10 +88,10 @@ public class Bug40142Test extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             final java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            final File actual = infoMgr.getAction(expected.getId());
+            final File actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getFileName(), actual.getFileName());
         }
 
@@ -103,10 +103,10 @@ public class Bug40142Test extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             final java.io.File file = new java.io.File(TestInit.getTestProperty("webdavPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            final File actual = infoMgr.getAction(expected.getId());
+            final File actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());
         }
     }
@@ -114,7 +114,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
     @Test
     public void testUpdateFileWithExistingName() throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
-        fMgr.insertFolderOnServer(folder);
+        ftm.insertFolderOnServer(folder);
 
         {
             final File expected = new DefaultFile();
@@ -124,10 +124,10 @@ public class Bug40142Test extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             final java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            final File actual = infoMgr.getAction(expected.getId());
+            final File actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getFileName(), actual.getFileName());
         }
 
@@ -140,18 +140,18 @@ public class Bug40142Test extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             final java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            actual = infoMgr.getAction(expected.getId());
+            actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getFileName(), actual.getFileName());
         }
 
         actual.setFileName("name.name.txt.pgp");
-        infoMgr.updateAction(actual, new File.Field[] { File.Field.FILENAME }, new Date());
-        assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+        itm.updateAction(actual, new File.Field[] { File.Field.FILENAME }, new Date());
+        assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-        actual = infoMgr.getAction(actual.getId());
+        actual = itm.getAction(actual.getId());
         assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());
     }
 
@@ -159,7 +159,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
     public void testCopyFile() throws OXException, IOException, SAXException, JSONException {
 
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
-        fMgr.insertFolderOnServer(folder);
+        ftm.insertFolderOnServer(folder);
         File actual;
 
         {
@@ -170,17 +170,17 @@ public class Bug40142Test extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             final java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            actual = infoMgr.getAction(expected.getId());
+            actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getFileName(), actual.getFileName());
         }
-        infoMgr.copyAction(actual.getId(), folder.getObjectID() + "", actual);
+        itm.copyAction(actual.getId(), folder.getObjectID() + "", actual);
         final String id = actual.getId();
         
 
-        actual = infoMgr.getAction(id);
+        actual = itm.getAction(id);
         assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());
 
     }
@@ -189,7 +189,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
     @Test
     public void testDeleteFileWithExistingNameInTrash() throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
-        fMgr.insertFolderOnServer(folder);
+        ftm.insertFolderOnServer(folder);
         File actual;
 
         {
@@ -200,15 +200,15 @@ public class Bug40142Test extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             final java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            actual = infoMgr.getAction(expected.getId());
+            actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getFileName(), actual.getFileName());
         }
         final String oldID = actual.getId();
-        infoMgr.deleteAction(Collections.singletonList(actual.getId()), Collections.singletonList(actual.getFolderId()), new Date(), false);
-        assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
+        itm.deleteAction(Collections.singletonList(actual.getId()), Collections.singletonList(actual.getFolderId()), new Date(), false);
+        assertFalse("Deleting an entry should work", itm.getLastResponse().hasError());
         actual = null;
 
         {
@@ -219,24 +219,24 @@ public class Bug40142Test extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             final java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            actual = infoMgr.getAction(expected.getId());
+            actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getFileName(), actual.getFileName());
         }
 
-        infoMgr.deleteAction(Collections.singletonList(actual.getId()), Collections.singletonList(actual.getFolderId()), new Date(), false);
+        itm.deleteAction(Collections.singletonList(actual.getId()), Collections.singletonList(actual.getFolderId()), new Date(), false);
 
-        assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
-        final int result = (int) infoMgr.getConfigAction("/modules/infostore/folder/trash");
+        assertFalse("Deleting an entry should work", itm.getLastResponse().hasError());
+        final int result = (int) itm.getConfigAction("/modules/infostore/folder/trash");
         final String id1 = result + "/" + oldID.substring(oldID.indexOf("/") + 1, oldID.length());
         final String id2 = result + "/" + actual.getId().substring(actual.getId().indexOf("/") + 1, actual.getId().length());
-        actual = infoMgr.getAction(id2);
+        actual = itm.getAction(id2);
         assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());
 
-        infoMgr.deleteAction(Collections.singletonList(id1), Collections.singletonList(result), new Date(), true);
-        infoMgr.deleteAction(Collections.singletonList(id2), Collections.singletonList(result), new Date(), true);
+        itm.deleteAction(Collections.singletonList(id1), Collections.singletonList(result), new Date(), true);
+        itm.deleteAction(Collections.singletonList(id2), Collections.singletonList(result), new Date(), true);
     }
 
 }

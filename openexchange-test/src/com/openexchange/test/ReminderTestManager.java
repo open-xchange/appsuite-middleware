@@ -182,7 +182,7 @@ public class ReminderTestManager implements TestManager {
     }
 
     public void delete(ReminderObject reminder) {
-        DeleteRequest request = new DeleteRequest(reminder, true);
+        DeleteRequest request = new DeleteRequest(reminder, false);
         CommonDeleteResponse deleteResponse = execute(request);
         setLastResponse(deleteResponse);
     }

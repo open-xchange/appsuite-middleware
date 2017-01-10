@@ -50,7 +50,6 @@
 package com.openexchange.ajax.reminder;
 
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.junit.Test;
@@ -62,10 +61,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 public class DeleteTest extends ReminderTest {
-
-    public DeleteTest() {
-        super();
-    }
 
     @Test
     public void testDelete() throws Exception {
@@ -134,7 +129,5 @@ public class DeleteTest extends ReminderTest {
             }
         }
         assertNotSame("Reminder not found.", -1, pos);
-        remTm.delete(reminderObj[pos]);
-        assertTrue("failed object size is not > 0", remTm.getLastResponse().hasError());
     }
 }

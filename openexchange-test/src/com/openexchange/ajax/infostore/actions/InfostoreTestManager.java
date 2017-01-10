@@ -69,6 +69,7 @@ import com.openexchange.ajax.folder.actions.VersionsRequest;
 import com.openexchange.ajax.folder.actions.VersionsResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
@@ -278,7 +279,7 @@ public class InfostoreTestManager implements TestManager {
     
     public List<File> getAll(int folderId, int[] columns, int sort, Order order) throws OXException, JSONException, IOException {
         AllInfostoreRequest allRequest = new AllInfostoreRequest(folderId, columns, sort, order);
-        AllInfostoreResponse response = getClient().execute(allRequest);
+        AbstractColumnsResponse response = getClient().execute(allRequest);
         lastResponse = response;
 
         return createResponse(response.getResponse(), columns);

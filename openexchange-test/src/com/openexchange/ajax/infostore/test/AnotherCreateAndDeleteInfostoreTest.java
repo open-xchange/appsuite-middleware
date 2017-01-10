@@ -77,7 +77,7 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
     @Test
     public void testCreatingOneItem() throws OXException, IOException, SAXException, JSONException, OXException {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest" + System.currentTimeMillis());
-        fMgr.insertFolderOnServer(folder);
+        ftm.insertFolderOnServer(folder);
 
         File expected = new DefaultFile();
         expected.setCreated(new Date());
@@ -89,10 +89,10 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         meta.put("customField0013", Integer.valueOf(2));
         expected.setMeta(meta);
 
-        infoMgr.newAction(expected);
-        assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+        itm.newAction(expected);
+        assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-        File actual = infoMgr.getAction(expected.getId());
+        File actual = itm.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
 
         final Map<String, Object> actualMeta = actual.getMeta();
@@ -106,8 +106,8 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         assertNotNull("Unexpected meta value", actualValue);
         assertEquals("Unexpected meta value", "2", actualValue.toString());
 
-        infoMgr.deleteAction(expected);
-        assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
+        itm.deleteAction(expected);
+        assertFalse("Deleting an entry should work", itm.getLastResponse().hasError());
     }
 
 }

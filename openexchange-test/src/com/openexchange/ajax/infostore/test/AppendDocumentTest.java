@@ -78,15 +78,6 @@ import com.openexchange.java.util.UUIDs;
  */
 public class AppendDocumentTest extends AbstractInfostoreTest {
 
-    /**
-     * Initializes a new {@link AppendDocumentTest}.
-     *
-     * @param name The test name
-     */
-    public AppendDocumentTest() {
-        super();
-    }
-
     @Test
     public void testAppendFile() throws Exception {
         /*
@@ -132,8 +123,8 @@ public class AppendDocumentTest extends AbstractInfostoreTest {
             document.setFileName(tempFile.getName());
             document.setVersion(String.valueOf(1));
             document.setFileSize(tempFile.length());
-            infoMgr.newAction(document, tempFile);
-            timestamp = infoMgr.getLastResponse().getTimestamp();
+            itm.newAction(document, tempFile);
+            timestamp = itm.getLastResponse().getTimestamp();
             offset = tempFile.length();
         } finally {
             if (null != tempFile) {
@@ -223,8 +214,8 @@ public class AppendDocumentTest extends AbstractInfostoreTest {
             document.setFileName(tempFile.getName());
             document.setVersion(String.valueOf(1));
             document.setFileSize(tempFile.length());
-            infoMgr.newAction(document, tempFile);
-            timestamp = infoMgr.getLastResponse().getTimestamp();
+            itm.newAction(document, tempFile);
+            timestamp = itm.getLastResponse().getTimestamp();
             offset = tempFile.length();
         } finally {
             if (null != tempFile) {

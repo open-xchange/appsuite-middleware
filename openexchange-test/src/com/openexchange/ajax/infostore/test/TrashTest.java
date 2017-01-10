@@ -58,6 +58,8 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
@@ -80,6 +82,7 @@ import com.openexchange.java.util.UUIDs;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class TrashTest extends AbstractInfostoreTest {
 
     private final int[] COLUMNS = new int[] { Metadata.ID, Metadata.FILENAME, Metadata.FOLDER_ID };
@@ -87,20 +90,11 @@ public class TrashTest extends AbstractInfostoreTest {
     private FolderObject testFolder;
     private int trashFolderID;
 
-    /**
-     * Initializes a new {@link TrashTest}.
-     *
-     * @param name The test name
-     */
-    public TrashTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
-        testFolder = fMgr.insertFolderOnServer(testFolder);
+        testFolder = ftm.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
+        testFolder = ftm.insertFolderOnServer(testFolder);
         trashFolderID = getClient().getValues().getInfostoreTrashFolder();
     }
 
@@ -329,7 +323,7 @@ public class TrashTest extends AbstractInfostoreTest {
     }
 
     private void assertFolderExistsInFolder(int folderID, int objectID) throws Exception {
-        FolderObject[] folders = fMgr.listFoldersOnServer(folderID);
+        FolderObject[] folders = ftm.listFoldersOnServer(folderID);
         for (FolderObject folder : folders) {
             if (folder.getObjectID() == objectID) {
                 return;
@@ -348,7 +342,7 @@ public class TrashTest extends AbstractInfostoreTest {
     }
 
     private void assertFolderNotExistsInFolder(int folderID, int objectID) throws Exception {
-        FolderObject[] folders = fMgr.listFoldersOnServer(folderID);
+        FolderObject[] folders = ftm.listFoldersOnServer(folderID);
         for (FolderObject folder : folders) {
             assertFalse("Folder " + objectID + " found in folder: " + folderID, objectID == folder.getObjectID());
         }
@@ -359,8 +353,8 @@ public class TrashTest extends AbstractInfostoreTest {
     }
 
     private FolderObject createRandomFolder(int folderID, String foldername) throws Exception {
-        FolderObject folder = fMgr.generatePrivateFolder(foldername, FolderObject.INFOSTORE, folderID, getClient().getValues().getUserId());
-        folder = fMgr.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePrivateFolder(foldername, FolderObject.INFOSTORE, folderID, getClient().getValues().getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         return folder;
     }
 
@@ -379,7 +373,7 @@ public class TrashTest extends AbstractInfostoreTest {
             NewInfostoreResponse newResponse = getClient().execute(new NewInfostoreRequest(file, data));
             file.setId(newResponse.getID());
             file.setLastModified(newResponse.getTimestamp());
-            infoMgr.getCreatedEntities().add(file);
+            itm.getCreatedEntities().add(file);
         } finally {
             Streams.close(data);
         }

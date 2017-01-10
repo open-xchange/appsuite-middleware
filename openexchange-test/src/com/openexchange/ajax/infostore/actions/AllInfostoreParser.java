@@ -49,23 +49,24 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.ajax.framework.CommonAllResponse;
 
 /**
  * {@link AllInfostoreParser}
  *
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class AllInfostoreParser extends AbstractAJAXParser<AllInfostoreResponse> {
+public class AllInfostoreParser extends AbstractColumnsParser<AbstractColumnsResponse> {
 
-    public AllInfostoreParser(final boolean failOnError) {
-        super(failOnError);
+    public AllInfostoreParser(final boolean failOnError, final int[] columns) {
+        super(failOnError, columns);
     }
 
     @Override
-    protected AllInfostoreResponse createResponse(Response response) throws JSONException {
-        return new AllInfostoreResponse(response);
+    protected AbstractColumnsResponse instantiateResponse(Response response) {
+        return new CommonAllResponse(response);
     }
 }

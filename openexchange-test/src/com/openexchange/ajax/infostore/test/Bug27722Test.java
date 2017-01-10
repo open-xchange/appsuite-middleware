@@ -79,20 +79,11 @@ public final class Bug27722Test extends AbstractInfostoreTest {
     private FolderObject testFolder;
     private List<File> items;
 
-    /**
-     * Initializes a new {@link Bug27722Test}.
-     *
-     * @param name
-     */
-    public Bug27722Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
-        testFolder = fMgr.insertFolderOnServer(testFolder);
+        testFolder = ftm.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
+        testFolder = ftm.insertFolderOnServer(testFolder);
         items = new ArrayList<File>(TOTAL_ITEMS);
         for (int i = 0; i < TOTAL_ITEMS; i++) {
             java.io.File tempFile = null;
@@ -115,7 +106,7 @@ public final class Bug27722Test extends AbstractInfostoreTest {
                 document.setVersion(String.valueOf(1));
                 document.setFileSize(tempFile.length());
 
-                infoMgr.newAction(document, tempFile);
+                itm.newAction(document, tempFile);
                 items.add(document);
             } finally {
                 if (null != tempFile) {
@@ -144,14 +135,14 @@ public final class Bug27722Test extends AbstractInfostoreTest {
         /*
          * execute delete request
          */
-        infoMgr.deleteAction(objectIDs, folderIDs, infoMgr.getLastResponse().getTimestamp());
-        long duration = infoMgr.getLastResponse().getRequestDuration();
+        itm.deleteAction(objectIDs, folderIDs, itm.getLastResponse().getTimestamp());
+        long duration = itm.getLastResponse().getRequestDuration();
         assertTrue("deletion took " + duration + "ms, which is too long", 10 * DELETED_ITEMS > duration); // allow 10ms per item
         /*
          * verify deletion
          */
         int[] columns = { CommonObject.OBJECT_ID };
-        List<File> all = infoMgr.getAll(testFolder.getObjectID(), columns);
+        List<File> all = itm.getAll(testFolder.getObjectID(), columns);
         assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, all.size());
         for (File file : all) {
             String objectID = file.getId();
@@ -178,14 +169,14 @@ public final class Bug27722Test extends AbstractInfostoreTest {
         /*
          * execute hard delete request
          */
-        infoMgr.deleteAction(objectIDs, folderIDs, infoMgr.getLastResponse().getTimestamp(), Boolean.TRUE);
-        long duration = infoMgr.getLastResponse().getRequestDuration();
+        itm.deleteAction(objectIDs, folderIDs, itm.getLastResponse().getTimestamp(), Boolean.TRUE);
+        long duration = itm.getLastResponse().getRequestDuration();
         assertTrue("hard deletion took " + duration + "ms, which is too long", 50 * DELETED_ITEMS > duration); // allow 50ms per hard-deleted item
         /*
          * verify deletion
          */
         int[] columns = { CommonObject.OBJECT_ID };
-        List<File> all = infoMgr.getAll(testFolder.getObjectID(), columns);
+        List<File> all = itm.getAll(testFolder.getObjectID(), columns);
 
         assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, all.size());
         for (File file : all) {

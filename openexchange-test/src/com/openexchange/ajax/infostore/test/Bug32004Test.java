@@ -82,8 +82,8 @@ public class Bug32004Test extends AbstractInfostoreTest {
          */
         int trashFolderID = getClient().getValues().getInfostoreTrashFolder();
         String name = UUID.randomUUID().toString();
-        FolderObject folder = fMgr.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, getClient().getValues().getUserId());
-        folder = fMgr.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, getClient().getValues().getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         /*
          * reload folder in different trees and check name
          */
