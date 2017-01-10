@@ -575,6 +575,28 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.mail.flagging.mode</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the flagging mode. Possible values:<br>-<code>default</code> The default value. No flagging or coloring.<br>-<code>apply_flagged</code> When a mail will be flagged with a color, the mail will also be flagged with the \Flagged flag.<br>-<code>apply_color</code> When a mail is flagged (contains the \Flagged flag) and contains no color, the mail is returned with a configured color (see com.openexchange.mail.flagging.color)<br>-<code>apply_both</code> A combination of apply_flagged and apply_color<br> |
+| __Default__ | default  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.flagging.color  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.flagging.color</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the color which should be added to colorless flagged mails in case the flagging mode is "apply_color" or "apply_both". Only values from 1 to 10 are allowed.<br> |
+| __Default__ | 1  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.flagging.mode  |
+| __File__ | mail.properties  |
+
+---
 
 
 ## OAuth 
