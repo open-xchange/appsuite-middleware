@@ -71,15 +71,6 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class NotifyFolderSharesTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link NotifyFolderSharesTest}.
-     *
-     * @param name The test name
-     */
-    public NotifyFolderSharesTest() {
-        super();
-    }
-
     @Test
     public void testNotifyGuest() throws Exception {
         int module = randomModule();
@@ -111,14 +102,14 @@ public class NotifyFolderSharesTest extends ShareTest {
         OCLPermission permission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, 0);
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         permission.setGroupPermission(true);
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = getClient2();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         testNotify(module, parent, permission, emailAddress);
     }
 
     private void testNotifyUser(int module, int parent) throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = getClient2();
         int userId = client2.getValues().getUserId();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();

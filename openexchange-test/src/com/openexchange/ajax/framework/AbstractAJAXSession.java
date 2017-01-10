@@ -53,9 +53,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.slf4j.LoggerFactory;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
@@ -117,7 +119,9 @@ public abstract class AbstractAJAXSession {
         testUser = testContext.acquireUser();
         testUser2 = testContext.acquireUser();
         client = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);
+        client.execute(new ClearMailsRequest());
         client2 = null == clientId ? new AJAXClient(testUser2) : new AJAXClient(testUser2, clientId);
+        client2.execute(new ClearMailsRequest());
         admin = testContext.getAdmin();
 
         catm = new CalendarTestManager(client);
@@ -151,6 +155,8 @@ public abstract class AbstractAJAXSession {
                 client2.logout();
                 client2 = null;
             }
+        } catch (Exception e) {
+            LoggerFactory.getLogger(AbstractAJAXSession.class).error("Unable to correctly tear down test setup.", e);
         } finally {
             TestContextPool.backContext(testContext);
         }

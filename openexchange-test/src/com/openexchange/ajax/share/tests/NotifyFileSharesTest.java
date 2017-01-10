@@ -51,6 +51,8 @@ package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
@@ -71,16 +73,8 @@ import com.openexchange.share.recipient.RecipientType;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class NotifyFileSharesTest extends ShareTest {
-
-    /**
-     * Initializes a new {@link NotifyFileSharesTest}.
-     *
-     * @param name The test name
-     */
-    public NotifyFileSharesTest() {
-        super();
-    }
 
     @Test
     public void testNotifyGuest() throws Exception {
