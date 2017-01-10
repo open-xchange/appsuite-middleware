@@ -1222,8 +1222,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount(id);
         fillMailAccount(retval, id, userId, contextId, false, con);
         fillTransportAccount(retval, id, userId, contextId, con);
-        if(MailAccount.DEFAULT_ID==id){
+        if (MailAccount.DEFAULT_ID == id){
             checkDefaultAccountConfiguration(retval, userId, contextId);
+        } else {
+            int oauthId = retval.getTransportOAuthId();
+            if (oauthId < 0 && TransportAuth.MAIL.equals(retval.getTransportAuth()) && retval.getMailOAuthId() >= 0) {
+                retval.setTransportOAuthId(retval.getMailOAuthId());
+            }
         }
         return retval;
     }
@@ -2773,7 +2778,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, id, url, login, password, personal, replyTo, starttls, send_addr, oauth FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT t.name, t.id, t.url, t.login, t.password, t.personal, t.replyTo, t.starttls, t.send_addr, t.oauth, m.login, m.password, m.oauth FROM user_transport_account AS t JOIN user_mail_account AS m ON t.cid=m.cid AND t.id=m.id AND t.user=m.user WHERE t.cid=? and t.id=? and t.user=?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, accountId);
             stmt.setLong(3, userId);
@@ -2823,62 +2828,50 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              * Fill properties
              */
             fillTransportProperties(transportAccount, contextId, userId, accountId, con);
+            /*
+             * Check credentials
+             */
             if (transportAccount.getTransportAuth() == null) {
                 if (Strings.isEmpty(transportAccount.getTransportLogin()) || Strings.isEmpty(transportAccount.getTransportPassword())) {
-                    loadLoginAndPasswordFromMailAccount(con, contextId, accountId, userId, transportAccount);
+                    String login = result.getString(11);
+                    if (!result.wasNull()) {
+                        transportAccount.setTransportLogin(login);
+                    }
+
+                    String password = result.getString(12);
+                    if (!result.wasNull()) {
+                        transportAccount.setTransportPassword(password);
+                    }
+
+                    int oauthId = result.getInt(13);
+                    if (result.wasNull()) {
+                        transportAccount.setTransportOAuthId(-1);
+                    } else {
+                        transportAccount.setTransportOAuthId(oauthId < 0 ? -1 : oauthId);
+                    }
                 }
             } else {
                 if (transportAccount.getTransportAuth().equals(TransportAuth.MAIL)) {
-                    loadLoginAndPasswordFromMailAccount(con, contextId, accountId, userId, transportAccount);
+                    String login = result.getString(11);
+                    if (!result.wasNull()) {
+                        transportAccount.setTransportLogin(login);
+                    }
+
+                    String password = result.getString(12);
+                    if (!result.wasNull()) {
+                        transportAccount.setTransportPassword(password);
+                    }
+
+                    int oauthId = result.getInt(13);
+                    if (result.wasNull()) {
+                        transportAccount.setTransportOAuthId(-1);
+                    } else {
+                        transportAccount.setTransportOAuthId(oauthId < 0 ? -1 : oauthId);
+                    }
                 }
             }
 
             return transportAccount;
-        } catch (final SQLException e) {
-            if (null != stmt) {
-                final String sql = stmt.toString();
-                LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() {
-
-                    @Override
-                    public String toString() {
-                        return sql.substring(sql.indexOf(": ") + 2);
-                    }
-                });
-            }
-            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
-    private void loadLoginAndPasswordFromMailAccount(Connection con, int contextId, int accountId, int userId, TransportAccountImpl transportAccount) throws OXException {
-        // load login and secret from mail_account
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("SELECT login, password, oauth FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
-            stmt.setLong(1, contextId);
-            stmt.setLong(2, accountId);
-            stmt.setLong(3, userId);
-            result = stmt.executeQuery();
-            if (result.next()) {
-                final String login = result.getString(1);
-                if (!result.wasNull()) {
-                    transportAccount.setTransportLogin(login);
-                }
-
-                final String password = result.getString(2);
-                if (!result.wasNull()) {
-                    transportAccount.setTransportPassword(password);
-                }
-
-                final int oauthId = result.getInt(3);
-                if (result.wasNull()) {
-                    transportAccount.setTransportOAuthId(-1);
-                } else {
-                    transportAccount.setTransportOAuthId(oauthId < 0 ? -1 : oauthId);
-                }
-            }
         } catch (final SQLException e) {
             if (null != stmt) {
                 final String sql = stmt.toString();
