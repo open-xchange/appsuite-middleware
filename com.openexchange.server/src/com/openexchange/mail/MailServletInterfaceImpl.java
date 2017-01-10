@@ -1916,6 +1916,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return mailAccess.getMessageStorage().getImageAttachment(fullName, msgUID, cid);
     }
 
+    /**
+     * Adds the configured color to colorless flagged mails in case the flagging mode is apply_color or apply_both.
+     *
+     * @param mails The mails to check
+     */
+    private void checkMailsForColor(MailMessage[] mails) {
+        FLAGGING_MODE mode = getFlaggingMode();
+        if (mode.equals(FLAGGING_MODE.apply_color) || mode.equals(FLAGGING_MODE.apply_both)) {
+            int color = getFlaggingColor();
+            for (MailMessage mail : mails) {
+                if (mail.getColorLabel() == 0 && mail.isFlagged()) {
+                    mail.setColorLabel(color);
+                }
+            }
+        }
+    }
+
     @Override
     public MailMessage[] getMessageList(String folder, String[] uids, int[] fields, String[] headerFields) throws OXException {
         /*
@@ -1983,6 +2000,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         }
                     }
                 }
+
+                checkMailsForColor(mails);
                 return mails;
             }
         } catch (OXException e) {
@@ -2157,6 +2176,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 return SearchIteratorAdapter.emptyIterator();
             }
         }
+
+        checkMailsForColor(mails);
+
         /*
          * Set account information
          */
@@ -2267,6 +2289,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (OXException e) {
             LOG.error("", e);
         }
+
+        checkMailsForColor(mails);
         return new ArrayIterator<>(mails);
     }
 
@@ -3924,7 +3948,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         FLAGGING_MODE mode = getFlaggingMode();
         if (mode.equals(FLAGGING_MODE.apply_flagged) || mode.equals(FLAGGING_MODE.apply_both)) {
             int flags = MailMessage.FLAG_FLAGGED;
-            updateMessageFlags(folder, mailIDs, flags, true);
+            updateMessageFlags(folder, mailIDs, flags, newColorLabel != 0);
         }
     }
 
