@@ -92,6 +92,8 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.MailFlaggingModePreferenceItem;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
@@ -299,6 +301,10 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.WEBMAIL.getCapabilityName());
             }
         });
+
+        MailFlaggingModePreferenceItem item = new MailFlaggingModePreferenceItem();
+        registerService(PreferencesItemService.class, item);
+        registerService(ConfigTreeEquivalent.class, item);
     }
 
     @Override
