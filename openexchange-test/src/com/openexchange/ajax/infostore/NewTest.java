@@ -34,11 +34,10 @@ public class NewTest extends InfostoreAJAXTest {
         String id = data.getId();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
-        assertEquals("test upload", obj.getTitle());
-        assertEquals("test upload description", obj.getDescription());
+        assertEquals(data.getTitle(), obj.getTitle());
+        assertEquals(data.getDescription(), obj.getDescription());
         assertEquals("1", obj.getVersion());
         assertEquals("text/plain", obj.getFileMIMEType());
-        assertEquals(upload.getName(), obj.getFileName());
 
         InputStream is = null;
         InputStream is2 = null;
@@ -57,7 +56,7 @@ public class NewTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File dataNoUpload = createFile(folderId, "test no upload");
         dataNoUpload.setFileMIMEType("");
-        dataNoUpload.setDescription("other_desc");
+        dataNoUpload.setDescription("test no upload description");
         itm.newAction(dataNoUpload);
 
         id = dataNoUpload.getId();
@@ -66,11 +65,10 @@ public class NewTest extends InfostoreAJAXTest {
 
         assertEquals("test no upload", obj.getTitle());
         assertEquals("test no upload description", obj.getDescription());
-
     }
 
     @Test
-    public void testUploadEmptyFile() throws Exception {
+    public void testUploadEmptyFile_considerEmptyUpdate() throws Exception {
         File emptyFile = File.createTempFile("infostore-new-test", ".txt");
 
         com.openexchange.file.storage.File file = new DefaultFile();
@@ -78,17 +76,16 @@ public class NewTest extends InfostoreAJAXTest {
         file.setTitle("test upload");
         file.setDescription("test upload description");
         file.setFileMIMEType("text/plain");
-        
+
         itm.newAction(file, emptyFile);
 
         String id = file.getId();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
-        assertEquals("test upload", obj.getTitle());
-        assertEquals("test upload description", obj.getDescription());
-        assertEquals("1", obj.getVersion());
-        assertEquals("text/plain", obj.getFileMIMEType());
-        assertEquals(emptyFile.getName(), obj.getFileName());
+        assertEquals(file.getTitle(), obj.getTitle());
+        assertEquals(file.getDescription(), obj.getDescription());
+        assertEquals("0", obj.getVersion());
+        assertEquals("application/octet-stream", obj.getFileMIMEType());
         assertTrue(emptyFile.delete());
     }
 
@@ -114,7 +111,7 @@ public class NewTest extends InfostoreAJAXTest {
         data.setFileMIMEType("text/plain");
         itm.setFailOnError(false);
         itm.newAction(data, largeFile);
-        
+
         assertTrue(itm.getLastResponse().hasError());
     }
 
@@ -165,7 +162,7 @@ public class NewTest extends InfostoreAJAXTest {
         itm.newAction(data, upload);
 
         com.openexchange.file.storage.File obj = itm.getAction(data.getId());
-        assertEquals(upload.getName(), obj.getTitle());
+        assertEquals(data.getTitle(), obj.getTitle());
     }
 
     @SuppressWarnings("deprecation")

@@ -83,7 +83,6 @@ public class CopyTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File orig = itm.getAction(objectId);
         com.openexchange.file.storage.File copy = itm.getAction(id);
 
-        assertEquals(orig.getFileName(), copy.getFileName());
         Map<String, Object> meta = orig.getMeta();
         for (Map.Entry<String, Object> entry : meta.entrySet()) {
             String key = entry.getKey();
@@ -115,8 +114,8 @@ public class CopyTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File copy = itm.getAction(copyId);
 
         assertEquals("other.properties", copy.getFileName());
-        assertEquals(data.getFileSize(), copy.getFileSize());
-        assertEquals(data.getFileMIMEType(), copy.getFileMIMEType());
+        assertEquals(file.getFileSize(), copy.getFileSize());
+        assertEquals(file.getFileMIMEType(), copy.getFileMIMEType());
 
         InputStream is = null;
         InputStream is2 = null;
@@ -166,12 +165,13 @@ public class CopyTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File org = itm.getAction(origId);
         org.setTitle("copy");
+        org.setFileMIMEType("text/plain");
         itm.copyAction(origId, String.valueOf(folderId), org, upload);
-        final String id = org.getId();
+        final String copyId = org.getId();
 
-        com.openexchange.file.storage.File copy = itm.getAction(id);
+        com.openexchange.file.storage.File copy = itm.getAction(copyId);
 
-        assertEquals(org.getFileName(), copy.getFileName());
+        assertTrue("copy" == copy.getTitle());
         assertEquals("text/plain", copy.getFileMIMEType());
     }
 

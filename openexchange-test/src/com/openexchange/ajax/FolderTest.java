@@ -164,8 +164,8 @@ public class FolderTest extends AbstractAJAXSession {
             fuid = ftm.insertFolderOnServer(newInfostoreFolder).getObjectID();
             assertFalse(fuid == -1);
             FolderObject retrievedNewInfoStoreFolder = ftm.getFolderFromServer(fuid);
-            retrievedNewInfoStoreFolder.setLastModified(new Date(cal.getTimeInMillis()));
             retrievedNewInfoStoreFolder.setFolderName("ChangedInfostoreFolderName" + System.currentTimeMillis());
+            retrievedNewInfoStoreFolder.setLastModified(new Date(Long.MAX_VALUE));
             ftm.updateFolderOnServer(retrievedNewInfoStoreFolder);
             
             ftm.getFolderFromServer(fuid);

@@ -101,7 +101,7 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         this.off = off;
         this.len = len;
     }
-
+    
     @Override
     public Method getMethod() {
         return Method.GET;
@@ -118,8 +118,8 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DOCUMENT));
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_MODULE, moduleID));
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderID));
-        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ID, objectId));
-        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, attachmentID));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, objectId));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ID, attachmentID));
         if (contentType != null) {
             parameters.add(new URLParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, contentType));
         }

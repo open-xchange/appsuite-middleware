@@ -54,6 +54,7 @@ import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.attach.actions.ListRequest;
@@ -82,10 +83,6 @@ public final class Bug24876Test {
     private long timestamp;
     private int attachmentId;
     private TestContext testContext;
-
-    public Bug24876Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -127,6 +124,7 @@ public final class Bug24876Test {
      * Test is disabled. Multiple servlet needs parameter module which conflicts with module parameter of attachment list request.
      */
     @Test
+    @Ignore
     public void testMultipleList() throws Exception {
         ListResponse response = client.execute(MultipleRequest.create(new ListRequest(contact, new int[] { attachmentId }, new int[] { AttachmentField.CREATION_DATE }, TimeZones.UTC))).getResponse(0);
         assertEquals("attachment listing did not return the only created attachment", 1, response.getArray().length);

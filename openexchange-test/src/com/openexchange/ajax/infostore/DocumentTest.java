@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -21,8 +22,9 @@ public class DocumentTest extends InfostoreAJAXTest {
     public void setUp() throws Exception {
         super.setUp();
         upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        com.openexchange.file.storage.File data = createFile(folderId, "test upload");
+        com.openexchange.file.storage.File data = createFile(folderId, "test upload" + UUID.randomUUID().toString());
         itm.newAction(data, upload);
+        id = data.getId();
     }
 
     @Test
@@ -48,7 +50,7 @@ public class DocumentTest extends InfostoreAJAXTest {
     public void testContentType() throws Exception {
         itm.document(Integer.toString(folderId), id, "-1", "application/octet-stream");
         String contentType = ((GetDocumentResponse) itm.getLastResponse()).getContentType();
-        assertEquals("application/octet-stream", contentType);
+        assertEquals("application/octet-stream;charset=UTF-8", contentType);
 
         itm.document(Integer.toString(folderId), id, "-1", null);
 

@@ -32,6 +32,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testBasic() throws Exception {
         final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File file = itm.getAction(id);
+        final String description = file.getDescription();
         file.setTitle("test knowledge updated");
         file.setColorLabel(1);
 
@@ -42,7 +43,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File object = itm.getAction(id);
 
         assertEquals("test knowledge updated", object.getTitle());
-        assertEquals("test knowledge description", object.getDescription());
+        assertEquals(description, object.getDescription());
         assertEquals(1, object.getColorLabel());
         assertEquals("1", object.getVersion());
 
@@ -84,7 +85,8 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        com.openexchange.file.storage.File urOrig = Iterables.get(itm.getCreatedEntities(), 0);
+        final String id = urOrig.getId();
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
@@ -92,8 +94,8 @@ public class UpdateTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
 
-        assertEquals("1", obj.getVersion());
-        assertEquals("text/plain", obj.getFileMIMEType());
+        assertEquals("2", obj.getVersion());
+        assertEquals(urOrig.getFileMIMEType(), obj.getFileMIMEType());
         assertEquals(upload.getName(), obj.getFileName());
 
         InputStream is = null;
@@ -155,7 +157,8 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testUniqueFilenamesOnSwitchVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        com.openexchange.file.storage.File orig = Iterables.get(itm.getCreatedEntities(), 0);
+        final String id = orig.getId();
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         org.setFileName("theFile.txt");
@@ -179,9 +182,10 @@ public class UpdateTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File reloaded = itm.getAction(id);
 
-        assertEquals("theFile (1).txt", reloaded.getFileName());
+        assertEquals(orig.getFileName(), reloaded.getFileName());
     }
 
+    //FIXME has to be reviewed 
     @Test
     public void testSwitchVersion() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -198,8 +202,10 @@ public class UpdateTest extends InfostoreAJAXTest {
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE)); // V3
         assertFalse(itm.getLastResponse().hasError());
 
+        com.openexchange.file.storage.File org2 = itm.getAction(id);
+
         org.setVersion("2");
-        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, new Date(Long.MAX_VALUE));
+        itm.updateAction(org2, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, org2.getLastModified());
         assertFalse(itm.getLastResponse().hasError());
 
         com.openexchange.file.storage.File obj = itm.getAction(id);

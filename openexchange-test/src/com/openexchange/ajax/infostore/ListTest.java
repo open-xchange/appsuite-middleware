@@ -108,7 +108,7 @@ public class ListTest extends InfostoreAJAXTest {
             int numberOfVersions = row.getInt(1);
 
             if (id.equals(origId)) {
-                assertEquals(1, numberOfVersions);
+                assertEquals(2, numberOfVersions);
                 found = true;
             }
         }

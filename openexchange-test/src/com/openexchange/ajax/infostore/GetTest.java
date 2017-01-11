@@ -5,16 +5,18 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.file.storage.File;
 
 public class GetTest extends InfostoreAJAXTest {
 
     @Test
     public void testBasic() throws Exception {
-        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        File file = Iterables.get(itm.getCreatedEntities(), 0);
+        final String origId = file.getId();
         com.openexchange.file.storage.File document = itm.getAction(origId);
 
-        assertEquals("test knowledge", document.getTitle());
-        assertEquals("test knowledge description", document.getDescription());
+        assertEquals(file.getTitle(), document.getTitle());
+        assertEquals(file.getDescription(), document.getDescription());
 
     }
 }

@@ -53,58 +53,76 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * Tests the HTTP authorization header on the login servlet.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class HttpAuthTest extends AbstractAJAXSession {
-
+public class HttpAuthTest {
     private String protocol;
     private String hostname;
+    private String login;
+    private String password;
+    private TestContext testContext;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
+        AJAXConfig.init();
+        ProvisioningSetup.init();
+        
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);
+        TestUser testUser = testContext.acquireUser();
+        login = testUser.getLogin();
+        password = testUser.getPassword();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        TestContextPool.backContext(testContext);
     }
 
     @Test
     public void testAuthorizationRequired() throws Throwable {
-        HttpClient client2 = AJAXSession.newHttpClient();
         HttpUriRequest request = new HttpGet(protocol + "://" + hostname + HttpAuthRequest.HTTP_AUTH_URL);
-        HttpResponse response = client2.execute(request);
+        HttpResponse response = AJAXSession.newHttpClient().execute(request);
         assertEquals("HTTP auth URL does not respond with a required authorization.", HttpServletResponse.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
     }
 
     @Test
     public void testRedirect() throws Throwable {
         final AJAXSession session = new AJAXSession();
+        final AJAXClient myClient = new AJAXClient(session, false);
         try {
             session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
             // Create session.
-            HttpAuthResponse response = getClient().execute(new HttpAuthRequest(testUser.getLogin(), testUser.getPassword()));
+            HttpAuthResponse response = myClient.execute(new HttpAuthRequest(login, password));
             String location = response.getLocation();
             assertNotNull("Location is missing in response.", location);
             int sessionStart = location.indexOf("session=");
             String sessionId = location.substring(sessionStart + 8, location.indexOf('&', sessionStart + 8));
             session.setId(sessionId);
         } finally {
-            getClient().logout();
+            myClient.logout();
         }
     }
 }
