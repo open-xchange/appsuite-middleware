@@ -123,7 +123,9 @@ public class CTMUtils {
     public static void parse(final int pos, final int field, final JSONArray jsonArray, final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
         switch (field) {
             case Appointment.ALARM:
-                appointmentObj.setAlarm(jsonArray.getInt(pos));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setAlarm(jsonArray.getInt(pos));
+                }
                 break;
             case Appointment.OBJECT_ID:
                 appointmentObj.setObjectID(jsonArray.getInt(pos));
