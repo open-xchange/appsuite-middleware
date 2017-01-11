@@ -65,6 +65,7 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
+import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.RedeemRequest;
 import com.openexchange.ajax.share.actions.RedeemResponse;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
@@ -87,9 +88,6 @@ public class LoginScreenTest extends ShareTest {
 
     private FolderObject folder;
 
-    public LoginScreenTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -160,9 +158,11 @@ public class LoginScreenTest extends ShareTest {
          * Create link and set password
          */
         ShareTarget target = new ShareTarget(folder.getModule(), Integer.toString(folder.getObjectID()));
-        ShareLink shareLink = getClient().execute(new GetLinkRequest(target)).getShareLink();
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target);
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
+        ShareLink shareLink = getLinkResponse.getShareLink();
         assertTrue(shareLink.isNew());
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, System.currentTimeMillis());
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, getLinkResponse.getTimestamp().getTime());
         String newPW = UUIDs.getUnformattedStringFromRandom();
         updateLinkRequest.setPassword(newPW);
         getClient().execute(updateLinkRequest);

@@ -74,10 +74,7 @@ public class Bug41287Test extends ShareTest {
     private FolderObject parent;
     private FolderObject subfolder;
     private ShareTarget target;
-
-    public Bug41287Test() {
-        super();
-    }
+    private long lastModified;
 
     @Before
     public void setUp() throws Exception {
@@ -88,13 +85,13 @@ public class Bug41287Test extends ShareTest {
         remember(parent);
         target = new ShareTarget(FolderObject.INFOSTORE, String.valueOf(subfolder.getObjectID()));
         GetLinkRequest req = new GetLinkRequest(target);
-        getClient().execute(req);
+        lastModified = getClient().execute(req).getResponse().getTimestamp().getTime();
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            DeleteLinkRequest req = new DeleteLinkRequest(target, System.currentTimeMillis());
+            DeleteLinkRequest req = new DeleteLinkRequest(target, lastModified);
             getClient().execute(req);
         } finally {
             super.tearDown();
