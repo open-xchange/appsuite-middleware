@@ -200,8 +200,7 @@ public final class JerichoParser {
         return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);
     }
 
-    private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[^?][^>]+)(>?)\\s*");
+    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[a-zA-Z][^>]+)(>?)\\s*");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -415,7 +414,7 @@ public final class JerichoParser {
         return null;
     }
 
-    private static boolean contains(char c, CharSequence toCheck) {
+    private static boolean containsStartTag(CharSequence toCheck) {
         if (null == toCheck) {
             return false;
         }
@@ -423,12 +422,30 @@ public final class JerichoParser {
         if (len <= 0) {
             return false;
         }
-        for (int k = len, index = 0; k-- > 0; index++) {
-            if (c == toCheck.charAt(index)) {
+        for (int k = len - 1, index = 0; k-- > 0; index++) {
+            if ('<' == toCheck.charAt(index) && isAsciLetter(toCheck.charAt(index + 1))) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean isAsciLetter(char ch) {
+        return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+    }
+
+    private static int indexOf(int ch, int fromIndex, CharSequence cs) {
+        int max = cs.length();
+        if (fromIndex >= max) {
+            return -1;
+        }
+
+        for (int i = fromIndex; i < max; i++) {
+            if (cs.charAt(i) == ch) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static Pattern PATTERN_ATTRIBUTE = Pattern.compile("([a-zA-Z_0-9-]+)=((?:\".*?\")|(?:'.*?')|(?:[a-zA-Z_0-9-]+))");
