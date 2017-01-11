@@ -50,6 +50,8 @@
 
 OXFUNCTIONS=@oxfunctions@
 export PATH="/opt/open-xchange/sbin:${PATH}"
+export LANG=C
+export LC_ALL=C
 
 # some defaults
 PATH="${PATH}:/opt/open-xchange/sbin"
@@ -76,6 +78,7 @@ SKIP_COMPRESSION_VALUES="true false"
 SKIP_RUN_COMMANDS=false
 SKIP_RUN_COMMANDS_LONG=skip-system-tools
 SKIP_RUN_COMMANDS_VALUES="true false"
+SPINNER='/-\|'
 EXCLUDE_OLDER_LOGS_THAN=disabled
 EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
 EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
@@ -112,7 +115,7 @@ PROCS='
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$SKIP_RUN_COMMANDS_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
-NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
+NEEDED_TOOLS="awk bzip2 cat cp df du egrep find file grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
 OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/guard/etc"
 OTHER_CONFIGS="/etc/security/limits.conf"
@@ -148,6 +151,18 @@ clean_up(){
    test "${KEEP_TMP}" = "true" || rm -rf ${TMP}/${LOGDIR}
 }
 
+busySpin(){
+    # very simple busy spinner
+    printf '\b%.1s' "${SPINNER}"
+    SPINNER=${SPINNER#?}${SPINNER%???}
+}
+
+busyEnd(){
+    # remove last spinner char
+    printf '\b%.1s' " "
+    echo
+}
+
 collect_command_output() {
    # Drop leading blanks from commands
    PROCS=$(echo ${PROCS} | sed 's|;[[:blank:]]*|;|g')
@@ -157,8 +172,18 @@ collect_command_output() {
    IFS=";"
    for i in ${PROCS}; do
        IFS=${OIFS}
-       echo "  ${i}"
-       ${i} > "/${TMP}/${LOGDIR}/commands/${i}" 2>&1
+       # slashes are forbidden in file names
+       removed_path=$(echo ${i} | sed 's|/.*/||g')
+       tool_name=$(echo ${removed_path} | awk '{print $1}')
+       # bash functions may use the busy spinner and have to write the output file directly
+       if [ -n "$(type ${tool_name} 2>/dev/null | grep 'function' )" ]; then
+           echo -n "  ${i}  "
+           ${i} "/${TMP}/${LOGDIR}/commands/${removed_path}"
+           echo
+       else
+           echo "  ${i}"
+           ${i} > "/${TMP}/${LOGDIR}/commands/${removed_path}" 2>&1
+       fi
        IFS=";"
    done
    IFS=${OIFS}
@@ -166,12 +191,13 @@ collect_command_output() {
 }
 
 ox_java_vm_limits() {
+    local _output="${1}"
     PROC_LIMITS="/proc/$(get_ox_java_pid)/limits";
     if [ -f "${PROC_LIMITS}" ]; then
-        cat ${PROC_LIMITS};
+        cat ${PROC_LIMITS}
     else
         echo "File does not exist: ${PROC_LIMITS}"
-    fi
+    fi &> ${_output}
 }
 
 collect_httpd_configs() {
@@ -216,6 +242,7 @@ collect_httpd_configs() {
 }
 
 readerengine_cache_overview() {
+    local _output="${1}"
     if [ -d "${READEREINGINE_CACHE_DIR}" ]; then
         echo "Show readerengine disc usage (du -ks):"
         du -ks "$(dirname ${READEREINGINE_CACHE_DIR})/"*
@@ -230,7 +257,7 @@ readerengine_cache_overview() {
         echo
     else
     echo "Skipping, readerengine cache does not exist: ${READEREINGINE_CACHE_DIR}"
-    fi
+    fi &> ${_output}
 }
 
 collect_logs() {
