@@ -118,7 +118,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * update recipient, set a password for the anonymous guest
          */
         ShareTarget shareTarget = new ShareTarget(module, String.valueOf(folder.getObjectID()));
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(shareTarget, getClient().getValues().getTimeZone(), System.currentTimeMillis());
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(shareTarget, getClient().getValues().getTimeZone(), folder.getLastModified().getTime());
         updateLinkRequest.setPassword("secret");
         ((AnonymousRecipient) guestPermission.getRecipient()).setPassword("secret"); // for subsequent comparison
         UpdateLinkResponse updateLinkResponse = getClient().execute(updateLinkRequest);

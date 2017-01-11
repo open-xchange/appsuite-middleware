@@ -86,20 +86,11 @@ public class QuotaTest extends ShareTest {
     private AJAXClient client2;
     private Map<Integer, FolderObject> foldersToDelete;
 
-    /**
-     * Initializes a new {@link QuotaTest}.
-     *
-     * @param name The test name
-     */
-    public QuotaTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
         Map<String, String> userAttributes = new HashMap<String, String>();
         userAttributes.put("com.openexchange.quota.invite_guests", "0");
         userAttributes.put("com.openexchange.quota.share_links", "0");

@@ -92,7 +92,6 @@ public class Bug15491Test extends AppointmentTest {
 
     @Test
     public void testRead() throws Exception {
-        System.currentTimeMillis();
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
@@ -116,7 +115,6 @@ public class Bug15491Test extends AppointmentTest {
 
     @Test
     public void testWrite() throws Exception {
-        System.currentTimeMillis();
         appointment.setUid("ichbineineuid");
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 

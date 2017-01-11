@@ -48,8 +48,9 @@ public class DetachTest extends InfostoreAJAXTest {
 
     @Test
     public void testBasic() throws Exception {
-        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
-        ftm.detach(origId, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3, 4, 5 });
+        com.openexchange.file.storage.File file = Iterables.get(itm.getCreatedEntities(), 0);
+        final String origId = file.getId();
+        ftm.detach(origId, file.getLastModified(), new int[] { 1, 2, 3, 4, 5 });
 
         checkNoVersions(origId);
     }
@@ -74,11 +75,13 @@ public class DetachTest extends InfostoreAJAXTest {
         assertEquals(version, obj.getVersion());
         assertEquals(numberoOfVersions, obj.getNumberOfVersions());
 
-        ftm.detach(objectId, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
+        ftm.detach(objectId, obj.getLastModified(), new int[] { 1, 2, 3 });
+
+        com.openexchange.file.storage.File obj2 = itm.getAction(objectId);
 
         final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[] { 1, 2, 3 }));
 
-        final int[] notDetached = ftm.detach(objectId, new Date(System.currentTimeMillis()), new int[] { 1, 2, 3 });
+        final int[] notDetached = ftm.detach(objectId, obj2.getLastModified(), new int[] { 1, 2, 3 });
         assertEquals(versions.size(), notDetached.length);
         for (final int lId : notDetached) {
             assertTrue(versions.remove(lId));
