@@ -105,6 +105,7 @@ public class RuleParser {
      * Parses the specified JSONObject into a new Rule object
      *
      * @param json The JSONObject to parse
+     * @param session The session
      * @return the Rule object
      * @throws OXException
      * @throws SieveException
@@ -120,6 +121,7 @@ public class RuleParser {
      *
      * @param rule The rule object
      * @param json The JSONObject
+     * @param session The session
      * @return The parsed Rule object
      * @throws JSONException
      * @throws SieveException

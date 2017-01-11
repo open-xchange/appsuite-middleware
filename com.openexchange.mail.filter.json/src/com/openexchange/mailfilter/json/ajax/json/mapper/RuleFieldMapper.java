@@ -94,6 +94,7 @@ public interface RuleFieldMapper {
      *
      * @param rule The rule to set the attribute to
      * @param attribute The attribute to set to the rule
+     * @param session The session
      * @throws JSONException If a JSON error occurs
      * @throws SieveException If a Sieve parsing error occurs
      * @throws OXException If an error occurs

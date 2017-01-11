@@ -66,6 +66,7 @@ public interface CommandParser<T> {
      * Parses the specified {@link JSONObject} and creates a {@link T} object
      *
      * @param jsonObject The {@link JSONObject} to parse
+     * @param session The session
      * @return The newly created {@link T} object
      * @throws JSONException if a JSON parsing error occurs
      * @throws SieveException if a Sieve parsing error occurs
