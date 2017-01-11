@@ -49,7 +49,6 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -132,7 +131,7 @@ public class CassandraServiceImpl implements CassandraService {
             throw CassandraServiceExceptionCodes.AUTHENTICATION_ERROR.create(e, initializer.getContactPoints());
         }
         // Initialise the sessions cache
-        synchronousSessions = new HashMap<>();
+        synchronousSessions = new ConcurrentHashMap<>();
         asynchronousSessions = new ConcurrentHashMap<>();
     }
 
