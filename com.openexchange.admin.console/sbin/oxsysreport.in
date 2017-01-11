@@ -119,7 +119,7 @@ PROCS='
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$REPORT_CLIENT_LONG:,$SKIP_COMPRESSION_LONG:,$SKIP_RUN_COMMANDS_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
-NEEDED_TOOLS="awk bzip2 cat cp df du egrep find file grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
+NEEDED_TOOLS="awk bzip2 cat cut cp df du egrep find file grep gzip head mkdir mktemp rm rmdir sed sleep tail tar tr xargs"
 OX_LOG_DIR=/var/log/open-xchange
 OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc"
 OTHER_CONFIGS="/etc/security/limits.conf"
@@ -432,6 +432,105 @@ create_thread_dumps() {
     fi
 }
 
+verify_ox_dpkg_packages(){
+    # check package consistency and origin
+    local _output="${1}"
+    local _dpkg_verify_support=$(dpkg -V 'dpkg' &>/dev/null && echo 'true')
+    local _ox_packages=$(dpkg -l | \
+        grep '^ii' | \
+        egrep 'open-xchange|readerengine|calcengine' | \
+        awk '{print $2}')
+
+    for package in ${_ox_packages}; do
+        busySpin
+        if [ -n "$(type apt-cache)" ]; then
+            echo "${package}"
+            # only the repository is signed so lets print the origin instead
+            local _version=$(apt-cache policy ${package} | \
+                grep '\*\*\*' | \
+                awk '{print $2}')
+            local _origin=$(apt-cache policy ${package} | \
+                grep -A 1 '\*\*\*' | \
+                grep -v '\*\*\*' | \
+                awk '{print $2}' | \
+                sed 's|http.*@|https://<REMOVED BY OXSYSREPORT>@//|g')
+            echo "  Version: ${_version}"
+            echo "  Origin: ${_origin}"
+            # print SHA if exist
+            apt-cache show ${package}=${_version} | \
+                egrep 'SHA256:|SHA1:' | \
+                sed 's|^|  |g'
+            if [ 'true' == "${_dpkg_verify_support}" ]; then
+                # use dpkg verify
+                dpkg -V "${package}" | \
+                    sed 's|^|  Change: |g'
+            else
+                    echo "  Info: dpkg does not support the needed '-V' option in this version."
+            fi
+        else
+            echo "Error, missing tool: apt-cache"
+        fi >> "${_output}" 2>&1
+    done
+    busyEnd
+}
+
+verify_ox_rpm_packages(){
+    # check package consistency and origin
+    local _system="${1}"
+    local _output="${2}"
+    for package in $(rpm -qa --qf "%{NAME}\n" | egrep 'open-xchange|readerengine|calcengine'); do
+        busySpin
+        if [ -n "$(type rpm)" ]; then
+            echo "${package}"
+            unset _origin
+            local _version=$(rpm -q "${package}" --qf "%{VERSION}-%{RELEASE}\n")
+            if [ "Redhat" == "${_system}" ]; then
+                if [ -n "$(type yum)" ]; then
+                    local _repo_id=$(yum info "${package}-${_version}" | \
+                        grep 'From repo' | \
+                        awk '{print $4}')
+                    local _origin=$(yum repolist "${_repo_id}" -v | \
+                        grep 'Repo-baseurl' | \
+                        awk '{print $3}' | \
+                        sed 's|http.*@||g')
+                else
+                    echo "Error, missing tool: yum"
+                fi
+            elif [ "SuSE" == "${_system}" ]; then
+                if [ -n "$(type zypper)" ]; then
+                    local _repo_id=$(zypper -n --no-refresh info "${package}" | \
+                        grep 'Repository:' | \
+                        awk '{print $2}')
+                    if [ -n "${_repo_id}" -a '@System' != "${_repo_id}" ]; then
+                        local _origin=$(zypper -n --no-refresh repos "${_repo_id}" | \
+                            grep '^URI' | \
+                            awk '{print $3}' | \
+                            sed 's|http.*@||g')
+                    fi
+                else
+                    echo "Error, missing tool: zypper"
+                fi
+            fi
+            echo "  Version: ${_version}"
+            echo "  Repository: ${_repo_id}"
+            echo "  Origin: ${_origin}"
+            # the documented signature 'Key ID' is shorter and has capital letters
+            rpm -q -i "${package}" | \
+                grep '^Signature' | \
+                sed 's|.*Key ID ||g' | \
+                tr [a-z] [A-Z] | \
+                cut -c 9- | \
+                sed 's|^|  Signature Key ID: |g'
+            # strip runtime generated CSS files
+            rpm -V "${package}" | \
+                sed 's|^|  Change: |g'
+        else
+            echo "Error, missing tool: rpm"
+        fi >> "${_output}" 2>&1
+    done
+    busyEnd
+}
+
 distribution_check() {
 # Distribution depending staff should go here
     ox_system_type
@@ -440,22 +539,22 @@ distribution_check() {
      if [ $(( ${DIST} & ${DEBIAN} )) -eq ${DEBIAN} ]; then
          echo "Debian system detected"
          OTHER_CONFIGS="${OTHER_CONFIGS} /etc/debian_version"
-         PROCS=${PROCS}';dpkg -l'
+         PROCS=${PROCS}';dpkg -l;verify_ox_dpkg_packages'
          test -f /etc/mysql/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/mysql/my.cnf"
      elif [ $(( ${DIST} & ${UCS} )) -eq ${UCS} ]; then
          echo "Univention system detected"
          UNIVENTION_LOG_DIR="/var/log/univention*"
-         PROCS=${PROCS}';dpkg -l;ucr dump'
+         PROCS=${PROCS}';dpkg -l;ucr dump;verify_ox_dpkg_packages'
          test -f /etc/mysql/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/mysql/my.cnf"
      elif [ $(( ${DIST} & ${SUSE} )) -eq ${SUSE} ]; then
          echo "SuSE system detected"
          OTHER_CONFIGS="${OTHER_CONFIGS} /etc/SuSE-release"
-         PROCS=${PROCS}';rpm -qa --last'
+         PROCS=${PROCS}';rpm -qa --last;verify_ox_rpm_packages SuSE'
          test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
      elif [ $(( ${DIST} & ${REDHAT} )) -eq ${REDHAT} ]; then
          echo "Redhat system detected"
          OTHER_CONFIGS="${OTHER_CONFIGS} /etc/*-release"
-         PROCS=${PROCS}';rpm -qa --last'
+         PROCS=${PROCS}';rpm -qa --last;verify_ox_rpm_packages Redhat'
          test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
      else
          echo "Distribution not detected"
