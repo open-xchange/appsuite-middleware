@@ -49,7 +49,9 @@
 #
 
 OXFUNCTIONS=@oxfunctions@
-export PATH="${PATH}:/opt/open-xchange/sbin"
+export PATH="/opt/open-xchange/sbin:${PATH}"
+export LANG=C
+export LC_ALL=C
 
 # some defaults
 PATH="${PATH}:/opt/open-xchange/sbin"
@@ -76,6 +78,7 @@ SKIP_COMPRESSION_VALUES="true false"
 SKIP_RUN_COMMANDS=false
 SKIP_RUN_COMMANDS_LONG=skip-system-tools
 SKIP_RUN_COMMANDS_VALUES="true false"
+SPINNER='/-\|'
 EXCLUDE_OLDER_LOGS_THAN=disabled
 EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
 EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
@@ -122,6 +125,18 @@ clean_up(){
    test "${KEEP_TMP}" = "true" || rm -rf ${TMP}/${LOGDIR}
 }
 
+busySpin(){
+    # very simple busy spinner
+    printf '\b%.1s' "${SPINNER}"
+    SPINNER=${SPINNER#?}${SPINNER%???}
+}
+
+busyEnd(){
+    # remove last spinner char
+    printf '\b%.1s' " "
+    echo
+}
+
 collect_command_output() {
    echo "Collecting output of system tools into $(normalize_path ${TMP}/${LOGDIR}/commands)"
    cd /${TMP}
@@ -129,8 +144,18 @@ collect_command_output() {
    IFS=";"
    for i in ${PROCS}; do
        IFS=${OIFS}
-       echo "  ${i}"
-       ${i} > "/${TMP}/${LOGDIR}/commands/${i}" 2>&1
+       # slashes are forbidden in file names
+       removed_path=$(echo ${i} | sed 's|/.*/||g')
+       tool_name=$(echo ${removed_path} | awk '{print $1}')
+       # bash functions may use the busy spinner and have to write the output file directly
+       if [ -n "$(type ${tool_name} 2>/dev/null | grep 'function' )" ]; then
+           echo -n "  ${i}  "
+           ${i} "/${TMP}/${LOGDIR}/commands/${removed_path}"
+           echo
+       else
+           echo "  ${i}"
+           ${i} > "/${TMP}/${LOGDIR}/commands/${removed_path}" 2>&1
+       fi
        IFS=";"
    done
    IFS=${OIFS}
