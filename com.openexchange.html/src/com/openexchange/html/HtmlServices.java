@@ -229,6 +229,15 @@ public final class HtmlServices {
             }
         }
 
+        // Check for global event handlers
+        if (lc.indexOf("on") >= 0) {
+            for (String eventHandler : GLOBAL_EVENT_HANDLERS) {
+                if (lc.indexOf(eventHandler) >= 0) {
+                    return false;
+                }
+            }
+        }
+
         // Check additionally specified unsafe tokens
         if (null != more && more.length > 0) {
             for (final String token : more) {
@@ -403,5 +412,90 @@ public final class HtmlServices {
 
         return c == null ? s : new String(c);
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------ //
+
+    private static final String[] GLOBAL_EVENT_HANDLERS = {
+        "onabort",
+        "onanimationcancel",
+        "onanimationend",
+        "onanimationiteration",
+        "onanimationstart",
+        "onblur",
+        "onerror",
+        "onfocus",
+        "oncancel",
+        "oncanplay",
+        "oncanplaythrough",
+        "onchange",
+        "onclick",
+        "onclose",
+        "oncontextmenu",
+        "oncuechange",
+        "ondblclick",
+        "ondrag",
+        "ondragend",
+        "ondragenter",
+        "ondragexit",
+        "ondragleave",
+        "ondragover",
+        "ondragstart",
+        "ondrop",
+        "ondurationchange",
+        "onemptied",
+        "onended",
+        "ongotpointercapture",
+        "oninput",
+        "oninvalid",
+        "onkeydown",
+        "onkeypress",
+        "onkeyup",
+        "onload",
+        "onloadeddata",
+        "onloadedmetadata",
+        "onloadstart",
+        "onlostpointercapture",
+        "onmousedown",
+        "onmouseenter",
+        "onmouseleave",
+        "onmousemove",
+        "onmouseout",
+        "onmouseover",
+        "onmouseup",
+        "onmousewheel",
+        "onpause",
+        "onplay",
+        "onplaying",
+        "onpointerdown",
+        "onpointermove",
+        "onpointerup",
+        "onpointercancel",
+        "onpointerover",
+        "onpointerout",
+        "onpointerenter",
+        "onpointerleave",
+        "onpointerlockchange",
+        "onpointerlockerror",
+        "onprogress",
+        "onratechange",
+        "onreset",
+        "onscroll",
+        "onseeked",
+        "onseeking",
+        "onselect",
+        "onselectionchange",
+        "onshow",
+        "onsort",
+        "onstalled",
+        "onsubmit",
+        "onsuspend",
+        "ontimeupdate",
+        "onvolumechange",
+        "ontouchcancel",
+        "ontouchend",
+        "ontouchmove",
+        "ontouchstart",
+        "ontransitionend",
+        "onwaiting"};
 
 }
