@@ -49,6 +49,7 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
+import java.io.Closeable;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -191,7 +192,7 @@ public class CassandraServiceImpl implements CassandraService {
         // Close synchronous session
         LOGGER.info("Closing synchronous session");
         for (CassandraSession session : synchronousSessions.values()) {
-            session.getSession().close();
+            closeSafe(session.getSession());
         }
         synchronousSessions.clear();
 
@@ -211,21 +212,29 @@ public class CassandraServiceImpl implements CassandraService {
             } catch (CancellationException e) {
                 LOGGER.warn("{}", e.getMessage(), e);
             }
-            if (futureSession != null) {
-                futureSession.close();
-            }
+            closeSafe(futureSession);
         }
         asynchronousSessions.clear();
 
         // Close the global session
         LOGGER.info("Closing global session");
         if (globalSession != null && !globalSession.isClosed()) {
-            globalSession.close();
+            closeSafe(globalSession);
         }
 
         // Close the cluster
         LOGGER.info("Closing cluster connection");
-        cluster.close();
+        closeSafe(cluster);
+    }
+
+    private void closeSafe(Closeable closeable) {
+        if (null != closeable) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
     }
 
     /**
