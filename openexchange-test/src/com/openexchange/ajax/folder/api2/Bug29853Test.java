@@ -59,6 +59,8 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -74,6 +76,7 @@ import com.openexchange.groupware.container.FolderObject;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class Bug29853Test extends AbstractFolderTest {
 
     private static final int THREAD_COUNT = 20;

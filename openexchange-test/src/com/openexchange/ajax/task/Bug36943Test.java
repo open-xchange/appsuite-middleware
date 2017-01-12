@@ -77,10 +77,6 @@ public final class Bug36943Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Task task;
 
-    public Bug36943Test() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -110,6 +106,6 @@ public final class Bug36943Test extends AbstractAJAXSession {
             response.fillTask(task);
         }
         assertTrue("Creating a task with pile of \uD83D\uDCA9 poo may have an error.", response.hasError());
-        assertTrue("Expected exception for wrong characters.", TaskExceptionCode.INCORRECT_STRING.create().similarTo(response.getException()));
+        assertTrue("Expected exception for wrong characters.", TaskExceptionCode.INCORRECT_STRING.equals(response.getException()));
     }
 }

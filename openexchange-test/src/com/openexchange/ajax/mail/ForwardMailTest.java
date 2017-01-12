@@ -85,6 +85,7 @@ public class ForwardMailTest extends AbstractReplyTest {
         }
     }
 
+    //FIXME 'to' seems to be missing while sending mail so it cannot be retrieved from inbox
     @Test
     public void testShouldForwardWithoutNotifyingFormerRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
         String mail1 = getClient().getValues().getSendAddress();

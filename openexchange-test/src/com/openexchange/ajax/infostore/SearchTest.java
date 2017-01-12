@@ -38,8 +38,7 @@ public class SearchTest extends AbstractAJAXTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        final int userId = getClient().getValues().getUserId();
-        this.folderId = createFolderForTest(userId);
+        this.folderId = createFolderForTest();
 
         all = new String[26];
 
@@ -52,9 +51,9 @@ public class SearchTest extends AbstractAJAXTest {
         }
     }
     
-    private int createFolderForTest(final int userId) throws JSONException, OXException, IOException {
+    private int createFolderForTest() throws JSONException, OXException, IOException {
         final int parent = getClient().getValues().getPrivateInfostoreFolder();
-        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + UUID.randomUUID().toString(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, userId, parent);
+        FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + UUID.randomUUID().toString(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, getClient().getValues().getUserId(), parent);
         return ftm.insertFolderOnServer(folder).getObjectID();
     }
 
@@ -64,7 +63,6 @@ public class SearchTest extends AbstractAJAXTest {
         assertFalse(itm.getLastResponse().hasError());
 
         assertTitles(files, "Test 5", "Test 15", "Test 25");
-
     }
 
     @Test

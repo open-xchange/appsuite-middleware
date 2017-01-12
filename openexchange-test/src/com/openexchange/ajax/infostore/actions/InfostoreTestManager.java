@@ -172,8 +172,10 @@ public class InfostoreTestManager implements TestManager {
         newRequest.setFailOnError(getFailOnError());
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
         lastResponse = newResponse;
-        data.setId(newResponse.getID());
-        createdEntities.add(data);
+        if (!lastResponse.hasError()) {
+            data.setId(newResponse.getID());
+            createdEntities.add(data);
+        }
     }
 
     /*
@@ -201,6 +203,7 @@ public class InfostoreTestManager implements TestManager {
             createdEntities.add(data);
         }
     }
+
     public void copyAction(String id, String folderId, File data, java.io.File file) throws OXException, IOException, JSONException {
         CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(id, folderId, data);
         copyRequest.setFailOnError(getFailOnError());
@@ -258,7 +261,7 @@ public class InfostoreTestManager implements TestManager {
     public File getAction(String id) throws OXException, JSONException, IOException {
         return getAction(id, -1);
     }
-    
+
     public File getAction(String id, int version) throws OXException, JSONException, IOException {
         int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.VERSION, Metadata.COLOR_LABEL };
         GetInfostoreRequest getRequest = new GetInfostoreRequest(id, version, columns);
@@ -276,7 +279,7 @@ public class InfostoreTestManager implements TestManager {
     public List<File> getAll(int folderId, int[] columns) throws OXException, JSONException, IOException {
         return getAll(folderId, columns, Metadata.ID, Order.DESCENDING);
     }
-    
+
     public List<File> getAll(int folderId, int[] columns, int sort, Order order) throws OXException, JSONException, IOException {
         AllInfostoreRequest allRequest = new AllInfostoreRequest(folderId, columns, sort, order);
         AbstractColumnsResponse response = getClient().execute(allRequest);
@@ -335,7 +338,10 @@ public class InfostoreTestManager implements TestManager {
         SaveAsRequest request = new SaveAsRequest(Integer.toString(folderId), attached, module, attachment, fields);
         SaveAsResponse response = getClient().execute(request);
         lastResponse = response;
-        return response.getData().toString();
+        if (!lastResponse.hasError()) {
+            return response.getData().toString();
+        }
+        return "";
     }
 
     public void revert(final String id) throws MalformedURLException, IOException, JSONException, OXException {

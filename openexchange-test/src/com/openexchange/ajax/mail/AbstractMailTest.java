@@ -173,7 +173,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      * @param folder
      *            The folder
      */
-    protected final void clearFolder(final String folder) throws OXException, IOException, SAXException, JSONException {
+    protected final void clearFolder(final String folder) throws OXException, IOException, JSONException {
         Executor.execute(getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
     }
 
@@ -185,7 +185,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      * @return All folder and IDs as a two-dimensional array whereby the second
      *         dimension's array is always of length <code>2</code>.
      */
-    protected final String[][] getFolderAndIDs(final String folder) throws OXException, IOException, SAXException, JSONException {
+    protected final String[][] getFolderAndIDs(final String folder) throws OXException, IOException, JSONException {
         final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(folder, COLUMNS_FOLDER_ID, 0, null, true));
         final Object[][] array = allR.getArray();
         final String[][] folderAndIDs = new String[array.length][];
@@ -252,7 +252,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         return mailObject.toString();
     }
 
-    protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, SAXException, JSONException {
+    protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, JSONException {
         final CommonAllResponse response = getClient().execute(new AllRequest(inboxFolder, new int[] { 600 }, -1, null, true));
         final JSONArray arr = (JSONArray) response.getData();
         final JSONArray mailFields = arr.getJSONArray(0);
@@ -261,7 +261,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         return (JSONObject) response2.getData();
     }
 
-    public TestMail getMail(final String folder, final String id) throws OXException, IOException, SAXException, JSONException {
+    public TestMail getMail(final String folder, final String id) throws OXException, IOException, JSONException {
         final GetRequest getRequest = new GetRequest(folder, id);
         final GetResponse getResponse = getClient().execute(getRequest);
         final JSONObject jsonMail = (JSONObject) getResponse.getData();

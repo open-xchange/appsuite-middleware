@@ -52,12 +52,14 @@ package com.openexchange.ajax.session;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * Tests the action formLogin of the login servlet.
@@ -70,8 +72,12 @@ public class FormLoginTest extends AbstractAJAXSession {
 
     private String password;
 
-    public FormLoginTest() {
-        super();
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        TestUser testUser3 = testContext.acquireUser();
+        login = testUser3.getLogin();
+        password = testUser3.getPassword();
     }
 
     @Test

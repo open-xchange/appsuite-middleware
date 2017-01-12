@@ -74,7 +74,7 @@ public class SaveAsRequest extends AbstractFileRequest<SaveAsResponse> {
     private Map<String, String> body;
 
     public SaveAsRequest(final String folderId, final int attached, final int module, final int attachment, final Map<String, String> body) {
-        super(true);
+        super(false);
         this.folderId = folderId;
         this.attached = attached;
         this.module = module;
@@ -94,19 +94,17 @@ public class SaveAsRequest extends AbstractFileRequest<SaveAsResponse> {
 
     @Override
     public SaveAsParser getParser() {
-        return new SaveAsParser(true);
+        return new SaveAsParser(failOnError);
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> params = new ArrayList<>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "saveAs"));
-        if (this.folderId != null) {
-            params.add(new Parameter("id", folderId));
-        }
-        params.add(new Parameter("attached", this.attached));
-        params.add(new Parameter("module", this.module));
-        params.add(new Parameter("attachment", this.attachment));
+        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ATTACHEDID, this.attached));
+        params.add(new Parameter(AJAXServlet.PARAMETER_MODULE, this.module));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ATTACHMENT, this.attachment));
 
         return params.toArray(new Parameter[params.size()]);
     }
