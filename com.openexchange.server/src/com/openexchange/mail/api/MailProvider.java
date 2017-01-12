@@ -137,7 +137,11 @@ public abstract class MailProvider {
         getProtocolProps().loadProperties();
         final MailAccess<?, ?> access = createNewMailAccess(null);
         if (null != access) {
-            MailAccess.startupImpl(access);
+            try {                
+                MailAccess.startupImpl(access);
+            } finally {
+                access.close(false);
+            }
         }
     }
 
