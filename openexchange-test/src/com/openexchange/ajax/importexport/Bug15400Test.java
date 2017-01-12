@@ -87,7 +87,7 @@ public class Bug15400Test extends AbstractManagedContactTest {
         assertNotNull("got no data from import request", jsonObject);
         int objectID = jsonObject.optInt("id");
         assertTrue("got no object id from import request", 0 < objectID);
-        Contact importedContact = manager.getAction(folderID, objectID);
+        Contact importedContact = cotm.getAction(folderID, objectID);
         assertEquals(truncatedName, importedContact.getSurName());
     }
 

@@ -74,7 +74,7 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         Contact contact = super.generateContact("Otto");
         contact.setGivenName("Heinz");
         contact.setDisplayName("Otto, Heinz");
-        contact = manager.newAction(contact);
+        contact = cotm.newAction(contact);
         /*
          * check different queries
          */
@@ -83,7 +83,7 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         for (String query : queries) {
             AutocompleteRequest request = new AutocompleteRequest(query, false, parentFolderID, Contact.ALL_COLUMNS, true);
             CommonSearchResponse response = getClient().execute(request);
-            List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+            List<Contact> contacts = cotm.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
             assertNotNull(contacts);
             assertEquals("wrong number of results", 1, contacts.size());
             assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());
@@ -98,22 +98,22 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         Contact contact = super.generateContact("Otto");
         contact.setGivenName("Heinz");
         contact.setDisplayName("Otto, Heinz");
-        contact = manager.newAction(contact);
+        contact = cotm.newAction(contact);
         Contact contact2 = super.generateContact("Otto");
         contact2.setGivenName("Horst");
         contact2.setDisplayName("Otto, Horst");
-        contact2 = manager.newAction(contact2);
+        contact2 = cotm.newAction(contact2);
         Contact contact3 = super.generateContact("Wurst");
         contact3.setGivenName("Heinz");
         contact3.setDisplayName("Wurst, Heinz");
-        contact3 = manager.newAction(contact3);
+        contact3 = cotm.newAction(contact3);
         /*
          * check query
          */
         String parentFolderID = String.valueOf(contact.getParentFolderID());
         AutocompleteRequest request = new AutocompleteRequest("Heinz Otto", false, parentFolderID, Contact.ALL_COLUMNS, true);
         CommonSearchResponse response = getClient().execute(request);
-        List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+        List<Contact> contacts = cotm.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());
         assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());
@@ -128,13 +128,13 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         distributionList.setDisplayName(distributionList.getGivenName() + " " + distributionList.getSurName());
         distributionList.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT), new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT)
         });
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * expect in auto-complete response
          */
         AutocompleteRequest request = new AutocompleteRequest(distributionList.getGivenName(), false, Integer.toString(folderID), Contact.ALL_COLUMNS, true);
         CommonSearchResponse response = getClient().execute(request);
-        List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+        List<Contact> contacts = cotm.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());
         assertEquals(distributionList.getDisplayName(), contacts.get(0).getDisplayName());

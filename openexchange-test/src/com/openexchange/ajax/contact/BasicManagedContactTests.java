@@ -72,9 +72,9 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
     public void testCreateAndGetContact() {
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
-        Contact actual = manager.getAction(folderID, expected.getObjectID());
+        Contact actual = cotm.getAction(folderID, expected.getObjectID());
 
         assertEquals("Surname should match", expected.getSurName(), actual.getSurName());
         assertEquals("Given name should match", expected.getGivenName(), actual.getGivenName());
@@ -84,36 +84,36 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
     public void testDeleteContact() {
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
-        manager.deleteAction(expected);
+        cotm.deleteAction(expected);
 
-        Contact found = manager.getAction(folderID, expected.getObjectID());
+        Contact found = cotm.getAction(folderID, expected.getObjectID());
         assertNull("Should not find a contact after deletion", found);
     }
 
     @Test
     public void testGetAllContacts() {
-        int numberBefore = manager.allAction(folderID).length;
+        int numberBefore = cotm.allAction(folderID).length;
 
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
-        Contact[] allContactsOnServer = manager.allAction(folderID);
+        Contact[] allContactsOnServer = cotm.allAction(folderID);
 
         assertEquals("Should find exactly one more contact", numberBefore + 1, allContactsOnServer.length);
     }
 
     @Test
     public void testGetAllContactsWithColumns() {
-        int numberBefore = manager.allAction(folderID).length;
+        int numberBefore = cotm.allAction(folderID).length;
 
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
-        Contact[] allContactsOnServer = manager.allAction(folderID, new int[] { 1, 4, 5, 20 });
+        Contact[] allContactsOnServer = cotm.allAction(folderID, new int[] { 1, 4, 5, 20 });
 
         assertEquals("Should find exactly one more contact", numberBefore + 1, allContactsOnServer.length);
 
@@ -135,11 +135,11 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
 
         for (String graphem : sinograph) {
-            manager.newAction(ContactTestManager.generateContact(folderID, graphem));
+            cotm.newAction(ContactTestManager.generateContact(folderID, graphem));
         }
 
         int fieldNum = ContactField.SUR_NAME.getNumber();
-        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.ASCENDING, "gb2312");
+        Contact[] allContacts = cotm.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.ASCENDING, "gb2312");
 
         for (int i = 0, len = sinograph.size(); i < len; i++) {
             String expected = sinograph.get(i);
@@ -152,11 +152,11 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
 
         for (String graphem : sinograph) {
-            manager.newAction(ContactTestManager.generateContact(folderID, graphem));
+            cotm.newAction(ContactTestManager.generateContact(folderID, graphem));
         }
 
         int fieldNum = ContactField.SUR_NAME.getNumber();
-        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.DESCENDING, "gb2312");
+        Contact[] allContacts = cotm.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.DESCENDING, "gb2312");
 
         for (int i = 0, len = sinograph.size(); i < len; i++) {
             String expected = sinograph.get(len - i - 1);
@@ -189,12 +189,12 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
                 tmp.setParentFolderID(folderID);
                 tmp.set(field.getNumber(), value);
                 tmp.setInfo(value); //we'll use this field to compare afterwards
-                manager.newAction(tmp);
+                cotm.newAction(tmp);
             }
         }
 
         int fieldNum = ContactField.SUR_NAME.getNumber();
-        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum, ContactField.INFO.getNumber() }, -1, Order.ASCENDING, "gb2312");
+        Contact[] allContacts = cotm.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum, ContactField.INFO.getNumber() }, -1, Order.ASCENDING, "gb2312");
 
         for (int i = 0, len = sinograph.size(); i < len; i++) {
             String expected = sinograph.get(i);
@@ -206,13 +206,13 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
     public void testUpdateContactAndGetUpdates() {
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
         expected.setDisplayName("Display name");
 
-        Contact update = manager.updateAction(expected);
+        Contact update = cotm.updateAction(expected);
 
-        Contact[] updated = manager.updatesAction(folderID, new Date(update.getLastModified().getTime() - 1));
+        Contact[] updated = cotm.updatesAction(folderID, new Date(update.getLastModified().getTime() - 1));
 
         assertEquals("Only one contact should have been updated", 1, updated.length);
 
@@ -223,7 +223,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
     @Test
     public void testAllWithGBK() throws Exception {
         //{"action":"all","module":"contacts","columns":"20,1,5,2,602","folder":"66","collation":"gbk","sort":"502","order":"asc"}
-        Contact[] allAction = manager.allAction(getClient().getValues().getPrivateContactFolder(), new int[] { 20, 1, 5, 2, 602 }, 502, Order.ASCENDING, "gbk");
+        Contact[] allAction = cotm.allAction(getClient().getValues().getPrivateContactFolder(), new int[] { 20, 1, 5, 2, 602 }, 502, Order.ASCENDING, "gbk");
         assertTrue("Should find more than 0 contacts in the private contact folder", allAction.length > 0);
     }
 }

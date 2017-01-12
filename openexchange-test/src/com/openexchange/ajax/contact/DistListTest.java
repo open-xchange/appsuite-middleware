@@ -78,12 +78,12 @@ public class DistListTest extends AbstractManagedContactTest {
          */
         Contact distributionList = super.generateContact("List");
         distributionList.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("dn", "mail@example.invalid", DistributionListEntryObject.INDEPENDENT) });
-        manager.setFailOnError(true);
-        distributionList = manager.newAction(distributionList);
+        cotm.setFailOnError(true);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
 
@@ -95,7 +95,7 @@ public class DistListTest extends AbstractManagedContactTest {
          * create contact
          */
         Contact referencedContact = super.generateContact("Test");
-        referencedContact = manager.newAction(referencedContact);
+        referencedContact = cotm.newAction(referencedContact);
         /*
          * create distribution list
          */
@@ -107,11 +107,11 @@ public class DistListTest extends AbstractManagedContactTest {
         members[0].setDisplayname(referencedContact.getDisplayName());
         members[0].setEmailfield(DistributionListEntryObject.EMAILFIELD1);
         distributionList.setDistributionList(members);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -133,16 +133,16 @@ public class DistListTest extends AbstractManagedContactTest {
         /*
          * try to create distribution list
          */
-        distributionList = manager.newAction(distributionList);
-        AbstractAJAXResponse lastResponse = manager.getLastResponse();
+        distributionList = cotm.newAction(distributionList);
+        AbstractAJAXResponse lastResponse = cotm.getLastResponse();
         assertNotNull("no error message", lastResponse.getErrorMessage());
         assertTrue("wrong exception", ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.equals(lastResponse.getException()));
         /*
          * try to create with empty address instead
          */
         members[0].setEmailaddress("");
-        distributionList = manager.newAction(distributionList);
-        lastResponse = manager.getLastResponse();
+        distributionList = cotm.newAction(distributionList);
+        lastResponse = cotm.getLastResponse();
         assertNotNull("no error message", lastResponse.getErrorMessage());
         assertTrue("wrong exception", ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.equals(lastResponse.getException()));
     }
@@ -159,11 +159,11 @@ public class DistListTest extends AbstractManagedContactTest {
         members[0].setEmailaddress("hallo@example.com");
         members[0].setEmailfield(DistributionListEntryObject.INDEPENDENT);
         distributionList.setDistributionList(members);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -172,16 +172,16 @@ public class DistListTest extends AbstractManagedContactTest {
          * try to update distribution list
          */
         distributionList.getDistributionList()[0].setEmailaddress(null);
-        distributionList = manager.newAction(distributionList);
-        AbstractAJAXResponse lastResponse = manager.getLastResponse();
+        distributionList = cotm.newAction(distributionList);
+        AbstractAJAXResponse lastResponse = cotm.getLastResponse();
         assertNotNull("no error message", lastResponse.getErrorMessage());
         assertTrue("wrong exception", ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.equals(lastResponse.getException()));
         /*
          * try to update with empty address instead
          */
         distributionList.getDistributionList()[0].setEmailaddress("");
-        distributionList = manager.newAction(distributionList);
-        lastResponse = manager.getLastResponse();
+        distributionList = cotm.newAction(distributionList);
+        lastResponse = cotm.getLastResponse();
         assertNotNull("no error message", lastResponse.getErrorMessage());
         assertTrue("wrong exception", ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.equals(lastResponse.getException()));
     }
@@ -193,7 +193,7 @@ public class DistListTest extends AbstractManagedContactTest {
          */
         Contact referencedContact = super.generateContact("Test");
         referencedContact.setEmail1("mail@example.com");
-        referencedContact = manager.newAction(referencedContact);
+        referencedContact = cotm.newAction(referencedContact);
         /*
          * create distribution list
          */
@@ -206,11 +206,11 @@ public class DistListTest extends AbstractManagedContactTest {
         members[0].setEmailaddress(referencedContact.getEmail1());
         members[0].setEmailfield(DistributionListEntryObject.EMAILFIELD1);
         distributionList.setDistributionList(members);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -219,11 +219,11 @@ public class DistListTest extends AbstractManagedContactTest {
         /*
          * delete referenced contact
          */
-        manager.deleteAction(referencedContact);
+        cotm.deleteAction(referencedContact);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -239,7 +239,7 @@ public class DistListTest extends AbstractManagedContactTest {
          */
         Contact referencedContact = super.generateContact("Test");
         referencedContact.setEmail1("mail@example.com");
-        referencedContact = manager.newAction(referencedContact);
+        referencedContact = cotm.newAction(referencedContact);
         /*
          * create distribution list
          */
@@ -252,11 +252,11 @@ public class DistListTest extends AbstractManagedContactTest {
         members[0].setEmailaddress(referencedContact.getEmail1());
         members[0].setEmailfield(DistributionListEntryObject.EMAILFIELD1);
         distributionList.setDistributionList(members);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -266,11 +266,11 @@ public class DistListTest extends AbstractManagedContactTest {
          * update referenced contact
          */
         referencedContact.setEmail1("mail_edit@example.com");
-        referencedContact = manager.updateAction(referencedContact);
+        referencedContact = cotm.updateAction(referencedContact);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -279,11 +279,11 @@ public class DistListTest extends AbstractManagedContactTest {
         /*
          * delete referenced contact
          */
-        manager.deleteAction(referencedContact);
+        cotm.deleteAction(referencedContact);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -299,7 +299,7 @@ public class DistListTest extends AbstractManagedContactTest {
          */
         Contact referencedContact = super.generateContact("Test");
         referencedContact.setEmail1("mail@example.com");
-        referencedContact = manager.newAction(referencedContact);
+        referencedContact = cotm.newAction(referencedContact);
         /*
          * create distribution list
          */
@@ -311,11 +311,11 @@ public class DistListTest extends AbstractManagedContactTest {
         members[0].setEmailaddress(referencedContact.getEmail1());
         members[0].setEmailfield(DistributionListEntryObject.EMAILFIELD1);
         distributionList.setDistributionList(members);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
@@ -68,10 +69,6 @@ import com.openexchange.exception.OXException;
 public class ForwardMailTest extends AbstractReplyTest {
 
     MailTestManager manager;
-
-    public ForwardMailTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -93,7 +90,8 @@ public class ForwardMailTest extends AbstractReplyTest {
         String mail1 = getClient().getValues().getSendAddress();
 
         JSONObject mySentMail = createEMail(mail1, "Forward test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
-        sendMail(mySentMail.toString());
+        String[] folderAndId = sendMail(mySentMail.toString());
+        assertNotNull(folderAndId);
 
         JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());
         TestMail myForwardMail = new TestMail(getForwardMail(new TestMail(myReceivedMail)));

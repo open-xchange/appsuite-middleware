@@ -65,7 +65,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 
 /**
- * Tests the CSV imports and exports (rewritten from webdav + servlet to test manager).
+ * Tests the CSV imports and exports (rewritten from webdav + servlet to test cotm).
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *

@@ -80,7 +80,7 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
             //create
             Contact tmp = generateContact();
             tmp.setSurName(name);
-            manager.newAction(tmp);
+            cotm.newAction(tmp);
 
             //prepare search
             ContactSearchObject search = new ContactSearchObject();
@@ -98,7 +98,7 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
             searches.add(search);
         }
         for (int i = 0; i < sinographs.size(); i++) {
-            Contact[] results = manager.searchAction(searches.get(i));
+            Contact[] results = cotm.searchAction(searches.get(i));
 
             assertEquals("#" + i + " Should find one contact", 1, results.length);
             assertEquals("#" + i + " Should find the right contact", sinographs.get(i), results[0].getSurName());
@@ -110,9 +110,9 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
         for (String name : sinographs) {
             Contact tmp = generateContact();
             tmp.setSurName(name);
-            manager.newAction(tmp);
+            cotm.newAction(tmp);
         }
-        Contact[] contacts = manager.searchAction("*", folderID, ContactField.SUR_NAME.getNumber(), Order.ASCENDING, "gb2312", Contact.ALL_COLUMNS);
+        Contact[] contacts = cotm.searchAction("*", folderID, ContactField.SUR_NAME.getNumber(), Order.ASCENDING, "gb2312", Contact.ALL_COLUMNS);
 
         for (int i = 0; i < sinographs.size(); i++) {
             String name = contacts[i].getSurName();

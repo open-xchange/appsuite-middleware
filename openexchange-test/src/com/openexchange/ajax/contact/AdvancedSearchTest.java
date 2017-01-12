@@ -25,10 +25,6 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
 
     private static final String BOB_LASTNAME = "Rather complicated last name with timestamp (" + new Date().getTime() + ") that does not appear in other folders";
 
-    public AdvancedSearchTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -42,7 +38,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         Contact charlie = ContactTestManager.generateContact(folderID);
         charlie.setGivenName("Charlie");
 
-        manager.newAction(alice, bob, charlie);
+        cotm.newAction(alice, bob, charlie);
     }
 
     @Test
@@ -132,7 +128,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
 
     @Test
     public void testSearchOrdering() throws Exception {
-        manager.newAction(ContactTestManager.generateContact(folderID, "Elvis"), ContactTestManager.generateContact(folderID, "Feelvis"), ContactTestManager.generateContact(folderID, "Gelvis"), ContactTestManager.generateContact(folderID, "Geena"), ContactTestManager.generateContact(folderID, "Hellvis"));
+        cotm.newAction(ContactTestManager.generateContact(folderID, "Elvis"), ContactTestManager.generateContact(folderID, "Feelvis"), ContactTestManager.generateContact(folderID, "Gelvis"), ContactTestManager.generateContact(folderID, "Geena"), ContactTestManager.generateContact(folderID, "Hellvis"));
         ContactField field = ContactField.SUR_NAME;
         JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['>=' , {'field' : '" + field.getAjaxName() + "'} , 'E'], " + "['<' , {'field' : '" + field.getAjaxName() + "'}, 'I'], " + "['NOT' , ['=' , {'field' : '" + field.getAjaxName() + "'}, 'Geena']], " + "['=' , {'field' : '" + ContactField.FOLDER_ID.getAjaxName() + "'}, " + folderID + "]" + "]})");
 
@@ -171,7 +167,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
 
     @Test
     public void testSearchOrderingWithKana() throws Exception {
-        manager.newAction(ContactTestManager.generateContact(folderID, "\u30ef"), ContactTestManager.generateContact(folderID, "\u30ea"), ContactTestManager.generateContact(folderID, "\u30e9"), ContactTestManager.generateContact(folderID, "\u30e5"), ContactTestManager.generateContact(folderID, "\u30e4"), ContactTestManager.generateContact(folderID, "\u30df"), ContactTestManager.generateContact(folderID, "\u30de"), ContactTestManager.generateContact(folderID, "\u30d0"), ContactTestManager.generateContact(folderID, "\u30cf"), ContactTestManager.generateContact(folderID, "\u30cb"), ContactTestManager.generateContact(folderID, "\u30ca"), ContactTestManager.generateContact(folderID, "\u30c0"), ContactTestManager.generateContact(folderID, "\u30bf"), ContactTestManager.generateContact(folderID, "\u30b6"), ContactTestManager.generateContact(folderID, "\u30b5"), ContactTestManager.generateContact(folderID, "\u30ac"), ContactTestManager.generateContact(folderID, "\u30ab"), ContactTestManager.generateContact(folderID, "\u30a3"), ContactTestManager.generateContact(folderID, "\u30a2"));
+        cotm.newAction(ContactTestManager.generateContact(folderID, "\u30ef"), ContactTestManager.generateContact(folderID, "\u30ea"), ContactTestManager.generateContact(folderID, "\u30e9"), ContactTestManager.generateContact(folderID, "\u30e5"), ContactTestManager.generateContact(folderID, "\u30e4"), ContactTestManager.generateContact(folderID, "\u30df"), ContactTestManager.generateContact(folderID, "\u30de"), ContactTestManager.generateContact(folderID, "\u30d0"), ContactTestManager.generateContact(folderID, "\u30cf"), ContactTestManager.generateContact(folderID, "\u30cb"), ContactTestManager.generateContact(folderID, "\u30ca"), ContactTestManager.generateContact(folderID, "\u30c0"), ContactTestManager.generateContact(folderID, "\u30bf"), ContactTestManager.generateContact(folderID, "\u30b6"), ContactTestManager.generateContact(folderID, "\u30b5"), ContactTestManager.generateContact(folderID, "\u30ac"), ContactTestManager.generateContact(folderID, "\u30ab"), ContactTestManager.generateContact(folderID, "\u30a3"), ContactTestManager.generateContact(folderID, "\u30a2"));
 
         String[] letters = new String[] { "\u30a2", "\u30ab", "\u30b5", "\u30bf", "\u30ca", "\u30cf", "\u30de", "\u30e4", "\u30e9", "\u30ef" };
 
@@ -206,7 +202,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     public void testSearchOrderingWithHanzi() throws Exception {
         List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
         for (String graphem : sinograph) {
-            manager.newAction(ContactTestManager.generateContact(folderID, graphem));
+            cotm.newAction(ContactTestManager.generateContact(folderID, graphem));
         }
 
         ContactField field = ContactField.SUR_NAME;
@@ -242,7 +238,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         LinkedList<String> randomized = new LinkedList<String>(sinograph);
         Collections.shuffle(randomized);
         for (String graphem : randomized) {
-            manager.newAction(ContactTestManager.generateContact(folderID, graphem));
+            cotm.newAction(ContactTestManager.generateContact(folderID, graphem));
         }
 
         JSONObject filter = new JSONObject("{'filter' : [ '>=' , {'field':'" + field.getAjaxName() + "'}, '\u963f' ]})");
@@ -269,7 +265,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     @Test
     public void testNameThatAppearedTwice() throws Exception {
         String name = "\u7802\u7cd6";
-        manager.newAction(ContactTestManager.generateContact(folderID, name));
+        cotm.newAction(ContactTestManager.generateContact(folderID, name));
 
         ContactField field = ContactField.SUR_NAME;
         List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");

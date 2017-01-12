@@ -119,7 +119,7 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
 
         InputStream stream = new ByteArrayInputStream(streambase);
         CSVImportRequest importRequest = new CSVImportRequest(folderID, stream, false);
-        AbstractAJAXResponse response = manager.getClient().execute(importRequest);
+        AbstractAJAXResponse response = cotm.getClient().execute(importRequest);
 
         assertFalse(response.hasError());
         assertFalse(response.hasConflicts());
@@ -127,8 +127,8 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
         JSONArray data = (JSONArray) response.getData();
         assertEquals(2, data.length());
 
-        Contact c1 = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
-        Contact c2 = manager.getAction(folderID, data.getJSONObject(1).getInt("id"));
+        Contact c1 = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact c2 = cotm.getAction(folderID, data.getJSONObject(1).getInt("id"));
         assertTrue(c1.getGivenName().equals(ContactTestData.NAME1));
         assertTrue(c2.getGivenName().equals(ContactTestData.NAME2));
     }

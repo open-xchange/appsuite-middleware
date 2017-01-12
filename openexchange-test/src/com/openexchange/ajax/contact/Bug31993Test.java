@@ -76,13 +76,13 @@ public class Bug31993Test extends AbstractManagedContactTest {
          */
         Contact contact1 = super.generateContact("Mike");
         contact1.setBirthday(D("1969-04-11 00:00:00"));
-        contact1 = manager.newAction(contact1);
+        contact1 = cotm.newAction(contact1);
         Contact contact2 = super.generateContact("Frank");
         contact2.setBirthday(D("1980-04-10 00:00:00"));
-        contact2 = manager.newAction(contact2);
+        contact2 = cotm.newAction(contact2);
         Contact contact3 = super.generateContact("Oliver");
         contact3.setBirthday(D("1988-04-11 00:00:00"));
-        contact3 = manager.newAction(contact3);
+        contact3 = cotm.newAction(contact3);
         /*
          * search birthdays
          */
@@ -94,7 +94,7 @@ public class Bug31993Test extends AbstractManagedContactTest {
 
         request = new SearchByBirthdayRequest(new Date(1397088000000L), new Date(1404345600000L), parentFolderID, columns, true);
         response = getClient().execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 3, contacts.size());
 

@@ -53,10 +53,10 @@ public class Bug36687Test extends AbstractManagedContactTest {
         /*
          * verify imported contacts
          */
-        Contact firstContact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact firstContact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("First imported contact not found", firstContact);
         assertNotNull("No E-Mail found in first contact", firstContact.getEmail1());
-        Contact secondContact = manager.getAction(folderID, data.getJSONObject(1).getInt("id"));
+        Contact secondContact = cotm.getAction(folderID, data.getJSONObject(1).getInt("id"));
         assertNotNull("Second imported contact not found", secondContact);
         assertNotNull("No E-Mail found in second contact", secondContact.getEmail1());
     }
@@ -81,10 +81,10 @@ public class Bug36687Test extends AbstractManagedContactTest {
         /*
          * verify imported contacts
          */
-        Contact firstContact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact firstContact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("First imported contact not found", firstContact);
         assertNotNull("No E-Mail found in first contact", firstContact.getEmail1());
-        Contact secondContact = manager.getAction(folderID, data.getJSONObject(1).getInt("id"));
+        Contact secondContact = cotm.getAction(folderID, data.getJSONObject(1).getInt("id"));
         assertNotNull("Second imported contact not found", secondContact);
         assertNotNull("No E-Mail found in second contact", secondContact.getEmail1());
     }
@@ -109,7 +109,7 @@ public class Bug36687Test extends AbstractManagedContactTest {
         /*
          * verify imported contacts
          */
-        Contact firstContact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact firstContact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("First imported contact not found", firstContact);
         assertNotNull("No E-Mail found in first contact", firstContact.getEmail1());
         assertEquals("Wrong name", "Heinz\u0160", firstContact.getSurName());
@@ -135,7 +135,7 @@ public class Bug36687Test extends AbstractManagedContactTest {
         /*
          * verify imported contacts
          */
-        Contact firstContact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact firstContact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("First imported contact not found", firstContact);
         assertNotNull("No E-Mail found in first contact", firstContact.getEmail1());
         assertEquals("Wrong name", "Heinz\u0160", firstContact.getSurName());
@@ -161,7 +161,7 @@ public class Bug36687Test extends AbstractManagedContactTest {
         /*
          * verify imported contacts
          */
-        Contact firstContact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact firstContact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("First imported contact not found", firstContact);
         assertNotNull("No E-Mail found in first contact", firstContact.getEmail1());
         assertEquals("Wrong name", "Heinz\u0160", firstContact.getSurName());
@@ -187,7 +187,7 @@ public class Bug36687Test extends AbstractManagedContactTest {
         /*
          * verify imported contacts
          */
-        Contact firstContact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact firstContact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("First imported contact not found", firstContact);
         assertNotNull("No E-Mail found in first contact", firstContact.getEmail1());
         assertEquals("Wrong name", "Heinz\ufffd", firstContact.getSurName());

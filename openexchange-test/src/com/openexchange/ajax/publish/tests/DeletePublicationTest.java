@@ -94,7 +94,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         expected.setId(newResp.getId());
 
         // delete folder of publication
-        getFolderManager().deleteFolderOnServer(contact.getParentFolderID(), new Date(Long.MAX_VALUE));
+        ftm.deleteFolderOnServer(contact.getParentFolderID(), new Date(Long.MAX_VALUE));
         Thread.sleep(1000); //asynchronous delete event needs time to hit
 
         // verify deletion of publication

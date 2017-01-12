@@ -23,13 +23,13 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager.setSleep(0);
+        cotm.setSleep(0);
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            manager.setSleep(500);
+            cotm.setSleep(500);
         } finally {
             super.tearDown();
         }
@@ -48,12 +48,12 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
         String email1 = "abel@oxample.invalid";
         Contact c1 = generateContact("Abel");
         c1.setEmail1(email1);
-        manager.newAction(c1);
+        cotm.newAction(c1);
 
         String email2 = "baker@oxample.invalid";
         Contact c2 = generateContact("Baker");
         c2.setEmail1(email2);
-        manager.newAction(c2);
+        cotm.newAction(c2);
 
         int type = DistributionListEntryObject.EMAILFIELD1;
 
@@ -86,29 +86,29 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
             Contact addMemberUpdate = makeDistro(objId);
             addMemberUpdate.setDistributionList(members);
             addMemberUpdate.setLastModified(timeStamp);
-            manager.updateAction(addMemberUpdate);
+            cotm.updateAction(addMemberUpdate);
 
-            timeStamp = manager.getLastResponse().getTimestamp();
+            timeStamp = cotm.getLastResponse().getTimestamp();
 
             Date updatesTimeStamp = new Date(timeStamp.getTime() - 1);
 
             //list, all, updates are performed before the get
             int actualSize;
 
-            actualSize = manager.listAction(new int[] { folderID, objId })[0].getNumberOfDistributionLists();
+            actualSize = cotm.listAction(new int[] { folderID, objId })[0].getNumberOfDistributionLists();
             assertEquals("[list] Attempt #" + attempts + " failed", expectedSize, actualSize);
             //			if(actualSize != expectedSize) listErrors++;
 
-            actualSize = manager.allAction(folderID, Contact.ALL_COLUMNS)[0].getNumberOfDistributionLists();
+            actualSize = cotm.allAction(folderID, Contact.ALL_COLUMNS)[0].getNumberOfDistributionLists();
             assertEquals("[all] Attempt #" + attempts + " failed", expectedSize, actualSize);
             //			if(actualSize != expectedSize) allErrors++;
 
-            actualSize = manager.updatesAction(folderID, updatesTimeStamp)[0].getNumberOfDistributionLists();
+            actualSize = cotm.updatesAction(folderID, updatesTimeStamp)[0].getNumberOfDistributionLists();
             assertEquals("[updates] Attempt #" + attempts + " failed", expectedSize, actualSize);
             //			if(actualSize != expectedSize) updatesErrors++;
 
             // get for editing
-            Contact actual = manager.getAction(folderID, objId);
+            Contact actual = cotm.getAction(folderID, objId);
             actualSize = actual.getNumberOfDistributionLists();
             assertEquals("[get] Attempt #" + attempts + " failed", expectedSize, actualSize);
             //			if(actual.getNumberOfDistributionLists() != expectedSize) getFullErrors++;
@@ -117,11 +117,11 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
             Contact removeMemberUpdate = makeDistro(objId);
             removeMemberUpdate.setDistributionList(new DistributionListEntryObject[] {});
             removeMemberUpdate.setLastModified(timeStamp);
-            manager.updateAction(removeMemberUpdate);
-            timeStamp = manager.getLastResponse().getTimestamp();
+            cotm.updateAction(removeMemberUpdate);
+            timeStamp = cotm.getLastResponse().getTimestamp();
 
             //check
-            actual = manager.getAction(folderID, objId);
+            actual = cotm.getAction(folderID, objId);
             assertEquals("[get] Attempt #" + attempts + " failed", 0, actual.getNumberOfDistributionLists());
             //			if(actual.getNumberOfDistributionLists() != expectedSize) getEmptyErrors++;
         }

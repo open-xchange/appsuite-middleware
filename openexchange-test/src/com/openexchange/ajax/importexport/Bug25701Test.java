@@ -87,10 +87,10 @@ public class Bug25701Test extends AbstractManagedContactTest {
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneHome1());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
     @Test
@@ -107,12 +107,12 @@ public class Bug25701Test extends AbstractManagedContactTest {
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         homeTelephoneNumbers = Arrays.asList(new String[] { importedContact.getTelephoneHome1(), importedContact.getTelephoneHome2() });
         assertTrue("33465472555 not found", homeTelephoneNumbers.contains("33465472555"));
         assertTrue("47574573624 not found", homeTelephoneNumbers.contains("47574573624"));
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
     @Test
@@ -129,12 +129,12 @@ public class Bug25701Test extends AbstractManagedContactTest {
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         businessTelephoneNumbers = Arrays.asList(new String[] { importedContact.getTelephoneBusiness1(), importedContact.getTelephoneBusiness2() });
         assertTrue("33465472555 not found", businessTelephoneNumbers.contains("33465472555"));
         assertTrue("47574573624 not found", businessTelephoneNumbers.contains("47574573624"));
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
     @Test
@@ -149,10 +149,10 @@ public class Bug25701Test extends AbstractManagedContactTest {
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("33465472555 not found", "33465472555", importedContact.getFaxHome());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
     @Test
@@ -167,10 +167,10 @@ public class Bug25701Test extends AbstractManagedContactTest {
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("33465472555 not found", "33465472555", importedContact.getFaxBusiness());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
     @Test
@@ -185,10 +185,10 @@ public class Bug25701Test extends AbstractManagedContactTest {
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneTTYTTD());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
     @Test
@@ -203,10 +203,10 @@ public class Bug25701Test extends AbstractManagedContactTest {
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephonePager());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
     @Test
@@ -221,10 +221,10 @@ public class Bug25701Test extends AbstractManagedContactTest {
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneCar());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
     private Contact importAndFetch(String vCard) throws Exception {
@@ -236,12 +236,12 @@ public class Bug25701Test extends AbstractManagedContactTest {
         assertNotNull("got no data from import request", jsonObject);
         int objectID = jsonObject.optInt("id");
         assertTrue("got no object id from import request", 0 < objectID);
-        return manager.getAction(folderID, objectID);
+        return cotm.getAction(folderID, objectID);
     }
 
     private String export() throws Exception {
         VCardExportRequest exportRequest = new VCardExportRequest(folderID, false);
-        VCardExportResponse exportResponse = manager.getClient().execute(exportRequest);
+        VCardExportResponse exportResponse = cotm.getClient().execute(exportRequest);
         return exportResponse.getVCard();
     }
 

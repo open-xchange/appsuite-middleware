@@ -49,12 +49,9 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * This is a roundtrip test, doing Create-(verify)-update-(verify)-delete-(verify) for a publication and subscription of OXMF.
@@ -63,47 +60,25 @@ import com.openexchange.test.FolderTestManager;
  */
 public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
 
-    protected ContactTestManager cMgr;
-
-    protected FolderTestManager fMgr;
-
     protected FolderObject pubFolder;
 
     protected FolderObject subFolder;
-
-    public OXMFContactLifeCycleTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        this.cMgr = getContactManager();
-        this.fMgr = getFolderManager();
-
         // setup folders
-        this.pubFolder = fMgr.generatePublicFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        this.subFolder = fMgr.generatePublicFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        fMgr.insertFolderOnServer(pubFolder);
-        fMgr.insertFolderOnServer(subFolder);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            cMgr.cleanUp();
-            fMgr.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-
+        this.pubFolder = ftm.generatePublicFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        this.subFolder = ftm.generatePublicFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        ftm.insertFolderOnServer(pubFolder);
+        ftm.insertFolderOnServer(subFolder);
     }
 
     protected Contact createContact(String firstname, String lastname) {
         Contact contact1 = generateContact(firstname, lastname);
         contact1.setParentFolderID(pubFolder.getObjectID());
-        cMgr.newAction(contact1);
+        cotm.newAction(contact1);
         return contact1;
     }
 }

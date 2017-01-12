@@ -84,14 +84,14 @@ public class Bug32635Test extends AbstractManagedContactTest {
         Contact contact = super.generateContact("Preu\u00df");
         contact.setGivenName("Stefan");
         contact.setDisplayName("Preu\u00df, Stefan");
-        contact = manager.newAction(contact);
+        contact = cotm.newAction(contact);
         /*
          * check auto-complete
          */
         String parentFolderID = String.valueOf(contact.getParentFolderID());
         AutocompleteRequest request = new AutocompleteRequest("Stefan Preu\u00df", false, parentFolderID, Contact.ALL_COLUMNS, true);
         CommonSearchResponse response = getClient().execute(request);
-        List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+        List<Contact> contacts = cotm.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());
         assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());

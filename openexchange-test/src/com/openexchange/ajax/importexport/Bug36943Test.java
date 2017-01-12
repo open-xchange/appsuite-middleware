@@ -56,7 +56,7 @@ public class Bug36943Test extends AbstractManagedContactTest {
         /*
          * verify imported data
          */
-        Contact contact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact contact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("imported contact not found", contact);
         assertNotNull("no last name imported", contact.getSurName());
         String expectedLastName = lastName.replaceAll("\uD83D\uDCA9", "");
@@ -86,7 +86,7 @@ public class Bug36943Test extends AbstractManagedContactTest {
         /*
          * verify imported data
          */
-        Contact contact = manager.getAction(folderID, objectID);
+        Contact contact = cotm.getAction(folderID, objectID);
         assertNotNull("imported contact not found", contact);
         assertNotNull("no last name imported", contact.getSurName());
         String expectedLastName = lastName.replaceAll("\uD83D\uDCA9", "");

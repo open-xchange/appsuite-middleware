@@ -79,7 +79,7 @@ import com.openexchange.test.FolderTestManager;
  */
 public class DistListPermissionsTest extends AbstractManagedContactTest {
 
-    private ContactTestManager manager2;
+    private ContactTestManager cotm2;
     private AJAXClient client2;
     private FolderTestManager folderManager2;
 
@@ -87,20 +87,16 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     private Contact referencedContact1;
     private Contact referencedContact2;
 
-    public DistListPermissionsTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
-        manager2 = new ContactTestManager(client2);
+        client2 = getClient2();
+        cotm2 = new ContactTestManager(client2);
         folderManager2 = new FolderTestManager(client2);
         /*
          * create a shared folder as user 2
          */
-        sharedFolder = folderManager.generateSharedFolder("DistListTest_" + UUID.randomUUID().toString(), Module.CONTACTS.getFolderConstant(), client2.getValues().getPrivateContactFolder(), new int[] { client2.getValues().getUserId(), getClient().getValues().getUserId() });
+        sharedFolder = ftm.generateSharedFolder("DistListTest_" + UUID.randomUUID().toString(), Module.CONTACTS.getFolderConstant(), client2.getValues().getPrivateContactFolder(), new int[] { client2.getValues().getUserId(), getClient().getValues().getUserId() });
         sharedFolder = folderManager2.insertFolderOnServer(sharedFolder);
         /*
          * create two contacts in that folder
@@ -110,19 +106,19 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
         referencedContact1.setEmail2("email2@example.com");
         referencedContact1.setEmail3("email3@example.com");
         referencedContact1.setParentFolderID(sharedFolder.getObjectID());
-        referencedContact1 = manager2.newAction(referencedContact1);
+        referencedContact1 = cotm2.newAction(referencedContact1);
         referencedContact2 = super.generateContact("Test2");
         referencedContact2.setEmail1("email1@example.org");
         referencedContact2.setEmail2("email2@example.org");
         referencedContact2.setEmail3("email3@example.org");
         referencedContact2.setParentFolderID(sharedFolder.getObjectID());
-        referencedContact2 = manager2.newAction(referencedContact2);
+        referencedContact2 = cotm2.newAction(referencedContact2);
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            manager2.cleanUp();
+            cotm2.cleanUp();
             folderManager2.cleanUp();
         } finally {
             super.tearDown();
@@ -130,16 +126,16 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testReferencedContactFromSharedFolder() throws OXException, IOException, JSONException {
+    public void testReferencedContactFromSharedFolder() throws OXException {
         /*
          * create distribution list
          */
         Contact distributionList = generateDistributionList(1, referencedContact1, referencedContact2);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 2, distributionList.getNumberOfDistributionLists());
@@ -153,11 +149,11 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
          * create distribution list as user 1
          */
         Contact distributionList = generateDistributionList(1, referencedContact1);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -167,11 +163,11 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
          * privatize member as user 2
          */
         referencedContact1.setPrivateFlag(true);
-        referencedContact1 = manager2.updateAction(referencedContact1);
+        referencedContact1 = cotm2.updateAction(referencedContact1);
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -186,11 +182,11 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
          * create distribution list as user 1
          */
         Contact distributionList = generateDistributionList(1, referencedContact1);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -200,11 +196,11 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
          * privatize member as user 2
          */
         referencedContact1.setPrivateFlag(true);
-        referencedContact1 = manager2.updateAction(referencedContact1);
+        referencedContact1 = cotm2.updateAction(referencedContact1);
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -215,11 +211,11 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
          * un-privatize member as user 2
          */
         referencedContact1.setPrivateFlag(false);
-        referencedContact1 = manager2.updateAction(referencedContact1);
+        referencedContact1 = cotm2.updateAction(referencedContact1);
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -233,11 +229,11 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
          * create distribution list as user 1
          */
         Contact distributionList = generateDistributionList(1, referencedContact1);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -256,7 +252,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -271,11 +267,11 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
          * create distribution list as user 1
          */
         Contact distributionList = generateDistributionList(1, referencedContact1);
-        distributionList = manager.newAction(distributionList);
+        distributionList = cotm.newAction(distributionList);
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -298,7 +294,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());
@@ -313,7 +309,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
         /*
          * verify distribution list as user 1
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertNotNull("distibution list not found", distributionList);
         assertTrue("not marked as distribution list", distributionList.getMarkAsDistribtuionlist());
         assertEquals("member count wrong", 1, distributionList.getNumberOfDistributionLists());

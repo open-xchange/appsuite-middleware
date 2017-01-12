@@ -69,10 +69,6 @@ import com.openexchange.dav.carddav.CardDAVTest;
  */
 public class CurrentUserPrincipalTest extends CardDAVTest {
 
-    public CurrentUserPrincipalTest() {
-        super();
-    }
-
     /**
      * Checks if the CardDAV server reports the current user principal, it's url and resource type.
      * 

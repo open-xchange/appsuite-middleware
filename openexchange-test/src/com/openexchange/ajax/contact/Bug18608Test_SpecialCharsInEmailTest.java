@@ -23,11 +23,11 @@ public class Bug18608Test_SpecialCharsInEmailTest extends AbstractManagedContact
     }
 
     private void testEMail(String email1) {
-        manager.setFailOnError(false);
+        cotm.setFailOnError(false);
         Contact c = generateContact();
         c.setEmail1(email1);
-        c = manager.newAction(c);
-        AbstractAJAXResponse lastResponse = manager.getLastResponse();
+        c = cotm.newAction(c);
+        AbstractAJAXResponse lastResponse = cotm.getLastResponse();
         assertTrue("We do bit allow special characters in e-mail addresses", lastResponse.hasError());
     }
 

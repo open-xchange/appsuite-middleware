@@ -69,25 +69,25 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
     @Test
     public void testFileAsViaCreate() {
         contact.setFileAs("filed as");
-        manager.newAction(contact);
+        cotm.newAction(contact);
 
-        Contact actual = manager.getAction(contact);
+        Contact actual = cotm.getAction(contact);
 
         assertEquals("filed as", actual.getFileAs());
     }
 
     @Test
     public void testFileAsViaUpdate() {
-        manager.newAction(contact);
+        cotm.newAction(contact);
 
         Contact update = new Contact();
         update.setParentFolderID(contact.getParentFolderID());
         update.setObjectID(contact.getObjectID());
         update.setLastModified(contact.getLastModified());
         update.setFileAs("filed as");
-        manager.updateAction(update);
+        cotm.updateAction(update);
 
-        Contact actual = manager.getAction(contact);
+        Contact actual = cotm.getAction(contact);
 
         assertEquals("filed as", actual.getFileAs());
     }
@@ -95,16 +95,16 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
     @Test
     public void testFileAsViaUpdate2() {
         contact.setFileAs("filed as something else");
-        manager.newAction(contact);
+        cotm.newAction(contact);
 
         Contact update = new Contact();
         update.setParentFolderID(contact.getParentFolderID());
         update.setObjectID(contact.getObjectID());
         update.setLastModified(contact.getLastModified());
         update.setFileAs("filed as");
-        manager.updateAction(update);
+        cotm.updateAction(update);
 
-        Contact actual = manager.getAction(contact);
+        Contact actual = cotm.getAction(contact);
 
         assertEquals("filed as", actual.getFileAs());
     }

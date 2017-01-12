@@ -72,15 +72,11 @@ import com.openexchange.subscribe.Subscription;
  */
 public class NewSubscriptionTest extends AbstractSubscriptionTest {
 
-    public NewSubscriptionTest() {
-        super();
-    }
-
     @Test
     public void testShouldSurviveBasicOXMFSubscriptionCreation() throws OXException, IOException, SAXException, JSONException {
         //setup
-        FolderObject folder = getFolderManager().generatePublicFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        getFolderManager().insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePublicFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        ftm.insertFolderOnServer(folder);
 
         DynamicFormDescription form = generateFormDescription();
         Subscription expected = generateOXMFSubscription(form);

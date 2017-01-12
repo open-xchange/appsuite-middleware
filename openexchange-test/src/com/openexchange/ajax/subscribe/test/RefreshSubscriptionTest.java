@@ -70,13 +70,6 @@ import com.openexchange.subscribe.Subscription;
  */
 public class RefreshSubscriptionTest extends AbstractSubscriptionTest {
 
-    public RefreshSubscriptionTest() {
-        super();
-    }
-
-    @Test
-    public void testShouldFailOnNonExistingSubscription() throws OXException, IOException, SAXException, JSONException {}
-
     @Test
     public void testShouldNotFailOnExistingSubscription() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();

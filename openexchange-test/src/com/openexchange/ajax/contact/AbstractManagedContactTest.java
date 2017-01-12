@@ -50,50 +50,26 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
 
 public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
-    protected ContactTestManager manager;
-    protected FolderTestManager folderManager;
     protected int folderID;
 
-    public AbstractManagedContactTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        manager = new ContactTestManager(getClient());
-        manager.setFailOnError(false);
-
-        folderManager = new FolderTestManager(getClient());
-        folderManager.setFailOnError(false);
-
         UserValues values = getClient().getValues();
-        FolderObject folder = folderManager.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
-        folder = folderManager.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         folderID = folder.getObjectID();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-            folderManager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     protected Contact generateContact(String lastname) {

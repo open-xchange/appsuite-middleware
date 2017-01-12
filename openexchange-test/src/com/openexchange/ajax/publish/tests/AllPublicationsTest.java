@@ -63,7 +63,6 @@ import org.json.JSONException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.publish.actions.AllPublicationsRequest;
 import com.openexchange.ajax.publish.actions.AllPublicationsResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
@@ -92,8 +91,8 @@ public class AllPublicationsTest extends AbstractPublicationTest {
     public void testShouldNotFindNonExistingPublication() throws OXException, IOException, SAXException, JSONException {
         AJAXClient myClient = getClient();
 
-        FolderObject testFolder = getFolderManager().generatePublicFolder("pubsub", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        getFolderManager().insertFolderOnServer(testFolder);
+        FolderObject testFolder = ftm.generatePublicFolder("pubsub", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        ftm.insertFolderOnServer(testFolder);
 
         AllPublicationsRequest req = new AllPublicationsRequest(String.valueOf(testFolder.getObjectID()), Integer.MAX_VALUE, "calendar", new LinkedList<String>());
 
@@ -173,7 +172,6 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         String infostoreModule = "infostore";
 
         // create and upload a new Infostore item.
-        InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject infostorePublicationFolder = createDefaultInfostoreFolder("Second Folder for Publication-" + System.currentTimeMillis());
 
         File data = new DefaultFile();
@@ -184,7 +182,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         data.setFileName(upload.getName());
 
-        infoMgr.newAction(data, upload);
+        itm.newAction(data, upload);
 
         // publish
         ArrayList<Publication> expectedPublications = new ArrayList<Publication>();
@@ -241,7 +239,5 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         }
 
         assertTrue("Did not get published contact.", foundIds.contains(contactPublication.getId()));
-
-        infoMgr.cleanUp();
     }
 }

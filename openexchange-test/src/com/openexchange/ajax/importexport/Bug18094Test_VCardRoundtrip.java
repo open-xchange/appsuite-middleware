@@ -88,26 +88,26 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
     public void setUp() throws Exception {
         super.setUp();
         contact = ContactTestManager.generateFullContact(folderID);
-        manager.newAction(contact);
+        cotm.newAction(contact);
     }
 
     @Test
     public void testFullVCardRoundtrip() throws Exception {
         VCardExportRequest exportRequest = new VCardExportRequest(folderID, false);
-        VCardExportResponse exportResponse = manager.getClient().execute(exportRequest);
+        VCardExportResponse exportResponse = cotm.getClient().execute(exportRequest);
 
         String vcard = exportResponse.getVCard();
-        manager.deleteAction(contact);
+        cotm.deleteAction(contact);
 
         VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vcard.getBytes()));
-        VCardImportResponse importResponse = manager.getClient().execute(importRequest);
+        VCardImportResponse importResponse = cotm.getClient().execute(importRequest);
 
         JSONArray response = (JSONArray) importResponse.getData();
         assertEquals("Precondition: Should only find one contact in there", 1, response.length());
 
         JSONObject jsonObject = response.getJSONObject(0);
 
-        Contact actual = manager.getAction(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
+        Contact actual = cotm.getAction(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
 
         Set<ContactField> excluded = new HashSet<ContactField>() {
 

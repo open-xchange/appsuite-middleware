@@ -81,7 +81,7 @@ public class Bug36943Test extends AbstractManagedContactTest {
 
     @Test
     public void testUpdateWithAstralSymbols() throws Exception {
-        Contact contact = manager.newAction(generateContact());
+        Contact contact = cotm.newAction(generateContact());
         contact.setSurName("Pile of \uD83D\uDCA9 poo");
         UpdateResponse updateResponse = getClient().execute(new UpdateRequest(contact, false));
         assertTrue("No errors in response", updateResponse.hasError());

@@ -87,12 +87,12 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         referencedContact1.setEmail1("email1@example.com");
         referencedContact1.setEmail2("email2@example.com");
         referencedContact1.setEmail3("email3@example.com");
-        referencedContact1 = manager.newAction(referencedContact1);
+        referencedContact1 = cotm.newAction(referencedContact1);
         referencedContact2 = super.generateContact("Test2");
         referencedContact2.setEmail1("email1@example.org");
         referencedContact2.setEmail2("email2@example.org");
         referencedContact2.setEmail3("email3@example.org");
-        referencedContact2 = manager.newAction(referencedContact2);
+        referencedContact2 = cotm.newAction(referencedContact2);
     }
 
     private Contact createDistributionList(int mailField, Contact... referencedContacts) throws OXException {
@@ -119,7 +119,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
             members.add(member);
         }
         distributionList.setDistributionList(members.toArray(new DistributionListEntryObject[0]));
-        return manager.newAction(distributionList);
+        return cotm.newAction(distributionList);
     }
 
     @Test
@@ -129,21 +129,21 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
          * edit referenced contact's email1-address
          */
         referencedContact1.setEmail1("update_" + referencedContact1.getEmail1());
-        manager.updateAction(referencedContact1);
+        cotm.updateAction(referencedContact1);
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
         /*
          * edit other referenced contact's email1-address
          */
         referencedContact2.setEmail1("update_" + referencedContact2.getEmail1());
-        manager.updateAction(referencedContact2);
+        cotm.updateAction(referencedContact2);
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
     }
 
@@ -154,21 +154,21 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
          * edit referenced contact's email1-address
          */
         referencedContact1.setEmail2("update_" + referencedContact1.getEmail2());
-        manager.updateAction(referencedContact1);
+        cotm.updateAction(referencedContact1);
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
         /*
          * edit other referenced contact's email1-address
          */
         referencedContact2.setEmail2("update_" + referencedContact2.getEmail2());
-        manager.updateAction(referencedContact2);
+        cotm.updateAction(referencedContact2);
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
     }
 
@@ -179,21 +179,21 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
          * edit referenced contact's email1-address
          */
         referencedContact1.setEmail3("update_" + referencedContact1.getEmail1());
-        manager.updateAction(referencedContact1);
+        cotm.updateAction(referencedContact1);
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
         /*
          * edit other referenced contact's email1-address
          */
         referencedContact2.setEmail3("update_" + referencedContact2.getEmail3());
-        manager.updateAction(referencedContact2);
+        cotm.updateAction(referencedContact2);
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
     }
 
@@ -208,7 +208,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
         /*
          * remove other referenced contact's email1-address
@@ -218,7 +218,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
     }
 
@@ -233,7 +233,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
         /*
          * remove other referenced contact's email2-address
@@ -243,7 +243,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
     }
 
@@ -258,7 +258,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
         /*
          * remove other referenced contact's email3-address
@@ -268,7 +268,7 @@ public class DistListMemberUpdateTest extends AbstractManagedContactTest {
         /*
          * verify the distribution list
          */
-        distributionList = manager.getAction(distributionList);
+        distributionList = cotm.getAction(distributionList);
         assertMatches(distributionList.getDistributionList(), referencedContact1, referencedContact2);
     }
 

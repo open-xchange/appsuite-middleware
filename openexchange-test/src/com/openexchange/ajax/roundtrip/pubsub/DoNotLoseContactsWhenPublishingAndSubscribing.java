@@ -94,7 +94,7 @@ public class DoNotLoseContactsWhenPublishingAndSubscribing extends OXMFContactLi
 
         // refresh and check subscription
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(subFolder.getObjectID());
+        contacts = cotm.allAction(subFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
 
         // publish another contact
@@ -105,7 +105,7 @@ public class DoNotLoseContactsWhenPublishingAndSubscribing extends OXMFContactLi
 
         // refresh and check subscription again
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(subFolder.getObjectID());
+        contacts = cotm.allAction(subFolder.getObjectID());
         assertEquals("Should have two contacts after update", 2, contacts.length);
     }
 

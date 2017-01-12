@@ -72,7 +72,7 @@ public class Bug27151Test_RoundtripOfYomiFields extends AbstractManagedContactTe
         contact = ContactTestManager.generateFullContact(folderID);
         contact.setYomiFirstName("YomiFirstName1");
         contact.setYomiLastName("YomiLastName1");
-        manager.newAction(contact);
+        cotm.newAction(contact);
 
         // Back...
         VCardExportResponse exportResponse = getClient().execute(new VCardExportRequest(folderID, true));
@@ -84,16 +84,16 @@ public class Bug27151Test_RoundtripOfYomiFields extends AbstractManagedContactTe
         assertTrue(vCard.contains("YomiLastName1"));
 
         // (...clean up...)
-        manager.deleteAction(contact);
+        cotm.deleteAction(contact);
 
         //...and forth!
         VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vCard.getBytes()));
-        VCardImportResponse importResponse = manager.getClient().execute(importRequest);
+        VCardImportResponse importResponse = cotm.getClient().execute(importRequest);
 
         JSONArray response = (JSONArray) importResponse.getData();
         assertEquals("Precondition: Should only find one contact in there", 1, response.length());
         JSONObject jsonObject = response.getJSONObject(0);
-        Contact actual = manager.getAction(folderID, jsonObject.getInt("id"));
+        Contact actual = cotm.getAction(folderID, jsonObject.getInt("id"));
         assertEquals("YomiFirstName1", actual.getYomiFirstName());
         assertEquals("YomiLastName1", actual.getYomiLastName());
     }

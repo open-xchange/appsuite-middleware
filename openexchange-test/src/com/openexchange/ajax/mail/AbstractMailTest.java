@@ -195,19 +195,19 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         return folderAndIDs;
     }
 
-    protected String getInboxFolder() throws OXException, IOException, SAXException, JSONException {
+    protected String getInboxFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getInboxFolder();
     }
 
-    protected String getSentFolder() throws OXException, IOException, SAXException, JSONException {
+    protected String getSentFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getSentFolder();
     }
 
-    protected String getTrashFolder() throws OXException, IOException, SAXException, JSONException {
+    protected String getTrashFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getTrashFolder();
     }
 
-    protected String getDraftsFolder() throws OXException, IOException, SAXException, JSONException {
+    protected String getDraftsFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getDraftsFolder();
     }
 
@@ -225,11 +225,11 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     /**
      * @return the private task folder of the user.
      */
-    protected int getPrivateFolder() throws OXException, IOException, SAXException, JSONException {
+    protected int getPrivateFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getPrivateTaskFolder();
     }
 
-    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+    protected TimeZone getTimeZone() throws OXException, IOException, JSONException {
         return getClient().getValues().getTimeZone();
     }
 

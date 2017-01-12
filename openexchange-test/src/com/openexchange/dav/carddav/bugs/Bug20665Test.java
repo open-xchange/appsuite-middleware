@@ -70,10 +70,6 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug20665Test extends CardDAVTest {
 
-    public Bug20665Test() {
-        super();
-    }
-
     @Test
     public void testAddPhoto() throws Exception {
         /*

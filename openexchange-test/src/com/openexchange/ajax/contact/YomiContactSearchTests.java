@@ -33,7 +33,7 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
         contact.setYomiFirstName(YOMI_FIRST_NAME);
         contact.setYomiLastName(YOMI_LAST_NAME);
         contact.setParentFolderID(folderID);
-        manager.newAction(contact);
+        cotm.newAction(contact);
     }
 
     /**
@@ -54,7 +54,7 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
         search.setYomiFirstname(b);
         search.setYomiLastName(b);
         search.setOrSearch(true);
-        Contact[] results = manager.searchAction(search);
+        Contact[] results = cotm.searchAction(search);
 
         assertEquals("Should find one contact", 1, results.length);
         assertEquals("Should find the right contact", YOMI_LAST_NAME, results[0].getYomiLastName());

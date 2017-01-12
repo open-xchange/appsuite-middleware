@@ -55,7 +55,7 @@ public class Bug37172Test extends AbstractManagedContactTest {
         /*
          * verify imported data
          */
-        Contact contact = manager.getAction(folderID, objectID);
+        Contact contact = cotm.getAction(folderID, objectID);
         assertEquals("firstname wrong", "Test", contact.getGivenName());
         assertEquals("lastname wrong", null, contact.getSurName());
         assertEquals("cellular phone wrong", "0151 123456789", contact.getCellularTelephone1());
@@ -85,7 +85,7 @@ public class Bug37172Test extends AbstractManagedContactTest {
         int objectID = jsonObject.optInt("id");
         assertTrue("got no object id from import request", 0 < objectID);
 
-        Contact contact = manager.getAction(folderID, objectID);
+        Contact contact = cotm.getAction(folderID, objectID);
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", "Test", contact.getGivenName());
         assertEquals("lastname wrong", null, contact.getSurName());

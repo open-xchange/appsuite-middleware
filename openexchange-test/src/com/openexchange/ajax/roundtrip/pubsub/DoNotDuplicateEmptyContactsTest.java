@@ -79,7 +79,7 @@ public class DoNotDuplicateEmptyContactsTest extends OXMFContactLifeCycleTest {
     public void testShouldNotDuplicateEmptyContacts() throws OXException, OXException, OXException, IOException, SAXException, JSONException {
         Contact emptyContact = new Contact();
         emptyContact.setParentFolderID(pubFolder.getObjectID());
-        cMgr.newAction(emptyContact);
+        cotm.newAction(emptyContact);
 
         // prepare pubsub
         PublicationTestManager pubMgr = getPublishManager();
@@ -106,12 +106,12 @@ public class DoNotDuplicateEmptyContactsTest extends OXMFContactLifeCycleTest {
 
         // refresh and check subscription
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(subFolder.getObjectID());
+        contacts = cotm.allAction(subFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
 
         // refresh and check subscription again
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(subFolder.getObjectID());
+        contacts = cotm.allAction(subFolder.getObjectID());
         assertEquals("Should only contain one contact even after refreshing", 1, contacts.length);
     }
 }

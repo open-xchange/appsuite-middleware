@@ -30,28 +30,28 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         c2.setEmail2(BOB_MAIL2);
         c2.setDepartment(BOB_DEPARTMENT);
 
-        manager.newAction(c1, c2);
+        cotm.newAction(c1, c2);
     }
 
     @Test
     public void testSearchByInitial() {
-        Contact[] results = manager.searchFirstletterAction("B", folderID);
+        Contact[] results = cotm.searchFirstletterAction("B", folderID);
         assertEquals(1, results.length);
         assertEquals("Should find the right contact", BOB_LASTNAME, results[0].getSurName());
     }
 
     @Test
     public void testAsteriskSearch() {
-        Contact[] results = manager.searchAction("*", folderID);
+        Contact[] results = cotm.searchAction("*", folderID);
         assertEquals("Should find two contacts", 2, results.length);
     }
 
     @Test
     public void testSearchWorksOnlyOnDisplayNameByDefault() {
-        Contact[] results = manager.searchAction("*" + BOB_LASTNAME + "*", folderID);
+        Contact[] results = cotm.searchAction("*" + BOB_LASTNAME + "*", folderID);
         assertEquals("Should find no contact when searching for last name", 0, results.length);
 
-        results = manager.searchAction("*" + BOB_DISPLAYNAME + "*", folderID);
+        results = cotm.searchAction("*" + BOB_DISPLAYNAME + "*", folderID);
         assertEquals("Should find one contact when searching for display_name", 1, results.length);
     }
 
@@ -68,7 +68,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         search.setEmail3(b);
         search.setCatgories(b);
         search.setOrSearch(true);
-        Contact[] results = manager.searchAction(search);
+        Contact[] results = cotm.searchAction(search);
         assertEquals("Should find one contact", 1, results.length);
         assertEquals("Should find the right contact", BOB_LASTNAME, results[0].getSurName());
     }
@@ -82,11 +82,11 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         search.setEmail2(ALICE_MAIL1);
         search.setEmail3(ALICE_MAIL1);
         search.setExactMatch(true);
-        Contact[] results = manager.searchAction(search);
+        Contact[] results = cotm.searchAction(search);
         assertEquals("Should find one contact", 1, results.length);
         assertEquals("Should find the right contact", ALICE_MAIL1, results[0].getEmail1());
         search.setExactMatch(false);
-        results = manager.searchAction(search);
+        results = cotm.searchAction(search);
         assertEquals("Should find one contact", 1, results.length);
         assertEquals("Should find the right contact", ALICE_MAIL1, results[0].getEmail1());
 
@@ -95,10 +95,10 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         search.setEmail2(partialAddress);
         search.setEmail3(partialAddress);
         search.setExactMatch(true);
-        results = manager.searchAction(search);
+        results = cotm.searchAction(search);
         assertEquals("Should find no contact", 0, results.length);
         search.setExactMatch(false);
-        results = manager.searchAction(search);
+        results = cotm.searchAction(search);
         assertEquals("Should find one contact", 1, results.length);
         assertEquals("Should find the right contact", BOB_MAIL2, results[0].getEmail2());
 
@@ -109,7 +109,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         ContactSearchObject search = new ContactSearchObject();
         search.addFolder(folderID);
         search.setDepartment(BOB_DEPARTMENT);
-        Contact[] results = manager.searchAction(search);
+        Contact[] results = cotm.searchAction(search);
         assertEquals("Should find one contact", 1, results.length);
         assertEquals("Should find the right contact", BOB_LASTNAME, results[0].getSurName());
     }

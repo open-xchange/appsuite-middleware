@@ -77,7 +77,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         Contact list = generateContact("Distribution list");
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
-        manager.newAction(list);
+        cotm.newAction(list);
         CSVExportResponse csvExportResponse = getClient().execute(new CSVExportRequest(folderID, true));
         String csvStr = (String) csvExportResponse.getData();
 
@@ -91,7 +91,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         Contact list = generateContact("Distribution list");
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
-        manager.newAction(list);
+        cotm.newAction(list);
         CSVExportResponse csvExportResponse = getClient().execute(new CSVExportRequest(folderID, false));
         String csvStr = (String) csvExportResponse.getData();
 
@@ -105,7 +105,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         Contact list = generateContact("Distribution list is not present");
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
-        manager.newAction(list);
+        cotm.newAction(list);
         VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false));
         String vcard = (String) vcardExportResponse.getData();
 
@@ -120,7 +120,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         Contact list = generateContact("Distribution list is not present");
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
-        manager.newAction(list);
+        cotm.newAction(list);
         VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, Boolean.FALSE, false));
         String vcard = (String) vcardExportResponse.getData();
 
@@ -135,7 +135,7 @@ public class DistributionListExportTest extends AbstractManagedContactTest {
         Contact list = generateContact("Distribution list");
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
-        manager.newAction(list);
+        cotm.newAction(list);
         VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, Boolean.TRUE, true));
         String vcard = (String) vcardExportResponse.getData();
 

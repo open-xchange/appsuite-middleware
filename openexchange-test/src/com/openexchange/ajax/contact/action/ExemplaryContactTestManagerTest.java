@@ -88,7 +88,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         folderManager = new FolderTestManager(client);
 
         //create a folder for testing
-        folder = folderManager.generatePublicFolder("contacts manager tests (" + new Date().getTime() + ")", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        folder = folderManager.generatePublicFolder("contacts cotm tests (" + new Date().getTime() + ")", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         folderManager.insertFolderOnServer(folder);
 
         //create a contact in the private folder

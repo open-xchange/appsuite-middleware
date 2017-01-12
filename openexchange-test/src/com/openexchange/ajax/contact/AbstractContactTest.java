@@ -200,7 +200,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         OXTestToolkit.assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
         OXTestToolkit.assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
         OXTestToolkit.assertEqualsAndNotNull("marital status is not equals", contactObj1.getMaritalStatus(), contactObj2.getMaritalStatus());
-        OXTestToolkit.assertEqualsAndNotNull("manager name is not equals", contactObj1.getManagerName(), contactObj2.getManagerName());
+        OXTestToolkit.assertEqualsAndNotNull("cotm name is not equals", contactObj1.getManagerName(), contactObj2.getManagerName());
         OXTestToolkit.assertEqualsAndNotNull("middle name is not equals", contactObj1.getMiddleName(), contactObj2.getMiddleName());
         OXTestToolkit.assertEqualsAndNotNull("nickname is not equals", contactObj1.getNickname(), contactObj2.getNickname());
         OXTestToolkit.assertEqualsAndNotNull("note is not equals", contactObj1.getNote(), contactObj2.getNote());
@@ -322,7 +322,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         contactObj.setInstantMessenger2("instant messenger2");
         contactObj.setImage1(image);
         contactObj.setImageContentType("image/png");
-        contactObj.setManagerName("manager name");
+        contactObj.setManagerName("cotm name");
         contactObj.setMaritalStatus("marital status");
         contactObj.setMiddleName("middle name");
         contactObj.setNickname("nickname");

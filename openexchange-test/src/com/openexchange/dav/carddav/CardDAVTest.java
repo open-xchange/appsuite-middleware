@@ -79,7 +79,6 @@ import org.apache.jackrabbit.webdav.property.PropContainer;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -99,7 +98,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.ContactTestManager;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
@@ -114,13 +112,9 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     protected static final int TIMEOUT = 10000;
 
-    private ContactTestManager testManager = null;
     private int folderId;
     private VCardEngine vCardEngine;
 
-    public CardDAVTest() {
-        super();
-    }
 
     @Parameters(name = "AuthMethod={0}")
     public static Iterable<Object[]> params() {
@@ -133,21 +127,8 @@ public abstract class CardDAVTest extends WebDAVTest {
         /*
          * init
          */
-        this.testManager = new ContactTestManager(this.getAJAXClient());
-        this.getManager().setFailOnError(true);
         this.folderId = this.getAJAXClient().getValues().getPrivateContactFolder();
         this.vCardEngine = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != this.getManager()) {
-                this.getManager().cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Override
@@ -161,7 +142,7 @@ public abstract class CardDAVTest extends WebDAVTest {
      * @param contact
      */
     protected void rememberForCleanUp(final Contact contact) {
-        this.getManager().getCreatedEntities().add(contact);
+        cotm.getCreatedEntities().add(contact);
     }
 
     /**
@@ -182,15 +163,6 @@ public abstract class CardDAVTest extends WebDAVTest {
         return 6;
     }
 
-    /**
-     * Gets the underlying {@link ContactTestManager} instance.
-     * 
-     * @return
-     */
-    protected ContactTestManager getManager() {
-        return this.testManager;
-    }
-
     protected VCardEngine getVCardEngine() {
         return this.vCardEngine;
     }
@@ -207,7 +179,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected void delete(Contact contact) {
-        getManager().deleteAction(contact);
+        cotm.deleteAction(contact);
     }
 
     protected String getCTag() throws Exception {
@@ -489,15 +461,15 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected Contact searchContact(String uid, int[] folderIDs, int[] columnIDs) throws JSONException {
-        Contact[] contacts = getManager().searchAction(getSearchFilter(uid, folderIDs), null == columnIDs ? Contact.ALL_COLUMNS : columnIDs, -1, null);
+        Contact[] contacts = cotm.searchAction(getSearchFilter(uid, folderIDs), null == columnIDs ? Contact.ALL_COLUMNS : columnIDs, -1, null);
         return null != contacts && 0 < contacts.length ? contacts[0] : null;
     }
 
     //	protected Contact getContact(String uid, int folderID) {
-    //		Contact[] contacts = this.getManager().allAction(folderId, new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.UID });
+    //		Contact[] contacts = cotm.allAction(folderId, new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.UID });
     //		for (Contact contact : contacts) {
     //			if (uid.equals(contact.getUid())) {
-    //				return this.getManager().getAction(contact);
+    //				return cotm.getAction(contact);
     //			}
     //		}
     //		return null;
@@ -508,7 +480,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected List<Contact> getContacts(int folderID) throws InterruptedException, JSONException {
-        Contact[] contacts = getManager().allAction(folderID);
+        Contact[] contacts = cotm.allAction(folderID);
         return Arrays.asList(contacts);
     }
 
@@ -541,7 +513,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected Contact[] findContacts(final String pattern) {
-        return this.getManager().searchAction(pattern, this.getDefaultFolderID());
+        return cotm.searchAction(pattern, this.getDefaultFolderID());
     }
 
     /**
@@ -569,11 +541,11 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected Contact update(int originalFolderID, Contact contact) {
-        return getManager().updateAction(originalFolderID, contact);
+        return cotm.updateAction(originalFolderID, contact);
     }
 
     protected Contact update(Contact contact) {
-        return getManager().updateAction(contact);
+        return cotm.updateAction(contact);
     }
 
     /**
@@ -584,7 +556,7 @@ public abstract class CardDAVTest extends WebDAVTest {
      */
     protected Contact create(Contact contact, int folderID) {
         contact.setParentFolderID(folderID);
-        return this.getManager().newAction(contact);
+        return cotm.newAction(contact);
     }
 
     @Override

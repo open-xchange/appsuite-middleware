@@ -103,11 +103,11 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
         };
         List<Contact> unorderedContacts = new ArrayList<Contact>(Arrays.asList(orderedContacts));
         Collections.shuffle(unorderedContacts);
-        manager.newActionMultiple(unorderedContacts.toArray(new Contact[unorderedContacts.size()]));
+        cotm.newActionMultiple(unorderedContacts.toArray(new Contact[unorderedContacts.size()]));
         /*
          * get all contacts
          */
-        Contact[] receivedContacts = manager.allAction(folderID);
+        Contact[] receivedContacts = cotm.allAction(folderID);
         assertNotNull("no contacts received", receivedContacts);
         assertEquals("wrong number of contacts received", orderedContacts.length, receivedContacts.length);
         /*

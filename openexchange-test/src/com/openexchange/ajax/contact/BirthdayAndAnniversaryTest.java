@@ -75,13 +75,13 @@ public class BirthdayAndAnniversaryTest extends AbstractManagedContactTest {
          */
         Contact contact1 = super.generateContact("M\u00e4rz");
         contact1.setBirthday(D("1988-03-03 00:00"));
-        contact1 = manager.newAction(contact1);
+        contact1 = cotm.newAction(contact1);
         Contact contact2 = super.generateContact("Juli");
         contact2.setBirthday(D("1977-07-07 00:00:00"));
-        contact2 = manager.newAction(contact2);
+        contact2 = cotm.newAction(contact2);
         Contact contact3 = super.generateContact("Oktober");
         contact3.setBirthday(D("1910-10-10 00:00:00"));
-        contact3 = manager.newAction(contact3);
+        contact3 = cotm.newAction(contact3);
         /*
          * search birthdays in different timeframes
          */
@@ -93,31 +93,31 @@ public class BirthdayAndAnniversaryTest extends AbstractManagedContactTest {
 
         request = new SearchByBirthdayRequest(D("2013-01-01 00:00:00"), D("2013-09-01 00:00:00"), parentFolderID, columns, true);
         response = getClient().execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 2, contacts.size());
 
         request = new SearchByBirthdayRequest(D("2013-01-01 00:00:00"), D("2014-01-01 00:00:00"), parentFolderID, columns, true);
         response = getClient().execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 3, contacts.size());
 
         request = new SearchByBirthdayRequest(D("2013-06-01 00:00:00"), D("2014-01-01 00:00:00"), parentFolderID, columns, true);
         response = getClient().execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 2, contacts.size());
 
         request = new SearchByBirthdayRequest(D("2013-03-04 00:00:00"), D("2013-07-06 00:00:00"), parentFolderID, columns, true);
         response = getClient().execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 0, contacts.size());
 
         request = new SearchByBirthdayRequest(D("2085-03-03 00:00:00"), D("2085-03-03 01:01:00"), parentFolderID, columns, true);
         response = getClient().execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());
 

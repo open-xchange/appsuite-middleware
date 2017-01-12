@@ -23,15 +23,6 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug34499Test extends AbstractManagedContactTest {
 
-    /**
-     * Initializes a new {@link Bug34499Test}.
-     *
-     * @param name The test name
-     */
-    public Bug34499Test() {
-        super();
-    }
-
     @Test
     public void testImportEmptyDatesAndDistinguishedNames() throws Exception {
         /*
@@ -58,12 +49,12 @@ public class Bug34499Test extends AbstractManagedContactTest {
         /*
          * verify imported contacts
          */
-        Contact firstContact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact firstContact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("First imported contact not found", firstContact);
         assertNull("Birthday found in first contact", firstContact.getBirthday());
         assertNull("Anniversary found in first contact", firstContact.getAnniversary());
         assertNull("E-Mail found in first contact", firstContact.getEmail1());
-        Contact secondContact = manager.getAction(folderID, data.getJSONObject(1).getInt("id"));
+        Contact secondContact = cotm.getAction(folderID, data.getJSONObject(1).getInt("id"));
         assertNotNull("Second imported contact not found", secondContact);
         assertNull("Birthday found in second contact", secondContact.getBirthday());
         assertNull("Anniversary found in second contact", secondContact.getAnniversary());

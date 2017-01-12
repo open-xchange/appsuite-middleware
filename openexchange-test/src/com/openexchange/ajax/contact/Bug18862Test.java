@@ -74,9 +74,9 @@ public class Bug18862Test extends AbstractManagedContactTest {
         contact.setImage1(new byte[IMAGE_SIZE]);
         contact.setImageContentType("image/jpg");
         contact.setNumberOfImages(1);
-        super.manager.newAction(contact);
-        assertNotNull("got no response", super.manager.getLastResponse());
-        assertNotNull("no exception thrown", super.manager.getLastResponse().getException());
-        assertEquals("unexpected error code", EXPECTED_CODE, super.manager.getLastResponse().getException().getErrorCode());
+        super.cotm.newAction(contact);
+        assertNotNull("got no response", super.cotm.getLastResponse());
+        assertNotNull("no exception thrown", super.cotm.getLastResponse().getException());
+        assertEquals("unexpected error code", EXPECTED_CODE, super.cotm.getLastResponse().getException().getErrorCode());
     }
 }

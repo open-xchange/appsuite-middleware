@@ -87,9 +87,9 @@ public class Bug46654Test extends AbstractManagedContactTest {
         list.setMarkAsDistributionlist(true);
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("Otto", "otto@exmample.com", DistributionListEntryObject.INDEPENDENT), new DistributionListEntryObject("Horst", "horst@exmample.com", DistributionListEntryObject.INDEPENDENT)
         });
-        list = manager.newAction(list);
-        manager.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
-        manager.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
+        list = cotm.newAction(list);
+        cotm.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
+        cotm.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
         /*
          * get all contacts, sorted by column 607
          */

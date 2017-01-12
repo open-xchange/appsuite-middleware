@@ -75,7 +75,7 @@ public class AllTest extends AbstractManagedContactTest {
     @Test
     public void testAll() throws Exception {
         int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID };
-        Contact[] contacts = manager.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
+        Contact[] contacts = cotm.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
         assertNotNull("got no contacts", contacts);
         assertTrue("got no contacts", 0 < contacts.length);
     }
@@ -83,12 +83,12 @@ public class AllTest extends AbstractManagedContactTest {
     // Node 2652    @Test
     @Test
     public void testLastModifiedUTC() throws Exception {
-        manager.newAction(generateContact("testLastModifiedUTC1"), generateContact("testLastModifiedUTC2"), generateContact("testLastModifiedUTC3"));
+        cotm.newAction(generateContact("testLastModifiedUTC1"), generateContact("testLastModifiedUTC2"), generateContact("testLastModifiedUTC3"));
         int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
-        Contact[] contacts = manager.allAction(folderID, columnIDs);
+        Contact[] contacts = cotm.allAction(folderID, columnIDs);
         assertNotNull("got no contacts", contacts);
         assertTrue("got no contacts", 0 < contacts.length);
-        JSONArray arr = (JSONArray) manager.getLastResponse().getData();
+        JSONArray arr = (JSONArray) cotm.getLastResponse().getData();
         assertNotNull("no json array in response data", arr);
         int size = arr.length();
         assertTrue("no data in json array", 0 < arr.length());
@@ -105,7 +105,7 @@ public class AllTest extends AbstractManagedContactTest {
         /*
          * perform different all requests
          */
-        Contact[] allContactsDefault = manager.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
+        Contact[] allContactsDefault = cotm.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
         assertNotNull("got no contacts", allContactsDefault);
         assertTrue("got no contacts", 0 < allContactsDefault.length);
         Contact[] allContactsWithAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, true);
@@ -144,9 +144,9 @@ public class AllTest extends AbstractManagedContactTest {
         /*
          * check results
          */
-        CommonAllResponse response = manager.getClient().execute(allRequest);
+        CommonAllResponse response = cotm.getClient().execute(allRequest);
         JSONArray data = (JSONArray) response.getResponse().getData();
-        List<Contact> contacts = manager.transform(data, columnIDs);
+        List<Contact> contacts = cotm.transform(data, columnIDs);
         assertNotNull("got no contacts", contacts);
         assertTrue("got no contacts", 0 < contacts.size());
         Set<String> folderIDs = new HashSet<String>();
@@ -159,9 +159,9 @@ public class AllTest extends AbstractManagedContactTest {
     private Contact[] allAction(int folderId, int[] columns, Boolean admin) throws OXException, IOException, JSONException {
         List<Contact> allContacts = new LinkedList<Contact>();
         AllRequest request = new AllRequestWithAdmin(folderId, columns, admin);
-        CommonAllResponse response = getClient().execute(request, manager.getSleep());
+        CommonAllResponse response = getClient().execute(request, cotm.getSleep());
         JSONArray data = (JSONArray) response.getResponse().getData();
-        allContacts = manager.transform(data, columns);
+        allContacts = cotm.transform(data, columns);
         return allContacts.toArray(new Contact[] {});
     }
 

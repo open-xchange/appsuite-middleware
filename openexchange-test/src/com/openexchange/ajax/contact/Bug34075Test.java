@@ -83,7 +83,7 @@ public class Bug34075Test extends AbstractManagedContactTest {
          */
         Contact contact = generateContact();
         contact.setUid(UUID.randomUUID().toString());
-        contact = manager.newAction(contact);
+        contact = cotm.newAction(contact);
         /*
          * copy contact
          */
@@ -95,7 +95,7 @@ public class Bug34075Test extends AbstractManagedContactTest {
         /*
          * check copy
          */
-        Contact copiedContact = manager.getAction(contact.getParentFolderID(), objectID);
+        Contact copiedContact = cotm.getAction(contact.getParentFolderID(), objectID);
         assertNotNull("Copied contact not found", copiedContact);
         assertEquals("Last name wrong", contact.getSurName(), copiedContact.getSurName());
         assertFalse("Same UID in copied contact", contact.getUid().equals(copiedContact.getUid()));

@@ -76,7 +76,7 @@ public class Bug20360Test_UmlautBreaksImport extends AbstractManagedContactTest 
         JSONObject jsonObject = data.getJSONObject(0);
         int objID = jsonObject.getInt("id");
 
-        Contact actual = manager.getAction(folderID, objID);
+        Contact actual = cotm.getAction(folderID, objID);
 
         assertTrue(actual.containsEmail1());
         assertTrue(actual.containsEmail2());

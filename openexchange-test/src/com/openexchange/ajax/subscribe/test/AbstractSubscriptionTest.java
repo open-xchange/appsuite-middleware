@@ -70,10 +70,6 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
 
     protected SubscriptionTestManager subMgr;
 
-    public AbstractSubscriptionTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

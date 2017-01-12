@@ -43,7 +43,7 @@ public class Bug32200Test extends AbstractManagedContactTest {
         JSONArray data = (JSONArray) response.getData();
         assertNotNull("got no data", data);
         assertEquals(1, data.length());
-        Contact contact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact contact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("imported contact not found", contact);
         assertNotNull("no categories imported", contact.getCategories());
         assertEquals("wrong categories imported", categories, contact.getCategories());
@@ -54,7 +54,7 @@ public class Bug32200Test extends AbstractManagedContactTest {
         String categories = "Unwichtig,Privat,Alt";
         Contact contact = generateContact(getClass().getName());
         contact.setCategories(categories);
-        manager.newAction(contact);
+        cotm.newAction(contact);
         CSVExportResponse csvExportResponse = getClient().execute(new CSVExportRequest(folderID));
         String csv = String.valueOf(csvExportResponse.getData());
         assertNotNull("no data exported", csv);

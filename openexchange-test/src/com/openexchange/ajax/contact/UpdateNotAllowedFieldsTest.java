@@ -103,11 +103,11 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
             assertNotNull("got no exception", exception);
             assertEquals("unexpected exception category", expectedExceptionCategory, exception.getCategory());
         }
-        return manager.getAction(folderID, objectID);
+        return cotm.getAction(folderID, objectID);
     }
 
     private Contact[] getContactsToUpdate() throws Exception {
-        return new Contact[] { getClient().execute(new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone())).getContact(), manager.getAction(manager.newAction(generateContact())) };
+        return new Contact[] { getClient().execute(new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone())).getContact(), cotm.getAction(cotm.newAction(generateContact())) };
     }
 
     private static class DeltaUpdateRequest extends UpdateRequest {

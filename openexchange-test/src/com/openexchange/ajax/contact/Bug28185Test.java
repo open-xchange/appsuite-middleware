@@ -79,12 +79,12 @@ public class Bug28185Test extends AbstractManagedContactTest {
         member.setEntryID(98967896);
         members.add(member);
         distributionList.setDistributionList(members.toArray(new DistributionListEntryObject[0]));
-        manager.newAction(distributionList);
+        cotm.newAction(distributionList);
         /*
          * check for excpetion
          */
         assertFalse("contact has an object ID", 0 < distributionList.getObjectID());
-        OXException lastException = manager.getLastResponse().getException();
+        OXException lastException = cotm.getLastResponse().getException();
         assertNotNull("no exception thrown", lastException);
         assertEquals("unexpected error code in exception", "CON-0177", lastException.getErrorCode());
     }
@@ -100,12 +100,12 @@ public class Bug28185Test extends AbstractManagedContactTest {
         member.setEmailaddress("", false);
         members.add(member);
         distributionList.setDistributionList(members.toArray(new DistributionListEntryObject[0]));
-        manager.newAction(distributionList);
+        cotm.newAction(distributionList);
         /*
          * check for excpetion
          */
         assertFalse("contact has an object ID", 0 < distributionList.getObjectID());
-        OXException lastException = manager.getLastResponse().getException();
+        OXException lastException = cotm.getLastResponse().getException();
         assertNotNull("no exception thrown", lastException);
         assertEquals("unexpected error code in exception", "CON-0177", lastException.getErrorCode());
     }
@@ -121,12 +121,12 @@ public class Bug28185Test extends AbstractManagedContactTest {
         member.setEmailfield(1);
         members.add(member);
         distributionList.setDistributionList(members.toArray(new DistributionListEntryObject[0]));
-        manager.newAction(distributionList);
+        cotm.newAction(distributionList);
         /*
          * check for excpetion
          */
         assertFalse("contact has an object ID", 0 < distributionList.getObjectID());
-        OXException lastException = manager.getLastResponse().getException();
+        OXException lastException = cotm.getLastResponse().getException();
         assertNotNull("no exception thrown", lastException);
         assertEquals("unexpected error code in exception", "CON-0178", lastException.getErrorCode());
     }

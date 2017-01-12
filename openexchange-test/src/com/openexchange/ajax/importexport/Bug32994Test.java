@@ -44,7 +44,7 @@ public class Bug32994Test extends AbstractManagedContactTest {
         JSONArray data = (JSONArray) response.getData();
         assertNotNull("got no data", data);
         assertEquals(1, data.length());
-        Contact contact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact contact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("imported contact not found", contact);
         assertNotNull("no position imported", contact.getPosition());
         assertEquals("position wrong", "myposition", contact.getPosition());

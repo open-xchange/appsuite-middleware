@@ -90,7 +90,7 @@ public class Bug35059Test extends AbstractManagedContactTest {
         }
         Contact contact = super.generateContact("List");
         contact.setDistributionList(distributionList);
-        contact = manager.newAction(contact);
+        contact = cotm.newAction(contact);
         /*
          * get distribution list again
          */

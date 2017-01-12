@@ -27,8 +27,8 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
         task.addParticipant(new ExternalUserParticipant(user2email));
         task.addParticipant(new UserParticipant(user2id));
 
-        manager.insertTaskOnServer(task);
-        Task actual = manager.getTaskFromServer(task);
+        ttm.insertTaskOnServer(task);
+        Task actual = ttm.getTaskFromServer(task);
 
         boolean foundAsExternal = false, foundAsInternal = false;
 
@@ -59,8 +59,8 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
         Task task = generateTask("Another task to test the transformation of external participants into internal ones");
         task.addParticipant(new ExternalUserParticipant(user1email));
 
-        manager.insertTaskOnServer(task);
-        Task actual = manager.getTaskFromServer(task);
+        ttm.insertTaskOnServer(task);
+        Task actual = ttm.getTaskFromServer(task);
 
         boolean foundAsExternal = false;
         int foundAsInternal = 0;
@@ -90,7 +90,7 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
         String user2email = response.getContact().getEmail1();
 
         Task task = generateTask("Another task to test the transformation of external participants into internal ones");
-        Task result = manager.insertTaskOnServer(task);
+        Task result = ttm.insertTaskOnServer(task);
 
         Task update = new Task();
         update.setLastModified(result.getLastModified());
@@ -99,9 +99,9 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
         update.addParticipant(new ExternalUserParticipant(user2email));
         update.addParticipant(new UserParticipant(user2id));
 
-        manager.updateTaskOnServer(update);
+        ttm.updateTaskOnServer(update);
 
-        Task actual = manager.getTaskFromServer(task);
+        Task actual = ttm.getTaskFromServer(task);
 
         boolean foundAsExternal = false, foundAsInternal = false;
 
