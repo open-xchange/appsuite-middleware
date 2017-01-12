@@ -119,7 +119,10 @@ public class AJAXSession {
     }
 
     public static DefaultHttpClient newHttpClient() {
-        DefaultHttpClient retval = new DefaultHttpClient(new ThreadSafeClientConnManager());
+        ThreadSafeClientConnManager connManager = new ThreadSafeClientConnManager();
+        connManager.setDefaultMaxPerRoute(5000);
+        connManager.setMaxTotal(10000);
+        DefaultHttpClient retval = new DefaultHttpClient(connManager);
 
         HttpParams params = retval.getParams();
         int minute = 1 * 60 * 1000 * 1000;
