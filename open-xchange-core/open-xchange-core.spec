@@ -1424,7 +1424,7 @@ fi
 VALUE=$(ox_read_property NRFILES /opt/open-xchange/etc/ox-scriptconf.sh)
 VALUE=${VALUE//\"/}
 if [ "8192" = "$VALUE" ]; then
-    ox_set_property NRFILES "\"65536\"" /opt/open-xchange/etc/ox-scriptconf.sh
+    ox_set_property NRFILES 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 fi
 
 # SoftwareChange_Request-3862

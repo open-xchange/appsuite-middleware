@@ -90,6 +90,13 @@ then
 fi
 %endif
 
+# SoftwareChange_Request-3859
+drop_in=%{dropin_dir}/%{dropin_example}
+if [ -f ${drop_in} ]
+then
+  sed -i 's/^#LimitNOFILE=16384$/#LimitNOFILE=65536/' ${drop_in}
+fi
+
 %preun
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %service_del_preun open-xchange.service
