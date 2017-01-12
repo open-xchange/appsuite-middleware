@@ -210,7 +210,7 @@ public abstract class ChronosAction extends AppointmentAction {
         Date timestamp = new Date(0L);
         List<Appointment> appointments = new ArrayList<Appointment>(events.size());
         for (Event event : events) {
-            appointments.add(getEventConverter().getAppointment(session, event));
+            appointments.add(getEventConverter().getAppointment(session.getSession(), event));
             timestamp = getLatestModified(timestamp, event);
         }
         return new AJAXRequestResult(appointments, timestamp, "appointment");
@@ -228,7 +228,7 @@ public abstract class ChronosAction extends AppointmentAction {
             if (null == event) {
                 continue; //TODO check
             }
-            appointments.add(getEventConverter().getAppointment(session, event));
+            appointments.add(getEventConverter().getAppointment(session.getSession(), event));
             timestamp = getLatestModified(timestamp, event);
         }
         return new AJAXRequestResult(appointments, timestamp, "appointment");
@@ -240,7 +240,7 @@ public abstract class ChronosAction extends AppointmentAction {
         JSONArray jsonArray = new JSONArray(conflicts.size());
         for (EventConflict conflict : conflicts) {
             JSONObject jsonObject = new JSONObject();
-            CalendarDataObject appointment = getEventConverter().getAppointment(session, conflict.getConflictingEvent());
+            CalendarDataObject appointment = getEventConverter().getAppointment(session.getSession(), conflict.getConflictingEvent());
             if (conflict.isHardConflict()) {
                 appointment.setHardConflict();
             }
@@ -278,13 +278,13 @@ public abstract class ChronosAction extends AppointmentAction {
         CollectionDelta<Appointment> delta = new CollectionDelta<Appointment>();
         if (null != newAndModifiedEvents) {
             for (Event event : newAndModifiedEvents) {
-                delta.addNewOrModified(getEventConverter().getAppointment(session, event));
+                delta.addNewOrModified(getEventConverter().getAppointment(session.getSession(), event));
                 timestamp = getLatestModified(timestamp, event);
             }
         }
         if (null != deletedEvents) {
             for (Event event : deletedEvents) {
-                Appointment appointment = getEventConverter().getAppointment(session, event);
+                Appointment appointment = getEventConverter().getAppointment(session.getSession(), event);
                 appointment.setMarker(Marker.ID_ONLY);
                 delta.addDeleted(appointment);
                 timestamp = getLatestModified(timestamp, event);

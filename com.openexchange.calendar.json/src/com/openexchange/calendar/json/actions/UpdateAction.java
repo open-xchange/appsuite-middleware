@@ -177,7 +177,7 @@ public final class UpdateAction extends ChronosAction {
         }
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
-        Event event = getEventConverter().getEvent(session, appointment, eventID);
+        Event event = getEventConverter().getEvent(session.getSession(), appointment, eventID);
         if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID() && eventID.getFolderID() != appointment.getParentFolderID()) {
             /*
              * move event first

@@ -237,14 +237,13 @@ public class JSONResponseVisitor implements DocumentVisitor {
     @Override
     public void visit(CalendarDocument calendarDocument) {
         try {
-            ResultConverter calendarConverter = converterRegistry.getConverter("appointment");
+            ResultConverter calendarConverter = converterRegistry.getConverter(calendarDocument.getFormat());
             if (calendarConverter != null) {
                 AJAXRequestData requestData = this.requestData.copyOf();
                 if (timeZone != null) {
                     requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
                 }
-
-                AJAXRequestResult requestResult = new AJAXRequestResult(calendarDocument.getAppointment());
+                AJAXRequestResult requestResult = new AJAXRequestResult(calendarDocument.getObject());
                 calendarConverter.convert(requestData, requestResult, session, null);
                 json.put(requestResult.getResultObject());
             }

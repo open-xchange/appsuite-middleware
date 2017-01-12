@@ -54,6 +54,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.converters.AppointmentIcalResultConverter;
 import com.openexchange.calendar.json.converters.AppointmentResultConverter;
+import com.openexchange.calendar.json.converters.EventResultConverter;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -73,7 +74,7 @@ import com.openexchange.user.UserService;
  */
 public class AppointmentJSONActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] { 
+    private static final Class<?>[] NEEDED = new Class[] {
         CalendarService.class, UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class, ICalEmitter.class,
         RecurrenceService.class
     };
@@ -91,6 +92,7 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
         registerModule(new AppointmentActionFactory(this), "calendar");
         registerService(ResultConverter.class, new AppointmentResultConverter(this));
         registerService(ResultConverter.class, new AppointmentIcalResultConverter(this));
+        registerService(ResultConverter.class, new EventResultConverter(this));
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(AppointmentActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
 
             @Override

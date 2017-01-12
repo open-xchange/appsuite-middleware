@@ -71,6 +71,7 @@ import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -88,6 +89,7 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EventConverter}
@@ -289,12 +291,12 @@ public class EventConverter {
     /**
      * Converts the supplied appointment into a corresponding event.
      *
-     * @param session The calendar session
+     * @param session The server session
      * @param appointment The appointment to convert
      * @param originalEventID The identifier of the original event in case of update operations, or <code>null</code> if unknwon
      * @return The event
      */
-    public Event getEvent(CalendarSession session, Appointment appointment, EventID originalEventID) throws OXException {
+    public Event getEvent(ServerSession session, Appointment appointment, EventID originalEventID) throws OXException {
         Event event = new Event();
         RecurrenceData recurrenceData = null;
         if (appointment.containsObjectID()) {
@@ -432,11 +434,11 @@ public class EventConverter {
     /**
      * Converts the supplied event into a corresponding appointment.
      *
-     * @param session The calendar session
+     * @param session The server session
      * @param event The event to convert
      * @return The appointment
      */
-    public CalendarDataObject getAppointment(CalendarSession session, Event event) throws OXException {
+    public CalendarDataObject getAppointment(ServerSession session, Event event) throws OXException {
         CalendarDataObject appointment = new CalendarDataObject();
         RecurrenceData recurrenceData = null;
         if (event.containsId()) {
@@ -735,6 +737,20 @@ public class EventConverter {
      * Extracts the series pattern from the supplied appointment data, optionally merging with the previous series pattern in case of
      * update operations.
      *
+     * @param session The server session
+     * @param appointment The appointment to extract the series pattern from
+     * @param originalPattern The original pattern, or <code>null</code> if not available
+     * @return The series pattern, or <code>null</code> if not set
+     */
+    private RecurrenceData getRecurrenceData(ServerSession session, Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
+        return getRecurrenceData(services.getService(CalendarService.class).init(session), appointment, originalRecurrenceData);
+    }
+
+    /**
+     * Extracts the series pattern from the supplied appointment data, optionally merging with the previous series pattern in case of
+     * update operations.
+     *
+     * @param session The calendar session
      * @param appointment The appointment to extract the series pattern from
      * @param originalPattern The original pattern, or <code>null</code> if not available
      * @return The series pattern, or <code>null</code> if not set
@@ -897,6 +913,17 @@ public class EventConverter {
             event = getEvent(session, new EventID(eventID.getFolderID(), event.getSeriesId()), recurrenceFields);
         }
         return new DefaultRecurrenceData(event);
+    }
+
+    /**
+     * Loads the recurrence data for an event.
+     *
+     * @param session The server session
+     * @param eventID The identifier of the event to get the recurrence data for
+     * @return The series pattern, or <code>null</code> if not set
+     */
+    private RecurrenceData loadRecurrenceData(ServerSession session, EventID eventID) throws OXException {
+        return loadRecurrenceData(services.getService(CalendarService.class).init(session), eventID);
     }
 
     /**
