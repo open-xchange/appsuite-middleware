@@ -59,7 +59,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.mime.ContentType;
 
@@ -83,7 +83,7 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 
     @Override
-    public void call(IDataWrapper data) throws OXException, IOException {
+    public void call(IDataWrapper data) throws Exception {
         if (IDataWrapper.DOWNLOAD.equalsIgnoreCase(data.getDelivery()) || (IDataWrapper.SAVE_AS_TYPE.equals(data.getContentType()) && !IDataWrapper.VIEW.equalsIgnoreCase(data.getDelivery()))) {
             // Write as a common file download: application/octet-stream
             final StringBuilder sb = new StringBuilder(32);
@@ -135,6 +135,10 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
                     }
                 }
                 checkedDownload = DownloadUtility.checkInlineDownload(data.getDocumentData(), fileLength, data.getFileName(), cts, data.getContentDisposition(), data.getUserAgent(), data.getRequestData().getSession());
+                if (checkedDownload.isConsideredHarmful()) {
+                    // CLient requested possibly harmful content for inline display. Deny.
+                    throw new FileResponseRendererActionException(HttpServletResponse.SC_FORBIDDEN, "Denied to output possibly harmful content");
+                }
             }
             /*
              * Set stream
