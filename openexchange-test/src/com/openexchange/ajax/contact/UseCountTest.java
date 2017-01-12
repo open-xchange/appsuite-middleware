@@ -52,6 +52,7 @@ package com.openexchange.ajax.contact;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
@@ -66,7 +67,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link UseCountTest}
@@ -76,8 +76,6 @@ import com.openexchange.test.FolderTestManager;
  */
 public class UseCountTest extends ContactTest {
 
-    private ContactTestManager ctm;
-    private FolderTestManager ftm;
     private MailTestManager mtm;
     private String address;
     private int folderId;
@@ -86,17 +84,15 @@ public class UseCountTest extends ContactTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        ftm = new FolderTestManager(getClient());
-        FolderObject folder = ftm.generatePrivateFolder("useCountTest", Module.CONTACTS.getFolderConstant(), getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject folder = ftm.generatePrivateFolder("useCountTest" + UUID.randomUUID().toString(), Module.CONTACTS.getFolderConstant(), getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
         folderId = folder.getObjectID();
-        ctm = new ContactTestManager(getClient());
         Contact c1 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
         c1.setEmail1("useCount1@ox.invalid");
-        c1 = ctm.newAction(c1);
+        c1 = cotm.newAction(c1);
         Contact c2 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
         c2.setEmail1("useCount2@ox.invalid");
-        c2 = ctm.newAction(c2);
+        c2 = cotm.newAction(c2);
 
         SetRequest req = new SetRequest("io.ox/mail", "{\"contactCollectOnMailTransport\": true}", true);
         getClient().execute(req);
@@ -110,8 +106,6 @@ public class UseCountTest extends ContactTest {
     public void tearDown() throws Exception {
         try {
             mtm.cleanUp();
-            ctm.cleanUp();
-            ftm.cleanUp();
         } finally {
             super.tearDown();
         }
@@ -127,7 +121,6 @@ public class UseCountTest extends ContactTest {
         assertEquals(2, json.length());
         Contact[] contacts = jsonArray2ContactArray(json, CONTACT_FIELDS);
         assertEquals(address, contacts[0].getEmail1());
-        getClient().logout();
     }
 
 }

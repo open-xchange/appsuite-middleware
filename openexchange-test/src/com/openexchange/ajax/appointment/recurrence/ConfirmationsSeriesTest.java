@@ -99,10 +99,6 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
     private Appointment appointment;
     private ExternalUserParticipant participant;
 
-    public ConfirmationsSeriesTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
