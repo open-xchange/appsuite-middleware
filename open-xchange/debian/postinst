@@ -34,6 +34,13 @@ postFix() {
     then
       install -D -m 644 ${examples_dir}/${dropin_example} ${dropin_dir}/${dropin_example}
     fi
+
+    # SoftwareChange_Request-3859
+    drop_in=${dropin_dir}/${dropin_example}
+    if [ -f ${drop_in} ]
+    then
+      sed -i 's/^#LimitNOFILE=16384$/#LimitNOFILE=65536/' ${drop_in}
+    fi
 }
 
 case "$1" in
