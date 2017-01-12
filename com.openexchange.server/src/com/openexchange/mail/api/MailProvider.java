@@ -155,7 +155,11 @@ public abstract class MailProvider {
         }
         final MailAccess<?, ?> access = createNewMailAccess(null);
         if (null != access) {
-            MailAccess.shutdownImpl(access);
+            try {
+                MailAccess.shutdownImpl(access);
+            } finally {
+                access.close(false);
+            }
         }
         getProtocolProps().resetProperties();
     }
